@@ -10,12 +10,12 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
-import eu.kanade.tachiyomi.util.system.Themes
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.presentation.theme.Themes
 import tachiyomi.core.preference.Preference
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.core.preference.getEnum
@@ -61,13 +61,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun lightTheme() =
         this.preferenceStore.getEnum(
             Keys.lightTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT,
+            if (supportsDynamic) Themes.Monet else Themes.Neko,
         )
 
     fun darkTheme() =
         this.preferenceStore.getEnum(
             Keys.darkTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT,
+            if (supportsDynamic) Themes.Monet else Themes.Neko,
         )
 
     fun showNavigationOverlayNewUser() =

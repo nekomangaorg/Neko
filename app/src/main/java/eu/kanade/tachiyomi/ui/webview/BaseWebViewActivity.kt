@@ -183,7 +183,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
         val prefTheme = getPrefTheme(preferences)
-        setTheme(prefTheme.styleRes)
+        setTheme(prefTheme.styleRes())
         val themeValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, themeValue, true)
 

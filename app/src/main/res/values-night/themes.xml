@@ -16,16 +16,6 @@
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
     </style>
 
-    <style name="Theme.Tachiyomi.GreyWolf">
-        <item name="colorPrimary">@color/gray</item>
-        <item name="colorControlHighlight">@color/gray</item>
-        <item name="colorSecondaryVariant">@color/gray_button</item>
-        <item name="colorOnPrimary">@color/gray_button</item>
-        <item name="colorSecondary">@color/greyWolfSecondary</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-    </style>
 
     <style name="Theme.Tachiyomi.Outrun">
         <item name="colorPrimary">@color/outrun_blush</item>

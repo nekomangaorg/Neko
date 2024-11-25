@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components.theme
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -35,33 +33,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.material3.createMdc3Theme
-import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import org.nekomanga.R
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.Themes
+import org.nekomanga.presentation.theme.colorSchemeFromTheme
 
 @Composable
 fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
-    val selectedColor = MaterialTheme.colorScheme.primary
-    val configuration = Configuration(context.resources.configuration)
-    configuration.uiMode =
-        if (isDarkTheme) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
-    val themeContext = context.createConfigurationContext(configuration)
-    themeContext.setTheme(theme.styleRes)
-    val colorScheme =
-        createMdc3Theme(
-                context = themeContext,
-                layoutDirection = LayoutDirection.Ltr,
-                setTextColors = true,
-                readTypography = false,
-            )
-            .colorScheme!!
+    /*val configuration = Configuration(context.resources.configuration)
+        configuration.uiMode =
+            if (isDarkTheme) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+        val themeContext = context.createConfigurationContext(configuration)
+        themeContext.setTheme(theme.styleRes())
+    */
+    val colorScheme = colorSchemeFromTheme(LocalContext.current, theme, isDarkTheme)
 
     val themeMatchesApp =
         if (context.isInNightMode()) {
@@ -79,7 +69,7 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
             onClick,
         )
         Text(
-            text = stringResource(id = if (isDarkTheme) theme.darkNameRes else theme.nameRes),
+            text = stringResource(id = if (isDarkTheme) theme.darkNameRes() else theme.nameRes()),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodySmall,
         )
@@ -105,7 +95,7 @@ fun AppThemePreviewItem(
     OutlinedCard(
         onClick = onClick,
         modifier = Modifier.height(180.dp).fillMaxWidth(),
-        colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.background),
+        colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.surface),
         border = BorderStroke(width = Size.tiny, color = selectedColor),
     ) {
         // App Bar
@@ -119,7 +109,7 @@ fun AppThemePreviewItem(
                         .weight(0.7f)
                         .padding(end = Size.small)
                         .background(
-                            color = colorScheme.surfaceVariant,
+                            color = colorScheme.surfaceContainerHigh,
                             shape = MaterialTheme.shapes.small,
                         )
             )
@@ -139,7 +129,10 @@ fun AppThemePreviewItem(
         Box(
             modifier =
                 Modifier.padding(start = Size.small, top = Size.extraTiny)
-                    .background(color = DividerDefaults.color, shape = MaterialTheme.shapes.small)
+                    .background(
+                        color = colorScheme.surfaceContainerHigh,
+                        shape = MaterialTheme.shapes.small,
+                    )
                     .fillMaxWidth(0.5f)
                     .aspectRatio(MangaCover.Book.ratio)
         ) {
@@ -151,9 +144,7 @@ fun AppThemePreviewItem(
             ) {
                 Box(
                     modifier =
-                        Modifier.fillMaxHeight()
-                            .width(Size.smedium)
-                            .background(colorScheme.tertiary)
+                        Modifier.fillMaxHeight().width(Size.smedium).background(colorScheme.primary)
                 )
                 Box(
                     modifier =
@@ -169,12 +160,12 @@ fun AppThemePreviewItem(
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentAlignment = Alignment.BottomCenter,
         ) {
-            Surface(tonalElevation = Size.small) {
+            Surface() {
                 Row(
                     modifier =
                         Modifier.height(Size.extraLarge)
                             .fillMaxWidth()
-                            .background(colorScheme.surfaceVariant)
+                            .background(colorScheme.surfaceContainerLow)
                             .padding(horizontal = Size.small),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
@@ -215,7 +206,5 @@ fun AppThemePreviewItem(
 @Preview
 @Composable
 private fun PreviewThemeItem() {
-    Surface() {
-        ThemeItem(theme = Themes.SPRING_AND_DUSK, isDarkTheme = false, selected = false) {}
-    }
+    Surface() { ThemeItem(theme = Themes.Pink, isDarkTheme = false, selected = false) {} }
 }
