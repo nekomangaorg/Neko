@@ -24,7 +24,6 @@ import com.mikepenz.fastadapter.select.SelectExtension
 import com.mikepenz.fastadapter.select.getSelectExtension
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -33,6 +32,7 @@ import kotlin.math.max
 import org.nekomanga.R
 import org.nekomanga.databinding.ThemeItemBinding
 import org.nekomanga.databinding.ThemesPreferenceBinding
+import org.nekomanga.presentation.theme.Themes
 import uy.kohesive.injekt.injectLazy
 
 class ThemePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -60,21 +60,21 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         fastAdapterDark.setHasStableIds(true)
         selectExtensionLight = fastAdapterLight.getSelectExtension().setThemeListener(false)
         selectExtensionDark = fastAdapterDark.getSelectExtension().setThemeListener(true)
-        val enumConstants = Themes.values()
+        val enumConstants = Themes.entries.toTypedArray()
         val supportsDynamic = DynamicColors.isDynamicColorAvailable()
         itemAdapterLight.set(
             enumConstants
                 .filter {
-                    (!it.isDarkTheme || it.followsSystem) &&
-                        (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                    (!it.isDarkTheme() || it.followsSystem()) &&
+                        (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
                 .map { ThemeItem(it, false) }
         )
         itemAdapterDark.set(
             enumConstants
                 .filter {
-                    (it.isDarkTheme || it.followsSystem) &&
-                        (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                    (it.isDarkTheme() || it.followsSystem()) &&
+                        (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
                 .map { ThemeItem(it, true) }
         )
@@ -222,9 +222,9 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             override fun bindView(item: ThemeItem, payloads: List<Any>) {
                 binding.themeNameText.setText(
                     if (item.isDarkTheme) {
-                        item.theme.darkNameRes
+                        item.theme.darkNameRes()
                     } else {
-                        item.theme.nameRes
+                        item.theme.nameRes()
                     }
                 )
 
@@ -244,7 +244,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 val configuration = Configuration(context.resources.configuration)
                 configuration.uiMode = if (item.isDarkTheme) UI_MODE_NIGHT_YES else UI_MODE_NIGHT_NO
                 val themeContext = context.createConfigurationContext(configuration)
-                themeContext.setTheme(item.theme.styleRes)
+                themeContext.setTheme(item.theme.styleRes())
                 val primaryText = themeContext.getResourceColor(android.R.attr.textColorPrimary)
                 val secondaryText = themeContext.getResourceColor(android.R.attr.textColorSecondary)
                 val background = themeContext.getResourceColor(R.attr.background)

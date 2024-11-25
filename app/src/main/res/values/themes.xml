@@ -121,8 +121,6 @@
 
     <style name="Theme.Tachiyomi.Outrun" />
 
-    <style name="Theme.Tachiyomi.GreyWolf" />
-
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>

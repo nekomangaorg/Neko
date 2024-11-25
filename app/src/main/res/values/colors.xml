@@ -113,13 +113,11 @@
     <color name="backgroundLime">#E9EFEB</color>
     <color name="downloadBadgeLime">#80CAD3</color>
 
-    <!-- Grey Wolf -->
-    <color name="greyWolfSecondary">#636363</color>
-
 
     <!--Outrun theme -->
     <color name="outrun_pink">#dd546e</color>
     <color name="outrun_blush">#C06C84</color>
+    <color name="outrun_blush_light">#EFC8D3</color>
     <color name="outrun_blue">#202146</color>
     <color name="outrun_black">#170c32</color>
     <color name="outrun_dark_purple">#201147</color>

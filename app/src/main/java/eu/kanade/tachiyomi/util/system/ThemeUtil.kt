@@ -8,6 +8,7 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.presentation.theme.Themes
 
 object ThemeUtil {
 
@@ -26,8 +27,8 @@ object ThemeUtil {
                     else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
             )
-        preferences.lightTheme().set(Themes.DEFAULT)
-        preferences.darkTheme().set(Themes.DEFAULT)
+        preferences.lightTheme().set(Themes.Neko)
+        preferences.darkTheme().set(Themes.Neko)
     }
 
     /** Migration method */
@@ -40,17 +41,17 @@ object ThemeUtil {
             putString(
                 PreferenceKeys.lightTheme,
                 when (lightTheme) {
-                    "SPRING" -> Themes.SPRING_AND_DUSK
-                    "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
-                    else -> Themes.DEFAULT
+                    "SPRING" -> Themes.Pink
+                    "STRAWBERRY_DAIQUIRI" -> Themes.Red
+                    else -> Themes.Neko
                 }.name,
             )
             putString(
                 PreferenceKeys.darkTheme,
                 when (darkTheme) {
-                    "DUSK" -> Themes.SPRING_AND_DUSK
-                    "CHOCOLATE_STRAWBERRIES" -> Themes.STRAWBERRIES
-                    else -> Themes.DEFAULT
+                    "DUSK" -> Themes.Pink
+                    "CHOCOLATE_STRAWBERRIES" -> Themes.Red
+                    else -> Themes.Neko
                 }.name,
             )
         }
@@ -65,7 +66,7 @@ object ThemeUtil {
 }
 
 fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
-    setTheme(getPrefTheme(preferences).styleRes)
+    setTheme(getPrefTheme(preferences).styleRes())
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {

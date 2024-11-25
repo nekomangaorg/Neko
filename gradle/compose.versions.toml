@@ -8,7 +8,6 @@ markdown_version = "0.27.0"
 
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
-accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist_version" }
 
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
@@ -43,6 +42,6 @@ markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil2",
 swipe = "me.saket.swipe:swipe:1.3.0"
 
 [bundles]
-accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-themeadapter"]
+accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller"]
 compose = ["activity", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion"]
 charting = ["charty"]

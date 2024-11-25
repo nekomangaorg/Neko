@@ -57,7 +57,10 @@ fun ToolTipButton(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         state = textFieldTooltipState,
         tooltip = {
-            PlainTooltip {
+            PlainTooltip(
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+            ) {
                 Text(
                     modifier = Modifier.padding(Size.tiny),
                     style = MaterialTheme.typography.bodyLarge,
