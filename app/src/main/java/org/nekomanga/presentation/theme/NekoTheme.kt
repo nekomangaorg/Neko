@@ -17,6 +17,7 @@ import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OutRunColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
+import org.nekomanga.presentation.theme.colorschemes.RedColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -54,7 +55,7 @@ fun nekoThemeColorScheme(): ColorScheme {
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
         Themes.Outrun -> OutRunColorScheme
-        Themes.Red -> TODO()
+        Themes.Red -> RedColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme())
