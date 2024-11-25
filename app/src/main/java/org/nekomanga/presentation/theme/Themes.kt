@@ -17,8 +17,9 @@ enum class Themes {
     Tako,
     BlueGreen;
 
-    val isDarkTheme = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
-    val followsSystem = nightMode() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    fun isDarkTheme() = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
+    fun followsSystem() = nightMode() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 
     // With the way kotlin handles when(enum) and the fact that the main activity uses these methods
     // immediately, we were getting a .clone() error

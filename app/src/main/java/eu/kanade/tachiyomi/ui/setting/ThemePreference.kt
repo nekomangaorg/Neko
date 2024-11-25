@@ -60,12 +60,12 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         fastAdapterDark.setHasStableIds(true)
         selectExtensionLight = fastAdapterLight.getSelectExtension().setThemeListener(false)
         selectExtensionDark = fastAdapterDark.getSelectExtension().setThemeListener(true)
-        val enumConstants = Themes.values()
+        val enumConstants = Themes.entries.toTypedArray()
         val supportsDynamic = DynamicColors.isDynamicColorAvailable()
         itemAdapterLight.set(
             enumConstants
                 .filter {
-                    (!it.isDarkTheme || it.followsSystem) &&
+                    (!it.isDarkTheme() || it.followsSystem()) &&
                         (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
                 .map { ThemeItem(it, false) }
@@ -73,7 +73,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         itemAdapterDark.set(
             enumConstants
                 .filter {
-                    (it.isDarkTheme || it.followsSystem) &&
+                    (it.isDarkTheme() || it.followsSystem()) &&
                         (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
                 .map { ThemeItem(it, true) }

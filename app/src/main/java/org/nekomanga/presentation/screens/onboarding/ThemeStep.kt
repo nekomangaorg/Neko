@@ -60,7 +60,7 @@ internal class ThemeStep : OnboardingStep {
 
         Themes.entries
             .filter {
-                (!it.isDarkTheme || it.followsSystem) &&
+                (!it.isDarkTheme() || it.followsSystem()) &&
                     (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
             }
             .toSet()
@@ -69,7 +69,7 @@ internal class ThemeStep : OnboardingStep {
             derivedStateOf {
                 Themes.entries
                     .filter {
-                        (!it.isDarkTheme || it.followsSystem) &&
+                        (!it.isDarkTheme() || it.followsSystem()) &&
                             (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                     }
                     .toSet()
@@ -80,7 +80,7 @@ internal class ThemeStep : OnboardingStep {
             derivedStateOf {
                 Themes.entries
                     .filter {
-                        (it.isDarkTheme || it.followsSystem) &&
+                        (it.isDarkTheme() || it.followsSystem()) &&
                             (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                     }
                     .toSet()
@@ -194,7 +194,7 @@ internal class ThemeStep : OnboardingStep {
         TimberKt.d {
             """
                 isSelected: $isSelected
-                isDarkTheme : $isDarkTheme
+                isDarkTheme() : $isDarkTheme
                 followingSystemTheme: $followingSystemTheme
                 isInNightMode: ${context.isInNightMode()}
             """

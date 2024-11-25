@@ -14,6 +14,7 @@ import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
+import org.nekomanga.presentation.theme.colorschemes.OutRunColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
@@ -52,9 +53,9 @@ fun nekoThemeColorScheme(): ColorScheme {
         Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
-        Themes.Tako -> TakoColorScheme
-        Themes.Outrun -> TODO()
+        Themes.Outrun -> OutRunColorScheme
         Themes.Red -> TODO()
+        Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme())
 }
