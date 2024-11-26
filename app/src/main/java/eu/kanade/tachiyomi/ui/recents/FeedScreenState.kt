@@ -49,6 +49,7 @@ data class FeedSettingActions(
     val switchUploadsSortOrder: () -> Unit,
     val outlineCoversClick: () -> Unit,
     val outlineCardsClick: () -> Unit,
+    val clearDownloadQueueClick: () -> Unit,
 )
 
 data class FeedScreenActions(

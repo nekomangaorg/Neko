@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -41,6 +42,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedBottomSheet(
     contentPadding: PaddingValues,
     feedScreenType: FeedScreenType,
+    downloadScreenVisible: Boolean,
     historyGrouping: FeedHistoryGroup,
     sortByFetched: Boolean,
     outlineCovers: Boolean,
@@ -50,6 +52,7 @@ fun FeedBottomSheet(
     outlineCoversClick: () -> Unit,
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
+    clearDownloadsClick: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
 
@@ -64,8 +67,9 @@ fun FeedBottomSheet(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
-            when (feedScreenType) {
-                FeedScreenType.History ->
+            when {
+                downloadScreenVisible -> downloadsContent(clearDownloadsClick)
+                feedScreenType == FeedScreenType.History ->
                     historyContent(
                         historyGrouping = historyGrouping,
                         outlineCovers = outlineCovers,
@@ -75,14 +79,12 @@ fun FeedBottomSheet(
                         groupHistoryClick = groupHistoryClick,
                         clearHistoryClick = clearHistoryClick,
                     )
-                FeedScreenType.Updates ->
+                feedScreenType == FeedScreenType.Updates ->
                     uploadsContent(
                         fetchSort = sortByFetched,
                         outlineCovers = outlineCovers,
-                        outlineCards = outlineCards,
                         sortClick = sortClick,
                         outlineCoversClick = outlineCoversClick,
-                        outlineCardsClick = outlineCardsClick,
                     )
             }
         }
@@ -178,13 +180,25 @@ private fun LazyListScope.historyContent(
     }
 }
 
+private fun LazyListScope.downloadsContent(clearDownloadsClick: () -> Unit) {
+    item {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            TextButton(onClick = clearDownloadsClick) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Outlined.DeleteSweep, contentDescription = null)
+                    Gap(Size.small)
+                    Text(text = stringResource(id = R.string.clear_download_queue))
+                }
+            }
+        }
+    }
+}
+
 private fun LazyListScope.uploadsContent(
     fetchSort: Boolean,
     outlineCovers: Boolean,
-    outlineCards: Boolean,
     sortClick: () -> Unit,
     outlineCoversClick: () -> Unit,
-    outlineCardsClick: () -> Unit,
 ) {
     item { Checkbox(R.string.sort_fetched_time, fetchSort, sortClick) }
     item { Checkbox(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }

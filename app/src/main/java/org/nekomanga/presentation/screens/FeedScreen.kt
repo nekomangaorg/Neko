@@ -59,6 +59,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
 import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
@@ -109,6 +110,15 @@ fun FeedScreen(
     val navBarPadding = rememberNavBarPadding(sideNav)
 
     var showClearHistoryDialog by remember { mutableStateOf(false) }
+    var showClearDownloadsDialog by remember { mutableStateOf(false) }
+
+    var downloadScreenVisible by
+        remember(feedScreenState.value.showingDownloads, feedScreenState.value.downloads.size) {
+            mutableStateOf(
+                feedScreenState.value.showingDownloads &&
+                    feedScreenState.value.downloads.isNotEmpty()
+            )
+        }
 
     Box(
         modifier =
@@ -124,6 +134,7 @@ fun FeedScreen(
                     FeedBottomSheet(
                         contentPadding = navBarPadding,
                         feedScreenType = feedScreenState.value.feedScreenType,
+                        downloadScreenVisible = downloadScreenVisible,
                         historyGrouping = feedScreenState.value.historyGrouping,
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
                         outlineCovers = feedScreenState.value.outlineCovers,
@@ -132,6 +143,7 @@ fun FeedScreen(
                             feedSettingActions.groupHistoryClick(feedHistoryGroup)
                         },
                         clearHistoryClick = { showClearHistoryDialog = true },
+                        clearDownloadsClick = { showClearDownloadsDialog = true },
                         sortClick = { feedSettingActions.switchUploadsSortOrder() },
                         outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                         outlineCardsClick = { feedSettingActions.outlineCardsClick() },
@@ -217,10 +229,8 @@ fun FeedScreen(
                         ) {
                             feedScreenActions.toggleShowingDownloads()
                         }
-                        when (
-                            feedScreenState.value.showingDownloads &&
-                                feedScreenState.value.downloads.isNotEmpty()
-                        ) {
+
+                        when (downloadScreenVisible) {
                             true ->
                                 DownloadScreen(
                                     contentPadding = recyclerContentPadding,
@@ -285,6 +295,17 @@ fun FeedScreen(
             defaultThemeColorState(),
             onDismiss = { showClearHistoryDialog = false },
             onConfirm = { feedSettingActions.clearHistoryClick() },
+        )
+    }
+
+    if (showClearDownloadsDialog) {
+        ClearDownloadQueueDialog(
+            defaultThemeColorState(),
+            onDismiss = { showClearDownloadsDialog = false },
+            onConfirm = {
+                feedSettingActions.clearDownloadQueueClick()
+                scope.launch { sheetState.hide() }
+            },
         )
     }
 }

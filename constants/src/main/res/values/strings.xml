@@ -352,6 +352,8 @@
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
     <string name="clear_history">Clear history</string>
+    <string name="clear_download_queue">Clear download queue</string>
+    <string name="clear_download_queue_confirmation">Are you sure?</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation_1">Are you sure?</string>
     <string name="clear_history_confirmation_2">All history will be lost.</string>

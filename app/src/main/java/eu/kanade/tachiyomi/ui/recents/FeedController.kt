@@ -45,6 +45,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     switchUploadsSortOrder = presenter::toggleUploadsSortOrder,
                     outlineCoversClick = presenter::toggleOutlineCovers,
                     outlineCardsClick = presenter::toggleOutlineCards,
+                    clearDownloadQueueClick = presenter::clearDownloadQueue,
                 ),
             feedScreenActions =
                 FeedScreenActions(

@@ -217,6 +217,10 @@ class FeedPresenter(
         }
     }
 
+    fun clearDownloadQueue() {
+        presenterScope.launch { downloadManager.clearQueue() }
+    }
+
     fun toggleUploadsSortOrder() {
         presenterScope.launchIO { preferences.sortFetchedTime().toggle() }
     }
