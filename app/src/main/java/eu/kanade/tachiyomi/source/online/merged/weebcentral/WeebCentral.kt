@@ -132,6 +132,9 @@ class WeebCentral : ReducedHttpSource() {
         val document = response.asJsoup()
         response.closeQuietly()
 
+        val chapterPrefixes = arrayOf("Epilogue", "Side Story")
+        val volumePrefixes = arrayOf("Volume", "Special")
+
         val chapters =
             document.select("a").mapNotNull { element ->
                 val chapterText = element.selectFirst("span[class~=^\$]")?.text()
@@ -143,7 +146,7 @@ class WeebCentral : ReducedHttpSource() {
 
                         setUrlWithoutDomain(element.attr("href"))
 
-                        if (chapterText.startsWith("Volume") || chapterText.startsWith("Special")) {
+                        if (volumePrefixes.any { prefix -> chapterText.startsWith(prefix) }) {
                             this.vol = chapterText.substringAfter(" ")
                             val prefix =
                                 when (chapterText.startsWith("Volume")) {
@@ -171,7 +174,15 @@ class WeebCentral : ReducedHttpSource() {
                             }
 
                             // get chapter
-                            this.chapter_txt = "Ch.${chapterText.substringAfter(" ")}"
+
+                            this.chapter_txt =
+                                when {
+                                    chapterPrefixes.none { prefix ->
+                                        chapterText.startsWith(prefix)
+                                    } -> "Ch.${chapterText.substringAfter(" ")}"
+                                    else -> chapterText
+                                }
+
                             chapterName.add(this.chapter_txt)
                         }
 
