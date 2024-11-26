@@ -316,13 +316,25 @@ private fun HistoryRow(
                 hideChapterTitles = hideChapterTitles,
                 updatedColor = mediumAlphaColor,
                 themeColorState = themeColorState,
-                canExpand = canExpand,
-                isExpanded = isExpanded,
-                expandClick = expandClick,
                 deleteAllClick = deleteAllClick,
                 deleteClick = deleteClick,
                 downloadClick = downloadClick,
             )
+        }
+        if (canExpand) {
+
+            TextButton(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = expandClick,
+            ) {
+                Icon(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    imageVector =
+                        if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f),
+                )
+            }
         }
     }
 }
@@ -334,9 +346,6 @@ private fun ChapterInfo(
     hideChapterTitles: Boolean,
     updatedColor: Color,
     themeColorState: ThemeColorState,
-    canExpand: Boolean,
-    isExpanded: Boolean,
-    expandClick: () -> Unit,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
@@ -377,18 +386,6 @@ private fun ChapterInfo(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-            }
-            if (canExpand) {
-                Spacer(modifier.weight(1f))
-                TextButton(onClick = expandClick) {
-                    Icon(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        imageVector =
-                            if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f),
-                    )
-                }
             }
             Spacer(modifier.weight(1f))
             Buttons(
