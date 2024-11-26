@@ -39,7 +39,7 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int)
     JAVANESE("jv", "Javanese", R.drawable.ic_flag_id),
     KAZAKH("kk", "Kazakh", R.drawable.ic_flag_kk),
     KOREAN("ko", "Korean", R.drawable.ic_flag_kr),
-    LATIN("la", "Latin", R.drawable.ic_flag_la),
+    LATIN("la", "Latin", R.drawable.ic_flag_ri),
     LITHUANIAN("lt", "Lithuanian", R.drawable.ic_flag_lt),
     MALAY("ms", "Malay", R.drawable.ic_flag_my),
     MONGOLIAN("mn", "Mongolian", R.drawable.ic_flag_mn),
