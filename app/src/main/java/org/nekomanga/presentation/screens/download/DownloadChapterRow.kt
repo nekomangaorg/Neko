@@ -95,7 +95,7 @@ private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
                 true ->
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = { 0f },
+                        progress = { download.chapterItem.downloadProgress.toFloat() / 100 },
                         color = MaterialTheme.colorScheme.secondary,
                         drawStopIndicator = {},
                     )
