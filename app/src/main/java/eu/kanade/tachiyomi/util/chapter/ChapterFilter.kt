@@ -31,7 +31,7 @@ class ChapterFilter(
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
-        val filteredChapters = filterChaptersByScanlators(chapters, manga, preferences)
+        val filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
 
         return if (
             readEnabled ||
@@ -60,7 +60,7 @@ class ChapterFilter(
         manga: Manga,
         selectedChapter: T? = null,
     ): List<T> {
-        var filteredChapters = filterChaptersByScanlators(chapters, manga, preferences)
+        var filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
 
         // if filter preferences are not enabled don't even filter
         if (
@@ -117,26 +117,32 @@ class ChapterFilter(
      * filters chapters for scanlators, excludes globally blocked, unsupported and manga specific
      * filtered
      */
-    fun <T : Chapter> filterChaptersByScanlators(
+    /** filters chapters for scanlators */
+    fun <T : Chapter> filterChaptersByScanlatorsAndLanguage(
         chapters: List<T>,
         manga: Manga,
         preferences: PreferencesHelper,
     ): List<T> {
-        val blockedGroups = preferences.blockedScanlators().get()
+
+        val blockedGroupList = preferences.blockedScanlators().get()
         val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators)
+        val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language)
 
         return chapters.filter {
+            val languages = ChapterUtil.getLanguages(it.language)
+            val languageNotFound = languages.none { language -> language in filteredLanguagesList }
+
             val groups = ChapterUtil.getScanlators(it.scanlator)
-            groups.none { group ->
-                val inBlocked = group in blockedGroups
-                val inFiltered =
-                    when (filteredGroupList.isEmpty()) {
-                        true -> false
-                        false -> filteredGroupList.contains(group)
-                    }
-                val unsupported = group in MdConstants.UnsupportedOfficialScanlators
-                inBlocked || inFiltered || unsupported
-            }
+
+            val groupNotFound =
+                groups.none { group ->
+                    val inBlocked = group in blockedGroupList
+                    val inFiltered = group in filteredGroupList
+                    val unsupported = group in MdConstants.UnsupportedOfficialGroupList
+                    inBlocked || inFiltered || unsupported
+                }
+
+            languageNotFound && groupNotFound
         }
     }
 }

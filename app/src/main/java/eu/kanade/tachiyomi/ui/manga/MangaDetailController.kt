@@ -165,7 +165,7 @@ class MangaDetailController(private val mangaId: Long) :
                     download = { chapterItems, downloadAction ->
                         if (
                             chapterItems.size == 1 &&
-                                MdConstants.UnsupportedOfficialScanlators.contains(
+                                MdConstants.UnsupportedOfficialGroupList.contains(
                                     chapterItems[0].chapter.scanlator
                                 )
                         ) {
@@ -205,7 +205,7 @@ class MangaDetailController(private val mangaId: Long) :
     private fun openChapter(context: Context, chapter: Chapter) {
         if (
             chapter.scanlator != null &&
-                MdConstants.UnsupportedOfficialScanlators.contains(chapter.scanlator)
+                MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
             context.toast("${chapter.scanlator} not supported, try WebView")
         } else {

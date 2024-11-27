@@ -45,7 +45,9 @@ class ListHandler {
                     listDto.data.relationships
                         .filter { it.type == MdConstants.Types.manga }
                         .map { it.id }
-                when (allMangaIds.isEmpty() || allMangaIds.size < MdUtil.getMangaListOffset(page)) {
+                when (
+                    allMangaIds.isEmpty() || allMangaIds.size <= MdUtil.getMangaListOffset(page)
+                ) {
                     true ->
                         Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                     false -> {
