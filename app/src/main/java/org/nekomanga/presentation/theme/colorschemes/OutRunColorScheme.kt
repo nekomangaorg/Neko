@@ -4,9 +4,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Shades for hex colors https://noeldelgado.github.io/shadowlord/
-// Color palette https://paletton.com/
-
 internal object OutRunColorScheme : BaseColorScheme() {
     // This is not used so if it starts being used, ignore the below and start fresh
     override val lightScheme =
@@ -31,8 +28,8 @@ internal object OutRunColorScheme : BaseColorScheme() {
             onBackground = Color(0xFF201147),
             surface = Color(0xFFEFC8D3),
             onSurface = Color(0xFF201147),
-            surfaceVariant = Color(0xFFEFC8D3),
-            onSurfaceVariant = Color(0xFF201147),
+            surfaceVariant = Color(0xFF201147),
+            onSurfaceVariant = Color(0xFFFFFFFF),
             outline = Color(0xFF4B3A78),
             outlineVariant = Color(0xFF4B3A78),
             scrim = Color(0xFFFFFFFF),

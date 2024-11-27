@@ -4,9 +4,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Shades for hex colors https://noeldelgado.github.io/shadowlord/
-// Color palette https://paletton.com/
-
 internal object PinkColorScheme : BaseColorScheme() {
     override val lightScheme =
         lightColorScheme(
@@ -30,7 +27,7 @@ internal object PinkColorScheme : BaseColorScheme() {
             onBackground = Color(0xDE240728),
             surface = Color(0xFFF7F4F8),
             onSurface = Color(0xDE240728),
-            surfaceVariant = Color(0xFFF7F4F8),
+            surfaceVariant = Color(0xFFEFE3F3),
             onSurfaceVariant = Color(0xFF000000),
             outline = Color(0xFFD9B6E5),
             outlineVariant = Color(0xFFECDBF2),
@@ -69,7 +66,7 @@ internal object PinkColorScheme : BaseColorScheme() {
             onBackground = Color(0xFFFFFFFF),
             surface = Color(0xFF16151D),
             onSurface = Color(0xFFFFFFFF),
-            surfaceVariant = Color(0xFF16151D),
+            surfaceVariant = Color(0xFF272026),
             onSurfaceVariant = Color(0xFFFFFFFF),
             outline = Color(0xFFF5C6D9),
             outlineVariant = Color(0xFFFAE2EC),
