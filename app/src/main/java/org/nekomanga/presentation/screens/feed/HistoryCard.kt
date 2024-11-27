@@ -164,7 +164,7 @@ fun HistoryCard(
             if (groupedBySeries) {
                 Text(
                     modifier =
-                        Modifier.padding(start = Size.small, top = Size.medium).fillMaxWidth(),
+                        Modifier.padding(start = Size.small, top = Size.small).fillMaxWidth(),
                     text = stringResource(id = R.string.showing_x_most_recent),
                     textAlign = TextAlign.Center,
                     style =
