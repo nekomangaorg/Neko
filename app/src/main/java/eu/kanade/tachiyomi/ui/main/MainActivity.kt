@@ -1300,7 +1300,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             val hasQueue = downloading || downloadManager.queueState.value.isNotEmpty()
 
             if (hasQueue) {
-                nav.getOrCreateBadge(R.id.nav_recents)
+                nav.getOrCreateBadge(R.id.nav_recents).apply {
+                    backgroundColor = this@MainActivity.getResourceColor(R.attr.colorSecondary)
+                }
                 showDLQueueTutorial()
             } else {
                 nav.removeBadge(R.id.nav_recents)
