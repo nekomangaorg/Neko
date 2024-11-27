@@ -280,6 +280,7 @@ fun SearchOutlineTopAppBar(
                         ToolTipButton(
                             toolTipLabel = stringResource(id = R.string.cancel_search),
                             icon = Icons.Filled.SearchOff,
+                            enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                             buttonClicked = {
                                 onSearchText("")
                                 searchText = ""
@@ -291,6 +292,7 @@ fun SearchOutlineTopAppBar(
                         ToolTipButton(
                             toolTipLabel = stringResource(id = R.string.search),
                             icon = Icons.Filled.Search,
+                            enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                             buttonClicked = { searchEnabled = true },
                         )
                     }
@@ -298,10 +300,7 @@ fun SearchOutlineTopAppBar(
                 placeholder = {
                     Text(
                         text = searchPlaceHolder,
-                        color =
-                            MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.mediumAlphaHighContrast
-                            ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 trailingIcon = {
@@ -314,6 +313,7 @@ fun SearchOutlineTopAppBar(
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.clear),
                                 icon = Icons.Filled.Close,
+                                enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 buttonClicked = {
                                     onSearchText("")
                                     searchText = ""
