@@ -59,7 +59,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     search = presenter::search,
                     downloadClick = { chapterItem, feedManga, downloadAction ->
                         if (
-                            MdConstants.UnsupportedOfficialScanlators.contains(
+                            MdConstants.UnsupportedOfficialGroupList.contains(
                                 chapterItem.chapter.scanlator
                             )
                         ) {

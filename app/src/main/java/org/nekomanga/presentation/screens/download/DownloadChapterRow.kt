@@ -18,6 +18,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -97,6 +98,7 @@ private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
                         modifier = Modifier.fillMaxWidth(),
                         progress = { download.chapterItem.downloadProgress.toFloat() / 100 },
                         color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.medium),
                         drawStopIndicator = {},
                     )
                 false -> {
@@ -108,8 +110,9 @@ private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
 
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = { animatedProgress },
                         color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.medium),
+                        progress = { animatedProgress },
                     )
                 }
             }
