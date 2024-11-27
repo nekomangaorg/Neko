@@ -86,4 +86,6 @@
     <color name="tabBarIconColorTealSapphire">#589ab8</color>
     <color name="appBarTextTealSapphire">@color/md_white_1000</color>
 
+    <color name="primaryVariantMangaDex">#212121</color>
+
 </resources>

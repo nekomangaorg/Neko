@@ -168,5 +168,6 @@
 
     <!-- MangaDex Theme -->
     <color name="secondaryMangaDex">#FF6740</color>
+    <color name="primaryVariantMangaDex">#FFD9CF</color>
 
 </resources>

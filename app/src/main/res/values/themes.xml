@@ -232,6 +232,7 @@
 
     <style name="Theme.Tachiyomi.MangaDex">
         <item name="colorPrimary">@color/secondaryMangaDex</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantMangaDex</item>
         <item name="colorSecondary">@color/secondaryMangaDex</item>
         <item name="colorSecondaryVariant">?attr/colorSecondary</item>
         <item name="colorOnPrimary">@color/md_white_1000</item>
