@@ -95,27 +95,25 @@ class ChapterItemFilter(
         preferences: PreferencesHelper,
     ): List<T> {
 
-        val blockedGroups = preferences.blockedScanlators().get()
+        val blockedGroupList = preferences.blockedScanlators().get()
         val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators)
-        val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language)
+        val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language)
 
         return chapters.filter {
-            val groups = ChapterUtil.getScanlators(it.chapter.scanlator)
             val languages = ChapterUtil.getLanguages(it.chapter.language)
-            val foundLanguage = languages.none { language -> language in filteredLanguages }
-            val foundGroup =
+            val languageNotFound = languages.none { language -> language in filteredLanguagesList }
+
+            val groups = ChapterUtil.getScanlators(it.chapter.scanlator)
+
+            val groupNotFound =
                 groups.none { group ->
-                    val inBlocked = group in blockedGroups
-                    val inFiltered =
-                        when (filteredGroupList.isEmpty()) {
-                            true -> false
-                            false -> filteredGroupList.contains(group)
-                        }
-                    val unsupported = group in MdConstants.UnsupportedOfficialScanlators
+                    val inBlocked = group in blockedGroupList
+                    val inFiltered = group in filteredGroupList
+                    val unsupported = group in MdConstants.UnsupportedOfficialGroupList
                     inBlocked || inFiltered || unsupported
                 }
 
-            foundLanguage || foundGroup
+            languageNotFound && groupNotFound
         }
     }
 }

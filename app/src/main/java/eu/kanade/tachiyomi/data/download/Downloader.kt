@@ -254,7 +254,7 @@ class Downloader(
                 .filter {
                     when (it.scanlator) {
                         null -> true
-                        else -> !MdConstants.UnsupportedOfficialScanlators.contains(it.scanlator!!)
+                        else -> !MdConstants.UnsupportedOfficialGroupList.contains(it.scanlator!!)
                     }
                 }
                 // Add chapters to queue from the start.
