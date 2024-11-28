@@ -2,7 +2,10 @@ package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -46,6 +49,12 @@ object ChartColors {
 }
 
 fun nekoRippleConfiguration(color: Color) = RippleConfiguration(color, nekoRippleAlpha)
+
+@Composable
+@ReadOnlyComposable
+fun defaultRippleConfiguration(): RippleConfiguration {
+    return nekoRippleConfiguration(MaterialTheme.colorScheme.primary)
+}
 
 private val nekoRippleAlpha =
     RippleAlpha(

@@ -139,10 +139,9 @@ fun HistoryCard(
         )
         if (showRemoveHistoryDialog >= 0) {
             DeleteHistoryDialog(
-                themeColorState = themeColorState,
                 onDismiss = { showRemoveHistoryDialog = -1 },
-                name = feedManga.chapters[showRemoveHistoryDialog].chapter.name,
-                title = R.string.remove_history_question,
+                name =
+                    "${feedManga.mangaTitle}: ${feedManga.chapters[showRemoveHistoryDialog].chapter.name}",
                 description = R.string.this_will_remove_the_read_date,
                 onConfirm = {
                     deleteHistoryClick(feedManga.chapters[showRemoveHistoryDialog].chapter)
@@ -151,10 +150,8 @@ fun HistoryCard(
         }
         if (showRemoveAllHistoryDialog) {
             DeleteHistoryDialog(
-                themeColorState = themeColorState,
                 onDismiss = { showRemoveAllHistoryDialog = false },
                 name = feedManga.mangaTitle,
-                title = R.string.remove_all_history_question,
                 description = R.string.this_will_remove_the_read_date_for_all,
                 onConfirm = deleteAllHistoryClick,
             )

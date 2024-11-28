@@ -321,7 +321,7 @@
     <string name="search_history">Search history</string>
     <string name="search_updates">Search updates</string>
 
-    <string name="this_will_remove_the_read_date_for_all">This will remove the read date for all chapters for: </string>
+    <string name="this_will_remove_the_read_date_for_all">This will remove the read date for all chapters of: </string>
     <string name="this_will_remove_the_read_date">This will remove the read date for:</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="this_will_remove_the_read_date_for_x_question">This will remove the read date of
@@ -355,8 +355,8 @@
     <string name="clear_download_queue">Clear download queue</string>
     <string name="clear_download_queue_confirmation">Are you sure?</string>
     <string name="clear_history_completed">History deleted</string>
-    <string name="clear_history_confirmation_1">Are you sure?</string>
-    <string name="clear_history_confirmation_2">All history will be lost.</string>
+    <string name="clear_history_confirmation_1">Clear all history?</string>
+    <string name="clear_history_confirmation_2">All history will be lost, and is not recoverable.</string>
     <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
 
 

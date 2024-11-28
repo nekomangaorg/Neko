@@ -292,7 +292,6 @@ fun FeedScreen(
     }
     if (showClearHistoryDialog) {
         DeleteAllHistoryDialog(
-            defaultThemeColorState(),
             onDismiss = { showClearHistoryDialog = false },
             onConfirm = { feedSettingActions.clearHistoryClick() },
         )
