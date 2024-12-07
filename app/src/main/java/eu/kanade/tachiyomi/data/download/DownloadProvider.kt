@@ -102,21 +102,22 @@ class DownloadProvider(
     }
 
     fun chapterDirDoesNotExist(chapter: Chapter, chapterDirs: List<UniFile>): Boolean {
-        var exists =
-            getValidChapterDirNames(chapter).none { chapterDir ->
-                chapterDirs.none { uniFile ->
+
+        var found =
+            getValidChapterDirNames(chapter).any { chapterDir ->
+                chapterDirs.any { uniFile ->
                     uniFile.nameWithoutExtension!!.equals(chapterDir, true)
                 }
             }
 
-        if (!exists) {
-            exists =
-                chapterDirs.none { uniFile ->
+        if (!found) {
+            found =
+                chapterDirs.any { uniFile ->
                     uniFile.nameWithoutExtension!!.contains(chapter.uuid())
                 }
         }
 
-        return exists
+        return !found
     }
 
     /**
