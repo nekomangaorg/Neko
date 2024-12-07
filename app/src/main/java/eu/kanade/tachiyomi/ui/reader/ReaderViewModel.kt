@@ -530,10 +530,7 @@ class ReaderViewModel(
      * @param chapters the list of chapters to download.
      */
     private fun downloadChapters(chapters: List<DomainChapterItem>) {
-        downloadManager.downloadChapters(
-            manga!!,
-            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
-        )
+        downloadManager.downloadChapters(manga!!, chapters.map { it.chapter.toDbChapter() })
     }
 
     /**
