@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -40,10 +40,17 @@ fun DownloadScreen(
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
-            items(downloads, { download -> download.chapterItem.chapter.id }) { download ->
-                DownloadChapterRow(download, downloaderRunning) {
-                    downloadScreenActions.downloadSwiped(download)
-                }
+            itemsIndexed(downloads, key = { _, download -> download.chapterItem.chapter.id }) {
+                index,
+                download ->
+                DownloadChapterRow(
+                    modifier = Modifier.animateItem(),
+                    index = index,
+                    chapter = download,
+                    downloaderRunning = downloaderRunning,
+                    downloadSwiped = { downloadScreenActions.downloadSwiped(download) },
+                    moveToTopClicked = { downloadScreenActions.moveToTopClick(download) },
+                )
             }
         }
 

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -21,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -28,18 +32,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.presentation.components.ChapterSwipe
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun DownloadChapterRow(
+    modifier: Modifier = Modifier,
+    index: Int,
     chapter: DownloadItem,
     downloaderRunning: Boolean,
     downloadSwiped: () -> Unit,
+    moveToTopClicked: () -> Unit,
 ) {
     val swipeAction =
         SwipeAction(
@@ -49,16 +62,18 @@ fun DownloadChapterRow(
         )
 
     ChapterSwipe(
-        modifier = Modifier.padding(vertical = Dp(1f)),
+        modifier = modifier.padding(vertical = Dp(1f)),
         startSwipeAction = swipeAction,
         endSwipeAction = swipeAction,
     ) {
-        ChapterRow(chapter, downloaderRunning)
+        ChapterRow(index, chapter, moveToTopClicked)
     }
 }
 
 @Composable
-private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
+private fun ChapterRow(index: Int, download: DownloadItem, moveToTopClicked: () -> Unit) {
+
+    var dropdown by remember { mutableStateOf(false) }
 
     Row(
         modifier =
@@ -117,12 +132,38 @@ private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
                 }
             }
         }
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = null,
+        IconButton(
+            onClick = { dropdown = !dropdown },
             modifier = Modifier.padding(end = Size.medium),
-        )
+        ) {
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+            SimpleDropdownMenu(
+                expanded = dropdown,
+                themeColorState = defaultThemeColorState(),
+                onDismiss = { dropdown = false },
+                dropDownItems =
+                    getDropDownItems(index = index, moveTopTopClicked = moveToTopClicked),
+            )
+        }
     }
+}
+
+@Composable
+private fun getDropDownItems(
+    index: Int,
+    moveTopTopClicked: () -> Unit,
+): ImmutableList<SimpleDropDownItem> {
+    return (when (index == 0) {
+            true -> emptyList()
+            false ->
+                listOf(
+                    SimpleDropDownItem.Action(
+                        text = UiText.StringResource(R.string.move_to_top),
+                        onClick = { moveTopTopClicked() },
+                    )
+                )
+        })
+        .toPersistentList()
 }
 
 @Composable

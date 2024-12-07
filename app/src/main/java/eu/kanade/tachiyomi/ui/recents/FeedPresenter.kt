@@ -335,6 +335,18 @@ class FeedPresenter(
         presenterScope.launchIO { downloadManager.deletePendingDownloadsItems(listOf(download)) }
     }
 
+    fun moveDownloadToTop(downloadItem: DownloadItem) {
+        presenterScope.launchIO {
+            val index =
+                downloadManager.queueState.value.indexOfFirst { download ->
+                    download.chapterItem.id == downloadItem.chapterItem.chapter.id
+                }
+            val mutableDownloads = downloadManager.queueState.value.toMutableList()
+            val downloadList = listOf(mutableDownloads.removeAt(index))
+            downloadManager.reorderQueue(downloadList + mutableDownloads)
+        }
+    }
+
     /**
      * Finds the manga in the given list, finds the matching chapters and updates the chapter and
      * the list. Returning the updated list or false if the chapter didnt exist
