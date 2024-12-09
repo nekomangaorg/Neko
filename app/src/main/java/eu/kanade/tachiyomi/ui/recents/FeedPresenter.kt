@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -507,7 +508,7 @@ class FeedPresenter(
     private fun observeDownloads() {
 
         pausablePresenterScope.launchIO {
-            downloadManager.queueState.collectLatest { queueDownloads ->
+            downloadManager.queueState.debounce(100).collectLatest { queueDownloads ->
                 val downloads =
                     queueDownloads
                         .map { download ->
