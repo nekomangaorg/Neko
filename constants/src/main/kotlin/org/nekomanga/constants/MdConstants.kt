@@ -16,7 +16,7 @@ object MdConstants {
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
     const val chapterSuffix = "/chapter/"
 
-    val UnsupportedOfficialGroupList = arrayOf("Alpha Manga")
+    val UnsupportedOfficialGroupList = arrayOf("Alpha Manga", "INKR Comics", "Kodansha USA")
 
     object Api {
         const val baseUrl = "https://api.mangadex.org"
