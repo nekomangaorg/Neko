@@ -77,7 +77,9 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                 DownloadScreenActions(
                     downloadSwiped = presenter::removeDownload,
                     fabClick = presenter::toggleDownloader,
-                    moveToTopClick = presenter::moveDownloadToTop,
+                    moveDownloadClick = presenter::moveDownload,
+                    moveSeriesClick = presenter::moveDownloadSeries,
+                    cancelSeriesClick = presenter::cancelDownloadSeries,
                 ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },

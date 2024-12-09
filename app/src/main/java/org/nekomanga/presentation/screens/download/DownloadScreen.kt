@@ -43,13 +43,23 @@ fun DownloadScreen(
             itemsIndexed(downloads, key = { _, download -> download.chapterItem.chapter.id }) {
                 index,
                 download ->
+                val first = index == 0
+                val last = index == downloads.lastIndex
+
                 DownloadChapterRow(
                     modifier = Modifier.animateItem(),
-                    index = index,
+                    first = first,
+                    last = last,
                     chapter = download,
                     downloaderRunning = downloaderRunning,
                     downloadSwiped = { downloadScreenActions.downloadSwiped(download) },
-                    moveToTopClicked = { downloadScreenActions.moveToTopClick(download) },
+                    moveDownloadClicked = { direction ->
+                        downloadScreenActions.moveDownloadClick(download, direction)
+                    },
+                    moveSeriesClicked = { direction ->
+                        downloadScreenActions.moveSeriesClick(download, direction)
+                    },
+                    cancelSeriesClicked = { downloadScreenActions.cancelSeriesClick(download) },
                 )
             }
         }

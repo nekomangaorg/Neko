@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.ui.recents.MoveDownloadDirection
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
@@ -48,11 +49,14 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun DownloadChapterRow(
     modifier: Modifier = Modifier,
-    index: Int,
+    first: Boolean,
+    last: Boolean,
     chapter: DownloadItem,
     downloaderRunning: Boolean,
     downloadSwiped: () -> Unit,
-    moveToTopClicked: () -> Unit,
+    moveDownloadClicked: (MoveDownloadDirection) -> Unit,
+    moveSeriesClicked: (MoveDownloadDirection) -> Unit,
+    cancelSeriesClicked: () -> Unit,
 ) {
     val swipeAction =
         SwipeAction(
@@ -66,12 +70,26 @@ fun DownloadChapterRow(
         startSwipeAction = swipeAction,
         endSwipeAction = swipeAction,
     ) {
-        ChapterRow(index, chapter, moveToTopClicked)
+        ChapterRow(
+            first,
+            last,
+            chapter,
+            moveDownloadClicked,
+            moveSeriesClicked,
+            cancelSeriesClicked,
+        )
     }
 }
 
 @Composable
-private fun ChapterRow(index: Int, download: DownloadItem, moveToTopClicked: () -> Unit) {
+private fun ChapterRow(
+    first: Boolean,
+    last: Boolean,
+    download: DownloadItem,
+    moveDownloadClicked: (MoveDownloadDirection) -> Unit,
+    moveSeriesClicked: (MoveDownloadDirection) -> Unit,
+    cancelSeriesClicked: () -> Unit,
+) {
 
     var dropdown by remember { mutableStateOf(false) }
 
@@ -142,7 +160,17 @@ private fun ChapterRow(index: Int, download: DownloadItem, moveToTopClicked: () 
                 themeColorState = defaultThemeColorState(),
                 onDismiss = { dropdown = false },
                 dropDownItems =
-                    getDropDownItems(index = index, moveTopTopClicked = moveToTopClicked),
+                    getDropDownItems(
+                        first = first,
+                        last = last,
+                        moveToTopClicked = { moveDownloadClicked(MoveDownloadDirection.Top) },
+                        moveSeriesToTopClicked = { moveSeriesClicked(MoveDownloadDirection.Top) },
+                        moveToBottomClicked = { moveDownloadClicked(MoveDownloadDirection.Bottom) },
+                        moveSeriesToBottomClicked = {
+                            moveSeriesClicked(MoveDownloadDirection.Bottom)
+                        },
+                        cancelSeriesClicked = cancelSeriesClicked,
+                    ),
             )
         }
     }
@@ -150,19 +178,50 @@ private fun ChapterRow(index: Int, download: DownloadItem, moveToTopClicked: () 
 
 @Composable
 private fun getDropDownItems(
-    index: Int,
-    moveTopTopClicked: () -> Unit,
+    first: Boolean,
+    last: Boolean,
+    moveToTopClicked: () -> Unit,
+    moveSeriesToTopClicked: () -> Unit,
+    moveToBottomClicked: () -> Unit,
+    moveSeriesToBottomClicked: () -> Unit,
+    cancelSeriesClicked: () -> Unit,
 ): ImmutableList<SimpleDropDownItem> {
-    return (when (index == 0) {
-            true -> emptyList()
-            false ->
-                listOf(
-                    SimpleDropDownItem.Action(
-                        text = UiText.StringResource(R.string.move_to_top),
-                        onClick = { moveTopTopClicked() },
-                    )
-                )
-        })
+    return listOf(
+            SimpleDropDownItem.Parent(
+                text = UiText.StringResource(R.string.move_download),
+                children =
+                    listOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.to_top),
+                            onClick = moveToTopClicked,
+                            enabled = !first,
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.to_bottom),
+                            onClick = moveToBottomClicked,
+                            enabled = !last,
+                        ),
+                    ),
+            ),
+            SimpleDropDownItem.Parent(
+                text = UiText.StringResource(R.string.move_series),
+                children =
+                    listOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.to_top),
+                            onClick = moveSeriesToTopClicked,
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.to_bottom),
+                            onClick = moveSeriesToBottomClicked,
+                        ),
+                    ),
+            ),
+            SimpleDropDownItem.Action(
+                text = UiText.StringResource(R.string.cancel_all_for_series),
+                onClick = cancelSeriesClicked,
+            ),
+        )
         .toPersistentList()
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.window.PopupProperties
 import kotlinx.collections.immutable.ImmutableList
 import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -44,13 +45,22 @@ fun SimpleDropdownMenu(
         properties = PopupProperties(),
         onDismissRequest = onDismiss,
     ) {
-        val style =
+        val enabledStyle =
             MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 letterSpacing = (-.5).sp,
             )
+        val disabledStyle =
+            enabledStyle.copy(enabledStyle.color.copy(alpha = NekoColors.disabledAlphaLowContrast))
+
         dropDownItems.forEach { item ->
-            Row(modifier = background, item = item, style = style, onDismiss = onDismiss)
+            Row(
+                modifier = background,
+                item = item,
+                enabledStyle = enabledStyle,
+                disabledStyle = disabledStyle,
+                onDismiss = onDismiss,
+            )
         }
     }
 }
@@ -59,17 +69,33 @@ fun SimpleDropdownMenu(
 private fun CascadeColumnScope.Row(
     modifier: Modifier,
     item: SimpleDropDownItem,
-    style: TextStyle,
+    enabledStyle: TextStyle,
+    disabledStyle: TextStyle,
     onDismiss: () -> Unit,
 ) {
+
     when (item) {
         is SimpleDropDownItem.Parent -> {
+
+            val style =
+                when (item.enabled) {
+                    true -> enabledStyle
+                    false -> disabledStyle
+                }
+
             DropdownMenuItem(
                 modifier = modifier,
                 text = { Text(text = item.text.asString(), style = style) },
+                enabled = item.enabled,
                 children = {
                     for (child in item.children) {
-                        Row(modifier = modifier, item = child, style = style, onDismiss = onDismiss)
+                        Row(
+                            modifier = modifier,
+                            item = child,
+                            enabledStyle = enabledStyle,
+                            disabledStyle = disabledStyle,
+                            onDismiss = onDismiss,
+                        )
                     }
                 },
                 childrenHeader = {
@@ -81,10 +107,16 @@ private fun CascadeColumnScope.Row(
             )
         }
         is SimpleDropDownItem.Action -> {
+            val style =
+                when (item.enabled) {
+                    true -> enabledStyle
+                    false -> disabledStyle
+                }
             Item(
                 modifier = modifier,
                 text = item.text.asString(),
                 style = style,
+                enabled = item.enabled,
                 onClick = item.onClick,
                 onDismiss = onDismiss,
             )
@@ -97,11 +129,13 @@ private fun Item(
     modifier: Modifier,
     text: String,
     style: TextStyle,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
         modifier = modifier,
+        enabled = enabled,
         text = { Text(text = text, style = style) },
         onClick = {
             onDismiss()
@@ -112,8 +146,12 @@ private fun Item(
 
 @Immutable
 sealed class SimpleDropDownItem {
-    data class Action(val text: UiText, val onClick: () -> Unit) : SimpleDropDownItem()
-
-    data class Parent(val text: UiText, val children: List<SimpleDropDownItem>) :
+    data class Action(val text: UiText, val enabled: Boolean = true, val onClick: () -> Unit) :
         SimpleDropDownItem()
+
+    data class Parent(
+        val text: UiText,
+        val enabled: Boolean = true,
+        val children: List<SimpleDropDownItem>,
+    ) : SimpleDropDownItem()
 }

@@ -67,8 +67,15 @@ data class FeedScreenActions(
 data class DownloadScreenActions(
     val downloadSwiped: (DownloadItem) -> Unit,
     val fabClick: () -> Unit,
-    val moveToTopClick: (DownloadItem) -> Unit,
+    val moveDownloadClick: (DownloadItem, MoveDownloadDirection) -> Unit,
+    val moveSeriesClick: (DownloadItem, MoveDownloadDirection) -> Unit,
+    val cancelSeriesClick: (DownloadItem) -> Unit,
 )
+
+enum class MoveDownloadDirection {
+    Top,
+    Bottom,
+}
 
 data class FeedManga(
     val mangaTitle: String,

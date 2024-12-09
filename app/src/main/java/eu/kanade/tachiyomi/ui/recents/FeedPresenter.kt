@@ -336,7 +336,7 @@ class FeedPresenter(
         presenterScope.launchIO { downloadManager.deletePendingDownloadsItems(listOf(download)) }
     }
 
-    fun moveDownloadToTop(downloadItem: DownloadItem) {
+    fun moveDownload(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
         presenterScope.launchIO {
             val index =
                 downloadManager.queueState.value.indexOfFirst { download ->
@@ -344,7 +344,39 @@ class FeedPresenter(
                 }
             val mutableDownloads = downloadManager.queueState.value.toMutableList()
             val downloadList = listOf(mutableDownloads.removeAt(index))
-            downloadManager.reorderQueue(downloadList + mutableDownloads)
+            val list =
+                when (direction) {
+                    MoveDownloadDirection.Top -> downloadList + mutableDownloads
+                    MoveDownloadDirection.Bottom -> mutableDownloads + downloadList
+                }
+
+            downloadManager.reorderQueue(list)
+        }
+    }
+
+    fun moveDownloadSeries(downloadItem: DownloadItem, direction: MoveDownloadDirection) {
+        presenterScope.launchIO {
+            val partitionedPair =
+                downloadManager.queueState.value.partition { download ->
+                    download.mangaItem.id == downloadItem.mangaItem.id
+                }
+
+            val list =
+                when (direction) {
+                    MoveDownloadDirection.Top -> partitionedPair.first + partitionedPair.second
+                    MoveDownloadDirection.Bottom -> partitionedPair.second + partitionedPair.first
+                }
+            downloadManager.reorderQueue(list)
+        }
+    }
+
+    fun cancelDownloadSeries(downloadItem: DownloadItem) {
+        presenterScope.launchIO {
+            val downloadsToDelete =
+                downloadManager.queueState.value.filter { download ->
+                    download.mangaItem.id == downloadItem.mangaItem.id
+                }
+            downloadManager.deletePendingDownloads(downloadsToDelete)
         }
     }
 

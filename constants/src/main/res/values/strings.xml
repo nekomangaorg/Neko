@@ -991,7 +991,12 @@
     <string name="download_queue">Download queue</string>
     <string name="downloading_">Downloading: %1$s</string>
     <string name="cancel_all">Cancel all</string>
+    <string name="move_series">Move series</string>
+    <string name="move_download">Move download</string>
+    <string name="to_top">To top</string>
+    <string name="to_bottom">To bottom</string>
     <string name="move_series_to_top">Move series to top</string>
+    <string name="move_series_to_bottom">Move series to bottom</string>
     <string name="downloads_swipe_tutorial">Downloads can be cancelled by swiping them away\nSwipe this tip to dismiss it</string>
     <string name="cancel_all_for_series">Cancel all for this series</string>
     <string name="downloaded">Downloaded</string>
