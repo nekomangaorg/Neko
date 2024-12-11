@@ -235,7 +235,7 @@ fun FeedScreen(
                                 DownloadScreen(
                                     contentPadding = recyclerContentPadding,
                                     downloads = feedScreenState.value.downloads,
-                                    downloaderRunning = feedScreenState.value.downloaderRunning,
+                                    downloaderStatus = feedScreenState.value.downloaderStatus,
                                     downloadScreenActions = downloadScreenActions,
                                 )
                             false ->

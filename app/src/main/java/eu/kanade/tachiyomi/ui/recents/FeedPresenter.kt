@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -560,9 +561,25 @@ class FeedPresenter(
         }
 
         pausablePresenterScope.launchIO {
-            downloadManager.isDownloaderRunning.collectLatest { running ->
-                _feedScreenState.update { it.copy(downloaderRunning = running) }
-            }
+            combine(
+                    preferences.downloadOnlyOverWifi().changes(),
+                    downloadManager.isDownloaderRunning,
+                    downloadManager.networkStateFlow(),
+                ) { downloadOnlyOverWifi, downloadRunning, networkStateFlow ->
+                    Triple(downloadOnlyOverWifi, downloadRunning, networkStateFlow)
+                }
+                .collectLatest { results ->
+                    TimberKt.d { "ESCO ${results.first} ${results.second} ${results.third}" }
+                    val result =
+                        if (!results.third.isWifi && results.first) {
+                            DownloaderStatus.NetworkPaused
+                        } else if (results.second) {
+                            DownloaderStatus.Running
+                        } else {
+                            DownloaderStatus.Paused
+                        }
+                    _feedScreenState.update { it.copy(downloaderStatus = result) }
+                }
         }
 
         pausablePresenterScope.launchIO {

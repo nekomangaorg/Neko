@@ -52,7 +52,6 @@ fun DownloadChapterRow(
     first: Boolean,
     last: Boolean,
     chapter: DownloadItem,
-    downloaderRunning: Boolean,
     downloadSwiped: () -> Unit,
     moveDownloadClicked: (MoveDownloadDirection) -> Unit,
     moveSeriesClicked: (MoveDownloadDirection) -> Unit,
@@ -94,10 +93,7 @@ private fun ChapterRow(
     var dropdown by remember { mutableStateOf(false) }
 
     Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surface)
-                .padding(top = Size.small, bottom = Size.small),
+        modifier = Modifier.fillMaxWidth().padding(top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

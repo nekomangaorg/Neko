@@ -27,7 +27,7 @@ data class FeedScreenState(
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val downloads: ImmutableList<DownloadItem> = persistentListOf(),
-    val downloaderRunning: Boolean = false,
+    val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
     val searchQuery: String = "",
 )
 
@@ -41,6 +41,12 @@ enum class FeedHistoryGroup {
     Series,
     Day,
     Week,
+}
+
+enum class DownloaderStatus {
+    Running,
+    Paused,
+    NetworkPaused,
 }
 
 data class FeedSettingActions(

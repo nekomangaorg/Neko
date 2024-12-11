@@ -1025,6 +1025,7 @@
     <string name="group_downloader">Downloads</string>
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>
     <string name="no_wifi_connection">No Wi-Fi connection available</string>
+    <string name="unable_to_download">Unable to download</string>
     <string name="no_network_connection">No network connection available</string>
 
     <!-- Downloads settings -->
