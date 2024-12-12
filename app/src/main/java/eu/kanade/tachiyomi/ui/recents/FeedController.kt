@@ -26,6 +26,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         val context = LocalContext.current
 
@@ -38,6 +39,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             loadNextPage = presenter::loadNextPage,
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
+            legacySideNav = isSideNav,
             feedSettingActions =
                 FeedSettingActions(
                     groupHistoryClick = presenter::toggleGroupHistoryType,

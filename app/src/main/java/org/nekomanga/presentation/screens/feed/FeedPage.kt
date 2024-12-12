@@ -52,7 +52,6 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
-    contentPadding: PaddingValues,
     feedMangaList: ImmutableList<FeedManga>,
     outlineCovers: Boolean,
     outlineCards: Boolean,
@@ -63,6 +62,7 @@ fun FeedPage(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
+    contentPadding: PaddingValues = PaddingValues(),
 ) {
     val scrollState = rememberLazyListState()
 
@@ -71,7 +71,6 @@ fun FeedPage(
     val now = Date().time
 
     var timeSpan by remember { mutableStateOf("") }
-
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         state = scrollState,
@@ -82,6 +81,7 @@ fun FeedPage(
             FeedScreenType.History -> {
                 items(feedMangaList) { feedManga ->
                     HistoryCard(
+                        modifier = Modifier.animateItem(),
                         feedManga = feedManga,
                         themeColorState = themeColorState,
                         outlineCover = outlineCovers,
@@ -151,6 +151,7 @@ fun FeedPage(
                         }
                         item {
                             UpdatesCard(
+                                modifier = Modifier.animateItem(),
                                 chapterItem,
                                 themeColorState = themeColorState,
                                 mangaTitle = feedManga.mangaTitle,

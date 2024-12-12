@@ -569,7 +569,6 @@ class FeedPresenter(
                     Triple(downloadOnlyOverWifi, downloadRunning, networkStateFlow)
                 }
                 .collectLatest { results ->
-                    TimberKt.d { "ESCO ${results.first} ${results.second} ${results.third}" }
                     val result =
                         if (!results.third.isWifi && results.first) {
                             DownloaderStatus.NetworkPaused

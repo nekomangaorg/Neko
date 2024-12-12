@@ -1209,6 +1209,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 (router.backstack.map { it?.controller } + extraController)
                     .filterNotNull()
                     .filterNot { it is BrowseController }
+                    .filterNot { it is FeedController }
                     .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->

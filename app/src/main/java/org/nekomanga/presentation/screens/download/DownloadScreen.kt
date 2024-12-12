@@ -1,11 +1,8 @@
 package org.nekomanga.presentation.screens.download
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -56,45 +52,15 @@ fun DownloadScreen(
             }
         }
 
-    val layoutDirection = LocalLayoutDirection.current
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .padding(
-                    top = contentPadding.calculateTopPadding(),
-                    bottom = contentPadding.calculateBottomPadding(),
-                    start = contentPadding.calculateStartPadding(layoutDirection),
-                    end = contentPadding.calculateEndPadding(layoutDirection),
-                )
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(start = Size.small, end = Size.small, bottom = Size.large),
+                    .padding(start = Size.small, end = Size.small, bottom = Size.huge),
             state = scrollState,
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(Size.medium),
         ) {
-            stickyHeader(key = downloaderStatus) {
-                MaterialFade(visible = downloaderStatus == DownloaderStatus.NetworkPaused) {
-                    ElevatedCard(
-                        modifier =
-                            Modifier.fillMaxWidth().align(Alignment.TopCenter).padding(Size.medium),
-                        colors =
-                            CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                            ),
-                    ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = Size.smedium),
-                            textAlign = TextAlign.Center,
-                            text = stringResource(R.string.no_wifi_connection),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
-                    }
-                }
-            }
             downloadGroup.entries.forEach { entry ->
                 item(entry.key) {
                     ElevatedCard {
@@ -133,7 +99,31 @@ fun DownloadScreen(
             }
         }
 
-        AnimatedVisibility(
+        MaterialFade(
+            visible = downloaderStatus == DownloaderStatus.NetworkPaused,
+            modifier = Modifier.align(Alignment.BottomEnd),
+        ) {
+            ElevatedCard(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = contentPadding.calculateBottomPadding() - Size.medium),
+                colors =
+                    CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    ),
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = Size.smedium),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(R.string.no_wifi_connection),
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+            }
+        }
+
+        MaterialFade(
             visible = downloaderStatus != DownloaderStatus.NetworkPaused,
             modifier = Modifier.align(Alignment.BottomEnd),
         ) {

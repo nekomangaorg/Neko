@@ -23,6 +23,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun UpdatesCard(
+    modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
     themeColorState: ThemeColorState,
     mangaTitle: String,
@@ -34,6 +35,7 @@ fun UpdatesCard(
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     UpdatesRow(
+        modifier = modifier,
         chapterItem = chapterItem,
         themeColorState = themeColorState,
         mangaTitle = mangaTitle,
@@ -48,6 +50,7 @@ fun UpdatesCard(
 
 @Composable
 private fun UpdatesRow(
+    modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
     themeColorState: ThemeColorState,
     mangaTitle: String,
@@ -63,7 +66,8 @@ private fun UpdatesRow(
 
     Row(
         modifier =
-            Modifier.fillMaxWidth()
+            modifier
+                .fillMaxWidth()
                 .clickable { chapterClick(chapterItem.chapter.id) }
                 .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,

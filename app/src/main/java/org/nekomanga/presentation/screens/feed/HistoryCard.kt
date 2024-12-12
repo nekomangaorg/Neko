@@ -72,6 +72,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun HistoryCard(
+    modifier: Modifier = Modifier,
     feedManga: FeedManga,
     themeColorState: ThemeColorState,
     outlineCard: Boolean,
@@ -98,7 +99,7 @@ fun HistoryCard(
     var showRemoveAllHistoryDialog by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(Size.small).animateContentSize(),
+        modifier = modifier.fillMaxWidth().padding(Size.small).animateContentSize(),
         outlineCard = outlineCard,
         cardColor = CardDefaults.cardColors(containerColor = cardColor),
         mangaClick = mangaClick,

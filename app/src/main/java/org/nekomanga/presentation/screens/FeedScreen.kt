@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyRow
@@ -38,10 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import eu.kanade.tachiyomi.ui.recents.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
@@ -62,7 +58,6 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
 import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
-import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
@@ -75,6 +70,7 @@ fun FeedScreen(
     feedScreenState: State<FeedScreenState>,
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
+    legacySideNav: Boolean,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
     downloadScreenActions: DownloadScreenActions,
@@ -106,8 +102,9 @@ fun FeedScreen(
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
-    val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav)
+    // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
+    val actualSideNav = legacySideNav
+    val navBarPadding = rememberNavBarPadding(actualSideNav)
 
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showClearDownloadsDialog by remember { mutableStateOf(false) }
@@ -192,7 +189,7 @@ fun FeedScreen(
                         PaddingValues(
                             top = incomingContentPadding.calculateTopPadding(),
                             bottom =
-                                if (sideNav) {
+                                if (actualSideNav) {
                                     Size.navBarSize
                                 } else {
                                     Size.navBarSize
@@ -202,17 +199,9 @@ fun FeedScreen(
                                         .calculateBottomPadding(),
                         )
 
-                    val layoutDirection = LocalLayoutDirection.current
                     Box(
                         modifier =
-                            Modifier.padding(
-                                    start = navBarPadding.calculateStartPadding(layoutDirection),
-                                    bottom =
-                                        max(
-                                            navBarPadding.calculateBottomPadding() - Size.small,
-                                            0.dp,
-                                        ),
-                                )
+                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                 .fillMaxSize()
                     ) {
                         val (feedManga, hasMoreResults) =
@@ -259,10 +248,7 @@ fun FeedScreen(
                         if (!feedScreenState.value.firstLoad) {
                             ScreenFooter(
                                 screenType = feedScreenType,
-                                modifier =
-                                    Modifier.align(Alignment.BottomStart).conditional(sideNav) {
-                                        this.navigationBarsPadding()
-                                    },
+                                modifier = Modifier.align(Alignment.BottomStart),
                                 showDownloads = feedScreenState.value.downloads.isNotEmpty(),
                                 downloadsSelected = feedScreenState.value.showingDownloads,
                                 downloadsClicked = feedScreenActions.toggleShowingDownloads,
