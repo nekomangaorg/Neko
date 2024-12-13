@@ -132,6 +132,7 @@ fun FeedScreen(
                         contentPadding = navBarPadding,
                         feedScreenType = feedScreenState.value.feedScreenType,
                         downloadScreenVisible = downloadScreenVisible,
+                        downloadOnlyOnWifi = feedScreenState.value.downloadOnlyOnWifi,
                         historyGrouping = feedScreenState.value.historyGrouping,
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
                         outlineCovers = feedScreenState.value.outlineCovers,
@@ -144,6 +145,7 @@ fun FeedScreen(
                         sortClick = { feedSettingActions.switchUploadsSortOrder() },
                         outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                         outlineCardsClick = { feedSettingActions.outlineCardsClick() },
+                        toggleDownloadOnWifi = { feedSettingActions.toggleDownloadOnlyOnWifi() },
                     )
                 }
             },

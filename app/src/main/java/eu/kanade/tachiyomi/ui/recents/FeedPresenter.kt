@@ -54,6 +54,7 @@ class FeedPresenter(
                 groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
                 historyGrouping = preferences.historyChapterGrouping().get(),
                 hideChapterTitles = mangaDetailsPreferences.hideChapterTitlesByDefault().get(),
+                downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
             )
         )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
@@ -124,6 +125,12 @@ class FeedPresenter(
         presenterScope.launch {
             securityPreferences.incognitoMode().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(incognitoMode = it) }
+            }
+        }
+
+        presenterScope.launch {
+            preferences.downloadOnlyOverWifi().changes().collectLatest {
+                _feedScreenState.update { state -> state.copy(downloadOnlyOnWifi = it) }
             }
         }
 
@@ -382,6 +389,10 @@ class FeedPresenter(
                 }
             downloadManager.deletePendingDownloads(downloadsToDelete)
         }
+    }
+
+    fun toggleDownloadOnlyOnWifi() {
+        presenterScope.launchIO { preferences.downloadOnlyOverWifi().toggle() }
     }
 
     /**

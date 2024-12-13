@@ -48,6 +48,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     outlineCoversClick = presenter::toggleOutlineCovers,
                     outlineCardsClick = presenter::toggleOutlineCards,
                     clearDownloadQueueClick = presenter::clearDownloadQueue,
+                    toggleDownloadOnlyOnWifi = presenter::toggleDownloadOnlyOnWifi,
                 ),
             feedScreenActions =
                 FeedScreenActions(

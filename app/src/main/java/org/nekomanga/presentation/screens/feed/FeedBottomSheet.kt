@@ -43,6 +43,7 @@ fun FeedBottomSheet(
     contentPadding: PaddingValues,
     feedScreenType: FeedScreenType,
     downloadScreenVisible: Boolean,
+    downloadOnlyOnWifi: Boolean,
     historyGrouping: FeedHistoryGroup,
     sortByFetched: Boolean,
     outlineCovers: Boolean,
@@ -53,6 +54,7 @@ fun FeedBottomSheet(
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
     clearDownloadsClick: () -> Unit,
+    toggleDownloadOnWifi: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
 
@@ -68,7 +70,8 @@ fun FeedBottomSheet(
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
             when {
-                downloadScreenVisible -> downloadsContent(clearDownloadsClick)
+                downloadScreenVisible ->
+                    downloadsContent(clearDownloadsClick, downloadOnlyOnWifi, toggleDownloadOnWifi)
                 feedScreenType == FeedScreenType.History ->
                     historyContent(
                         historyGrouping = historyGrouping,
@@ -166,8 +169,8 @@ private fun LazyListScope.historyContent(
             }
         }
     }
-    item { Checkbox(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
-    item { Checkbox(R.string.show_outline_around_cards, outlineCards, outlineCardsClick) }
+    item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+    item { SwitchRow(R.string.show_outline_around_cards, outlineCards, outlineCardsClick) }
     item {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             TextButton(onClick = clearHistoryClick) {
@@ -180,7 +183,18 @@ private fun LazyListScope.historyContent(
     }
 }
 
-private fun LazyListScope.downloadsContent(clearDownloadsClick: () -> Unit) {
+private fun LazyListScope.downloadsContent(
+    clearDownloadsClick: () -> Unit,
+    downloadOnlyOnWifi: Boolean,
+    toggleDownloadOnWifi: () -> Unit,
+) {
+    item {
+        SwitchRow(
+            textRes = R.string.only_download_over_wifi,
+            downloadOnlyOnWifi,
+            toggleDownloadOnWifi,
+        )
+    }
     item {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             TextButton(onClick = clearDownloadsClick) {
@@ -200,12 +214,12 @@ private fun LazyListScope.uploadsContent(
     sortClick: () -> Unit,
     outlineCoversClick: () -> Unit,
 ) {
-    item { Checkbox(R.string.sort_fetched_time, fetchSort, sortClick) }
-    item { Checkbox(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+    item { SwitchRow(R.string.sort_fetched_time, fetchSort, sortClick) }
+    item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
 }
 
 @Composable
-private fun Checkbox(@StringRes textRes: Int, checked: Boolean, onClick: () -> Unit) {
+private fun SwitchRow(@StringRes textRes: Int, checked: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,

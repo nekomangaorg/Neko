@@ -28,6 +28,7 @@ data class FeedScreenState(
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val downloads: ImmutableList<DownloadItem> = persistentListOf(),
     val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
+    val downloadOnlyOnWifi: Boolean,
     val searchQuery: String = "",
 )
 
@@ -56,6 +57,7 @@ data class FeedSettingActions(
     val outlineCoversClick: () -> Unit,
     val outlineCardsClick: () -> Unit,
     val clearDownloadQueueClick: () -> Unit,
+    val toggleDownloadOnlyOnWifi: () -> Unit,
 )
 
 data class FeedScreenActions(
