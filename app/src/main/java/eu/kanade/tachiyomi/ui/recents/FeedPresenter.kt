@@ -185,27 +185,30 @@ class FeedPresenter(
     }
 
     fun switchViewType(feedScreenType: FeedScreenType) {
-        presenterScope.launch { preferences.feedViewType().set(feedScreenType) }
+        presenterScope.launchIO {
+            _feedScreenState.update { it.copy(allFeedManga = persistentListOf()) }
+            preferences.feedViewType().set(feedScreenType)
+        }
     }
 
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
-        presenterScope.launch { preferences.historyChapterGrouping().set(historyGrouping) }
+        presenterScope.launchIO { preferences.historyChapterGrouping().set(historyGrouping) }
     }
 
     fun toggleOutlineCards() {
-        presenterScope.launch { preferences.feedViewOutlineCards().toggle() }
+        presenterScope.launchIO { preferences.feedViewOutlineCards().toggle() }
     }
 
     fun toggleOutlineCovers() {
-        presenterScope.launch { libraryPreferences.outlineOnCovers().toggle() }
+        presenterScope.launchIO { libraryPreferences.outlineOnCovers().toggle() }
     }
 
     fun toggleIncognitoMode() {
-        presenterScope.launch { securityPreferences.incognitoMode().toggle() }
+        presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }
     }
 
     fun toggleShowingDownloads() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _feedScreenState.update { it.copy(showingDownloads = !it.showingDownloads) }
         }
     }

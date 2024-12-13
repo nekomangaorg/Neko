@@ -81,7 +81,6 @@ fun FeedPage(
             FeedScreenType.History -> {
                 items(feedMangaList) { feedManga ->
                     HistoryCard(
-                        modifier = Modifier.animateItem(),
                         feedManga = feedManga,
                         themeColorState = themeColorState,
                         outlineCover = outlineCovers,
@@ -151,8 +150,7 @@ fun FeedPage(
                         }
                         item {
                             UpdatesCard(
-                                modifier = Modifier.animateItem(),
-                                chapterItem,
+                                chapterItem = chapterItem,
                                 themeColorState = themeColorState,
                                 mangaTitle = feedManga.mangaTitle,
                                 artwork = feedManga.artwork,
