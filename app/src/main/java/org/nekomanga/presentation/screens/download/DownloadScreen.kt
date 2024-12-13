@@ -107,7 +107,11 @@ fun DownloadScreen(
                 modifier =
                     Modifier.fillMaxWidth()
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = contentPadding.calculateBottomPadding() - Size.medium),
+                        .padding(
+                            bottom = contentPadding.calculateBottomPadding() - Size.medium,
+                            start = Size.small,
+                            end = Size.small,
+                        ),
                 colors =
                     CardDefaults.elevatedCardColors(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
