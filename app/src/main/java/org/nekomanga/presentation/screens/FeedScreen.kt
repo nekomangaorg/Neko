@@ -238,6 +238,7 @@ fun FeedScreen(
                                         feedScreenState.value.historyGrouping ==
                                             FeedHistoryGroup.Series,
                                     feedScreenType = feedScreenState.value.feedScreenType,
+                                    historyGrouping = feedScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,
                                     outlineCards = feedScreenState.value.outlineCards,
                                     hideChapterTitles = feedScreenState.value.hideChapterTitles,
@@ -287,7 +288,6 @@ fun FeedScreen(
 
     if (showClearDownloadsDialog) {
         ClearDownloadQueueDialog(
-            defaultThemeColorState(),
             onDismiss = { showClearDownloadsDialog = false },
             onConfirm = {
                 feedSettingActions.clearDownloadQueueClick()

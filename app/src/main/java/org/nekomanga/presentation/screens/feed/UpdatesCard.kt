@@ -18,14 +18,12 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun UpdatesCard(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
-    themeColorState: ThemeColorState,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
@@ -37,7 +35,6 @@ fun UpdatesCard(
     UpdatesRow(
         modifier = modifier,
         chapterItem = chapterItem,
-        themeColorState = themeColorState,
         mangaTitle = mangaTitle,
         artwork = artwork,
         outlineCovers = outlineCovers,
@@ -52,7 +49,6 @@ fun UpdatesCard(
 private fun UpdatesRow(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
-    themeColorState: ThemeColorState,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
@@ -106,7 +102,6 @@ private fun UpdatesRow(
             )
         }
         DownloadButton(
-            themeColorState = themeColorState,
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
             onDownload = downloadClick,

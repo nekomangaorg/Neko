@@ -46,6 +46,7 @@ import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 private const val size = 24
@@ -55,7 +56,7 @@ private const val borderSize = 2.5
 @Composable
 fun DownloadButton(
     modifier: Modifier = Modifier,
-    themeColorState: ThemeColorState,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
     downloadState: Download.State,
     downloadProgress: Int,
     onDownload: (MangaConstants.DownloadAction) -> Unit,

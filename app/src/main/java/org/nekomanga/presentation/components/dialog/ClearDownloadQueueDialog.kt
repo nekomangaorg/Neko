@@ -13,19 +13,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.res.stringResource
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.theme.Size
 
 /** Simple Dialog to add a new category */
 @Composable
-fun ClearDownloadQueueDialog(
-    themeColorState: ThemeColorState,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun ClearDownloadQueueDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
     CompositionLocalProvider(
-        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalRippleConfiguration provides
+            nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         LocalContentColor provides MaterialTheme.colorScheme.onSurface,
     ) {
         AlertDialog(
@@ -56,7 +53,9 @@ fun ClearDownloadQueueDialog(
                         onDismiss()
                     },
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
                 ) {
                     Text(text = stringResource(id = R.string.clear))
                 }
@@ -65,7 +64,9 @@ fun ClearDownloadQueueDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

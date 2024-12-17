@@ -67,14 +67,13 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.dialog.DeleteHistoryDialog
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun HistoryCard(
     modifier: Modifier = Modifier,
     feedManga: FeedManga,
-    themeColorState: ThemeColorState,
     outlineCard: Boolean,
     outlineCover: Boolean,
     hideChapterTitles: Boolean,
@@ -107,7 +106,7 @@ fun HistoryCard(
         val titleColor =
             getReadTextColor(
                 isRead = feedManga.chapters.all { it.chapter.read },
-                themeColorState.buttonColor,
+                MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
         Text(
@@ -127,7 +126,6 @@ fun HistoryCard(
                     .padding(start = Size.small),
             artwork = feedManga.artwork,
             chapterItem = feedManga.chapters.first(),
-            themeColorState = themeColorState,
             outlineCovers = outlineCover,
             hideChapterTitles = hideChapterTitles,
             canExpand = canExpand,
@@ -231,7 +229,6 @@ fun HistoryCard(
                             ) {
                                 Row() {
                                     Buttons(
-                                        themeColorState = themeColorState,
                                         chapterItem = chapterItem,
                                         deleteClick = { showRemoveHistoryDialog = index },
                                         downloadClick = { action ->
@@ -283,7 +280,6 @@ private fun HistoryRow(
     modifier: Modifier = Modifier,
     artwork: Artwork,
     chapterItem: ChapterItem,
-    themeColorState: ThemeColorState,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     canExpand: Boolean,
@@ -313,7 +309,6 @@ private fun HistoryRow(
                 chapterItem = chapterItem,
                 hideChapterTitles = hideChapterTitles,
                 updatedColor = mediumAlphaColor,
-                themeColorState = themeColorState,
                 deleteAllClick = deleteAllClick,
                 deleteClick = deleteClick,
                 downloadClick = downloadClick,
@@ -343,7 +338,6 @@ private fun ChapterInfo(
     chapterItem: ChapterItem,
     hideChapterTitles: Boolean,
     updatedColor: Color,
-    themeColorState: ThemeColorState,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
@@ -387,7 +381,6 @@ private fun ChapterInfo(
             }
             Spacer(modifier.weight(1f))
             Buttons(
-                themeColorState = themeColorState,
                 chapterItem = chapterItem,
                 deleteAll = true,
                 deleteAllClick = deleteAllClick,
@@ -400,7 +393,6 @@ private fun ChapterInfo(
 
 @Composable
 private fun RowScope.Buttons(
-    themeColorState: ThemeColorState,
     chapterItem: ChapterItem,
     deleteAll: Boolean = false,
     deleteClick: () -> Unit,
@@ -412,7 +404,7 @@ private fun RowScope.Buttons(
             Icon(
                 imageVector = Icons.Outlined.DeleteSweep,
                 contentDescription = null,
-                tint = themeColorState.buttonColor.copy(alpha = .8f),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
             )
         }
     }
@@ -420,11 +412,11 @@ private fun RowScope.Buttons(
         Icon(
             imageVector = Icons.Outlined.Delete,
             contentDescription = null,
-            tint = themeColorState.buttonColor.copy(alpha = .8f),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
         )
     }
     DownloadButton(
-        themeColorState = themeColorState,
+        themeColorState = defaultThemeColorState(),
         downloadState = chapterItem.downloadState,
         downloadProgress = chapterItem.downloadProgress,
         onDownload = downloadClick,

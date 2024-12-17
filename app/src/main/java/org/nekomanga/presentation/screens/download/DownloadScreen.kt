@@ -17,6 +17,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,7 +64,15 @@ fun DownloadScreen(
         ) {
             downloadGroup.entries.forEach { entry ->
                 item(entry.key) {
-                    ElevatedCard {
+                    ElevatedCard(
+                        colors =
+                            CardDefaults.elevatedCardColors(
+                                containerColor =
+                                    MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                        Size.extraTiny
+                                    )
+                            )
+                    ) {
                         Text(
                             modifier = Modifier.padding(top = Size.small).fillMaxWidth(),
                             textAlign = TextAlign.Center,

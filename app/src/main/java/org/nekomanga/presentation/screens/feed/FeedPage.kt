@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
@@ -46,7 +46,6 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.decimalFormat
-import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -62,11 +61,10 @@ fun FeedPage(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
+    historyGrouping: FeedHistoryGroup,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val scrollState = rememberLazyListState()
-
-    val themeColorState = defaultThemeColorState()
 
     val now = Date().time
 
@@ -79,51 +77,71 @@ fun FeedPage(
     ) {
         when (feedScreenType) {
             FeedScreenType.History -> {
-                items(feedMangaList) { feedManga ->
-                    HistoryCard(
-                        feedManga = feedManga,
-                        themeColorState = themeColorState,
-                        outlineCover = outlineCovers,
-                        outlineCard = outlineCards,
-                        hideChapterTitles = hideChapterTitles,
-                        groupedBySeries = groupedBySeries,
-                        downloadClick = { chp, action ->
-                            feedScreenActions.downloadClick(chp, feedManga, action)
-                        },
-                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                        chapterClick = { chapterId ->
-                            feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
-                        },
-                        deleteAllHistoryClick = {
-                            feedScreenActions.deleteAllHistoryClick(feedManga)
-                        },
-                        deleteHistoryClick = { chp ->
-                            feedScreenActions.deleteHistoryClick(feedManga, chp)
-                        },
-                    )
-                    LaunchedEffect(scrollState) {
-                        if (
-                            hasMoreResults &&
-                                feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4
-                        ) {
-                            loadNextPage()
+                feedMangaList.forEach { feedManga ->
+                    val dateString =
+                        getDateString(
+                            feedManga.chapters.first().chapter.lastRead,
+                            now,
+                            historyGrouping,
+                        )
+                    if (dateString.isNotEmpty() && timeSpan != dateString) {
+                        timeSpan = dateString
+
+                        item {
+                            Text(
+                                text = dateString,
+                                style =
+                                    MaterialTheme.typography.labelLarge.copy(
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    ),
+                                modifier =
+                                    Modifier.padding(
+                                        start = Size.small,
+                                        top = Size.small,
+                                        end = Size.small,
+                                    ),
+                            )
+                        }
+                    }
+
+                    item {
+                        HistoryCard(
+                            feedManga = feedManga,
+                            outlineCover = outlineCovers,
+                            outlineCard = outlineCards,
+                            hideChapterTitles = hideChapterTitles,
+                            groupedBySeries = groupedBySeries,
+                            downloadClick = { chp, action ->
+                                feedScreenActions.downloadClick(chp, feedManga, action)
+                            },
+                            mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                            chapterClick = { chapterId ->
+                                feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
+                            },
+                            deleteAllHistoryClick = {
+                                feedScreenActions.deleteAllHistoryClick(feedManga)
+                            },
+                            deleteHistoryClick = { chp ->
+                                feedScreenActions.deleteHistoryClick(feedManga, chp)
+                            },
+                        )
+                        LaunchedEffect(scrollState) {
+                            if (
+                                hasMoreResults &&
+                                    feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4
+                            ) {
+                                loadNextPage()
+                            }
                         }
                     }
                 }
             }
             FeedScreenType.Updates -> {
-
                 feedMangaList.forEach { feedManga ->
-                    val dateString =
-                        DateUtils.getRelativeTimeSpanString(
-                                feedManga.date,
-                                now,
-                                DateUtils.DAY_IN_MILLIS,
-                            )
-                            .toString()
+                    val dateString = getDateString(feedManga.date, now, isRecent = true)
                     // there should only ever be 1
                     feedManga.chapters.forEach { chapterItem ->
-                        if (timeSpan != dateString) {
+                        if (dateString.isNotEmpty() && timeSpan != dateString) {
                             timeSpan = dateString
 
                             val prefix =
@@ -137,7 +155,7 @@ fun FeedPage(
                                     text = stringResource(id = prefix, dateString),
                                     style =
                                         MaterialTheme.typography.labelLarge.copy(
-                                            color = themeColorState.buttonColor
+                                            color = MaterialTheme.colorScheme.primary
                                         ),
                                     modifier =
                                         Modifier.padding(
@@ -151,7 +169,6 @@ fun FeedPage(
                         item {
                             UpdatesCard(
                                 chapterItem = chapterItem,
-                                themeColorState = themeColorState,
                                 mangaTitle = feedManga.mangaTitle,
                                 artwork = feedManga.artwork,
                                 outlineCovers = outlineCovers,
@@ -168,8 +185,32 @@ fun FeedPage(
                     }
                 }
             }
-            else -> Unit
         }
+    }
+}
+
+private fun getDateString(
+    date: Long,
+    currentDate: Long,
+    historyGroupType: FeedHistoryGroup = FeedHistoryGroup.Day,
+    isRecent: Boolean = false,
+): String {
+    if (historyGroupType == FeedHistoryGroup.Never || historyGroupType == FeedHistoryGroup.Series) {
+        return ""
+    }
+
+    val dateType =
+        if (isRecent || historyGroupType == FeedHistoryGroup.Day) {
+            DateUtils.DAY_IN_MILLIS
+        } else {
+            DateUtils.WEEK_IN_MILLIS
+        }
+
+    val dateString = DateUtils.getRelativeTimeSpanString(date, currentDate, dateType).toString()
+    return if (dateString == "0 weeks ago") {
+        "This week"
+    } else {
+        dateString
     }
 }
 
