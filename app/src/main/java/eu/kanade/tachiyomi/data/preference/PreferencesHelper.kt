@@ -9,9 +9,8 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.recents.FeedScreenType
-import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
+import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
+import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -164,33 +163,16 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun defaultCategory() = this.preferenceStore.getInt(Keys.defaultCategory, -1)
 
-    fun recentsViewType() = this.preferenceStore.getInt("recents_view_type", 0)
-
     fun feedViewType() = this.preferenceStore.getEnum("feed_view_type", FeedScreenType.Updates)
-
-    fun showRecentsDownloads() =
-        this.preferenceStore.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
-
-    fun showRecentsRemHistory() =
-        this.preferenceStore.getBoolean(Keys.showRemHistoryInRecents, true)
-
-    fun showReadInAllRecents() = this.preferenceStore.getBoolean(Keys.showReadInAllRecents, false)
-
-    fun showUpdatedTime() = this.preferenceStore.getBoolean(Keys.showUpdatedTime, false)
 
     fun sortFetchedTime() = this.preferenceStore.getBoolean("sort_fetched_time", false)
 
     fun groupChaptersUpdates() = this.preferenceStore.getBoolean(Keys.groupChaptersUpdates, false)
 
-    fun groupChaptersHistory() = this.preferenceStore.getBoolean(Keys.groupChaptersHistory, true)
-
     fun historyChapterGrouping() =
         preferenceStore.getEnum(Keys.historyChapterGrouping, FeedHistoryGroup.Series)
 
     fun feedViewOutlineCards() = preferenceStore.getBoolean("feedViewCardOutlined", false)
-
-    fun showTitleFirstInRecents() =
-        this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
 
     fun lastAppCheck() = this.preferenceStore.getLong("last_app_check", 0)
 

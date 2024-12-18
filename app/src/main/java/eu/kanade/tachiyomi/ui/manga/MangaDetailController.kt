@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
+import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -30,7 +31,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
@@ -303,7 +303,7 @@ class MangaDetailController(private val mangaId: Long) :
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
-            is RecentsController,
+            is FeedController,
             is DisplayController,
             is SimilarController -> {
                 router.popToRoot()
@@ -336,7 +336,7 @@ class MangaDetailController(private val mangaId: Long) :
                 previousController.search(text)
             }
             is BrowseController,
-            is RecentsController,
+            is FeedController,
             is DisplayController -> {
                 // Manually navigate to LibraryController
                 router.handleBack()

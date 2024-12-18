@@ -46,9 +46,6 @@ object EstimatedItemHeight {
      */
     private fun estimatedHeight(id: Int): Int {
         return when (id) {
-            R.layout.recent_manga_item -> 92.dpToPx
-            R.layout.recents_header_item -> 40.dpToPx
-            R.layout.recent_chapters_section_item -> 32.dpToPx
             R.layout.chapters_item -> 60.dpToPx
             R.layout.manga_header_item -> 500.dpToPx
             R.layout.manga_grid_item -> 222.dpToPx

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.recents
+package eu.kanade.tachiyomi.ui.feed
 
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.download.DownloadManager

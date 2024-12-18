@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.recents
+package eu.kanade.tachiyomi.ui.feed
 
 import android.app.Activity
 import android.content.Context

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.recents
+package eu.kanade.tachiyomi.ui.feed
 
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode

@@ -31,9 +31,9 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
-import eu.kanade.tachiyomi.ui.recents.FeedRepository
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository

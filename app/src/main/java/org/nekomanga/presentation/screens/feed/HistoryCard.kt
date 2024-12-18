@@ -54,8 +54,8 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R

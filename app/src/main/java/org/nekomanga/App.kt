@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
@@ -171,7 +170,6 @@ open class App : Application(), DefaultLifecycleObserver {
     override fun onLowMemory() {
         super.onLowMemory()
         LibraryPresenter.onLowMemory()
-        RecentsPresenter.onLowMemory()
     }
 
     protected open fun setupNotificationChannels() {

@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
@@ -43,7 +44,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -1427,9 +1427,7 @@ class LibraryPresenter(
                 Random(cal.time.time)
             }
 
-            val recentManga by lazy {
-                runBlocking { RecentsPresenter.getRecentManga(true).map { it.first } }
-            }
+            val recentManga by lazy { runBlocking { FeedRepository.getRecentlyReadManga() } }
             val libraryManga by lazy { db.getLibraryMangaList().executeAsBlocking() }
             libraryPreferences
                 .searchSuggestions()

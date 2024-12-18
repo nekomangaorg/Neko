@@ -29,8 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.recents.FeedScreenType
+import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
+import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.sheets.BaseSheet

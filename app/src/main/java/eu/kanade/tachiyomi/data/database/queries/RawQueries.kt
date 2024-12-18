@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable as MangaCategory
 import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
+import eu.kanade.tachiyomi.ui.feed.FeedPresenter
 
 /** Query to get the manga from the library, with their categories and unread count. */
 val libraryQuery =
@@ -67,8 +67,8 @@ fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: 
 fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int): String {
     return when {
         isResuming && endless && offset > 0 -> "LIMIT $offset"
-        endless -> "LIMIT ${RecentsPresenter.ENDLESS_LIMIT}\nOFFSET $offset"
-        else -> "LIMIT ${RecentsPresenter.SHORT_LIMIT}"
+        endless -> "LIMIT ${FeedPresenter.ENDLESS_LIMIT}\nOFFSET $offset"
+        else -> "LIMIT ${FeedPresenter.ENDLESS_LIMIT}"
     }
 }
 

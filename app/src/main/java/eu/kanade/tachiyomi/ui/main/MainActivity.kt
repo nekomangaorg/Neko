@@ -70,6 +70,7 @@ import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
@@ -77,9 +78,6 @@ import eu.kanade.tachiyomi.ui.more.OverflowDialog
 import eu.kanade.tachiyomi.ui.more.about.AboutController
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
-import eu.kanade.tachiyomi.ui.recents.FeedController
-import eu.kanade.tachiyomi.ui.recents.RecentsController
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
@@ -780,24 +778,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         }
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
-            SHORTCUT_RECENTLY_UPDATED,
-            SHORTCUT_RECENTLY_READ -> {
-                if (nav.selectedItemId != R.id.nav_feed) {
-                    nav.selectedItemId = R.id.nav_feed
-                } else {
-                    router.popToRoot()
-                }
-                nav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller as? RecentsController
-                    controller?.tempJumpTo(
-                        when (intent.action) {
-                            SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
-                            else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
-                        }
-                    )
-                }
-            }
             SHORTCUT_BROWSE -> nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
@@ -809,20 +789,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
                 if (router.backstack.lastOrNull()?.controller !is NewUpdateDialogController) {
                     NewUpdateDialogController(extras).showDialog(router)
-                }
-            }
-            SHORTCUT_SOURCE -> {
-                val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_browse
-                router.pushController(BrowseController().withFadeTransaction())
-            }
-            SHORTCUT_DOWNLOADS -> {
-                nav.selectedItemId = R.id.nav_feed
-                router.popToRoot()
-                nav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller as? RecentsController
-                    controller?.showSheet()
                 }
             }
             else -> return false

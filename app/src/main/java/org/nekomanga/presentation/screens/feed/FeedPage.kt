@@ -34,10 +34,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.recents.FeedManga
-import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
-import eu.kanade.tachiyomi.ui.recents.FeedScreenType
+import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
+import eu.kanade.tachiyomi.ui.feed.FeedManga
+import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
+import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList

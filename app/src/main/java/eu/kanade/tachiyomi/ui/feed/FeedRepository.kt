@@ -1,6 +1,7 @@
-package eu.kanade.tachiyomi.ui.recents
+package eu.kanade.tachiyomi.ui.feed
 
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -286,6 +287,23 @@ class FeedRepository(
             is MangaConstants.DownloadAction.Cancel ->
                 downloadManager.deleteChapters(listOf(dbChapter), dbManga)
             else -> Unit
+        }
+    }
+
+    companion object {
+        suspend fun getRecentlyReadManga(): List<Manga> {
+            val feedRepository = FeedRepository()
+            val page =
+                feedRepository.getPage(
+                    offset = 0,
+                    limit = 25,
+                    type = FeedScreenType.History,
+                    uploadsFetchSort = false,
+                    group = FeedHistoryGroup.Series,
+                )
+            return page.get()?.second?.mapNotNull { feedManga ->
+                feedRepository.db.getManga(feedManga.mangaId).executeAsBlocking()
+            } ?: emptyList()
         }
     }
 }

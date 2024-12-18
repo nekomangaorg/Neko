@@ -13,8 +13,8 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
@@ -44,16 +44,15 @@ class MangaShortcutManager(
 
                 val recentManga =
                     if (preferences.showSeriesInShortcuts().get()) {
-                        RecentsPresenter.getRecentManga()
+                        FeedRepository.getRecentlyReadManga()
                     } else {
                         emptyList()
                     }
 
                 val recents =
-                    (recentManga.take(shortcutManager.maxShortcutCountPerActivity))
-                        .sortedByDescending { it.second }
-                        .map { it.first }
-                        .take(shortcutManager.maxShortcutCountPerActivity)
+                    (recentManga.take(shortcutManager.maxShortcutCountPerActivity)).take(
+                        shortcutManager.maxShortcutCountPerActivity
+                    )
 
                 val shortcuts =
                     recents.map { item ->
@@ -62,7 +61,7 @@ class MangaShortcutManager(
                             (Coil.imageLoader(context).execute(request).drawable as? BitmapDrawable)
                                 ?.bitmap
 
-                        ShortcutInfo.Builder(context, "Manga-${item.id?.toString() ?: item.title}")
+                        ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
                             .setShortLabel(
                                 item.title.takeUnless { it.isBlank() }
                                     ?: context.getString(R.string.manga)
@@ -86,7 +85,7 @@ class MangaShortcutManager(
                                 }
                             )
                             .setIntent(
-                                SearchActivity.openMangaIntent(context, item.id, true)
+                                SearchActivity.openMangaIntent(context, item.id!!, true)
                                     .addFlags(
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                             Intent.FLAG_ACTIVITY_SINGLE_TOP
