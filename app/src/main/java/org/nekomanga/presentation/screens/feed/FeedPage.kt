@@ -181,6 +181,14 @@ fun FeedPage(
                                     feedScreenActions.downloadClick(chapterItem, feedManga, action)
                                 },
                             )
+                            LaunchedEffect(scrollState) {
+                                if (
+                                    hasMoreResults &&
+                                        feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4
+                                ) {
+                                    loadNextPage()
+                                }
+                            }
                         }
                     }
                 }
