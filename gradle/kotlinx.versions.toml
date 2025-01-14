@@ -1,7 +1,7 @@
 [versions]
 coroutinesVersion = "1.10.1"
 kotlinVersion = "2.0.21"
-serializationVersion = "1.7.3"
+serializationVersion = "1.8.0"
 
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinVersion" }
