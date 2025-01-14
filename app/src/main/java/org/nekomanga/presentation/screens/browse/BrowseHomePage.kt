@@ -17,7 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -86,7 +86,7 @@ fun BrowseHomePage(
                     )
                     Gap(Size.tiny)
                     Icon(
-                        imageVector = Icons.Default.ArrowForward,
+                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
@@ -148,7 +148,7 @@ fun BrowseHomePage(
                     )
                     Gap(Size.tiny)
                     Icon(
-                        imageVector = Icons.Default.ArrowForward,
+                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
@@ -102,7 +102,7 @@ fun MainDropdownMenu(
                 )
                 Row(
                     title = UiText.StringResource(R.string.help),
-                    icon = UiIcon.Icon(Icons.Outlined.HelpOutline),
+                    icon = UiIcon.Icon(Icons.AutoMirrored.Outlined.HelpOutline),
                     onClick = helpClick,
                     onDismiss = onDismiss,
                 )

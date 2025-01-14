@@ -202,7 +202,7 @@ class WeebCentral : ReducedHttpSource() {
         return try {
             when (this == null) {
                 true -> 0L
-                false -> dateFormat.parse(this).time
+                false -> dateFormat.parse(this)!!.time
             }
         } catch (_: ParseException) {
             0L

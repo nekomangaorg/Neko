@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
@@ -245,7 +245,7 @@ fun InformationBlock(
 
                     Gap(Size.tiny)
                     Image(
-                        imageVector = Icons.Filled.Comment,
+                        imageVector = Icons.AutoMirrored.Filled.Comment,
                         contentDescription = null,
                         colorFilter = ColorFilter.tint(mediumAlpha),
                     )

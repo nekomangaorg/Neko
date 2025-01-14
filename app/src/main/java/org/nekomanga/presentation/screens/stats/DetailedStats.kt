@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
@@ -656,7 +656,9 @@ private fun SortChip(sortType: Sort, onClick: () -> Unit) {
         AssistChip(
             onClick = onClick,
             label = { Text(text = stringResource(id = sortType.stringRes)) },
-            trailingIcon = { Icon(imageVector = Icons.Default.Sort, contentDescription = null) },
+            trailingIcon = {
+                Icon(imageVector = Icons.AutoMirrored.Default.Sort, contentDescription = null)
+            },
         )
     }
 }

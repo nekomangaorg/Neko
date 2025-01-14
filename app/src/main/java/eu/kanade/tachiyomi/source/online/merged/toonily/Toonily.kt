@@ -52,7 +52,7 @@ class Toonily : ReducedHttpSource() {
         }
     }
 
-    protected open val userAgentRandomizer = " ${Random.nextInt().absoluteValue}"
+    val userAgentRandomizer = " ${Random.nextInt().absoluteValue}"
 
     override val client: OkHttpClient =
         network.cloudFlareClient
@@ -99,7 +99,7 @@ class Toonily : ReducedHttpSource() {
         return parseSearchManga(response)
     }
 
-    open fun searchFormBuilder(query: String): FormBody.Builder =
+    fun searchFormBuilder(query: String): FormBody.Builder =
         FormBody.Builder().apply {
             add("action", "madara_load_more")
             add("page", "0")

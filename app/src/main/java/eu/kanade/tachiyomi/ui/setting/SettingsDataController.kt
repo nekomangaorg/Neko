@@ -150,22 +150,21 @@ class SettingsDataController : SettingsController() {
             }
 
             when (requestCode) {
-                STORAGE_DIR ->
-                    if (data != null && resultCode == Activity.RESULT_OK) {
-                        val context = applicationContext ?: return
-                        val uri = data.data
-                        val flags =
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                STORAGE_DIR -> {
+                    val context = applicationContext ?: return
+                    val uri = data.data
+                    val flags =
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
-                        if (uri != null) {
-                            context.contentResolver.takePersistableUriPermission(uri, flags)
-                        }
-
-                        val file = UniFile.fromUri(context, uri)!!
-
-                        storagePreferences.baseStorageDirectory().set(file.uri.toString())
+                    if (uri != null) {
+                        context.contentResolver.takePersistableUriPermission(uri, flags)
                     }
+
+                    val file = UniFile.fromUri(context, uri)!!
+
+                    storagePreferences.baseStorageDirectory().set(file.uri.toString())
+                }
                 CODE_BACKUP_CREATE -> {
                     val flags =
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or

@@ -2,8 +2,8 @@ package org.nekomanga.presentation.components
 
 import ToolTipButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -36,7 +36,7 @@ fun listGridAppBarAction(
         false ->
             AppBar.Action(
                 title = UiText.StringResource(resourceId = R.string.display_as_list),
-                icon = Icons.Filled.ViewList,
+                icon = Icons.AutoMirrored.Filled.ViewList,
                 onClick = onClick,
                 isEnabled = isEnabled,
             )
