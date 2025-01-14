@@ -38,7 +38,7 @@ enum class FeedScreenType {
 }
 
 enum class FeedHistoryGroup {
-    Never,
+    No,
     Series,
     Day,
     Week,

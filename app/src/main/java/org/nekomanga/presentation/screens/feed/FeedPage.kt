@@ -195,7 +195,7 @@ private fun getDateString(
     historyGroupType: FeedHistoryGroup = FeedHistoryGroup.Day,
     isRecent: Boolean = false,
 ): String {
-    if (historyGroupType == FeedHistoryGroup.Never || historyGroupType == FeedHistoryGroup.Series) {
+    if (historyGroupType == FeedHistoryGroup.No || historyGroupType == FeedHistoryGroup.Series) {
         return ""
     }
 

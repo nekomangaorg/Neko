@@ -116,7 +116,7 @@ private fun LazyListScope.historyContent(
             var expanded by remember { mutableStateOf(false) }
             var selectedText =
                 when (historyGrouping) {
-                    FeedHistoryGroup.Never -> R.string.group_never
+                    FeedHistoryGroup.No -> R.string.group_no
                     FeedHistoryGroup.Series -> R.string.group_by_series
                     FeedHistoryGroup.Day -> R.string.group_by_day
                     FeedHistoryGroup.Week -> R.string.group_by_week
@@ -146,7 +146,7 @@ private fun LazyListScope.historyContent(
                     FeedHistoryGroup.values().forEach { entry ->
                         val textRes =
                             when (entry) {
-                                FeedHistoryGroup.Never -> R.string.group_never
+                                FeedHistoryGroup.No -> R.string.group_no
                                 FeedHistoryGroup.Series -> R.string.group_by_series
                                 FeedHistoryGroup.Day -> R.string.group_by_day
                                 FeedHistoryGroup.Week -> R.string.group_by_week
