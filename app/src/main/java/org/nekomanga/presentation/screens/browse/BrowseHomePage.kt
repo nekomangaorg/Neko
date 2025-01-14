@@ -114,7 +114,7 @@ fun BrowseHomePage(
                             ) {
                                 Column(modifier = Modifier.width(coverSize)) {
                                     MangaCover.Square.invoke(
-                                        manga = displayManga,
+                                        artwork = displayManga.currentArtwork,
                                         shouldOutlineCover = shouldOutlineCover,
                                         modifier = Modifier.requiredHeight(coverSize),
                                     )

@@ -37,10 +37,10 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     fun bind(download: Download) {
         this.download = download
         // Update the chapter name.
-        binding.chapterTitle.text = download.chapter.name
+        binding.chapterTitle.text = download.chapterItem.name
 
         // Update the manga title
-        binding.title.text = download.manga.title
+        binding.title.text = download.mangaItem.title
 
         // Update the progress bar and the number of downloaded pages
         val pages = download.pages

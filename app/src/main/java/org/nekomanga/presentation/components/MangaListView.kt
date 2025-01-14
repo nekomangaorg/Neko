@@ -82,7 +82,7 @@ fun MangaListWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
-            stickyHeader { HeaderCard(stringResource(id = stringRes)) }
+            stickyHeader { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
             itemsIndexed(
                 mangaList,
                 key = { _, displayManga ->
@@ -166,7 +166,7 @@ private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
 private fun RowScope.MangaListCover(displayManga: DisplayManga, shouldOutlineCover: Boolean) {
     Box(modifier = Modifier.Companion.align(alignment = Alignment.CenterVertically)) {
         MangaCover.Square.invoke(
-            manga = displayManga,
+            artwork = displayManga.currentArtwork,
             shouldOutlineCover = shouldOutlineCover,
             modifier = Modifier.size(Size.huge).padding(Size.tiny),
         )

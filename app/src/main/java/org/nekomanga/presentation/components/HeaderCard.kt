@@ -18,25 +18,32 @@ import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun HeaderCard(text: String) {
+fun HeaderCard(headerText: @Composable () -> Unit) {
     ElevatedCard(
         shape = RoundedCornerShape(Shapes.coverRadius),
         modifier = Modifier.fillMaxWidth().padding(Size.small),
         colors =
             CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-        )
+        headerText()
     }
+}
+
+@Composable
+fun DefaultHeaderText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSecondary,
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
+    )
 }
 
 @Preview
 @Composable
 private fun HeaderCardPreview() {
-    Box(modifier = Modifier.statusBarsPadding()) { HeaderCard(text = "My Test header") }
+    Box(modifier = Modifier.statusBarsPadding()) {
+        HeaderCard { DefaultHeaderText(text = "My Test Header") }
+    }
 }

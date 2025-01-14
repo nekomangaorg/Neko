@@ -3,6 +3,8 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.MergeType
 
+data class SimpleManga(val title: String, val id: Long)
+
 data class SourceManga(
     val currentThumbnail: String,
     val url: String,

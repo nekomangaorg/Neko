@@ -1912,7 +1912,7 @@ class MangaDetailPresenter(
         pausablePresenterScope.launchIO {
             downloadManager
                 .statusFlow()
-                .filter { it.manga.id == currentManga().id }
+                .filter { it.mangaItem.id == currentManga().id }
                 .catch { error -> TimberKt.e(error) }
                 .collect { updateDownloadState(it) }
         }
@@ -1920,7 +1920,7 @@ class MangaDetailPresenter(
         pausablePresenterScope.launchIO {
             downloadManager
                 .progressFlow()
-                .filter { it.manga.id == currentManga().id }
+                .filter { it.mangaItem.id == currentManga().id }
                 .catch { error -> TimberKt.e(error) }
                 .collect { updateDownloadState(it) }
         }
@@ -1930,7 +1930,7 @@ class MangaDetailPresenter(
     private fun updateDownloadState(download: Download) {
         presenterScope.launchIO {
             val currentChapters = generalState.value.activeChapters
-            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
+            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
             if (index >= 0) {
                 val mutableChapters = currentChapters.toMutableList()
                 val updateChapter =

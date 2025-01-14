@@ -23,9 +23,10 @@ import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Size.medium
 
 @Composable
-fun Divider() {
+fun Divider(modifier: Modifier = Modifier) {
     androidx.compose.material3.Divider(
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+        modifier = modifier,
     )
 }
 

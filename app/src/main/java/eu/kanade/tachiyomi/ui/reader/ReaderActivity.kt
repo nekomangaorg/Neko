@@ -220,9 +220,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         const val VISIBLE_CHAPTERS = "${BuildConfig.APPLICATION_ID}.VISIBLE_CHAPTERS"
 
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+            return newIntent(context, manga.id, chapter.id)
+        }
+
+        fun newIntent(context: Context, mangaId: Long?, chapterId: Long?): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
-            intent.putExtra("manga", manga.id)
-            intent.putExtra("chapter", chapter.id)
+            intent.putExtra("manga", mangaId)
+            intent.putExtra("chapter", chapterId)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }

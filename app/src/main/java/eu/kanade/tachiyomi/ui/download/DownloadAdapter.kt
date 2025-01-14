@@ -38,7 +38,7 @@ class DownloadAdapter(controller: DownloadItemListener) :
     override fun onCreateBubbleText(position: Int): String {
         return when (val item = getItem(position)) {
             is DownloadHeaderItem -> item.name
-            is DownloadItem -> item.download.manga.title
+            is DownloadItem -> item.download.mangaItem.title
             else -> ""
         }
     }

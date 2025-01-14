@@ -21,7 +21,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() ?: false
+        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
             (this.activity as? MainActivity)?.backCallback?.invoke()

@@ -2,13 +2,16 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.util.system.NetworkState
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
+import eu.kanade.tachiyomi.util.system.networkStateFlow
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -20,7 +23,10 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
+import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.logging.TimberKt
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -40,6 +46,8 @@ class DownloadManager(val context: Context) {
 
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
+
+    private val db = Injekt.get<DatabaseHelper>()
 
     /**
      * Downloads provider, used to retrieve the folders where the chapters are or should be stored.
@@ -115,7 +123,7 @@ class DownloadManager(val context: Context) {
      * @param chapterId the chapter to check.
      */
     fun getQueuedDownloadOrNull(chapterId: Long): Download? {
-        return queueState.value.find { it.chapter.id == chapterId }
+        return queueState.value.find { it.chapterItem.id == chapterId }
     }
 
     fun startDownloadNow(chapter: Chapter) {
@@ -212,10 +220,25 @@ class DownloadManager(val context: Context) {
      * @param downloads list of downloads to cancel
      */
     fun deletePendingDownloads(downloads: List<Download>) {
-        val downloadsByManga = downloads.groupBy { it.manga.id }
-        downloadsByManga.map { entry ->
-            val manga = entry.value.first().manga
-            deleteChapters(entry.value.map { it.chapter }, manga)
+        val downloadsByManga = downloads.groupBy { it.chapterItem.mangaId }
+        downloadsByManga.forEach { entry ->
+            val manga = entry.value.first().mangaItem
+            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
+            deleteChapters(entry.value.map { it.chapterItem.toDbChapter() }, dbManga)
+        }
+    }
+
+    /**
+     * Calls delete chapter, which deletes temp downloads
+     *
+     * @param downloads list of downloads to cancel
+     */
+    fun deletePendingDownloadsItems(downloads: List<DownloadItem>) {
+        val downloadsByManga = downloads.groupBy { it.mangaItem.id }
+        downloadsByManga.forEach { entry ->
+            val manga = entry.value.first().mangaItem
+            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
+            deleteChapters(entry.value.map { it.chapterItem.chapter.toDbChapter() }, dbManga)
         }
     }
 
@@ -450,4 +473,8 @@ class DownloadManager(val context: Context) {
                         .asFlow()
                 )
             }
+
+    fun networkStateFlow(): Flow<NetworkState> {
+        return context.networkStateFlow()
+    }
 }

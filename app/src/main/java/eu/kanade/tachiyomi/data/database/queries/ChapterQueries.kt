@@ -30,44 +30,12 @@ interface ChapterQueries : DbProvider {
             )
             .prepare()
 
-    fun getChaptersByMangaId(id: Long) =
-        db.get()
-            .listOfObjects(Chapter::class.java)
-            .withQuery(
-                Query.builder()
-                    .table(ChapterTable.TABLE)
-                    .where("${ChapterTable.COL_MANGA_ID} = ?")
-                    .whereArgs(id)
-                    .build()
-            )
-            .prepare()
-
-    fun getRecentChapters(search: String = "", offset: Int, isResuming: Boolean) =
+    fun getRecentChapters(search: String = "", offset: Int, limit: Int, sortByFetched: Boolean) =
         db.get()
             .listOfObjects(MangaChapter::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentsQuery(search.sqLite, offset, isResuming))
-                    //                .args(date.time, startDate.time)
-                    .observesTables(ChapterTable.TABLE)
-                    .build()
-            )
-            .withGetResolver(MangaChapterGetResolver.INSTANCE)
-            .prepare()
-
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     *
-     * @param date recent date range
-     * @offset offset the db by
-     */
-    fun getUpdatedChaptersDistinct(search: String = "", offset: Int, isResuming: Boolean) =
-        db.get()
-            .listOfObjects(MangaChapter::class.java)
-            .withQuery(
-                RawQuery.builder()
-                    .query(getRecentsQueryDistinct(search.sqLite, offset, isResuming))
-                    //                .args(date.time, startDate.time)
+                    .query(getRecentsQuery(search.sqLite, offset, limit, sortByFetched))
                     .observesTables(ChapterTable.TABLE)
                     .build()
             )

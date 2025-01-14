@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
@@ -30,7 +30,7 @@ enum class MangaCover(val ratio: Float) {
     @Composable
     operator fun invoke(
         modifier: Modifier = Modifier,
-        manga: DisplayManga,
+        artwork: Artwork,
         contentDescription: String = "",
         shape: Shape = RoundedCornerShape(Shapes.coverRadius),
         shouldOutlineCover: Boolean = true,
@@ -38,10 +38,7 @@ enum class MangaCover(val ratio: Float) {
         val color by remember { mutableStateOf(Pastel.getColorLight()) }
         AsyncImage(
             model =
-                ImageRequest.Builder(LocalContext.current)
-                    .data(manga.currentArtwork)
-                    .placeholder(color)
-                    .build(),
+                ImageRequest.Builder(LocalContext.current).data(artwork).placeholder(color).build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier =

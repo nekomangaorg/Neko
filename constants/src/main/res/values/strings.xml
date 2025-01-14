@@ -228,6 +228,7 @@
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="use_staggered_grid">Use staggered grid</string>
     <string name="show_outline_around_covers">Show outline around covers</string>
+    <string name="show_outline_around_cards">Show outline around cards</string>
     <string name="grid_size">Grid size</string>
     <string name="_per_row">%d per row</string>
     <string name="hide_unread_badges">Hide unread badges</string>
@@ -308,18 +309,26 @@
     <string name="search_suggestions">Search suggestions</string>
     <string name="search_tips_show_periodically">Search tips will show up periodically. Long press the suggestion to search it.</string>
 
-    <!-- Recents -->
+    <!-- Feed -->
     <string name="recents">Recents</string>
+    <string name="feed">Feed</string>
     <string name="updates_and_history">Updates &amp; history</string>
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
     <string name="reset_chapter_history">Reset chapter history</string>
     <string name="recent_updates">Recent updates</string>
+    <string name="search_history">Search history</string>
+    <string name="search_updates">Search updates</string>
+
+    <string name="this_will_remove_the_read_date_for_all">This will remove the read date for all chapters of: </string>
+    <string name="this_will_remove_the_read_date">This will remove the read date for:</string>
+    <string name="are_you_sure">Are you sure?</string>
     <string name="this_will_remove_the_read_date_for_x_question">This will remove the read date of
         \"%1$s\". Are you sure?</string>
     <string name="this_will_remove_the_read_date_question">This will remove the read date of this
         chapter. Are you sure?</string>
+    <string name="reset_all_chapters">Reset all chapters</string>
     <string name="reset_all_chapters_for_this_">Reset all chapters for this %1$s</string>
     <string name="last_read_">Last read %1$s</string>
     <string name="read_">Read %1$s</string>
@@ -334,13 +343,20 @@
     <string name="no_recently_read_manga">No recently read manga</string>
     <string name="grouped">Grouped</string>
     <string name="reset_chapter_question">Reset chapter?</string>
+    <string name="remove_all_history_question">Remove all history?</string>
+    <string name="remove_history_question">Remove history?</string>
     <string name="press_and_hold_to_also_reset">Press and hold can also reset chapter history</string>
     <string name="show_download_button">Show download button</string>
+    <string name="showing_x_most_recent">Showing 25 most recent chapters</string>
     <string name="only_unread">Only unread</string>
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
     <string name="clear_history">Clear history</string>
+    <string name="clear_download_queue">Clear download queue</string>
+    <string name="clear_download_queue_confirmation">Are you sure?</string>
     <string name="clear_history_completed">History deleted</string>
+    <string name="clear_history_confirmation_1">Clear all history?</string>
+    <string name="clear_history_confirmation_2">All history will be lost, and is not recoverable.</string>
     <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
 
 
@@ -351,7 +367,12 @@
     <string name="a_while_ago">A while ago</string>
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
-    <string name="group_chapters_together">Group chapters together</string>
+    <string name="group_chapters_together">Group chapters</string>
+    <string name="group_no">No</string>
+    <string name="group_by_series">By series</string>
+    <string name="group_by_day">By day</string>
+    <string name="group_by_week">By week</string>
+
     <string name="uniform_covers">Uniform covers</string>
     <string name="affects_library_grid">Affects library grid covers</string>
 
@@ -970,7 +991,12 @@
     <string name="download_queue">Download queue</string>
     <string name="downloading_">Downloading: %1$s</string>
     <string name="cancel_all">Cancel all</string>
+    <string name="move_series">Move series</string>
+    <string name="move_download">Move download</string>
+    <string name="to_top">To top</string>
+    <string name="to_bottom">To bottom</string>
     <string name="move_series_to_top">Move series to top</string>
+    <string name="move_series_to_bottom">Move series to bottom</string>
     <string name="downloads_swipe_tutorial">Downloads can be cancelled by swiping them away\nSwipe this tip to dismiss it</string>
     <string name="cancel_all_for_series">Cancel all for this series</string>
     <string name="downloaded">Downloaded</string>
@@ -999,6 +1025,7 @@
     <string name="group_downloader">Downloads</string>
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>
     <string name="no_wifi_connection">No Wi-Fi connection available</string>
+    <string name="unable_to_download">Unable to download</string>
     <string name="no_network_connection">No network connection available</string>
 
     <!-- Downloads settings -->
@@ -1230,6 +1257,7 @@
     <string name="save">Save</string>
     <string name="set">Set</string>
     <string name="search">Search</string>
+    <string name="cancel_search">Cancel search</string>
     <string name="search_">Search %1$s</string>
     <string name="select_all">Select all</string>
     <string name="select_none">Select none</string>

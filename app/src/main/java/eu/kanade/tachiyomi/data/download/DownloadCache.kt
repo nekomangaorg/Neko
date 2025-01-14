@@ -266,17 +266,17 @@ class DownloadCache(
      */
     @Synchronized
     fun removeChapters(chapters: List<Chapter>, manga: Manga) {
-        val id = manga.id ?: return
-        mangaFiles[id] ?: return
+        manga.id ?: return
+        mangaFiles[manga.id] ?: return
 
         for (chapter in chapters) {
             if (!chapter.isMergedChapter()) {
-                mangaFiles[id]!!.second.remove(chapter.mangadex_chapter_id)
+                mangaFiles[manga.id]!!.second.remove(chapter.mangadex_chapter_id)
             }
 
             provider.getValidChapterDirNames(chapter).forEach {
-                if (it in mangaFiles[id]!!.first) {
-                    mangaFiles[id]!!.first.remove(it)
+                if (it in mangaFiles[manga.id]!!.first) {
+                    mangaFiles[manga.id]!!.first.remove(it)
                 }
             }
         }

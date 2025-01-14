@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.toSimpleManga
 import java.io.BufferedOutputStream
 import java.io.File
 import java.util.Locale
@@ -50,6 +52,7 @@ import kotlinx.coroutines.supervisorScope
 import okhttp3.Response
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -65,6 +68,7 @@ class Downloader(
     private val preferences: PreferencesHelper by injectLazy()
     private val readerPreferences: ReaderPreferences by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
+    private val db: DatabaseHelper by injectLazy()
 
     /** Store for persisting downloads across restarts. */
     private val store = DownloadStore(context, sourceManager)
@@ -260,11 +264,12 @@ class Downloader(
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
                 // Filter out those already enqueued.
-                .filter { chapter -> queueState.value.none { it.chapter.id == chapter.id } }
+                .filter { chapter -> queueState.value.none { it.chapterItem.id == chapter.id } }
                 // Create a download for each one.
                 .map {
                     val source = it.getHttpSource(sourceManager)
-                    Download(source, manga, it)
+                    val simpleChapter = it.toSimpleChapter()!!
+                    Download(source, manga.toSimpleManga(), simpleChapter)
                 }
                 .toList()
 
@@ -288,19 +293,22 @@ class Downloader(
      * @param download the chapter to be downloaded.
      */
     private suspend fun downloadChapter(download: Download) {
-        val mangaDir = provider.getMangaDir(download.manga)
+        val dbManga = db.getManga(download.mangaItem.id).executeAsBlocking() ?: return
+        val dbChapter = db.getChapter(download.chapterItem.id).executeAsBlocking() ?: return
+
+        val mangaDir = provider.getMangaDir(dbManga)
 
         val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
         if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
             download.status = Download.State.ERROR
             notifier.onError(
                 context.getString(R.string.couldnt_download_low_space),
-                download.chapter.name,
+                download.chapterItem.name,
             )
             return
         }
 
-        val chapterDirname = provider.getChapterDirName(download.chapter)
+        val chapterDirname = provider.getChapterDirName(dbChapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
 
         val pagesToDownload = if (download.source is MangaDex) 6 else 3
@@ -311,7 +319,7 @@ class Downloader(
                 download.pages
                     ?: run {
                         // Otherwise, pull page list from network and add them to download object
-                        val pages = download.source.getPageList(download.chapter)
+                        val pages = download.source.getPageList(dbChapter)
 
                         if (pages.isEmpty()) {
                             throw Exception(context.getString(R.string.no_pages_found))
@@ -360,14 +368,14 @@ class Downloader(
                 tmpDir.renameTo(chapterDirname)
                 DiskUtil.createNoMediaFile(tmpDir, context)
             }
-            cache.addChapter(chapterDirname, download.manga)
+            cache.addChapter(chapterDirname, dbManga)
             download.status = Download.State.DOWNLOADED
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             // If the page list threw, it will resume here
             TimberKt.e(error)
             download.status = Download.State.ERROR
-            notifier.onError(error.message, download.chapter.name, download.manga.title)
+            notifier.onError(error.message, download.chapterItem.name, download.mangaItem.title)
         }
     }
 
@@ -422,7 +430,7 @@ class Downloader(
             // Mark this page as error and allow to download the remaining
             page.progress = 0
             page.status = Page.State.ERROR
-            notifier.onError(e.message, download.chapter.name, download.manga.title)
+            notifier.onError(e.message, download.chapterItem.name, download.mangaItem.title)
         }
     }
 
@@ -629,11 +637,11 @@ class Downloader(
 
     fun removeFromQueue(chapters: List<Chapter>) {
         val chapterIds = chapters.map { it.id }
-        removeFromQueueIf { it.chapter.id in chapterIds }
+        removeFromQueueIf { it.chapterItem.id in chapterIds }
     }
 
     fun removeFromQueue(manga: Manga) {
-        removeFromQueueIf { it.manga.id == manga.id }
+        removeFromQueueIf { it.mangaItem.id == manga.id }
     }
 
     private fun clearQueueState() {

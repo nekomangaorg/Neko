@@ -6,10 +6,12 @@
             android:id="@+id/nav_library"
             android:icon="@drawable/ic_library_selector_24dp"
             android:title="@string/library" />
+
         <item
-            android:id="@+id/nav_recents"
+            android:id="@+id/nav_feed"
             android:icon="@drawable/ic_recents_selector_24dp"
-            android:title="@string/recents" />
+            android:title="@string/feed" />
+
 
         <item
             android:id="@+id/nav_browse"

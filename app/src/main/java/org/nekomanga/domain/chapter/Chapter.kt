@@ -30,6 +30,7 @@ data class SimpleChapter(
     val mangaDexChapterId: String,
     val oldMangaDexChapterId: String?,
     val scanlator: String,
+    val lastRead: Long = 0L,
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
 
@@ -140,7 +141,7 @@ data class SimpleChapter(
         )
 }
 
-fun Chapter.toSimpleChapter(): SimpleChapter? {
+fun Chapter.toSimpleChapter(lastRead: Long = 0L): SimpleChapter? {
     if (id == null || manga_id == null) return null
     return SimpleChapter(
         id = id!!,
@@ -162,6 +163,7 @@ fun Chapter.toSimpleChapter(): SimpleChapter? {
         mangaDexChapterId = mangadex_chapter_id,
         oldMangaDexChapterId = old_mangadex_id,
         language = language ?: "",
+        lastRead = lastRead,
     )
 }
 

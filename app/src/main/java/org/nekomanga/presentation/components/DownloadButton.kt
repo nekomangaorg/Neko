@@ -12,6 +12,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -28,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +39,14 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.core.util.launchDelayed
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 private const val size = 24
@@ -46,6 +55,76 @@ private const val borderSize = 2.5
 
 @Composable
 fun DownloadButton(
+    modifier: Modifier = Modifier,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
+    downloadState: Download.State,
+    downloadProgress: Int,
+    onDownload: (MangaConstants.DownloadAction) -> Unit,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        var showChapterDropdown by remember { mutableStateOf(false) }
+        DlButton(
+            themeColorState.buttonColor,
+            downloadState,
+            downloadProgress,
+            Modifier.combinedClickable(
+                onClick = {
+                    when (downloadState) {
+                        Download.State.NOT_DOWNLOADED ->
+                            onDownload(MangaConstants.DownloadAction.Download)
+                        else -> showChapterDropdown = true
+                    }
+                },
+                onLongClick = {},
+            ),
+        )
+
+        val scope = rememberCoroutineScope()
+        SimpleDropdownMenu(
+            expanded = showChapterDropdown,
+            themeColorState = themeColorState,
+            onDismiss = { showChapterDropdown = false },
+            dropDownItems =
+                when (downloadState) {
+                    Download.State.DOWNLOADED -> {
+                        persistentListOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.remove),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.Remove)
+                                    }
+                                },
+                            )
+                        )
+                    }
+                    else -> {
+                        persistentListOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.start_downloading_now),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.ImmediateDownload)
+                                    }
+                                },
+                            ),
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.cancel),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.Cancel)
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                },
+        )
+    }
+}
+
+@Composable
+private fun DlButton(
     buttonColor: Color,
     downloadState: Download.State,
     downloadProgress: Int,

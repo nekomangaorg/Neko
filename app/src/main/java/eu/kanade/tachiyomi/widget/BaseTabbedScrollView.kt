@@ -7,7 +7,6 @@ import androidx.viewbinding.ViewBinding
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -38,13 +37,6 @@ constructor(context: Context, attrs: AttributeSet? = null) : NestedScrollView(co
         setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         initGeneralPreferences()
     }
-}
-
-abstract class BaseRecentsDisplayView<VB : ViewBinding>
-@JvmOverloads
-constructor(context: Context, attrs: AttributeSet? = null) :
-    BaseTabbedScrollView<VB>(context, attrs) {
-    var controller: RecentsController? = null
 }
 
 abstract class BaseLibraryDisplayView<VB : ViewBinding>

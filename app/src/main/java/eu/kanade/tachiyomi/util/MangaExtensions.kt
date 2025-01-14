@@ -17,6 +17,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
 fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
@@ -112,6 +113,10 @@ fun Manga.toDisplayManga(
                 originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
             ),
     )
+}
+
+fun Manga.toSimpleManga(): SimpleManga {
+    return SimpleManga(id = this.id!!, title = (this as? MangaImpl)?.title ?: this.title)
 }
 
 fun SManga.getSlug(): String {

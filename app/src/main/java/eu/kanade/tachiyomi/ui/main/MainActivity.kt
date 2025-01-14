@@ -50,8 +50,6 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
-import com.getkeepsafe.taptargetview.TapTarget
-import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
@@ -72,6 +70,7 @@ import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
@@ -79,8 +78,6 @@ import eu.kanade.tachiyomi.ui.more.OverflowDialog
 import eu.kanade.tachiyomi.ui.more.about.AboutController
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
-import eu.kanade.tachiyomi.ui.recents.RecentsController
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
@@ -254,7 +251,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             }
             true
         }
-        for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
+        for (id in listOf(R.id.nav_feed, R.id.nav_browse)) {
             nav.getItemView(id)?.setOnLongClickListener {
                 nav.selectedItemId = id
                 nav.post {
@@ -315,7 +312,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (router.hasRootController()) {
             nav.selectedItemId =
                 when (router.backstack.firstOrNull()?.controller) {
-                    is RecentsController -> R.id.nav_recents
+                    is FeedController -> R.id.nav_feed
                     is BrowseController -> R.id.nav_browse
                     else -> R.id.nav_library
                 }
@@ -340,7 +337,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 setRoot(
                     when (id) {
                         R.id.nav_library -> LibraryController()
-                        R.id.nav_recents -> RecentsController()
+                        R.id.nav_feed -> FeedController()
                         else -> BrowseController()
                     },
                     id,
@@ -466,7 +463,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     handler: ControllerChangeHandler,
                 ) {
                     nav.translationY = 0f
-                    showDLQueueTutorial()
                     if (router.backstackSize == 1) {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
                             window?.setSoftInputMode(
@@ -728,44 +724,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        showDLQueueTutorial()
         reEnableBackPressedCallBack()
-    }
-
-    private fun showDLQueueTutorial() {
-        if (
-            router.backstackSize == 1 &&
-                this !is SearchActivity &&
-                downloadManager.queueState.value.isNotEmpty() &&
-                !preferences.shownDownloadQueueTutorial().get()
-        ) {
-            if (!isBindingInitialized) return
-            val recentsItem = nav.getItemView(R.id.nav_recents) ?: return
-            preferences.shownDownloadQueueTutorial().set(true)
-            TapTargetView.showFor(
-                this,
-                TapTarget.forView(
-                        recentsItem,
-                        getString(R.string.manage_whats_downloading),
-                        getString(R.string.visit_recents_for_download_queue),
-                    )
-                    .outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
-                    .outerCircleAlpha(0.95f)
-                    .titleTextSize(20)
-                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
-                    .descriptionTextSize(16)
-                    .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
-                    .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
-                    .targetCircleColor(android.R.color.white)
-                    .targetRadius(45),
-                object : TapTargetView.Listener() {
-                    override fun onTargetClick(view: TapTargetView) {
-                        super.onTargetClick(view)
-                        nav.selectedItemId = R.id.nav_recents
-                    }
-                },
-            )
-        }
     }
 
     override fun onPause() {
@@ -819,24 +778,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         }
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
-            SHORTCUT_RECENTLY_UPDATED,
-            SHORTCUT_RECENTLY_READ -> {
-                if (nav.selectedItemId != R.id.nav_recents) {
-                    nav.selectedItemId = R.id.nav_recents
-                } else {
-                    router.popToRoot()
-                }
-                nav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller as? RecentsController
-                    controller?.tempJumpTo(
-                        when (intent.action) {
-                            SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
-                            else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
-                        }
-                    )
-                }
-            }
             SHORTCUT_BROWSE -> nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
@@ -848,20 +789,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
                 if (router.backstack.lastOrNull()?.controller !is NewUpdateDialogController) {
                     NewUpdateDialogController(extras).showDialog(router)
-                }
-            }
-            SHORTCUT_SOURCE -> {
-                val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_browse
-                router.pushController(BrowseController().withFadeTransaction())
-            }
-            SHORTCUT_DOWNLOADS -> {
-                nav.selectedItemId = R.id.nav_recents
-                router.popToRoot()
-                nav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller as? RecentsController
-                    controller?.showSheet()
                 }
             }
             else -> return false
@@ -970,7 +897,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             0,
             -1 -> R.id.nav_library
             1,
-            -2 -> R.id.nav_recents
+            -2 -> R.id.nav_feed
             -3 -> R.id.nav_browse
             else -> R.id.nav_library
         }
@@ -1248,6 +1175,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 (router.backstack.map { it?.controller } + extraController)
                     .filterNotNull()
                     .filterNot { it is BrowseController }
+                    .filterNot { it is FeedController }
                     .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->
@@ -1300,12 +1228,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             val hasQueue = downloading || downloadManager.queueState.value.isNotEmpty()
 
             if (hasQueue) {
-                nav.getOrCreateBadge(R.id.nav_recents).apply {
+                nav.getOrCreateBadge(R.id.nav_feed).apply {
                     backgroundColor = this@MainActivity.getResourceColor(R.attr.colorSecondary)
                 }
-                showDLQueueTutorial()
             } else {
-                nav.removeBadge(R.id.nav_recents)
+                nav.removeBadge(R.id.nav_feed)
             }
         }
     }

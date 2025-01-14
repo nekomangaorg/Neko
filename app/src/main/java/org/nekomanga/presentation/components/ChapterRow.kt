@@ -60,13 +60,11 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
-import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -240,7 +238,6 @@ private fun ChapterInfo(
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
-    var chapterDropdown by remember { mutableStateOf(false) }
 
     val downloadState = remember(downloadStateProvider()) { downloadStateProvider() }
     val downloadProgress = remember(downloadProgressProvider()) { downloadProgressProvider() }
@@ -409,63 +406,13 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        Box(
+        DownloadButton(
             modifier = Modifier.align(Alignment.CenterVertically),
-            contentAlignment = Alignment.Center,
-        ) {
-            DownloadButton(
-                themeColorState.buttonColor,
-                downloadState,
-                downloadProgress,
-                Modifier.combinedClickable(
-                    onClick = {
-                        when (downloadState) {
-                            Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
-                            else -> chapterDropdown = true
-                        }
-                    },
-                    onLongClick = {},
-                ),
-            )
-
-            val scope = rememberCoroutineScope()
-            SimpleDropdownMenu(
-                expanded = chapterDropdown,
-                themeColorState = themeColorState,
-                onDismiss = { chapterDropdown = false },
-                dropDownItems =
-                    when (downloadState) {
-                        Download.State.DOWNLOADED -> {
-                            persistentListOf(
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.remove),
-                                    onClick = {
-                                        scope.launchDelayed { onDownload(DownloadAction.Remove) }
-                                    },
-                                )
-                            )
-                        }
-                        else -> {
-                            persistentListOf(
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.start_downloading_now),
-                                    onClick = {
-                                        scope.launchDelayed {
-                                            onDownload(DownloadAction.ImmediateDownload)
-                                        }
-                                    },
-                                ),
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.cancel),
-                                    onClick = {
-                                        scope.launchDelayed { onDownload(DownloadAction.Cancel) }
-                                    },
-                                ),
-                            )
-                        }
-                    },
-            )
-        }
+            themeColorState = themeColorState,
+            downloadState = downloadState,
+            downloadProgress = downloadProgress,
+            onDownload = onDownload,
+        )
     }
 }
 

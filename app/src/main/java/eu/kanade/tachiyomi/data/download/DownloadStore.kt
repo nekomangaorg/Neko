@@ -7,9 +7,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
+import eu.kanade.tachiyomi.util.toSimpleManga
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.domain.chapter.toSimpleChapter
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -66,7 +68,7 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
      * @param download the download.
      */
     private fun getKey(download: Download): String {
-        return download.chapter.id!!.toString()
+        return download.chapterItem.id.toString()
     }
 
     /** Returns the list of downloads to restore. It should be called in a background thread. */
@@ -85,8 +87,9 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
                     cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeAsBlocking() }
                         ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
+                val simpleChapter = chapter.toSimpleChapter() ?: continue
                 val source = chapter.getHttpSource(sourceManager)
-                downloads.add(Download(source, manga, chapter))
+                downloads.add(Download(source, manga.toSimpleManga(), simpleChapter))
             }
         }
 
@@ -101,7 +104,7 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
      * @param download the download to serialize.
      */
     private fun serialize(download: Download): String {
-        val obj = DownloadObject(download.manga.id!!, download.chapter.id!!, counter++)
+        val obj = DownloadObject(download.mangaItem.id, download.chapterItem.id, counter++)
         return json.encodeToString(obj)
     }
 

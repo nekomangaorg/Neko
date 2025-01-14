@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
@@ -94,6 +95,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 
+        addSingletonFactory { StorageManager(app, get()) }
+
         addSingleton(FollowsHandler())
 
         addSingleton(ArtworkHandler())
@@ -144,13 +147,13 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(BrowseRepository())
 
+        addSingleton(FeedRepository())
+
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { MangaShortcutManager() }
-
-        addSingletonFactory { StorageManager(app, get()) }
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {

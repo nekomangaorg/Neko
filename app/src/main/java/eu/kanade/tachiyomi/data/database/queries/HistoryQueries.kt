@@ -43,13 +43,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentMangaLimit(search: String = "", offset: Int, isResuming: Boolean) =
+    fun getHistoryUngrouped(search: String = "", offset: Int, isResuming: Boolean) =
         db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentMangaListLimitQuery(search.sqLite, offset, isResuming))
-                    //                .args(date.time, startDate.time)
+                    .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -62,13 +61,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getHistoryUngrouped(search: String = "", offset: Int, isResuming: Boolean) =
+    fun getRecentMangaLimit(search: String = "", offset: Int, isResuming: Boolean) =
         db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
-                    //                .args(date.time, startDate.time)
+                    .query(getRecentMangasLimitQuery(search.sqLite, offset, isResuming))
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -131,6 +129,18 @@ interface HistoryQueries : DbProvider {
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
+            .prepare()
+
+    fun getChapterHistoryByMangaId(mangaId: Long) =
+        db.get()
+            .listOfObjects(MangaChapterHistory::class.java)
+            .withQuery(
+                RawQuery.builder()
+                    .query(getAllChapterHistoryByMangaId(mangaId))
+                    .observesTables(HistoryTable.TABLE)
+                    .build()
+            )
+            .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
             .prepare()
 
     fun getTotalReadDuration(): Long {

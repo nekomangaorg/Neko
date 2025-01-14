@@ -53,7 +53,7 @@ fun MangaGridWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
-            stickyHeader { HeaderCard(stringResource(id = stringRes)) }
+            stickyHeader { HeaderCard { DefaultHeaderText(text = stringResource(id = stringRes)) } }
             gridItems(
                 items = allGrids,
                 columns = columns,
@@ -157,7 +157,7 @@ fun ColumnScope.ComfortableGridItem(
     modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
-        manga = manga,
+        artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
@@ -174,7 +174,7 @@ fun BoxScope.CompactGridItem(
     modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
-        manga = manga,
+        artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
