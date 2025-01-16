@@ -30,7 +30,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
 
         val context = LocalContext.current
 
-        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
+        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == false) {
             (this.activity as? MainActivity)?.backCallback?.invoke()
         }
 
@@ -56,6 +56,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     chapterClick = { mangaId, chapterId ->
                         openChapter(context, mangaId, chapterId)
                     },
+                    chapterSwipe = presenter::toggleChapterRead,
                     switchViewType = presenter::switchViewType,
                     deleteAllHistoryClick = presenter::deleteAllHistory,
                     deleteHistoryClick = presenter::deleteHistory,
