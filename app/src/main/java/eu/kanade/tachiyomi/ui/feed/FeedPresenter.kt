@@ -625,6 +625,6 @@ class FeedPresenter(
     }
 
     companion object {
-        const val ENDLESS_LIMIT = 20
+        const val ENDLESS_LIMIT = 30
     }
 }

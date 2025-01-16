@@ -131,7 +131,7 @@ fun FeedPage(
                         LaunchedEffect(scrollState) {
                             if (
                                 hasMoreResults &&
-                                    feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4
+                                    feedMangaList.indexOf(feedManga) >= feedMangaList.size - 10
                             ) {
                                 loadNextPage()
                             }
@@ -186,7 +186,7 @@ fun FeedPage(
                             LaunchedEffect(scrollState) {
                                 if (
                                     hasMoreResults &&
-                                        feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4
+                                        feedMangaList.indexOf(feedManga) >= feedMangaList.size - 10
                                 ) {
                                     loadNextPage()
                                 }
