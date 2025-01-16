@@ -148,43 +148,41 @@ fun FeedScreen(
                 }
             },
         ) {
-            NekoScaffold(
-                type =
-                    if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
-                    else NekoScaffoldType.SearchOutline,
-                incognitoMode = feedScreenState.value.incognitoMode,
-                searchPlaceHolder = searchHint,
-                isRoot = true,
-                onSearch = feedScreenActions.search,
-                actions = {
-                    AppBarActions(
-                        actions =
-                            listOf(
-                                AppBar.Action(
-                                    title = UiText.StringResource(R.string.settings),
-                                    icon = Icons.Outlined.Tune,
-                                    onClick = { scope.launch { sheetState.show() } },
-                                ),
-                                AppBar.MainDropdown(
-                                    incognitoMode = feedScreenState.value.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
-                                ),
-                            )
-                    )
-                },
-            ) { incomingContentPadding ->
-                PullRefresh(
-                    refreshing = feedScreenState.value.isRefreshing,
-                    onRefresh = { feedScreenActions.updateLibrary(true) },
-                    indicatorOffset =
-                        incomingContentPadding.calculateTopPadding() +
-                            WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-                ) {
+            PullRefresh(
+                refreshing = feedScreenState.value.isRefreshing,
+                onRefresh = { feedScreenActions.updateLibrary(true) },
+                indicatorOffset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+            ) {
+                NekoScaffold(
+                    type =
+                        if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
+                        else NekoScaffoldType.SearchOutline,
+                    incognitoMode = feedScreenState.value.incognitoMode,
+                    searchPlaceHolder = searchHint,
+                    isRoot = true,
+                    onSearch = feedScreenActions.search,
+                    actions = {
+                        AppBarActions(
+                            actions =
+                                listOf(
+                                    AppBar.Action(
+                                        title = UiText.StringResource(R.string.settings),
+                                        icon = Icons.Outlined.Tune,
+                                        onClick = { scope.launch { sheetState.show() } },
+                                    ),
+                                    AppBar.MainDropdown(
+                                        incognitoMode = feedScreenState.value.incognitoMode,
+                                        incognitoModeClick = incognitoClick,
+                                        settingsClick = settingsClick,
+                                        statsClick = statsClick,
+                                        aboutClick = aboutClick,
+                                        helpClick = helpClick,
+                                        menuShowing = { visible -> mainDropdownShowing = visible },
+                                    ),
+                                )
+                        )
+                    },
+                ) { incomingContentPadding ->
                     val recyclerContentPadding =
                         PaddingValues(
                             top = incomingContentPadding.calculateTopPadding(),
