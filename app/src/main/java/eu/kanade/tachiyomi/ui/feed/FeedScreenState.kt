@@ -32,6 +32,7 @@ data class FeedScreenState(
 )
 
 enum class FeedScreenType {
+    Summary,
     History,
     Updates,
 }

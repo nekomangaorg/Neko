@@ -56,6 +56,7 @@ class FeedPresenter(
                 downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
             )
         )
+
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
 
     private var searchJob: Job? = null
@@ -259,7 +260,7 @@ class FeedPresenter(
                 it.copy(
                     allFeedManga =
                         it.allFeedManga
-                            .filter { fm -> fm.mangaId != feedManga.mangaId }
+                            .filter { fm -> (fm as FeedManga).mangaId != feedManga.mangaId }
                             .toImmutableList()
                 )
             }
@@ -512,7 +513,7 @@ class FeedPresenter(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.searchFeedManga.toMutableList(),
+                _feedScreenState.value.searchFeedManga.map { it as FeedManga }.toList(),
             )
         if (searchFeedUpdated) {
             _feedScreenState.update {
@@ -525,7 +526,7 @@ class FeedPresenter(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.allFeedManga.toMutableList(),
+                _feedScreenState.value.allFeedManga.map { it as FeedManga }.toList(),
             )
         if (feedUpdated) {
             _feedScreenState.update { it.copy(allFeedManga = feedMangaList.toImmutableList()) }

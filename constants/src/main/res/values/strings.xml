@@ -316,6 +316,7 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
+    <string name="summary">Summary</string>
     <string name="entire_series">Entire series</string>
     <string name="reset_chapter_history">Reset chapter history</string>
     <string name="recent_updates">Recent updates</string>

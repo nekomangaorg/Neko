@@ -143,7 +143,7 @@ private fun LazyListScope.historyContent(
                     modifier = Modifier.menuAnchor(),
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    FeedHistoryGroup.values().forEach { entry ->
+                    FeedHistoryGroup.entries.forEach { entry ->
                         val textRes =
                             when (entry) {
                                 FeedHistoryGroup.No -> R.string.group_no
