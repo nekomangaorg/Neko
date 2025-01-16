@@ -241,7 +241,6 @@ fun FeedScreen(
                                     historyGrouping = feedScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,
                                     outlineCards = feedScreenState.value.outlineCards,
-                                    hideChapterTitles = feedScreenState.value.hideChapterTitles,
                                     updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
                                     feedScreenActions = feedScreenActions,
                                     loadNextPage = loadNextPage,

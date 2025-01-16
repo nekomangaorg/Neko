@@ -1,12 +1,14 @@
 package org.nekomanga.presentation.screens.feed
 
 import android.text.format.DateUtils
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,13 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
@@ -43,9 +47,9 @@ import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.decimalFormat
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -55,7 +59,6 @@ fun FeedPage(
     outlineCovers: Boolean,
     outlineCards: Boolean,
     hasMoreResults: Boolean,
-    hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
     updatesFetchSort: Boolean,
     feedScreenActions: FeedScreenActions,
@@ -73,7 +76,6 @@ fun FeedPage(
         modifier = Modifier.fillMaxWidth(),
         state = scrollState,
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
         when (feedScreenType) {
             FeedScreenType.History -> {
@@ -95,13 +97,17 @@ fun FeedPage(
                                         color = MaterialTheme.colorScheme.tertiary
                                     ),
                                 modifier =
-                                    Modifier.padding(
-                                        start = Size.small,
-                                        top = Size.small,
-                                        end = Size.small,
-                                    ),
+                                    Modifier.fillMaxWidth()
+                                        .padding(
+                                            start = Size.small,
+                                            end = Size.small,
+                                            top = Size.small,
+                                            bottom = Size.small,
+                                        ),
                             )
                         }
+                    } else {
+                        item { Gap(Size.small) }
                     }
 
                     item {
@@ -109,11 +115,7 @@ fun FeedPage(
                             feedManga = feedManga,
                             outlineCover = outlineCovers,
                             outlineCard = outlineCards,
-                            hideChapterTitles = hideChapterTitles,
                             groupedBySeries = groupedBySeries,
-                            downloadClick = { chp, action ->
-                                feedScreenActions.downloadClick(chp, feedManga, action)
-                            },
                             mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                             chapterClick = { chapterId ->
                                 feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
@@ -125,6 +127,7 @@ fun FeedPage(
                                 feedScreenActions.deleteHistoryClick(feedManga, chp)
                             },
                         )
+                        Gap(Size.tiny)
                         LaunchedEffect(scrollState) {
                             if (
                                 hasMoreResults &&
@@ -172,7 +175,6 @@ fun FeedPage(
                                 mangaTitle = feedManga.mangaTitle,
                                 artwork = feedManga.artwork,
                                 outlineCovers = outlineCovers,
-                                hideChapterTitles = hideChapterTitles,
                                 mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                                 chapterClick = { chapterId ->
                                     feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
@@ -253,30 +255,49 @@ fun FeedCover(
 
 @Composable
 fun FeedChapterTitleLine(
-    hideChapterTitles: Boolean,
+    language: String,
     isBookmarked: Boolean,
     chapterNumber: Float,
     title: String,
     style: TextStyle,
     textColor: Color,
 ) {
-    val titleText =
-        when (hideChapterTitles) {
-            true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
-            false -> title
-        }
     Row {
         if (isBookmarked) {
             Icon(
                 imageVector = Icons.Filled.Bookmark,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp).align(Alignment.CenterVertically),
+                modifier = Modifier.size(Size.medium).align(Alignment.CenterVertically),
                 tint = MaterialTheme.colorScheme.primary,
             )
-            Gap(4.dp)
+            Gap(Size.extraTiny)
+        }
+        if (language.isNotEmpty() && !language.equals("en", true)) {
+            val iconRes = MdLang.fromIsoCode(language)?.iconResId
+
+            when (iconRes == null) {
+                true -> {
+                    TimberKt.e { "Missing flag for $language" }
+                }
+                false -> {
+                    val painter =
+                        rememberDrawablePainter(
+                            drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes)
+                        )
+                    Image(
+                        painter = painter,
+                        modifier =
+                            Modifier.height(Size.medium)
+                                .clip(RoundedCornerShape(Size.tiny))
+                                .align(Alignment.CenterVertically),
+                        contentDescription = "flag",
+                    )
+                    Gap(Size.extraTiny)
+                }
+            }
         }
         Text(
-            text = titleText,
+            text = title,
             style =
                 style.copy(
                     color = textColor,

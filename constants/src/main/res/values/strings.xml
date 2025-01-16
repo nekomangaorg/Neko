@@ -316,6 +316,7 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
+    <string name="entire_series">Entire series</string>
     <string name="reset_chapter_history">Reset chapter history</string>
     <string name="recent_updates">Recent updates</string>
     <string name="search_history">Search history</string>
@@ -344,7 +345,7 @@
     <string name="grouped">Grouped</string>
     <string name="reset_chapter_question">Reset chapter?</string>
     <string name="remove_all_history_question">Remove all history?</string>
-    <string name="remove_history_question">Remove history?</string>
+    <string name="remove_history">Remove history</string>
     <string name="press_and_hold_to_also_reset">Press and hold can also reset chapter history</string>
     <string name="show_download_button">Show download button</string>
     <string name="showing_x_most_recent">Showing 25 most recent chapters</string>

@@ -27,7 +27,6 @@ fun UpdatesCard(
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
-    hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
@@ -38,7 +37,6 @@ fun UpdatesCard(
         mangaTitle = mangaTitle,
         artwork = artwork,
         outlineCovers = outlineCovers,
-        hideChapterTitles = hideChapterTitles,
         mangaClick = mangaClick,
         chapterClick = chapterClick,
         downloadClick = downloadClick,
@@ -52,7 +50,6 @@ private fun UpdatesRow(
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
-    hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
@@ -79,8 +76,8 @@ private fun UpdatesRow(
             val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
             val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
             FeedChapterTitleLine(
-                hideChapterTitles = hideChapterTitles,
                 isBookmarked = chapterItem.chapter.bookmark,
+                language = chapterItem.chapter.language,
                 chapterNumber = chapterItem.chapter.chapterNumber,
                 title = chapterItem.chapter.name,
                 style = MaterialTheme.typography.bodyLarge,

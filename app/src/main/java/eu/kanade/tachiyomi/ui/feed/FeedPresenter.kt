@@ -53,7 +53,6 @@ class FeedPresenter(
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
                 historyGrouping = preferences.historyChapterGrouping().get(),
-                hideChapterTitles = mangaDetailsPreferences.hideChapterTitlesByDefault().get(),
                 downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
             )
         )
