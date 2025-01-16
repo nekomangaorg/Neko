@@ -1,26 +1,18 @@
 package org.nekomanga.presentation.screens.feed
 
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -29,44 +21,38 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.presentation.components.Divider
-import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.dialog.DeleteHistoryDialog
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -76,9 +62,7 @@ fun HistoryCard(
     feedManga: FeedManga,
     outlineCard: Boolean,
     outlineCover: Boolean,
-    hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
-    downloadClick: (ChapterItem, MangaConstants.DownloadAction) -> Unit,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     deleteAllHistoryClick: () -> Unit,
@@ -86,6 +70,7 @@ fun HistoryCard(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val canExpand by remember { mutableStateOf(feedManga.chapters.size > 1) }
+    val allChaptersRead = feedManga.chapters.all { it.chapter.read }
     val cardColor: Color by
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small)
@@ -94,14 +79,11 @@ fun HistoryCard(
         )
     val lowContrastColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-    var showRemoveHistoryDialog by remember { mutableIntStateOf(-1) }
-    var showRemoveAllHistoryDialog by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier.fillMaxWidth().padding(Size.small).animateContentSize(),
+        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small).animateContentSize(),
         outlineCard = outlineCard,
         cardColor = CardDefaults.cardColors(containerColor = cardColor),
-        mangaClick = mangaClick,
     ) {
         val titleColor =
             getReadTextColor(
@@ -109,58 +91,45 @@ fun HistoryCard(
                 MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-        Text(
-            text = feedManga.mangaTitle,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = titleColor,
-            modifier =
-                Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny),
-        )
-
-        HistoryRow(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .clickable { chapterClick(feedManga.chapters.first().chapter.id) }
-                    .padding(start = Size.small),
-            artwork = feedManga.artwork,
-            chapterItem = feedManga.chapters.first(),
-            outlineCovers = outlineCover,
-            hideChapterTitles = hideChapterTitles,
-            canExpand = canExpand,
-            isExpanded = expanded,
-            mangaClick = mangaClick,
-            expandClick = { expanded = !expanded },
-            deleteAllClick = { showRemoveAllHistoryDialog = true },
-            deleteClick = { showRemoveHistoryDialog = 0 },
-            downloadClick = { action -> downloadClick(feedManga.chapters.first(), action) },
-        )
-        if (showRemoveHistoryDialog >= 0) {
-            DeleteHistoryDialog(
-                onDismiss = { showRemoveHistoryDialog = -1 },
-                name =
-                    "${feedManga.mangaTitle}: ${feedManga.chapters[showRemoveHistoryDialog].chapter.name}",
-                description = R.string.this_will_remove_the_read_date,
-                onConfirm = {
-                    deleteHistoryClick(feedManga.chapters[showRemoveHistoryDialog].chapter)
-                },
-            )
-        }
-        if (showRemoveAllHistoryDialog) {
-            DeleteHistoryDialog(
-                onDismiss = { showRemoveAllHistoryDialog = false },
-                name = feedManga.mangaTitle,
-                description = R.string.this_will_remove_the_read_date_for_all,
-                onConfirm = deleteAllHistoryClick,
+        Row {
+            Column(modifier = Modifier.weight(2f)) {
+                Gap(Size.tiny)
+                Text(
+                    text = feedManga.mangaTitle,
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = titleColor,
+                    modifier = Modifier.fillMaxWidth().padding(start = Size.small),
+                )
+                Gap(Size.tiny)
+                HistoryRow(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clickable { chapterClick(feedManga.chapters.first().chapter.id) }
+                            .padding(start = Size.small),
+                    artwork = feedManga.artwork,
+                    chapterItem = feedManga.chapters.first(),
+                    outlineCovers = outlineCover,
+                    mangaClick = mangaClick,
+                )
+            }
+            DeleteExpandColumn(
+                canExpand = canExpand,
+                isExpanded = expanded,
+                expandClick = { expanded = !expanded },
+                chapterName = feedManga.chapters.first().chapter.name,
+                deleteHistoryClick = { deleteHistoryClick(feedManga.chapters.first().chapter) },
+                deleteAllHistoryClick = deleteAllHistoryClick,
             )
         }
 
         if (expanded) {
             if (groupedBySeries) {
+                Gap(Size.small)
                 Text(
-                    modifier =
-                        Modifier.padding(start = Size.small, top = Size.small).fillMaxWidth(),
+                    modifier = Modifier.padding(start = Size.small).fillMaxWidth(),
                     text = stringResource(id = R.string.showing_x_most_recent),
                     textAlign = TextAlign.Center,
                     style =
@@ -171,78 +140,67 @@ fun HistoryCard(
                                 )
                         ),
                 )
+                Gap(Size.small)
+                Divider(Modifier.padding(horizontal = Size.small))
             }
             feedManga.chapters.forEachIndexed { index, chapterItem ->
-                if (index == 0) {
-                    Gap(Size.smedium)
-                } else {
-                    Divider(Modifier.padding(horizontal = Size.small))
+                if (index != 0) {
                     Column(
                         modifier =
-                            Modifier.fillMaxWidth().clickable {
+                            Modifier.fillMaxWidth().padding(vertical = Size.small).clickable {
                                 chapterClick(chapterItem.chapter.id)
                             }
                     ) {
-                        Gap(Size.smedium)
-                        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
                             Column(
-                                modifier = Modifier.align(Alignment.CenterStart).fillMaxWidth(.75f)
+                                modifier =
+                                    Modifier.weight(1f).fillMaxWidth().padding(start = Size.small)
                             ) {
+                                val textColor =
+                                    getReadTextColor(
+                                        isRead = chapterItem.chapter.read,
+                                        lowContrastColor,
+                                    )
                                 FeedChapterTitleLine(
-                                    hideChapterTitles = hideChapterTitles,
                                     isBookmarked = chapterItem.chapter.bookmark,
+                                    language = chapterItem.chapter.language,
                                     chapterNumber = chapterItem.chapter.chapterNumber,
                                     title = chapterItem.chapter.name,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    textColor = getReadTextColor(isRead = chapterItem.chapter.read),
+                                    textColor = textColor,
+                                )
+
+                                ScanlatorLine(
+                                    scanlator = chapterItem.chapter.scanlator,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textColor = textColor,
                                 )
 
                                 LastReadLine(
                                     lastRead = chapterItem.chapter.lastRead,
-                                    scanlator = chapterItem.chapter.scanlator,
-                                    language = chapterItem.chapter.language,
+                                    hasPagesLeft =
+                                        !chapterItem.chapter.read &&
+                                            chapterItem.chapter.pagesLeft > 0,
+                                    pagesLeft = chapterItem.chapter.pagesLeft,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    textColor =
-                                        getReadTextColor(
-                                            isRead = chapterItem.chapter.read,
-                                            lowContrastColor,
-                                        ),
+                                    textColor = textColor,
                                 )
-                                if (
-                                    !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0
-                                ) {
-                                    PagesLeftLine(
-                                        pagesLeft = chapterItem.chapter.pagesLeft,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textColor =
-                                            getReadTextColor(
-                                                isRead = chapterItem.chapter.read,
-                                                lowContrastColor,
-                                            ),
-                                    )
-                                }
                             }
 
-                            Box(
-                                modifier = Modifier.align(Alignment.CenterEnd),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Row() {
-                                    Buttons(
-                                        chapterItem = chapterItem,
-                                        deleteClick = { showRemoveHistoryDialog = index },
-                                        downloadClick = { action ->
-                                            downloadClick(chapterItem, action)
-                                        },
-                                    )
-                                }
-                            }
+                            Buttons(
+                                chapterName = chapterItem.chapter.name,
+                                deleteHistoryClick = { deleteHistoryClick(chapterItem.chapter) },
+                                deleteAllHistoryClick = deleteAllHistoryClick,
+                            )
                         }
-                        Gap(Size.smedium)
                     }
                 }
             }
-            Gap(Size.medium)
+        } else {
+            Gap(Size.small)
         }
     }
 }
@@ -252,25 +210,14 @@ fun Card(
     modifier: Modifier = Modifier,
     outlineCard: Boolean,
     cardColor: CardColors,
-    mangaClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     when (outlineCard) {
         true -> {
-            OutlinedCard(
-                onClick = mangaClick,
-                modifier = modifier,
-                colors = cardColor,
-                content = content,
-            )
+            OutlinedCard(modifier = modifier, colors = cardColor, content = content)
         }
         false -> {
-            ElevatedCard(
-                onClick = mangaClick,
-                modifier = modifier,
-                colors = cardColor,
-                content = content,
-            )
+            ElevatedCard(modifier = modifier, colors = cardColor, content = content)
         }
     }
 }
@@ -281,54 +228,44 @@ private fun HistoryRow(
     artwork: Artwork,
     chapterItem: ChapterItem,
     outlineCovers: Boolean,
-    hideChapterTitles: Boolean,
-    canExpand: Boolean,
-    isExpanded: Boolean,
-    expandClick: () -> Unit,
     mangaClick: () -> Unit,
-    deleteAllClick: () -> Unit,
-    deleteClick: () -> Unit,
-    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     val mediumAlphaColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Size.tiny)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            FeedCover(
-                artwork = artwork,
-                outlined = outlineCovers,
-                coverSize = Size.squareCover,
-                onClick = mangaClick,
-            )
-            ChapterInfo(
-                modifier =
-                    Modifier.padding(vertical = Size.small, horizontal = Size.small)
-                        .align(Alignment.Top)
-                        .height(Size.squareCover)
-                        .weight(3f),
-                chapterItem = chapterItem,
-                hideChapterTitles = hideChapterTitles,
-                updatedColor = mediumAlphaColor,
-                deleteAllClick = deleteAllClick,
-                deleteClick = deleteClick,
-                downloadClick = downloadClick,
-            )
-        }
-        if (canExpand) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        FeedCover(
+            artwork = artwork,
+            outlined = outlineCovers,
+            coverSize = Size.squareHistoryCover,
+            onClick = mangaClick,
+        )
+        ChapterInfo(
+            modifier = Modifier.padding(horizontal = Size.small).align(Alignment.Top),
+            chapterItem = chapterItem,
+            updatedColor = mediumAlphaColor,
+        )
+    }
+}
 
-            TextButton(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = expandClick,
-            ) {
-                Icon(
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    imageVector =
-                        if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f),
-                )
-            }
-        }
+@Composable
+fun DeleteExpandColumn(
+    modifier: Modifier = Modifier,
+    canExpand: Boolean,
+    isExpanded: Boolean,
+    chapterName: String,
+    deleteHistoryClick: () -> Unit,
+    deleteAllHistoryClick: () -> Unit,
+    expandClick: () -> Unit,
+) {
+    Column(modifier = modifier) {
+        Buttons(
+            canExpand = canExpand,
+            isExpanded = isExpanded,
+            expandClick = expandClick,
+            chapterName = chapterName,
+            deleteHistoryClick = deleteHistoryClick,
+            deleteAllHistoryClick = deleteAllHistoryClick,
+        )
     }
 }
 
@@ -336,142 +273,95 @@ private fun HistoryRow(
 private fun ChapterInfo(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
-    hideChapterTitles: Boolean,
     updatedColor: Color,
-    deleteAllClick: () -> Unit,
-    deleteClick: () -> Unit,
-    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     Column(modifier = modifier) {
         val textColor = getReadTextColor(isRead = chapterItem.chapter.read)
 
         FeedChapterTitleLine(
-            hideChapterTitles = hideChapterTitles,
+            language = chapterItem.chapter.language,
             isBookmarked = chapterItem.chapter.bookmark,
             chapterNumber = chapterItem.chapter.chapterNumber,
             title = chapterItem.chapter.name,
             style = MaterialTheme.typography.bodyLarge,
             textColor = textColor,
         )
-
         val readColor = getReadTextColor(isRead = chapterItem.chapter.read, updatedColor)
-        LastReadLine(
-            lastRead = chapterItem.chapter.lastRead,
+        ScanlatorLine(
             scanlator = chapterItem.chapter.scanlator,
-            language = chapterItem.chapter.language,
             style = MaterialTheme.typography.bodyMedium,
             textColor = readColor,
         )
 
-        Spacer(modifier.weight(1f))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            if (!chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0) {
-                Text(
-                    text =
-                        pluralStringResource(
-                            R.plurals.pages_left,
-                            chapterItem.chapter.pagesLeft,
-                            chapterItem.chapter.pagesLeft,
-                        ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = readColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Spacer(modifier.weight(1f))
-            Buttons(
-                chapterItem = chapterItem,
-                deleteAll = true,
-                deleteAllClick = deleteAllClick,
-                deleteClick = deleteClick,
-                downloadClick = downloadClick,
-            )
-        }
+        LastReadLine(
+            lastRead = chapterItem.chapter.lastRead,
+            hasPagesLeft = !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0,
+            pagesLeft = chapterItem.chapter.pagesLeft,
+            style = MaterialTheme.typography.bodyMedium,
+            textColor = readColor,
+        )
     }
 }
 
 @Composable
-private fun RowScope.Buttons(
-    chapterItem: ChapterItem,
-    deleteAll: Boolean = false,
-    deleteClick: () -> Unit,
-    deleteAllClick: () -> Unit = {},
-    downloadClick: (MangaConstants.DownloadAction) -> Unit,
+private fun Buttons(
+    canExpand: Boolean = false,
+    isExpanded: Boolean = false,
+    chapterName: String,
+    expandClick: () -> Unit = {},
+    deleteHistoryClick: () -> Unit,
+    deleteAllHistoryClick: () -> Unit,
 ) {
-    if (deleteAll) {
-        IconButton(onClick = deleteAllClick) {
-            Icon(
-                imageVector = Icons.Outlined.DeleteSweep,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
-            )
-        }
-    }
-    IconButton(onClick = deleteClick) {
+    var dropdown by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { dropdown = !dropdown }) {
         Icon(
             imageVector = Icons.Outlined.Delete,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
         )
+        if (dropdown) {
+            SimpleDropdownMenu(
+                expanded = dropdown,
+                themeColorState = defaultThemeColorState(),
+                onDismiss = { dropdown = false },
+                dropDownItems =
+                    listOf(
+                            SimpleDropDownItem.Parent(
+                                UiText.StringResource(R.string.remove_history),
+                                children =
+                                    persistentListOf(
+                                        SimpleDropDownItem.Action(
+                                            UiText.String(chapterName),
+                                            onClick = deleteHistoryClick,
+                                        ),
+                                        SimpleDropDownItem.Action(
+                                            UiText.StringResource(R.string.entire_series),
+                                            onClick = deleteAllHistoryClick,
+                                        ),
+                                    ),
+                            )
+                        )
+                        .toPersistentList(),
+            )
+        }
     }
-    DownloadButton(
-        themeColorState = defaultThemeColorState(),
-        downloadState = chapterItem.downloadState,
-        downloadProgress = chapterItem.downloadProgress,
-        onDownload = downloadClick,
-    )
+    if (canExpand) {
+        IconButton(onClick = expandClick) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
+            )
+        }
+    }
 }
 
 @Composable
-private fun LastReadLine(
-    lastRead: Long,
-    scanlator: String,
-    language: String,
-    style: TextStyle,
-    textColor: Color,
-) {
-    val statuses = mutableListOf<String>()
-
-    statuses.add("Read ${lastRead.timeSpanFromNow}")
-
+private fun ScanlatorLine(scanlator: String, textColor: Color, style: TextStyle) {
     if (scanlator.isNotBlank()) {
-        statuses.add(scanlator)
-    }
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (language.isNotEmpty() && !language.equals("en", true)) {
-            val iconRes = MdLang.fromIsoCode(language)?.iconResId
-
-            when (iconRes == null) {
-                true -> {
-                    TimberKt.e { "Missing flag for $language" }
-                    Text(
-                        text = "$language${Constants.SEPARATOR}",
-                        style =
-                            MaterialTheme.typography.bodyMedium.copy(
-                                color = textColor,
-                                fontWeight = FontWeight.Medium,
-                                letterSpacing = (-.6).sp,
-                            ),
-                    )
-                }
-                false -> {
-                    val painter =
-                        rememberDrawablePainter(
-                            drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes)
-                        )
-                    Image(
-                        painter = painter,
-                        modifier = Modifier.height(16.dp).clip(RoundedCornerShape(4.dp)),
-                        contentDescription = "flag",
-                    )
-                    Gap(4.dp)
-                }
-            }
-        }
         Text(
-            text = statuses.joinToString(Constants.SEPARATOR),
+            text = scanlator,
             style =
                 style.copy(
                     color = textColor,
@@ -485,10 +375,24 @@ private fun LastReadLine(
 }
 
 @Composable
-private fun PagesLeftLine(pagesLeft: Int, style: TextStyle, textColor: Color) {
+private fun LastReadLine(
+    lastRead: Long,
+    hasPagesLeft: Boolean,
+    pagesLeft: Int,
+    style: TextStyle,
+    textColor: Color,
+) {
+    val statuses = mutableListOf<String>()
+
+    statuses.add("Read ${lastRead.timeSpanFromNow}")
+
+    if (hasPagesLeft) {
+        statuses.add(pluralStringResource(R.plurals.pages_left, pagesLeft, pagesLeft))
+    }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = pluralStringResource(R.plurals.pages_left, pagesLeft, pagesLeft),
+            text = statuses.joinToString(Constants.SEPARATOR),
             style =
                 style.copy(
                     color = textColor,
