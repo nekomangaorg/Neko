@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.feed
+package org.nekomanga.presentation.screens.feed.updates
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,9 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.screens.feed.FeedChapterTitleLine
+import org.nekomanga.presentation.screens.feed.FeedCover
+import org.nekomanga.presentation.screens.feed.getReadTextColor
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -78,7 +81,6 @@ private fun UpdatesRow(
             FeedChapterTitleLine(
                 isBookmarked = chapterItem.chapter.bookmark,
                 language = chapterItem.chapter.language,
-                chapterNumber = chapterItem.chapter.chapterNumber,
                 title = chapterItem.chapter.name,
                 style = MaterialTheme.typography.bodyLarge,
                 textColor = titleColor,

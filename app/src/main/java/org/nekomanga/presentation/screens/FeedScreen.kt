@@ -37,9 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenState
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
@@ -234,9 +232,6 @@ fun FeedScreen(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
-                                    groupedBySeries =
-                                        feedScreenState.value.historyGrouping ==
-                                            FeedHistoryGroup.Series,
                                     feedScreenType = feedScreenState.value.feedScreenType,
                                     historyGrouping = feedScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,
@@ -307,10 +302,18 @@ private fun ScreenFooter(
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth().padding(bottom = Size.smedium),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item { Gap(8.dp) }
+        item { Gap(Size.tiny) }
+
+        /*    item {
+            FooterFilterChip(
+                selected = screenType == FeedScreenType.Summary && downloadsSelected == false,
+                onClick = { screenTypeClick(FeedScreenType.Summary) },
+                name = stringResource(R.string.summary),
+            )
+        }*/
 
         item {
             FooterFilterChip(

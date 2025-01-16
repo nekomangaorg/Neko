@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.feed
+package org.nekomanga.presentation.screens.feed.history
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -54,6 +54,9 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.screens.feed.FeedChapterTitleLine
+import org.nekomanga.presentation.screens.feed.FeedCover
+import org.nekomanga.presentation.screens.feed.getReadTextColor
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -167,7 +170,6 @@ fun HistoryCard(
                                 FeedChapterTitleLine(
                                     isBookmarked = chapterItem.chapter.bookmark,
                                     language = chapterItem.chapter.language,
-                                    chapterNumber = chapterItem.chapter.chapterNumber,
                                     title = chapterItem.chapter.name,
                                     style = MaterialTheme.typography.bodyLarge,
                                     textColor = textColor,
@@ -281,7 +283,6 @@ private fun ChapterInfo(
         FeedChapterTitleLine(
             language = chapterItem.chapter.language,
             isBookmarked = chapterItem.chapter.bookmark,
-            chapterNumber = chapterItem.chapter.chapterNumber,
             title = chapterItem.chapter.name,
             style = MaterialTheme.typography.bodyLarge,
             textColor = textColor,
