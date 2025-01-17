@@ -30,7 +30,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
 
         val context = LocalContext.current
 
-        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == false) {
+        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
             (this.activity as? MainActivity)?.backCallback?.invoke()
         }
 
