@@ -63,6 +63,7 @@ data class FeedSettingActions(
 data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
     val chapterClick: (Long, Long) -> Unit,
+    val chapterSwipe: (ChapterItem) -> Unit,
     val switchViewType: (FeedScreenType) -> Unit,
     val toggleShowingDownloads: () -> Unit,
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,

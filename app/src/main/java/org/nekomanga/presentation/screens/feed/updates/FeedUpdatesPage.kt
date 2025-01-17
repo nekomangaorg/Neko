@@ -78,6 +78,9 @@ fun FeedUpdatesPage(
                         chapterClick = { chapterId ->
                             feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
                         },
+                        chapterSwipe = { chapterItem ->
+                            feedScreenActions.chapterSwipe(chapterItem)
+                        },
                         downloadClick = { action ->
                             feedScreenActions.downloadClick(chapterItem, feedManga, action)
                         },

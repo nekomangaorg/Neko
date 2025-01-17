@@ -12,8 +12,8 @@ import me.saket.swipe.rememberSwipeableActionsState
 @Composable
 fun ChapterSwipe(
     modifier: Modifier = Modifier,
-    startSwipeAction: SwipeAction,
-    endSwipeAction: SwipeAction,
+    startSwipeActions: List<SwipeAction> = emptyList<SwipeAction>(),
+    endSwipeActions: List<SwipeAction> = emptyList<SwipeAction>(),
     content: @Composable BoxScope.() -> Unit,
 ) {
 
@@ -21,8 +21,8 @@ fun ChapterSwipe(
     SwipeableActionsBox(
         modifier = modifier,
         state = state,
-        startActions = listOf(startSwipeAction),
-        endActions = listOf(endSwipeAction),
+        startActions = startSwipeActions,
+        endActions = endSwipeActions,
         backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.secondary,
         content = content,
     )

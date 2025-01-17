@@ -198,6 +198,21 @@ class FeedPresenter(
         }
     }
 
+    fun toggleChapterRead(chapterItem: ChapterItem) {
+        presenterScope.launchIO {
+            val updatedChapterItem = feedRepository.toggleChapterRead(chapterItem)
+            updateReadOnFeed(updatedChapterItem)
+            if (updatedChapterItem.chapter.read) {
+                if (
+                    preferences.removeAfterMarkedAsRead().get() &&
+                        !updatedChapterItem.chapter.bookmark
+                ) {
+                    feedRepository.deleteChapter(updatedChapterItem)
+                }
+            }
+        }
+    }
+
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
         presenterScope.launchIO { preferences.historyChapterGrouping().set(historyGrouping) }
     }
@@ -435,6 +450,26 @@ class FeedPresenter(
         return false to emptyList()
     }
 
+    private fun updateChapterReadStatus(
+        updatedChapterItem: ChapterItem,
+        feedManga: List<FeedManga>,
+    ): Pair<Boolean, List<FeedManga>> {
+        var wasUpdated: Boolean = false
+        val updatedFeedManga =
+            feedManga.mapIndexed { index, manga ->
+                if (
+                    manga.mangaId == updatedChapterItem.chapter.mangaId &&
+                        manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
+                ) {
+                    wasUpdated = true
+                    manga.copy(chapters = persistentListOf(updatedChapterItem))
+                } else {
+                    manga
+                }
+            }
+        return wasUpdated to updatedFeedManga
+    }
+
     private fun onUpdateManga(mangaId: Long?) {
         presenterScope.launchIO {
             when (mangaId) {
@@ -506,6 +541,29 @@ class FeedPresenter(
         }
     }
 
+    private fun updateReadOnFeed(chapterItem: ChapterItem) {
+
+        val (searchFeedUpdated, searchFeedMangaList) =
+            updateChapterReadStatus(
+                chapterItem,
+                _feedScreenState.value.searchFeedManga.map { it }.toList(),
+            )
+        if (searchFeedUpdated) {
+            _feedScreenState.update {
+                it.copy(searchFeedManga = searchFeedMangaList.toImmutableList())
+            }
+        }
+
+        val (feedUpdated, feedMangaList) =
+            updateChapterReadStatus(
+                chapterItem,
+                _feedScreenState.value.allFeedManga.map { it }.toList(),
+            )
+        if (feedUpdated) {
+            _feedScreenState.update { it.copy(allFeedManga = feedMangaList.toImmutableList()) }
+        }
+    }
+
     private fun updateDownloadOnFeed(chapterId: Long, mangaId: Long, download: Download?) {
 
         val (searchFeedUpdated, searchFeedMangaList) =
@@ -513,7 +571,7 @@ class FeedPresenter(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.searchFeedManga.map { it as FeedManga }.toList(),
+                _feedScreenState.value.searchFeedManga.map { it }.toList(),
             )
         if (searchFeedUpdated) {
             _feedScreenState.update {
@@ -526,7 +584,7 @@ class FeedPresenter(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.allFeedManga.map { it as FeedManga }.toList(),
+                _feedScreenState.value.allFeedManga.map { it }.toList(),
             )
         if (feedUpdated) {
             _feedScreenState.update { it.copy(allFeedManga = feedMangaList.toImmutableList()) }

@@ -796,7 +796,7 @@
     <string name="flat_lime">Flat Lime</string>
     <string name="white_theme">Neko Pure</string>
     <string name="locale">Locale</string>
-    <string name="last_used_library_recents">Last used (Library or Recents)</string>
+    <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>

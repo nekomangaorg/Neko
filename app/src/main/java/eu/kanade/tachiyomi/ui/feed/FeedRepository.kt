@@ -224,6 +224,11 @@ class FeedRepository(
         db.deleteHistory().executeAsBlocking()
     }
 
+    suspend fun deleteChapter(chapterItem: ChapterItem) {
+        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        downloadManager.deleteChapters(listOf(chapterItem.chapter.toDbChapter()), manga)
+    }
+
     suspend fun deleteAllHistoryForManga(mangaId: Long) {
         val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
         history.forEach {
@@ -267,6 +272,21 @@ class FeedRepository(
                     false -> 0
                 },
         )
+    }
+
+    /** this toggle the chapter read and returns the new chapter item */
+    suspend fun toggleChapterRead(chapterItem: ChapterItem): ChapterItem {
+        val markedAsRead = !chapterItem.chapter.read
+        val chapter =
+            chapterItem.chapter.copy(
+                read = markedAsRead,
+                lastRead = if (!markedAsRead) 0 else chapterItem.chapter.lastRead,
+                pagesLeft = if (!markedAsRead) 0 else chapterItem.chapter.pagesLeft,
+            )
+
+        val dbChapter = db.getChapter(chapter.id).executeOnIO()!!
+        dbChapter.copyFrom(chapter.toDbChapter())
+        return chapterItem.copy(chapter = chapter)
     }
 
     suspend fun downloadChapter(
