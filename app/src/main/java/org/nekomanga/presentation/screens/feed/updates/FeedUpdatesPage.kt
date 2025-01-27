@@ -40,6 +40,9 @@ fun FeedUpdatesPage(
     var timeSpan by remember { mutableStateOf("") }
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         feedUpdatesMangaList.forEachIndexed { index, feedManga ->
+            if (index == 0) {
+                timeSpan = ""
+            }
             val dateString = getDateString(feedManga.date, now, isRecent = true)
             // there should only ever be 1
             feedManga.chapters.forEach { chapterItem ->
