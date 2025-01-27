@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,21 +34,36 @@ enum class MangaCover(val ratio: Float) {
         contentDescription: String = "",
         shape: Shape = RoundedCornerShape(Shapes.coverRadius),
         shouldOutlineCover: Boolean = true,
+        shoulderOverlayCover: Boolean = false,
     ) {
-        val color by remember { mutableStateOf(Pastel.getColorLight()) }
+        val color by remember { mutableIntStateOf(Pastel.getColorLight()) }
+
+        val alpha =
+            when (shoulderOverlayCover) {
+                true -> NekoColors.disabledAlphaLowContrast
+                false -> NekoColors.highAlphaHighContrast
+            }
+
         AsyncImage(
             model =
                 ImageRequest.Builder(LocalContext.current).data(artwork).placeholder(color).build(),
             contentDescription = contentDescription,
+            alpha = alpha,
             contentScale = ContentScale.Crop,
             modifier =
-                modifier.aspectRatio(ratio).clip(shape).conditional(shouldOutlineCover) {
-                    this.border(
-                        width = Outline.thickness,
-                        color = Outline.color,
-                        shape = RoundedCornerShape(Shapes.coverRadius),
-                    )
-                },
+                modifier
+                    .aspectRatio(ratio)
+                    .clip(shape)
+                    .conditional(
+                        shouldOutlineCover,
+                        {
+                            this.border(
+                                width = Outline.thickness,
+                                color = Outline.color,
+                                shape = RoundedCornerShape(Shapes.coverRadius),
+                            )
+                        },
+                    ),
         )
     }
 }

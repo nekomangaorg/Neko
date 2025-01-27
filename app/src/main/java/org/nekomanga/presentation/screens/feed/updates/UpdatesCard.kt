@@ -82,7 +82,10 @@ private fun UpdatesRow(
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     val mediumAlphaColor =
-        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
+
+    val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
+    val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
 
     Row(
         modifier =
@@ -97,11 +100,10 @@ private fun UpdatesRow(
             artwork = artwork,
             outlined = outlineCovers,
             coverSize = Size.extraHuge,
+            shoulderOverlayCover = chapterItem.chapter.read,
             onClick = mangaClick,
         )
         Column(modifier = Modifier.padding(horizontal = Size.small).weight(3f)) {
-            val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
-            val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
             FeedChapterTitleLine(
                 isBookmarked = chapterItem.chapter.bookmark,
                 language = chapterItem.chapter.language,
@@ -127,6 +129,7 @@ private fun UpdatesRow(
         DownloadButton(
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
+            defaultDisableColor = chapterItem.chapter.read,
             onDownload = downloadClick,
         )
     }

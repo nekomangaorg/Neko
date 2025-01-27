@@ -106,13 +106,16 @@ fun FeedCover(
     outlined: Boolean,
     coverSize: Dp,
     modifier: Modifier = Modifier,
+    shoulderOverlayCover: Boolean = false,
     onClick: () -> Unit,
 ) {
+
     Box(modifier = modifier.clip(RoundedCornerShape(Shapes.coverRadius)).clickable { onClick() }) {
         MangaCover.Square.invoke(
             artwork = artwork,
             shouldOutlineCover = outlined,
             modifier = Modifier.size(coverSize),
+            shoulderOverlayCover = shoulderOverlayCover,
         )
     }
 }
