@@ -136,6 +136,7 @@ fun FeedScreen(
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         outlineCards = feedScreenState.value.outlineCards,
+                        swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
                         groupHistoryClick = { feedHistoryGroup ->
                             feedSettingActions.groupHistoryClick(feedHistoryGroup)
                         },
@@ -145,16 +146,19 @@ fun FeedScreen(
                         outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                         outlineCardsClick = { feedSettingActions.outlineCardsClick() },
                         toggleDownloadOnWifi = { feedSettingActions.toggleDownloadOnlyOnWifi() },
+                        toggleSwipeRefresh = { feedSettingActions.toggleSwipeRefresh() },
                     )
                 }
             },
         ) {
             PullRefresh(
+                enabled = feedScreenState.value.swipeRefreshEnabled,
                 refreshing = feedScreenState.value.isRefreshing,
                 onRefresh = { feedScreenActions.updateLibrary(true) },
                 indicatorOffset =
                     WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding(),
+                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding() +
+                        Size.extraLarge,
             ) {
                 NekoScaffold(
                     type =

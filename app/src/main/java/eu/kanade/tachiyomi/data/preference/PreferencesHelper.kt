@@ -165,6 +165,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun feedViewType() = this.preferenceStore.getEnum("feed_view_type", FeedScreenType.Updates)
 
+    fun swipeRefreshFeedScreen() =
+        this.preferenceStore.getBoolean("swipe_refresh_feed_screen_enabled", true)
+
     fun sortFetchedTime() = this.preferenceStore.getBoolean("sort_fetched_time", false)
 
     fun groupChaptersUpdates() = this.preferenceStore.getBoolean(Keys.groupChaptersUpdates, false)

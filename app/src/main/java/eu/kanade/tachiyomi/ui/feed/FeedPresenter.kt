@@ -54,6 +54,7 @@ class FeedPresenter(
                 groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
                 historyGrouping = preferences.historyChapterGrouping().get(),
                 downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
+                swipeRefreshEnabled = preferences.swipeRefreshFeedScreen().get(),
             )
         )
 
@@ -173,6 +174,12 @@ class FeedPresenter(
         }
 
         presenterScope.launch {
+            preferences.swipeRefreshFeedScreen().changes().collectLatest {
+                _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) }
+            }
+        }
+
+        presenterScope.launch {
             preferences.sortFetchedTime().changes().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(
@@ -196,6 +203,10 @@ class FeedPresenter(
             _feedScreenState.update { it.copy(allFeedManga = persistentListOf()) }
             preferences.feedViewType().set(feedScreenType)
         }
+    }
+
+    fun toggleSwipeRefresh() {
+        presenterScope.launchIO { preferences.swipeRefreshFeedScreen().toggle() }
     }
 
     fun toggleChapterRead(chapterItem: ChapterItem) {

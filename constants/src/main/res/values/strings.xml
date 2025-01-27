@@ -369,6 +369,7 @@
     <string name="a_while_ago">A while ago</string>
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
+    <string name="feed_swipe_refresh_enabled">Enable swipe refresh library</string>
     <string name="group_chapters_together">Group chapters</string>
     <string name="group_no">No</string>
     <string name="group_by_series">By series</string>
