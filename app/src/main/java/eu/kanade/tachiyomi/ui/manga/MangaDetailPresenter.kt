@@ -84,6 +84,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -452,7 +453,7 @@ class MangaDetailPresenter(
                         if (chaptersToMarkRead.isNotEmpty()) {
                             markChapters(
                                 chaptersToMarkRead,
-                                MangaConstants.MarkAction.Read(),
+                                ChapterMarkActions.Read(),
                                 skipSync = true,
                             )
                         }
@@ -1614,20 +1615,19 @@ class MangaDetailPresenter(
 
     fun markChapters(
         chapterItems: List<ChapterItem>,
-        markAction: MangaConstants.MarkAction,
+        markAction: ChapterMarkActions,
         skipSync: Boolean = false,
     ) {
         presenterScope.launchIO {
             val initialChapterItems =
                 if (
-                    markAction is MangaConstants.MarkAction.PreviousRead ||
-                        markAction is MangaConstants.MarkAction.PreviousUnread
+                    markAction is ChapterMarkActions.PreviousRead ||
+                        markAction is ChapterMarkActions.PreviousUnread
                 ) {
                     when (currentManga().sortDescending(mangaDetailsPreferences)) {
                         true ->
-                            (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters
-                                ?: (markAction as MangaConstants.MarkAction.PreviousUnread)
-                                    .altChapters
+                            (markAction as? ChapterMarkActions.PreviousRead)?.altChapters
+                                ?: (markAction as ChapterMarkActions.PreviousUnread).altChapters
                         false -> chapterItems
                     }
                 } else {
@@ -1636,29 +1636,29 @@ class MangaDetailPresenter(
 
             val (newChapterItems, nameRes) =
                 when (markAction) {
-                    is MangaConstants.MarkAction.Bookmark -> {
+                    is ChapterMarkActions.Bookmark -> {
                         initialChapterItems.map { it.chapter }.map { it.copy(bookmark = true) } to
                             R.string.bookmarked
                     }
-                    is MangaConstants.MarkAction.UnBookmark -> {
+                    is ChapterMarkActions.UnBookmark -> {
                         initialChapterItems.map { it.chapter }.map { it.copy(bookmark = false) } to
                             R.string.removed_bookmark
                     }
-                    is MangaConstants.MarkAction.Read -> {
+                    is ChapterMarkActions.Read -> {
                         initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to
                             R.string.marked_as_read
                     }
-                    is MangaConstants.MarkAction.PreviousRead -> {
+                    is ChapterMarkActions.PreviousRead -> {
                         initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to
                             R.string.marked_as_read
                     }
-                    is MangaConstants.MarkAction.PreviousUnread -> {
+                    is ChapterMarkActions.PreviousUnread -> {
                         initialChapterItems
                             .map { it.chapter }
                             .map { it.copy(read = false, lastPageRead = 0, pagesLeft = 0) } to
                             R.string.marked_as_unread
                     }
-                    is MangaConstants.MarkAction.Unread -> {
+                    is ChapterMarkActions.Unread -> {
                         initialChapterItems
                             .map { it.chapter }
                             .map {
@@ -1675,7 +1675,7 @@ class MangaDetailPresenter(
             updateChapterFlows()
 
             fun finalizeChapters() {
-                if (markAction is MangaConstants.MarkAction.Read) {
+                if (markAction is ChapterMarkActions.Read) {
                     if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(
@@ -1713,8 +1713,8 @@ class MangaDetailPresenter(
                 // sync with dex if marked read or marked unread
                 val syncRead =
                     when (markAction) {
-                        is MangaConstants.MarkAction.Read -> true
-                        is MangaConstants.MarkAction.Unread -> false
+                        is ChapterMarkActions.Read -> true
+                        is ChapterMarkActions.Unread -> false
                         else -> null
                     }
 

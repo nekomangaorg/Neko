@@ -52,6 +52,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
+import org.nekomanga.usecases.chapters.MarkChapterRead
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.core.util.storage.AndroidStorageFolderProvider
@@ -146,6 +147,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(DisplayRepository())
 
         addSingleton(BrowseRepository())
+
+        addSingleton(MarkChapterRead())
 
         addSingleton(FeedRepository())
 

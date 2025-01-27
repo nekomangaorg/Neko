@@ -13,6 +13,7 @@ import kotlinx.collections.immutable.persistentSetOf
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
@@ -170,30 +171,6 @@ object MangaConstants {
         object Cancel : DownloadAction()
     }
 
-    sealed class MarkAction {
-        abstract val canUndo: Boolean
-
-        data class Bookmark(override val canUndo: Boolean = false) : MarkAction()
-
-        data class UnBookmark(override val canUndo: Boolean = false) : MarkAction()
-
-        data class PreviousRead(override val canUndo: Boolean, val altChapters: List<ChapterItem>) :
-            MarkAction()
-
-        data class PreviousUnread(
-            override val canUndo: Boolean,
-            val altChapters: List<ChapterItem>,
-        ) : MarkAction()
-
-        data class Read(override val canUndo: Boolean = false) : MarkAction()
-
-        data class Unread(
-            override val canUndo: Boolean = false,
-            val lastRead: Int? = null,
-            val pagesLeft: Int? = null,
-        ) : MarkAction()
-    }
-
     class CategoryActions(
         val set: (List<CategoryItem>) -> Unit = {},
         val addNew: (String) -> Unit = {},
@@ -236,7 +213,7 @@ object MangaConstants {
     )
 
     class ChapterActions(
-        val mark: (List<ChapterItem>, MarkAction) -> Unit,
+        val mark: (List<ChapterItem>, ChapterMarkActions) -> Unit,
         val clearRemoved: () -> Unit,
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
