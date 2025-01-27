@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -151,7 +152,9 @@ fun FeedScreen(
             PullRefresh(
                 refreshing = feedScreenState.value.isRefreshing,
                 onRefresh = { feedScreenActions.updateLibrary(true) },
-                indicatorOffset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                indicatorOffset =
+                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding(),
             ) {
                 NekoScaffold(
                     type =
