@@ -20,7 +20,7 @@ data class FeedScreenState(
     val outlineCards: Boolean,
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
-    val groupChaptersUpdates: Boolean = false,
+    val groupUpdateChapters: Boolean = false,
     val historyGrouping: FeedHistoryGroup,
     val incognitoMode: Boolean = false,
     val swipeRefreshEnabled: Boolean = true,
@@ -59,6 +59,7 @@ data class FeedSettingActions(
     val outlineCardsClick: () -> Unit,
     val clearDownloadQueueClick: () -> Unit,
     val toggleDownloadOnlyOnWifi: () -> Unit,
+    val toggleGroupUpdateChapters: () -> Unit,
     val toggleSwipeRefresh: () -> Unit,
 )
 

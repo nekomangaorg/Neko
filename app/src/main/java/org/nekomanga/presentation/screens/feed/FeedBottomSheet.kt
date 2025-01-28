@@ -49,6 +49,8 @@ fun FeedBottomSheet(
     outlineCovers: Boolean,
     outlineCards: Boolean,
     swipeRefreshEnabled: Boolean,
+    groupUpdateChapters: Boolean,
+    toggleGroupUpdateChapters: () -> Unit,
     sortClick: () -> Unit,
     outlineCardsClick: () -> Unit,
     outlineCoversClick: () -> Unit,
@@ -91,6 +93,8 @@ fun FeedBottomSheet(
                         fetchSort = sortByFetched,
                         outlineCovers = outlineCovers,
                         sortClick = sortClick,
+                        groupUpdateChapters = groupUpdateChapters,
+                        toggleGroupUpdateChapters = toggleGroupUpdateChapters,
                         outlineCoversClick = outlineCoversClick,
                         swipeRefreshEnabled = swipeRefreshEnabled,
                         toggleSwipeRefresh = toggleSwipeRefresh,
@@ -220,6 +224,8 @@ private fun LazyListScope.downloadsContent(
 private fun LazyListScope.uploadsContent(
     fetchSort: Boolean,
     outlineCovers: Boolean,
+    groupUpdateChapters: Boolean,
+    toggleGroupUpdateChapters: () -> Unit,
     sortClick: () -> Unit,
     outlineCoversClick: () -> Unit,
     swipeRefreshEnabled: Boolean,
@@ -227,6 +233,9 @@ private fun LazyListScope.uploadsContent(
 ) {
     item { SwitchRow(R.string.sort_fetched_time, fetchSort, sortClick) }
     item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+    item {
+        SwitchRow(R.string.group_chapters_together, groupUpdateChapters, toggleGroupUpdateChapters)
+    }
     item { SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh) }
 }
 
