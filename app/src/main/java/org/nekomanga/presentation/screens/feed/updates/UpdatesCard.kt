@@ -131,32 +131,20 @@ private fun UpdatesRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-        when (isGrouped) {
-            true -> {
-                Column(modifier = Modifier.padding(end = Size.small)) {
-                    Text(
-                        text = "$numberOfChapters",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = updatedColor,
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = "ch.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = updatedColor,
-                        maxLines = 1,
-                    )
-                }
-            }
-            false -> {
-                DownloadButton(
-                    downloadState = chapterItem.downloadState,
-                    downloadProgress = chapterItem.downloadProgress,
-                    defaultDisableColor = chapterItem.chapter.read,
-                    onDownload = downloadClick,
+            if (isGrouped) {
+                Text(
+                    text = "$numberOfChapters total chapters",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = updatedColor,
+                    maxLines = 1,
                 )
             }
         }
+        DownloadButton(
+            downloadState = chapterItem.downloadState,
+            downloadProgress = chapterItem.downloadProgress,
+            defaultDisableColor = chapterItem.chapter.read,
+            onDownload = downloadClick,
+        )
     }
 }
