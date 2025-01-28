@@ -134,13 +134,20 @@ private fun UpdatesRow(
         }
         when (isGrouped) {
             true -> {
-                Text(
-                    text = "$numberOfChapters total",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = updatedColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Column(modifier = Modifier.padding(end = Size.small)) {
+                    Text(
+                        text = "$numberOfChapters",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = updatedColor,
+                        maxLines = 1,
+                    )
+                    Text(
+                        text = "ch.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = updatedColor,
+                        maxLines = 1,
+                    )
+                }
             }
             false -> {
                 DownloadButton(
