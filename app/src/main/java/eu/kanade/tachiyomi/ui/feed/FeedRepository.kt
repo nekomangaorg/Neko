@@ -64,6 +64,14 @@ class FeedRepository(
             .runCatching {
                 when (type) {
                     FeedScreenType.Updates -> {
+                        TimberKt.d {
+                            """
+                                offset: $offset
+                                limit: $limit
+                            """
+                                .trimIndent()
+                        }
+
                         val chapters =
                             db.getRecentChapters(
                                     search = searchQuery,
@@ -89,6 +97,7 @@ class FeedRepository(
                                         chapters = persistentListOf(chapterItem),
                                     )
                                 }
+                        TimberKt.d { """has more: ${chapters.isNotEmpty()}""" }
                         Pair(chapters.isNotEmpty(), chapters)
                     }
                     FeedScreenType.History -> {

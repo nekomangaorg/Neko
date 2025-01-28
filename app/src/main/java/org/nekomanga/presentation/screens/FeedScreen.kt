@@ -137,6 +137,7 @@ fun FeedScreen(
                         outlineCovers = feedScreenState.value.outlineCovers,
                         outlineCards = feedScreenState.value.outlineCards,
                         swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
+                        groupUpdateChapters = feedScreenState.value.groupUpdateChapters,
                         groupHistoryClick = { feedHistoryGroup ->
                             feedSettingActions.groupHistoryClick(feedHistoryGroup)
                         },
@@ -146,6 +147,9 @@ fun FeedScreen(
                         outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                         outlineCardsClick = { feedSettingActions.outlineCardsClick() },
                         toggleDownloadOnWifi = { feedSettingActions.toggleDownloadOnlyOnWifi() },
+                        toggleGroupUpdateChapters = {
+                            feedSettingActions.toggleGroupUpdateChapters()
+                        },
                         toggleSwipeRefresh = { feedSettingActions.toggleSwipeRefresh() },
                     )
                 }
@@ -237,6 +241,7 @@ fun FeedScreen(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
+                                    groupedBySeries = feedScreenState.value.groupUpdateChapters,
                                     feedScreenType = feedScreenState.value.feedScreenType,
                                     historyGrouping = feedScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,

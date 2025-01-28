@@ -37,6 +37,8 @@ fun UpdatesCard(
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
+    numberOfChapters: Int = 1,
+    isGrouped: Boolean = false,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     chapterSwipe: (ChapterItem) -> Unit,
@@ -60,8 +62,10 @@ fun UpdatesCard(
         UpdatesRow(
             modifier = modifier,
             chapterItem = chapterItem,
+            numberOfChapters = numberOfChapters,
             mangaTitle = mangaTitle,
             artwork = artwork,
+            isGrouped = isGrouped,
             outlineCovers = outlineCovers,
             mangaClick = mangaClick,
             chapterClick = chapterClick,
@@ -74,6 +78,8 @@ fun UpdatesCard(
 private fun UpdatesRow(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
+    numberOfChapters: Int,
+    isGrouped: Boolean,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
@@ -126,11 +132,24 @@ private fun UpdatesRow(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        DownloadButton(
-            downloadState = chapterItem.downloadState,
-            downloadProgress = chapterItem.downloadProgress,
-            defaultDisableColor = chapterItem.chapter.read,
-            onDownload = downloadClick,
-        )
+        when (isGrouped) {
+            true -> {
+                Text(
+                    text = "$numberOfChapters total",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = updatedColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            false -> {
+                DownloadButton(
+                    downloadState = chapterItem.downloadState,
+                    downloadProgress = chapterItem.downloadProgress,
+                    defaultDisableColor = chapterItem.chapter.read,
+                    onDownload = downloadClick,
+                )
+            }
+        }
     }
 }

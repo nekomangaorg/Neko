@@ -51,7 +51,7 @@ class FeedPresenter(
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 outlineCards = preferences.feedViewOutlineCards().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
-                groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
+                groupUpdateChapters = preferences.groupChaptersUpdates().get(),
                 historyGrouping = preferences.historyChapterGrouping().get(),
                 downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
                 swipeRefreshEnabled = preferences.swipeRefreshFeedScreen().get(),
@@ -149,7 +149,7 @@ class FeedPresenter(
 
         presenterScope.launch {
             preferences.groupChaptersUpdates().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(groupChaptersUpdates = it) }
+                _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
             }
         }
 
@@ -222,6 +222,10 @@ class FeedPresenter(
                 }
             }
         }
+    }
+
+    fun togglerGroupUpdateChapters() {
+        presenterScope.launchIO { preferences.groupChaptersUpdates().toggle() }
     }
 
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
