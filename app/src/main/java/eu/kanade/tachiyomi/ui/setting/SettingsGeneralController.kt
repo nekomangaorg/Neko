@@ -29,7 +29,7 @@ class SettingsGeneralController : SettingsController() {
                 summaryRes =
                     when (preferences.startingTab().get()) {
                         -1 -> R.string.library
-                        -2 -> R.string.recents
+                        -2 -> R.string.feed
                         -3 -> R.string.browse
                         else -> R.string.last_used_library_recents
                     }
@@ -37,7 +37,7 @@ class SettingsGeneralController : SettingsController() {
                     arrayOf(
                         R.string.last_used_library_recents,
                         R.string.library,
-                        R.string.recents,
+                        R.string.feed,
                         R.string.browse,
                     )
                 entryValues = (0 downTo -3).toList()
@@ -54,7 +54,7 @@ class SettingsGeneralController : SettingsController() {
                             0,
                             1 -> R.string.last_used_library_recents
                             -1 -> R.string.library
-                            -2 -> R.string.recents
+                            -2 -> R.string.feed
                             -3 -> R.string.browse
                             else -> R.string.last_used_library_recents
                         }

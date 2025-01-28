@@ -316,6 +316,7 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
+    <string name="summary">Summary</string>
     <string name="entire_series">Entire series</string>
     <string name="reset_chapter_history">Reset chapter history</string>
     <string name="recent_updates">Recent updates</string>
@@ -368,6 +369,7 @@
     <string name="a_while_ago">A while ago</string>
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
+    <string name="feed_swipe_refresh_enabled">Enable swipe refresh library</string>
     <string name="group_chapters_together">Group chapters</string>
     <string name="group_no">No</string>
     <string name="group_by_series">By series</string>
@@ -795,7 +797,7 @@
     <string name="flat_lime">Flat Lime</string>
     <string name="white_theme">Neko Pure</string>
     <string name="locale">Locale</string>
-    <string name="last_used_library_recents">Last used (Library or Recents)</string>
+    <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>

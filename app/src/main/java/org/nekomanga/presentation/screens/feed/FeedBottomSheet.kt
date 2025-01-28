@@ -48,6 +48,7 @@ fun FeedBottomSheet(
     sortByFetched: Boolean,
     outlineCovers: Boolean,
     outlineCards: Boolean,
+    swipeRefreshEnabled: Boolean,
     sortClick: () -> Unit,
     outlineCardsClick: () -> Unit,
     outlineCoversClick: () -> Unit,
@@ -55,6 +56,7 @@ fun FeedBottomSheet(
     clearHistoryClick: () -> Unit,
     clearDownloadsClick: () -> Unit,
     toggleDownloadOnWifi: () -> Unit,
+    toggleSwipeRefresh: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
 
@@ -81,6 +83,8 @@ fun FeedBottomSheet(
                         outlineCardsClick = outlineCardsClick,
                         groupHistoryClick = groupHistoryClick,
                         clearHistoryClick = clearHistoryClick,
+                        swipeRefreshEnabled = swipeRefreshEnabled,
+                        toggleSwipeRefresh = toggleSwipeRefresh,
                     )
                 feedScreenType == FeedScreenType.Updates ->
                     uploadsContent(
@@ -88,6 +92,8 @@ fun FeedBottomSheet(
                         outlineCovers = outlineCovers,
                         sortClick = sortClick,
                         outlineCoversClick = outlineCoversClick,
+                        swipeRefreshEnabled = swipeRefreshEnabled,
+                        toggleSwipeRefresh = toggleSwipeRefresh,
                     )
             }
         }
@@ -98,6 +104,8 @@ private fun LazyListScope.historyContent(
     historyGrouping: FeedHistoryGroup,
     outlineCovers: Boolean,
     outlineCards: Boolean,
+    swipeRefreshEnabled: Boolean,
+    toggleSwipeRefresh: () -> Unit,
     outlineCoversClick: () -> Unit,
     outlineCardsClick: () -> Unit,
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
@@ -143,7 +151,7 @@ private fun LazyListScope.historyContent(
                     modifier = Modifier.menuAnchor(),
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    FeedHistoryGroup.values().forEach { entry ->
+                    FeedHistoryGroup.entries.forEach { entry ->
                         val textRes =
                             when (entry) {
                                 FeedHistoryGroup.No -> R.string.group_no
@@ -181,6 +189,7 @@ private fun LazyListScope.historyContent(
             }
         }
     }
+    item { SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh) }
 }
 
 private fun LazyListScope.downloadsContent(
@@ -213,9 +222,12 @@ private fun LazyListScope.uploadsContent(
     outlineCovers: Boolean,
     sortClick: () -> Unit,
     outlineCoversClick: () -> Unit,
+    swipeRefreshEnabled: Boolean,
+    toggleSwipeRefresh: () -> Unit,
 ) {
     item { SwitchRow(R.string.sort_fetched_time, fetchSort, sortClick) }
     item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+    item { SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh) }
 }
 
 @Composable

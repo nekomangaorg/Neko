@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun PullRefresh(
+    enabled: Boolean = true,
     refreshing: Boolean,
     onRefresh: () -> Unit,
     indicatorOffset: Dp = Size.none,
@@ -30,7 +32,7 @@ fun PullRefresh(
             refreshingOffset = indicatorOffset,
         )
 
-    Box(Modifier.pullRefresh(state, !refreshing)) {
+    Box(Modifier.conditional(enabled) { this.pullRefresh(state, !refreshing) }) {
         content()
 
         Box(Modifier.padding().matchParentSize().clipToBounds()) {

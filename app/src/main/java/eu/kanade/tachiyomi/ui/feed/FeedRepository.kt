@@ -19,16 +19,19 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.MarkChapterRead
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
+    private val markChapters: MarkChapterRead = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -224,6 +227,11 @@ class FeedRepository(
         db.deleteHistory().executeAsBlocking()
     }
 
+    suspend fun deleteChapter(chapterItem: ChapterItem) {
+        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        downloadManager.deleteChapters(listOf(chapterItem.chapter.toDbChapter()), manga)
+    }
+
     suspend fun deleteAllHistoryForManga(mangaId: Long) {
         val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
         history.forEach {
@@ -267,6 +275,21 @@ class FeedRepository(
                     false -> 0
                 },
         )
+    }
+
+    /** this toggle the chapter read and returns the new chapter item */
+    suspend fun toggleChapterRead(chapterItem: ChapterItem): ChapterItem {
+        val markAction =
+            when (!chapterItem.chapter.read) {
+                true -> ChapterMarkActions.Read()
+                false -> ChapterMarkActions.Unread()
+            }
+
+        markChapters(markAction, chapterItem)
+
+        val simpleChapter =
+            db.getChapter(chapterItem.chapter.id).executeOnIO()!!.toSimpleChapter()!!
+        return chapterItem.copy(chapter = simpleChapter)
     }
 
     suspend fun downloadChapter(

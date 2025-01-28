@@ -69,6 +69,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoScaffold
@@ -473,16 +474,16 @@ private fun ChapterRow(
         onBookmark = {
             chapterActions.mark(
                 listOf(chapterItem),
-                if (chapterItem.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true)
-                else MangaConstants.MarkAction.Bookmark(true),
+                if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
+                else ChapterMarkActions.Bookmark(true),
             )
         },
         onRead = {
             chapterActions.mark(
                 listOf(chapterItem),
                 when (chapterItem.chapter.read) {
-                    true -> MangaConstants.MarkAction.Unread(true)
-                    false -> MangaConstants.MarkAction.Read(true)
+                    true -> ChapterMarkActions.Unread(true)
+                    false -> ChapterMarkActions.Read(true)
                 },
             )
         },
@@ -502,8 +503,8 @@ private fun ChapterRow(
                 }
             val action =
                 when (read) {
-                    true -> MangaConstants.MarkAction.PreviousRead(true, altChapters)
-                    false -> MangaConstants.MarkAction.PreviousUnread(true, altChapters)
+                    true -> ChapterMarkActions.PreviousRead(true, altChapters)
+                    false -> ChapterMarkActions.PreviousUnread(true, altChapters)
                 }
             chapterActions.mark(chaptersToMark, action)
         },

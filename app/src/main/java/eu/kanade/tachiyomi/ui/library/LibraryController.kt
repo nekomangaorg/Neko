@@ -171,7 +171,6 @@ class LibraryController(
 
     /** Library search query. */
     private var query = ""
-    private var oldShowAllCategories = true
 
     /** Currently selected mangaSet. */
     private val selectedMangaSet = mutableSetOf<Manga>()

@@ -23,6 +23,7 @@ data class FeedScreenState(
     val groupChaptersUpdates: Boolean = false,
     val historyGrouping: FeedHistoryGroup,
     val incognitoMode: Boolean = false,
+    val swipeRefreshEnabled: Boolean = true,
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val downloads: ImmutableList<DownloadItem> = persistentListOf(),
@@ -32,6 +33,7 @@ data class FeedScreenState(
 )
 
 enum class FeedScreenType {
+    Summary,
     History,
     Updates,
 }
@@ -57,11 +59,13 @@ data class FeedSettingActions(
     val outlineCardsClick: () -> Unit,
     val clearDownloadQueueClick: () -> Unit,
     val toggleDownloadOnlyOnWifi: () -> Unit,
+    val toggleSwipeRefresh: () -> Unit,
 )
 
 data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
     val chapterClick: (Long, Long) -> Unit,
+    val chapterSwipe: (ChapterItem) -> Unit,
     val switchViewType: (FeedScreenType) -> Unit,
     val toggleShowingDownloads: () -> Unit,
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,

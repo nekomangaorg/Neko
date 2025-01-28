@@ -66,8 +66,8 @@ fun DownloadChapterRow(
 
     ChapterSwipe(
         modifier = modifier.padding(vertical = Dp(1f)),
-        startSwipeAction = swipeAction,
-        endSwipeAction = swipeAction,
+        startSwipeActions = listOf(swipeAction),
+        endSwipeActions = listOf(swipeAction),
     ) {
         ChapterRow(
             first,

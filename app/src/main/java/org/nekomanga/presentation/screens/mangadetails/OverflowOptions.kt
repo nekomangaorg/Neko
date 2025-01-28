@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
@@ -86,7 +87,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.mark(
                                         chaptersProvider(),
-                                        MangaConstants.MarkAction.Read(true),
+                                        ChapterMarkActions.Read(true),
                                     )
                                 },
                             ),
@@ -95,7 +96,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.mark(
                                         chaptersProvider(),
-                                        MangaConstants.MarkAction.Unread(true),
+                                        ChapterMarkActions.Unread(true),
                                     )
                                 },
                             ),

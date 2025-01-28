@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -37,9 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenState
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
@@ -137,6 +136,7 @@ fun FeedScreen(
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         outlineCards = feedScreenState.value.outlineCards,
+                        swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
                         groupHistoryClick = { feedHistoryGroup ->
                             feedSettingActions.groupHistoryClick(feedHistoryGroup)
                         },
@@ -146,47 +146,50 @@ fun FeedScreen(
                         outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                         outlineCardsClick = { feedSettingActions.outlineCardsClick() },
                         toggleDownloadOnWifi = { feedSettingActions.toggleDownloadOnlyOnWifi() },
+                        toggleSwipeRefresh = { feedSettingActions.toggleSwipeRefresh() },
                     )
                 }
             },
         ) {
-            NekoScaffold(
-                type =
-                    if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
-                    else NekoScaffoldType.SearchOutline,
-                incognitoMode = feedScreenState.value.incognitoMode,
-                searchPlaceHolder = searchHint,
-                isRoot = true,
-                onSearch = feedScreenActions.search,
-                actions = {
-                    AppBarActions(
-                        actions =
-                            listOf(
-                                AppBar.Action(
-                                    title = UiText.StringResource(R.string.settings),
-                                    icon = Icons.Outlined.Tune,
-                                    onClick = { scope.launch { sheetState.show() } },
-                                ),
-                                AppBar.MainDropdown(
-                                    incognitoMode = feedScreenState.value.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
-                                ),
-                            )
-                    )
-                },
-            ) { incomingContentPadding ->
-                PullRefresh(
-                    refreshing = feedScreenState.value.isRefreshing,
-                    onRefresh = { feedScreenActions.updateLibrary(true) },
-                    indicatorOffset =
-                        incomingContentPadding.calculateTopPadding() +
-                            WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-                ) {
+            PullRefresh(
+                enabled = feedScreenState.value.swipeRefreshEnabled,
+                refreshing = feedScreenState.value.isRefreshing,
+                onRefresh = { feedScreenActions.updateLibrary(true) },
+                indicatorOffset =
+                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding() +
+                        Size.extraLarge,
+            ) {
+                NekoScaffold(
+                    type =
+                        if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
+                        else NekoScaffoldType.SearchOutline,
+                    incognitoMode = feedScreenState.value.incognitoMode,
+                    searchPlaceHolder = searchHint,
+                    isRoot = true,
+                    onSearch = feedScreenActions.search,
+                    actions = {
+                        AppBarActions(
+                            actions =
+                                listOf(
+                                    AppBar.Action(
+                                        title = UiText.StringResource(R.string.settings),
+                                        icon = Icons.Outlined.Tune,
+                                        onClick = { scope.launch { sheetState.show() } },
+                                    ),
+                                    AppBar.MainDropdown(
+                                        incognitoMode = feedScreenState.value.incognitoMode,
+                                        incognitoModeClick = incognitoClick,
+                                        settingsClick = settingsClick,
+                                        statsClick = statsClick,
+                                        aboutClick = aboutClick,
+                                        helpClick = helpClick,
+                                        menuShowing = { visible -> mainDropdownShowing = visible },
+                                    ),
+                                )
+                        )
+                    },
+                ) { incomingContentPadding ->
                     val recyclerContentPadding =
                         PaddingValues(
                             top = incomingContentPadding.calculateTopPadding(),
@@ -234,9 +237,6 @@ fun FeedScreen(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
-                                    groupedBySeries =
-                                        feedScreenState.value.historyGrouping ==
-                                            FeedHistoryGroup.Series,
                                     feedScreenType = feedScreenState.value.feedScreenType,
                                     historyGrouping = feedScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,
@@ -307,10 +307,18 @@ private fun ScreenFooter(
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth().padding(bottom = Size.smedium),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item { Gap(8.dp) }
+        item { Gap(Size.tiny) }
+
+        /*    item {
+            FooterFilterChip(
+                selected = screenType == FeedScreenType.Summary && downloadsSelected == false,
+                onClick = { screenTypeClick(FeedScreenType.Summary) },
+                name = stringResource(R.string.summary),
+            )
+        }*/
 
         item {
             FooterFilterChip(

@@ -59,12 +59,14 @@ fun DownloadButton(
     themeColorState: ThemeColorState = defaultThemeColorState(),
     downloadState: Download.State,
     downloadProgress: Int,
+    defaultDisableColor: Boolean = false,
     onDownload: (MangaConstants.DownloadAction) -> Unit,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         var showChapterDropdown by remember { mutableStateOf(false) }
         DlButton(
             themeColorState.buttonColor,
+            defaultDisableColor = defaultDisableColor,
             downloadState,
             downloadProgress,
             Modifier.combinedClickable(
@@ -126,6 +128,7 @@ fun DownloadButton(
 @Composable
 private fun DlButton(
     buttonColor: Color,
+    defaultDisableColor: Boolean,
     downloadState: Download.State,
     downloadProgress: Int,
     modifier: Modifier = Modifier,
@@ -152,7 +155,7 @@ private fun DlButton(
 
     when (downloadState) {
         Download.State.ERROR -> NotDownloaded(MaterialTheme.colorScheme.error, modifier)
-        Download.State.NOT_DOWNLOADED -> NotDownloaded(buttonColor, modifier)
+        Download.State.NOT_DOWNLOADED -> NotDownloaded(buttonColor, modifier, defaultDisableColor)
         Download.State.QUEUE -> Queued(modifier)
         Download.State.DOWNLOADED -> Downloaded(buttonColor, downloadComplete, modifier)
         Download.State.DOWNLOADING -> Downloading(buttonColor, modifier, downloadProgress)
@@ -160,14 +163,29 @@ private fun DlButton(
 }
 
 @Composable
-private fun NotDownloaded(buttonColor: Color, modifier: Modifier) {
+private fun NotDownloaded(
+    buttonColor: Color,
+    modifier: Modifier,
+    defaultDisableColor: Boolean = false,
+) {
+
+    val (color, alpha) =
+        when (defaultDisableColor) {
+            true ->
+                MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = NekoColors.disabledAlphaLowContrast
+                ) to NekoColors.disabledAlphaLowContrast
+            false -> buttonColor to 1f
+        }
+
     Background(
         color = Color.Transparent,
-        borderStroke = BorderStroke(borderSize.dp, buttonColor),
+        borderStroke = BorderStroke(borderSize.dp, color),
         modifier = modifier,
     ) {
         DownloadIcon(
-            color = buttonColor,
+            color = color,
+            alpha = alpha,
             icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward),
         )
     }

@@ -49,6 +49,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     outlineCardsClick = presenter::toggleOutlineCards,
                     clearDownloadQueueClick = presenter::clearDownloadQueue,
                     toggleDownloadOnlyOnWifi = presenter::toggleDownloadOnlyOnWifi,
+                    toggleSwipeRefresh = presenter::toggleSwipeRefresh,
                 ),
             feedScreenActions =
                 FeedScreenActions(
@@ -56,6 +57,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     chapterClick = { mangaId, chapterId ->
                         openChapter(context, mangaId, chapterId)
                     },
+                    chapterSwipe = presenter::toggleChapterRead,
                     switchViewType = presenter::switchViewType,
                     deleteAllHistoryClick = presenter::deleteAllHistory,
                     deleteHistoryClick = presenter::deleteHistory,
