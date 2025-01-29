@@ -11,11 +11,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FooterFilterChip(selected: Boolean, onClick: () -> Unit, name: String) {
+fun FooterFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    name: String,
+    icon: ImageVector? = null,
+) {
     FilterChip(
         selected = selected,
         onClick = onClick,
@@ -26,10 +32,16 @@ fun FooterFilterChip(selected: Boolean, onClick: () -> Unit, name: String) {
         },
         shape = RoundedCornerShape(100),
         label = {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-            )
+            when (icon != null) {
+                true -> Icon(imageVector = icon, contentDescription = null)
+                false -> {
+                    Text(
+                        text = name,
+                        style =
+                            MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                    )
+                }
+            }
         },
         colors =
             FilterChipDefaults.filterChipColors(

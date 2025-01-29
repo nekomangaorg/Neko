@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,11 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.LinearProgressIndicator
@@ -253,20 +254,6 @@ fun FeedScreen(
                                     feedScreenActions = feedScreenActions,
                                     loadNextPage = loadNextPage,
                                 )
-                                if (feedScreenState.value.pageLoading) {
-                                    Row(
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .align(Alignment.BottomCenter)
-                                                .padding(bottom = Size.extraHuge)
-                                    ) {
-                                        LinearProgressIndicator(
-                                            modifier =
-                                                Modifier.fillMaxWidth()
-                                                    .padding(horizontal = Size.small)
-                                        )
-                                    }
-                                }
                             }
                         }
 
@@ -274,6 +261,7 @@ fun FeedScreen(
                             ScreenFooter(
                                 screenType = feedScreenType,
                                 modifier = Modifier.align(Alignment.BottomStart),
+                                loadingMore = feedScreenState.value.pageLoading,
                                 showDownloads = feedScreenState.value.downloads.isNotEmpty(),
                                 downloadsSelected = feedScreenState.value.showingDownloads,
                                 downloadsClicked = feedScreenActions.toggleShowingDownloads,
@@ -323,48 +311,49 @@ fun FeedScreen(
 private fun ScreenFooter(
     screenType: FeedScreenType,
     modifier: Modifier = Modifier,
+    loadingMore: Boolean,
     showDownloads: Boolean,
     downloadsSelected: Boolean,
     downloadsClicked: () -> Unit,
     screenTypeClick: (FeedScreenType) -> Unit,
 ) {
-    LazyRow(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.small),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(Size.none),
     ) {
-        item { Gap(Size.tiny) }
-
-        /*    item {
-            FooterFilterChip(
+        if (loadingMore) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Size.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Gap(Size.tiny)
+            /* FooterFilterChip(
                 selected = screenType == FeedScreenType.Summary && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.Summary) },
                 name = stringResource(R.string.summary),
-            )
-        }*/
-
-        item {
+            )*/
             FooterFilterChip(
                 selected = screenType == FeedScreenType.History && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.History) },
                 name = stringResource(R.string.history),
             )
-        }
 
-        item {
             FooterFilterChip(
                 selected = screenType == FeedScreenType.Updates && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.Updates) },
                 name = stringResource(R.string.updates),
             )
-        }
 
-        if (showDownloads) {
-            item {
+            if (showDownloads) {
                 FooterFilterChip(
                     selected = downloadsSelected,
                     onClick = downloadsClicked,
-                    name = stringResource(R.string.downloads),
+                    name = "",
+                    icon = Icons.Default.Downloading,
                 )
             }
         }
