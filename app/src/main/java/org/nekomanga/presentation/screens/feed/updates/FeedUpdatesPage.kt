@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
@@ -87,11 +86,16 @@ private fun grouped(
     var groupedBySeries =
         remember(feedUpdatesMangaList.size) {
             feedUpdatesMangaList
-                .groupBy { it.mangaId }
+                .groupBy { getDateString(it.date, now) }
                 .map {
-                    val chapters = it.value.flatMap { it.chapters }.toImmutableList()
-                    it.value.first().copy(chapters = chapters)
+                    it.value
+                        .groupBy { it.mangaId }
+                        .map {
+                            val chapters = it.value.flatMap { it.chapters }.toImmutableList()
+                            it.value.first().copy(chapters = chapters)
+                        }
                 }
+                .flatten()
         }
     var loadingMore by remember { mutableStateOf(false) }
     LaunchedEffect(groupedBySeries.size) { loadingMore = false }
@@ -101,7 +105,7 @@ private fun grouped(
             if (index == 0) {
                 timeSpan = ""
             }
-            val dateString = getDateString(feedManga.date, now, isRecent = true)
+            val dateString = getDateString(feedManga.date, now)
             // there should only ever be 1
 
             val latestChapter = feedManga.chapters.first()
@@ -123,7 +127,11 @@ private fun grouped(
                                 color = MaterialTheme.colorScheme.primary
                             ),
                         modifier =
-                            Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
+                            Modifier.padding(
+                                start = Size.small,
+                                top = Size.small,
+                                end = Size.small
+                            ),
                     )
                 }
             }
@@ -183,7 +191,7 @@ private fun ungrouped(
             if (index == 0) {
                 timeSpan = ""
             }
-            val dateString = getDateString(feedManga.date, now, isRecent = true)
+            val dateString = getDateString(feedManga.date, now)
             // there should only ever be 1
             feedManga.chapters.forEach { chapterItem ->
                 if (dateString.isNotEmpty() && timeSpan != dateString) {
@@ -240,27 +248,7 @@ private fun ungrouped(
     }
 }
 
-private fun getDateString(
-    date: Long,
-    currentDate: Long,
-    historyGroupType: FeedHistoryGroup = FeedHistoryGroup.Day,
-    isRecent: Boolean = false,
-): String {
-    if (historyGroupType == FeedHistoryGroup.No || historyGroupType == FeedHistoryGroup.Series) {
-        return ""
-    }
-
-    val dateType =
-        if (isRecent || historyGroupType == FeedHistoryGroup.Day) {
-            DateUtils.DAY_IN_MILLIS
-        } else {
-            DateUtils.WEEK_IN_MILLIS
-        }
-
-    val dateString = DateUtils.getRelativeTimeSpanString(date, currentDate, dateType).toString()
-    return if (dateString == "0 weeks ago") {
-        "This week"
-    } else {
-        dateString
-    }
+private fun getDateString(date: Long, currentDate: Long): String {
+    return DateUtils.getRelativeTimeSpanString(date, currentDate, DateUtils.DAY_IN_MILLIS)
+        .toString()
 }
