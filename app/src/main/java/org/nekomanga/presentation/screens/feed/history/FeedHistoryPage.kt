@@ -30,9 +30,10 @@ fun FeedHistoryPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedHistoryMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    outlineCovers: Boolean = false,
-    outlineCards: Boolean = false,
-    hasMoreResults: Boolean = false,
+    outlineCovers: Boolean,
+    outlineCards: Boolean,
+    hasMoreResults: Boolean,
+    loadingResults: Boolean,
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
     historyGrouping: FeedHistoryGroup,
@@ -75,6 +76,13 @@ fun FeedHistoryPage(
             }
 
             item {
+                LaunchedEffect(scrollState, loadingResults) {
+                    if (
+                        index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults
+                    ) {
+                        loadNextPage()
+                    }
+                }
                 HistoryCard(
                     feedManga = feedManga,
                     outlineCover = outlineCovers,
@@ -90,11 +98,6 @@ fun FeedHistoryPage(
                     },
                 )
                 Gap(Size.tiny)
-                LaunchedEffect(scrollState) {
-                    if (hasMoreResults && index >= feedHistoryMangaList.size - 10) {
-                        loadNextPage()
-                    }
-                }
             }
         }
     }

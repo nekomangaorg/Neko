@@ -1,10 +1,7 @@
 package org.nekomanga.presentation.screens.feed.updates
 
 import android.text.format.DateUtils
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,12 +18,10 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
-import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.R
-import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -34,33 +29,36 @@ fun FeedUpdatesPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    outlineCovers: Boolean = false,
-    hasMoreResults: Boolean = false,
-    groupedBySeries: Boolean = false,
+    outlineCovers: Boolean,
+    hasMoreResults: Boolean,
+    loadingResults: Boolean,
+    groupedBySeries: Boolean,
     updatesFetchSort: Boolean,
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
 ) {
     when (groupedBySeries) {
         true -> {
-            grouped(
+            Grouped(
                 modifier = modifier,
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
                 hasMoreResults = hasMoreResults,
+                loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
                 feedScreenActions = feedScreenActions,
                 loadNextPage = loadNextPage,
             )
         }
         false -> {
-            ungrouped(
+            Ungrouped(
                 modifier = modifier,
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
                 hasMoreResults = hasMoreResults,
+                loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
                 feedScreenActions = feedScreenActions,
                 loadNextPage = loadNextPage,
@@ -70,12 +68,13 @@ fun FeedUpdatesPage(
 }
 
 @Composable
-private fun grouped(
+private fun Grouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
+    loadingResults: Boolean = false,
     updatesFetchSort: Boolean,
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
@@ -97,8 +96,6 @@ private fun grouped(
                 }
                 .flatten()
         }
-    var loadingMore by remember { mutableStateOf(false) }
-    LaunchedEffect(groupedBySeries.size) { loadingMore = false }
 
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         groupedBySeries.forEachIndexed { index, feedManga ->
@@ -127,15 +124,16 @@ private fun grouped(
                                 color = MaterialTheme.colorScheme.primary
                             ),
                         modifier =
-                            Modifier.padding(
-                                start = Size.small,
-                                top = Size.small,
-                                end = Size.small
-                            ),
+                            Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
                     )
                 }
             }
             item {
+                LaunchedEffect(scrollState, loadingResults) {
+                    if (index >= groupedBySeries.size - 5 && hasMoreResults && !loadingResults) {
+                        loadNextPage()
+                    }
+                }
                 UpdatesCard(
                     chapterItem = latestChapter,
                     numberOfChapters = feedManga.chapters.size,
@@ -147,36 +145,24 @@ private fun grouped(
                     chapterClick = { chapterId ->
                         feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
                     },
-                    chapterSwipe = { chapterItem -> feedScreenActions.chapterSwipe(chapterItem) },
-                    downloadClick = {},
+                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(latestChapter) },
+                    downloadClick = { action ->
+                        feedScreenActions.downloadClick(latestChapter, feedManga, action)
+                    },
                 )
-
-                LaunchedEffect(feedUpdatesMangaList.size) {
-                    if (hasMoreResults && index >= groupedBySeries.size - 5) {
-                        loadingMore = true
-                        loadNextPage()
-                    }
-                }
-            }
-        }
-        if (loadingMore) {
-            item {
-                Gap(Size.small)
-                Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    Loading()
-                }
             }
         }
     }
 }
 
 @Composable
-private fun ungrouped(
+private fun Ungrouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
+    loadingResults: Boolean = false,
     updatesFetchSort: Boolean,
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
@@ -184,8 +170,6 @@ private fun ungrouped(
     val scrollState = rememberLazyListState()
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
-    var loadingMore by remember { mutableStateOf(false) }
-    LaunchedEffect(feedUpdatesMangaList.size) { loadingMore = false }
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         feedUpdatesMangaList.forEachIndexed { index, feedManga ->
             if (index == 0) {
@@ -220,6 +204,15 @@ private fun ungrouped(
                     }
                 }
                 item {
+                    LaunchedEffect(scrollState, loadingResults) {
+                        if (
+                            index >= feedUpdatesMangaList.size - 5 &&
+                                hasMoreResults &&
+                                !loadingResults
+                        ) {
+                            loadNextPage()
+                        }
+                    }
                     UpdatesCard(
                         chapterItem = chapterItem,
                         mangaTitle = feedManga.mangaTitle,
@@ -236,12 +229,6 @@ private fun ungrouped(
                             feedScreenActions.downloadClick(chapterItem, feedManga, action)
                         },
                     )
-                    LaunchedEffect(feedUpdatesMangaList.size) {
-                        if (hasMoreResults && index >= feedUpdatesMangaList.size - 5) {
-                            loadingMore = true
-                            loadNextPage()
-                        }
-                    }
                 }
             }
         }

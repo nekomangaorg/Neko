@@ -65,7 +65,7 @@ class FeedPresenter(
     private val paginator =
         DefaultPaginator(
             initialKey = _feedScreenState.value.offset,
-            onLoadUpdated = {},
+            onLoadUpdated = { _feedScreenState.update { state -> state.copy(pageLoading = it) } },
             onRequest = {
                 feedRepository.getPage(
                     offset = _feedScreenState.value.offset,
@@ -76,14 +76,13 @@ class FeedPresenter(
                 )
             },
             getNextKey = { _feedScreenState.value.offset + ENDLESS_LIMIT },
-            onError = {
-                // TODO
-            },
+            onError = { _feedScreenState.update { state -> state.copy(pageLoading = false) } },
             onSuccess = { hasNextPage, items, newKey ->
                 _feedScreenState.update { state ->
                     state.copy(
                         allFeedManga = (state.allFeedManga + items).toImmutableList(),
                         offset = newKey,
+                        pageLoading = false,
                         hasMoreResults = hasNextPage,
                     )
                 }
@@ -699,6 +698,6 @@ class FeedPresenter(
     }
 
     companion object {
-        const val ENDLESS_LIMIT = 10
+        const val ENDLESS_LIMIT = 15
     }
 }

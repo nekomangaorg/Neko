@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -25,6 +26,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -236,11 +238,12 @@ fun FeedScreen(
                                     downloaderStatus = feedScreenState.value.downloaderStatus,
                                     downloadScreenActions = downloadScreenActions,
                                 )
-                            false ->
+                            false -> {
                                 FeedPage(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
+                                    loadingResults = feedScreenState.value.pageLoading,
                                     groupedBySeries = feedScreenState.value.groupUpdateChapters,
                                     feedScreenType = feedScreenState.value.feedScreenType,
                                     historyGrouping = feedScreenState.value.historyGrouping,
@@ -250,6 +253,21 @@ fun FeedScreen(
                                     feedScreenActions = feedScreenActions,
                                     loadNextPage = loadNextPage,
                                 )
+                                if (feedScreenState.value.pageLoading) {
+                                    Row(
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                                .align(Alignment.BottomCenter)
+                                                .padding(bottom = Size.extraHuge)
+                                    ) {
+                                        LinearProgressIndicator(
+                                            modifier =
+                                                Modifier.fillMaxWidth()
+                                                    .padding(horizontal = Size.small)
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         if (!feedScreenState.value.firstLoad) {
@@ -300,6 +318,8 @@ fun FeedScreen(
         )
     }
 }
+
+@Composable private fun Progress(modifier: Modifier = Modifier, show: Boolean) {}
 
 @Composable
 private fun ScreenFooter(

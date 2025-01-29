@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +16,7 @@ import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.NoResultsEmptyScreen
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseFilterPage(
@@ -59,7 +61,9 @@ fun BrowseFilterPage(
         if (pageLoading) {
             Column(Modifier.fillMaxSize()) {
                 Spacer(modifier = Modifier.fillMaxHeight(.92f))
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
+                )
             }
         }
     }

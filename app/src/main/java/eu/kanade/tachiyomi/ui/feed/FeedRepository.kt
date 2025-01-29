@@ -18,6 +18,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.delay
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -60,6 +61,9 @@ class FeedRepository(
         uploadsFetchSort: Boolean,
         group: FeedHistoryGroup,
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
+        if (offset > 0) {
+            delay(500L)
+        }
         return com.github.michaelbull.result
             .runCatching {
                 when (type) {

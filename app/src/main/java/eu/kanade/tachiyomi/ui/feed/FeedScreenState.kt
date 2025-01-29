@@ -20,6 +20,7 @@ data class FeedScreenState(
     val outlineCards: Boolean,
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
+    val pageLoading: Boolean = false,
     val groupUpdateChapters: Boolean = false,
     val historyGrouping: FeedHistoryGroup,
     val incognitoMode: Boolean = false,
