@@ -319,8 +319,6 @@ fun FeedScreen(
     }
 }
 
-@Composable private fun Progress(modifier: Modifier = Modifier, show: Boolean) {}
-
 @Composable
 private fun ScreenFooter(
     screenType: FeedScreenType,
@@ -331,8 +329,8 @@ private fun ScreenFooter(
     screenTypeClick: (FeedScreenType) -> Unit,
 ) {
     LazyRow(
-        modifier = modifier.fillMaxWidth().padding(bottom = Size.smedium),
-        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item { Gap(Size.tiny) }
