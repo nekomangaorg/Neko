@@ -24,7 +24,7 @@ internal object GreenColorScheme : BaseColorScheme() {
             errorContainer = Color(0xFFDC6559),
             onErrorContainer = Color(0xFFFFFFFF),
             background = Color(0xFFE9EFEB),
-            onBackground = Color(0xFFFFFFFF),
+            onBackground = Color(0xFF000000),
             surface = Color(0xFFE9EFEB),
             onSurface = Color(0xFF000000),
             surfaceVariant = Color(0xFFD9ECE0),
