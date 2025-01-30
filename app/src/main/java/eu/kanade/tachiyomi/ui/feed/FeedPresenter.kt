@@ -434,34 +434,56 @@ class FeedPresenter(
         download: Download?,
         feedManga: List<FeedManga>,
     ): Pair<Boolean, List<FeedManga>> {
-        val mutableFeedManga = feedManga.toMutableList()
-        val indexOfFeedManga = mutableFeedManga.indexOfFirst { it.mangaId == mangaId }
-        if (indexOfFeedManga >= 0) {
-            val mutableChapters = mutableFeedManga[indexOfFeedManga].chapters.toMutableList()
-            val indexOfChapter = mutableChapters.indexOfFirst { it.chapter.id == chapterId }
-            if (indexOfChapter >= 0) {
-                mutableChapters[indexOfChapter] =
-                    when (download == null) {
-                        true ->
-                            mutableChapters[indexOfChapter].copy(
-                                downloadState = Download.State.NOT_DOWNLOADED,
-                                downloadProgress = 0,
-                            )
-                        false ->
-                            mutableChapters[indexOfChapter].copy(
-                                downloadState = download.status,
-                                downloadProgress = download.progress,
-                            )
-                    }
-
-                mutableFeedManga[indexOfFeedManga] =
-                    mutableFeedManga[indexOfFeedManga].copy(
-                        chapters = mutableChapters.toImmutableList()
-                    )
-                return true to mutableFeedManga
-            }
+        if (feedManga.isEmpty()) {
+            return false to emptyList()
         }
-        return false to emptyList()
+        val mutableFeedMangaList = feedManga.toMutableList()
+        val indexOfFeedMangaList =
+            mutableFeedMangaList.mapIndexedNotNull { index, manga ->
+                if (manga.mangaId == mangaId) {
+                    index
+                } else {
+                    null
+                }
+            }
+        if (indexOfFeedMangaList.isEmpty()) {
+            return false to emptyList()
+        }
+        val mangaIndexWithMatchingChapter =
+            indexOfFeedMangaList
+                .filter { index ->
+                    mutableFeedMangaList[index].chapters.indexOfFirst {
+                        it.chapter.id == chapterId
+                    } != -1
+                }
+                .firstOrNull()
+
+        if (mangaIndexWithMatchingChapter == null) {
+            return false to emptyList()
+        }
+        val mutableChapterList =
+            mutableFeedMangaList[mangaIndexWithMatchingChapter].chapters.toMutableList()
+        val indexOfChapter = mutableChapterList.indexOfFirst { it.chapter.id == chapterId }
+
+        mutableChapterList[indexOfChapter] =
+            when (download == null) {
+                true ->
+                    mutableChapterList[indexOfChapter].copy(
+                        downloadState = Download.State.NOT_DOWNLOADED,
+                        downloadProgress = 0,
+                    )
+                false ->
+                    mutableChapterList[indexOfChapter].copy(
+                        downloadState = download.status,
+                        downloadProgress = download.progress,
+                    )
+            }
+
+        mutableFeedMangaList[mangaIndexWithMatchingChapter] =
+            mutableFeedMangaList[mangaIndexWithMatchingChapter].copy(
+                chapters = mutableChapterList.toImmutableList()
+            )
+        return true to mutableFeedMangaList
     }
 
     private fun updateChapterReadStatus(

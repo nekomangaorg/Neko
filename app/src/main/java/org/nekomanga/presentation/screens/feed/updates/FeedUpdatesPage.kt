@@ -83,7 +83,7 @@ private fun Grouped(
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
     var groupedBySeries =
-        remember(feedUpdatesMangaList.size) {
+        remember(feedUpdatesMangaList) {
             feedUpdatesMangaList
                 .groupBy { getDateString(it.date, now) }
                 .map {
