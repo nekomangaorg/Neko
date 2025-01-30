@@ -91,7 +91,7 @@ fun DownloadScreen(
                         ) {
                             Text(
                                 modifier = Modifier.padding(top = Size.small),
-                                text = "${entry.key} [${entry.value.size}]",
+                                text = "${entry.key} (${entry.value.size})",
                                 color =
                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                         alpha = NekoColors.mediumAlphaHighContrast
