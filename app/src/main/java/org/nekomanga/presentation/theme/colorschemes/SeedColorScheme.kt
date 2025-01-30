@@ -35,7 +35,7 @@ internal object SeedColorScheme : BaseColorScheme() {
             outline = Color(0xFFFFFFFF), // 60% less than primary
             outlineVariant = Color(0xFFFFFFFF), // 80% less than primary
             scrim = Color(0xFFFFFFFF),
-            inverseSurface = Color(0xFFFFFFFF),
+            inverseSurface = Color(0xFF000000),
             inverseOnSurface = Color(0xFFFFFFFF),
             inversePrimary = Color(0xFFFFFFFF),
             surfaceDim = Color(0xFFFFFFFF),
@@ -74,7 +74,7 @@ internal object SeedColorScheme : BaseColorScheme() {
             outline = Color(0xFF000000),
             outlineVariant = Color(0xFF000000),
             scrim = Color(0xFF000000),
-            inverseSurface = Color(0xFF000000),
+            inverseSurface = Color(0xFFFFFFFF),
             inverseOnSurface = Color(0xFF000000),
             inversePrimary = Color(0xFF000000),
             surfaceDim = Color(0xFF000000),
