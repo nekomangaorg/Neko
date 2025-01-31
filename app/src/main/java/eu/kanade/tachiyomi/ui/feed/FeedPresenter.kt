@@ -69,13 +69,21 @@ class FeedPresenter(
             onRequest = {
                 feedRepository.getPage(
                     offset = _feedScreenState.value.offset,
-                    limit = ENDLESS_LIMIT,
+                    limit =
+                        if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
+                            UDATES_ENDLESS_LIMIT
+                        else HISTORY_ENDLESS_LIMIT,
                     type = _feedScreenState.value.feedScreenType,
                     uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
                     group = _feedScreenState.value.historyGrouping,
                 )
             },
-            getNextKey = { _feedScreenState.value.offset + ENDLESS_LIMIT },
+            getNextKey = {
+                _feedScreenState.value.offset +
+                    if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
+                        UDATES_ENDLESS_LIMIT
+                    else HISTORY_ENDLESS_LIMIT
+            },
             onError = { _feedScreenState.update { state -> state.copy(pageLoading = false) } },
             onSuccess = { hasNextPage, items, newKey ->
                 _feedScreenState.update { state ->
@@ -555,11 +563,15 @@ class FeedPresenter(
                 launch {
                     val currentOffset = _feedScreenState.value.offset
                     var mutableFeedManga = mutableListOf<FeedManga>()
-                    for (i in 0..currentOffset step ENDLESS_LIMIT) {
+                    val limit =
+                        if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
+                            UDATES_ENDLESS_LIMIT
+                        else HISTORY_ENDLESS_LIMIT
+                    for (i in 0..currentOffset step limit) {
                         feedRepository
                             .getPage(
                                 offset = i,
-                                limit = ENDLESS_LIMIT,
+                                limit = limit,
                                 type = _feedScreenState.value.feedScreenType,
                                 uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
                                 group = _feedScreenState.value.historyGrouping,
@@ -720,6 +732,7 @@ class FeedPresenter(
     }
 
     companion object {
-        const val ENDLESS_LIMIT = 15
+        const val HISTORY_ENDLESS_LIMIT = 15
+        const val UDATES_ENDLESS_LIMIT = 100
     }
 }

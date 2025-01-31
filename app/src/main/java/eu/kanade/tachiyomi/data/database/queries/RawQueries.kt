@@ -64,11 +64,13 @@ fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: 
 """
 }
 
-fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int): String {
+fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int, isHistory: Boolean): String {
+    val limit =
+        if (isHistory) FeedPresenter.HISTORY_ENDLESS_LIMIT else FeedPresenter.UDATES_ENDLESS_LIMIT
     return when {
         isResuming && endless && offset > 0 -> "LIMIT $offset"
-        endless -> "LIMIT ${FeedPresenter.ENDLESS_LIMIT}\nOFFSET $offset"
-        else -> "LIMIT ${FeedPresenter.ENDLESS_LIMIT}"
+        endless -> "LIMIT ${limit}\nOFFSET $offset"
+        else -> "LIMIT $limit"
     }
 }
 
@@ -89,7 +91,7 @@ fun getRecentHistoryUngrouped(search: String = "", offset: Int = 0, isResuming: 
     AND ${History.TABLE}.${History.COL_LAST_READ} > 0
     AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${History.TABLE}.${History.COL_LAST_READ} DESC
-    ${limitAndOffset(true, isResuming, offset)}
+    ${limitAndOffset(true, isResuming, offset,true)}
 """
 
 /**
@@ -136,7 +138,7 @@ fun getRecentMangasLimitQuery(search: String = "", offset: Int = 0, isResuming: 
     AND max_last_read.${History.COL_LAST_READ} > 0
     AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY max_last_read.${History.COL_LAST_READ} DESC
-    ${limitAndOffset(true, isResuming, offset)}
+    ${limitAndOffset(true, isResuming, offset, false)}
 """
 
 /**
@@ -254,7 +256,7 @@ fun getAllRecentsType(
     WHERE ${Manga.COL_FAVORITE} = 1
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
     ORDER BY history_last_read DESC
-    ${limitAndOffset(endless, isResuming, offset)}
+    ${limitAndOffset(endless, isResuming, offset, true)}
 """
 
 fun getHistoryByMangaId() =
