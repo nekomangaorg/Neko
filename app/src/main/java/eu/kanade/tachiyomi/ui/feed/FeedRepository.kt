@@ -5,6 +5,7 @@ import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -290,6 +291,10 @@ class FeedRepository(
             }
 
         chapterUseCases.markChapters(markAction, listOf(chapterItem))
+
+        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+
+        chapterUseCases.markChaptersRemote(markAction, manga.uuid(), listOf(chapterItem))
 
         val simpleChapter =
             db.getChapter(chapterItem.chapter.id).executeOnIO()!!.toSimpleChapter()!!

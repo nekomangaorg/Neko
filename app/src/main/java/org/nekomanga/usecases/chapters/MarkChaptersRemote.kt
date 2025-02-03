@@ -15,7 +15,7 @@ class MarkChaptersRemote(
         markAction: ChapterMarkActions,
         mangaUuid: String,
         chapterItems: List<ChapterItem>,
-        skipSync: Boolean,
+        skipSync: Boolean = false,
     ) {
         val syncRead =
             when (markAction) {
