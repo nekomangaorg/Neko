@@ -98,6 +98,7 @@ import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.ChapterUseCases
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -117,6 +118,7 @@ class MangaDetailPresenter(
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
+    private val chapterUseCases: ChapterUseCases = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaDetailController>() {
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
@@ -1619,7 +1621,7 @@ class MangaDetailPresenter(
         skipSync: Boolean = false,
     ) {
         presenterScope.launchIO {
-            val initialChapterItems =
+            val updatedChapterList =
                 if (
                     markAction is ChapterMarkActions.PreviousRead ||
                         markAction is ChapterMarkActions.PreviousUnread
@@ -1634,44 +1636,18 @@ class MangaDetailPresenter(
                     chapterItems
                 }
 
-            val (newChapterItems, nameRes) =
+            val nameRes =
                 when (markAction) {
-                    is ChapterMarkActions.Bookmark -> {
-                        initialChapterItems.map { it.chapter }.map { it.copy(bookmark = true) } to
-                            R.string.bookmarked
-                    }
-                    is ChapterMarkActions.UnBookmark -> {
-                        initialChapterItems.map { it.chapter }.map { it.copy(bookmark = false) } to
-                            R.string.removed_bookmark
-                    }
-                    is ChapterMarkActions.Read -> {
-                        initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to
-                            R.string.marked_as_read
-                    }
-                    is ChapterMarkActions.PreviousRead -> {
-                        initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to
-                            R.string.marked_as_read
-                    }
-                    is ChapterMarkActions.PreviousUnread -> {
-                        initialChapterItems
-                            .map { it.chapter }
-                            .map { it.copy(read = false, lastPageRead = 0, pagesLeft = 0) } to
-                            R.string.marked_as_unread
-                    }
-                    is ChapterMarkActions.Unread -> {
-                        initialChapterItems
-                            .map { it.chapter }
-                            .map {
-                                it.copy(
-                                    read = false,
-                                    lastPageRead = markAction.lastRead ?: 0,
-                                    pagesLeft = markAction.pagesLeft ?: 0,
-                                )
-                            } to R.string.marked_as_unread
-                    }
+                    is ChapterMarkActions.Bookmark -> R.string.bookmarked
+                    is ChapterMarkActions.UnBookmark -> R.string.removed_bookmark
+                    is ChapterMarkActions.Read -> R.string.marked_as_read
+                    is ChapterMarkActions.PreviousRead -> R.string.marked_as_read
+                    is ChapterMarkActions.PreviousUnread -> R.string.marked_as_unread
+                    is ChapterMarkActions.Unread -> R.string.marked_as_unread
                 }
 
-            db.updateChaptersProgress(newChapterItems.map { it.toDbChapter() }).executeOnIO()
+            chapterUseCases.markChapters(markAction, updatedChapterList)
+
             updateChapterFlows()
 
             fun finalizeChapters() {
@@ -1679,19 +1655,22 @@ class MangaDetailPresenter(
                     if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(
-                            newChapterItems
-                                .filter { !it.bookmark }
-                                .map { ChapterItem(chapter = it) },
-                            newChapterItems.size == generalState.value.allChapters.size,
+                            updatedChapterList
+                                .filter { !it.chapter.bookmark }
+                                .map { ChapterItem(chapter = it.chapter) },
+                            updatedChapterList.size == generalState.value.allChapters.size,
                         )
                     }
                     // get the highest chapter number and update tracking for it
-                    newChapterItems
-                        .maxByOrNull { it.chapterNumber.toInt() }
+                    updatedChapterList
+                        .maxByOrNull { it.chapter.chapterNumber.toInt() }
                         ?.let {
                             kotlin
                                 .runCatching {
-                                    updateTrackChapterMarkedAsRead(it.toDbChapter(), mangaId) {
+                                    updateTrackChapterMarkedAsRead(
+                                        it.chapter.toDbChapter(),
+                                        mangaId,
+                                    ) {
                                         updateTrackingFlows()
                                     }
                                 }
@@ -1720,9 +1699,9 @@ class MangaDetailPresenter(
 
                 if (syncRead != null && !skipSync && preferences.readingSync().get()) {
                     val chapterIds =
-                        newChapterItems
-                            .filter { !it.isMergedChapter() }
-                            .map { it.mangaDexChapterId }
+                        updatedChapterList
+                            .filter { !it.chapter.isMergedChapter() }
+                            .map { it.chapter.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
                         presenterScope.launchNonCancellable {
                             statusHandler.marksChaptersStatus(
@@ -1743,7 +1722,7 @@ class MangaDetailPresenter(
                         action = {
                             presenterScope.launch {
                                 val originalDbChapters =
-                                    initialChapterItems.map { it.chapter }.map { it.toDbChapter() }
+                                    updatedChapterList.map { it.chapter }.map { it.toDbChapter() }
                                 db.updateChaptersProgress(originalDbChapters).executeOnIO()
                                 updateChapterFlows()
                             }

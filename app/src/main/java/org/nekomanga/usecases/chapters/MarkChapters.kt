@@ -4,25 +4,30 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
-class MarkChapterRead(private val db: DatabaseHelper = Injekt.get()) {
-    suspend operator fun invoke(markAction: ChapterMarkActions, chapterItem: ChapterItem) {
-        val updatedChapter =
-            when (markAction) {
-                is ChapterMarkActions.Read -> {
-                    chapterItem.chapter.copy(read = true)
-                }
-                is ChapterMarkActions.Unread -> {
-                    chapterItem.chapter.copy(
-                        read = false,
-                        lastPageRead = markAction.lastRead ?: 0,
-                        pagesLeft = markAction.pagesLeft ?: 0,
-                    )
-                }
-                else -> chapterItem.chapter
-            }.toDbChapter()
-        db.updateChaptersProgress(listOf(updatedChapter)).executeOnIO()
+class MarkChapterUseCase(private val db: DatabaseHelper) {
+    suspend operator fun invoke(markAction: ChapterMarkActions, chapterItems: List<ChapterItem>) {
+
+        val dbChapters =
+            chapterItems.map { chapterItem ->
+                when (markAction) {
+                    is ChapterMarkActions.Bookmark -> chapterItem.chapter.copy(bookmark = true)
+                    is ChapterMarkActions.UnBookmark -> chapterItem.chapter.copy(bookmark = false)
+                    is ChapterMarkActions.Read,
+                    is ChapterMarkActions.PreviousRead -> chapterItem.chapter.copy(read = true)
+                    is ChapterMarkActions.Unread -> {
+                        chapterItem.chapter.copy(
+                            read = false,
+                            lastPageRead = markAction.lastRead ?: 0,
+                            pagesLeft = markAction.pagesLeft ?: 0,
+                        )
+                    }
+                    is ChapterMarkActions.PreviousUnread -> {
+                        chapterItem.chapter.copy(read = false, lastPageRead = 0, pagesLeft = 0)
+                    }
+                }.toDbChapter()
+            }
+
+        db.updateChaptersProgress(dbChapters).executeOnIO()
     }
 }

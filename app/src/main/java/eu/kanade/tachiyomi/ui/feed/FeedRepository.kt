@@ -25,14 +25,14 @@ import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.usecases.chapters.MarkChapterRead
+import org.nekomanga.usecases.chapters.ChapterUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val markChapters: MarkChapterRead = Injekt.get(),
+    private val chapterUseCases: ChapterUseCases = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -289,7 +289,7 @@ class FeedRepository(
                 false -> ChapterMarkActions.Unread()
             }
 
-        markChapters(markAction, chapterItem)
+        chapterUseCases.markChapters(markAction, listOf(chapterItem))
 
         val simpleChapter =
             db.getChapter(chapterItem.chapter.id).executeOnIO()!!.toSimpleChapter()!!
