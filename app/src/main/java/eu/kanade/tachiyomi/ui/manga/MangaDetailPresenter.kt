@@ -1650,7 +1650,7 @@ class MangaDetailPresenter(
 
             updateChapterFlows()
 
-            fun finalizeChapters() {
+            suspend fun finalizeChapters() {
                 if (markAction is ChapterMarkActions.Read) {
                     if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
@@ -1689,29 +1689,12 @@ class MangaDetailPresenter(
                         }
                 }
 
-                // sync with dex if marked read or marked unread
-                val syncRead =
-                    when (markAction) {
-                        is ChapterMarkActions.Read -> true
-                        is ChapterMarkActions.Unread -> false
-                        else -> null
-                    }
-
-                if (syncRead != null && !skipSync && preferences.readingSync().get()) {
-                    val chapterIds =
-                        updatedChapterList
-                            .filter { !it.chapter.isMergedChapter() }
-                            .map { it.chapter.mangaDexChapterId }
-                    if (chapterIds.isNotEmpty()) {
-                        presenterScope.launchNonCancellable {
-                            statusHandler.marksChaptersStatus(
-                                currentManga().uuid(),
-                                chapterIds,
-                                syncRead,
-                            )
-                        }
-                    }
-                }
+                chapterUseCases.markChaptersRemote(
+                    markAction,
+                    currentManga().uuid(),
+                    updatedChapterList,
+                    skipSync,
+                )
             }
 
             if (markAction.canUndo) {
@@ -1720,14 +1703,14 @@ class MangaDetailPresenter(
                         messageRes = nameRes,
                         actionLabelRes = R.string.undo,
                         action = {
-                            presenterScope.launch {
+                            presenterScope.launchIO {
                                 val originalDbChapters =
                                     updatedChapterList.map { it.chapter }.map { it.toDbChapter() }
                                 db.updateChaptersProgress(originalDbChapters).executeOnIO()
                                 updateChapterFlows()
                             }
                         },
-                        dismissAction = { finalizeChapters() },
+                        dismissAction = { presenterScope.launchIO { finalizeChapters() } },
                     )
                 )
             } else {

@@ -5,6 +5,10 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 
+/**
+ * Use Case to mark chapter read, unread, previously read, previously unread, bookmarked,
+ * unbookmarked
+ */
 class MarkChapterUseCase(private val db: DatabaseHelper) {
     suspend operator fun invoke(markAction: ChapterMarkActions, chapterItems: List<ChapterItem>) {
 
