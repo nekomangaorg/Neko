@@ -40,21 +40,6 @@
         <item>@string/smart_fit</item>
     </string-array>
 
-    <string-array name="manga_statuses">
-        <item>@string/unknown_status</item>
-        <item>@string/ongoing</item>
-        <item>@string/completed</item>
-        <item>@string/licensed</item>
-    </string-array>
-
-    <string-array name="series_type">
-        <item>@string/manga</item>
-        <item>@string/manhwa</item>
-        <item>@string/manhua</item>
-        <item>@string/comic</item>
-        <item>@string/webtoon</item>
-    </string-array>
-
     <string-array name="webtoon_side_padding">
         <item>@string/webtoon_side_padding_0</item>
         <item>@string/webtoon_side_padding_5</item>
@@ -104,14 +89,6 @@
         <item>@string/default_value</item>
         <item>@string/multiply</item>
         <item>@string/screen</item>
-    </string-array>
-
-    <string-array name="show_recent_download">
-        <item>@string/never</item>
-        <item>@string/only_unread</item>
-        <item>@string/only_downloaded</item>
-        <item>@string/unread_or_downloaded</item>
-        <item>@string/always</item>
     </string-array>
 
     <string-array name="reader_nav">

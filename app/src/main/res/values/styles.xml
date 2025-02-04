@@ -5,19 +5,9 @@
     <!--Toolbars-->
     <!--========-->
 
-    <style name="Theme.ActionBar.Dark.DayNight" parent="@style/ThemeOverlay.Material3.Dark.ActionBar">
-        <item name="popupTheme">@style/ThemeOverlay.Material3.Light</item>
-        <item name="elevationOverlayEnabled">true</item>
-        <item name="elevationOverlayColor">?colorSecondary</item>
-    </style>
-
     <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.Material3.ActionBar">
         <item name="elevationOverlayEnabled">true</item>
         <item name="elevationOverlayColor">?colorSecondary</item>
-    </style>
-
-    <style name="ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="android:background">?background</item>
     </style>
 
     <!--===============-->
@@ -25,11 +15,6 @@
     <!--===============-->
     <style name="TextAppearance" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textColor">?attr/colorOnBackground</item>
-    </style>
-
-    <style name="TextAppearance.BodyMedium.ReducedSpace" parent="TextAppearance.Material3.BodySmall">
-        <item name="android:textSize">14sp</item>
-        <item name="lineHeight">19sp</item>
     </style>
 
     <style name="TextAppearance.Tachiyomi.BodySecondary" parent="TextAppearance">
@@ -53,21 +38,6 @@
     <!--Widgets-->
     <!--=======-->
     <style name="Theme.Widget" />
-
-    <style name="Theme.Widget.FAB" parent="@style/Widget.Material3.ExtendedFloatingActionButton.Icon.Secondary">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_gravity">bottom|end</item>
-        <item name="android:layout_margin">@dimen/fab_margin</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="layout_anchorGravity">bottom|right|end</item>
-        <item name="tint">?attr/colorOnSecondary</item>
-        <item name="backgroundTint">?attr/unreadBadgeColor</item>
-        <item name="android:tint">?attr/unreadBadgeColor</item>
-        <item name="iconTint">?attr/colorOnUnreadBadge</item>
-        <item name="textAllCaps">false</item>
-        <item name="android:textColor">?attr/colorOnUnreadBadge</item>
-    </style>
 
     <style name="Widget.Tachiyomi.ActionMode" parent="Widget.Material3.ActionMode">
         <item name="colorControlHighlight">?colorControlHighlight</item>
@@ -96,31 +66,6 @@
         <item name="shapeAppearance">?attr/shapeAppearanceCornerSmall</item>
     </style>
 
-    <style name="Widget.Tachiyomi.CardView.Tracker" parent="Widget.Material3.CardView.Outlined">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">@dimen/material_component_cards_top_and_bottom_padding</item>
-        <item name="android:layout_marginTop">@dimen/space_between_cards</item>
-        <item name="android:layout_marginBottom">@dimen/space_between_cards</item>
-        <item name="android:layout_marginStart">
-            @dimen/material_component_cards_space_between_cards
-        </item>
-        <item name="android:layout_marginEnd">@dimen/material_component_cards_space_between_cards
-        </item>
-        <item name="cardCornerRadius">@dimen/rounded_radius</item>
-        <item name="cardBackgroundColor">?background</item>
-        <item name="cardElevation">4dp</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.CardView.Draggable" parent="Widget.Material3.CardView.Elevated">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="cardCornerRadius">0dp</item>
-        <item name="cardBackgroundColor">?background</item>
-        <item name="cardForegroundColor">@color/draggable_card_foreground</item>
-        <item name="cardElevation">0dp</item>
-    </style>
-
     <style name="Theme.Widget.GridView">
         <item name="android:smoothScrollbar">true</item>
         <item name="android:numColumns">auto_fit</item>
@@ -137,11 +82,6 @@
         <item name="android:verticalSpacing">0dp</item>
     </style>
 
-
-    <style name="Theme.Widget.SpinnerItem" parent="Widget.AppCompat.DropDownItem.Spinner">
-        <item name="android:textColor">?attr/colorOnBackground</item>
-        <item name="android:background">@drawable/list_item_selector</item>
-    </style>
 
     <style name="FloatingTextView" parent="TextAppearance.AppCompat">
         <item name="android:paddingStart">12dp</item>
@@ -178,16 +118,6 @@
     <style name="Theme.Widget.Animation.DropFromAbove" parent="android:Animation">
         <item name="android:windowEnterAnimation">@anim/fade_in_grow_from_top</item>
         <item name="android:windowExitAnimation">@anim/fade_out_short</item>
-    </style>
-
-    <style name="FullCoverDialogTheme" parent="BottomSheetDialogTheme">
-        <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.Static</item>
-    </style>
-
-    <style name="Theme.Widget.Animation.Static" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@null</item>
-        <item name="android:windowExitAnimation">@null</item>
-        <item name="android:exitFadeDuration">0</item>
     </style>
 
     <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.Material3.TextInputLayout.OutlinedBox.Dense">
@@ -244,30 +174,6 @@
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->
-    <style name="Widget.Tachiyomi.Button.ActionButton" parent="Widget.Material3.Button.TextButton.Icon">
-        <item name="iconGravity">top</item>
-        <item name="iconTint">@color/button_action_selector</item>
-        <item name="iconPadding">4dp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textColor">@color/button_action_selector</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.Button.ActionButton.White.Landscape">
-        <item name="iconGravity">start</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.Button.ActionButton.White">
-        <item name="iconTint">@android:color/white</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <style name="Theme.Widget.Button" parent="Widget.AppCompat.Button" />
-
-    <style name="Widget.Tachiyomi.Button.Small" parent="Widget.Material3.Button.TextButton">
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textColor">?attr/colorSecondary</item>
-        <item name="rippleColor">?colorControlHighlight</item>
-    </style>
 
     <style name="Widget.Tachiyomi.CompoundButton.Switch" parent="Widget.Material3.CompoundButton.Switch">
         <item name="thumbTint">@color/switch_thumb_tint</item>
@@ -309,25 +215,6 @@
     </style>
     1
 
-    <style name="Widget.Tachiyomi.Button.OutlinedButton.Icon" parent="Widget.Material3.Button.OutlinedButton.Icon">
-        <item name="android:paddingStart">12dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:letterSpacing">0.0</item>
-        <item name="android:layout_height">40dp</item>
-        <item name="iconTint">?attr/colorSecondary</item>
-        <item name="rippleColor">?colorControlHighlight</item>
-        <item name="android:stateListAnimator">@animator/icon_btn_state_list_anim</item>
-        <item name="android:textColor">?attr/colorOnBackground</item>
-        <item name="cornerRadius">20dp</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.Button.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="backgroundTint">@color/ext_bg_selector</item>
-        <item name="android:textColor">@color/ext_button_text_selector</item>
-        <item name="rippleColor">?colorControlHighlight</item>
-    </style>
-
     <style name="Theme.Widget.Button.Primary" parent="Widget.Material3.Button">
         <item name="android:textAllCaps">false</item>
         <item name="backgroundTint">@color/mtrl_btn_bg_selector</item>
@@ -349,37 +236,6 @@
         <item name="android:background">@drawable/item_background_borderless_on_secondary</item>
         <item name="android:tint">?attr/colorOnHopper</item>
         <item name="rippleColor">@color/on_secondary_highlight</item>
-    </style>
-
-    <style name="Theme.Widget.CustomImageButton">
-        <item name="android:background">@drawable/round_ripple</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:tint">?attr/colorSecondary</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.Chip.Genre" parent="Widget.Material3.Chip.Suggestion.Elevated">
-        <item name="chipBackgroundColor">@color/secondary_alpha</item>
-        <item name="chipMinHeight">28dp</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:textAppearance">@style/Theme.TextAppearance.Chip</item>
-        <item name="chipStrokeWidth">0dp</item>
-        <item name="android:checkable">false</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.Chip.AddTag" parent="Widget.Material3.Chip.Suggestion">
-        <item name="chipBackgroundColor">@android:color/transparent</item>
-        <item name="chipMinHeight">28dp</item>
-        <item name="android:textColor">?colorOnSurface</item>
-        <item name="android:textAppearance">@style/Theme.TextAppearance.Chip</item>
-        <item name="chipStrokeColor">?colorOnSurface</item>
-        <item name="chipStrokeWidth">1dp</item>
-        <item name="android:checkable">false</item>
-    </style>
-
-    <style name="Theme.TextAppearance.Chip" parent="TextAppearance.MaterialComponents.Chip">
-        <item name="android:textSize">13sp</item>
-        <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
 </resources>

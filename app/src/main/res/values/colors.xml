@@ -3,23 +3,17 @@
     <!-- Application Colors -->
     <color name="iconColor">#2A2121</color>
     <color name="iconOutline">#ff124a</color>
-    <color name="iconBackground">#ffffff</color>
 
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
     <color name="onPrimaryTachiyomi">@color/md_white_1000</color>
     <color name="primaryInverseTachiyomi">@color/neko_primary</color>
-    <color name="splashBackground">#ff124a</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
     <color name="rippleColorTachiyomi">@color/md_black_1000_54</color>
     <color name="secondaryVariantTachiyomi">@color/neko_primary</color>
-    <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
     <color name="material_red_500">#F44336</color>
-    <color name="material_green_800">#2E7D32</color>
-
-    <color name="gray">#404040</color>
 
 
     <color name="read_chapter">@color/material_on_background_disabled</color>
@@ -27,22 +21,15 @@
     <color name="total_badge">@color/neko_green_complementary</color>
     <color name="total_badge_text">@color/md_white_1000</color>
 
-    <color name="colorAmoledPrimary">@color/md_black_1000</color>
-
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
 
     <color name="strong_divider">@color/md_black_1000_38</color>
     <color name="divider">@color/md_black_1000_12</color>
-    <color name="download">@color/neko_green</color>
 
     <color name="background">@color/md_grey_50</color>
-    <color name="dialog">@color/md_white_1000</color>
-    <color name="splashIcon">@color/md_black_1000</color>
     <color name="colorOnSurface">@color/md_black_1000</color>
     <color name="colorOnBackground">@color/md_black_1000_87</color>
 
-
-    <color name="elevated_dark_background">#121212</color>
 
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
@@ -53,8 +40,6 @@
     <color name="md_white_1000">#FFFFFFFF</color>
     <color name="md_white_1000_76">#C2FFFFFF</color>
     <color name="md_white_1000_54">#8AFFFFFF</color>
-    <color name="md_white_1000_50">#80FFFFFF</color>
-    <color name="md_white_1000_20">#33FFFFFF</color>
     <color name="md_white_1000_38">#61FFFFFF</color>
     <color name="md_white_1000_12">#1FFFFFFF</color>
 
@@ -63,14 +48,11 @@
 
     <color name="md_grey_50">#FAFAFA</color>
 
-    <color name="md_blue_A400">#2979FF</color>
-
     <color name="md_red_500">#F44336</color>
     <color name="holo_red">#AA2200</color>
     <color name="primaryRed">#C14033</color>
 
     <color name="pale_green">#99CC99</color>
-    <color name="strong_green">#106010</color>
 
     <!-- Navigation overlay colors -->
     <color name="navigation_menu">#CC95818D</color>
@@ -111,35 +93,23 @@
     <color name="secondaryVariantLime">#065124</color>
     <color name="rippleColorLime">#1F4AF88A</color>
     <color name="backgroundLime">#E9EFEB</color>
-    <color name="downloadBadgeLime">#80CAD3</color>
 
 
     <!--Outrun theme -->
     <color name="outrun_pink">#dd546e</color>
     <color name="outrun_blush">#C06C84</color>
-    <color name="outrun_blush_light">#EFC8D3</color>
-    <color name="outrun_blue">#202146</color>
     <color name="outrun_black">#170c32</color>
     <color name="outrun_dark_purple">#201147</color>
 
 
     <color name="neko_primary">#101820</color>
     <color name="neko_accent">#101820</color>
-    <color name="neko_variant">#2E2157</color>
 
 
     <color name="neko_green">#3DDA83</color>
     <color name="neko_green_complementary">#aa206c</color>
     <color name="neko_green_darker">#20aa5e</color>
-    <color name="gold">#D4AF37</color>
 
-
-    <color name="neko_miami_primary">#41B6E6</color>
-    <color name="neko_miami_primary_variant">#000000</color>
-    <color name="neko_miami_status">#241734</color>
-    <color name="neko_miami_accent">#DB3EB1</color>
-    <color name="neko_miami_dark_accent">#AFDB3EB1</color>
-    <color name="neko_miami_badge_1">#F706CF</color>
 
     <!-- Strawberry Daiquiri Theme -->
     <color name="primaryStrawberry">#d31d3b</color>
@@ -161,7 +131,6 @@
     <color name="secondaryVariantTako">#3f2b49</color>
     <color name="tabBarIconColorTako">#574360</color>
     <color name="rippleColorTako">#1F66577E</color>
-    <color name="surfaceTako">#F7F5FF</color>
     <color name="backgroundTako">#F2EDF7</color>
     <color name="actionTintTako">#221b28</color>
     <color name="inactiveTabTako">#C2221b28</color>

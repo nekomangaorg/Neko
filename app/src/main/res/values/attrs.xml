@@ -6,16 +6,16 @@
         <attr name="max" format="integer" />
     </declare-styleable>
 
-    <attr name="actionBarTintColor" format="color"/>
-    <attr name="readerBackground" format="color"/>
-    <attr name="colorOnSecondary" format="color"/>
+    <attr name="actionBarTintColor" format="color" />
+    <attr name="readerBackground" format="color" />
+    <attr name="colorOnSecondary" format="color" />
     <attr name="colorOnTertiary" format="color" tools:ignore="PrivateResource" />
     <attr name="colorTertiary" format="color" tools:ignore="PrivateResource" />
-    <attr name="textAppearanceBodySecondary" format="reference"/>
-    <attr name="tabBarIconColor" format="reference|integer"/>
-    <attr name="tabBarIconInactive" format="reference|integer"/>
-    <attr name="mainActionBarSize" format="dimension"/>
-    <attr name="tabHighlightBackground" format="color"/>
+    <attr name="textAppearanceBodySecondary" format="reference" />
+    <attr name="tabBarIconColor" format="reference|integer" />
+    <attr name="tabBarIconInactive" format="reference|integer" />
+    <attr name="mainActionBarSize" format="dimension" />
+    <attr name="tabHighlightBackground" format="color" />
     <attr name="hasColoredActionBar" format="boolean">false</attr>
     <attr name="unreadBadgeColor" format="color" />
     <attr name="colorOnUnreadBadge" format="color" />
@@ -31,21 +31,21 @@
     </declare-styleable>
 
     <declare-styleable name="TriStateCheckBox">
-        <attr name="android:text" format="reference|string"/>
-        <attr name="android:maxLines"/>
-        <attr name="android:clickable"/>
-        <attr name="android:focusable"/>
-        <attr name="android:textAppearance"/>
-        <attr name="android:textColor"/>
-        <attr name="android:drawablePadding"/>
+        <attr name="android:text" format="reference|string" />
+        <attr name="android:maxLines" />
+        <attr name="android:clickable" />
+        <attr name="android:focusable" />
+        <attr name="android:textAppearance" />
+        <attr name="android:textColor" />
+        <attr name="android:drawablePadding" />
     </declare-styleable>
 
 
     <declare-styleable name="SortTextView">
-        <attr name="android:text" format="reference|string"/>
-        <attr name="android:maxLines"/>
-        <attr name="android:textAppearance"/>
-        <attr name="android:drawablePadding"/>
+        <attr name="android:text" format="reference|string" />
+        <attr name="android:maxLines" />
+        <attr name="android:textAppearance" />
+        <attr name="android:drawablePadding" />
     </declare-styleable>
 
     <declare-styleable name="MenuSheetItemView">
@@ -57,5 +57,4 @@
 
     <bool name="isLightMode">true</bool>
 
-    <fraction name="chartRatio">1</fraction>
 </resources>

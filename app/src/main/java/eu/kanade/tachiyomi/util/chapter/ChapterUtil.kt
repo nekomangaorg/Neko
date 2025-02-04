@@ -6,13 +6,13 @@ import android.widget.TextView
 import androidx.core.widget.TextViewCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 
 class ChapterUtil {
     companion object {
@@ -28,19 +28,6 @@ class ChapterUtil {
             return when (chapterDate > 0) {
                 true -> chapterDate.timeSpanFromNow
                 false -> null
-            }
-        }
-
-        fun setTextViewForChapter(
-            textView: TextView,
-            chapter: Chapter,
-            showBookmark: Boolean = true,
-            hideStatus: Boolean = false,
-        ) {
-            val context = textView.context
-            textView.setTextColor(chapterColor(context, chapter, hideStatus))
-            if (!hideStatus && showBookmark) {
-                setBookmark(textView, chapter)
             }
         }
 
@@ -75,13 +62,6 @@ class ChapterUtil {
             }
         }
 
-        fun readColor(context: Context, chapter: Chapter): Int {
-            return when {
-                chapter.read -> readColor(context)
-                else -> unreadColor(context)
-            }
-        }
-
         fun bookmarkColor(context: Context, chapter: Chapter): Int {
             return when {
                 chapter.bookmark -> bookmarkedColor(context)
@@ -98,75 +78,22 @@ class ChapterUtil {
         private fun bookmarkedColor(context: Context): Int =
             context.getResourceColor(R.attr.colorSecondary)
 
-        private val volumeRegex = Regex("""(vol|volume)\.? *([0-9]+)?""", RegexOption.IGNORE_CASE)
-        private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
-
-        fun getGroupNumber(chapter: Chapter): Int? {
-            val groups = volumeRegex.find(chapter.name)?.groups
-            if (groups != null) return groups[2]?.value?.toIntOrNull()
-            val seasonGroups = seasonRegex.find(chapter.name)?.groups
-            if (seasonGroups != null) return seasonGroups[2]?.value?.toIntOrNull()
-            return null
-        }
-
-        private fun getVolumeNumber(chapter: Chapter): Int? {
-            val groups = volumeRegex.find(chapter.name)?.groups
-            if (groups != null) return groups[2]?.value?.toIntOrNull()
-            return null
-        }
-
-        private fun getSeasonNumber(chapter: Chapter): Int? {
-            val groups = seasonRegex.find(chapter.name)?.groups
-            if (groups != null) return groups[2]?.value?.toIntOrNull()
-            return null
-        }
-
-        fun hasMultipleVolumes(chapters: List<Chapter>): Boolean {
-            val volumeSet = mutableSetOf<Int>()
-            chapters.forEach {
-                val volNum = getVolumeNumber(it)
-                if (volNum != null) {
-                    volumeSet.add(volNum)
-                    if (volumeSet.size >= 2) return true
-                }
-            }
-            return false
-        }
-
-        fun hasMultipleSeasons(chapters: List<Chapter>): Boolean {
-            val volumeSet = mutableSetOf<Int>()
-            chapters.forEach {
-                val volNum = getSeasonNumber(it)
-                if (volNum != null) {
-                    volumeSet.add(volNum)
-                    if (volumeSet.size >= 2) return true
-                }
-            }
-            return false
-        }
-
-        fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
-            return chapters.size > 20
-        }
-
-        private const val scanlatorSeparator = " & "
-
         fun getScanlators(scanlators: String?): List<String> {
             if (scanlators.isNullOrBlank()) return emptyList()
-            return scanlators.split(scanlatorSeparator).distinct()
+            return scanlators.split(Constants.SCANLATOR_SEPARATOR).distinct()
         }
 
         fun getScanlatorString(scanlators: Set<String>): String {
-            return scanlators.toList().sorted().joinToString(scanlatorSeparator)
+            return scanlators.toList().sorted().joinToString(Constants.SCANLATOR_SEPARATOR)
         }
 
         fun getLanguages(language: String?): List<String> {
             if (language.isNullOrBlank()) return emptyList()
-            return language.split(scanlatorSeparator).distinct()
+            return language.split(Constants.SCANLATOR_SEPARATOR).distinct()
         }
 
         fun getLanguageString(languages: Set<String>): String {
-            return languages.toList().sorted().joinToString(scanlatorSeparator)
+            return languages.toList().sorted().joinToString(Constants.SCANLATOR_SEPARATOR)
         }
     }
 }

@@ -8,9 +8,9 @@ import uy.kohesive.injekt.api.get
 
 /** Holds the use cases for Chapter handling */
 class ChapterUseCases(
-    private val db: DatabaseHelper = Injekt.get(),
-    private val statusHandler: StatusHandler = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get(),
+    db: DatabaseHelper = Injekt.get(),
+    statusHandler: StatusHandler = Injekt.get(),
+    preferences: PreferencesHelper = Injekt.get(),
 ) {
     val markChapters = MarkChapterUseCase(db)
     val markChaptersRemote = MarkChaptersRemote(statusHandler, preferences)

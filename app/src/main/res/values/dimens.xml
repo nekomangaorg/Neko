@@ -1,10 +1,6 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="space_between_cards">4dp</dimen>
     <dimen name="rounded_radius">12dp</dimen>
-
-    <dimen name="fab_size">56dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
 
     <!--Nav header-->
 
@@ -21,8 +17,6 @@
     <dimen name="theme_accent_width_preview">16dp</dimen>
 
     <!-- stuff from material dimens lib -->
-    <dimen name="material_component_cards_space_between_cards">8dp</dimen>
-    <dimen name="material_component_cards_top_and_bottom_padding">16dp</dimen>
     <dimen name="material_layout_avatar">40dp</dimen>
     <dimen name="material_layout_keylines_screen_edge_margin">16dp</dimen>
     <dimen name="material_component_lists_icon_left_padding">16dp</dimen>
@@ -31,12 +25,6 @@
         8dp
     </dimen>
     <dimen name="material_component_lists_single_line_with_avatar_height">56dp</dimen>
-    <dimen name="material_component_lists_padding_above_list">8dp</dimen>
 
     <!-- Stats -->
-    <dimen name="marginPage">28dp</dimen>
-    <dimen name="marginClose">4dp</dimen>
-    <dimen name="marginSmall">8dp</dimen>
-    <dimen name="marginNormal">12dp</dimen>
-    <dimen name="marginFar">56dp</dimen>
 </resources>

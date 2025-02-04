@@ -258,10 +258,4 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
-    <style name="Theme.OSS" parent="Theme.Tachiyomi.Monet">
-        <item name="colorPrimary">?colorPrimaryVariant</item>
-        <item name="android:statusBarColor">?colorPrimaryVariant</item>
-        <item name="windowActionBar">true</item>
-        <item name="windowNoTitle">false</item>
-    </style>
 </resources>
