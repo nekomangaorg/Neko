@@ -66,7 +66,7 @@ fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: 
 
 fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int, isHistory: Boolean): String {
     val limit =
-        if (isHistory) FeedPresenter.HISTORY_ENDLESS_LIMIT else FeedPresenter.UDATES_ENDLESS_LIMIT
+        if (isHistory) FeedPresenter.HISTORY_ENDLESS_LIMIT else FeedPresenter.UPDATES_ENDLESS_LIMIT
     return when {
         isResuming && endless && offset > 0 -> "LIMIT $offset"
         endless -> "LIMIT ${limit}\nOFFSET $offset"

@@ -46,6 +46,8 @@ import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenState
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.feed.FeedSettingActions
+import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
+import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -70,6 +72,8 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun FeedScreen(
     feedScreenState: State<FeedScreenState>,
+    updatesPagingScreenState: State<UpdatesScreenPagingState>,
+    historyPagingScreenState: State<HistoryScreenPagingState>,
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
     legacySideNav: Boolean,
@@ -135,8 +139,8 @@ fun FeedScreen(
                         feedScreenType = feedScreenState.value.feedScreenType,
                         downloadScreenVisible = downloadScreenVisible,
                         downloadOnlyOnWifi = feedScreenState.value.downloadOnlyOnWifi,
-                        historyGrouping = feedScreenState.value.historyGrouping,
-                        sortByFetched = feedScreenState.value.updatesSortedByFetch,
+                        historyGrouping = historyPagingScreenState.value.historyGrouping,
+                        sortByFetched = updatesPagingScreenState.value.updatesSortedByFetch,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         outlineCards = feedScreenState.value.outlineCards,
                         swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
@@ -217,11 +221,43 @@ fun FeedScreen(
                                 .fillMaxSize()
                     ) {
                         val (feedManga, hasMoreResults) =
-                            if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
-                                feedScreenState.value.searchFeedManga to false
-                            } else {
-                                feedScreenState.value.allFeedManga to
-                                    feedScreenState.value.hasMoreResults
+                            when (feedScreenType) {
+                                FeedScreenType.Summary -> {
+                                    if (
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
+                                            false
+                                    } else {
+                                        historyPagingScreenState.value.historyFeedMangaList to
+                                            historyPagingScreenState.value.hasMoreResults
+                                    }
+                                }
+                                FeedScreenType.History -> {
+                                    if (
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
+                                            false
+                                    } else {
+                                        historyPagingScreenState.value.historyFeedMangaList to
+                                            historyPagingScreenState.value.hasMoreResults
+                                    }
+                                }
+                                FeedScreenType.Updates -> {
+                                    if (
+                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList to
+                                            false
+                                    } else {
+                                        updatesPagingScreenState.value.updatesFeedMangaList to
+                                            updatesPagingScreenState.value.hasMoreResults
+                                    }
+                                }
                             }
 
                         if (
@@ -244,13 +280,21 @@ fun FeedScreen(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
-                                    loadingResults = feedScreenState.value.pageLoading,
+                                    loadingResults =
+                                        if (
+                                            feedScreenState.value.feedScreenType ==
+                                                FeedScreenType.History
+                                        )
+                                            historyPagingScreenState.value.pageLoading
+                                        else updatesPagingScreenState.value.pageLoading,
                                     groupedBySeries = feedScreenState.value.groupUpdateChapters,
                                     feedScreenType = feedScreenState.value.feedScreenType,
-                                    historyGrouping = feedScreenState.value.historyGrouping,
+                                    historyGrouping =
+                                        historyPagingScreenState.value.historyGrouping,
                                     outlineCovers = feedScreenState.value.outlineCovers,
                                     outlineCards = feedScreenState.value.outlineCards,
-                                    updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
+                                    updatesFetchSort =
+                                        updatesPagingScreenState.value.updatesSortedByFetch,
                                     feedScreenActions = feedScreenActions,
                                     loadNextPage = loadNextPage,
                                 )
@@ -261,7 +305,13 @@ fun FeedScreen(
                             ScreenFooter(
                                 screenType = feedScreenType,
                                 modifier = Modifier.align(Alignment.BottomStart),
-                                loadingMore = feedScreenState.value.pageLoading,
+                                loadingMore =
+                                    if (
+                                        feedScreenState.value.feedScreenType ==
+                                            FeedScreenType.History
+                                    )
+                                        historyPagingScreenState.value.pageLoading
+                                    else updatesPagingScreenState.value.pageLoading,
                                 showDownloads = feedScreenState.value.downloads.isNotEmpty(),
                                 downloadsSelected = feedScreenState.value.showingDownloads,
                                 downloadsClicked = feedScreenActions.toggleShowingDownloads,

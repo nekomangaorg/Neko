@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
@@ -52,46 +53,82 @@ class FeedPresenter(
                 outlineCards = preferences.feedViewOutlineCards().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupUpdateChapters = preferences.groupChaptersUpdates().get(),
-                historyGrouping = preferences.historyChapterGrouping().get(),
                 downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
                 swipeRefreshEnabled = preferences.swipeRefreshFeedScreen().get(),
             )
         )
 
+    private val _historyScreenPagingState =
+        MutableStateFlow(
+            HistoryScreenPagingState(historyGrouping = preferences.historyChapterGrouping().get())
+        )
+
+    private val _updatesScreenPagingState = MutableStateFlow(UpdatesScreenPagingState())
+
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
+
+    val updatesScreenPagingState: StateFlow<UpdatesScreenPagingState> =
+        _updatesScreenPagingState.asStateFlow()
+
+    val historyScreenPagingState: StateFlow<HistoryScreenPagingState> =
+        _historyScreenPagingState.asStateFlow()
 
     private var searchJob: Job? = null
 
-    private val paginator =
+    private val updatesPaginator =
         DefaultPaginator(
-            initialKey = _feedScreenState.value.offset,
-            onLoadUpdated = { _feedScreenState.update { state -> state.copy(pageLoading = it) } },
+            initialKey = _updatesScreenPagingState.value.offset,
+            onLoadUpdated = {
+                _updatesScreenPagingState.update { state -> state.copy(pageLoading = it) }
+            },
             onRequest = {
-                feedRepository.getPage(
-                    offset = _feedScreenState.value.offset,
-                    limit =
-                        if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
-                            UDATES_ENDLESS_LIMIT
-                        else HISTORY_ENDLESS_LIMIT,
-                    type = _feedScreenState.value.feedScreenType,
-                    uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
-                    group = _feedScreenState.value.historyGrouping,
+                feedRepository.getUpdatesPage(
+                    offset = _updatesScreenPagingState.value.offset,
+                    limit = UPDATES_ENDLESS_LIMIT,
+                    uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
                 )
             },
-            getNextKey = {
-                _feedScreenState.value.offset +
-                    if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
-                        UDATES_ENDLESS_LIMIT
-                    else HISTORY_ENDLESS_LIMIT
+            getNextKey = { _updatesScreenPagingState.value.offset + UPDATES_ENDLESS_LIMIT },
+            onError = {
+                _updatesScreenPagingState.update { state -> state.copy(pageLoading = false) }
             },
-            onError = { _feedScreenState.update { state -> state.copy(pageLoading = false) } },
             onSuccess = { hasNextPage, items, newKey ->
-                _feedScreenState.update { state ->
+                _updatesScreenPagingState.update { state ->
                     state.copy(
-                        allFeedManga = (state.allFeedManga + items).toImmutableList(),
                         offset = newKey,
                         pageLoading = false,
                         hasMoreResults = hasNextPage,
+                        updatesFeedMangaList =
+                            (state.updatesFeedMangaList + items).toImmutableList(),
+                    )
+                }
+            },
+        )
+
+    private val historyPaginator =
+        DefaultPaginator(
+            initialKey = _historyScreenPagingState.value.offset,
+            onLoadUpdated = {
+                _historyScreenPagingState.update { state -> state.copy(pageLoading = it) }
+            },
+            onRequest = {
+                feedRepository.getHistoryPage(
+                    offset = _historyScreenPagingState.value.offset,
+                    group = _historyScreenPagingState.value.historyGrouping,
+                )
+            },
+            getNextKey = { _historyScreenPagingState.value.offset + HISTORY_ENDLESS_LIMIT },
+            onError = {
+                _historyScreenPagingState.update { state -> state.copy(pageLoading = false) }
+            },
+            onSuccess = { hasNextPage, items, newKey ->
+                _historyScreenPagingState.update { state ->
+                    state.copy(
+                        offset = newKey,
+                        pageLoading = false,
+                        hasMoreResults = hasNextPage,
+                        historyFeedMangaList =
+                            (state.historyFeedMangaList + items).toImmutableList(),
                     )
                 }
             },
@@ -162,20 +199,44 @@ class FeedPresenter(
 
         presenterScope.launch {
             preferences.historyChapterGrouping().changes().collectLatest {
-                _feedScreenState.update { state ->
-                    state.copy(historyGrouping = it, offset = 0, allFeedManga = persistentListOf())
+                _historyScreenPagingState.update { state ->
+                    state.copy(
+                        historyGrouping = it,
+                        offset = 0,
+                        historyFeedMangaList = persistentListOf(),
+                    )
                 }
-                paginator.reset()
+                historyPaginator.reset()
                 loadNextPage()
             }
         }
 
         presenterScope.launch {
-            preferences.feedViewType().changes().collectLatest {
-                _feedScreenState.update { state ->
-                    state.copy(feedScreenType = it, offset = 0, allFeedManga = persistentListOf())
+            preferences.feedViewType().changes().collectLatest { type ->
+                if (type == FeedScreenType.History) {
+
+                    _historyScreenPagingState.update { state ->
+                        state.copy(
+                            offset = 0,
+                            searchHistoryFeedMangaList = persistentListOf(),
+                            historyFeedMangaList = persistentListOf(),
+                            searchQuery = "",
+                        )
+                    }
+                    historyPaginator.reset()
+                } else if (type == FeedScreenType.Updates) {
+                    _updatesScreenPagingState.update { state ->
+                        state.copy(
+                            offset = 0,
+                            searchUpdatesFeedMangaList = persistentListOf(),
+                            updatesFeedMangaList = persistentListOf(),
+                            searchQuery = "",
+                        )
+                    }
+                    updatesPaginator.reset()
                 }
-                paginator.reset()
+                _feedScreenState.update { state -> state.copy(feedScreenType = type) }
+
                 loadNextPage()
             }
         }
@@ -188,28 +249,33 @@ class FeedPresenter(
 
         presenterScope.launch {
             preferences.sortFetchedTime().changes().collectLatest {
-                _feedScreenState.update { state ->
+                _updatesScreenPagingState.update { state ->
                     state.copy(
                         updatesSortedByFetch = it,
                         offset = 0,
-                        allFeedManga = persistentListOf(),
+                        updatesFeedMangaList = persistentListOf(),
+                        searchQuery = "",
+                        searchUpdatesFeedMangaList = persistentListOf(),
                     )
                 }
-                paginator.reset()
+                updatesPaginator.reset()
                 loadNextPage()
             }
         }
     }
 
     fun loadNextPage() {
-        presenterScope.launchIO { paginator.loadNextItems() }
+        presenterScope.launchIO {
+            if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates) {
+                updatesPaginator.loadNextItems()
+            } else if (_feedScreenState.value.feedScreenType == FeedScreenType.History) {
+                historyPaginator.loadNextItems()
+            }
+        }
     }
 
     fun switchViewType(feedScreenType: FeedScreenType) {
-        presenterScope.launchIO {
-            _feedScreenState.update { it.copy(allFeedManga = persistentListOf()) }
-            preferences.feedViewType().set(feedScreenType)
-        }
+        presenterScope.launchIO { preferences.feedViewType().set(feedScreenType) }
     }
 
     fun toggleSwipeRefresh() {
@@ -276,28 +342,28 @@ class FeedPresenter(
 
     fun deleteAllHistoryForAllManga() {
         presenterScope.launchIO {
-            _feedScreenState.update {
+            _historyScreenPagingState.update {
                 it.copy(
-                    allFeedManga = persistentListOf(),
-                    searchFeedManga = persistentListOf(),
+                    offset = 0,
+                    historyFeedMangaList = persistentListOf(),
+                    searchHistoryFeedMangaList = persistentListOf(),
                     searchQuery = "",
                 )
             }
             feedRepository.deleteAllHistory()
-            paginator.reset()
-            paginator.loadNextItems()
+            historyPaginator.reset()
+            historyPaginator.loadNextItems()
         }
     }
 
     fun deleteAllHistory(feedManga: FeedManga) {
         presenterScope.launchIO {
-            TimberKt.d { "Delete all history click" }
             feedRepository.deleteAllHistoryForManga(feedManga.mangaId)
-            _feedScreenState.update {
+            _historyScreenPagingState.update {
                 it.copy(
-                    allFeedManga =
-                        it.allFeedManga
-                            .filter { fm -> (fm as FeedManga).mangaId != feedManga.mangaId }
+                    historyFeedMangaList =
+                        it.historyFeedMangaList
+                            .filter { fm -> fm.mangaId != feedManga.mangaId }
                             .toImmutableList()
                 )
             }
@@ -312,17 +378,18 @@ class FeedPresenter(
 
                 feedRepository.deleteHistoryForChapter(simpleChapter.url)
                 val index =
-                    _feedScreenState.value.allFeedManga.indexOfFirst {
+                    _historyScreenPagingState.value.historyFeedMangaList.indexOfFirst {
                         it.mangaId == feedManga.mangaId
                     }
-                val mutableFeedManga = _feedScreenState.value.allFeedManga.toMutableList()
+                val mutableFeedManga =
+                    _historyScreenPagingState.value.historyFeedMangaList.toMutableList()
 
-                if (_feedScreenState.value.historyGrouping == FeedHistoryGroup.Series) {
+                if (_historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series) {
                     val newFeedManga =
                         feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
                     mutableFeedManga[index] = newFeedManga
                 } else {
-                    val newFeedManga = _feedScreenState.value.allFeedManga[index]
+                    val newFeedManga = _historyScreenPagingState.value.historyFeedMangaList[index]
                     mutableFeedManga[index] =
                         newFeedManga.copy(
                             chapters =
@@ -331,8 +398,8 @@ class FeedPresenter(
                                     .toImmutableList()
                         )
                 }
-                _feedScreenState.update {
-                    it.copy(allFeedManga = mutableFeedManga.toImmutableList())
+                _historyScreenPagingState.update {
+                    it.copy(historyFeedMangaList = mutableFeedManga.toImmutableList())
                 }
             }
         }
@@ -342,24 +409,63 @@ class FeedPresenter(
         searchJob?.cancel()
         searchJob =
             presenterScope.launchIO {
-                _feedScreenState.update { it.copy(searchQuery = "") }
                 if (searchQuery.isNullOrBlank()) {
-                    _feedScreenState.update { it.copy(searchFeedManga = persistentListOf()) }
-                } else {
-                    feedRepository
-                        .getPage(
-                            searchQuery,
-                            0,
-                            100,
-                            _feedScreenState.value.feedScreenType,
-                            _feedScreenState.value.updatesSortedByFetch,
-                            _feedScreenState.value.historyGrouping,
-                        )
-                        .onSuccess { results ->
-                            _feedScreenState.update { state ->
-                                state.copy(searchFeedManga = (results.second).toImmutableList())
+                    when (_feedScreenState.value.feedScreenType) {
+                        FeedScreenType.Summary -> TODO()
+                        FeedScreenType.History ->
+                            _historyScreenPagingState.update {
+                                it.copy(
+                                    searchHistoryFeedMangaList = persistentListOf(),
+                                    searchQuery = "",
+                                )
                             }
+                        FeedScreenType.Updates ->
+                            _updatesScreenPagingState.update {
+                                it.copy(
+                                    searchUpdatesFeedMangaList = persistentListOf(),
+                                    searchQuery = "",
+                                )
+                            }
+                    }
+                } else {
+                    when (_feedScreenState.value.feedScreenType) {
+                        FeedScreenType.Summary -> TODO()
+                        FeedScreenType.History -> {
+                            feedRepository
+                                .getHistoryPage(
+                                    searchQuery,
+                                    offset = 0,
+                                    _historyScreenPagingState.value.historyGrouping,
+                                )
+                                .onSuccess { results ->
+                                    _historyScreenPagingState.update {
+                                        it.copy(
+                                            searchQuery = searchQuery,
+                                            searchHistoryFeedMangaList =
+                                                (results.second).toImmutableList(),
+                                        )
+                                    }
+                                }
                         }
+                        FeedScreenType.Updates -> {
+                            feedRepository
+                                .getUpdatesPage(
+                                    searchQuery,
+                                    offset = 0,
+                                    limit = 100,
+                                    _updatesScreenPagingState.value.updatesSortedByFetch,
+                                )
+                                .onSuccess { results ->
+                                    _updatesScreenPagingState.update {
+                                        it.copy(
+                                            searchQuery = searchQuery,
+                                            searchUpdatesFeedMangaList =
+                                                (results.second).toImmutableList(),
+                                        )
+                                    }
+                                }
+                        }
+                    }
                 }
             }
     }
@@ -524,118 +630,207 @@ class FeedPresenter(
                     _feedScreenState.update { it.copy(isRefreshing = true) }
                 }
                 else -> {
-                    paginator.reset()
-                    paginator.loadNextItems()
+                    updatesPaginator.reset()
+                    updatesPaginator.loadNextItems()
                 }
             }
         }
     }
 
     fun updateMangaForChanges() {
-        TimberKt.d {
-            "update manga for changes processing=${!_feedScreenState.value.firstLoad && (_feedScreenState.value.allFeedManga.isNotEmpty() || _feedScreenState.value.searchFeedManga.isNotEmpty())}"
-        }
-        if (
-            !_feedScreenState.value.firstLoad &&
-                (_feedScreenState.value.allFeedManga.isNotEmpty() ||
-                    _feedScreenState.value.searchFeedManga.isNotEmpty())
-        ) {
+        if (!_feedScreenState.value.firstLoad) {
             presenterScope.launchIO {
-                launch {
-                    if (_feedScreenState.value.searchFeedManga.isNotEmpty()) {
-                        feedRepository
-                            .getPage(
-                                searchQuery = _feedScreenState.value.searchQuery,
-                                offset = 0,
-                                limit = 100,
-                                type = _feedScreenState.value.feedScreenType,
-                                uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
-                                group = _feedScreenState.value.historyGrouping,
-                            )
-                            .onSuccess { results ->
-                                _feedScreenState.update { state ->
-                                    state.copy(searchFeedManga = (results.second).toImmutableList())
-                                }
+                if (_updatesScreenPagingState.value.searchUpdatesFeedMangaList.isNotEmpty()) {
+                    launch {
+                        getUpdatedSearchFeedMangaList(FeedScreenType.Updates) { feedMangaList ->
+                            _updatesScreenPagingState.update { state ->
+                                state.copy(searchUpdatesFeedMangaList = feedMangaList)
                             }
+                        }
+                    }
+                }
+                if (_historyScreenPagingState.value.searchHistoryFeedMangaList.isNotEmpty()) {
+                    launch {
+                        getUpdatedSearchFeedMangaList(FeedScreenType.History) { feedMangaList ->
+                            _historyScreenPagingState.update { state ->
+                                state.copy(searchHistoryFeedMangaList = feedMangaList)
+                            }
+                        }
                     }
                 }
 
-                launch {
-                    val currentOffset = _feedScreenState.value.offset
-                    var mutableFeedManga = mutableListOf<FeedManga>()
-                    val limit =
-                        if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
-                            UDATES_ENDLESS_LIMIT
-                        else HISTORY_ENDLESS_LIMIT
-                    for (i in 0..currentOffset step limit) {
-                        feedRepository
-                            .getPage(
-                                offset = i,
-                                limit = limit,
-                                type = _feedScreenState.value.feedScreenType,
-                                uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
-                                group = _feedScreenState.value.historyGrouping,
-                            )
-                            .onSuccess { results ->
-                                mutableFeedManga =
-                                    (mutableFeedManga + results.second).toMutableList()
-                            }
-                    }
-                    _feedScreenState.update { state ->
-                        state.copy(allFeedManga = mutableFeedManga.toImmutableList())
+                if (
+                    _updatesScreenPagingState.value.updatesFeedMangaList.isNotEmpty() ||
+                        _historyScreenPagingState.value.historyFeedMangaList.isNotEmpty()
+                ) {
+
+                    launch {
+                        val currentOffset = _updatesScreenPagingState.value.offset
+                        var mutableFeedManga = mutableListOf<FeedManga>()
+                        val limit =
+                            if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates)
+                                UPDATES_ENDLESS_LIMIT
+                            else HISTORY_ENDLESS_LIMIT
+                        for (i in 0..currentOffset step limit) {
+                            if (_feedScreenState.value.feedScreenType == FeedScreenType.Updates) {
+                                    feedRepository.getUpdatesPage(
+                                        offset = i,
+                                        limit = UPDATES_ENDLESS_LIMIT,
+                                        uploadsFetchSort =
+                                            _updatesScreenPagingState.value.updatesSortedByFetch,
+                                    )
+                                } else {
+                                    feedRepository.getHistoryPage(
+                                        offset = i,
+                                        group = _historyScreenPagingState.value.historyGrouping,
+                                    )
+                                }
+                                .onSuccess { results ->
+                                    mutableFeedManga =
+                                        (mutableFeedManga + results.second).toMutableList()
+                                }
+                        }
+                        when (feedScreenState.value.feedScreenType) {
+                            FeedScreenType.Summary -> TODO()
+                            FeedScreenType.History ->
+                                _historyScreenPagingState.update { state ->
+                                    state.copy(
+                                        historyFeedMangaList = mutableFeedManga.toImmutableList()
+                                    )
+                                }
+                            FeedScreenType.Updates ->
+                                _updatesScreenPagingState.update { state ->
+                                    state.copy(
+                                        updatesFeedMangaList = mutableFeedManga.toImmutableList()
+                                    )
+                                }
+                        }
                     }
                 }
             }
         }
     }
 
+    private suspend fun getUpdatedSearchFeedMangaList(
+        feedScreenType: FeedScreenType,
+        update: (ImmutableList<FeedManga>) -> Unit,
+    ) {
+        if (feedScreenType == FeedScreenType.Updates) {
+                feedRepository.getUpdatesPage(
+                    searchQuery = _updatesScreenPagingState.value.searchQuery,
+                    offset = 0,
+                    limit = 100,
+                    uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
+                )
+            } else {
+                feedRepository.getHistoryPage(
+                    searchQuery = _historyScreenPagingState.value.searchQuery,
+                    offset = 0,
+                    group = _historyScreenPagingState.value.historyGrouping,
+                )
+            }
+            .onSuccess { results -> update(results.second.toImmutableList()) }
+    }
+
     private fun updateReadOnFeed(chapterItem: ChapterItem) {
 
-        val (searchFeedUpdated, searchFeedMangaList) =
+        val (searchHistoryUpdated, searchHistoryFeedMangaList) =
             updateChapterReadStatus(
                 chapterItem,
-                _feedScreenState.value.searchFeedManga.map { it }.toList(),
+                _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
             )
-        if (searchFeedUpdated) {
-            _feedScreenState.update {
-                it.copy(searchFeedManga = searchFeedMangaList.toImmutableList())
+        if (searchHistoryUpdated) {
+            _historyScreenPagingState.update {
+                it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList.toImmutableList())
             }
         }
 
-        val (feedUpdated, feedMangaList) =
+        val (searchUpdatesUpdated, searchUpdatesFeedMangaList) =
             updateChapterReadStatus(
                 chapterItem,
-                _feedScreenState.value.allFeedManga.map { it }.toList(),
+                _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
             )
-        if (feedUpdated) {
-            _feedScreenState.update { it.copy(allFeedManga = feedMangaList.toImmutableList()) }
+        if (searchUpdatesUpdated) {
+            _updatesScreenPagingState.update {
+                it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toImmutableList())
+            }
+        }
+
+        val (historyFeedUpdated, historyFeedMangaList) =
+            updateChapterReadStatus(
+                chapterItem,
+                _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
+            )
+        if (historyFeedUpdated) {
+            _historyScreenPagingState.update {
+                it.copy(historyFeedMangaList = historyFeedMangaList.toImmutableList())
+            }
+        }
+
+        val (updatesFeedUpdated, updatesFeedMangaList) =
+            updateChapterReadStatus(
+                chapterItem,
+                _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+            )
+        if (updatesFeedUpdated) {
+            _updatesScreenPagingState.update {
+                it.copy(updatesFeedMangaList = updatesFeedMangaList.toImmutableList())
+            }
         }
     }
 
     private fun updateDownloadOnFeed(chapterId: Long, mangaId: Long, download: Download?) {
 
-        val (searchFeedUpdated, searchFeedMangaList) =
+        val (searchHistoryFeedUpdated, searchHistoryFeedMangaList) =
             updateChapterDownloadForManga(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.searchFeedManga.map { it }.toList(),
+                _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
             )
-        if (searchFeedUpdated) {
-            _feedScreenState.update {
-                it.copy(searchFeedManga = searchFeedMangaList.toImmutableList())
+        if (searchHistoryFeedUpdated) {
+            _historyScreenPagingState.update {
+                it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList.toImmutableList())
             }
         }
 
-        val (feedUpdated, feedMangaList) =
+        val (searchUpdatesFeedUpdated, searchUpdatesFeedMangaList) =
             updateChapterDownloadForManga(
                 chapterId,
                 mangaId,
                 download,
-                _feedScreenState.value.allFeedManga.map { it }.toList(),
+                _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
             )
-        if (feedUpdated) {
-            _feedScreenState.update { it.copy(allFeedManga = feedMangaList.toImmutableList()) }
+        if (searchUpdatesFeedUpdated) {
+            _updatesScreenPagingState.update {
+                it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toImmutableList())
+            }
+        }
+
+        val (historyFeedUpdated, historyFeedMangaList) =
+            updateChapterDownloadForManga(
+                chapterId,
+                mangaId,
+                download,
+                _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
+            )
+        if (historyFeedUpdated) {
+            _historyScreenPagingState.update {
+                it.copy(historyFeedMangaList = historyFeedMangaList.toImmutableList())
+            }
+        }
+
+        val (updatesFeedUpdated, updatesFeedMangaList) =
+            updateChapterDownloadForManga(
+                chapterId,
+                mangaId,
+                download,
+                _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+            )
+        if (updatesFeedUpdated) {
+            _updatesScreenPagingState.update {
+                it.copy(updatesFeedMangaList = updatesFeedMangaList.toImmutableList())
+            }
         }
     }
 
@@ -733,6 +928,6 @@ class FeedPresenter(
 
     companion object {
         const val HISTORY_ENDLESS_LIMIT = 15
-        const val UDATES_ENDLESS_LIMIT = 100
+        const val UPDATES_ENDLESS_LIMIT = 200
     }
 }

@@ -89,10 +89,7 @@ fun HistoryCard(
         cardColor = CardDefaults.cardColors(containerColor = cardColor),
     ) {
         val titleColor =
-            getReadTextColor(
-                isRead = feedManga.chapters.all { it.chapter.read },
-                MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            getReadTextColor(isRead = allChaptersRead, MaterialTheme.colorScheme.onSurfaceVariant)
 
         Row {
             Column(modifier = Modifier.weight(2f)) {

@@ -14,22 +14,34 @@ data class FeedScreenState(
     val isRefreshing: Boolean = false,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val showingDownloads: Boolean = false,
-    val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
     val outlineCards: Boolean,
-    val offset: Int = 0,
-    val hasMoreResults: Boolean = true,
-    val pageLoading: Boolean = false,
     val groupUpdateChapters: Boolean = false,
-    val historyGrouping: FeedHistoryGroup,
     val incognitoMode: Boolean = false,
     val swipeRefreshEnabled: Boolean = true,
-    val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
-    val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val downloads: ImmutableList<DownloadItem> = persistentListOf(),
     val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
     val downloadOnlyOnWifi: Boolean,
+)
+
+data class HistoryScreenPagingState(
+    val offset: Int = 0,
+    val hasMoreResults: Boolean = true,
+    val pageLoading: Boolean = false,
+    val historyGrouping: FeedHistoryGroup,
+    val historyFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val searchHistoryFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val searchQuery: String = "",
+)
+
+data class UpdatesScreenPagingState(
+    val offset: Int = 0,
+    val hasMoreResults: Boolean = true,
+    val pageLoading: Boolean = false,
+    val updatesSortedByFetch: Boolean = true,
+    val updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val searchUpdatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
     val searchQuery: String = "",
 )
 
