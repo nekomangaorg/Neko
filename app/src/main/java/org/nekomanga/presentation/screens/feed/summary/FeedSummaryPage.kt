@@ -1,62 +1,110 @@
 package org.nekomanga.presentation.screens.feed.summary
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.feed.FeedManga
+import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
+import org.nekomanga.presentation.screens.feed.updates.UpdatesCard
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedSummaryPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    historyFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    continueReadingFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    outlineCovers: Boolean,
+    feedScreenActions: FeedScreenActions,
 ) {
     val scrollState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                androidx.compose.material.Text(
-                    text = "New chapters",
-                    style =
-                        MaterialTheme.typography.titleLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
+        item { SummaryHeader(stringResource(R.string.feed_continue_reading)) }
+        items(continueReadingFeedMangaList) { feedManga ->
+            if (feedManga.chapters.isNotEmpty()) {
+                val chapter = feedManga.chapters.first()
+                ContinueReadingCard(
+                    feedManga = feedManga,
+                    outlineCover = outlineCovers,
+                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                    chapterClick = {
+                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                    },
+                    deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
+                    deleteHistoryClick = { chp ->
+                        feedScreenActions.deleteHistoryClick(feedManga, chp)
+                    },
                 )
             }
         }
-        items(updatesFeedMangaList) { Text("updated chapter") }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                androidx.compose.material.Text(
-                    text = "Continue reading",
-                    style =
-                        MaterialTheme.typography.titleLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                )
-            }
+        item { SummaryHeader(stringResource(R.string.new_chapters_unread)) }
+        items(updatesFeedMangaList) { feedManga ->
+            val chapter = feedManga.chapters.first()
+            UpdatesCard(
+                chapterItem = chapter,
+                isGrouped = false,
+                mangaTitle = feedManga.mangaTitle,
+                artwork = feedManga.artwork,
+                outlineCovers = outlineCovers,
+                mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                chapterClick = {
+                    feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                },
+                chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                downloadClick = { action ->
+                    feedScreenActions.downloadClick(chapter, feedManga, action)
+                },
+            )
         }
-        items(historyFeedMangaList) { Text("partially read chapter") }
+
+        item { SummaryHeader(stringResource(R.string.newly_added)) }
+        items(newlyAddedFeedMangaList) { feedManga ->
+            val chapter = feedManga.chapters.first()
+            NewlyAddedCard(
+                chapterItem = chapter,
+                mangaTitle = feedManga.mangaTitle,
+                dateAdded = feedManga.date,
+                artwork = feedManga.artwork,
+                outlineCovers = outlineCovers,
+                mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                chapterClick = {
+                    feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                },
+                chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                downloadClick = { action ->
+                    feedScreenActions.downloadClick(chapter, feedManga, action)
+                },
+            )
+        }
     }
+}
+
+@Composable
+private fun SummaryHeader(text: String) {
+    Text(
+        text = text,
+        style =
+            MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary),
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(
+                    start = Size.small,
+                    end = Size.small,
+                    top = Size.small,
+                    bottom = Size.small,
+                ),
+    )
 }

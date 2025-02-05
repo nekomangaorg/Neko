@@ -314,7 +314,9 @@
     <string name="feed">Feed</string>
     <string name="updates_and_history">Updates &amp; history</string>
     <string name="updates">Updates</string>
-    <string name="newly_added">Newly added</string>
+    <string name="newly_added">Newly added manga</string>
+    <string name="feed_continue_reading">Continue reading</string>
+    <string name="new_chapters_unread">New unread chapters</string>
     <string name="history">History</string>
     <string name="summary">Summary</string>
     <string name="entire_series">Entire series</string>

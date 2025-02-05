@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +33,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
+import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.manga.Artwork
@@ -47,6 +49,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun FeedPage(
     feedMangaList: ImmutableList<FeedManga>,
+    summaryScreenPagingState: State<SummaryScreenPagingState>,
     outlineCovers: Boolean,
     outlineCards: Boolean,
     hasMoreResults: Boolean,
@@ -61,7 +64,15 @@ fun FeedPage(
 ) {
     when (feedScreenType) {
         FeedScreenType.Summary -> {
-            FeedSummaryPage(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding)
+            FeedSummaryPage(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = contentPadding,
+                outlineCovers = outlineCovers,
+                feedScreenActions = feedScreenActions,
+                updatesFeedMangaList = summaryScreenPagingState.value.updatesFeedMangaList,
+                continueReadingFeedMangaList = summaryScreenPagingState.value.continueReadingList,
+                newlyAddedFeedMangaList = summaryScreenPagingState.value.newlyAddedFeedMangaList,
+            )
         }
         FeedScreenType.History -> {
             FeedHistoryPage(

@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,12 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
-import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -360,37 +357,6 @@ private fun ScanlatorLine(scanlator: String, textColor: Color, style: TextStyle)
     if (scanlator.isNotBlank()) {
         Text(
             text = scanlator,
-            style =
-                style.copy(
-                    color = textColor,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp,
-                ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-private fun LastReadLine(
-    lastRead: Long,
-    hasPagesLeft: Boolean,
-    pagesLeft: Int,
-    style: TextStyle,
-    textColor: Color,
-) {
-    val statuses = mutableListOf<String>()
-
-    statuses.add("Read ${lastRead.timeSpanFromNow}")
-
-    if (hasPagesLeft) {
-        statuses.add(pluralStringResource(R.plurals.pages_left, pagesLeft, pagesLeft))
-    }
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = statuses.joinToString(Constants.SEPARATOR),
             style =
                 style.copy(
                     color = textColor,

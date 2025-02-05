@@ -38,6 +38,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             feedScreenState = presenter.feedScreenState.collectAsState(),
             updatesPagingScreenState = presenter.updatesScreenPagingState.collectAsState(),
             historyPagingScreenState = presenter.historyScreenPagingState.collectAsState(),
+            summaryScreenPagingState = presenter.summaryScreenPagingState.collectAsState(),
             loadNextPage = presenter::loadNextPage,
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,

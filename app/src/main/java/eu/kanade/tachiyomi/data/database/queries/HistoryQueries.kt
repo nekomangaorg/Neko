@@ -43,12 +43,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getHistoryUngrouped(search: String = "", offset: Int, isResuming: Boolean) =
+    fun getHistoryUngrouped(search: String = "", offset: Int, limit: Int, isResuming: Boolean) =
         db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
+                    .query(getRecentHistoryUngrouped(search.sqLite, offset, limit, isResuming))
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -61,12 +61,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentMangaLimit(search: String = "", offset: Int, isResuming: Boolean) =
+    fun getRecentMangaLimit(search: String = "", offset: Int, limit: Int, isResuming: Boolean) =
         db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentMangasLimitQuery(search.sqLite, offset, isResuming))
+                    .query(getRecentMangasLimitQuery(search.sqLite, offset, limit, isResuming))
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -103,6 +103,7 @@ interface HistoryQueries : DbProvider {
         includeRead: Boolean,
         endless: Boolean,
         offset: Int,
+        limit: Int,
         isResuming: Boolean,
     ) =
         db.get()
@@ -110,7 +111,14 @@ interface HistoryQueries : DbProvider {
             .withQuery(
                 RawQuery.builder()
                     .query(
-                        getAllRecentsType(search.sqLite, includeRead, endless, offset, isResuming)
+                        getAllRecentsType(
+                            search.sqLite,
+                            includeRead,
+                            endless,
+                            offset,
+                            limit,
+                            isResuming,
+                        )
                     )
                     //                .args(date.time, startDate.time)
                     .observesTables(HistoryTable.TABLE)

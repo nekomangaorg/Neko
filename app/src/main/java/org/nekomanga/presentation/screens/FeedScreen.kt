@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedScreenState
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.feed.FeedSettingActions
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
+import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
@@ -74,6 +75,7 @@ fun FeedScreen(
     feedScreenState: State<FeedScreenState>,
     updatesPagingScreenState: State<UpdatesScreenPagingState>,
     historyPagingScreenState: State<HistoryScreenPagingState>,
+    summaryScreenPagingState: State<SummaryScreenPagingState>,
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
     legacySideNav: Boolean,
@@ -173,7 +175,11 @@ fun FeedScreen(
             ) {
                 NekoScaffold(
                     type =
-                        if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
+                        if (
+                            feedScreenState.value.showingDownloads ||
+                                feedScreenType == FeedScreenType.Summary
+                        )
+                            NekoScaffoldType.Title
                         else NekoScaffoldType.SearchOutline,
                     incognitoMode = feedScreenState.value.incognitoMode,
                     searchPlaceHolder = searchHint,
@@ -278,6 +284,7 @@ fun FeedScreen(
                             false -> {
                                 FeedPage(
                                     contentPadding = recyclerContentPadding,
+                                    summaryScreenPagingState = summaryScreenPagingState,
                                     feedMangaList = feedManga,
                                     hasMoreResults = hasMoreResults,
                                     loadingResults =
@@ -381,11 +388,11 @@ private fun ScreenFooter(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Gap(Size.tiny)
-            /* FooterFilterChip(
+            FooterFilterChip(
                 selected = screenType == FeedScreenType.Summary && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.Summary) },
                 name = stringResource(R.string.summary),
-            )*/
+            )
             FooterFilterChip(
                 selected = screenType == FeedScreenType.History && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.History) },

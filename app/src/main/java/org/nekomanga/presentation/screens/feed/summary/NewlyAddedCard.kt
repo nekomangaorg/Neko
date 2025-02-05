@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.feed.updates
+package org.nekomanga.presentation.screens.feed.summary
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -31,14 +31,13 @@ import org.nekomanga.presentation.screens.feed.getReadTextColor
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun UpdatesCard(
+fun NewlyAddedCard(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
     mangaTitle: String,
+    dateAdded: Long,
     artwork: Artwork,
     outlineCovers: Boolean,
-    numberOfChapters: Int = 1,
-    isGrouped: Boolean = false,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     chapterSwipe: (ChapterItem) -> Unit,
@@ -59,13 +58,12 @@ fun UpdatesCard(
         modifier = modifier.padding(vertical = Dp(1f)),
         endSwipeActions = listOf(swipeAction),
     ) {
-        UpdatesRow(
+        NewlyAddedRow(
             modifier = modifier,
             chapterItem = chapterItem,
-            numberOfChapters = numberOfChapters,
             mangaTitle = mangaTitle,
+            dateAdded = dateAdded,
             artwork = artwork,
-            isGrouped = isGrouped,
             outlineCovers = outlineCovers,
             mangaClick = mangaClick,
             chapterClick = chapterClick,
@@ -75,12 +73,11 @@ fun UpdatesCard(
 }
 
 @Composable
-private fun UpdatesRow(
+private fun NewlyAddedRow(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
-    numberOfChapters: Int,
-    isGrouped: Boolean,
     mangaTitle: String,
+    dateAdded: Long,
     artwork: Artwork,
     outlineCovers: Boolean,
     mangaClick: () -> Unit,
@@ -125,21 +122,12 @@ private fun UpdatesRow(
                 textColor = updatedColor,
             )
             Text(
-                text = "Updated ${chapterItem.chapter.dateUpload.timeSpanFromNow}",
+                text = "Added ${dateAdded.timeSpanFromNow}",
                 style = MaterialTheme.typography.labelSmall,
                 color = updatedColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-
-            if (isGrouped && numberOfChapters > 1) {
-                Text(
-                    text = "$numberOfChapters total chapters",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = updatedColor,
-                    maxLines = 1,
-                )
-            }
         }
         DownloadButton(
             downloadState = chapterItem.downloadState,

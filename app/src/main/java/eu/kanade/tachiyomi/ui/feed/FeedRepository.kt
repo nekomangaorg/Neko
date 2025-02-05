@@ -52,9 +52,136 @@ class FeedRepository(
         return feedManga.copy(chapters = simpleChapters)
     }
 
+    suspend fun getSummaryUpdatesList(): Result<List<FeedManga>, ResultError.Generic> {
+        return com.github.michaelbull.result
+            .runCatching {
+                getUpdatesPage(offset = 0, limit = 200, uploadsFetchSort = false)
+                    .get()!!
+                    .second
+                    .filter { it.chapters.none { it.chapter.read } }
+                    .groupBy { it.mangaId }
+                    .entries
+                    .map { it.value.last() }
+                    .take(6)
+            }
+            .mapError { err ->
+                TimberKt.e(err)
+                ResultError.Generic("Error : ${err.message}")
+            }
+    }
+
+    suspend fun getSummaryContinueReadingList(): Result<List<FeedManga>, ResultError.Generic> {
+        return com.github.michaelbull.result
+            .runCatching {
+                db.getRecentMangaLimit(offset = 0, limit = 100, isResuming = false)
+                    .executeOnIO()
+                    .mapNotNull { history ->
+                        history.manga.id ?: return@mapNotNull null
+                        history.chapter.id ?: return@mapNotNull null
+
+                        val chapter =
+                            getChapterItem(
+                                history.manga,
+                                history.chapter.toSimpleChapter(history.history.last_read)!!,
+                            )
+
+                        FeedManga(
+                            mangaId = history.manga.id!!,
+                            mangaTitle = history.manga.title,
+                            date = history.history.last_read,
+                            artwork = history.manga.toDisplayManga().currentArtwork,
+                            chapters = persistentListOf(chapter),
+                        )
+                    }
+                    .filter { it.chapters.none { it.chapter.read } }
+                    .groupBy { it.mangaId }
+                    .entries
+                    .map { it.value.last() }
+                    .take(6)
+            }
+            .mapError { err ->
+                TimberKt.e(err)
+                ResultError.Generic("Error : ${err.message}")
+            }
+    }
+
+    suspend fun getSummaryNewlyAddedList(): Result<List<FeedManga>, ResultError.Generic> {
+        return com.github.michaelbull.result
+            .runCatching {
+                db.getFavoriteMangaList()
+                    .executeOnIO()
+                    .distinctBy { it.id }
+                    .sortedBy { it.date_added }
+                    .takeLast(100)
+                    .mapNotNull { manga ->
+                        TimberKt.d { "ESCO ${manga.title} ${manga.date_added}" }
+                        val chapters = db.getChapters(manga).executeOnIO()
+                        if (chapters.any { it.read }) {
+                            return@mapNotNull null
+                        }
+                        val simpleChapter =
+                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
+
+                        simpleChapter ?: return@mapNotNull null
+
+                        val displayManga = manga.toDisplayManga()
+                        FeedManga(
+                            mangaId = displayManga.mangaId,
+                            mangaTitle = displayManga.title,
+                            date = manga.date_added,
+                            artwork = displayManga.currentArtwork,
+                            chapters = persistentListOf(getChapterItem(manga, simpleChapter)),
+                        )
+                    }
+                    .takeLast(6)
+                    .reversed()
+            }
+            .mapError { err ->
+                TimberKt.e(err)
+                ResultError.Generic("Error : ${err.message}")
+            }
+    }
+
+    suspend fun getNewlyAddedPage(): Result<List<FeedManga>, ResultError.Generic> {
+        return com.github.michaelbull.result
+            .runCatching {
+                db.getFavoriteMangaList()
+                    .executeOnIO()
+                    .distinctBy { it.id }
+                    .sortedBy { it.date_added }
+                    .takeLast(100)
+                    .mapNotNull { manga ->
+                        val chapters = db.getChapters(manga).executeOnIO()
+                        if (chapters.any { it.read }) {
+                            return@mapNotNull null
+                        }
+                        val simpleChapter =
+                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
+
+                        simpleChapter ?: return@mapNotNull null
+
+                        val displayManga = manga.toDisplayManga()
+                        FeedManga(
+                            mangaId = displayManga.mangaId,
+                            mangaTitle = displayManga.title,
+                            date = manga.date_added,
+                            artwork = displayManga.currentArtwork,
+                            chapters = persistentListOf(getChapterItem(manga, simpleChapter)),
+                        )
+                    }
+                    .takeLast(6)
+                    .reversed()
+            }
+            .mapError { err ->
+                TimberKt.e(err)
+                ResultError.Generic("Error : ${err.message}")
+            }
+    }
+
     suspend fun getHistoryPage(
         searchQuery: String = "",
         offset: Int,
+        limit: Int = FeedPresenter.HISTORY_ENDLESS_LIMIT,
         group: FeedHistoryGroup,
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         if (offset > 0) {
@@ -71,6 +198,7 @@ class FeedRepository(
                             db.getRecentMangaLimit(
                                     search = searchQuery,
                                     offset = offset,
+                                    limit = limit,
                                     isResuming = false,
                                 )
                                 .executeOnIO()
@@ -120,6 +248,7 @@ class FeedRepository(
                             db.getHistoryUngrouped(
                                     search = searchQuery,
                                     offset = offset,
+                                    limit = limit,
                                     isResuming = false,
                                 )
                                 .executeOnIO()
@@ -153,6 +282,7 @@ class FeedRepository(
                             db.getHistoryUngrouped(
                                     search = searchQuery,
                                     offset = offset,
+                                    limit = limit,
                                     isResuming = false,
                                 )
                                 .executeOnIO()

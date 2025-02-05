@@ -45,6 +45,12 @@ data class UpdatesScreenPagingState(
     val searchQuery: String = "",
 )
 
+data class SummaryScreenPagingState(
+    val updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val continueReadingList: ImmutableList<FeedManga> = persistentListOf(),
+    val newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+)
+
 enum class FeedScreenType {
     Summary,
     History,
