@@ -12,18 +12,12 @@
     <color name="rippleColorTachiyomi">@color/neko_green</color>
     <color name="secondaryTachiyomi">@color/neko_green</color>
     <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
-    <color name="splashBackground">#212121</color>
-    <color name="actionModeShadow">@color/md_black_1000</color>
 
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
     <color name="strong_divider">@color/md_white_1000_38</color>
     <color name="divider">@color/md_white_1000_12</color>
-    <color name="download">#388E3C</color>
     <color name="holo_red">#cc4444</color>
-    <color name="splashIcon">@color/md_white_1000</color>
-
     <color name="background">#292929</color>
-    <color name="dialog">#292929</color>
     <color name="gray_button">#BFBFBF</color>
 
     <!-- Chocolate Strawberries Theme -->
@@ -44,7 +38,6 @@
     <color name="primaryInverseLime">#09933c</color>
     <color name="backgroundLime">#202125</color>
     <color name="secondaryVariantLime">#cbffe0</color>
-    <color name="downloadBadgeLime">#304E51</color>
 
     <!-- Tako Theme -->
     <color name="primaryTako">#fccd9f</color>
@@ -56,7 +49,6 @@
     <color name="secondaryVariantTako">#f4d1af</color>
     <color name="tabBarIconColorTako">@color/secondaryTako</color>
     <color name="rippleColorTako">#1FF3B375</color>
-    <color name="surfaceTako">#2A2A3C</color>
     <color name="backgroundTako">#21212E</color>
     <color name="actionTintTako">#f4ece5</color>
     <color name="inactiveTabTako">#C2f4ece5</color>
