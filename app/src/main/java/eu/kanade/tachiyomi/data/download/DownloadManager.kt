@@ -251,8 +251,9 @@ class DownloadManager(val context: Context) {
      */
     fun deleteChapters(chapters: List<Chapter>, manga: Manga) {
         GlobalScope.launchNonCancellable {
-            cache.removeChapters(chapters, manga)
-            removeFromDownloadQueue(chapters)
+            launchNonCancellable { cache.removeChapters(chapters, manga) }
+            launchNonCancellable { removeFromDownloadQueue(chapters) }
+
             try {
 
                 val mangaDir = provider.findMangaDir(manga)
@@ -262,10 +263,10 @@ class DownloadManager(val context: Context) {
                         provider.findTempChapterDirs(chapters, manga)
 
                 if (chapterDirs.isEmpty()) {
-                    pendingDeleter.deletePendingChapter(manga, chapters)
+                    launchNonCancellable { pendingDeleter.deletePendingChapter(manga, chapters) }
                 } else {
 
-                    GlobalScope.launchNonCancellable {
+                    launchNonCancellable {
                         chapterDirs.forEach {
                             it.delete()
                             pendingDeleter.deletePendingChapter(manga, chapters)
