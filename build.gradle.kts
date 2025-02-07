@@ -93,7 +93,6 @@ tasks.register("clean", Delete::class) { delete(rootProject.layout.buildDirector
 tasks.register<Copy>("installGitHook") {
     from("pre-commit")
     into(layout.projectDirectory.dir(".git/hooks"))
-    fileMode = 777
 }
 
 afterEvaluate {
