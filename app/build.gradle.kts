@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+
 plugins {
     id(androidx.plugins.application.get().pluginId)
     id(kotlinx.plugins.android.get().pluginId)
@@ -78,8 +80,7 @@ android {
 composeCompiler {
     // Enable experimental compiler opts
     // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
-    enableNonSkippingGroupOptimization.set(true)
-
+    featureFlags.addAll(ComposeFeatureFlag.OptimizeNonSkippingGroups)
     val enableMetrics =
         project.providers.gradleProperty("enableComposeCompilerMetrics").orNull.toBoolean()
     val enableReports =
