@@ -3,12 +3,9 @@ plugins {
     id(kotlinx.plugins.android.get().pluginId)
 }
 
-android { namespace = "org.nekomanga.constants"
-    buildFeatures {
-        buildConfig = true
-    }
+android {
+    namespace = "org.nekomanga.constants"
+    buildFeatures { buildConfig = true }
 }
 
-dependencies {
-    implementation(androidx.core.ktx)
-}
+dependencies { implementation(androidx.core.ktx) }

@@ -2,14 +2,11 @@ plugins {
     id(androidx.plugins.library.get().pluginId)
     id(kotlinx.plugins.android.get().pluginId)
     alias(kotlinx.plugins.serialization)
-
 }
 
 android {
     namespace = "org.nekomanga.core"
-    buildFeatures {
-        buildConfig = true
-    }
+    buildFeatures { buildConfig = true }
 }
 
 dependencies {

@@ -7,13 +7,11 @@ import org.nekomanga.domain.network.ResultError
 
 class DefaultPaginator<Key, Item>(
     private val initialKey: Key,
-    private inline val onLoadUpdated: (Boolean) -> Unit,
-    private inline val onRequest:
-        suspend (nextKey: Key) -> Result<Pair<Boolean, List<Item>>, ResultError>,
-    private inline val getNextKey: suspend (List<Item>) -> Key,
-    private inline val onError: suspend (ResultError?) -> Unit,
-    private inline val onSuccess:
-        suspend (hasNextPage: Boolean, items: List<Item>, newKey: Key) -> Unit,
+    private val onLoadUpdated: (Boolean) -> Unit,
+    private val onRequest: suspend (nextKey: Key) -> Result<Pair<Boolean, List<Item>>, ResultError>,
+    private val getNextKey: suspend (List<Item>) -> Key,
+    private val onError: suspend (ResultError?) -> Unit,
+    private val onSuccess: suspend (hasNextPage: Boolean, items: List<Item>, newKey: Key) -> Unit,
 ) : Paginator<Key, Item> {
 
     private var currentKey: Key = initialKey
