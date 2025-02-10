@@ -89,6 +89,7 @@ fun ContinueReadingCard(
                 lastRead = chapterItem.chapter.lastRead,
                 hasPagesLeft = !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0,
                 pagesLeft = chapterItem.chapter.pagesLeft,
+                lastReadPreviousChapter = feedManga.lastReadChapter,
                 style = MaterialTheme.typography.bodyMedium,
                 textColor = updatedColor,
             )

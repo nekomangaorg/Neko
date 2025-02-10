@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,14 +21,19 @@ fun LastReadLine(
     hasPagesLeft: Boolean,
     pagesLeft: Int,
     style: TextStyle,
+    lastReadPreviousChapter: String = "",
     textColor: Color,
 ) {
     val statuses = mutableListOf<String>()
 
-    statuses.add("Read ${lastRead.timeSpanFromNow}")
-
+    if (lastRead != 0L) {
+        statuses.add(stringResource(R.string.read_, lastRead.timeSpanFromNow))
+    }
     if (hasPagesLeft) {
         statuses.add(pluralStringResource(R.plurals.pages_left, pagesLeft, pagesLeft))
+    }
+    if (lastReadPreviousChapter.isNotEmpty()) {
+        statuses.add(stringResource(R.string.last_read_, lastReadPreviousChapter))
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {

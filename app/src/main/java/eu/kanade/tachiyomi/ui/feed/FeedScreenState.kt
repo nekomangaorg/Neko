@@ -114,4 +114,5 @@ data class FeedManga(
     val mangaId: Long,
     val artwork: Artwork,
     val chapters: ImmutableList<ChapterItem>,
+    val lastReadChapter: String = "",
 )

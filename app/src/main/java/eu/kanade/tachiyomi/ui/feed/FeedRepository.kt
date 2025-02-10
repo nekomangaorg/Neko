@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.text.SimpleDateFormat
@@ -73,7 +74,7 @@ class FeedRepository(
     suspend fun getSummaryContinueReadingList(): Result<List<FeedManga>, ResultError.Generic> {
         return com.github.michaelbull.result
             .runCatching {
-                db.getRecentMangaLimit(offset = 0, limit = 100, isResuming = false)
+                db.getRecentMangaLimit(offset = 0, limit = 50, isResuming = false)
                     .executeOnIO()
                     .mapNotNull { history ->
                         history.manga.id ?: return@mapNotNull null
@@ -93,10 +94,50 @@ class FeedRepository(
                             chapters = persistentListOf(chapter),
                         )
                     }
-                    .filter { it.chapters.none { it.chapter.read } }
                     .groupBy { it.mangaId }
                     .entries
-                    .map { it.value.last() }
+                    .mapNotNull { entry ->
+                        val feedMangaFiltered =
+                            entry.value.mapNotNull { feedManga ->
+                                if (
+                                    feedManga.chapters.isNotEmpty() &&
+                                        feedManga.chapters.none { it.chapter.read }
+                                ) {
+                                    feedManga
+                                } else {
+                                    null
+                                }
+                            }
+                        if (feedMangaFiltered.isNotEmpty()) {
+                            feedMangaFiltered.last()
+                        } else {
+                            val lastReadChapter =
+                                entry.value
+                                    .map { it.chapters }
+                                    .flatten()
+                                    .firstOrNull()
+                                    ?.chapter
+                                    ?.name ?: ""
+                            val manga = db.getManga(entry.key).executeOnIO()!!
+                            val chapters = db.getChapters(manga).executeOnIO()
+                            val chapter = ChapterSort(manga).getNextUnreadChapter(chapters)
+                            if (chapter == null) {
+                                return@mapNotNull null
+                            } else {
+                                FeedManga(
+                                    mangaId = manga.id!!,
+                                    mangaTitle = manga.title,
+                                    date = 0L,
+                                    artwork = manga.toDisplayManga().currentArtwork,
+                                    lastReadChapter = lastReadChapter,
+                                    chapters =
+                                        persistentListOf(
+                                            chapter.toSimpleChapter()!!.toChapterItem()
+                                        ),
+                                )
+                            }
+                        }
+                    }
                     .take(6)
             }
             .mapError { err ->
