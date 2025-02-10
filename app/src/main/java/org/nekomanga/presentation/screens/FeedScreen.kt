@@ -174,6 +174,10 @@ fun FeedScreen(
                         Size.extraLarge,
             ) {
                 NekoScaffold(
+                    title =
+                        if (feedScreenType == FeedScreenType.Summary)
+                            stringResource(R.string.summary)
+                        else "",
                     type =
                         if (
                             feedScreenState.value.showingDownloads ||
