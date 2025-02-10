@@ -422,7 +422,10 @@ class FeedPresenter(
         presenterScope.launchIO {
             feedRepository.getSummaryUpdatesList().onSuccess { list ->
                 _summaryScreenPagingState.update { state ->
-                    state.copy(updatesFeedMangaList = list.toImmutableList())
+                    state.copy(
+                        updatesFeedMangaList = list.toImmutableList(),
+                        updatingUpdates = false,
+                    )
                 }
             }
         }
@@ -430,7 +433,10 @@ class FeedPresenter(
         presenterScope.launchIO {
             feedRepository.getSummaryContinueReadingList().onSuccess { list ->
                 _summaryScreenPagingState.update { state ->
-                    state.copy(continueReadingList = list.toImmutableList())
+                    state.copy(
+                        continueReadingList = list.toImmutableList(),
+                        updatingContinueReading = false,
+                    )
                 }
             }
         }
@@ -438,7 +444,10 @@ class FeedPresenter(
         presenterScope.launchIO {
             feedRepository.getSummaryNewlyAddedList().onSuccess { list ->
                 _summaryScreenPagingState.update { state ->
-                    state.copy(newlyAddedFeedMangaList = list.toImmutableList())
+                    state.copy(
+                        newlyAddedFeedMangaList = list.toImmutableList(),
+                        updatingNewlyAdded = false,
+                    )
                 }
             }
         }

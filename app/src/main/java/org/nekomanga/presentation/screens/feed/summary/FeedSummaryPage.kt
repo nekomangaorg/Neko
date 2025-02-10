@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,9 @@ import org.nekomanga.presentation.theme.Size
 fun FeedSummaryPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
+    updatingUpdates: Boolean = false,
+    updatingContinueReading: Boolean = false,
+    updatingNewlyAdded: Boolean = false,
     updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
     continueReadingFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
     newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
@@ -32,6 +36,13 @@ fun FeedSummaryPage(
     val scrollState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         item { SummaryHeader(stringResource(R.string.feed_continue_reading)) }
+        if (updatingContinueReading) {
+            item {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
+                )
+            }
+        }
         items(continueReadingFeedMangaList) { feedManga ->
             if (feedManga.chapters.isNotEmpty()) {
                 val chapter = feedManga.chapters.first()
@@ -51,6 +62,13 @@ fun FeedSummaryPage(
         }
 
         item { SummaryHeader(stringResource(R.string.new_chapters_unread)) }
+        if (updatingUpdates) {
+            item {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
+                )
+            }
+        }
         items(updatesFeedMangaList) { feedManga ->
             val chapter = feedManga.chapters.first()
             UpdatesCard(
@@ -71,6 +89,13 @@ fun FeedSummaryPage(
         }
 
         item { SummaryHeader(stringResource(R.string.newly_added)) }
+        if (updatingNewlyAdded) {
+            item {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
+                )
+            }
+        }
         items(newlyAddedFeedMangaList) { feedManga ->
             val chapter = feedManga.chapters.first()
             NewlyAddedCard(

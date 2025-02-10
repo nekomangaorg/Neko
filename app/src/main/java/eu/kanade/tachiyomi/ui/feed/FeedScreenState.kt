@@ -46,8 +46,11 @@ data class UpdatesScreenPagingState(
 )
 
 data class SummaryScreenPagingState(
+    val updatingUpdates: Boolean = true,
     val updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val updatingContinueReading: Boolean = true,
     val continueReadingList: ImmutableList<FeedManga> = persistentListOf(),
+    val updatingNewlyAdded: Boolean = true,
     val newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
 )
 
