@@ -141,6 +141,7 @@ class FeedPresenter(
 
     override fun onCreate() {
         super.onCreate()
+        loadSummaryPage()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         presenterScope.launchIO {
             val downloads =
