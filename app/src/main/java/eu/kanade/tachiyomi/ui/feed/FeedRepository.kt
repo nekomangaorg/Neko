@@ -59,7 +59,7 @@ class FeedRepository(
                 getUpdatesPage(offset = 0, limit = 200, uploadsFetchSort = false)
                     .get()!!
                     .second
-                    .filter { it.chapters.none { it.chapter.read } }
+                    .filter { it.chapters.none { it.chapter.read || it.chapter.lastPageRead != 0 } }
                     .groupBy { it.mangaId }
                     .entries
                     .map { it.value.last() }
