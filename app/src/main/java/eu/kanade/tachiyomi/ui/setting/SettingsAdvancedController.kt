@@ -158,13 +158,28 @@ class SettingsAdvancedController : SettingsController() {
 
                 preference {
                     title = "Total cache usage"
+
+                    val tmpFiles =
+                        File(context.cacheDir, "")
+                            .listFiles()!!
+                            .mapNotNull {
+                                if (it.isFile && (it.name.endsWith(".tmp"))) {
+                                    DiskUtil.getDirectorySize(it)
+                                } else {
+                                    null
+                                }
+                            }
+                            .sum()
+
                     summary =
                         """
-                      Chapter Disk Cache: ${DiskUtil.readableDiskSize(context, chapterCache.cacheDir)}
-                      Cover Cache: ${coverCache.getCoverCacheSize()}
-                      Online Cover Cache: ${coverCache.getOnlineCoverCacheSize()}
-                      Image Cache: ${DiskUtil.readableDiskSize(context, CoilDiskCache.get(context).size)}
-                      Network Cache: ${DiskUtil.readableDiskSize(context, network.cacheDir)}
+                      Parent cache folder: ${DiskUtil.readableDiskSize(context, File(context.cacheDir, ""))}
+                      Chapter disk cache: ${DiskUtil.readableDiskSize(context, chapterCache.cacheDir)}
+                      Cover cache: ${coverCache.getCoverCacheSize()}
+                      Online cover cache: ${coverCache.getOnlineCoverCacheSize()}
+                      Image cache: ${DiskUtil.readableDiskSize(context, CoilDiskCache.get(context).size)}
+                      Network cache: ${DiskUtil.readableDiskSize(context, network.cacheDir)}
+                      Temp file cache: ${DiskUtil.readableDiskSize(context, tmpFiles)}
                     """
                             .trimIndent()
                     onClick {}
