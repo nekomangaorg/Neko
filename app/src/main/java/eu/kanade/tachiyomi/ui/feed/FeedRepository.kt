@@ -116,7 +116,7 @@ class FeedRepository(
                     .mapNotNull { manga ->
                         TimberKt.d { "ESCO ${manga.title} ${manga.date_added}" }
                         val chapters = db.getChapters(manga).executeOnIO()
-                        if (chapters.any { it.read }) {
+                        if (chapters.any { it.read || it.last_page_read != 0 }) {
                             return@mapNotNull null
                         }
                         val simpleChapter =
