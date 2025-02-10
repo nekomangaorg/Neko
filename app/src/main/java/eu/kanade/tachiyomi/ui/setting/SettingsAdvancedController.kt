@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
+import eu.kanade.tachiyomi.data.image.coil.CoilDiskCache
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -64,6 +65,7 @@ import tachiyomi.core.network.PREF_DOH_NJALLA
 import tachiyomi.core.network.PREF_DOH_QUAD101
 import tachiyomi.core.network.PREF_DOH_QUAD9
 import tachiyomi.core.network.PREF_DOH_SHECAN
+import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.system.setDefaultSettings
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -153,6 +155,21 @@ class SettingsAdvancedController : SettingsController() {
 
             preferenceCategory {
                 titleRes = R.string.data_management
+
+                preference {
+                    title = "Total cache usage"
+                    summary =
+                        """
+                      Chapter Disk Cache: ${DiskUtil.readableDiskSize(context, chapterCache.cacheDir)}
+                      Cover Cache: ${coverCache.getCoverCacheSize()}
+                      Online Cover Cache: ${coverCache.getOnlineCoverCacheSize()}
+                      Image Cache: ${DiskUtil.readableDiskSize(context, CoilDiskCache.get(context).size)}
+                      Network Cache: ${DiskUtil.readableDiskSize(context, network.cacheDir)}
+                    """
+                            .trimIndent()
+                    onClick {}
+                }
+
                 preference {
                     key = CLEAR_CACHE_KEY
                     titleRes = R.string.clear_chapter_cache
@@ -177,7 +194,7 @@ class SettingsAdvancedController : SettingsController() {
                     summary =
                         context.getString(
                             R.string.delete_old_covers_in_library_used_,
-                            coverCache.getChapterCacheSize(),
+                            coverCache.getCoverCacheSize(),
                         )
 
                     onClick {

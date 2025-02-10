@@ -55,7 +55,7 @@ class NetworkHelper(val context: Context) {
     private val json: Json by injectLazy()
     private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
 
-    private val cacheDir = File(context.cacheDir, "network_cache")
+    val cacheDir = File(context.cacheDir, "network_cache")
 
     private val cacheSize = 5L * 1024 * 1024 // 5 MiB
 

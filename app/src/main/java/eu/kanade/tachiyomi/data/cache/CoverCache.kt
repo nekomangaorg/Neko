@@ -58,7 +58,7 @@ class CoverCache(val context: Context) {
      */
     private val renewInterval = TimeUnit.HOURS.toMillis(1)
 
-    fun getChapterCacheSize(): String {
+    fun getCoverCacheSize(): String {
         return Formatter.formatFileSize(context, DiskUtil.getDirectorySize(cacheDir))
     }
 
