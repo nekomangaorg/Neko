@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import kotlinx.collections.immutable.ImmutableList
@@ -43,21 +44,28 @@ fun FeedSummaryPage(
                 )
             }
         }
-        items(continueReadingFeedMangaList) { feedManga ->
-            if (feedManga.chapters.isNotEmpty()) {
-                val chapter = feedManga.chapters.first()
-                ContinueReadingCard(
-                    feedManga = feedManga,
-                    outlineCover = outlineCovers,
-                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                    chapterClick = {
-                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
-                    },
-                    deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
-                    deleteHistoryClick = { chp ->
-                        feedScreenActions.deleteHistoryClick(feedManga, chp)
-                    },
-                )
+        if (!updatingContinueReading && continueReadingFeedMangaList.isEmpty()) {
+            item { NoResults() }
+        } else {
+
+            items(continueReadingFeedMangaList) { feedManga ->
+                if (feedManga.chapters.isNotEmpty()) {
+                    val chapter = feedManga.chapters.first()
+                    ContinueReadingCard(
+                        feedManga = feedManga,
+                        outlineCover = outlineCovers,
+                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                        chapterClick = {
+                            feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                        },
+                        deleteAllHistoryClick = {
+                            feedScreenActions.deleteAllHistoryClick(feedManga)
+                        },
+                        deleteHistoryClick = { chp ->
+                            feedScreenActions.deleteHistoryClick(feedManga, chp)
+                        },
+                    )
+                }
             }
         }
 
@@ -69,23 +77,27 @@ fun FeedSummaryPage(
                 )
             }
         }
-        items(updatesFeedMangaList) { feedManga ->
-            val chapter = feedManga.chapters.first()
-            UpdatesCard(
-                chapterItem = chapter,
-                isGrouped = false,
-                mangaTitle = feedManga.mangaTitle,
-                artwork = feedManga.artwork,
-                outlineCovers = outlineCovers,
-                mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                chapterClick = {
-                    feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
-                },
-                chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
-                downloadClick = { action ->
-                    feedScreenActions.downloadClick(chapter, feedManga, action)
-                },
-            )
+        if (!updatingUpdates && updatesFeedMangaList.isEmpty()) {
+            item { NoResults() }
+        } else {
+            items(updatesFeedMangaList) { feedManga ->
+                val chapter = feedManga.chapters.first()
+                UpdatesCard(
+                    chapterItem = chapter,
+                    isGrouped = false,
+                    mangaTitle = feedManga.mangaTitle,
+                    artwork = feedManga.artwork,
+                    outlineCovers = outlineCovers,
+                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                    chapterClick = {
+                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                    },
+                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                    downloadClick = { action ->
+                        feedScreenActions.downloadClick(chapter, feedManga, action)
+                    },
+                )
+            }
         }
 
         item { SummaryHeader(stringResource(R.string.newly_added)) }
@@ -96,23 +108,27 @@ fun FeedSummaryPage(
                 )
             }
         }
-        items(newlyAddedFeedMangaList) { feedManga ->
-            val chapter = feedManga.chapters.first()
-            NewlyAddedCard(
-                chapterItem = chapter,
-                mangaTitle = feedManga.mangaTitle,
-                dateAdded = feedManga.date,
-                artwork = feedManga.artwork,
-                outlineCovers = outlineCovers,
-                mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                chapterClick = {
-                    feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
-                },
-                chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
-                downloadClick = { action ->
-                    feedScreenActions.downloadClick(chapter, feedManga, action)
-                },
-            )
+        if (!updatingNewlyAdded && newlyAddedFeedMangaList.isEmpty()) {
+            item { NoResults() }
+        } else {
+            items(newlyAddedFeedMangaList) { feedManga ->
+                val chapter = feedManga.chapters.first()
+                NewlyAddedCard(
+                    chapterItem = chapter,
+                    mangaTitle = feedManga.mangaTitle,
+                    dateAdded = feedManga.date,
+                    artwork = feedManga.artwork,
+                    outlineCovers = outlineCovers,
+                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                    chapterClick = {
+                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                    },
+                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                    downloadClick = { action ->
+                        feedScreenActions.downloadClick(chapter, feedManga, action)
+                    },
+                )
+            }
         }
     }
 }
@@ -131,5 +147,15 @@ private fun SummaryHeader(text: String) {
                     top = Size.small,
                     bottom = Size.small,
                 ),
+    )
+}
+
+@Composable
+private fun NoResults() {
+    Text(
+        text = stringResource(R.string.no_results_found),
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.fillMaxWidth(),
     )
 }
