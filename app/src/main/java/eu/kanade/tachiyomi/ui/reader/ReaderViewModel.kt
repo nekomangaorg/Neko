@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import androidx.annotation.ColorInt
@@ -54,9 +55,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.util.Date
 import java.util.concurrent.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,7 +71,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -149,8 +147,6 @@ class ReaderViewModel(
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
-
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     private val statusHandler: StatusHandler by injectLazy()
 
@@ -482,7 +478,7 @@ class ReaderViewModel(
             TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
             saveReadingProgress(currentChapters.currChapter)
             setReadStartTime()
-            scope.launch { loadNewChapter(selectedChapter) }
+            viewModelScope.launch { loadNewChapter(selectedChapter) }
         }
         val pages = page.chapter.pages ?: return
         val inDownloadRange = page.number.toDouble() / pages.size > 0.2
@@ -497,7 +493,7 @@ class ReaderViewModel(
         val nextChapter = state.value.viewerChapters?.nextChapter?.chapter ?: return
         val chaptersNumberToDownload = preferences.autoDownloadWhileReading().get()
         if (chaptersNumberToDownload == 0 || !manga.favorite) return
-        scope.launchIO {
+        viewModelScope.launchIO {
             val isNextChapterDownloaded = downloadManager.isChapterDownloaded(nextChapter, manga)
             if (isNextChapterDownloaded) {
                 downloadAutoNextChapters(chaptersNumberToDownload, nextChapter.id)
@@ -578,7 +574,9 @@ class ReaderViewModel(
         }
     }
 
-    fun saveCurrentChapterReadingProgress() = getCurrentChapter()?.let { saveReadingProgress(it) }
+    fun saveCurrentChapterReadingProgress() = {
+        viewModelScope.launchNonCancellable { getCurrentChapter()?.let { saveReadingProgress(it) } }
+    }
 
     /**
      * Saves this [readerChapter]'s progress (last read page and whether it's read). If incognito
@@ -899,7 +897,7 @@ class ReaderViewModel(
         isLTR: Boolean,
         @ColorInt bg: Int,
     ) {
-        scope.launch {
+        viewModelScope.launch {
             if (firstPage.status != Page.State.READY) return@launch
             if (secondPage.status != Page.State.READY) return@launch
             val manga = manga ?: return@launch
@@ -956,7 +954,7 @@ class ReaderViewModel(
         manga ?: return
 
         if (!preferences.readingSync().get() && readerChapter.chapter.isMergedChapter()) return
-        scope.launchIO {
+        viewModelScope.launchIO {
             statusHandler.marksChaptersStatus(
                 manga!!.uuid(),
                 listOf(readerChapter.chapter.mangadex_chapter_id),
@@ -992,7 +990,7 @@ class ReaderViewModel(
     private fun enqueueDeleteReadChapters(chapter: ReaderChapter) {
         if (!chapter.chapter.read) return
         val manga = manga ?: return
-        scope.launchNonCancellable {
+        viewModelScope.launchNonCancellable {
             downloadManager.enqueueDeleteChapters(listOf(chapter.chapter), manga)
         }
     }
@@ -1002,7 +1000,7 @@ class ReaderViewModel(
      * are ignored.
      */
     fun deletePendingChapters() {
-        scope.launchNonCancellable { downloadManager.deletePendingChapters() }
+        viewModelScope.launchNonCancellable { downloadManager.deletePendingChapters() }
     }
 
     suspend fun lookupComment(chapterId: String): String? {
