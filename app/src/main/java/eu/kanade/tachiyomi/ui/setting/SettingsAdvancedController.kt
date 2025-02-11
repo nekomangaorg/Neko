@@ -235,6 +235,20 @@ class SettingsAdvancedController : SettingsController() {
                         }
                     }
                 }
+
+                preference {
+                    key = "clear_temp_cache_files"
+                    title = "Clear Temp Cache files"
+                    onClick {
+                        context.toast(R.string.starting_cleanup)
+                        (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                            File(context.cacheDir, "").listFiles()!!.forEach {
+                                launchIO { it.delete() }
+                            }
+                        }
+                    }
+                }
+
                 preference {
                     key = "clean_downloaded_chapters"
                     titleRes = R.string.clean_up_downloaded_chapters
