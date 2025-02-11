@@ -8,33 +8,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissState
-import androidx.compose.material.DismissValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +41,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -62,7 +54,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.launch
+import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.logging.TimberKt
@@ -98,111 +90,86 @@ fun ChapterRow(
     onDownload: (DownloadAction) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
-        val dismissState = rememberDismissState(initialValue = DismissValue.Default)
-        NekoSwipeToDismiss(
-            state = dismissState,
-            modifier = Modifier.padding(vertical = Dp(1f)),
-            background = {
-                val color =
-                    when (dismissState.dismissDirection) {
-                        null -> MaterialTheme.colorScheme.surface
-                        else ->
-                            MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                                themeColor.buttonColor,
-                                8.dp,
-                            )
-                    }
+        val (readIcon, readText) =
+            when (read) {
+                true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
+                false -> Icons.Default.Visibility to R.string.mark_as_read
+            }
 
-                when (dismissState.dismissDirection) {
-                    DismissDirection.EndToStart -> {
-                        val (icon, text) =
-                            when (read) {
-                                true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
-                                false -> Icons.Default.Visibility to R.string.mark_as_read
-                            }
-                        Background(
-                            icon,
-                            Alignment.CenterEnd,
-                            color,
-                            stringResource(id = text),
-                            themeColor.buttonColor,
-                        )
-                    }
-                    DismissDirection.StartToEnd -> {
-                        val (icon, text) =
-                            when (bookmark) {
-                                true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
-                                false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
-                            }
-                        Background(
-                            icon,
-                            Alignment.CenterStart,
-                            color,
-                            stringResource(id = text),
-                            themeColor.buttonColor,
-                        )
-                    }
-                    else -> Unit
-                }
-            },
-            dismissContent = {
-                ChapterInfo(
-                    themeColorState = themeColor,
-                    shouldHideChapterTitles = shouldHideChapterTitles,
-                    title = title,
-                    scanlator = scanlator,
-                    language = language,
-                    chapterNumber = chapterNumber,
-                    dateUploaded = dateUploaded,
-                    lastPageRead = lastPageRead,
-                    pagesLeft = pagesLeft,
-                    read = read,
-                    bookmark = bookmark,
-                    downloadStateProvider = downloadStateProvider,
-                    downloadProgressProvider = downloadProgressProvider,
-                    onClick = onClick,
-                    onWebView = onWebView,
-                    onComment = onComment,
-                    onDownload = onDownload,
-                    markPrevious = markPrevious,
-                    isMerged = isMerged,
-                    blockScanlator = blockScanlator,
-                )
-            },
-        )
-        when {
-            dismissState.isDismissed(DismissDirection.EndToStart) ->
-                Reset(dismissState = dismissState, action = onRead)
-            dismissState.isDismissed(DismissDirection.StartToEnd) ->
-                Reset(dismissState = dismissState, action = onBookmark)
+        val (bookmarkIcon, bookmarkText) =
+            when (bookmark) {
+                true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
+                false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
+            }
+
+        val markReadSwipeAction =
+            SwipeAction(
+                icon = {
+                    SwipeIcon(
+                        icon = readIcon,
+                        contentColor = themeColor.buttonColor,
+                        text = stringResource(readText),
+                    )
+                },
+                background =
+                    MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                        themeColor.buttonColor,
+                        8.dp,
+                    ),
+                onSwipe = onRead,
+            )
+
+        val markBookmarkAction =
+            SwipeAction(
+                icon = {
+                    SwipeIcon(
+                        icon = bookmarkIcon,
+                        contentColor = themeColor.buttonColor,
+                        text = stringResource(bookmarkText),
+                    )
+                },
+                background =
+                    MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                        themeColor.buttonColor,
+                        8.dp,
+                    ),
+                onSwipe = onBookmark,
+            )
+
+        ChapterSwipe(
+            startSwipeActions = listOf(markBookmarkAction),
+            endSwipeActions = listOf(markReadSwipeAction),
+        ) {
+            ChapterInfo(
+                themeColorState = themeColor,
+                shouldHideChapterTitles = shouldHideChapterTitles,
+                title = title,
+                scanlator = scanlator,
+                language = language,
+                chapterNumber = chapterNumber,
+                dateUploaded = dateUploaded,
+                lastPageRead = lastPageRead,
+                pagesLeft = pagesLeft,
+                read = read,
+                bookmark = bookmark,
+                downloadStateProvider = downloadStateProvider,
+                downloadProgressProvider = downloadProgressProvider,
+                onClick = onClick,
+                onWebView = onWebView,
+                onComment = onComment,
+                onDownload = onDownload,
+                markPrevious = markPrevious,
+                isMerged = isMerged,
+                blockScanlator = blockScanlator,
+            )
         }
     }
 }
 
 @Composable
-private fun Reset(dismissState: DismissState, action: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = dismissState.dismissDirection) {
-        scope.launch {
-            dismissState.reset()
-            action()
-        }
-    }
-}
-
-@Composable
-private fun Background(
-    icon: ImageVector,
-    alignment: Alignment,
-    color: Color,
-    text: String,
-    contentColor: Color,
-) {
-    Box(
-        Modifier.fillMaxSize().background(color).padding(horizontal = Dp(20f)),
-        contentAlignment = alignment,
-    ) {
-        Column(modifier = Modifier.align(alignment)) {
+private fun SwipeIcon(icon: ImageVector, text: String, contentColor: Color) {
+    Box(Modifier.padding(horizontal = Size.medium)) {
+        Column(modifier = Modifier.align(Alignment.CenterStart)) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
