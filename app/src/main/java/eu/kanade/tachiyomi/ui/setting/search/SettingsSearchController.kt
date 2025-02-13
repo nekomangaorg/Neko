@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
-import eu.kanade.tachiyomi.ui.setting.SettingsController
+import eu.kanade.tachiyomi.ui.setting.AbstractSettingsController
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -139,7 +139,7 @@ class SettingsSearchController :
     }
 
     /** Opens a catalogue with the given search. */
-    override fun onTitleClick(ctrl: SettingsController) {
+    override fun onTitleClick(ctrl: AbstractSettingsController) {
         searchView?.query.let { query = it.toString() }
 
         router.pushController(ctrl.withFadeTransaction())

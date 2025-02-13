@@ -1413,12 +1413,12 @@
     <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
 
     <!-- Merge Settings -->
-    <string name="merge_source_settings">Merge source settings</string>
+    <string name="merge_source_settings">Merge source</string>
     <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
 
 
     <!-- Site Settings -->
-    <string name="site_specific_settings">MangaDex settings</string>
+    <string name="site_specific_settings">MangaDex</string>
     <string name="content_rating_title">Content Ratings</string>
     <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
     <string name="auto_track_content_rating_title">Auto track content ratings</string>

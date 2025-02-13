@@ -2,6 +2,7 @@
 accompanist_version = "0.36.0"
 compose_version = "1.7.7"
 compose_material3_version = "1.3.1"
+compose_navigation = "2.8.7"
 markdown_version = "0.30.0"
 
 [libraries]
@@ -34,6 +35,8 @@ gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
+compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose_navigation" }
+
 date-field = "com.github.nonproto:compose-date-text-field:73c012b665"
 markdown = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown_version" }
 markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown_version" }
@@ -43,5 +46,5 @@ swipe = "me.saket.swipe:swipe:1.3.0"
 
 [bundles]
 accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller"]
-compose = ["activity", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion"]
+compose = ["activity", "compose-navigation", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion"]
 charting = ["charty"]

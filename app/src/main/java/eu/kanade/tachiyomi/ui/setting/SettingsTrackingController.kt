@@ -23,7 +23,7 @@ import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.injectLazy
 
 class SettingsTrackingController :
-    SettingsController(), TrackLoginDialog.Listener, TrackLogoutDialog.Listener {
+    AbstractSettingsController(), TrackLoginDialog.Listener, TrackLogoutDialog.Listener {
 
     private val trackManager: TrackManager by injectLazy()
 

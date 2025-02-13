@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.setting.SettingsController
+import eu.kanade.tachiyomi.ui.setting.AbstractSettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
@@ -56,7 +56,7 @@ class SearchActivity : MainActivity() {
             }
         }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
-        (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? AbstractSettingsController)?.setTitle()
     }
 
     // Override finishAfterTransition since the animation gets weird when launching this from other

@@ -34,7 +34,7 @@ import org.nekomanga.domain.storage.StoragePreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsDataController : SettingsController() {
+class SettingsDataController : AbstractSettingsController() {
     private val storagePreferences: StoragePreferences = Injekt.get()
     private val storageManager: StorageManager = Injekt.get()
     private val backupPreferences: BackupPreferences = Injekt.get()

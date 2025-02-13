@@ -10,7 +10,7 @@ import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
-class SettingsSecurityController : SettingsController() {
+class SettingsSecurityController : AbstractSettingsController() {
 
     val securityPreferences: SecurityPreferences by injectLazy()
 

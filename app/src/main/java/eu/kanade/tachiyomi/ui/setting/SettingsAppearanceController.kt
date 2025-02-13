@@ -18,7 +18,7 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsAppearanceController : SettingsController() {
+class SettingsAppearanceController : AbstractSettingsController() {
 
     private var lastThemeXLight: Int? = null
     private var lastThemeXDark: Int? = null

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader
 
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import androidx.annotation.ColorInt
@@ -71,6 +70,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences

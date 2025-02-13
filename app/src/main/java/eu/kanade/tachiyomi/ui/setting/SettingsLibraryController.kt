@@ -30,7 +30,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SettingsLibraryController : SettingsController() {
+class SettingsLibraryController : AbstractSettingsController() {
 
     private val db: DatabaseHelper by injectLazy()
     private val libraryPreferences: LibraryPreferences by injectLazy()

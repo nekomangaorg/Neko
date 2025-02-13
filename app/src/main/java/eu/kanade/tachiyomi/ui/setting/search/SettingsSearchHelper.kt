@@ -7,9 +7,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
+import eu.kanade.tachiyomi.ui.setting.AbstractSettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
 import eu.kanade.tachiyomi.ui.setting.SettingsAppearanceController
-import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsDataController
 import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsGeneralController
@@ -31,7 +31,7 @@ object SettingsSearchHelper {
      * All subclasses of `SettingsController` should be listed here, in order to have their
      * preferences searchable.
      */
-    private val settingControllersList: List<KClass<out SettingsController>> =
+    private val settingControllersList: List<KClass<out AbstractSettingsController>> =
         listOf(
             SettingsAdvancedController::class,
             SettingsAppearanceController::class,
@@ -85,7 +85,7 @@ object SettingsSearchHelper {
      * search query.
      */
     private fun getSettingSearchResult(
-        ctrl: SettingsController,
+        ctrl: AbstractSettingsController,
         pref: Preference,
         breadcrumbs: String = "",
     ) {
@@ -145,6 +145,6 @@ object SettingsSearchHelper {
         val title: String,
         val summary: String,
         val breadcrumb: String,
-        val searchController: SettingsController,
+        val searchController: AbstractSettingsController,
     )
 }

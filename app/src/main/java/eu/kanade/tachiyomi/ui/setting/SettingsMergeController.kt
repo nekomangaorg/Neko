@@ -12,7 +12,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SettingsMergeController :
-    SettingsController(), KomgaLoginDialog.Listener, KomgaLogoutDialog.Listener {
+    AbstractSettingsController(), KomgaLoginDialog.Listener, KomgaLogoutDialog.Listener {
     private val komga by lazy { Injekt.get<SourceManager>().komga }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) =

@@ -71,7 +71,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SettingsAdvancedController : SettingsController() {
+class SettingsAdvancedController : AbstractSettingsController() {
 
     private val network: NetworkHelper by injectLazy()
     private val networkPreferences: NetworkPreferences by injectLazy()

@@ -7,10 +7,9 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SettingsDownloadController : SettingsController() {
+class SettingsDownloadController : AbstractSettingsController() {
 
     private val db: DatabaseHelper by injectLazy()
 

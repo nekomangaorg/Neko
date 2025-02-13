@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
 import org.nekomanga.core.preferences.PreferenceValues
 
-class SettingsReaderController : SettingsController() {
+class SettingsReaderController : AbstractSettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) =
         screen.apply {

@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 
-class SettingsGeneralController : SettingsController() {
+class SettingsGeneralController : AbstractSettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 

@@ -91,6 +91,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     cancelSeriesClick = presenter::cancelDownloadSeries,
                 ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
+            settings2Click = { (this.activity as? MainActivity)?.showSettings2() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },
             helpClick = {

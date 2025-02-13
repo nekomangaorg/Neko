@@ -27,7 +27,7 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listener {
+class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialog.Listener {
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
     private val db by lazy { Injekt.get<DatabaseHelper>() }

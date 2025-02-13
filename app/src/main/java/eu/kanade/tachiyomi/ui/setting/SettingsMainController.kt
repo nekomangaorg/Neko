@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.R
 
-class SettingsMainController : SettingsController(), FloatingSearchInterface {
+class SettingsMainController : AbstractSettingsController(), FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)
