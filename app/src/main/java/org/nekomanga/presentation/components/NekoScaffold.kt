@@ -246,6 +246,7 @@ fun SearchOutlineTopAppBar(
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
+
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     TopAppBar(
@@ -263,67 +264,80 @@ fun SearchOutlineTopAppBar(
                             }
                         }
                         .focusRequester(focusRequester),
-                query = searchText,
-                onQueryChange = {
-                    searchText = it
-                    onSearchText(it)
-                },
+                expanded = false,
+                onExpandedChange = {},
                 colors =
                     SearchBarDefaults.colors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
-                onSearch = { onSearchText(it) },
-                active = false,
-                onActiveChange = {},
-                leadingIcon = {
-                    if (searchEnabled) {
-                        ToolTipButton(
-                            toolTipLabel = stringResource(id = R.string.cancel_search),
-                            icon = Icons.Filled.SearchOff,
-                            enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            buttonClicked = {
-                                onSearchText("")
-                                searchText = ""
-                                searchEnabled = false
-                                focusManager.clearFocus()
-                            },
-                        )
-                    } else {
-                        ToolTipButton(
-                            toolTipLabel = stringResource(id = R.string.search),
-                            icon = Icons.Filled.Search,
-                            enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            buttonClicked = { searchEnabled = true },
-                        )
-                    }
-                },
-                placeholder = {
-                    Text(
-                        text = searchPlaceHolder,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                trailingIcon = {
-                    Row {
-                        AnimatedVisibility(
-                            visible = searchText.isNotBlank(),
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                        ) {
-                            ToolTipButton(
-                                toolTipLabel = stringResource(id = R.string.clear),
-                                icon = Icons.Filled.Close,
-                                enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                buttonClicked = {
-                                    onSearchText("")
-                                    searchText = ""
-                                },
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = searchText,
+                        expanded = false,
+                        onExpandedChange = {},
+                        onQueryChange = {
+                            searchText = it
+                            onSearchText(it)
+                        },
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Green,
+                                unfocusedContainerColor = Color.Blue,
+                                disabledContainerColor = Color.Gray,
+                                errorContainerColor = Color.Red,
+                            ),
+                        onSearch = { onSearchText(it) },
+                        placeholder = {
+                            Text(
+                                text = searchPlaceHolder,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                        }
-                        if (!searchEnabled) {
-                            actions()
-                        }
-                    }
+                        },
+                        leadingIcon = {
+                            if (searchEnabled) {
+                                ToolTipButton(
+                                    toolTipLabel = stringResource(id = R.string.cancel_search),
+                                    icon = Icons.Filled.SearchOff,
+                                    enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    buttonClicked = {
+                                        onSearchText("")
+                                        searchText = ""
+                                        searchEnabled = false
+                                        focusManager.clearFocus()
+                                    },
+                                )
+                            } else {
+                                ToolTipButton(
+                                    toolTipLabel = stringResource(id = R.string.search),
+                                    icon = Icons.Filled.Search,
+                                    enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    buttonClicked = { searchEnabled = true },
+                                )
+                            }
+                        },
+                        trailingIcon = {
+                            Row {
+                                AnimatedVisibility(
+                                    visible = searchText.isNotBlank(),
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.clear),
+                                        icon = Icons.Filled.Close,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = {
+                                            onSearchText("")
+                                            searchText = ""
+                                        },
+                                    )
+                                }
+                                if (!searchEnabled) {
+                                    actions()
+                                }
+                            }
+                        },
+                    )
                 },
                 content = {},
             )
