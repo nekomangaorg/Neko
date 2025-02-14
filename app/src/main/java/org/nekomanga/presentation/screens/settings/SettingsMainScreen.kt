@@ -17,10 +17,7 @@ import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import org.nekomanga.R
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
 
 @Composable
@@ -38,84 +35,83 @@ fun SettingsMainScreen(
     onSecurityClick: () -> Unit,
     onAdvancedClick: () -> Unit,
 ) {
-        LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.general),
-                    icon = Icons.Outlined.Tune,
-                    onClick = onGeneralClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.appearance),
-                    icon = Icons.Outlined.Palette,
-                    onClick = onAppearanceClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.library),
-                    icon = Icons.Outlined.CollectionsBookmark,
-                    onClick = onLibraryClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.data_storage),
-                    icon = Icons.Outlined.Folder,
-                    onClick = onDataStorageClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.site_specific_settings),
-                    icon = Icons.Outlined.Public,
-                    onClick = onSiteSpecificClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.merge_source_settings),
-                    icon = Icons.Outlined.Merge,
-                    onClick = onMergeSourceClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.reader),
-                    icon = Icons.AutoMirrored.Default.ChromeReaderMode,
-                    onClick = onReaderClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.downloads),
-                    icon = Icons.Outlined.Download,
-                    onClick = onDownloadsClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.tracked),
-                    icon = Icons.Outlined.Autorenew,
-                    onClick = onTrackingClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.security),
-                    icon = Icons.Outlined.Security,
-                    onClick = onSecurityClick,
-                )
-            }
-            item {
-                IconItem(
-                    labelText = UiText.StringResource(R.string.advanced),
-                    icon = Icons.Outlined.Code,
-                    onClick = onAdvancedClick,
-                )
-            }
+    LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.general),
+                icon = Icons.Outlined.Tune,
+                onClick = onGeneralClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.appearance),
+                icon = Icons.Outlined.Palette,
+                onClick = onAppearanceClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.library),
+                icon = Icons.Outlined.CollectionsBookmark,
+                onClick = onLibraryClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.data_storage),
+                icon = Icons.Outlined.Folder,
+                onClick = onDataStorageClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.site_specific_settings),
+                icon = Icons.Outlined.Public,
+                onClick = onSiteSpecificClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.merge_source_settings),
+                icon = Icons.Outlined.Merge,
+                onClick = onMergeSourceClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.reader),
+                icon = Icons.AutoMirrored.Default.ChromeReaderMode,
+                onClick = onReaderClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.downloads),
+                icon = Icons.Outlined.Download,
+                onClick = onDownloadsClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.tracked),
+                icon = Icons.Outlined.Autorenew,
+                onClick = onTrackingClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.security),
+                icon = Icons.Outlined.Security,
+                onClick = onSecurityClick,
+            )
+        }
+        item {
+            IconItem(
+                labelText = UiText.StringResource(R.string.advanced),
+                icon = Icons.Outlined.Code,
+                onClick = onAdvancedClick,
+            )
         }
     }
 }

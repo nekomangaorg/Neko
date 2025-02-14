@@ -22,6 +22,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
         composable<SettingsMainRoute> {
             NekoScaffold(
                 type = NekoScaffoldType.SearchOutline,
+                searchNavigationEnabled = true,
                 onNavigationIconClicked = {},
                 onSearch = {},
                 searchPlaceHolder = stringResource(id = R.string.search_settings),

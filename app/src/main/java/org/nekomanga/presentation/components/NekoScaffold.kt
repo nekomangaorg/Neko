@@ -86,6 +86,7 @@ fun NekoScaffold(
         TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState()),
     navigationIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
+    searchNavigationEnabled: Boolean = false,
     onSearch: (String?) -> Unit = {},
     snackBarHost: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -151,6 +152,10 @@ fun NekoScaffold(
                             onSearch,
                             searchPlaceHolder,
                             color,
+                            searchNavigationEnabled,
+                            navigationIconLabel,
+                            navigationIcon,
+                            onNavigationIconClicked,
                             actions,
                             scrollBehavior,
                         )
@@ -241,6 +246,10 @@ fun SearchOutlineTopAppBar(
     onSearchText: (String?) -> Unit,
     searchPlaceHolder: String,
     color: Color,
+    navigationEnabled: Boolean,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
@@ -294,25 +303,34 @@ fun SearchOutlineTopAppBar(
                             )
                         },
                         leadingIcon = {
-                            if (searchEnabled) {
-                                ToolTipButton(
-                                    toolTipLabel = stringResource(id = R.string.cancel_search),
-                                    icon = Icons.Filled.SearchOff,
-                                    enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    buttonClicked = {
-                                        onSearchText("")
-                                        searchText = ""
-                                        searchEnabled = false
-                                        focusManager.clearFocus()
-                                    },
-                                )
-                            } else {
-                                ToolTipButton(
-                                    toolTipLabel = stringResource(id = R.string.search),
-                                    icon = Icons.Filled.Search,
-                                    enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    buttonClicked = { searchEnabled = true },
-                                )
+                            Row {
+                                if (navigationEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = navigationIconLabel,
+                                        icon = navigationIcon,
+                                        buttonClicked = onNavigationIconClicked,
+                                    )
+                                }
+                                if (searchEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.cancel_search),
+                                        icon = Icons.Filled.SearchOff,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = {
+                                            onSearchText("")
+                                            searchText = ""
+                                            searchEnabled = false
+                                            focusManager.clearFocus()
+                                        },
+                                    )
+                                } else {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = { searchEnabled = true },
+                                    )
+                                }
                             }
                         },
                         trailingIcon = {
