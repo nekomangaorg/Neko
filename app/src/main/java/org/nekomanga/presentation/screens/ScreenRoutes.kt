@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable object SettingsLibraryRoute
 
+@Serializable object SettingsDataStorageRoute
+
 @Serializable object SettingsMangaDexRoute
 
 @Serializable object SettingsMergeSourceRoute

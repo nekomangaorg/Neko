@@ -10,10 +10,14 @@ import androidx.compose.ui.Modifier
 import org.nekomanga.presentation.components.UiText
 
 @Composable
-fun SettingsGeneralScreen(modifier: Modifier = Modifier, contentPadding: PaddingValues) {
+fun SettingsDataStorageScreen(modifier: Modifier = Modifier, contentPadding: PaddingValues) {
     LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
         item {
-            IconItem(labelText = UiText.String("General"), icon = Icons.Default.Info, onClick = {})
+            IconItem(
+                labelText = UiText.String("Data and Storage"),
+                icon = Icons.Default.Info,
+                onClick = {},
+            )
         }
     }
 }

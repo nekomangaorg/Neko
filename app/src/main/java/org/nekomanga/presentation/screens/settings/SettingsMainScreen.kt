@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.settings
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -23,15 +24,21 @@ import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
 
 @Composable
-fun SettingsMainScreen(modifier: Modifier = Modifier, onGeneralClick: () -> Unit) {
-    NekoScaffold(
-        type = NekoScaffoldType.SearchOutline,
-        onNavigationIconClicked = {},
-        onSearch = {},
-        searchPlaceHolder = stringResource(id = R.string.search_settings),
-        actions = {},
-    ) { incomingPaddingValues ->
-        LazyColumn(contentPadding = incomingPaddingValues, modifier = Modifier.fillMaxWidth()) {
+fun SettingsMainScreen(
+    contentPadding: PaddingValues,
+    onGeneralClick: () -> Unit,
+    onAppearanceClick: () -> Unit,
+    onLibraryClick: () -> Unit,
+    onDataStorageClick: () -> Unit,
+    onSiteSpecificClick: () -> Unit,
+    onMergeSourceClick: () -> Unit,
+    onReaderClick: () -> Unit,
+    onDownloadsClick: () -> Unit,
+    onTrackingClick: () -> Unit,
+    onSecurityClick: () -> Unit,
+    onAdvancedClick: () -> Unit,
+) {
+        LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.general),
@@ -43,70 +50,70 @@ fun SettingsMainScreen(modifier: Modifier = Modifier, onGeneralClick: () -> Unit
                 IconItem(
                     labelText = UiText.StringResource(R.string.appearance),
                     icon = Icons.Outlined.Palette,
-                    onClick = {},
+                    onClick = onAppearanceClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.library),
                     icon = Icons.Outlined.CollectionsBookmark,
-                    onClick = {},
+                    onClick = onLibraryClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.data_storage),
                     icon = Icons.Outlined.Folder,
-                    onClick = {},
+                    onClick = onDataStorageClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.site_specific_settings),
                     icon = Icons.Outlined.Public,
-                    onClick = {},
+                    onClick = onSiteSpecificClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.merge_source_settings),
                     icon = Icons.Outlined.Merge,
-                    onClick = {},
+                    onClick = onMergeSourceClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.reader),
                     icon = Icons.AutoMirrored.Default.ChromeReaderMode,
-                    onClick = {},
+                    onClick = onReaderClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.downloads),
                     icon = Icons.Outlined.Download,
-                    onClick = {},
+                    onClick = onDownloadsClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.tracked),
                     icon = Icons.Outlined.Autorenew,
-                    onClick = {},
+                    onClick = onTrackingClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.security),
                     icon = Icons.Outlined.Security,
-                    onClick = {},
+                    onClick = onSecurityClick,
                 )
             }
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.advanced),
                     icon = Icons.Outlined.Code,
-                    onClick = {},
+                    onClick = onAdvancedClick,
                 )
             }
         }
