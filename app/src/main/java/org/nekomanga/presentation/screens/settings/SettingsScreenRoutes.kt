@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens
+package org.nekomanga.presentation.screens.settings
 
 import kotlinx.serialization.Serializable
 

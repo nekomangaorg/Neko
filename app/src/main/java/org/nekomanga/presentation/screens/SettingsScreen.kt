@@ -9,11 +9,30 @@ import androidx.navigation.compose.rememberNavController
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.screens.settings.SettingsAppearanceScreen
-import org.nekomanga.presentation.screens.settings.SettingsDataStorageScreen
-import org.nekomanga.presentation.screens.settings.SettingsGeneralScreen
-import org.nekomanga.presentation.screens.settings.SettingsLibraryScreen
+import org.nekomanga.presentation.screens.settings.SettingsAdvancedRoute
+import org.nekomanga.presentation.screens.settings.SettingsAppearanceRoute
+import org.nekomanga.presentation.screens.settings.SettingsDataStorageRoute
+import org.nekomanga.presentation.screens.settings.SettingsDownloadsRoute
+import org.nekomanga.presentation.screens.settings.SettingsGeneralRoute
+import org.nekomanga.presentation.screens.settings.SettingsLibraryRoute
+import org.nekomanga.presentation.screens.settings.SettingsMainRoute
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
+import org.nekomanga.presentation.screens.settings.SettingsMangaDexRoute
+import org.nekomanga.presentation.screens.settings.SettingsMergeSourceRoute
+import org.nekomanga.presentation.screens.settings.SettingsReaderRoute
+import org.nekomanga.presentation.screens.settings.SettingsSecurityRoute
+import org.nekomanga.presentation.screens.settings.SettingsTrackingRoute
+import org.nekomanga.presentation.screens.settings.screens.SettingsAdvancedScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsAppearanceScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsGeneralScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsLibraryScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsMangaDexScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsSecurityScreen
+import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScreen
 
 @Composable
 fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) {
@@ -23,7 +42,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
             NekoScaffold(
                 type = NekoScaffoldType.SearchOutline,
                 searchNavigationEnabled = true,
-                onNavigationIconClicked = {},
+                onNavigationIconClicked = onBackPressed,
                 onSearch = {},
                 searchPlaceHolder = stringResource(id = R.string.search_settings),
                 actions = {},
@@ -40,13 +59,14 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     onDownloadsClick = { navController.navigate(SettingsDownloadsRoute) },
                     onTrackingClick = { navController.navigate(SettingsTrackingRoute) },
                     onSecurityClick = { navController.navigate(SettingsSecurityRoute) },
-                    onAdvancedClick = { navController.navigate(SettingsAppearanceRoute) },
+                    onAdvancedClick = { navController.navigate(SettingsAdvancedRoute) },
                 )
             }
         }
         composable<SettingsGeneralRoute> {
             NekoScaffold(
-                type = NekoScaffoldType.NoTitle,
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.general),
                 onNavigationIconClicked = { navController.popBackStack() },
             ) { contentPadding ->
                 SettingsGeneralScreen(contentPadding = contentPadding)
@@ -55,7 +75,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
 
         composable<SettingsAppearanceRoute> {
             NekoScaffold(
-                type = NekoScaffoldType.NoTitle,
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.appearance),
                 onNavigationIconClicked = { navController.popBackStack() },
             ) { contentPadding ->
                 SettingsAppearanceScreen(contentPadding = contentPadding)
@@ -64,7 +85,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
 
         composable<SettingsLibraryRoute> {
             NekoScaffold(
-                type = NekoScaffoldType.NoTitle,
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.library),
                 onNavigationIconClicked = { navController.popBackStack() },
             ) { contentPadding ->
                 SettingsLibraryScreen(contentPadding = contentPadding)
@@ -73,10 +95,76 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
 
         composable<SettingsDataStorageRoute> {
             NekoScaffold(
-                type = NekoScaffoldType.NoTitle,
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.data_storage),
                 onNavigationIconClicked = { navController.popBackStack() },
             ) { contentPadding ->
                 SettingsDataStorageScreen(contentPadding = contentPadding)
+            }
+        }
+
+        composable<SettingsMangaDexRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.site_specific_settings),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsMangaDexScreen(contentPadding = contentPadding)
+            }
+        }
+
+        composable<SettingsMergeSourceRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.merge_source_settings),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsMergeSourceScreen(contentPadding = contentPadding)
+            }
+        }
+        composable<SettingsReaderRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.reader_settings),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsReaderScreen(contentPadding = contentPadding)
+            }
+        }
+        composable<SettingsDownloadsRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.downloads),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsDownloadsScreen(contentPadding = contentPadding)
+            }
+        }
+        composable<SettingsTrackingRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.tracking),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsTrackingScreen(contentPadding = contentPadding)
+            }
+        }
+        composable<SettingsSecurityRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.security),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsSecurityScreen(contentPadding = contentPadding)
+            }
+        }
+        composable<SettingsAdvancedRoute> {
+            NekoScaffold(
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.advanced),
+                onNavigationIconClicked = { navController.popBackStack() },
+            ) { contentPadding ->
+                SettingsAdvancedScreen(contentPadding = contentPadding)
             }
         }
     }

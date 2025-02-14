@@ -10,7 +10,6 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Merge
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Security
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.icons.MergeIcon
 
 @Composable
 fun SettingsMainScreen(
@@ -74,7 +74,7 @@ fun SettingsMainScreen(
         item {
             IconItem(
                 labelText = UiText.StringResource(R.string.merge_source_settings),
-                icon = Icons.Outlined.Merge,
+                icon = MergeIcon,
                 onClick = onMergeSourceClick,
             )
         }
