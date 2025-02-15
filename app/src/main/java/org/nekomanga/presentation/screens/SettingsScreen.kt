@@ -6,9 +6,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.screens.settings.Preference
+import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsAdvancedRoute
 import org.nekomanga.presentation.screens.settings.SettingsAppearanceRoute
 import org.nekomanga.presentation.screens.settings.SettingsDataStorageRoute
@@ -22,20 +27,23 @@ import org.nekomanga.presentation.screens.settings.SettingsMergeSourceRoute
 import org.nekomanga.presentation.screens.settings.SettingsReaderRoute
 import org.nekomanga.presentation.screens.settings.SettingsSecurityRoute
 import org.nekomanga.presentation.screens.settings.SettingsTrackingRoute
-import org.nekomanga.presentation.screens.settings.screens.SettingsAdvancedScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsAppearanceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsGeneralScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsLibraryScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMangaDexScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSecurityScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScreen
+import org.nekomanga.presentation.screens.settings.screens.generalSettingItems
 
 @Composable
-fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) {
+fun SettingsScreen(
+    preferencesHelper: PreferencesHelper,
+    windowSizeClass: WindowSizeClass,
+    onBackPressed: () -> Unit,
+) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = SettingsMainRoute) {
         composable<SettingsMainRoute> {
@@ -64,13 +72,11 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
             }
         }
         composable<SettingsGeneralRoute> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
+            PreferenceScaffold(
                 title = stringResource(R.string.general),
                 onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsGeneralScreen(contentPadding = contentPadding)
-            }
+                preferenceList = generalSettingItems(preferencesHelper),
+            )
         }
 
         composable<SettingsAppearanceRoute> {
@@ -159,13 +165,26 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
             }
         }
         composable<SettingsAdvancedRoute> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
+            PreferenceScaffold(
                 title = stringResource(R.string.advanced),
                 onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsAdvancedScreen(contentPadding = contentPadding)
-            }
+                preferenceList = persistentListOf(),
+            )
         }
+    }
+}
+
+@Composable
+private fun PreferenceScaffold(
+    title: String,
+    preferenceList: ImmutableList<Preference>,
+    onNavigationIconClicked: () -> Unit,
+) {
+    NekoScaffold(
+        type = NekoScaffoldType.Title,
+        title = title,
+        onNavigationIconClicked = onNavigationIconClicked,
+    ) { contentPadding ->
+        PreferenceScreen(contentPadding = contentPadding, items = preferenceList)
     }
 }

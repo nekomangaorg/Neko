@@ -7,21 +7,22 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.R
+import org.nekomanga.presentation.components.UiText
 import tachiyomi.core.preference.Preference as PreferenceData
 
 sealed class Preference {
-    abstract val title: String
+    abstract val title: UiText
     abstract val enabled: Boolean
 
     sealed class PreferenceItem<T> : Preference() {
-        abstract val subtitle: String?
+        abstract val subtitle: UiText?
         abstract val icon: ImageVector?
         abstract val onValueChanged: suspend (newValue: T) -> Boolean
 
         /** A basic [PreferenceItem] that only displays texts. */
         data class TextPreference(
-            override val title: String,
-            override val subtitle: String? = null,
+            override val title: UiText,
+            override val subtitle: UiText? = null,
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true },
@@ -31,8 +32,8 @@ sealed class Preference {
         /** A [PreferenceItem] that provides a two-state toggleable option. */
         data class SwitchPreference(
             val pref: PreferenceData<Boolean>,
-            override val title: String,
-            override val subtitle: String? = null,
+            override val title: UiText,
+            override val subtitle: UiText? = null,
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: Boolean) -> Boolean = { true },
@@ -44,8 +45,8 @@ sealed class Preference {
             val max: Int,
             val min: Int = 0,
             val steps: Int = 0,
-            override val title: String = "",
-            override val subtitle: String? = null,
+            override val title: UiText = UiText.String(""),
+            override val subtitle: UiText? = null,
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: Int) -> Boolean = { true },
@@ -55,13 +56,13 @@ sealed class Preference {
         @Suppress("UNCHECKED_CAST")
         data class ListPreference<T>(
             val pref: PreferenceData<T>,
-            override val title: String,
-            override val subtitle: String? = "%s",
+            override val title: UiText,
+            override val subtitle: UiText? = UiText.String("%s"),
             val subtitleProvider:
                 @Composable
                 (value: T, entries: ImmutableMap<T, String>) -> String? =
                 { v, e ->
-                    subtitle?.format(e[v])
+                    subtitle?.asString()?.format(e[v])
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
@@ -83,13 +84,13 @@ sealed class Preference {
         /** [ListPreference] but with no connection to a [PreferenceData] */
         data class BasicListPreference(
             val value: String,
-            override val title: String,
-            override val subtitle: String? = "%s",
+            override val title: UiText,
+            override val subtitle: UiText? = UiText.String("%s"),
             val subtitleProvider:
                 @Composable
                 (value: String, entries: ImmutableMap<String, String>) -> String? =
                 { v, e ->
-                    subtitle?.format(e[v])
+                    subtitle?.asString()?.format(e[v])
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
@@ -103,8 +104,8 @@ sealed class Preference {
          */
         data class MultiSelectListPreference(
             val pref: PreferenceData<Set<String>>,
-            override val title: String,
-            override val subtitle: String? = "%s",
+            override val title: UiText,
+            override val subtitle: UiText? = UiText.String("%s"),
             val subtitleProvider:
                 @Composable
                 (value: Set<String>, entries: ImmutableMap<String, String>) -> String? =
@@ -112,7 +113,7 @@ sealed class Preference {
                     val combined =
                         remember(v) { v.map { e[it] }.takeIf { it.isNotEmpty() }?.joinToString() }
                             ?: stringResource(R.string.none)
-                    subtitle?.format(combined)
+                    subtitle?.asString()?.format(combined)
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
@@ -123,8 +124,8 @@ sealed class Preference {
         /** A [PreferenceItem] that shows a EditText in the dialog. */
         data class EditTextPreference(
             val pref: PreferenceData<String>,
-            override val title: String,
-            override val subtitle: String? = "%s",
+            override val title: UiText,
+            override val subtitle: UiText? = UiText.String("%s"),
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true },
@@ -133,36 +134,36 @@ sealed class Preference {
         /** A [PreferenceItem] for individual tracker. */
         data class TrackerPreference(
             // val tracker: Tracker,
-            override val title: String,
+            override val title: UiText,
             val login: () -> Unit,
             val logout: () -> Unit,
         ) : PreferenceItem<String>() {
             override val enabled: Boolean = true
-            override val subtitle: String? = null
+            override val subtitle: UiText? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true }
         }
 
-        data class InfoPreference(override val title: String) : PreferenceItem<String>() {
+        data class InfoPreference(override val title: UiText) : PreferenceItem<String>() {
             override val enabled: Boolean = true
-            override val subtitle: String? = null
+            override val subtitle: UiText? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true }
         }
 
         data class CustomPreference(
-            override val title: String,
+            override val title: UiText,
             val content: @Composable () -> Unit,
         ) : PreferenceItem<Unit>() {
             override val enabled: Boolean = true
-            override val subtitle: String? = null
+            override val subtitle: UiText? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (newValue: Unit) -> Boolean = { true }
         }
     }
 
     data class PreferenceGroup(
-        override val title: String,
+        override val title: UiText,
         override val enabled: Boolean = true,
         val preferenceItems: ImmutableList<PreferenceItem<out Any>>,
     ) : Preference()

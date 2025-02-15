@@ -11,6 +11,10 @@ class SettingsController : BaseComposeController<SettingsPresenter>() {
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-        SettingsScreen(windowSizeClass, onBackPressed = { router.handleBack() })
+        SettingsScreen(
+            presenter.preferencesHelper,
+            windowSizeClass,
+            onBackPressed = { router.handleBack() },
+        )
     }
 }

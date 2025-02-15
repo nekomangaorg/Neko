@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
 
@@ -23,7 +25,7 @@ import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
  */
 @Composable
 fun PreferenceScreen(
-    items: List<Preference>,
+    items: ImmutableList<Preference>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -60,17 +62,18 @@ fun PreferenceScreen(
                 }
 
                 // Create Preference Item
-                is Preference.PreferenceItem<*> ->
+                is PreferenceItem<*> ->
                     item { PreferenceItem(item = preference, highlightKey = highlightKey) }
             }
         }
     }
 }
 
+@Composable
 private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
     return flatMap {
             if (it is Preference.PreferenceGroup) {
-                buildList<String?> {
+                buildList<UiText?> {
                     add(null) // Header
                     addAll(it.preferenceItems.map { groupItem -> groupItem.title })
                     add(null) // Spacer
@@ -79,5 +82,5 @@ private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
                 listOf(it.title)
             }
         }
-        .indexOfFirst { it == highlightKey }
+        .indexOfFirst { it?.asString() == highlightKey }
 }

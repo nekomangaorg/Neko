@@ -8,9 +8,14 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
+import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 
 val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
 val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
@@ -22,7 +27,7 @@ fun StatusWrapper(
     content: @Composable () -> Unit,
 ) {
     val enabled = item.enabled
-    val highlighted = item.title == highlightKey
+    val highlighted = item.title.asString() == highlightKey
     AnimatedVisibility(
         visible = enabled,
         enter = expandVertically() + fadeIn(),
@@ -42,10 +47,10 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
     StatusWrapper(item = item, highlightKey = highlightKey) {
         when (item) {
             is Preference.PreferenceItem.SwitchPreference -> {
-                /*val value by item.pref.collectAsState()
+                val value by item.pref.collectAsState()
                 SwitchPreferenceWidget(
-                    title = item.title,
-                    subtitle = item.subtitle,
+                    title = item.title.asString(),
+                    subtitle = item.subtitle?.asString(),
                     icon = item.icon,
                     checked = value,
                     onCheckedChanged = { newValue ->
@@ -55,7 +60,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                             }
                         }
                     },
-                )*/
+                )
             }
             is Preference.PreferenceItem.SliderPreference -> {
                 /*SliderItem(
@@ -112,12 +117,12 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )*/
             }
             is Preference.PreferenceItem.TextPreference -> {
-                /* TextPreferenceWidget(
-                    title = item.title,
-                    subtitle = item.subtitle,
+                TextPreferenceWidget(
+                    title = item.title.asString(),
+                    subtitle = item.subtitle?.asString(),
                     icon = item.icon,
                     onPreferenceClick = item.onClick,
-                )*/
+                )
             }
             is Preference.PreferenceItem.EditTextPreference -> {
                 /*val values by item.pref.collectAsState()

@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.theme
+package org.nekomanga.presentation.screens.settings.widgets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.settings.BasePreferenceWidget
+import org.nekomanga.presentation.theme.NekoTheme
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TextPreferenceWidget(
