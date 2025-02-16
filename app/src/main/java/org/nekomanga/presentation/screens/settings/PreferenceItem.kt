@@ -14,6 +14,7 @@ import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 
@@ -76,10 +77,10 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )*/
             }
             is Preference.PreferenceItem.ListPreference<*> -> {
-                /* val value by item.pref.collectAsState()
+                val value by item.pref.collectAsState()
                 ListPreferenceWidget(
                     value = value,
-                    title = item.title,
+                    title = item.title.asString(),
                     subtitle = item.internalSubtitleProvider(value, item.entries),
                     icon = item.icon,
                     entries = item.entries,
@@ -90,7 +91,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                             }
                         }
                     },
-                )*/
+                )
             }
             is Preference.PreferenceItem.BasicListPreference -> {
                 /*ListPreferenceWidget(

@@ -60,14 +60,14 @@ sealed class Preference {
             override val subtitle: UiText? = UiText.String("%s"),
             val subtitleProvider:
                 @Composable
-                (value: T, entries: ImmutableMap<T, String>) -> String? =
+                (value: T, entries: ImmutableMap<T, UiText>) -> String? =
                 { v, e ->
-                    subtitle?.asString()?.format(e[v])
+                    subtitle?.asString()?.format(e[v]?.asString())
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (newValue: T) -> Boolean = { true },
-            val entries: ImmutableMap<T, String>,
+            val entries: ImmutableMap<T, UiText>,
         ) : PreferenceItem<T>() {
             internal fun internalSet(newValue: Any) = pref.set(newValue as T)
 
@@ -77,8 +77,8 @@ sealed class Preference {
             @Composable
             internal fun internalSubtitleProvider(
                 value: Any?,
-                entries: ImmutableMap<out Any?, String>,
-            ) = subtitleProvider(value as T, entries as ImmutableMap<T, String>)
+                entries: ImmutableMap<out Any?, UiText>,
+            ) = subtitleProvider(value as T, entries as ImmutableMap<T, UiText>)
         }
 
         /** [ListPreference] but with no connection to a [PreferenceData] */
@@ -88,9 +88,9 @@ sealed class Preference {
             override val subtitle: UiText? = UiText.String("%s"),
             val subtitleProvider:
                 @Composable
-                (value: String, entries: ImmutableMap<String, String>) -> String? =
+                (value: String, entries: ImmutableMap<String, UiText>) -> String? =
                 { v, e ->
-                    subtitle?.asString()?.format(e[v])
+                    subtitle?.asString()?.format(e[v]?.asString())
                 },
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,

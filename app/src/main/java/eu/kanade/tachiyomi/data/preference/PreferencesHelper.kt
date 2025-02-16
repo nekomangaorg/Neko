@@ -138,6 +138,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
+    fun dateFormatPreference() = this.preferenceStore.getString(Keys.dateFormat, "")
+
     fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
     fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)

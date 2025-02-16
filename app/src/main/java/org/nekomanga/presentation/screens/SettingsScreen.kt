@@ -1,7 +1,11 @@
 package org.nekomanga.presentation.screens
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,6 +49,7 @@ fun SettingsScreen(
     onBackPressed: () -> Unit,
 ) {
     val navController = rememberNavController()
+    val context = LocalContext.current
     NavHost(navController = navController, startDestination = SettingsMainRoute) {
         composable<SettingsMainRoute> {
             NekoScaffold(
@@ -72,10 +77,24 @@ fun SettingsScreen(
             }
         }
         composable<SettingsGeneralRoute> {
+            val showNotificationSetting = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             PreferenceScaffold(
                 title = stringResource(R.string.general),
                 onNavigationIconClicked = { navController.popBackStack() },
-                preferenceList = generalSettingItems(preferencesHelper),
+                preferenceList =
+                    generalSettingItems(
+                        preferencesHelper,
+                        showNotificationSetting = showNotificationSetting,
+                        manageNotificationsClicked = {
+                            if (showNotificationSetting) {
+                                val intent =
+                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    }
+                                context.startActivity(intent)
+                            }
+                        },
+                    ),
             )
         }
 
