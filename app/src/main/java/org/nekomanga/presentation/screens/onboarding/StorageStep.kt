@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,7 +78,7 @@ internal class StorageStep : OnboardingStep {
                 Text(stringResource(R.string.onboarding_storage_action_select))
             }
 
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = Size.small),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
