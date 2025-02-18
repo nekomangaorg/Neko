@@ -8,10 +8,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.delay
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
@@ -26,23 +33,23 @@ import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
 @Composable
 fun PreferenceScreen(
     items: ImmutableList<Preference>,
+    incomingHighlightKey: String? = null,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state = rememberLazyListState()
-    val highlightKey = null
-    /*   val highlightKey = SearchableSettings.highlightKey
-        if (highlightKey != null) {
-            LaunchedEffect(Unit) {
-                val i = items.findHighlightedIndex(highlightKey)
-                if (i >= 0) {
-                    delay(0.5.seconds)
-                    state.animateScrollToItem(i)
-                }
-                SearchableSettings.highlightKey = null
+    var highlightKey by remember(incomingHighlightKey) { mutableStateOf(incomingHighlightKey) }
+    if (highlightKey != null) {
+        LaunchedEffect(Unit) {
+            val i = items.findHighlightedIndex(UiText.String(highlightKey!!))
+            if (i >= 0) {
+                delay(0.5.seconds)
+                state.animateScrollToItem(i)
             }
+            highlightKey = null
         }
-    */
+    }
+
     LazyColumn(modifier = modifier, state = state, contentPadding = contentPadding) {
         items.fastForEachIndexed { i, preference ->
             when (preference) {
@@ -69,8 +76,7 @@ fun PreferenceScreen(
     }
 }
 
-@Composable
-private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
+private fun List<Preference>.findHighlightedIndex(highlightKey: UiText): Int {
     return flatMap {
             if (it is Preference.PreferenceGroup) {
                 buildList<UiText?> {
@@ -82,5 +88,5 @@ private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
                 listOf(it.title)
             }
         }
-        .indexOfFirst { it?.asString() == highlightKey }
+        .indexOfFirst { it == highlightKey }
 }

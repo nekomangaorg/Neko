@@ -1,5 +1,7 @@
 package org.nekomanga.presentation.screens
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -50,15 +52,14 @@ fun SettingsScreen(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+
     NavHost(navController = navController, startDestination = SettingsMainRoute) {
         composable<SettingsMainRoute> {
             NekoScaffold(
-                type = NekoScaffoldType.SearchOutline,
-                searchNavigationEnabled = true,
+                type = NekoScaffoldType.Title,
+                title = stringResource(R.string.settings),
                 onNavigationIconClicked = onBackPressed,
-                onSearch = {},
-                searchPlaceHolder = stringResource(id = R.string.search_settings),
-                actions = {},
             ) { contentPadding ->
                 SettingsMainScreen(
                     contentPadding = contentPadding,
@@ -77,22 +78,15 @@ fun SettingsScreen(
             }
         }
         composable<SettingsGeneralRoute> {
-            val showNotificationSetting = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             PreferenceScaffold(
                 title = stringResource(R.string.general),
                 onNavigationIconClicked = { navController.popBackStack() },
                 preferenceList =
                     generalSettingItems(
                         preferencesHelper,
-                        showNotificationSetting = showNotificationSetting,
+                        showNotificationSetting = sdkMinimumO,
                         manageNotificationsClicked = {
-                            if (showNotificationSetting) {
-                                val intent =
-                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                    }
-                                context.startActivity(intent)
-                            }
+                            manageNotificationClick(context, sdkMinimumO)
                         },
                     ),
             )
@@ -205,5 +199,16 @@ private fun PreferenceScaffold(
         onNavigationIconClicked = onNavigationIconClicked,
     ) { contentPadding ->
         PreferenceScreen(contentPadding = contentPadding, items = preferenceList)
+    }
+}
+
+@SuppressLint("InlinedApi")
+fun manageNotificationClick(context: Context, sdkMinimumO: Boolean) {
+    if (sdkMinimumO) {
+        val intent =
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            }
+        context.startActivity(intent)
     }
 }
