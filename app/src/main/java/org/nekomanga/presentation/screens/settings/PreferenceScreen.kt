@@ -19,7 +19,6 @@ import androidx.compose.ui.util.fastForEachIndexed
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
-import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
 
@@ -41,7 +40,7 @@ fun PreferenceScreen(
     var highlightKey by remember(incomingHighlightKey) { mutableStateOf(incomingHighlightKey) }
     if (highlightKey != null) {
         LaunchedEffect(Unit) {
-            val i = items.findHighlightedIndex(UiText.String(highlightKey!!))
+            val i = items.findHighlightedIndex(highlightKey!!)
             if (i >= 0) {
                 delay(0.5.seconds)
                 state.animateScrollToItem(i)
@@ -76,10 +75,10 @@ fun PreferenceScreen(
     }
 }
 
-private fun List<Preference>.findHighlightedIndex(highlightKey: UiText): Int {
+private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
     return flatMap {
             if (it is Preference.PreferenceGroup) {
-                buildList<UiText?> {
+                buildList<String?> {
                     add(null) // Header
                     addAll(it.preferenceItems.map { groupItem -> groupItem.title })
                     add(null) // Spacer

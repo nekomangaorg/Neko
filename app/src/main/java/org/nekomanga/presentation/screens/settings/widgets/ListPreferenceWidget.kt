@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.nekomanga.R
-import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -36,7 +35,7 @@ fun <T> ListPreferenceWidget(
     title: String,
     subtitle: String?,
     icon: ImageVector?,
-    entries: Map<out T, UiText>,
+    entries: Map<out T, String>,
     onValueChange: (T) -> Unit,
 ) {
     var isDialogShown by remember { mutableStateOf(false) }
@@ -61,7 +60,7 @@ fun <T> ListPreferenceWidget(
                             val isSelected = value == current.key
                             item {
                                 DialogRow(
-                                    label = current.value.asString(),
+                                    label = current.value,
                                     isSelected = isSelected,
                                     onSelected = {
                                         onValueChange(current.key!!)

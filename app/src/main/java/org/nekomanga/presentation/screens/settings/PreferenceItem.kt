@@ -28,7 +28,7 @@ fun StatusWrapper(
     content: @Composable () -> Unit,
 ) {
     val enabled = item.enabled
-    val highlighted = item.title.asString() == highlightKey
+    val highlighted = item.title == highlightKey
     AnimatedVisibility(
         visible = enabled,
         enter = expandVertically() + fadeIn(),
@@ -50,8 +50,8 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
             is Preference.PreferenceItem.SwitchPreference -> {
                 val value by item.pref.collectAsState()
                 SwitchPreferenceWidget(
-                    title = item.title.asString(),
-                    subtitle = item.subtitle?.asString(),
+                    title = item.title,
+                    subtitle = item.subtitle,
                     icon = item.icon,
                     checked = value,
                     onCheckedChanged = { newValue ->
@@ -80,7 +80,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 val value by item.pref.collectAsState()
                 ListPreferenceWidget(
                     value = value,
-                    title = item.title.asString(),
+                    title = item.title,
                     subtitle = item.internalSubtitleProvider(value, item.entries),
                     icon = item.icon,
                     entries = item.entries,
@@ -119,8 +119,8 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
             }
             is Preference.PreferenceItem.TextPreference -> {
                 TextPreferenceWidget(
-                    title = item.title.asString(),
-                    subtitle = item.subtitle?.asString(),
+                    title = item.title,
+                    subtitle = item.subtitle,
                     icon = item.icon,
                     onPreferenceClick = item.onClick,
                 )

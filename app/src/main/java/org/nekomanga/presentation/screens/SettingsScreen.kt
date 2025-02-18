@@ -33,6 +33,7 @@ import org.nekomanga.presentation.screens.settings.SettingsMergeSourceRoute
 import org.nekomanga.presentation.screens.settings.SettingsReaderRoute
 import org.nekomanga.presentation.screens.settings.SettingsSecurityRoute
 import org.nekomanga.presentation.screens.settings.SettingsTrackingRoute
+import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsAppearanceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
@@ -42,7 +43,6 @@ import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceSc
 import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSecurityScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScreen
-import org.nekomanga.presentation.screens.settings.screens.generalSettingItems
 
 @Composable
 fun SettingsScreen(
@@ -78,18 +78,13 @@ fun SettingsScreen(
             }
         }
         composable<SettingsGeneralRoute> {
-            PreferenceScaffold(
-                title = stringResource(R.string.general),
-                onNavigationIconClicked = { navController.popBackStack() },
-                preferenceList =
-                    generalSettingItems(
-                        preferencesHelper,
-                        showNotificationSetting = sdkMinimumO,
-                        manageNotificationsClicked = {
-                            manageNotificationClick(context, sdkMinimumO)
-                        },
-                    ),
-            )
+            GeneralSettingsScreen(
+                    onBackPress = { navController.popBackStack() },
+                    preferencesHelper = preferencesHelper,
+                    showNotificationSetting = sdkMinimumO,
+                    manageNotificationsClicked = { manageNotificationClick(context, sdkMinimumO) },
+                )
+                .Content()
         }
 
         composable<SettingsAppearanceRoute> {
