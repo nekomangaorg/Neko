@@ -15,13 +15,9 @@ internal class GeneralSettingsScreen(
     val showNotificationSetting: Boolean,
     val onNavigationIconClick: () -> Unit,
     val manageNotificationsClicked: () -> Unit,
-) : SearchableSetting {
+) : SearchableSettings(onNavigationIconClick) {
 
     override fun getTitleRes(): Int = R.string.general
-
-    override fun onNavigationIconClick() {
-        onNavigationIconClick.invoke()
-    }
 
     @Composable
     override fun getPreferences(): ImmutableList<Preference> {

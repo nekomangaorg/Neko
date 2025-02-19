@@ -7,19 +7,17 @@ import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScaffold
 
-internal interface SearchableSetting {
+internal abstract class SearchableSettings(val onNavigationBackClick: () -> Unit) {
 
-    @StringRes fun getTitleRes(): Int
+    @StringRes abstract fun getTitleRes(): Int
 
-    fun onNavigationIconClick()
-
-    @Composable fun getPreferences(): ImmutableList<Preference>
+    @Composable abstract fun getPreferences(): ImmutableList<Preference>
 
     @Composable
     fun Content() {
         PreferenceScaffold(
             title = stringResource(getTitleRes()),
-            onNavigationIconClicked = { onNavigationIconClick() },
+            onNavigationIconClicked = onNavigationBackClick,
             itemsProvider = { getPreferences() },
         )
     }

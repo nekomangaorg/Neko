@@ -72,7 +72,7 @@ fun SettingsSearchScreen(
             listState = listState,
             contentPadding = contentPadding,
         ) { result ->
-            SearchableSetting.highlightKey = result.highlightKey
+            SearchableSettings.highlightKey = result.highlightKey
             navigate(result.route)
         }
     }

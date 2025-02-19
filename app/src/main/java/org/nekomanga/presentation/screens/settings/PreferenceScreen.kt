@@ -16,7 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
-import org.nekomanga.presentation.screens.settings.screens.SearchableSetting
+import org.nekomanga.presentation.screens.settings.screens.SearchableSettings
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
 
 /**
@@ -34,7 +34,7 @@ fun PreferenceScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state = rememberLazyListState()
-    val highlightKey = SearchableSetting.highlightKey
+    val highlightKey = SearchableSettings.highlightKey
     if (highlightKey != null) {
         LaunchedEffect(Unit) {
             val i = items.findHighlightedIndex(highlightKey)
@@ -42,7 +42,7 @@ fun PreferenceScreen(
                 delay(0.5.seconds)
                 state.animateScrollToItem(i)
             }
-            SearchableSetting.highlightKey = null
+            SearchableSettings.highlightKey = null
         }
     }
 
