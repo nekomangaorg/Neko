@@ -8,14 +8,20 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.presentation.screens.settings.Preference
+import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class GeneralSettingsScreen(
-    val onBackPress: () -> Unit,
     val preferencesHelper: PreferencesHelper,
     val showNotificationSetting: Boolean,
+    val onNavigationIconClick: () -> Unit,
     val manageNotificationsClicked: () -> Unit,
 ) : SearchableSetting {
-    @Composable override fun getTitleRes(): Int = R.string.general
+
+    override fun getTitleRes(): Int = R.string.general
+
+    override fun onNavigationIconClick() {
+        onNavigationIconClick.invoke()
+    }
 
     @Composable
     override fun getPreferences(): ImmutableList<Preference> {
@@ -87,5 +93,30 @@ internal class GeneralSettingsScreen(
                     ),
             ),
         )
+    }
+
+    companion object : SearchTermProvider {
+        @Composable
+        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+            return persistentListOf(
+                SearchTerm(stringResource(R.string.starting_screen)),
+                SearchTerm(stringResource(R.string.date_format)),
+                SearchTerm(
+                    stringResource(R.string.back_to_start),
+                    stringResource(R.string.pressing_back_to_start),
+                ),
+                SearchTerm(stringResource(R.string.manage_notifications)),
+                SearchTerm(stringResource(R.string.app_shortcuts)),
+                SearchTerm(
+                    stringResource(R.string.show_recent_series),
+                    stringResource(R.string.includes_recently_read_updated_added),
+                ),
+                SearchTerm(
+                    stringResource(R.string.series_opens_new_chapters),
+                    stringResource(R.string.no_new_chapters_open_details),
+                ),
+                SearchTerm(stringResource(R.string.auto_update_app)),
+            )
+        }
     }
 }

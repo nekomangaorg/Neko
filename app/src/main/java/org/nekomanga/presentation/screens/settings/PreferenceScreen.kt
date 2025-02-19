@@ -9,10 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
@@ -20,6 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
+import org.nekomanga.presentation.screens.settings.screens.SearchableSetting
 import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
 
 /**
@@ -37,15 +34,15 @@ fun PreferenceScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state = rememberLazyListState()
-    var highlightKey by remember(incomingHighlightKey) { mutableStateOf(incomingHighlightKey) }
+    val highlightKey = SearchableSetting.highlightKey
     if (highlightKey != null) {
         LaunchedEffect(Unit) {
-            val i = items.findHighlightedIndex(highlightKey!!)
+            val i = items.findHighlightedIndex(highlightKey)
             if (i >= 0) {
                 delay(0.5.seconds)
                 state.animateScrollToItem(i)
             }
-            highlightKey = null
+            SearchableSetting.highlightKey = null
         }
     }
 

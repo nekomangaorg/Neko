@@ -67,6 +67,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import org.nekomanga.R
+import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -84,6 +85,7 @@ fun NekoScaffold(
     isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior =
         TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState()),
+    focusRequester: FocusRequester = remember { FocusRequester() },
     navigationIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     searchNavigationEnabled: Boolean = false,
@@ -106,58 +108,59 @@ fun NekoScaffold(
                 when (type) {
                     NekoScaffoldType.Title ->
                         TitleOnlyTopAppBar(
-                            color,
-                            title,
-                            navigationIconLabel,
-                            navigationIcon,
-                            onNavigationIconClicked,
-                            actions,
-                            incognitoMode,
-                            isRoot,
-                            scrollBehavior,
+                            color = color,
+                            title = title,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            actions = actions,
+                            incognitoMode = incognitoMode,
+                            isRoot = isRoot,
+                            scrollBehavior = scrollBehavior,
                         )
                     NekoScaffoldType.NoTitle ->
                         NoTitleTopAppBar(
-                            color,
-                            navigationIconLabel,
-                            navigationIcon,
-                            onNavigationIconClicked,
-                            actions,
-                            scrollBehavior,
+                            color = color,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            actions = actions,
+                            scrollBehavior = scrollBehavior,
                         )
                     NekoScaffoldType.TitleAndSubtitle ->
                         TitleAndSubtitleTopAppBar(
-                            color,
-                            title,
-                            subtitle,
-                            navigationIconLabel,
-                            navigationIcon,
-                            onNavigationIconClicked,
-                            actions,
-                            scrollBehavior,
+                            color = color,
+                            title = title,
+                            subtitle = subtitle,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            actions = actions,
+                            scrollBehavior = scrollBehavior,
                         )
                     NekoScaffoldType.Search ->
                         NoTitleSearchTopAppBar(
-                            onSearch,
-                            searchPlaceHolder,
-                            color,
-                            navigationIconLabel,
-                            navigationIcon,
-                            onNavigationIconClicked,
-                            actions,
-                            scrollBehavior,
+                            onSearchText = onSearch,
+                            searchPlaceHolder = searchPlaceHolder,
+                            color = color,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            actions = actions,
+                            scrollBehavior = scrollBehavior,
                         )
                     NekoScaffoldType.SearchOutline ->
                         SearchOutlineTopAppBar(
-                            onSearch,
-                            searchPlaceHolder,
-                            color,
-                            searchNavigationEnabled,
-                            navigationIconLabel,
-                            navigationIcon,
-                            onNavigationIconClicked,
-                            actions,
-                            scrollBehavior,
+                            onSearchText = onSearch,
+                            searchPlaceHolder = searchPlaceHolder,
+                            color = color,
+                            navigationEnabled = searchNavigationEnabled,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            focusRequester = focusRequester,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            actions = actions,
+                            scrollBehavior = scrollBehavior,
                         )
                 }
             }
@@ -249,6 +252,130 @@ fun SearchOutlineTopAppBar(
     navigationEnabled: Boolean,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    focusRequester: FocusRequester,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
+) {
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var searchEnabled by rememberSaveable { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
+    TopAppBar(
+        title = {},
+        modifier = Modifier.statusBarsPadding(),
+        navigationIcon = {},
+        actions = {
+            SearchBar(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(horizontal = Size.small)
+                        .onFocusChanged {
+                            if (it.hasFocus) {
+                                searchEnabled = true
+                            }
+                        }
+                        .focusRequester(focusRequester),
+                expanded = false,
+                onExpandedChange = {},
+                colors =
+                    SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = searchText,
+                        expanded = false,
+                        onExpandedChange = {},
+                        onQueryChange = {
+                            searchText = it
+                            onSearchText(it)
+                        },
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Green,
+                                unfocusedContainerColor = Color.Blue,
+                                disabledContainerColor = Color.Gray,
+                                errorContainerColor = Color.Red,
+                            ),
+                        onSearch = { onSearchText(it) },
+                        placeholder = {
+                            Text(
+                                text = searchPlaceHolder,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        leadingIcon = {
+                            Row {
+                                if (navigationEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = navigationIconLabel,
+                                        icon = navigationIcon,
+                                        buttonClicked = onNavigationIconClicked,
+                                    )
+                                }
+                                if (searchEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.cancel_search),
+                                        icon = Icons.Filled.SearchOff,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = {
+                                            onSearchText("")
+                                            searchText = ""
+                                            searchEnabled = false
+                                            focusManager.clearFocus()
+                                        },
+                                    )
+                                } else {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = { searchEnabled = true },
+                                    )
+                                }
+                            }
+                        },
+                        trailingIcon = {
+                            Row {
+                                AnimatedVisibility(
+                                    visible = searchText.isNotBlank(),
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.clear),
+                                        icon = Icons.Filled.Close,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        buttonClicked = {
+                                            onSearchText("")
+                                            searchText = ""
+                                        },
+                                    )
+                                }
+                                if (!searchEnabled) {
+                                    actions()
+                                }
+                            }
+                        },
+                    )
+                },
+                content = {},
+            )
+        },
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
+        scrollBehavior = scrollBehavior,
+    )
+}
+
+@Composable
+fun SearchOutlineInstantTopAppBar(
+    onSearchText: (String?) -> Unit,
+    searchPlaceHolder: String,
+    color: Color,
+    navigationEnabled: Boolean,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
@@ -272,7 +399,8 @@ fun SearchOutlineTopAppBar(
                                 searchEnabled = true
                             }
                         }
-                        .focusRequester(focusRequester),
+                        .focusRequester(focusRequester)
+                        .runOnEnterKeyPressed { focusManager.clearFocus() },
                 expanded = false,
                 onExpandedChange = {},
                 colors =

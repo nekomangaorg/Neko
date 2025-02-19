@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.settings.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.presentation.screens.settings.Preference
@@ -10,7 +9,9 @@ import org.nekomanga.presentation.screens.settings.PreferenceScaffold
 
 internal interface SearchableSetting {
 
-    @Composable @ReadOnlyComposable @StringRes fun getTitleRes(): Int
+    @StringRes fun getTitleRes(): Int
+
+    fun onNavigationIconClick()
 
     @Composable fun getPreferences(): ImmutableList<Preference>
 
@@ -18,7 +19,7 @@ internal interface SearchableSetting {
     fun Content() {
         PreferenceScaffold(
             title = stringResource(getTitleRes()),
-            onNavigationIconClicked = {},
+            onNavigationIconClicked = { onNavigationIconClick() },
             itemsProvider = { getPreferences() },
         )
     }
