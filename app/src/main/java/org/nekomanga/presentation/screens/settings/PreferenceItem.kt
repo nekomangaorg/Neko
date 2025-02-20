@@ -5,18 +5,27 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.structuralEqualityPolicy
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
+import org.nekomanga.presentation.theme.Size
 
 val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
 val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
@@ -154,7 +163,23 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 // InfoWidget(text = item.title)
             }
             is Preference.PreferenceItem.CustomPreference -> {
-                item.content()
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (item.title.isNotEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(bottom = Size.small, top = Size.medium),
+                        ) {
+                            Text(
+                                text = item.title,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                    }
+                    item.content()
+                }
             }
         }
     }

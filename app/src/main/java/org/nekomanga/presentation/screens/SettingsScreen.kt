@@ -26,8 +26,8 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
+import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsAppearanceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsLibraryScreen
@@ -106,13 +106,11 @@ fun SettingsScreen(
         }
 
         composable<Screens.Settings.Appearance> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.appearance),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsAppearanceScreen(contentPadding = contentPadding)
-            }
+            AppearanceSettingsScreen(
+                    preferences = preferencesHelper,
+                    onNavigationIconClick = { navController.popBackStack() },
+                )
+                .Content()
         }
 
         composable<Screens.Settings.Library> {

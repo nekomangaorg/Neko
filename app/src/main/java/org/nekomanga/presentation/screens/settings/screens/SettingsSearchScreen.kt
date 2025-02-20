@@ -23,8 +23,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -73,7 +74,20 @@ fun SettingsSearchScreen(
             contentPadding = contentPadding,
         ) { result ->
             SearchableSettings.highlightKey = result.highlightKey
-            navigate(result.route)
+            val route =
+                when (result.settingScreenType) {
+                    SettingsScreenType.Advanced -> Screens.Settings.Advanced
+                    SettingsScreenType.Appearance -> Screens.Settings.Appearance
+                    SettingsScreenType.DataAndStorage -> Screens.Settings.DataStorage
+                    SettingsScreenType.General -> Screens.Settings.General
+                    SettingsScreenType.Library -> Screens.Settings.Library
+                    SettingsScreenType.MangaDex -> Screens.Settings.MangaDex
+                    SettingsScreenType.MergeSource -> Screens.Settings.MergeSource
+                    SettingsScreenType.Reader -> Screens.Settings.Reader
+                    SettingsScreenType.Security -> Screens.Settings.Security
+                    SettingsScreenType.Tracking -> Screens.Settings.Tracking
+                }
+            navigate(route)
         }
     }
 }
@@ -88,11 +102,12 @@ private fun SearchResult(
 ) {
     if (searchKey.isEmpty()) return
 
-    val index = getIndex()
+    val searchTerms = searchTerms()
+
     val result by
         produceState<List<SearchResultItem>?>(initialValue = null, searchKey) {
             value =
-                index
+                searchTerms
                     .asSequence()
                     .flatMap { settingsData ->
                         settingsData.contents
@@ -106,7 +121,7 @@ private fun SearchResult(
                             // Map result data
                             .map { searchTerm ->
                                 SearchResultItem(
-                                    route = settingsData.route,
+                                    settingScreenType = settingsData.settingScreenType,
                                     searchTerm = searchTerm,
                                     highlightKey = searchKey,
                                 )
@@ -145,19 +160,24 @@ private fun SearchResult(
 @Composable
 @NonRestartableComposable
 private fun searchTerms() =
-    persistentMapOf<Any, ImmutableList<SearchTerm>>(
-        Screens.Settings.General to GeneralSettingsScreen.getSearchTerms()
+    persistentListOf<SettingsData>(
+        SettingsData(
+            settingScreenType = SettingsScreenType.General,
+            contents = GeneralSettingsScreen.getSearchTerms(),
+        ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Appearance,
+            contents = AppearanceSettingsScreen.getSearchTerms(),
+        ),
     )
 
-@Composable
-@NonRestartableComposable
-private fun getIndex() =
-    searchTerms().map { entry -> SettingsData(route = entry.key, contents = entry.value) }
-
-private data class SettingsData(val route: Any, val contents: ImmutableList<SearchTerm>)
+private data class SettingsData(
+    val settingScreenType: SettingsScreenType,
+    val contents: ImmutableList<SearchTerm>,
+)
 
 private data class SearchResultItem(
-    val route: Any,
+    val settingScreenType: SettingsScreenType,
     val searchTerm: SearchTerm,
     val highlightKey: String,
 )

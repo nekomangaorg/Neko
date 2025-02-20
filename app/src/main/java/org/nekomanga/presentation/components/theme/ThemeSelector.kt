@@ -1,5 +1,4 @@
-/*
-package org.nekomanga.presentation.screens.settings.screens
+package org.nekomanga.presentation.components.theme
 
 import android.app.Activity
 import android.content.Context
@@ -13,51 +12,35 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.isInNightMode
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import jp.wasabeef.gap.Gap
 import org.nekomanga.R
-import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.theme.ThemeItem
-import org.nekomanga.presentation.screens.settings.Preference
+import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Themes
 
-fun appearanceSettingItems(
-    preferencesHelper: PreferencesHelper,
-    lightThemeContent: @Composable () -> Unit,
-    darkThemeContent: @Composable () -> Unit,
-): ImmutableList<Preference> {
-    return persistentListOf(
-        Preference.PreferenceGroup(
-            title = UiText.StringResource(R.string.app_theme),
-            preferenceItems =
-                persistentListOf(
-                    Preference.PreferenceItem.CustomPreference(
-                        title = UiText.StringResource(R.string.light_theme),
-                        content = lightThemeContent,
-                    ),
-                    Preference.PreferenceItem.CustomPreference(
-                        title = UiText.StringResource(R.string.dark_theme),
-                        content = darkThemeContent,
-                    ),
-                ),
-        )
-    )
-}
-
 @Composable
-fun lightThemeContent(
+fun ThemeSelector(
+    modifier: Modifier = Modifier,
     preferences: PreferencesHelper,
-    darkAppTheme: Themes,
-    lightAppTheme: Themes,
-    nightMode: Int,
+    darkThemeSelector: Boolean,
 ) {
+    val nightMode by preferences.nightMode().collectAsState()
+
+    val followingSystemTheme by
+        remember(nightMode) {
+            derivedStateOf { nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM }
+        }
+
+    val darkAppTheme by preferences.darkTheme().collectAsState()
+    val lightAppTheme by preferences.lightTheme().collectAsState()
+    val context = LocalContext.current
+
     val supportsDynamic = DynamicColors.isDynamicColorAvailable()
+
     val lightThemes by remember {
         derivedStateOf {
             Themes.entries
@@ -68,30 +51,77 @@ fun lightThemeContent(
                 .toSet()
         }
     }
+
+    val darkThemes by remember {
+        derivedStateOf {
+            Themes.entries
+                .filter {
+                    (it.isDarkTheme() || it.followsSystem()) &&
+                        (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                }
+                .toSet()
+        }
+    }
+
+    ThemeContent(
+        modifier = modifier,
+        context = context,
+        themeSet = if (darkThemeSelector) darkThemes else lightThemes,
+        preferences = preferences,
+        darkAppTheme = darkAppTheme,
+        lightAppTheme = lightAppTheme,
+        nightMode = nightMode,
+        followingSystemTheme = followingSystemTheme,
+        isDarkThemeContent = darkThemeSelector,
+    )
+}
+
+@Composable
+private fun ThemeContent(
+    modifier: Modifier = Modifier,
+    context: Context,
+    themeSet: Set<Themes>,
+    preferences: PreferencesHelper,
+    darkAppTheme: Themes,
+    lightAppTheme: Themes,
+    nightMode: Int,
+    followingSystemTheme: Boolean,
+    isDarkThemeContent: Boolean,
+) {
     Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(Size.medium),
     ) {
-        lightThemes.forEach { theme ->
+        Gap(Size.small)
+
+        themeSet.forEach { theme ->
             val isSelected =
                 remember(darkAppTheme, lightAppTheme, nightMode) {
-                    isSelected(theme, false, darkAppTheme, lightAppTheme, nightMode)
+                    isSelected(
+                        theme = theme,
+                        isDarkTheme = isDarkThemeContent,
+                        darkAppTheme = darkAppTheme,
+                        lightAppTheme = lightAppTheme,
+                        nightMode = nightMode,
+                    )
                 }
             ThemeItem(
                 theme = theme,
-                isDarkTheme = false,
+                isDarkTheme = isDarkThemeContent,
                 selected = isSelected,
                 onClick = {
                     themeClicked(
-                        theme,
-                        context,
+                        theme = theme,
+                        context = context,
                         isSelected = isSelected,
                         followingSystemTheme = followingSystemTheme,
-                        isDarkTheme = false,
+                        isDarkTheme = isDarkThemeContent,
+                        preferences = preferences,
                     )
                 },
             )
         }
+        Gap(Size.small)
     }
 }
 
@@ -114,17 +144,9 @@ private fun themeClicked(
     context: Context,
     isSelected: Boolean,
     followingSystemTheme: Boolean,
+    preferences: PreferencesHelper,
     isDarkTheme: Boolean,
 ) {
-    TimberKt.d {
-        """
-                isSelected: $isSelected
-                isDarkTheme() : $isDarkTheme
-                followingSystemTheme: $followingSystemTheme
-                isInNightMode: ${context.isInNightMode()}
-            """
-            .trimIndent()
-    }
 
     val nightMode =
         when (isDarkTheme) {
@@ -146,4 +168,3 @@ private fun themeClicked(
 
     (context as? Activity)?.let { activity -> ActivityCompat.recreate(activity) }
 }
-*/

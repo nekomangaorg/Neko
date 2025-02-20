@@ -3,33 +3,18 @@ package org.nekomanga.presentation.screens.onboarding
 import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
-import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import org.nekomanga.R
+import jp.wasabeef.gap.Gap
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.components.theme.ThemeItem
+import org.nekomanga.presentation.components.theme.ThemeFollowSystemSwitch
+import org.nekomanga.presentation.components.theme.ThemeSelector
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Themes
@@ -43,129 +28,17 @@ internal class ThemeStep : OnboardingStep {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
 
-        val nightModePreference = preferences.nightMode()
-
-        val nightMode by nightModePreference.collectAsState()
-
-        val followingSystemTheme by
-            remember(nightMode) {
-                derivedStateOf { nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM }
-            }
-
-        val darkAppTheme by preferences.darkTheme().collectAsState()
-        val lightAppTheme by preferences.lightTheme().collectAsState()
-        val supportsDynamic = DynamicColors.isDynamicColorAvailable()
-
-        Themes.entries
-            .filter {
-                (!it.isDarkTheme() || it.followsSystem()) &&
-                    (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
-            }
-            .toSet()
-
-        val lightThemes by remember {
-            derivedStateOf {
-                Themes.entries
-                    .filter {
-                        (!it.isDarkTheme() || it.followsSystem()) &&
-                            (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
-                    }
-                    .toSet()
-            }
-        }
-
-        val darkThemes by remember {
-            derivedStateOf {
-                Themes.entries
-                    .filter {
-                        (it.isDarkTheme() || it.followsSystem()) &&
-                            (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
-                    }
-                    .toSet()
-            }
-        }
+        val nightMode by preferences.nightMode().collectAsState()
 
         Column(modifier = Modifier.padding(Size.medium)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = stringResource(id = R.string.follow_system_theme))
-                Switch(
-                    checked = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                    colors =
-                        SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                        ),
-                    onCheckedChange = {
-                        when (it) {
-                            true -> {
-                                preferences
-                                    .nightMode()
-                                    .set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                                (context as? Activity)?.let { activity ->
-                                    ActivityCompat.recreate(activity)
-                                }
-                            }
-                            false -> preferences.nightMode().set(context.appDelegateNightMode())
-                        }
-                    },
-                )
-            }
-
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium),
-            ) {
-                lightThemes.forEach { theme ->
-                    val isSelected =
-                        remember(darkAppTheme, lightAppTheme, nightMode) {
-                            isSelected(theme, false, darkAppTheme, lightAppTheme, nightMode)
-                        }
-                    ThemeItem(
-                        theme = theme,
-                        isDarkTheme = false,
-                        selected = isSelected,
-                        onClick = {
-                            themeClicked(
-                                theme,
-                                context,
-                                isSelected = isSelected,
-                                followingSystemTheme = followingSystemTheme,
-                                isDarkTheme = false,
-                            )
-                        },
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium),
-            ) {
-                darkThemes.forEach { theme ->
-                    val isSelected =
-                        remember(darkAppTheme, lightAppTheme, nightMode) {
-                            isSelected(theme, true, darkAppTheme, lightAppTheme, nightMode)
-                        }
-                    ThemeItem(
-                        theme = theme,
-                        isDarkTheme = true,
-                        selected = isSelected,
-                        onClick = {
-                            themeClicked(
-                                theme,
-                                context,
-                                isSelected = isSelected,
-                                followingSystemTheme = followingSystemTheme,
-                                isDarkTheme = true,
-                            )
-                        },
-                    )
-                }
-            }
+            ThemeSelector(preferences = preferences, darkThemeSelector = false)
+            Gap(Size.small)
+            ThemeSelector(preferences = preferences, darkThemeSelector = true)
+            ThemeFollowSystemSwitch(
+                nightMode = nightMode,
+                nightModePreference = preferences.nightMode(),
+            )
         }
     }
 
