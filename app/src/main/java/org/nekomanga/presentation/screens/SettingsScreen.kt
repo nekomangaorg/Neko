@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
@@ -41,6 +42,7 @@ import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScree
 @Composable
 fun SettingsScreen(
     preferencesHelper: PreferencesHelper,
+    mangaDetailsPreferences: MangaDetailsPreferences,
     windowSizeClass: WindowSizeClass,
     onBackPressed: () -> Unit,
 ) {
@@ -108,6 +110,7 @@ fun SettingsScreen(
         composable<Screens.Settings.Appearance> {
             AppearanceSettingsScreen(
                     preferences = preferencesHelper,
+                    mangaDetailsPreferences = mangaDetailsPreferences,
                     onNavigationIconClick = { navController.popBackStack() },
                 )
                 .Content()

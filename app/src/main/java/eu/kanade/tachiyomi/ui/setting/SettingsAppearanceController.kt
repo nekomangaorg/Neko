@@ -109,13 +109,6 @@ class SettingsAppearanceController : AbstractSettingsController() {
             preferenceCategory {
                 titleRes = R.string.navigation
 
-                /*switchPreference {
-                    key = Keys.hideBottomNavOnScroll
-                    titleRes = R.string.hide_bottom_nav
-                    summaryRes = R.string.hides_on_scroll
-                    defaultValue = true
-                }*/
-
                 intListPreference(activity) {
                     key = Keys.sideNavIconAlignment
                     titleRes = R.string.side_nav_icon_alignment

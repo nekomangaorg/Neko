@@ -36,6 +36,7 @@ internal class ThemeStep : OnboardingStep {
             Gap(Size.small)
             ThemeSelector(preferences = preferences, darkThemeSelector = true)
             ThemeFollowSystemSwitch(
+                modifier = Modifier.padding(vertical = Size.small),
                 nightMode = nightMode,
                 nightModePreference = preferences.nightMode(),
             )

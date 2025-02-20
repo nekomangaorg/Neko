@@ -13,6 +13,7 @@ class SettingsController : BaseComposeController<SettingsPresenter>() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         SettingsScreen(
             presenter.preferencesHelper,
+            presenter.mangaDetailsPreferences,
             windowSizeClass,
             onBackPressed = { router.handleBack() },
         )
