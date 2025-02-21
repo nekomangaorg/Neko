@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.collectAsState
@@ -166,15 +167,22 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 Column(modifier = Modifier.fillMaxWidth()) {
                     if (item.title.isNotEmpty()) {
                         Box(
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.CenterStart,
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .padding(bottom = Size.small, top = Size.medium),
+                                    .padding(
+                                        start = Size.medium,
+                                        bottom = Size.small,
+                                        top = Size.medium,
+                                    ),
                         ) {
                             Text(
                                 text = item.title,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style =
+                                    MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Normal
+                                    ),
                             )
                         }
                     }

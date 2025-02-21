@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.seconds
@@ -65,7 +66,8 @@ internal fun BasePreferenceWidget(
                     text = title,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
-                    style = MaterialTheme.typography.titleMedium,
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
                 )
             }
             subcomponent?.invoke(this)

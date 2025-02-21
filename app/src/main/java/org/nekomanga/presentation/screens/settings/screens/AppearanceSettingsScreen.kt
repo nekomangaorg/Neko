@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.SideNavMode
@@ -73,7 +74,10 @@ internal class AppearanceSettingsScreen(
                                             end = Size.medium,
                                             top = Size.medium,
                                         ),
-                                    textStyle = MaterialTheme.typography.titleMedium,
+                                    textStyle =
+                                        MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Normal
+                                        ),
                                     nightMode = nightMode,
                                     nightModePreference = preferences.nightMode(),
                                 )
