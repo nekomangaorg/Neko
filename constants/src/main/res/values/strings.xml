@@ -218,6 +218,7 @@
     <!-- Library Display -->
     <string name="display_options">Display options</string>
     <string name="can_be_found_in_library_filters">Can also be found by expanding library filters</string>
+    <string name="display_options_can_be">Display options can be found by expanding the library filter in the Library tab.</string>
     <string name="list">List</string>
     <string name="comfortable_grid">Comfortable Grid</string>
     <string name="cover_only_grid">Cover-only grid</string>

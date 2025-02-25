@@ -38,7 +38,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun SettingsSearchScreen(
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit,
+    onNavigationIconClicked: () -> Unit,
     navigate: (Any) -> Unit,
 ) {
     // Hide keyboard on change screen
@@ -63,7 +63,7 @@ fun SettingsSearchScreen(
     NekoScaffold(
         type = NekoScaffoldType.SearchOutline,
         focusRequester = focusRequester,
-        onNavigationIconClicked = onBackPressed,
+        onNavigationIconClicked = onNavigationIconClicked,
         searchPlaceHolder = stringResource(R.string.search_settings),
         onSearch = { searchText = it },
     ) { contentPadding ->
@@ -168,6 +168,10 @@ private fun searchTerms() =
         SettingsData(
             settingScreenType = SettingsScreenType.Appearance,
             contents = AppearanceSettingsScreen.getSearchTerms(),
+        ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Library,
+            contents = LibrarySettingsScreen.getSearchTerms(),
         ),
     )
 

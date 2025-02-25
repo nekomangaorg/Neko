@@ -13,7 +13,7 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 internal class GeneralSettingsScreen(
     val preferencesHelper: PreferencesHelper,
     val showNotificationSetting: Boolean,
-    val onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: () -> Unit,
     val manageNotificationsClicked: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 

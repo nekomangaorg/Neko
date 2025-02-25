@@ -11,6 +11,8 @@ object Screens {
 
         @Serializable object Appearance
 
+        @Serializable object Categories
+
         @Serializable object Library
 
         @Serializable object DataStorage

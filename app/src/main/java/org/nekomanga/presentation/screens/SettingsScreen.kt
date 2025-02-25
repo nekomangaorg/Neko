@@ -9,16 +9,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.setting.SettingsLibraryViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
@@ -27,11 +33,12 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
+import org.nekomanga.presentation.screens.settings.screens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsLibraryScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMangaDexScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
@@ -43,7 +50,10 @@ import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScree
 fun SettingsScreen(
     preferencesHelper: PreferencesHelper,
     mangaDetailsPreferences: MangaDetailsPreferences,
+    libraryPreferences: LibraryPreferences,
+    categories: State<List<Category>>,
     windowSizeClass: WindowSizeClass,
+    setLibrarySearchSuggestion: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val navController = rememberNavController()
@@ -88,7 +98,7 @@ fun SettingsScreen(
 
         composable<Screens.Settings.Search> {
             SettingsSearchScreen(
-                onBackPressed = { navController.popBackStack() },
+                onNavigationIconClicked = { navController.popBackStack() },
                 navigate = { route ->
                     navController.navigate(route) {
                         popUpTo(Screens.Settings.Main) { inclusive = false }
@@ -116,14 +126,21 @@ fun SettingsScreen(
                 .Content()
         }
 
-        composable<Screens.Settings.Library> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.library),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsLibraryScreen(contentPadding = contentPadding)
-            }
+        composable<Screens.Settings.Library> { entry ->
+            val vm = ViewModelProvider.create(entry.viewModelStore)[SettingsLibraryViewModel::class]
+
+            LibrarySettingsScreen(
+                    onNavigationIconClick = { navController.popBackStack() },
+                    libraryPreferences = vm.libraryPreferences,
+                    setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
+                    categories = vm.dbCategories.collectAsState(),
+                    onAddEditCategoryClick = { navController.navigate(Screens.Settings.Categories) },
+                )
+                .Content()
+        }
+
+        composable<Screens.Settings.Categories> {
+            AddEditCategoriesScreen(onNavigationIconClick = { navController.popBackStack() })
         }
 
         composable<Screens.Settings.DataStorage> {

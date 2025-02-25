@@ -28,7 +28,7 @@ import org.nekomanga.presentation.theme.Size
 internal class AppearanceSettingsScreen(
     val mangaDetailsPreferences: MangaDetailsPreferences,
     val preferences: PreferencesHelper,
-    val onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
     override fun getTitleRes(): Int = R.string.appearance
 

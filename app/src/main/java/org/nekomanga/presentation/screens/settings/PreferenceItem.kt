@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.collectAsState
+import org.nekomanga.presentation.screens.settings.widgets.InfoWidget
 import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
@@ -161,7 +162,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )*/
             }
             is Preference.PreferenceItem.InfoPreference -> {
-                // InfoWidget(text = item.title)
+                InfoWidget(text = item.title)
             }
             is Preference.PreferenceItem.CustomPreference -> {
                 Column(modifier = Modifier.fillMaxWidth()) {
