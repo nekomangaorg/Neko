@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.toggle
@@ -179,7 +178,7 @@ class BrowsePresenter(
                 it.copy(
                     categories = categories,
                     promptForCategories =
-                        CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                        CategoryUtil.shouldShowCategoryPrompt(libraryPreferences, categories),
                 )
             }
         }
@@ -589,7 +588,7 @@ class BrowsePresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory().get()
+                val defaultCategory = libraryPreferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _browseScreenState.value.categories

@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.widgets.InfoWidget
 import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
+import org.nekomanga.presentation.screens.settings.widgets.MultiSelectListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
@@ -115,7 +116,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )*/
             }
             is Preference.PreferenceItem.MultiSelectListPreference -> {
-                /* val values by item.pref.collectAsState()
+                val values by item.pref.collectAsState()
                 MultiSelectListPreferenceWidget(
                     preference = item,
                     values = values,
@@ -126,7 +127,7 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                             }
                         }
                     },
-                )*/
+                )
             }
             is Preference.PreferenceItem.TextPreference -> {
                 TextPreferenceWidget(

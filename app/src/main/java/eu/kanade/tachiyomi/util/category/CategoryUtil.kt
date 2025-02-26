@@ -1,15 +1,15 @@
 package eu.kanade.tachiyomi.util.category
 
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.library.LibraryPreferences
 
 class CategoryUtil {
     companion object {
         fun shouldShowCategoryPrompt(
-            preferencesHelper: PreferencesHelper,
+            libraryPreferences: LibraryPreferences,
             categoryItems: List<CategoryItem>,
         ): Boolean {
-            return preferencesHelper.defaultCategory().get() == -1 && categoryItems.isNotEmpty()
+            return libraryPreferences.defaultCategory().get() == -1 && categoryItems.isNotEmpty()
         }
     }
 }

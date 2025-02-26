@@ -88,6 +88,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
@@ -106,6 +107,7 @@ import uy.kohesive.injekt.api.get
 class MangaDetailPresenter(
     private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -180,7 +182,7 @@ class MangaDetailPresenter(
 
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
-                    hasDefaultCategory = preferences.defaultCategory().get() != -1,
+                    hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                     extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
                     forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
@@ -1491,7 +1493,7 @@ class MangaDetailPresenter(
             updateMangaFlow()
             // add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && generalState.value.hasDefaultCategory) {
-                val defaultCategoryId = preferences.defaultCategory().get()
+                val defaultCategoryId = libraryPreferences.defaultCategory().get()
                 generalState.value.allCategories
                     .firstOrNull { defaultCategoryId == it.id }
                     ?.let { updateMangaCategories(listOf(it)) }

@@ -4,7 +4,6 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -101,7 +100,7 @@ class SettingsLibraryController : AbstractSettingsController() {
                     onClick { router.pushController(CategoryController().withFadeTransaction()) }
                 }
                 intListPreference(activity) {
-                    key = Keys.defaultCategory
+                    key = "default_category"
                     titleRes = R.string.default_category
 
                     val categories = listOf(Category.createDefault(context)) + dbCategories
@@ -112,7 +111,7 @@ class SettingsLibraryController : AbstractSettingsController() {
                     defaultValue = "-1"
 
                     val selectedCategory =
-                        categories.find { it.id == preferences.defaultCategory().get() }
+                        categories.find { it.id == libraryPreferences.defaultCategory().get() }
                     summary = selectedCategory?.name ?: context.getString(R.string.always_ask)
                     onChange { newValue ->
                         summary =

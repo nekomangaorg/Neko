@@ -163,8 +163,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun autoDownloadWhileReading() = this.preferenceStore.getInt("auto_download_while_reading", 0)
 
-    fun defaultCategory() = this.preferenceStore.getInt(Keys.defaultCategory, -1)
-
     fun feedViewType() = this.preferenceStore.getEnum("feed_view_type", FeedScreenType.Updates)
 
     fun swipeRefreshFeedScreen() =

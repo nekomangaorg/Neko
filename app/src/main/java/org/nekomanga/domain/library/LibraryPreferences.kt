@@ -6,6 +6,8 @@ import tachiyomi.core.preference.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
+    fun defaultCategory() = this.preferenceStore.getInt("default_category", -1)
+
     fun searchSuggestions() = this.preferenceStore.getString("library_search_suggestion")
 
     fun showSearchSuggestions() = this.preferenceStore.getBoolean("show_library_search_suggestions")

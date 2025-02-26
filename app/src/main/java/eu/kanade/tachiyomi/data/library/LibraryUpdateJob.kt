@@ -781,7 +781,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val interval = prefInterval ?: libraryPreferences.updateInterval().get()
             if (interval > 0) {
                 val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
-
                 val constraints =
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)

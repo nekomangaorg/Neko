@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -133,7 +134,8 @@ fun SettingsScreen(
                     onNavigationIconClick = { navController.popBackStack() },
                     libraryPreferences = vm.libraryPreferences,
                     setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
-                    categories = vm.dbCategories.collectAsState(),
+                    categories = vm.dbCategories.collectAsState().value,
+                    viewModelScope = vm.viewModelScope,
                     onAddEditCategoryClick = { navController.navigate(Screens.Settings.Categories) },
                 )
                 .Content()

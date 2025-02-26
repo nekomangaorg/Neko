@@ -1,23 +1,40 @@
 package org.nekomanga.presentation.screens.settings.screens
 
+import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class LibrarySettingsScreen(
     val libraryPreferences: LibraryPreferences,
     onNavigationIconClick: () -> Unit,
-    val categories: State<List<Category>>,
+    val categories: List<Category>,
+    val viewModelScope: CoroutineScope,
     val setLibrarySearchSuggestion: () -> Unit,
     val onAddEditCategoryClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
@@ -27,54 +44,145 @@ internal class LibrarySettingsScreen(
     @Composable
     override fun getPreferences(): ImmutableList<Preference> {
         val context = LocalContext.current
+
         return persistentListOf(
-            Preference.PreferenceGroup(
-                title = stringResource(R.string.general),
-                preferenceItems =
-                    persistentListOf(
-                        Preference.PreferenceItem.SwitchPreference(
-                            pref = libraryPreferences.removeArticles(),
-                            title = stringResource(R.string.sort_by_ignoring_articles),
-                            subtitle = stringResource(R.string.when_sorting_ignore_articles),
-                        ),
-                        Preference.PreferenceItem.SwitchPreference(
-                            pref = libraryPreferences.showSearchSuggestions(),
-                            title = stringResource(R.string.search_suggestions),
-                            subtitle = stringResource(R.string.search_tips_show_periodically),
-                            onValueChanged = {
-                                if (it) {
-                                    setLibrarySearchSuggestion()
-                                } else {
-                                    DelayedLibrarySuggestionsJob.setupTask(context, false)
-                                    libraryPreferences.searchSuggestions().set("")
-                                }
-                                true
-                            },
-                        ),
-                        Preference.PreferenceItem.InfoPreference(
-                            stringResource(R.string.display_options_can_be)
-                        ),
+            generalGroup(context),
+            categoriesGroup(categories),
+            globalUpdateGroup(context),
+        )
+    }
+
+    @Composable
+    private fun generalGroup(context: Context): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.general),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.removeArticles(),
+                        title = stringResource(R.string.sort_by_ignoring_articles),
+                        subtitle = stringResource(R.string.when_sorting_ignore_articles),
                     ),
-            ),
-            Preference.PreferenceGroup(
-                title = stringResource(R.string.categories),
-                preferenceItems =
-                    persistentListOf(
-                        Preference.PreferenceItem.TextPreference(
-                            title =
-                                if (categories.value.isNotEmpty())
-                                    stringResource(R.string.edit_categories)
-                                else stringResource(R.string.add_categories),
-                            subtitle =
-                                pluralStringResource(
-                                    R.plurals.category_plural,
-                                    categories.value.size,
-                                    categories.value.size,
-                                ),
-                            onClick = onAddEditCategoryClick,
-                        )
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.showSearchSuggestions(),
+                        title = stringResource(R.string.search_suggestions),
+                        subtitle = stringResource(R.string.search_tips_show_periodically),
+                        onValueChanged = {
+                            if (it) {
+                                setLibrarySearchSuggestion()
+                            } else {
+                                DelayedLibrarySuggestionsJob.setupTask(context, false)
+                                libraryPreferences.searchSuggestions().set("")
+                            }
+                            true
+                        },
                     ),
-            ),
+                    Preference.PreferenceItem.InfoPreference(
+                        stringResource(R.string.display_options_can_be)
+                    ),
+                ),
+        )
+    }
+
+    @Composable
+    private fun categoriesGroup(categories: List<Category>): Preference.PreferenceGroup {
+        val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
+
+        val categoryMap =
+            remember(categories) {
+                (listOf(alwaysAsk) + categories.map { it.id!! to it.name }).toMap().toImmutableMap()
+            }
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.categories),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.TextPreference(
+                        title =
+                            if (categories.isNotEmpty()) stringResource(R.string.edit_categories)
+                            else stringResource(R.string.add_categories),
+                        subtitle =
+                            pluralStringResource(
+                                R.plurals.category_plural,
+                                categories.size,
+                                categories.size,
+                            ),
+                        onClick = onAddEditCategoryClick,
+                    ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = libraryPreferences.defaultCategory(),
+                        title = stringResource(R.string.default_category),
+                        entries = categoryMap,
+                    ),
+                ),
+        )
+    }
+
+    @Composable
+    private fun globalUpdateGroup(context: Context): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.global_updates),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.ListPreference(
+                        pref = libraryPreferences.updateInterval(),
+                        title = stringResource(R.string.library_update_frequency),
+                        entries =
+                            persistentMapOf(
+                                0 to stringResource(R.string.manual),
+                                6 to stringResource(R.string.every_6_hours),
+                                12 to stringResource(R.string.every_12_hours),
+                                24 to stringResource(R.string.daily),
+                                48 to stringResource(R.string.every_2_days),
+                                168 to stringResource(R.string.weekly),
+                            ),
+                        onValueChanged = {
+                            viewModelScope.launchNonCancellable {
+                                val interval = libraryPreferences.updateInterval().get()
+                                LibraryUpdateJob.setupTask(context, interval)
+                            }
+                            true
+                        },
+                    ),
+                    Preference.PreferenceItem.MultiSelectListPreference(
+                        pref = libraryPreferences.autoUpdateDeviceRestrictions(),
+                        title = stringResource(R.string.library_update_device_restriction),
+                        subtitle = stringResource(R.string.restrictions_),
+                        entries =
+                            persistentMapOf(
+                                DEVICE_ONLY_ON_WIFI to stringResource(R.string.wifi),
+                                DEVICE_CHARGING to stringResource(R.string.charging),
+                                DEVICE_BATTERY_NOT_LOW to stringResource(R.string.battery_not_low),
+                            ),
+                        onValueChanged = {
+                            viewModelScope.launchNonCancellable {
+                                LibraryUpdateJob.setupTask(context)
+                            }
+                            true
+                        },
+                    ),
+                    Preference.PreferenceItem.MultiSelectListPreference(
+                        pref = libraryPreferences.autoUpdateMangaRestrictions(),
+                        title = stringResource(R.string.smart_library_update_restrictions),
+                        entries =
+                            persistentMapOf(
+                                MANGA_HAS_UNREAD to
+                                    stringResource(R.string.smart_library_has_unread),
+                                MANGA_NOT_STARTED to
+                                    stringResource(R.string.smart_library_has_not_started),
+                                MANGA_NOT_COMPLETED to
+                                    stringResource(R.string.smart_library_status_is_completed),
+                                MANGA_TRACKING_PLAN_TO_READ to
+                                    stringResource(R.string.smart_library_tracking_is_plan_to_read),
+                                MANGA_TRACKING_DROPPED to
+                                    stringResource(R.string.smart_library_tracking_is_dropped),
+                                MANGA_TRACKING_ON_HOLD to
+                                    stringResource(R.string.smart_library_tracking_is_on_hold),
+                                MANGA_TRACKING_COMPLETED to
+                                    stringResource(R.string.smart_library_tracking_is_completed),
+                            ),
+                        subtitle = stringResource(R.string.restrictions_),
+                    ),
+                ),
         )
     }
 
@@ -92,6 +200,9 @@ internal class LibrarySettingsScreen(
                 ),
                 SearchTerm(stringResource(R.string.display_options_can_be)),
                 SearchTerm(stringResource(R.string.add_edit_categories)),
+                SearchTerm(stringResource(R.string.default_category)),
+                SearchTerm(stringResource(R.string.global_updates)),
+                SearchTerm(stringResource(R.string.library_update_device_restriction)),
             )
         }
     }

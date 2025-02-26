@@ -43,8 +43,6 @@ object PreferenceKeys {
 
     const val dateFormat = "app_date_format"
 
-    const val defaultCategory = "default_category"
-
     const val showDLsInRecents = "show_dls_in_recents"
     const val showRemHistoryInRecents = "show_rem_history_in_recents"
     const val showReadInAllRecents = "show_read_in_all_recents"

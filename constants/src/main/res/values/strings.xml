@@ -1160,6 +1160,7 @@
     <string name="bottom">Bottom</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
     <string name="charging">Charging</string>

@@ -61,7 +61,7 @@ class SimilarPresenter(
                 it.copy(
                     categories = categories,
                     promptForCategories =
-                        CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                        CategoryUtil.shouldShowCategoryPrompt(libraryPreferences, categories),
                 )
             }
         }
@@ -113,7 +113,7 @@ class SimilarPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory().get()
+                val defaultCategory = libraryPreferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _similarScreenState.value.categories

@@ -101,7 +101,7 @@ class DisplayPresenter(
                 it.copy(
                     categories = categories,
                     promptForCategories =
-                        CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                        CategoryUtil.shouldShowCategoryPrompt(libraryPreferences, categories),
                 )
             }
         }
@@ -144,7 +144,7 @@ class DisplayPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory().get()
+                val defaultCategory = libraryPreferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _displayScreenState.value.categories

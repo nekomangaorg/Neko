@@ -49,7 +49,7 @@ fun <T> ListPreferenceWidget(
 
     if (isDialogShown) {
         AlertDialog(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
             onDismissRequest = { isDialogShown = false },
             title = { Text(text = title) },
             text = {
