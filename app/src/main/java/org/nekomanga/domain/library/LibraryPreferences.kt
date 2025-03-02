@@ -130,8 +130,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
-    fun whatToUpdateOnRefresh() = this.preferenceStore.getInt("update_on_refresh", -1)
-
     companion object {
 
         const val MANGA_NOT_COMPLETED = "manga_status_not_completed"

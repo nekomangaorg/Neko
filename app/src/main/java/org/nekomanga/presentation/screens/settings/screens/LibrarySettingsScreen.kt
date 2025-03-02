@@ -253,6 +253,11 @@ internal class LibrarySettingsScreen(
                             ),
                         onClick = { showCategoriesDialog = true },
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.updateCovers(),
+                        title = stringResource(R.string.auto_refresh_covers),
+                        subtitle = stringResource(R.string.auto_refresh_covers_summary),
+                    ),
                 ),
         )
     }
@@ -277,6 +282,12 @@ internal class LibrarySettingsScreen(
                 SearchTerm(stringResource(R.string.smart_library_update_restrictions)),
                 SearchTerm(stringResource(R.string.faster_library_update)),
                 SearchTerm(stringResource(R.string.library_update_order)),
+                SearchTerm(stringResource(R.string.categories)),
+                SearchTerm(stringResource(R.string.categories_on_manual)),
+                SearchTerm(
+                    stringResource(R.string.auto_refresh_covers),
+                    stringResource(R.string.auto_refresh_covers_summary),
+                ),
             )
         }
     }
