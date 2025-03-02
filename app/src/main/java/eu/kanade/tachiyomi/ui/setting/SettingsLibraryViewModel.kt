@@ -30,10 +30,9 @@ class SettingsLibraryViewModel : ViewModel() {
     val dbCategories = _dbCategories.asStateFlow()
 
     init {
-        val categories2 = db.getCategories().executeAsBlocking()
         viewModelScope.launch {
             db.getCategories().asFlow().distinctUntilChanged().collectLatest { categories ->
-                _dbCategories.value = categories
+                _dbCategories.value = listOf(Category.createDefault()) + categories
             }
         }
     }

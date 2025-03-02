@@ -2,7 +2,11 @@ package org.nekomanga.presentation.screens.settings.screens
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -27,8 +31,10 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
+import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 
 internal class LibrarySettingsScreen(
     val libraryPreferences: LibraryPreferences,
@@ -48,7 +54,7 @@ internal class LibrarySettingsScreen(
         return persistentListOf(
             generalGroup(context),
             categoriesGroup(categories),
-            globalUpdateGroup(context),
+            globalUpdateGroup(context, categories),
         )
     }
 
@@ -118,7 +124,46 @@ internal class LibrarySettingsScreen(
     }
 
     @Composable
-    private fun globalUpdateGroup(context: Context): Preference.PreferenceGroup {
+    private fun globalUpdateGroup(
+        context: Context,
+        allCategoryList: List<Category>,
+    ): Preference.PreferenceGroup {
+
+        val libraryUpdateInterval by libraryPreferences.updateInterval().collectAsState()
+
+        val showLibraryUpdateRestrictions by
+            remember(libraryUpdateInterval) { mutableStateOf(libraryUpdateInterval > 0) }
+
+        val includedCategories by libraryPreferences.whichCategoriesToUpdate().collectAsState()
+        val excludedCategories by libraryPreferences.whichCategoriesToExclude().collectAsState()
+
+        var showCategoriesDialog by rememberSaveable { mutableStateOf(false) }
+        if (showCategoriesDialog) {
+            TriStateListDialog(
+                title = stringResource(R.string.categories),
+                items = allCategoryList,
+                initialChecked =
+                    includedCategories.mapNotNull { id ->
+                        allCategoryList.find { it.id.toString() == id }
+                    },
+                initialInversed =
+                    excludedCategories.mapNotNull { id ->
+                        allCategoryList.find { it.id.toString() == id }
+                    },
+                itemLabel = { it.name },
+                onDismissRequest = { showCategoriesDialog = false },
+                onValueChanged = { newIncluded, newExcluded ->
+                    libraryPreferences
+                        .whichCategoriesToUpdate()
+                        .set(newIncluded.map { it.id.toString() }.toSet())
+                    libraryPreferences
+                        .whichCategoriesToExclude()
+                        .set(newExcluded.map { it.id.toString() }.toSet())
+                    showCategoriesDialog = false
+                },
+            )
+        }
+
         return Preference.PreferenceGroup(
             title = stringResource(R.string.global_updates),
             preferenceItems =
@@ -144,6 +189,7 @@ internal class LibrarySettingsScreen(
                         },
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
+                        enabled = showLibraryUpdateRestrictions,
                         pref = libraryPreferences.autoUpdateDeviceRestrictions(),
                         title = stringResource(R.string.library_update_device_restriction),
                         subtitle = stringResource(R.string.restrictions_),
@@ -161,6 +207,7 @@ internal class LibrarySettingsScreen(
                         },
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
+                        enabled = showLibraryUpdateRestrictions,
                         pref = libraryPreferences.autoUpdateMangaRestrictions(),
                         title = stringResource(R.string.smart_library_update_restrictions),
                         entries =
@@ -181,6 +228,30 @@ internal class LibrarySettingsScreen(
                                     stringResource(R.string.smart_library_tracking_is_completed),
                             ),
                         subtitle = stringResource(R.string.restrictions_),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.updateFaster(),
+                        title = stringResource(R.string.faster_library_update),
+                    ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = libraryPreferences.updatePrioritization(),
+                        title = stringResource(R.string.library_update_order),
+                        entries =
+                            persistentMapOf(
+                                0 to stringResource(R.string.alphabetically),
+                                1 to stringResource(R.string.last_updated),
+                                2 to stringResource(R.string.next_updated),
+                            ),
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.categories),
+                        subtitle =
+                            getCategoriesLabel(
+                                allCategoryList,
+                                includedCategories,
+                                excludedCategories,
+                            ),
+                        onClick = { showCategoriesDialog = true },
                     ),
                 ),
         )
@@ -203,6 +274,9 @@ internal class LibrarySettingsScreen(
                 SearchTerm(stringResource(R.string.default_category)),
                 SearchTerm(stringResource(R.string.global_updates)),
                 SearchTerm(stringResource(R.string.library_update_device_restriction)),
+                SearchTerm(stringResource(R.string.smart_library_update_restrictions)),
+                SearchTerm(stringResource(R.string.faster_library_update)),
+                SearchTerm(stringResource(R.string.library_update_order)),
             )
         }
     }

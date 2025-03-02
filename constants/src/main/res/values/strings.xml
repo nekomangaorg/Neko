@@ -2,6 +2,11 @@
 <resources>
     <string name="app_name" translatable="false">Neko</string>
 
+
+    <!-- Generic -->
+    <string name="selected">Selected</string>
+    <string name="not_selected">Not selected</string>
+    <string name="disabled">Disabled</string>
     <!--Models-->
 
     <!-- Manga Type -->
@@ -900,7 +905,6 @@
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
     <string name="doh">DNS over HTTPS</string>
-    <string name="disabled">Disabled</string>
     <string name="cloudflare" translatable="false">Cloudflare</string>
     <string name="google" translatable="false">Google</string>
     <string name="ad_guard" translatable="false">AdGuard</string>

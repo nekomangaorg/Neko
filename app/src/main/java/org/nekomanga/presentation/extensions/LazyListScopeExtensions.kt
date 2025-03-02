@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.components
+package org.nekomanga.presentation.extensions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
