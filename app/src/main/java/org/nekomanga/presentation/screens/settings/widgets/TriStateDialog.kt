@@ -21,6 +21,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
@@ -62,6 +63,7 @@ fun <T> TriStateListDialog(
             .toMutableStateList()
     }
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
         onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
         text = {
