@@ -109,6 +109,8 @@ fun Manga.toDisplayManga(
         displayTextRes = displayTextRes,
         currentArtwork =
             Artwork(
+                url = this.user_cover ?: "",
+                inLibrary = this.favorite,
                 mangaId = this.id!!,
                 originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
             ),
