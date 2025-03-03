@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_PAGES_LEFT
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_READ
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SCANLATOR
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SOURCE_ORDER
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_UPLOADER
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_VOL
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.TABLE
@@ -54,6 +55,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
             put(COL_VOL, obj.vol)
             put(COL_READ, obj.read)
             put(COL_SCANLATOR, obj.scanlator)
+            put(COL_UPLOADER, obj.uploader)
             put(COL_BOOKMARK, obj.bookmark)
             put(COL_DATE_FETCH, obj.date_fetch)
             put(COL_DATE_UPLOAD, obj.date_upload)
@@ -79,6 +81,7 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
             chapter_txt = cursor.getString(cursor.getColumnIndex(COL_CHP_TXT))
             chapter_title = cursor.getString(cursor.getColumnIndex(COL_CHP_TITLE))
             scanlator = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR))
+            uploader = cursor.getString(cursor.getColumnIndex(COL_UPLOADER))
             read = cursor.getInt(cursor.getColumnIndex(COL_READ)) == 1
             bookmark = cursor.getInt(cursor.getColumnIndex(COL_BOOKMARK)) == 1
             date_fetch = cursor.getLong(cursor.getColumnIndex(COL_DATE_FETCH))

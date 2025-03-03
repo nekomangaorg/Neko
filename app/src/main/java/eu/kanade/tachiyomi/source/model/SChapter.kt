@@ -26,6 +26,8 @@ interface SChapter : Serializable {
 
     var scanlator: String?
 
+    var uploader: String?
+
     var language: String?
 
     // chapter id from mangadex
@@ -46,6 +48,7 @@ interface SChapter : Serializable {
         date_upload = other.date_upload
         chapter_number = other.chapter_number
         scanlator = other.scanlator
+        uploader = other.uploader
         mangadex_chapter_id = other.mangadex_chapter_id
         language = other.language
     }
@@ -57,6 +60,7 @@ interface SChapter : Serializable {
             date_upload = this@SChapter.date_upload
             chapter_number = this@SChapter.chapter_number
             scanlator = this@SChapter.scanlator
+            uploader = this@SChapter.uploader
         }
     }
 

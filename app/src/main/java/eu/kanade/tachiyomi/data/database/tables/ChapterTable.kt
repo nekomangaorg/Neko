@@ -22,6 +22,8 @@ object ChapterTable {
 
     const val COL_SCANLATOR = "scanlator"
 
+    const val COL_UPLOADER = "uploader"
+
     const val COL_BOOKMARK = "bookmark"
 
     const val COL_DATE_FETCH = "date_fetch"
@@ -53,6 +55,7 @@ object ChapterTable {
             $COL_CHP_TITLE TEXT NOT NULL,
             $COL_VOL TEXT NOT NULL,
             $COL_SCANLATOR TEXT,
+            $COL_UPLOADER TEXT
             $COL_READ BOOLEAN NOT NULL,
             $COL_BOOKMARK BOOLEAN NOT NULL,
             $COL_LAST_PAGE_READ INT NOT NULL,
@@ -68,6 +71,7 @@ object ChapterTable {
             ON DELETE CASCADE
             )
             """
+
 
     val createMangaIdIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_${COL_MANGA_ID}_index ON $TABLE($COL_MANGA_ID)"
@@ -97,4 +101,7 @@ object ChapterTable {
 
     val addLanguage: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE TEXT DEFAULT ''"
+
+    val addUploader: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UPLOADER TEXT DEFAULT ''"
 }
