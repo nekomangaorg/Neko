@@ -141,12 +141,13 @@ class ApiMangaParser {
         lastChapterNumber: Int?,
         chapterListResponse: List<ChapterDataDto>,
         groupMap: Map<String, String>,
+        uploaderMap: Map<String, String>,
     ): Result<List<SChapter>, ResultError> {
         return runCatching {
                 Ok(
                     chapterListResponse
                         .asSequence()
-                        .map { mapChapter(it, lastChapterNumber, groupMap) }
+                        .map { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
                         .toList()
                 )
             }
@@ -161,6 +162,7 @@ class ApiMangaParser {
         networkChapter: ChapterDataDto,
         lastChapterNumber: Int?,
         groups: Map<String, String>,
+        uploaders: Map<String, String>,
     ): SChapter {
         val chapter = SChapter.create()
         val attributes = networkChapter.attributes
@@ -176,6 +178,13 @@ class ApiMangaParser {
                 .filter { it.type == MdConstants.Types.scanlator }
                 .mapNotNull { groups[it.id] }
                 .toMutableSet()
+
+        val uploaderName =
+            networkChapter.relationships
+                .filter { it.id != MdConstants.uploaderBot }
+                .filter { it.type == MdConstants.Types.uploader }
+                .map { uploaders[it.id] }
+                .firstOrNull()
 
         if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
             scanlatorName.remove("no group")

@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
+import eu.kanade.tachiyomi.source.online.models.dto.UploaderDto
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import retrofit2.http.Body
@@ -113,6 +114,10 @@ interface MangaDexService {
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdConstants.Api.user}/{id}")
+    suspend fun uploader(@Path("id") id: String): ApiResponse<UploaderDto>
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>

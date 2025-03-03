@@ -186,7 +186,13 @@ class MangaHandler {
                 }
                 .andThen { results ->
                     val groupMap = getGroupMap(results)
-                    apiMangaParser.chapterListParse(lastChapterNumber, results, groupMap)
+                    val uploaderMap = getUploaderMap(results)
+                    apiMangaParser.chapterListParse(
+                        lastChapterNumber,
+                        results,
+                        groupMap,
+                        uploaderMap,
+                    )
                 }
         }
     }
@@ -231,5 +237,22 @@ class MangaHandler {
             .flatten()
             .filter { it.type == MdConstants.Types.scanlator }
             .associate { it.id to it.attributes!!.name!! }
+    }
+
+    private suspend fun getUploaderMap(results: List<ChapterDataDto>): Map<String, String> {
+        return results
+            .map { chapter -> chapter.relationships }
+            .flatten()
+            .filter { it.type == MdConstants.Types.uploader }
+            .associate {
+                it.id to
+                    service
+                        .uploader(it.id)
+                        .getOrResultError("Trying to get uploader username")
+                        .mapBoth(
+                            success = { user -> user.data.attributes.username },
+                            failure = { "" },
+                        )
+            }
     }
 }

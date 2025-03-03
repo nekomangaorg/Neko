@@ -9,6 +9,7 @@ object MdConstants {
     const val currentSeasonalId = "328b04cf-aad6-4e2d-b3fc-4694075b8437"
     const val staffPicksId = "805ba886-dd99-4aa4-b460-4bd7c7b71352"
     const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
+    const val uploaderBot = "e29214b2-9bd4-4e01-9c65-c75b3b0c95ef"
     const val name = "MangaDex"
     const val baseUrl = "https://mangadex.org"
     const val cdnUrl = "https://uploads.mangadex.org"
@@ -27,6 +28,7 @@ object MdConstants {
         const val chapter = "/chapter"
         const val cover = "/cover"
         const val group = "/group"
+        const val user = "/user"
         const val author = "/author"
         const val userFollows = "/user/follows/manga"
         const val readingStatusForAllManga = "/manga/status"
@@ -98,6 +100,7 @@ object MdConstants {
         const val coverArt = "cover_art"
         const val manga = "manga"
         const val scanlator = "scanlation_group"
+        const val uploader = "user"
     }
 
     object ContentRating {
