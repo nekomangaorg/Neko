@@ -186,7 +186,8 @@ class MangaHandler {
                 }
                 .andThen { results ->
                     val groupMap = getGroupMap(results)
-                    val uploaderMap = getUploaderMap(results)
+                    val uploaderMap = getUploaderMap(results, groupMap)
+
                     apiMangaParser.chapterListParse(
                         lastChapterNumber,
                         results,
@@ -237,11 +238,17 @@ class MangaHandler {
             .flatten()
             .filter { it.type == MdConstants.Types.scanlator }
             .associate { it.id to it.attributes!!.name!! }
+            .filterValues { it != "no group" }
     }
 
-    private suspend fun getUploaderMap(results: List<ChapterDataDto>): Map<String, String> {
+    private suspend fun getUploaderMap(
+        results: List<ChapterDataDto>,
+        groups: Map<String, String>,
+    ): Map<String, String> {
         return results
+            .asSequence()
             .map { chapter -> chapter.relationships }
+            .filter { relationships -> !relationships.any { groups.containsKey(it.id) } }
             .flatten()
             .filter { it.type == MdConstants.Types.uploader }
             .associate {

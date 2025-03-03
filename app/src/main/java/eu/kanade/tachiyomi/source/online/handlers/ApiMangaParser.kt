@@ -185,8 +185,7 @@ class ApiMangaParser {
                 .map { uploaders[it.id] }
                 .firstOrNull()
 
-        if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
-            scanlatorName.remove("no group")
+        if (scanlatorName.isEmpty()) {
             scanlatorName.add("No Group")
         }
 
