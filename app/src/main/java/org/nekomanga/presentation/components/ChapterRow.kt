@@ -69,6 +69,7 @@ fun ChapterRow(
     themeColor: ThemeColorState,
     title: String,
     scanlator: String,
+    uploader: String,
     language: String?,
     chapterNumber: Double,
     dateUploaded: Long,
@@ -161,6 +162,7 @@ fun ChapterRow(
                 markPrevious = markPrevious,
                 isMerged = isMerged,
                 blockScanlator = blockScanlator,
+                uploader = uploader,
             )
         }
     }
@@ -187,6 +189,7 @@ private fun ChapterInfo(
     shouldHideChapterTitles: Boolean,
     title: String,
     scanlator: String,
+    uploader: String,
     language: String?,
     chapterNumber: Double,
     dateUploaded: Long,
@@ -319,6 +322,9 @@ private fun ChapterInfo(
             }
 
             if (scanlator.isNotBlank()) {
+                if (scanlator == "No Group") {
+                    statuses.add(uploader)
+                }
                 statuses.add(scanlator)
             }
 

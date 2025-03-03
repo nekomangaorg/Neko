@@ -30,6 +30,7 @@ data class SimpleChapter(
     val mangaDexChapterId: String,
     val oldMangaDexChapterId: String?,
     val scanlator: String,
+    val uploader: String,
     val lastRead: Long = 0L,
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
@@ -68,6 +69,7 @@ data class SimpleChapter(
             it.mangadex_chapter_id = mangaDexChapterId
             it.old_mangadex_id = oldMangaDexChapterId
             it.language = language
+            it.uploader = uploader
         }
     }
 
@@ -78,6 +80,7 @@ data class SimpleChapter(
             dateUpload = sChapter.date_upload,
             chapterNumber = sChapter.chapter_number,
             scanlator = sChapter.scanlator ?: "",
+            uploader = sChapter.uploader ?: "",
             volume = sChapter.vol,
         )
     }
@@ -101,6 +104,7 @@ data class SimpleChapter(
                 chapterTitle = "",
                 volume = "",
                 scanlator = "",
+                uploader = "",
                 mangaDexChapterId = "",
                 oldMangaDexChapterId = null,
                 language = "",
@@ -114,6 +118,7 @@ data class SimpleChapter(
             it.url = url
             it.name = name
             it.scanlator = scanlator
+            it.uploader = uploader
             it.read = read
             it.bookmark = bookmark
             it.last_page_read = lastPageRead
@@ -157,6 +162,7 @@ fun Chapter.toSimpleChapter(lastRead: Long = 0L): SimpleChapter? {
         dateUpload = date_upload,
         chapterNumber = chapter_number,
         scanlator = scanlator ?: "",
+        uploader = uploader ?: "",
         volume = vol,
         chapterTitle = chapter_title,
         chapterText = chapter_txt,
