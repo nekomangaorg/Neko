@@ -322,11 +322,10 @@ private fun ChapterInfo(
             }
 
             if (scanlator.isNotBlank()) {
+                if (scanlator == "No Group") {
+                    statuses.add(uploader)
+                }
                 statuses.add(scanlator)
-            }
-
-            if (uploader.isNotBlank()) {
-                statuses.add(uploader)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
