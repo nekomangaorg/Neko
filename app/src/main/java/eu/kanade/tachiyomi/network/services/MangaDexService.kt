@@ -115,7 +115,6 @@ interface MangaDexService {
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
-    @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.user}/{id}")
     suspend fun uploader(@Path("id") id: String): ApiResponse<UploaderDto>
 
