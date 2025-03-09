@@ -247,16 +247,6 @@ class SettingsLibraryController : AbstractSettingsController() {
                     allSelectionRes = R.string.all
                 }
 
-                intListPreference(activity) {
-                    key = libraryPreferences.whatToUpdateOnRefresh().key()
-                    titleRes = R.string.categories_on_manual
-
-                    entriesRes =
-                        arrayOf(R.string.first_category, R.string.categories_in_global_update)
-                    entryRange = 0..1
-                    defaultValue = -1
-                }
-
                 switchPreference {
                     key = libraryPreferences.updateCovers().key()
                     titleRes = R.string.auto_refresh_covers

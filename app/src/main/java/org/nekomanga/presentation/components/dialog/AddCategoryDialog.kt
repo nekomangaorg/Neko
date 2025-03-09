@@ -10,6 +10,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +57,7 @@ fun AddCategoryDialog(
         }
 
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
             title = { Text(text = stringResource(id = R.string.new_category)) },
             text = {
                 Column {

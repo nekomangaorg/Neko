@@ -143,6 +143,7 @@ fun SettingsScreen(
 
         composable<Screens.Settings.Categories> {
             AddEditCategoriesScreen(onNavigationIconClick = { navController.popBackStack() })
+                .Content()
         }
 
         composable<Screens.Settings.DataStorage> {
