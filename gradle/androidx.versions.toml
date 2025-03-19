@@ -1,5 +1,5 @@
 [versions]
-agp_version = "8.8.0"
+agp_version = "8.9.0"
 lifecycle_version = "2.8.7"
 
 [libraries]
@@ -17,7 +17,7 @@ browser = "androidx.browser:browser:1.8.0"
 biometric = "androidx.biometric:biometric:1.1.0"
 palette = "androidx.palette:palette:1.0.0"
 core-ktx = "androidx.core:core-ktx:1.15.0"
-constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.0"
+constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.1"
 multidex = "androidx.multidex:multidex:2.0.1"
 work = "androidx.work:work-runtime-ktx:2.10.0"
 
