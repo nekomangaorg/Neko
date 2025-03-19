@@ -4,6 +4,7 @@
 .DS_Store
 /build
 .idea/
+.kotlin/
 *iml
 *.iml
 */build
