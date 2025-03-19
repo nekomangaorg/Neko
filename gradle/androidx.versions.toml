@@ -9,7 +9,7 @@ gradle = { module = "com.android.tools.build:gradle", version.ref = "agp_version
 
 appcompat = "androidx.appcompat:appcompat:1.7.0"
 cardview = "androidx.cardview:cardview:1.0.0"
-webkit = "androidx.webkit:webkit:1.12.1"
+webkit = "androidx.webkit:webkit:1.13.0"
 recyclerview = "androidx.recyclerview:recyclerview:1.4.0"
 preferencektx = "androidx.preference:preference-ktx:1.2.1"
 annotation = "androidx.annotation:annotation:1.9.1"
