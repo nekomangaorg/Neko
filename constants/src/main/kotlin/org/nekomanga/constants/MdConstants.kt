@@ -27,6 +27,7 @@ object MdConstants {
         const val chapter = "/chapter"
         const val cover = "/cover"
         const val group = "/group"
+        const val user = "/user"
         const val author = "/author"
         const val userFollows = "/user/follows/manga"
         const val readingStatusForAllManga = "/manga/status"
@@ -98,6 +99,7 @@ object MdConstants {
         const val coverArt = "cover_art"
         const val manga = "manga"
         const val scanlator = "scanlation_group"
+        const val uploader = "user"
     }
 
     object ContentRating {

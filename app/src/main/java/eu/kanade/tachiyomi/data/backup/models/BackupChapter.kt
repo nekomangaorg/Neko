@@ -24,6 +24,8 @@ data class BackupChapter(
 
     // J2K specific values
     @ProtoNumber(800) var pagesLeft: Int = 0,
+    // Neko Values
+    @ProtoNumber(905) var uploader: String? = null,
 ) {
     fun toChapterImpl(): ChapterImpl {
         return ChapterImpl().apply {
@@ -31,6 +33,7 @@ data class BackupChapter(
             name = this@BackupChapter.name
             chapter_number = this@BackupChapter.chapterNumber
             scanlator = this@BackupChapter.scanlator
+            uploader = this@BackupChapter.uploader
             read = this@BackupChapter.read
             bookmark = this@BackupChapter.bookmark
             last_page_read = this@BackupChapter.lastPageRead
@@ -48,6 +51,7 @@ data class BackupChapter(
                 name = chapter.name,
                 chapterNumber = chapter.chapter_number,
                 scanlator = chapter.scanlator,
+                uploader = chapter.uploader,
                 read = chapter.read,
                 bookmark = chapter.bookmark,
                 lastPageRead = chapter.last_page_read,

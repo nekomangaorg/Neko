@@ -18,6 +18,8 @@ class ChapterImpl : Chapter {
 
     override var scanlator: String? = null
 
+    override var uploader: String? = null
+
     override var read: Boolean = false
 
     override var bookmark: Boolean = false
