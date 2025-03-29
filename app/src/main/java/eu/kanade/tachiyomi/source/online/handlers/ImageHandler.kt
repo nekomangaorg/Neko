@@ -3,7 +3,9 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
+import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
+import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -15,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.util.getOrResultError
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
@@ -77,9 +80,7 @@ class ImageHandler {
                 .runCatching {
                     network.cdnClient.newCachelessCallWithProgress(request, page).await()
                 }
-                .onSuccess { response ->
-                    withNonCancellableContext { reportImageWithResponse(response) }
-                }
+                .onSuccess { response -> reportImageWithResponse(response) }
 
         if (
             (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
@@ -111,19 +112,19 @@ class ImageHandler {
         return attempt.getOrThrow { e ->
             if (e !is CancellationException) {
                 TimberKt.e(attempt.getError()) { "$tag error getting images" }
-                withNonCancellableContext { reportFailedImage(request.url.toString()) }
+                reportFailedImage(request.url.toString())
             }
             e
         }
     }
 
-    private suspend fun reportFailedImage(url: String) {
+    private fun reportFailedImage(url: String) {
         val atHomeImageReportDto =
             AtHomeImageReportDto(url, false, duration = 30.seconds.inWholeMilliseconds)
         sendReport(atHomeImageReportDto)
     }
 
-    private suspend fun reportImageWithResponse(response: Response) {
+    private fun reportImageWithResponse(response: Response) {
         val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size.toLong()
         val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
         val cache = response.header("X-Cache", "") == "HIT"
@@ -139,14 +140,20 @@ class ImageHandler {
         sendReport(atHomeImageReportDto)
     }
 
-    private suspend fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
+    private fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
+
         TimberKt.d { "$tag Image to report $atHomeImageReportDto" }
 
         if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
             TimberKt.d { "$tag image is at CDN don't report to md@home node" }
             return
         }
-        networkServices.service.atHomeImageReport(atHomeImageReportDto)
+        launchIO {
+            withNonCancellableContext {
+                runCatching { networkServices.service.atHomeImageReport(atHomeImageReportDto) }
+                    .onFailure { TimberKt.w(it) { "failed to report image" } }
+            }
+        }
     }
 
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
