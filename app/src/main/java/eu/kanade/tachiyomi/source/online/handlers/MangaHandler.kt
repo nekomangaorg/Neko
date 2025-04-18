@@ -251,6 +251,7 @@ class MangaHandler {
             .filter { relationships -> !relationships.any { groups.containsKey(it.id) } }
             .flatten()
             .filter { it.type == MdConstants.Types.uploader }
+            .distinctBy { it.id }
             .associate {
                 it.id to
                     service
