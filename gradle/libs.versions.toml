@@ -1,5 +1,5 @@
 [versions]
-aboutlibVersion = "11.6.3"
+aboutlibVersion = "12.0.0"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 chuckerVersion = "3.5.2"
