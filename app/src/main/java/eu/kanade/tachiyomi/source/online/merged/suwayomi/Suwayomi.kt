@@ -90,9 +90,26 @@ class Suwayomi : MergedLoginSource() {
     override val client: OkHttpClient
         get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
 
-    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return "${hostUrl()}/manga/${simpleChapter.url}"
+    override fun getMangaUrl(url: String): String {
+        return hostUrl() + "/manga/" + url
     }
+
+    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
+        return hostUrl() + simpleChapter.url.split(" ", limit = 2)[0]
+    }
+
+    fun getChapterInfoFormBuilder(chapterId: String): RequestBody =
+        buildJsonObject {
+                put("operationName", JsonPrimitive("CHAPTER_INFO"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "query CHAPTER_INFO {chapter(id:${chapterId.toInt()}) {mangaId sourceOrder }}"
+                    ),
+                )
+            }
+            .toString()
+            .toRequestBody("application/json".toMediaType())
 
     private fun createClient(username: String, password: String): OkHttpClient {
         return client
@@ -124,11 +141,7 @@ class Suwayomi : MergedLoginSource() {
         val responseBody = response.body
 
         return responseBody.use { body ->
-            with(
-                json.decodeFromString<SuwayomiGraphQLResponseDto<SuwayomiSearchMangaDto>>(
-                    body.string()
-                )
-            ) {
+            with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
                 data.mangas.nodes.map { manga ->
                     SManga.create().apply {
                         this.title = manga.title
@@ -170,9 +183,7 @@ class Suwayomi : MergedLoginSource() {
                     val chapters =
                         responseBody.use {
                             json
-                                .decodeFromString<
-                                    SuwayomiGraphQLResponseDto<SuwayomiFetchChaptersDto>
-                                >(
+                                .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
                                     it.string()
                                 )
                                 .data
@@ -184,7 +195,8 @@ class Suwayomi : MergedLoginSource() {
                             SChapter.create().apply {
                                 chapter_number = chapter.chapterNumber
                                 name = chapter.name
-                                url = "${chapter.id}"
+                                url =
+                                    "/manga/${mangaUrl}/chapter/${chapter.sourceOrder} ${chapter.id}"
                                 scanlator = this@Suwayomi.name
                                 date_upload = chapter.uploadDate
                             }
@@ -208,7 +220,7 @@ class Suwayomi : MergedLoginSource() {
                     "query",
                     JsonPrimitive(
                         "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!) {" +
-                            "fetchChapters(input: \$input) {chapters {id name chapterNumber uploadDate}}}"
+                            "fetchChapters(input: \$input) {chapters {id name chapterNumber sourceOrder uploadDate}}}"
                     ),
                 )
                 put("variables", variables)
@@ -224,16 +236,20 @@ class Suwayomi : MergedLoginSource() {
         val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
         val response =
             customClient()
-                .newCall(POST(apiUrl, headers, fetchPagesFormBuilder(chapter.url)))
+                .newCall(
+                    POST(
+                        apiUrl,
+                        headers,
+                        fetchPagesFormBuilder(chapter.url.split(" ", limit = 2)[1]),
+                    )
+                )
                 .await()
         val responseBody = response.body
 
         val pages =
             responseBody.use {
                 json
-                    .decodeFromString<SuwayomiGraphQLResponseDto<SuwayomiFetchChapterPagesDto>>(
-                        it.string()
-                    )
+                    .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChapterPagesDto>>(it.string())
                     .data
                     .fetchChapterPages
                     .pages

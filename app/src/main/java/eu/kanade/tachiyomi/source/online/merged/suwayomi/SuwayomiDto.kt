@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.suwayomi
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class SuwayomiGraphQLResponseDto<T>(val data: T)
+@Serializable data class SuwayomiGraphQLDto<T>(val data: T)
 
 @Serializable data class SuwayomiSearchMangaDto(val mangas: SuwayomiNodesDto)
 
@@ -20,8 +20,13 @@ data class SuwayomiChapterDto(
     val name: String,
     val chapterNumber: Float,
     val uploadDate: Long,
+    val sourceOrder: Long,
 )
 
 @Serializable data class SuwayomiFetchChapterPagesDto(val fetchChapterPages: SuwayomiPagesDto)
 
 @Serializable data class SuwayomiPagesDto(val pages: List<String>)
+
+@Serializable data class SuwayomiChapterUrlDto(val chapters: SuwayomiChapterUrlInfoDto)
+
+@Serializable data class SuwayomiChapterUrlInfoDto(val mangaId: Long, val sourceOrder: Long)

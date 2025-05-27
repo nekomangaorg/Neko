@@ -1458,16 +1458,13 @@ class MangaDetailPresenter(
         return when (mergeMangaList.isNotEmpty()) {
             true -> {
                 val mergeManga = mergeMangaList.first()
-                val baseUrl =
-                    when (val source = MergeType.getSource(mergeManga.mergeType, sourceManager)) {
-                        is MergedLoginSource -> source.hostUrl()
-                        else -> source.baseUrl
+                val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
+                val url =
+                    when (source) {
+                        is MergedLoginSource -> source.getMangaUrl(mergeManga.url)
+                        else -> source.baseUrl + mergeManga.url
                     }
-                Yes(
-                    url = baseUrl + mergeManga.url,
-                    title = mergeManga.title,
-                    mergeType = mergeManga.mergeType,
-                )
+                Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)
             }
             false -> No
         }
