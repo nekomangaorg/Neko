@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.MergedLoginSource
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
@@ -27,7 +27,7 @@ import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
-class Komga : ReducedHttpSource() {
+class Komga : MergedLoginSource() {
 
     override val baseUrl: String = ""
 
@@ -36,9 +36,11 @@ class Komga : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    fun hostUrl() = preferences.sourceUrl(this).get()
+    override fun requiresCredentials(): Boolean = true
 
-    suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
+    override fun hostUrl() = preferences.sourceUrl(this).get()
+
+    override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
             try {
                 val komgaUrl = "$url/api/v1/series?page=0&size=1".toHttpUrlOrNull()!!.newBuilder()
@@ -54,14 +56,14 @@ class Komga : ReducedHttpSource() {
         }
     }
 
-    fun hasCredentials(): Boolean {
+    override fun hasCredentials(): Boolean {
         val username = preferences.sourceUsername(this@Komga).get()
         val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
         return listOf(username, password, url).none { it.isBlank() }
     }
 
-    suspend fun isLoggedIn(): Boolean {
+    override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
             val username = preferences.sourceUsername(this@Komga).get()
             val password = preferences.sourcePassword(this@Komga).get()

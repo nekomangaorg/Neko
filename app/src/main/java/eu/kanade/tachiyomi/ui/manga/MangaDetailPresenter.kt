@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.MergedLoginSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -168,14 +169,34 @@ class MangaDetailPresenter(
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes =
-                when (sourceManager.komga.hasCredentials()) {
-                    true ->
-                        MergeType.entries.filterNot { it == MergeType.MangaLife }.toPersistentList()
-                    false ->
+                when (
+                    arrayOf(
+                        sourceManager.komga.hasCredentials(),
+                        sourceManager.suwayomi.hasCredentials(),
+                    )
+                ) {
+                    arrayOf(false, true) ->
                         MergeType.entries
                             .filterNot { it == MergeType.Komga }
                             .filterNot { it == MergeType.MangaLife }
                             .toPersistentList()
+
+                    arrayOf(true, false) ->
+                        MergeType.entries
+                            .filterNot { it == MergeType.Suwayomi }
+                            .filterNot { it == MergeType.MangaLife }
+                            .toPersistentList()
+
+                    arrayOf(false, false) ->
+                        MergeType.entries
+                            .filterNot { it == MergeType.Komga }
+                            .filterNot { it == MergeType.Suwayomi }
+                            .filterNot { it == MergeType.MangaLife }
+                            .toPersistentList()
+
+                    else -> {
+                        MergeType.entries.filterNot { it == MergeType.MangaLife }.toPersistentList()
+                    }
                 }
 
             _generalState.value =
@@ -1439,7 +1460,7 @@ class MangaDetailPresenter(
                 val mergeManga = mergeMangaList.first()
                 val baseUrl =
                     when (val source = MergeType.getSource(mergeManga.mergeType, sourceManager)) {
-                        is Komga -> source.hostUrl()
+                        is MergedLoginSource -> source.hostUrl()
                         else -> source.baseUrl
                     }
                 Yes(

@@ -34,7 +34,8 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
     Komga(1, eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
     Toonily(2, eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name),
     WeebCentral(3, eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name),
-    Comick(4, eu.kanade.tachiyomi.source.online.merged.comick.Comick.name);
+    Comick(4, eu.kanade.tachiyomi.source.online.merged.comick.Comick.name),
+    Suwayomi(5, eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name);
 
     companion object {
         fun getById(id: Int): MergeType {
@@ -45,6 +46,7 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
             return when (name) {
                 MangaLife.scanlatorName -> MangaLife
                 Komga.scanlatorName -> Komga
+                Suwayomi.scanlatorName -> Suwayomi
                 Toonily.scanlatorName -> Toonily
                 WeebCentral.scanlatorName -> WeebCentral
                 Comick.scanlatorName -> Comick
@@ -60,6 +62,7 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
             return when (mergeType) {
                 MangaLife -> sourceManager.mangaLife
                 Komga -> sourceManager.komga
+                Suwayomi -> sourceManager.suwayomi
                 Toonily -> sourceManager.toonily
                 WeebCentral -> sourceManager.weebCentral
                 Comick -> sourceManager.comick

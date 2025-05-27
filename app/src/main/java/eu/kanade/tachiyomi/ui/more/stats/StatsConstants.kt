@@ -19,6 +19,7 @@ object StatsConstants {
         val tagCount: Int = 0,
         val komgaMergeCount: Int = 0,
         val mangaLifeMergeCount: Int = 0,
+        val suwayomiMergeCount: Int = 0,
         val toonilyMergeCount: Int = 0,
         val weebCentralMergeCount: Int = 0,
         val averageMangaRating: Double = 0.0,
