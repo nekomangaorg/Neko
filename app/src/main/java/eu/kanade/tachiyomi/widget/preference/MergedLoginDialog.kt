@@ -45,11 +45,10 @@ class MergedLoginDialog(
         v?.apply {
             binding.progress.visibility = View.VISIBLE
             binding.login.visibility = View.GONE
-
+            val isMissingCredentials = source.requiresCredentials() &&
+                (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank())
             if (
-                (source.requiresCredentials() &&
-                    (binding.username.text.isNullOrBlank() ||
-                        binding.password.text.isNullOrBlank())) || binding.url.text.isNullOrBlank()
+                isMissingCredentials || binding.url.text.isNullOrBlank()
             ) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
