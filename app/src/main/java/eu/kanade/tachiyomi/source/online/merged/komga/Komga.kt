@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.MergedLoginSource
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
@@ -19,15 +19,18 @@ import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.PATCH
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
-class Komga : MergedLoginSource() {
+class Komga : MergedServerSource() {
 
     override val baseUrl: String = ""
 
@@ -198,6 +201,18 @@ class Komga : MergedLoginSource() {
                         ("?convert=png".takeIf { !supportedImageTypes.contains(page.mediaType) }
                             ?: ""),
             )
+        }
+    }
+
+    override suspend fun updateStatusChapters(chapters: List<SChapter>, read: Boolean) {
+        if (hostUrl().isBlank()) {
+            throw Exception("Invalid host name")
+        }
+        chapters.map { chapter ->
+            val chapterUrl = "${hostUrl()}${chapter.url}/read-progress"
+            val body =
+                "{\"completed\":${read},\"page\":0}".toRequestBody("application/json".toMediaType())
+            customClient().newCall(PATCH(chapterUrl, headers, body)).await()
         }
     }
 

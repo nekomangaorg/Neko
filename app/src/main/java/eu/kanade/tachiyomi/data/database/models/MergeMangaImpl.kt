@@ -46,10 +46,10 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
             return when (name) {
                 MangaLife.scanlatorName -> MangaLife
                 Komga.scanlatorName -> Komga
-                Suwayomi.scanlatorName -> Suwayomi
                 Toonily.scanlatorName -> Toonily
                 WeebCentral.scanlatorName -> WeebCentral
                 Comick.scanlatorName -> Comick
+                Suwayomi.scanlatorName -> Suwayomi
                 else -> null
             }
         }
@@ -62,10 +62,10 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
             return when (mergeType) {
                 MangaLife -> sourceManager.mangaLife
                 Komga -> sourceManager.komga
-                Suwayomi -> sourceManager.suwayomi
                 Toonily -> sourceManager.toonily
                 WeebCentral -> sourceManager.weebCentral
                 Comick -> sourceManager.comick
+                Suwayomi -> sourceManager.suwayomi
             }
         }
 

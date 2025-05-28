@@ -6,12 +6,13 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.MergedLoginSource
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import okhttp3.Credentials
@@ -31,7 +32,7 @@ import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
-class Suwayomi : MergedLoginSource() {
+class Suwayomi : MergedServerSource() {
 
     override val baseUrl: String = ""
 
@@ -104,7 +105,8 @@ class Suwayomi : MergedLoginSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "query CHAPTER_INFO {chapter(id:${chapterId.toInt()}) {mangaId sourceOrder }}"
+                        "query CHAPTER_INFO {chapter(id:${chapterId.toInt()}){" +
+                            "mangaId sourceOrder }}"
                     ),
                 )
             }
@@ -159,7 +161,9 @@ class Suwayomi : MergedLoginSource() {
                 put(
                     "query",
                     JsonPrimitive(
-                        "query SEARCH_MANGA{mangas(filter:{title:{likeInsensitive:\"%${query}%\"}}){nodes{id title}}}"
+                        "query SEARCH_MANGA{" +
+                            "mangas(filter:{title:{likeInsensitive:\"%${query}%\"}}){" +
+                            "nodes{id title}}}"
                     ),
                 )
             }
@@ -176,7 +180,9 @@ class Suwayomi : MergedLoginSource() {
                     val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
                     val response =
                         customClient()
-                            .newCall(POST(apiUrl, headers, fetchChaptersFormBuilder(mangaUrl)))
+                            .newCall(
+                                POST(apiUrl, headers, fetchChaptersFormBuilder(mangaUrl.toLong()))
+                            )
                             .await()
                     val responseBody = response.body
 
@@ -196,7 +202,9 @@ class Suwayomi : MergedLoginSource() {
                                 chapter_number = chapter.chapterNumber
                                 name = chapter.name
                                 url =
-                                    "/manga/${mangaUrl}/chapter/${chapter.sourceOrder} ${chapter.id}"
+                                    "/manga/${mangaUrl}/chapter/${chapter.sourceOrder}" +
+                                        " " +
+                                        "${chapter.id}"
                                 scanlator = this@Suwayomi.name
                                 date_upload = chapter.uploadDate
                             }
@@ -210,17 +218,18 @@ class Suwayomi : MergedLoginSource() {
         }
     }
 
-    fun fetchChaptersFormBuilder(mangaId: String): RequestBody {
+    fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
         val variables = buildJsonObject {
-            put("input", buildJsonObject { put("mangaId", JsonPrimitive(mangaId.toInt())) })
+            put("input", buildJsonObject { put("mangaId", JsonPrimitive(mangaId)) })
         }
         return buildJsonObject {
                 put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS_FETCH"))
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!) {" +
-                            "fetchChapters(input: \$input) {chapters {id name chapterNumber sourceOrder uploadDate}}}"
+                        "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!){" +
+                            "fetchChapters(input: \$input) {" +
+                            "chapters{id name chapterNumber sourceOrder uploadDate}}}"
                     ),
                 )
                 put("variables", variables)
@@ -234,16 +243,9 @@ class Suwayomi : MergedLoginSource() {
             throw Exception("Invalid host name")
         }
         val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
+        val chapterId = chapter.url.split(" ", limit = 2)[1].toLong()
         val response =
-            customClient()
-                .newCall(
-                    POST(
-                        apiUrl,
-                        headers,
-                        fetchPagesFormBuilder(chapter.url.split(" ", limit = 2)[1]),
-                    )
-                )
-                .await()
+            customClient().newCall(POST(apiUrl, headers, fetchPagesFormBuilder(chapterId))).await()
         val responseBody = response.body
 
         val pages =
@@ -259,17 +261,54 @@ class Suwayomi : MergedLoginSource() {
         }
     }
 
-    fun fetchPagesFormBuilder(chapterId: String): RequestBody {
+    fun fetchPagesFormBuilder(chapterId: Long): RequestBody {
         val variables = buildJsonObject {
-            put("input", buildJsonObject { put("chapterId", JsonPrimitive(chapterId.toInt())) })
+            put("input", buildJsonObject { put("chapterId", JsonPrimitive(chapterId)) })
         }
         return buildJsonObject {
                 put("operationName", JsonPrimitive("GET_CHAPTER_PAGES_FETCH"))
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation GET_CHAPTER_PAGES_FETCH(\$input:FetchChapterPagesInput!) {" +
+                        "mutation GET_CHAPTER_PAGES_FETCH(\$input:FetchChapterPagesInput!){" +
                             "fetchChapterPages(input:\$input){pages}}"
+                    ),
+                )
+                put("variables", variables)
+            }
+            .toString()
+            .toRequestBody("application/json".toMediaType())
+    }
+
+    override suspend fun updateStatusChapters(chapters: List<SChapter>, read: Boolean) {
+        if (hostUrl().isBlank()) {
+            throw Exception("Invalid host name")
+        }
+        val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
+
+        val chapterIds = chapters.map { it.url.split(" ", limit = 2)[1].toLong() }
+        customClient()
+                .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
+                .await()
+    }
+
+    fun updateChapterFormBuilder(chapterIds: List<Long>, read: Boolean): RequestBody {
+        val variables = buildJsonObject {
+            put(
+                "input",
+                buildJsonObject {
+                    put("ids", JsonArray(chapterIds.map { JsonPrimitive(it) }))
+                    put("patch", buildJsonObject { put("isRead", JsonPrimitive(read)) })
+                },
+            )
+        }
+        return buildJsonObject {
+                put("operationName", JsonPrimitive("UPDATE_CHAPTERS"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation UPDATE_CHAPTERS(\$input:UpdateChaptersInput!){" +
+                            "updateChapters(input:\$input){__typename}}"
                     ),
                 )
                 put("variables", variables)

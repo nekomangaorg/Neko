@@ -51,6 +51,7 @@ class SettingsMergeController :
 
             preferenceCategory {
                 title = Suwayomi.name
+                this.summaryRes = R.string.minimum_suwayomi_version
 
                 val sourcePreference =
                     MergedLoginPreference(context, suwayomi).apply {

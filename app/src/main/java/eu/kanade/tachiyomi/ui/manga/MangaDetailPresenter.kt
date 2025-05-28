@@ -26,9 +26,8 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.MergedLoginSource
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -1461,7 +1460,7 @@ class MangaDetailPresenter(
                 val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
                 val url =
                     when (source) {
-                        is MergedLoginSource -> source.getMangaUrl(mergeManga.url)
+                        is MergedServerSource -> source.getMangaUrl(mergeManga.url)
                         else -> source.baseUrl + mergeManga.url
                     }
                 Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)

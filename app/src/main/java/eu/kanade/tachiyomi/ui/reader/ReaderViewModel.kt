@@ -952,15 +952,21 @@ class ReaderViewModel(
 
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         manga ?: return
-        if (readerChapter.chapter.isMergedChapter() || !preferences.readingSync().get()) {
+        if (!preferences.readingSync().get()) {
             return
         }
 
-        viewModelScope.launchIO {
-            statusHandler.marksChaptersStatus(
-                manga!!.uuid(),
-                listOf(readerChapter.chapter.mangadex_chapter_id),
-            )
+        if (!readerChapter.chapter.isMergedChapter()) {
+            viewModelScope.launchIO {
+                statusHandler.markChaptersStatus(
+                    manga!!.uuid(),
+                    listOf(readerChapter.chapter.mangadex_chapter_id),
+                )
+            }
+        } else {
+            viewModelScope.launchIO {
+                statusHandler.markMergedChaptersStatus(listOf(readerChapter.chapter))
+            }
         }
     }
 

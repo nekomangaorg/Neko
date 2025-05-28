@@ -5,9 +5,13 @@ import com.github.michaelbull.result.mapBoth
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.NetworkServices
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
@@ -38,7 +42,7 @@ class StatusHandler {
     /**
      * Mark a list of chapters as read or unread for a manga on MangaDex. Defaults to marking read
      */
-    suspend fun marksChaptersStatus(
+    suspend fun markChaptersStatus(
         mangaId: String,
         chapterIds: List<String>,
         read: Boolean = true,
@@ -51,6 +55,17 @@ class StatusHandler {
                 }
             authService.markStatusForMultipleChapters(mangaId, dto).onFailure {
                 this.log("trying to mark chapters read=$read")
+            }
+        }
+    }
+
+    suspend fun markMergedChaptersStatus(chapters: List<SChapter>, read: Boolean = true) {
+        val chaptersBySource = chapters.groupBy { it.scanlator }
+        chaptersBySource.map { (sourceName, chapters) ->
+            val mergeType = MergeType.getMergeTypeFromName(sourceName) ?: return@map
+            val source = MergeType.getSource(mergeType, Injekt.get<SourceManager>())
+            if (source is MergedServerSource) {
+                source.updateStatusChapters(chapters, read)
             }
         }
     }

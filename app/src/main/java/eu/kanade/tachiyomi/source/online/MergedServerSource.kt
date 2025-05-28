@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.source.online
 
-abstract class MergedLoginSource : ReducedHttpSource() {
+import eu.kanade.tachiyomi.source.model.SChapter
+
+abstract class MergedServerSource : ReducedHttpSource() {
 
     abstract fun requiresCredentials(): Boolean
 
@@ -13,4 +15,6 @@ abstract class MergedLoginSource : ReducedHttpSource() {
     abstract fun hasCredentials(): Boolean
 
     abstract suspend fun isLoggedIn(): Boolean
+
+    abstract suspend fun updateStatusChapters(chapters: List<SChapter>, read: Boolean)
 }

@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.MergedLoginSource
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
@@ -18,11 +18,11 @@ import uy.kohesive.injekt.api.get
 
 class MergedLoginDialog(
     bundle: Bundle? = null,
-    val source: MergedLoginSource = Injekt.get<SourceManager>().komga,
+    val source: MergedServerSource = Injekt.get<SourceManager>().komga,
 ) : LoginDialogPreference(bundle = bundle, showUrl = true) {
 
     constructor(
-        source: MergedLoginSource
+        source: MergedServerSource
     ) : this(Bundle().apply { putLong("key", source.id) }, source)
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -45,11 +45,10 @@ class MergedLoginDialog(
         v?.apply {
             binding.progress.visibility = View.VISIBLE
             binding.login.visibility = View.GONE
-            val isMissingCredentials = source.requiresCredentials() &&
-                (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank())
-            if (
-                isMissingCredentials || binding.url.text.isNullOrBlank()
-            ) {
+            val isMissingCredentials =
+                source.requiresCredentials() &&
+                    (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank())
+            if (isMissingCredentials || binding.url.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return
