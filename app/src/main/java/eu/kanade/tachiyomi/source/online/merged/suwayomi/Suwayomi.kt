@@ -155,7 +155,8 @@ class Suwayomi : MergedServerSource() {
                     "query",
                     JsonPrimitive(
                         "query SEARCH_MANGA{" +
-                            "mangas(filter:{title:{likeInsensitive:\"%${query}%\"}}){" +
+                            "mangas(condition:{inLibrary:true}," +
+                            "filter:{title:{likeInsensitive:\"%${query}%\"}}){" +
                             "nodes{id title}}}"
                     ),
                 )
@@ -164,7 +165,7 @@ class Suwayomi : MergedServerSource() {
             .toRequestBody("application/json".toMediaType())
 
     override suspend fun fetchChapters(
-        mangaUrl: String,
+        mangaUrl: String
     ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
@@ -199,7 +200,8 @@ class Suwayomi : MergedServerSource() {
                                     name = chapter.name
                                     url =
                                         "/manga/${mangaUrl}/chapter/${chapter.sourceOrder}" +
-                                            " " + "${chapter.id}"
+                                            " " +
+                                            "${chapter.id}"
                                     scanlator = this@Suwayomi.name
                                     date_upload = chapter.uploadDate
                                 },
@@ -226,7 +228,7 @@ class Suwayomi : MergedServerSource() {
                     JsonPrimitive(
                         "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!){" +
                             "fetchChapters(input: \$input) {" +
-                            "chapters{id name chapterNumber sourceOrder uploadDate isRead}}}",
+                            "chapters{id name chapterNumber sourceOrder uploadDate isRead}}}"
                     ),
                 )
                 put("variables", variables)
