@@ -39,8 +39,6 @@ class Komga : MergedServerSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    override fun requiresCredentials(): Boolean = true
-
     override fun hostUrl() = preferences.sourceUrl(this).get()
 
     override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
@@ -59,7 +57,7 @@ class Komga : MergedServerSource() {
         }
     }
 
-    override fun hasCredentials(): Boolean {
+    fun hasCredentials(): Boolean {
         val username = preferences.sourceUsername(this@Komga).get()
         val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
@@ -136,7 +134,9 @@ class Komga : MergedServerSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -164,17 +164,20 @@ class Komga : MergedServerSource() {
                         }
                     val r =
                         page.map { book ->
-                            SChapter.create().apply {
-                                chapter_number = book.metadata.numberSort
-                                name = "${book.metadata.number} - ${book.metadata.title}"
-                                url = "/api/v1/books/${book.id}"
-                                scanlator = this@Komga.name
-                                date_upload =
-                                    book.metadata.releaseDate?.toDate()
-                                        ?: book.fileLastModified.toDateTime()
-                            }
+                            Pair(
+                                SChapter.create().apply {
+                                    chapter_number = book.metadata.numberSort
+                                    name = "${book.metadata.number} - ${book.metadata.title}"
+                                    url = "/api/v1/books/${book.id}"
+                                    scanlator = this@Komga.name
+                                    date_upload =
+                                        book.metadata.releaseDate?.toDate()
+                                            ?: book.fileLastModified.toDateTime()
+                                },
+                                book.readProgress.completed,
+                            )
                         }
-                    return@runCatching r.sortedByDescending { it.chapter_number }
+                    return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
                 .mapError {
                     TimberKt.e(it) { "Error fetching komga chapters" }

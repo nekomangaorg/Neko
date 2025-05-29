@@ -1451,7 +1451,7 @@
     <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
     <string name="reading_sync">Auto sync read status</string>
-    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex.  This only pulls read from MangaDex to prevent accidentally marking chapters unread</string>
+    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex and self-hosted merge sources.  This only pulls read to prevent accidentally marking chapters unread</string>
     <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>

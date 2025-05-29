@@ -168,35 +168,10 @@ class MangaDetailPresenter(
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes =
-                when (
-                    arrayOf(
-                        sourceManager.komga.hasCredentials(),
-                        sourceManager.suwayomi.hasCredentials(),
-                    )
-                ) {
-                    arrayOf(false, true) ->
-                        MergeType.entries
-                            .filterNot { it == MergeType.Komga }
-                            .filterNot { it == MergeType.MangaLife }
-                            .toPersistentList()
-
-                    arrayOf(true, false) ->
-                        MergeType.entries
-                            .filterNot { it == MergeType.Suwayomi }
-                            .filterNot { it == MergeType.MangaLife }
-                            .toPersistentList()
-
-                    arrayOf(false, false) ->
-                        MergeType.entries
-                            .filterNot { it == MergeType.Komga }
-                            .filterNot { it == MergeType.Suwayomi }
-                            .filterNot { it == MergeType.MangaLife }
-                            .toPersistentList()
-
-                    else -> {
-                        MergeType.entries.filterNot { it == MergeType.MangaLife }.toPersistentList()
-                    }
-                }
+                MergeType.entries
+                    .filterNot { !sourceManager.komga.hasCredentials() && it == MergeType.Komga }
+                    .filterNot { it == MergeType.MangaLife }
+                    .toPersistentList()
 
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(

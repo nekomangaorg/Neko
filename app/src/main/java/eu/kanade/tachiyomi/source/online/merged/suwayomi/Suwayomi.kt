@@ -41,9 +41,9 @@ class Suwayomi : MergedServerSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    override fun requiresCredentials(): Boolean = false
-
     override fun hostUrl() = preferences.sourceUrl(this).get()
+
+    override fun requiresCredentials(): Boolean = false
 
     override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
@@ -59,13 +59,6 @@ class Suwayomi : MergedServerSource() {
                 false
             }
         }
-    }
-
-    override fun hasCredentials(): Boolean {
-        val username = preferences.sourceUsername(this@Suwayomi).get()
-        val password = preferences.sourcePassword(this@Suwayomi).get()
-        val url = hostUrl()
-        return listOf(username, password, url).none { it.isBlank() }
     }
 
     override suspend fun isLoggedIn(): Boolean {
@@ -170,7 +163,9 @@ class Suwayomi : MergedServerSource() {
             .toString()
             .toRequestBody("application/json".toMediaType())
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String,
+    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -198,18 +193,20 @@ class Suwayomi : MergedServerSource() {
                         }
                     val r =
                         chapters.map { chapter ->
-                            SChapter.create().apply {
-                                chapter_number = chapter.chapterNumber
-                                name = chapter.name
-                                url =
-                                    "/manga/${mangaUrl}/chapter/${chapter.sourceOrder}" +
-                                        " " +
-                                        "${chapter.id}"
-                                scanlator = this@Suwayomi.name
-                                date_upload = chapter.uploadDate
-                            }
+                            Pair(
+                                SChapter.create().apply {
+                                    chapter_number = chapter.chapterNumber
+                                    name = chapter.name
+                                    url =
+                                        "/manga/${mangaUrl}/chapter/${chapter.sourceOrder}" +
+                                            " " + "${chapter.id}"
+                                    scanlator = this@Suwayomi.name
+                                    date_upload = chapter.uploadDate
+                                },
+                                chapter.isRead,
+                            )
                         }
-                    return@runCatching r.sortedByDescending { it.chapter_number }
+                    return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
                 .mapError {
                     TimberKt.e(it) { "Error fetching suwayomi chapters" }
@@ -229,7 +226,7 @@ class Suwayomi : MergedServerSource() {
                     JsonPrimitive(
                         "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!){" +
                             "fetchChapters(input: \$input) {" +
-                            "chapters{id name chapterNumber sourceOrder uploadDate}}}"
+                            "chapters{id name chapterNumber sourceOrder uploadDate isRead}}}",
                     ),
                 )
                 put("variables", variables)
@@ -288,8 +285,8 @@ class Suwayomi : MergedServerSource() {
 
         val chapterIds = chapters.map { it.url.split(" ", limit = 2)[1].toLong() }
         customClient()
-                .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
-                .await()
+            .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
+            .await()
     }
 
     fun updateChapterFormBuilder(chapterIds: List<Long>, read: Boolean): RequestBody {

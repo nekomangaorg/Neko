@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.weebcentral
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -108,7 +109,9 @@ class WeebCentral : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
         val url =
             (baseUrl + mangaUrl)
                 .toHttpUrl()
@@ -125,7 +128,7 @@ class WeebCentral : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-        return parseChapters(response)
+        return parseChapters(response).map { it.map { chapter -> Pair(chapter, false) } }
     }
 
     private fun parseChapters(response: Response): Result<List<SChapter>, ResultError> {

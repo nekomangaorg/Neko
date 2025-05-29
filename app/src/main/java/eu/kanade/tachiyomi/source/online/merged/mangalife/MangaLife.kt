@@ -84,7 +84,9 @@ class MangaLife : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String,
+    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -164,7 +166,7 @@ class MangaLife : ReducedHttpSource() {
 
                             scanlator = this@MangaLife.name
                         }
-                    }
+                    }.map { Pair(it, false) }
                 }
                 .mapError {
                     TimberKt.e(it) { "Error merging with manga life" }

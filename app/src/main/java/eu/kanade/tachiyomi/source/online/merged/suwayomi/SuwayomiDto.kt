@@ -21,12 +21,9 @@ data class SuwayomiChapterDto(
     val chapterNumber: Float,
     val uploadDate: Long,
     val sourceOrder: Long,
+    val isRead: Boolean,
 )
 
 @Serializable data class SuwayomiFetchChapterPagesDto(val fetchChapterPages: SuwayomiPagesDto)
 
 @Serializable data class SuwayomiPagesDto(val pages: List<String>)
-
-@Serializable data class SuwayomiChapterUrlDto(val chapters: SuwayomiChapterUrlInfoDto)
-
-@Serializable data class SuwayomiChapterUrlInfoDto(val mangaId: Long, val sourceOrder: Long)

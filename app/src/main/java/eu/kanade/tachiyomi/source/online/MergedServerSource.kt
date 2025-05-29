@@ -4,15 +4,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 
 abstract class MergedServerSource : ReducedHttpSource() {
 
-    abstract fun requiresCredentials(): Boolean
+    open fun requiresCredentials(): Boolean = true
 
     abstract fun hostUrl(): String
 
     open fun getMangaUrl(url: String): String = hostUrl() + url
 
     abstract suspend fun loginWithUrl(username: String, password: String, url: String): Boolean
-
-    abstract fun hasCredentials(): Boolean
 
     abstract suspend fun isLoggedIn(): Boolean
 

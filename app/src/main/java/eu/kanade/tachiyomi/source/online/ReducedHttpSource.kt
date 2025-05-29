@@ -13,7 +13,9 @@ abstract class ReducedHttpSource : HttpSource() {
 
     abstract suspend fun searchManga(query: String): List<SManga>
 
-    abstract suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError>
+    abstract suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<Pair<SChapter, Boolean>>, ResultError>
 
     override suspend fun getImage(page: Page): Response {
         return client.newCachelessCallWithProgress(imageRequest(page), page).await()
