@@ -48,7 +48,7 @@ class Suwayomi : MergedServerSource() {
     override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
             try {
-                val suwayomiUrl = "$url/api/v1/settings/about".toHttpUrlOrNull()!!.newBuilder()
+                val suwayomiUrl = "$url/api/opds/v1.2".toHttpUrlOrNull()!!.newBuilder()
                 val response =
                     createClient(username, password)
                         .newCall(GET(suwayomiUrl.toString(), headers))
