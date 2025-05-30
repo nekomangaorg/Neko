@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.merged.mangalife
 
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -167,8 +168,8 @@ class MangaLife : ReducedHttpSource() {
                             scanlator = this@MangaLife.name
                         }
                     }
-                        .map { Pair(it, false) }
                 }
+                .map { it.map { chp -> Pair(chp, false) } }
                 .mapError {
                     TimberKt.e(it) { "Error merging with manga life" }
                     "Unknown Exception with merge".toResultError()

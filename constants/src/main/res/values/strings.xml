@@ -1416,7 +1416,7 @@
     <!-- Merge Settings -->
     <string name="merge_source_settings">Merge source settings</string>
     <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
-    <string name="minimum_suwayomi_version">Minimum required Suwayomi-Server version: v2.0.1727</string>
+    <string name="minimum_suwayomi_version">Minimum required Suwayomi-Server version: 1.0.0</string>
 
 
     <!-- Site Settings -->

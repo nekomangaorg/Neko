@@ -48,7 +48,7 @@ class Suwayomi : MergedServerSource() {
     override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
             try {
-                val suwayomiUrl = "$url/api/opds/v1.2".toHttpUrlOrNull()!!.newBuilder()
+                val suwayomiUrl = "$url/api/graphql".toHttpUrlOrNull()!!.newBuilder()
                 val response =
                     createClient(username, password)
                         .newCall(GET(suwayomiUrl.toString(), headers))
@@ -141,7 +141,7 @@ class Suwayomi : MergedServerSource() {
                     SManga.create().apply {
                         this.title = manga.title
                         this.url = "${manga.id}"
-                        this.thumbnail_url = "${hostUrl()}/api/v1/manga/${this.url}/thumbnail"
+                        this.thumbnail_url = hostUrl() + manga.thumbnailUrl
                     }
                 }
             }
@@ -156,8 +156,8 @@ class Suwayomi : MergedServerSource() {
                     JsonPrimitive(
                         "query SEARCH_MANGA{" +
                             "mangas(condition:{inLibrary:true}," +
-                            "filter:{title:{likeInsensitive:\"%${query}%\"}}){" +
-                            "nodes{id title}}}"
+                            "filter:{title:{includesInsensitive:\"${query}\"}}){" +
+                            "nodes{id title thumbnailUrl}}}"
                     ),
                 )
             }

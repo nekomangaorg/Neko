@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class SuwayomiNodesDto(val nodes: List<SuwayomiSeriesDto>)
 
-@Serializable data class SuwayomiSeriesDto(val id: Long, val title: String)
+@Serializable
+data class SuwayomiSeriesDto(val id: Long, val title: String, val thumbnailUrl: String)
 
 @Serializable data class SuwayomiFetchChaptersDto(val fetchChapters: SuwayomiChaptersDto)
 
