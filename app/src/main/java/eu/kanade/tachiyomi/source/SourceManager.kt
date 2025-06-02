@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.merged.comick.Comick
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
@@ -20,6 +21,8 @@ open class SourceManager {
     val toonily: Toonily by lazy { Toonily() }
 
     val weebCentral: WeebCentral by lazy { WeebCentral() }
+
+    val comick: Comick by lazy { Comick() }
 
     open fun get(sourceKey: Long): Source? {
         return mangaDex
