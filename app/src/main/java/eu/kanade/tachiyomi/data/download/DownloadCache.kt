@@ -101,6 +101,10 @@ class DownloadCache(
         return validChapterDirNames.any { it in fileNames || "$it.cbz" in fileNames }
     }
 
+    fun findChapterDirName(chapter: Chapter, manga: Manga): String {
+        return provider.findChapterDir(chapter, manga)?.name ?: ""
+    }
+
     /**
      * Returns the amount of downloaded chapters for a manga.
      *
@@ -139,6 +143,25 @@ class DownloadCache(
                 }
             }
             return count
+        }
+    }
+
+    fun getAllDownloads(manga: Manga, forceCheckFolder: Boolean = false): List<String> {
+        checkRenew()
+
+        if (forceCheckFolder) {
+            val mangaDir = provider.findMangaDir(manga)
+
+            mangaDir ?: return emptyList()
+
+            return mangaDir
+                .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                .orEmpty()
+                .mapNotNull { it.name }
+                .toList()
+        } else {
+            mangaFiles[manga.id] ?: return emptyList()
+            return mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
         }
     }
 

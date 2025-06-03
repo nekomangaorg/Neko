@@ -755,6 +755,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             // possibly move this into a chapter repository
             val blockedScanlators = preferences.blockedScanlators().get()
+            val allDownloads = downloadManager.getAllDownloads(currentManga()).toMutableSet()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
@@ -770,10 +771,19 @@ class MangaDetailPresenter(
                                 downloadManager.isChapterDownloaded(
                                     chapter.toDbChapter(),
                                     currentManga(),
-                                ) -> Download.State.DOWNLOADED
+                                ) -> {
+                                    allDownloads.remove(
+                                        downloadManager.downloadedChapterName(
+                                            chapter.toDbChapter(),
+                                            currentManga(),
+                                        )
+                                    )
+                                    Download.State.DOWNLOADED
+                                }
                                 else -> {
                                     val download =
                                         downloadManager.getQueuedDownloadOrNull(chapter.id)
+
                                     when (download == null) {
                                         true -> Download.State.NOT_DOWNLOADED
                                         false -> download.status
@@ -794,6 +804,12 @@ class MangaDetailPresenter(
                                 },
                         )
                     }
+
+            if (allDownloads.size > 0) {
+                TimberKt.d { "ESCO Still has chapters ${allDownloads.size}" }
+               //TODO need to create a new DB manga insert it resort chapter list, then call this method updateChapterFlows and return out
+            }
+
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
 
             val allChapterScanlators =
