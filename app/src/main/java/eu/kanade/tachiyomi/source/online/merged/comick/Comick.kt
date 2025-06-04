@@ -8,7 +8,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.merged.comick.getSorts // Import for getSorts
+// Import getComickFilters instead of getSorts for FilterList initialization
+import eu.kanade.tachiyomi.source.online.merged.comick.getComickFilters
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -27,7 +28,7 @@ class Comick(override val lang: String = "en") : HttpSource() {
     private val comickApi = ComickApi(client, lang)
 
     override suspend fun fetchPopularManga(page: Int): MangasPage {
-        val filters = FilterList(getSorts()) // Default sorts
+        val filters = getComickFilters() // Use default filters
         val popularSort = getSortType(filters)
         val genre = getGenre(filters)
         val demographic = getDemographic(filters)

@@ -158,7 +158,7 @@ class ComickApiTest {
         val request = mockWebServer.takeRequest()
         assertEquals("/v1.0/search?q=test%20search&page=1&limit=20&genres=fantasy&demographics=shoujo&completed=false", request.path)
     }
-    
+
     @Test(expected = Exception::class)
     fun `getComic http error`() = runBlocking {
         val slug = "error-comic"
@@ -210,7 +210,7 @@ class ComickApiTest {
         val request = mockWebServer.takeRequest()
         assertEquals("/demographic", request.path)
     }
-    
+
     @Test
     fun `login success`() = runBlocking {
         val token = "test-auth-token"

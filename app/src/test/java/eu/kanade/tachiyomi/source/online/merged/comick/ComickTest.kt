@@ -122,7 +122,7 @@ class ComickTest {
         assertTrue(result.mangas.isNotEmpty())
         assertEquals("Search Result Manga 1", result.mangas[0].title)
     }
-    
+
     @Test
     fun `test fetchMangaDetails`() = runBlocking {
         val mangaDetailsJson = """
@@ -138,7 +138,7 @@ class ComickTest {
             "last_chapter": "25",
             "mainCover": "main_detail_cover.jpg",
             "desc": "This is a detailed manga description.",
-            "status": 1, 
+            "status": 1,
             "authors": [{"name": "Author A", "slug": "author-a"}],
             "artists": [{"name": "Artist B", "slug": "artist-b"}],
             "mdcovers": [{"b2key": "md_detail_cover.jpg"}]
@@ -182,7 +182,7 @@ class ComickTest {
         assertEquals("Chapter 1: The Beginning", result[0].name)
         assertEquals(1, result[0].chapter_number.toInt())
     }
-    
+
     // fetchPageList requires ComickApi to be directly testable or Comick to allow PageList parsing.
     // The current Comick.fetchPageList directly calls comickApi.getPageList(chapterHid)
     // and returns its result. So a test for Comick.fetchPageList would be identical
