@@ -24,12 +24,13 @@ import uy.kohesive.injekt.injectLazy
 class Comick : ReducedHttpSource() {
 
     override val name = "Comick"
-    override val baseUrl = "https://api.comick.fun"
-    override val headers = Headers.Builder().add("Referer", "$baseUrl/").build()
+    override val baseUrl = "https://comick.io"
+    val apiUrl = "https://api.comick.fun"
+    override val headers = Headers.Builder().add("Referer", "$apiUrl/").build()
     private val json: Json by injectLazy()
 
     private suspend fun getChapterListDto(comicHid: String): ChapterList { // Renamed
-        val url = "$baseUrl/comic/$comicHid/chapters?lang=en&tachiyomi=true&limit=99999".toHttpUrl()
+        val url = "$apiUrl/comic/$comicHid/chapters?lang=en&tachiyomi=true&limit=99999".toHttpUrl()
         val request = Request.Builder().url(url).build()
         val response = client.newCall(request).awaitSuccess()
         return json.decodeFromString(response.body.string())
@@ -37,8 +38,8 @@ class Comick : ReducedHttpSource() {
 
     // This is the actual implementation for the abstract getPageList
     override suspend fun getPageList(chapter: SChapter): List<Page> {
-        val chapterHid = chapter.url.substringAfterLast("/")
-        val url = "$baseUrl/chapter/$chapterHid?tachiyomi=true".toHttpUrl()
+        val chapterHid = chapter.url.substringAfterLast("/").substringBefore("-")
+        val url = "$apiUrl/chapter/$chapterHid?tachiyomi=true".toHttpUrl()
         val request = Request.Builder().url(url).build()
         val response = client.newCall(request).awaitSuccess()
         val images =
@@ -63,7 +64,7 @@ class Comick : ReducedHttpSource() {
         query: String
     ): List<SearchResponse> {
         val url =
-            "$baseUrl/v1.0/search"
+            "$apiUrl/v1.0/search"
                 .toHttpUrl()
                 .newBuilder()
                 .apply {
@@ -106,9 +107,9 @@ class Comick : ReducedHttpSource() {
                     SChapter.create().apply {
                         vol = chapter.vol ?: ""
                         name = beautifyChapterName(chapter.vol, chapter.chap, chapter.title)
-                        url = "/chapter/${chapter.hid}"
+                        url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap!!}-en"
                         date_upload = chapter.createdAt?.parseDate() ?: 0L
-                        chapter_number = chapter.chap?.toFloatOrNull() ?: -1f
+                        chapter_number = chapter.chap.toFloatOrNull() ?: -1f
                         scanlator = Comick.name
                         uploader = chapter.groupName?.joinToString(Constants.SCANLATOR_SEPARATOR)
                     }
@@ -125,13 +126,12 @@ class Comick : ReducedHttpSource() {
             headers
                 .newBuilder()
                 .add("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
-                .add("Referer", "$baseUrl/")
+                .add("Referer", "$apiUrl/")
                 .build()
         return Request.Builder().url(page.imageUrl!!).headers(imageHeaders).build()
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        // Assuming simpleChapter.url is the relative URL (/chapter/hid)
         return baseUrl + simpleChapter.url
     }
 
