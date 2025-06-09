@@ -34,7 +34,7 @@ open class SourceManager {
 
     companion object {
 
-        val possibleIds = MdLang.values().map { getId(it.lang) }
+        val possibleIds = MdLang.entries.map { getId(it.lang) }
 
         fun getId(lang: String): Long {
             val key = "mangadex/$lang/1"

@@ -45,7 +45,7 @@ class ArtworkHandler {
                             fileName = it.attributes!!.fileName!!,
                             locale = it.attributes.locale ?: "",
                             volume =
-                                if (it.attributes.volume != null) "Vol. ${it.attributes.volume}"
+                                if (it.attributes.volume != null) "Vol.${it.attributes.volume}"
                                 else "",
                             description = it.attributes.description ?: "",
                         )

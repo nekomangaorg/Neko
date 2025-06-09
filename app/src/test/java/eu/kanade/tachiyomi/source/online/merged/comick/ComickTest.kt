@@ -6,7 +6,6 @@ import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SimpleChapter
 import eu.kanade.tachiyomi.util.system.ResultError
 import kotlinx.coroutines.runBlocking
@@ -29,11 +28,13 @@ import uy.kohesive.injekt.api.addSingleton
 // Minimal Injekt setup for tests
 object TestInjektModule : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
-        addSingleton(Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            coerceInputValues = true
-        })
+        addSingleton(
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                coerceInputValues = true
+            }
+        )
     }
 }
 
@@ -41,7 +42,8 @@ class ComickTest {
 
     private lateinit var source: Comick
     private lateinit var mockWebServer: MockWebServer
-    private val client = OkHttpClient.Builder().build() // Client for Comick, not used by MockWebServer directly
+    private val client =
+        OkHttpClient.Builder().build() // Client for Comick, not used by MockWebServer directly
 
     @Before
     fun setUp() {
@@ -63,7 +65,8 @@ class ComickTest {
     @Test
     fun `test searchManga success`() = runBlocking {
         val searchQuery = "test query"
-        val searchResponseJson = """
+        val searchResponseJson =
+            """
         [
             {
                 "hid": "search-hid-1",
@@ -89,11 +92,17 @@ class ComickTest {
         val manga = result[0]
         assertEquals("Search Manga 1", manga.title)
         assertEquals("/comic/search-manga-1", manga.url)
-        assertEquals("https://meo.comick.pictures/cover1.jpg", manga.thumbnail_url) // Assuming gpurl logic
+        assertEquals(
+            "https://meo.comick.pictures/cover1.jpg",
+            manga.thumbnail_url,
+        ) // Assuming gpurl logic
         assertFalse(manga.initialized)
 
         val request = mockWebServer.takeRequest()
-        assertEquals("/v1.0/search?q=$searchQuery&page=1&limit=20&genres=all&demographics=all", request.path)
+        assertEquals(
+            "/v1.0/search?q=$searchQuery&page=1&limit=20&genres=all&demographics=all",
+            request.path,
+        )
     }
 
     @Test
@@ -109,7 +118,8 @@ class ComickTest {
     @Test
     fun `test fetchChapters success`() = runBlocking {
         val mangaUrl = "/comic/manga-hid-123"
-        val chapterListResponseJsonPage1 = """
+        val chapterListResponseJsonPage1 =
+            """
         {
             "chapters": [
                 { "hid": "chap-hid-1", "lang": "en", "title": "Chapter 1", "chap": "1", "created_at": "2023-01-15T10:00:00Z", "group_name": ["Group A"]},
@@ -121,9 +131,9 @@ class ComickTest {
         """
         // If testing pagination, enqueue multiple responses:
         // mockWebServer.enqueue(MockResponse().setBody(chapterListResponseJsonPage1))
-        // mockWebServer.enqueue(MockResponse().setBody(chapterListResponseJsonPage2)) // if total > limit
+        // mockWebServer.enqueue(MockResponse().setBody(chapterListResponseJsonPage2)) // if total >
+        // limit
         mockWebServer.enqueue(MockResponse().setBody(chapterListResponseJsonPage1))
-
 
         val result = source.fetchChapters(mangaUrl)
 
@@ -137,7 +147,10 @@ class ComickTest {
         assertEquals("Group A", chapters[0].scanlator)
 
         val request = mockWebServer.takeRequest()
-        assertEquals("/comic/manga-hid-123/chapters?lang=en&page=1&limit=500&sort=chap", request.path)
+        assertEquals(
+            "/comic/manga-hid-123/chapters?lang=en&page=1&limit=500&sort=chap",
+            request.path,
+        )
     }
 
     @Test
@@ -148,11 +161,11 @@ class ComickTest {
         assertTrue(result.getError() is ResultError.Network)
     }
 
-
     @Test
     fun `testGetPageList success`() = runBlocking {
         val chapterUrl = "/chapter/chapter-hid-for-pages"
-        val pageListJson = """
+        val pageListJson =
+            """
         {
             "chapter": {
                 "hid": "chapter-hid-for-pages",
@@ -190,9 +203,10 @@ class ComickTest {
         // It's expected to throw on error, or the source should handle it and return emptyList
         // Based on current Comick.kt, it will throw due to awaitSuccess()
         assertNotNull(exception) // Expecting an exception from awaitSuccess
-        assertTrue(pages == null || pages.isEmpty()) // Depending on exact error handling in getPageList
+        assertTrue(
+            pages == null || pages.isEmpty()
+        ) // Depending on exact error handling in getPageList
     }
-
 
     @Test
     fun `testImageRequest`() {
@@ -201,7 +215,10 @@ class ComickTest {
         val request = source.imageRequest(page)
 
         assertEquals(testImageUrl, request.url.toString())
-        assertEquals("image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8", request.header("Accept"))
+        assertEquals(
+            "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+            request.header("Accept"),
+        )
         assertEquals(source.baseUrl + "/", request.header("Referer")) // baseUrl ends with /
         assertEquals("meo.comick.pictures", request.header("Host"))
     }
