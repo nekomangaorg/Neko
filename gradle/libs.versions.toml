@@ -1,5 +1,5 @@
 [versions]
-aboutlibVersion = "12.2.1"
+aboutlibVersion = "12.2.0"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 coilVersion = "2.7.0"
