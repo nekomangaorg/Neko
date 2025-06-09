@@ -121,9 +121,6 @@ interface MangaDexService {
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
 
-    @POST(MdConstants.Api.legacyMapping)
-    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
-
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
 }
