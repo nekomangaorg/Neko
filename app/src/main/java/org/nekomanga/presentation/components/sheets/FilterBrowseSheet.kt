@@ -682,7 +682,7 @@ fun SavedFilters(
                 items(sortedFilters) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
                     FilterChipWrapper(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.animateItem(),
                         selected = isEnabled,
                         onClick = {
                             scope.launch { listState.animateScrollToItem(0) }
@@ -693,7 +693,7 @@ fun SavedFilters(
                     // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() +
                     // fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
                     if (isEnabled) {
-                        Row(modifier = Modifier.animateItemPlacement()) {
+                        Row(modifier = Modifier.animateItem()) {
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.delete_filter),
                                 icon = Icons.Outlined.Delete,
