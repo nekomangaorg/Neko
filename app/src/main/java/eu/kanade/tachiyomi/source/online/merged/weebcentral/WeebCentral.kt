@@ -34,7 +34,7 @@ class WeebCentral : ReducedHttpSource() {
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return simpleChapter.url
+        return baseUrl + simpleChapter.url
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
