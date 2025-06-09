@@ -69,7 +69,6 @@ class NetworkHelper(val context: Context) {
                     .cache(Cache(cacheDir, cacheSize))
                     .cookieJar(cookieManager)
                     .apply {
-
                         when (networkPreferences.dohProvider().get()) {
                             PREF_DOH_CLOUDFLARE -> dohCloudflare()
                             PREF_DOH_GOOGLE -> dohGoogle()

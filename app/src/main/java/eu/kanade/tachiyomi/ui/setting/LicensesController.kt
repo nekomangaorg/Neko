@@ -7,6 +7,7 @@ import androidx.compose.ui.res.stringResource
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
+import com.mikepenz.aboutlibraries.ui.compose.rememberLibraries
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
@@ -31,7 +32,7 @@ class LicensesController : BasicComposeController() {
                         badgeContentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                 padding =
-                    LibraryDefaults.libraryPadding(badgeContentPadding = PaddingValues(Size.tiny)),
+                    LibraryDefaults.libraryPadding(contentPadding = PaddingValues(Size.tiny)),
             )
         }
     }
