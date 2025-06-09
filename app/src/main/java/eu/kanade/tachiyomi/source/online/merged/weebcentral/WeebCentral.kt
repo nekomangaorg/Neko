@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -111,7 +112,7 @@ class WeebCentral : ReducedHttpSource() {
 
     override suspend fun fetchChapters(
         mangaUrl: String
-    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
+    ): Result<List<SChapterStatusPair>, ResultError> {
         val url =
             (baseUrl + mangaUrl)
                 .toHttpUrl()

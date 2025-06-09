@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.MergedServerSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
@@ -136,7 +137,7 @@ class Komga : MergedServerSource() {
 
     override suspend fun fetchChapters(
         mangaUrl: String
-    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {

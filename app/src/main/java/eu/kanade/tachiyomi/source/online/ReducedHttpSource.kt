@@ -9,13 +9,15 @@ import org.nekomanga.domain.network.ResultError
 import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
 
+typealias SChapterStatusPair = Pair<SChapter, Boolean>
+
 abstract class ReducedHttpSource : HttpSource() {
 
     abstract suspend fun searchManga(query: String): List<SManga>
 
     abstract suspend fun fetchChapters(
         mangaUrl: String
-    ): Result<List<Pair<SChapter, Boolean>>, ResultError>
+    ): Result<List<SChapterStatusPair>, ResultError>
 
     override suspend fun getImage(page: Page): Response {
         return client.newCachelessCallWithProgress(imageRequest(page), page).await()

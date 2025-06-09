@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toResultError
 import java.text.SimpleDateFormat
@@ -86,8 +87,8 @@ class MangaLife : ReducedHttpSource() {
     }
 
     override suspend fun fetchChapters(
-        mangaUrl: String,
-    ): Result<List<Pair<SChapter, Boolean>>, ResultError> {
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
