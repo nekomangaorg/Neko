@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.comick.Comick
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -17,6 +18,8 @@ open class SourceManager {
     val mangaLife: MangaLife by lazy { MangaLife() }
 
     val komga: Komga by lazy { Komga() }
+
+    val suwayomi: Suwayomi by lazy { Suwayomi() }
 
     val toonily: Toonily by lazy { Toonily() }
 

@@ -100,6 +100,8 @@ class StatsPresenter(
                             mergedMangaList.filter { it.mergeType == MergeType.Komga }.count(),
                         mangaLifeMergeCount =
                             mergedMangaList.filter { it.mergeType == MergeType.MangaLife }.count(),
+                        suwayomiMergeCount =
+                            mergedMangaList.filter { it.mergeType == MergeType.Suwayomi }.count(),
                         toonilyMergeCount =
                             mergedMangaList.filter { it.mergeType == MergeType.Toonily }.count(),
                         weebCentralMergeCount =

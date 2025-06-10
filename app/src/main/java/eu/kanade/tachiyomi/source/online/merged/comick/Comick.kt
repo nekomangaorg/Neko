@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.serialization.decodeFromString
@@ -96,7 +97,7 @@ class Comick : ReducedHttpSource() {
 
     override suspend fun fetchChapters(
         mangaUrl: String
-    ): Result<List<SChapter>, ResultError> { // Return type uses the new Result
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return try {
             val comicHid = mangaUrl.substringAfterLast("/")
 
@@ -104,15 +105,19 @@ class Comick : ReducedHttpSource() {
 
             Ok(
                 chaptersList.map { chapter ->
-                    SChapter.create().apply {
-                        vol = chapter.vol ?: ""
-                        name = beautifyChapterName(chapter.vol, chapter.chap, chapter.title)
-                        url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap!!}-en"
-                        date_upload = chapter.createdAt?.parseDate() ?: 0L
-                        chapter_number = chapter.chap.toFloatOrNull() ?: -1f
-                        scanlator = Comick.name
-                        uploader = chapter.groupName?.joinToString(Constants.SCANLATOR_SEPARATOR)
-                    }
+                    Pair(
+                        SChapter.create().apply {
+                            vol = chapter.vol ?: ""
+                            name = beautifyChapterName(chapter.vol, chapter.chap, chapter.title)
+                            url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap!!}-en"
+                            date_upload = chapter.createdAt?.parseDate() ?: 0L
+                            chapter_number = chapter.chap.toFloatOrNull() ?: -1f
+                            scanlator = Comick.name
+                            uploader =
+                                chapter.groupName?.joinToString(Constants.SCANLATOR_SEPARATOR)
+                        },
+                        false,
+                    )
                 }
             )
         } catch (e: Exception) {

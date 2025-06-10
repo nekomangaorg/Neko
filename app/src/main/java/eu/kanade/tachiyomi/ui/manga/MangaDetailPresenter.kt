@@ -26,8 +26,8 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -168,15 +168,10 @@ class MangaDetailPresenter(
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes =
-                when (sourceManager.komga.hasCredentials()) {
-                    true ->
-                        MergeType.entries.filterNot { it == MergeType.MangaLife }.toPersistentList()
-                    false ->
-                        MergeType.entries
-                            .filterNot { it == MergeType.Komga }
-                            .filterNot { it == MergeType.MangaLife }
-                            .toPersistentList()
-                }
+                MergeType.entries
+                    .filterNot { !sourceManager.komga.hasCredentials() && it == MergeType.Komga }
+                    .filterNot { it == MergeType.MangaLife }
+                    .toPersistentList()
 
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
@@ -1437,16 +1432,13 @@ class MangaDetailPresenter(
         return when (mergeMangaList.isNotEmpty()) {
             true -> {
                 val mergeManga = mergeMangaList.first()
-                val baseUrl =
-                    when (val source = MergeType.getSource(mergeManga.mergeType, sourceManager)) {
-                        is Komga -> source.hostUrl()
-                        else -> source.baseUrl
+                val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
+                val url =
+                    when (source) {
+                        is MergedServerSource -> source.getMangaUrl(mergeManga.url)
+                        else -> source.baseUrl + mergeManga.url
                     }
-                Yes(
-                    url = baseUrl + mergeManga.url,
-                    title = mergeManga.title,
-                    mergeType = mergeManga.mergeType,
-                )
+                Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)
             }
             false -> No
         }

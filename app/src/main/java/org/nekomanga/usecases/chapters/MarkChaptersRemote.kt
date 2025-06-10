@@ -25,13 +25,22 @@ class MarkChaptersRemote(
             }
         if (syncRead != null && !skipSync && preferences.readingSync().get()) {
 
-            val chapterUuidList =
-                chapterItems
-                    .filter { !it.chapter.isMergedChapter() }
-                    .map { it.chapter.mangaDexChapterId }
+            val (mergedChapters, nonMergedChapters) =
+                chapterItems.map { it.chapter }.partition { it.isMergedChapter() }
+
             withNonCancellableContext {
-                if (chapterUuidList.isNotEmpty()) {
-                    statusHandler.marksChaptersStatus(mangaUuid, chapterUuidList, syncRead)
+                if (nonMergedChapters.isNotEmpty()) {
+                    statusHandler.markChaptersStatus(
+                        mangaUuid,
+                        nonMergedChapters.map { it.mangaDexChapterId },
+                        syncRead,
+                    )
+                }
+                if (mergedChapters.isNotEmpty()) {
+                    statusHandler.markMergedChaptersStatus(
+                        mergedChapters.map { it.toSChapter() },
+                        syncRead,
+                    )
                 }
             }
         }

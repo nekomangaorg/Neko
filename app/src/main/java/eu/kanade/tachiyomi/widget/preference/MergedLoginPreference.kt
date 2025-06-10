@@ -8,7 +8,7 @@ import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.createWithColorRes
 import kotlinx.coroutines.CoroutineScope
@@ -16,9 +16,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 
-class KomgaLoginPreference
+class MergedLoginPreference
 @JvmOverloads
-constructor(context: Context, val source: Komga, attrs: AttributeSet? = null) :
+constructor(context: Context, val source: MergedServerSource, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
 
     init {
@@ -27,7 +27,7 @@ constructor(context: Context, val source: Komga, attrs: AttributeSet? = null) :
 
     val scope = CoroutineScope(Dispatchers.Main)
 
-    var komgaUrl = ""
+    var mergeUrl = ""
 
     private var onLoginClick: () -> Unit = {}
 
@@ -50,10 +50,10 @@ constructor(context: Context, val source: Komga, attrs: AttributeSet? = null) :
         val summary = (holder.findViewById(android.R.id.summary) as? TextView)
         summary?.isVisible = true
         summary?.text =
-            if (komgaUrl.isBlank()) {
+            if (mergeUrl.isBlank()) {
                 ""
             } else {
-                "Logged in at $komgaUrl"
+                "Logged in at $mergeUrl"
             }
     }
 

@@ -258,13 +258,19 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         if (preferences.readingSync().get()) {
-            val nonMergedChapterIds =
-                dbChapters.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
-            if (nonMergedChapterIds.isNotEmpty()) {
+            val (mergedChapters, nonMergedChapters) = dbChapters.partition { it.isMergedChapter() }
+            if (nonMergedChapters.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
                 launchIO {
-                    statusHandler.marksChaptersStatus(mangaId.toString(), nonMergedChapterIds)
+                    statusHandler.markChaptersStatus(
+                        mangaId.toString(),
+                        nonMergedChapters.map { it.mangadex_chapter_id },
+                    )
                 }
+            }
+            if (mergedChapters.isNotEmpty()) {
+                val statusHandler: StatusHandler = Injekt.get()
+                launchIO { statusHandler.markMergedChaptersStatus(mergedChapters) }
             }
         }
         val newLastChapter = dbChapters.maxByOrNull { it.chapter_number.toInt() }
