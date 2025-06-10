@@ -133,7 +133,11 @@ fun MergeSheet(
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                         MergeType.Comick -> R.drawable.ic_comick_logo
                                     }
-                                MergeLogo(id = id, onClick = { mergeType = validMergeType })
+                                MergeLogo(
+                                    id = id,
+                                    onClick = { mergeType = validMergeType },
+                                    title = validMergeType.name,
+                                )
                             }
                         }
                     }
@@ -183,19 +187,23 @@ fun MergeSheet(
 }
 
 @Composable
-private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
-    Box(
-        modifier =
-            Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                .clickable(onClick = onClick)
-                .padding(Size.small)
-                .clip(RoundedCornerShape(Shapes.coverRadius))
-    ) {
-        Image(
-            painter = painterResource(id = id),
-            contentDescription = null,
-            modifier = Modifier.size(86.dp),
-        )
+private fun MergeLogo(@DrawableRes id: Int, title: String, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier =
+                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                    .clickable(onClick = onClick)
+                    .padding(Size.small)
+                    .clip(RoundedCornerShape(Shapes.coverRadius))
+        ) {
+            Image(
+                painter = painterResource(id = id),
+                contentDescription = null,
+                modifier = Modifier.size(86.dp),
+            )
+        }
+
+        Text(text = title, style = MaterialTheme.typography.bodySmall)
     }
 }
 

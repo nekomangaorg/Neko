@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.merged.toonily
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
@@ -121,6 +122,11 @@ class Toonily : ReducedHttpSource() {
     ): Result<List<SChapterStatusPair>, ResultError> {
         val response =
             client.newCall(POST("${baseUrl}${mangaUrl}ajax/chapters", searchHeaders)).await()
+
+        if (!response.isSuccessful) {
+            response.close()
+            return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
+        }
         return parseChapterList(response).map { it.map { chapter -> Pair(chapter, false) } }
     }
 

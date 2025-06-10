@@ -19,6 +19,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.await
 import tachiyomi.core.network.awaitSuccess
 import uy.kohesive.injekt.injectLazy
 
@@ -29,13 +30,6 @@ class Comick : ReducedHttpSource() {
     val apiUrl = "https://api.comick.fun"
     override val headers = Headers.Builder().add("Referer", "$apiUrl/").build()
     private val json: Json by injectLazy()
-
-    private suspend fun getChapterListDto(comicHid: String): ChapterList { // Renamed
-        val url = "$apiUrl/comic/$comicHid/chapters?lang=en&tachiyomi=true&limit=99999".toHttpUrl()
-        val request = Request.Builder().url(url).build()
-        val response = client.newCall(request).awaitSuccess()
-        return json.decodeFromString(response.body.string())
-    }
 
     // This is the actual implementation for the abstract getPageList
     override suspend fun getPageList(chapter: SChapter): List<Page> {
@@ -101,10 +95,20 @@ class Comick : ReducedHttpSource() {
         return try {
             val comicHid = mangaUrl.substringAfterLast("/")
 
-            val chaptersList = getChapterListDto(comicHid).chapters
+            val lookupUrl =
+                "$apiUrl/comic/$comicHid/chapters?lang=en&tachiyomi=true&limit=99999".toHttpUrl()
+            val request = Request.Builder().url(lookupUrl).build()
+            val response = client.newCall(request).await()
+
+            if (!response.isSuccessful) {
+                response.close()
+                return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
+            }
+
+            val chapterList = json.decodeFromString<ChapterList>(response.body.string()).chapters
 
             Ok(
-                chaptersList.map { chapter ->
+                chapterList.map { chapter ->
                     Pair(
                         SChapter.create().apply {
                             vol = chapter.vol ?: ""

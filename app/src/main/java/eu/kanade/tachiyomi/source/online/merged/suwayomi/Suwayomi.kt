@@ -187,6 +187,7 @@ class Suwayomi : MergedServerSource() {
                                 POST(apiUrl, headers, fetchChaptersFormBuilder(mangaUrl.toLong()))
                             )
                             .await()
+
                     val responseBody = response.body
 
                     val chapters =

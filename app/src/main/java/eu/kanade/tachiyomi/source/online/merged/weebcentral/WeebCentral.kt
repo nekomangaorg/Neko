@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.merged.weebcentral
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
@@ -126,7 +127,7 @@ class WeebCentral : ReducedHttpSource() {
 
         if (!response.isSuccessful) {
             response.close()
-            throw Exception("HTTP error ${response.code}")
+            return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
 
         return parseChapters(response).map { it.map { chapter -> Pair(chapter, false) } }
