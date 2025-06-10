@@ -58,7 +58,7 @@ class Komga : MergedServerSource() {
         }
     }
 
-    fun hasCredentials(): Boolean {
+    override fun hasCredentials(): Boolean {
         val username = preferences.sourceUsername(this@Komga).get()
         val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
@@ -67,12 +67,10 @@ class Komga : MergedServerSource() {
 
     override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
+            if (!hasCredentials()) return@withIOContext false
             val username = preferences.sourceUsername(this@Komga).get()
             val password = preferences.sourcePassword(this@Komga).get()
             val url = hostUrl()
-            if (listOf(username, password, url).any { it.isBlank() }) {
-                return@withIOContext false
-            }
             return@withIOContext loginWithUrl(username, password, url)
         }
     }

@@ -170,6 +170,9 @@ class MangaDetailPresenter(
             val validMergeTypes =
                 MergeType.entries
                     .filterNot { !sourceManager.komga.hasCredentials() && it == MergeType.Komga }
+                    .filterNot {
+                        !sourceManager.suwayomi.hasCredentials() && it == MergeType.Suwayomi
+                    }
                     .filterNot { it == MergeType.MangaLife }
                     .toPersistentList()
 
