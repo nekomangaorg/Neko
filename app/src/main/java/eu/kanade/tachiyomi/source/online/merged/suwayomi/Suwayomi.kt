@@ -62,16 +62,13 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    override fun hasCredentials(): Boolean {
-        val username = preferences.sourceUsername(this@Suwayomi).get()
-        val password = preferences.sourcePassword(this@Suwayomi).get()
-        val url = hostUrl()
-        return listOf(username, password, url).none { it.isBlank() }
+    override fun isConfigured(): Boolean {
+        return hostUrl().isNotBlank()
     }
 
     override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
-            if (!hasCredentials()) return@withIOContext false
+            if (!isConfigured()) return@withIOContext false
             val username = preferences.sourceUsername(this@Suwayomi).get()
             val password = preferences.sourcePassword(this@Suwayomi).get()
             val url = hostUrl()

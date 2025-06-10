@@ -169,9 +169,9 @@ class MangaDetailPresenter(
             _currentManga.value = dbManga
             val validMergeTypes =
                 MergeType.entries
-                    .filterNot { !sourceManager.komga.hasCredentials() && it == MergeType.Komga }
+                    .filterNot { it == MergeType.Komga && !sourceManager.komga.isConfigured() }
                     .filterNot {
-                        !sourceManager.suwayomi.hasCredentials() && it == MergeType.Suwayomi
+                        it == MergeType.Suwayomi && !sourceManager.suwayomi.isConfigured()
                     }
                     .filterNot { it == MergeType.MangaLife }
                     .toPersistentList()
