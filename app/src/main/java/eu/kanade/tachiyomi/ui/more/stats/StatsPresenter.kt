@@ -97,11 +97,16 @@ class StatsPresenter(
                         bookmarkCount = libraryList.sumOf { it.bookmarkCount },
                         trackedCount = getMangaByTrackCount(libraryList, tracks),
                         komgaMergeCount = mergedMangaList.count { it.mergeType == MergeType.Komga },
-                        mangaLifeMergeCount = mergedMangaList.count { it.mergeType == MergeType.MangaLife },
-                        suwayomiMergeCount = mergedMangaList.count { it.mergeType == MergeType.Suwayomi },
-                        toonilyMergeCount = mergedMangaList.count { it.mergeType == MergeType.Toonily },
-                        comickMergeCount = mergedMangaList.count { it.mergeType == MergeType.Comick },
-                        weebCentralMergeCount = mergedMangaList.count { it.mergeType == MergeType.WeebCentral },
+                        mangaLifeMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.MangaLife },
+                        suwayomiMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.Suwayomi },
+                        toonilyMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.Toonily },
+                        comickMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.Comick },
+                        weebCentralMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.WeebCentral },
                         globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                         downloadCount = libraryList.sumOf { getDownloadCount(it) },
                         tagCount =

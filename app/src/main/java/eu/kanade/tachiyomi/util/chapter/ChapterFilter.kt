@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
@@ -138,8 +137,7 @@ class ChapterFilter(
                 groups.none { group ->
                     val inBlocked = group in blockedGroupList
                     val inFiltered = group in filteredGroupList
-                    val unsupported = group in MdConstants.UnsupportedOfficialGroupList
-                    inBlocked || inFiltered || unsupported
+                    inBlocked || inFiltered
                 }
 
             languageNotFound && groupNotFound

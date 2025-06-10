@@ -86,8 +86,8 @@ fun SimpleStats(
                     context.getString(R.string.komga_merged),
                 numberFormat.format(statsState.mangaLifeMergeCount).toString() to
                     context.getString(R.string.mangalife_merged),
-            numberFormat.format(statsState.comickMergeCount).toString() to
-                context.getString(R.string.mangalife_merged),
+                numberFormat.format(statsState.comickMergeCount).toString() to
+                    context.getString(R.string.mangalife_merged),
                 numberFormat.format(statsState.suwayomiMergeCount).toString() to
                     context.getString(R.string.suwayomi_merged),
                 numberFormat.format(statsState.toonilyMergeCount).toString() to

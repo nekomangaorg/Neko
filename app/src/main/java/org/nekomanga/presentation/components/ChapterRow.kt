@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +58,7 @@ import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -379,13 +381,24 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        DownloadButton(
-            modifier = Modifier.align(Alignment.CenterVertically),
-            themeColorState = themeColorState,
-            downloadState = downloadState,
-            downloadProgress = downloadProgress,
-            onDownload = onDownload,
-        )
+        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator)) {
+            Icon(
+                imageVector = Icons.Outlined.Lock,
+                contentDescription = null,
+                modifier =
+                    Modifier.align(Alignment.CenterVertically).padding(Size.small).size(Size.large),
+                tint = themeColorState.altContainerColor,
+            )
+        } else {
+
+            DownloadButton(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                themeColorState = themeColorState,
+                downloadState = downloadState,
+                downloadProgress = downloadProgress,
+                onDownload = onDownload,
+            )
+        }
     }
 }
 
