@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.source.online.merged.mangalife
 
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toResultError
 import java.text.SimpleDateFormat
@@ -84,7 +86,9 @@ class MangaLife : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -166,6 +170,7 @@ class MangaLife : ReducedHttpSource() {
                         }
                     }
                 }
+                .map { it.map { chp -> Pair(chp, false) } }
                 .mapError {
                     TimberKt.e(it) { "Error merging with manga life" }
                     "Unknown Exception with merge".toResultError()

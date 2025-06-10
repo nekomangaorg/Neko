@@ -105,7 +105,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         this.preferenceStore.getString(Keys.sourcePassword(source.id)).delete()
     }
 
-    fun setKomgaCredentials(source: Source, username: String, password: String, url: String) {
+    fun setSourceCredentials(source: Source, username: String, password: String, url: String) {
         this.preferenceStore.getString(Keys.sourceUsername(source.id)).set(username)
         this.preferenceStore.getString(Keys.sourcePassword(source.id)).set(password)
         this.preferenceStore.getString(Keys.sourceUrl(source.id)).set(url)

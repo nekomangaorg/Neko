@@ -26,8 +26,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 22
-        versionName = "2.19.4"
+        versionCode = 24
+        versionName = "2.19.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -128,9 +128,6 @@ dependencies {
 
     // TLS 1.3 support for Android < 10
     implementation(libs.conscrypt)
-
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
 
     implementation(libs.bundles.retrofit)
 

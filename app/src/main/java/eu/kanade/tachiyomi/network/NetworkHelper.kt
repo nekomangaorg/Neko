@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
-import com.chuckerteam.chucker.api.ChuckerCollector
-import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.google.common.net.HttpHeaders
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -71,16 +69,6 @@ class NetworkHelper(val context: Context) {
                     .cache(Cache(cacheDir, cacheSize))
                     .cookieJar(cookieManager)
                     .apply {
-                        if (BuildConfig.DEBUG) {
-                            addInterceptor(
-                                ChuckerInterceptor.Builder(context)
-                                    .collector(ChuckerCollector(context))
-                                    .maxContentLength(250000L)
-                                    .redactHeaders(emptySet())
-                                    .alwaysReadResponseBody(false)
-                                    .build()
-                            )
-                        }
                         when (networkPreferences.dohProvider().get()) {
                             PREF_DOH_CLOUDFLARE -> dohCloudflare()
                             PREF_DOH_GOOGLE -> dohGoogle()

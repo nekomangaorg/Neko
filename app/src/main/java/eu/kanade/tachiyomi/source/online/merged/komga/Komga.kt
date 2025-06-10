@@ -6,7 +6,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.MergedServerSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
@@ -19,15 +20,18 @@ import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.PATCH
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
-class Komga : ReducedHttpSource() {
+class Komga : MergedServerSource() {
 
     override val baseUrl: String = ""
 
@@ -36,9 +40,9 @@ class Komga : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    fun hostUrl() = preferences.sourceUrl(this).get()
+    override fun hostUrl() = preferences.sourceUrl(this).get()
 
-    suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
+    override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
             try {
                 val komgaUrl = "$url/api/v1/series?page=0&size=1".toHttpUrlOrNull()!!.newBuilder()
@@ -54,21 +58,19 @@ class Komga : ReducedHttpSource() {
         }
     }
 
-    fun hasCredentials(): Boolean {
+    override fun hasCredentials(): Boolean {
         val username = preferences.sourceUsername(this@Komga).get()
         val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
         return listOf(username, password, url).none { it.isBlank() }
     }
 
-    suspend fun isLoggedIn(): Boolean {
+    override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
+            if (!hasCredentials()) return@withIOContext false
             val username = preferences.sourceUsername(this@Komga).get()
             val password = preferences.sourcePassword(this@Komga).get()
             val url = hostUrl()
-            if (listOf(username, password, url).any { it.isBlank() }) {
-                return@withIOContext false
-            }
             return@withIOContext loginWithUrl(username, password, url)
         }
     }
@@ -131,7 +133,9 @@ class Komga : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -159,17 +163,20 @@ class Komga : ReducedHttpSource() {
                         }
                     val r =
                         page.map { book ->
-                            SChapter.create().apply {
-                                chapter_number = book.metadata.numberSort
-                                name = "${book.metadata.number} - ${book.metadata.title}"
-                                url = "/api/v1/books/${book.id}"
-                                scanlator = this@Komga.name
-                                date_upload =
-                                    book.metadata.releaseDate?.toDate()
-                                        ?: book.fileLastModified.toDateTime()
-                            }
+                            Pair(
+                                SChapter.create().apply {
+                                    chapter_number = book.metadata.numberSort
+                                    name = "${book.metadata.number} - ${book.metadata.title}"
+                                    url = "/api/v1/books/${book.id}"
+                                    scanlator = this@Komga.name
+                                    date_upload =
+                                        book.metadata.releaseDate?.toDate()
+                                            ?: book.fileLastModified.toDateTime()
+                                },
+                                book.readProgress.completed,
+                            )
                         }
-                    return@runCatching r.sortedByDescending { it.chapter_number }
+                    return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
                 .mapError {
                     TimberKt.e(it) { "Error fetching komga chapters" }
@@ -196,6 +203,18 @@ class Komga : ReducedHttpSource() {
                         ("?convert=png".takeIf { !supportedImageTypes.contains(page.mediaType) }
                             ?: ""),
             )
+        }
+    }
+
+    override suspend fun updateStatusChapters(chapters: List<SChapter>, read: Boolean) {
+        if (hostUrl().isBlank()) {
+            throw Exception("Invalid host name")
+        }
+        chapters.map { chapter ->
+            val chapterUrl = "${hostUrl()}${chapter.url}/read-progress"
+            val body =
+                "{\"completed\":${read},\"page\":0}".toRequestBody("application/json".toMediaType())
+            customClient().newCall(PATCH(chapterUrl, headers, body)).await()
         }
     }
 

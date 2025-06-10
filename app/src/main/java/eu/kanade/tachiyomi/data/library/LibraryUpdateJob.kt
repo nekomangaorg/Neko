@@ -457,7 +457,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val blockedGroups = preferences.blockedScanlators().get()
 
                 val fetchedChapters =
-                    (holder.sChapters + merged).filter {
+                    (holder.sChapters + merged.map { it.first }).filter {
                         ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
                             scanlator in blockedGroups
                         }
@@ -559,27 +559,50 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                 coroutineScope {
                     launch {
-                        if (preferences.readingSync().get() && mangaDexLoginHelper.isLoggedIn()) {
+                        if (preferences.readingSync().get()) {
                             val dbChapters = db.getChapters(manga).executeAsBlocking()
-                            statusHandler
-                                .getReadChapterIds(MdUtil.getMangaUUID(manga.url))
-                                .collect { chapterIds ->
-                                    val markRead =
-                                        dbChapters
-                                            .asSequence()
-                                            .filter { !it.isMergedChapter() }
-                                            .filter { chapterIds.contains(it.mangadex_chapter_id) }
-                                            .filter { !it.read }
-                                            .map {
-                                                it.read = true
-                                                it.last_page_read = 0
-                                                it.pages_left = 0
-                                                it
-                                            }
-                                            .toList()
-
-                                    db.updateChaptersProgress(markRead).executeAsBlocking()
-                                }
+                            val (mergedChapters, nonMergedChapters) =
+                                dbChapters.partition { it.isMergedChapter() }
+                            if (mangaDexLoginHelper.isLoggedIn()) {
+                                statusHandler
+                                    .getReadChapterIds(MdUtil.getMangaUUID(manga.url))
+                                    .collect { chapterIds ->
+                                        val markRead =
+                                            nonMergedChapters
+                                                .filter {
+                                                    chapterIds.contains(it.mangadex_chapter_id)
+                                                }
+                                                .filter { !it.read }
+                                                .map {
+                                                    it.read = true
+                                                    it.last_page_read = 0
+                                                    it.pages_left = 0
+                                                    it
+                                                }
+                                                .toList()
+                                        db.updateChaptersProgress(markRead).executeAsBlocking()
+                                    }
+                            }
+                            if (mergedChapters.isNotEmpty()) {
+                                val readChapters =
+                                    merged
+                                        .filter { it.second }
+                                        .map { Pair(it.first.scanlator, it.first.url) }
+                                val markRead =
+                                    mergedChapters
+                                        .filter {
+                                            readChapters.contains(Pair(it.scanlator, it.url))
+                                        }
+                                        .filter { !it.read }
+                                        .map {
+                                            it.read = true
+                                            it.last_page_read = 0
+                                            it.pages_left = 0
+                                            it
+                                        }
+                                        .toList()
+                                db.updateChaptersProgress(markRead).executeAsBlocking()
+                            }
                         }
                     }
                     launch { updateMissingChapterCount(manga) }

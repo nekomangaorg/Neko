@@ -1,7 +1,7 @@
 [versions]
-coroutinesVersion = "1.10.1"
-kotlinVersion = "2.1.10"
-serializationVersion = "1.8.0"
+coroutinesVersion = "1.10.2"
+kotlinVersion = "2.1.21"
+serializationVersion = "1.8.1"
 
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -15,7 +15,7 @@ serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization
 serialization-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serializationVersion" }
 
 
-immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8"
+immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0"
 
 [bundles]
 

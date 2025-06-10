@@ -1359,15 +1359,20 @@ class LibraryPresenter(
     fun confirmMarkReadStatus(mangaList: HashMap<Manga, List<Chapter>>, markRead: Boolean) {
         if (preferences.readingSync().get()) {
             mangaList.forEach { entry ->
-                val nonMergedChapterIds =
-                    entry.value.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
-                if (nonMergedChapterIds.isNotEmpty()) {
+                val (mergedChapters, nonMergedChapters) =
+                    entry.value.partition { it.isMergedChapter() }
+                if (nonMergedChapters.isNotEmpty()) {
                     presenterScope.launch {
-                        statusHandler.marksChaptersStatus(
+                        statusHandler.markChaptersStatus(
                             MdUtil.getMangaUUID(entry.key.url),
-                            nonMergedChapterIds,
+                            nonMergedChapters.map { it.mangadex_chapter_id },
                             markRead,
                         )
+                    }
+                }
+                if (mergedChapters.isNotEmpty()) {
+                    presenterScope.launch {
+                        statusHandler.markMergedChaptersStatus(mergedChapters, markRead)
                     }
                 }
             }

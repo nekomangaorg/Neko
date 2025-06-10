@@ -458,6 +458,7 @@ private fun ChapterRow(
         themeColor = themeColorState,
         title = chapterItem.chapter.name,
         scanlator = chapterItem.chapter.scanlator,
+        uploader = chapterItem.chapter.uploader,
         language = chapterItem.chapter.language,
         chapterNumber = chapterItem.chapter.chapterNumber.toDouble(),
         dateUploaded = chapterItem.chapter.dateUpload,

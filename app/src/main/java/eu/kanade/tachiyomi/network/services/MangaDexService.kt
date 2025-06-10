@@ -7,14 +7,13 @@ import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
-import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
-import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
+import eu.kanade.tachiyomi.source.online.models.dto.UploaderDto
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import retrofit2.http.Body
@@ -114,11 +113,11 @@ interface MangaDexService {
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
+    @GET("${MdConstants.Api.user}/{id}")
+    suspend fun uploader(@Path("id") id: String): ApiResponse<UploaderDto>
+
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
-
-    @POST(MdConstants.Api.legacyMapping)
-    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)

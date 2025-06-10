@@ -1,13 +1,16 @@
 package eu.kanade.tachiyomi.ui.feed
 
+import androidx.compose.ui.util.fastAny
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -33,6 +36,7 @@ class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -40,6 +44,8 @@ class FeedRepository(
     private val bySeriesSet = mutableSetOf<Long>()
 
     suspend fun getUpdatedFeedMangaForHistoryBySeries(feedManga: FeedManga): FeedManga {
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters =
             chapterHistories
@@ -47,6 +53,11 @@ class FeedRepository(
                     chpHistory.chapter
                         .toSimpleChapter(chpHistory.history.last_read)!!
                         .toChapterItem()
+                }
+                .filterNot {
+                    it.chapter.scanlatorList().fastAny { scanlator ->
+                        scanlator in blockedScanlators
+                    }
                 }
                 .toPersistentList()
 
@@ -72,6 +83,8 @@ class FeedRepository(
     }
 
     suspend fun getSummaryContinueReadingList(): Result<List<FeedManga>, ResultError.Generic> {
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         return com.github.michaelbull.result
             .runCatching {
                 db.getRecentMangaLimit(offset = 0, limit = 50, isResuming = false)
@@ -85,6 +98,14 @@ class FeedRepository(
                                 history.manga,
                                 history.chapter.toSimpleChapter(history.history.last_read)!!,
                             )
+
+                        if (
+                            chapter.chapter.scanlatorList().fastAny { scanlator ->
+                                scanlator in blockedScanlators
+                            }
+                        ) {
+                            return@mapNotNull null
+                        }
 
                         FeedManga(
                             mangaId = history.manga.id!!,
@@ -147,6 +168,8 @@ class FeedRepository(
     }
 
     suspend fun getSummaryNewlyAddedList(): Result<List<FeedManga>, ResultError.Generic> {
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         return com.github.michaelbull.result
             .runCatching {
                 db.getFavoriteMangaList()
@@ -155,10 +178,17 @@ class FeedRepository(
                     .sortedBy { it.date_added }
                     .takeLast(100)
                     .mapNotNull { manga ->
-                        val chapters = db.getChapters(manga).executeOnIO()
+                        val chapters =
+                            db.getChapters(manga).executeOnIO().filterNot {
+                                it.scanlatorList().fastAny { scanlator ->
+                                    scanlator in blockedScanlators
+                                }
+                            }
+
                         if (chapters.any { it.read || it.last_page_read != 0 }) {
                             return@mapNotNull null
                         }
+
                         val simpleChapter =
                             chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
 
@@ -361,6 +391,8 @@ class FeedRepository(
         uploadsFetchSort: Boolean,
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
 
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         if (offset > 0) {
             delay(300L)
         }
@@ -382,6 +414,14 @@ class FeedRepository(
                                     true -> it.chapter.date_fetch
                                     false -> it.chapter.date_upload
                                 }
+
+                            if (
+                                chapterItem.chapter.scanlatorList().fastAny { scanlator ->
+                                    scanlator in blockedScanlators
+                                }
+                            ) {
+                                return@mapNotNull null
+                            }
 
                             FeedManga(
                                 mangaId = chapterItem.chapter.mangaId,
