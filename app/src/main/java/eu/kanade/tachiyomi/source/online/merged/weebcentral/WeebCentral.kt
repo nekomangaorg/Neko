@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.source.online.merged.weebcentral
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -34,7 +37,7 @@ class WeebCentral : ReducedHttpSource() {
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return simpleChapter.url
+        return baseUrl + simpleChapter.url
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
@@ -108,7 +111,9 @@ class WeebCentral : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
         val url =
             (baseUrl + mangaUrl)
                 .toHttpUrl()
@@ -122,10 +127,10 @@ class WeebCentral : ReducedHttpSource() {
 
         if (!response.isSuccessful) {
             response.close()
-            throw Exception("HTTP error ${response.code}")
+            return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
 
-        return parseChapters(response)
+        return parseChapters(response).map { it.map { chapter -> Pair(chapter, false) } }
     }
 
     private fun parseChapters(response: Response): Result<List<SChapter>, ResultError> {

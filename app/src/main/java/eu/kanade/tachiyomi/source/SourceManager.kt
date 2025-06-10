@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.merged.comick.Comick
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -17,9 +19,13 @@ open class SourceManager {
 
     val komga: Komga by lazy { Komga() }
 
+    val suwayomi: Suwayomi by lazy { Suwayomi() }
+
     val toonily: Toonily by lazy { Toonily() }
 
     val weebCentral: WeebCentral by lazy { WeebCentral() }
+
+    val comick: Comick by lazy { Comick() }
 
     open fun get(sourceKey: Long): Source? {
         return mangaDex
@@ -31,7 +37,7 @@ open class SourceManager {
 
     companion object {
 
-        val possibleIds = MdLang.values().map { getId(it.lang) }
+        val possibleIds = MdLang.entries.map { getId(it.lang) }
 
         fun getId(lang: String): Long {
             val key = "mangadex/$lang/1"

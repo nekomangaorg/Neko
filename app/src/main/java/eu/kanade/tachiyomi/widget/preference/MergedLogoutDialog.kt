@@ -17,14 +17,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
-
-    val source: Source by lazy { Injekt.get<SourceManager>().komga }
+class MergedLogoutDialog(
+    bundle: Bundle? = null,
+    val source: Source = Injekt.get<SourceManager>().komga,
+) : DialogController(bundle) {
 
     protected lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()
 
-    constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
+    constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) }, source)
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return activity!!
@@ -38,7 +39,7 @@ class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                                 // val loggedOut = source.logout()
 
                                 // if (loggedOut.loggedOut) {
-                                launch { preferences.setKomgaCredentials(source, "", "", "") }
+                                launch { preferences.setSourceCredentials(source, "", "", "") }
                                 activity?.toast(R.string.successfully_logged_out)
                                 (targetController as? Listener)?.siteLogoutDialogClosed(source)
                                 /* } else {

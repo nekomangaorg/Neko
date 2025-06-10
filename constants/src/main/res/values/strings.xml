@@ -1075,6 +1075,7 @@
     <string name="chapters_downloaded">Downloaded chapters</string>
     <string name="komga_merged">Komga merged</string>
     <string name="mangalife_merged">MangaLife merged</string>
+    <string name="suwayomi_merged">Suwayomi merged</string>
     <string name="toonily_merged">Toonily merged</string>
     <string name="weebcentral_merged">Weeb Central merged</string>
     <string name="total_tags">Total tags</string>
@@ -1415,6 +1416,7 @@
     <!-- Merge Settings -->
     <string name="merge_source_settings">Merge source settings</string>
     <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
+    <string name="minimum_suwayomi_version">Minimum required Suwayomi-Server version: 1.0.0</string>
 
 
     <!-- Site Settings -->
@@ -1449,7 +1451,7 @@
     <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
     <string name="reading_sync">Auto sync read status</string>
-    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex.  This only pulls read from MangaDex to prevent accidentally marking chapters unread</string>
+    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex and self-hosted merge sources.  This only pulls read to prevent accidentally marking chapters unread</string>
     <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>

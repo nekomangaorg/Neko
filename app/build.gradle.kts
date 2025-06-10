@@ -129,9 +129,6 @@ dependencies {
     // TLS 1.3 support for Android < 10
     implementation(libs.conscrypt)
 
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
-
     implementation(libs.bundles.retrofit)
 
     // Disk

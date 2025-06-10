@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
@@ -16,12 +16,14 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class KomgaLoginDialog(bundle: Bundle? = null) :
-    LoginDialogPreference(bundle = bundle, showUrl = true) {
+class MergedLoginDialog(
+    bundle: Bundle? = null,
+    val source: MergedServerSource = Injekt.get<SourceManager>().komga,
+) : LoginDialogPreference(bundle = bundle, showUrl = true) {
 
-    val source: Komga by lazy { Injekt.get<SourceManager>().komga }
-
-    constructor(source: Komga) : this(Bundle().apply { putLong("key", source.id) })
+    constructor(
+        source: MergedServerSource
+    ) : this(Bundle().apply { putLong("key", source.id) }, source)
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         binding = PrefAccountLoginBinding.inflate(activity!!.layoutInflater)
@@ -43,12 +45,10 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
         v?.apply {
             binding.progress.visibility = View.VISIBLE
             binding.login.visibility = View.GONE
-
-            if (
-                binding.username.text.isNullOrBlank() ||
-                    binding.password.text.isNullOrBlank() ||
-                    binding.url.text.isNullOrBlank()
-            ) {
+            val isMissingCredentials =
+                source.requiresCredentials() &&
+                    (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank())
+            if (isMissingCredentials || binding.url.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return
@@ -65,7 +65,7 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
                     val result = source.loginWithUrl(username, password, url)
                     if (result) {
                         dialog?.dismiss()
-                        preferences.setKomgaCredentials(source, username, password, url)
+                        preferences.setSourceCredentials(source, username, password, url)
                         context.toast(R.string.successfully_logged_in)
                         (targetController as? Listener)?.siteLoginDialogClosed(
                             source,

@@ -7,8 +7,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
-import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
-import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
@@ -120,9 +118,6 @@ interface MangaDexService {
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
-
-    @POST(MdConstants.Api.legacyMapping)
-    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)

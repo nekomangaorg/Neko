@@ -30,8 +30,7 @@ class LicensesController : BasicComposeController() {
                         badgeBackgroundColor = MaterialTheme.colorScheme.primary,
                         badgeContentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
-                padding =
-                    LibraryDefaults.libraryPadding(badgeContentPadding = PaddingValues(Size.tiny)),
+                padding = LibraryDefaults.libraryPadding(contentPadding = PaddingValues(Size.tiny)),
             )
         }
     }
