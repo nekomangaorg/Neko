@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.mappers
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import androidx.core.database.getStringOrNull
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_PAGES_LEFT
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_READ
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SCANLATOR
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SOURCE_ORDER
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_UNAVAILABLE
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_UPLOADER
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_VOL
@@ -56,6 +58,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
             put(COL_READ, obj.read)
             put(COL_SCANLATOR, obj.scanlator)
             put(COL_UPLOADER, obj.uploader)
+            put(COL_UNAVAILABLE, obj.isUnavailable)
             put(COL_BOOKMARK, obj.bookmark)
             put(COL_DATE_FETCH, obj.date_fetch)
             put(COL_DATE_UPLOAD, obj.date_upload)
@@ -71,6 +74,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
 
 class ChapterGetResolver : DefaultGetResolver<Chapter>() {
 
+    @SuppressLint("Range")
     override fun mapFromCursor(cursor: Cursor): Chapter =
         ChapterImpl().apply {
             id = cursor.getLong(cursor.getColumnIndex(COL_ID))
@@ -92,6 +96,7 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
             source_order = cursor.getInt(cursor.getColumnIndex(COL_SOURCE_ORDER))
             mangadex_chapter_id = cursor.getString(cursor.getColumnIndex(COL_MANGADEX_CHAPTER_ID))
             language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE))
+            isUnavailable = cursor.getInt(cursor.getColumnIndex(COL_UNAVAILABLE)) == 1
             old_mangadex_id =
                 cursor.getStringOrNull(cursor.getColumnIndex(COL_OLD_MANGADEX_CHAPTER_ID))
         }

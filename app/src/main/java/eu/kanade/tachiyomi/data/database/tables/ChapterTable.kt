@@ -24,6 +24,8 @@ object ChapterTable {
 
     const val COL_UPLOADER = "uploader"
 
+    const val COL_UNAVAILABLE = "unavailable"
+
     const val COL_BOOKMARK = "bookmark"
 
     const val COL_DATE_FETCH = "date_fetch"
@@ -56,6 +58,7 @@ object ChapterTable {
             $COL_VOL TEXT NOT NULL,
             $COL_SCANLATOR TEXT,
             $COL_UPLOADER TEXT,
+            $COL_UNAVAILABLE BOOLEAN NOT NULL,
             $COL_READ BOOLEAN NOT NULL,
             $COL_BOOKMARK BOOLEAN NOT NULL,
             $COL_LAST_PAGE_READ INT NOT NULL,
@@ -103,4 +106,7 @@ object ChapterTable {
 
     val addUploader: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UPLOADER TEXT DEFAULT ''"
+
+    val addUnavailable: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UNAVAILABLE BOOL DEFAULT 0"
 }

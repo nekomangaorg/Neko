@@ -295,6 +295,7 @@
 
 
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
+    <string name="include_unavailable">Include unavailable chapters</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>

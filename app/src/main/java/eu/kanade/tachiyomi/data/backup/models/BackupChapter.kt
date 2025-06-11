@@ -26,6 +26,7 @@ data class BackupChapter(
     @ProtoNumber(800) var pagesLeft: Int = 0,
     // Neko Values
     @ProtoNumber(905) var uploader: String? = null,
+    @ProtoNumber(906) var isUnavailable: Boolean = false,
 ) {
     fun toChapterImpl(): ChapterImpl {
         return ChapterImpl().apply {
@@ -41,6 +42,7 @@ data class BackupChapter(
             date_upload = this@BackupChapter.dateUpload
             source_order = this@BackupChapter.sourceOrder
             pages_left = this@BackupChapter.pagesLeft
+            isUnavailable = this@BackupChapter.isUnavailable
         }
     }
 

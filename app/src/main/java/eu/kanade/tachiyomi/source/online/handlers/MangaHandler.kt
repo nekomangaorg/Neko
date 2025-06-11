@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,11 @@ class MangaHandler {
                 withContext(Dispatchers.Default) { fetchMangaDetails(manga.uuid(), fetchArtwork) }
             val chapterList =
                 withContext(Dispatchers.Default) {
-                    fetchChapterList(manga.uuid(), manga.last_chapter_number)
+                    fetchChapterList(
+                        manga.uuid(),
+                        manga.last_chapter_number,
+                        preferencesHelper.includeUnavailable().get(),
+                    )
                 }
 
             return@withContext zip(
@@ -164,11 +169,12 @@ class MangaHandler {
     suspend fun fetchChapterList(
         mangaUUID: String,
         lastChapterNumber: Int?,
+        includeUnavailable: Boolean,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-            fetchOffset(mangaUUID, langs, 0)
+            fetchOffset(mangaUUID, langs, includeUnavailable, 0)
                 .andThen { chapterListDto ->
                     Ok(
                         when (chapterListDto.total > chapterListDto.limit) {
@@ -177,9 +183,11 @@ class MangaHandler {
                                     fetchRestOfChapters(
                                         mangaUUID,
                                         langs,
+                                        includeUnavailable,
                                         chapterListDto.limit,
                                         chapterListDto.total,
                                     )
+
                             false -> chapterListDto.data
                         }
                     )
@@ -201,6 +209,7 @@ class MangaHandler {
     private suspend fun fetchRestOfChapters(
         mangaUUID: String,
         langs: List<String>,
+        includeUnavailable: Boolean,
         limit: Int,
         total: Int,
     ): List<ChapterDataDto> {
@@ -208,7 +217,9 @@ class MangaHandler {
             val totalRequestNo = (total / limit)
 
             (1..totalRequestNo)
-                .map { pos -> async { fetchOffset(mangaUUID, langs, pos * limit) } }
+                .map { pos ->
+                    async { fetchOffset(mangaUUID, langs, includeUnavailable, pos * limit) }
+                }
                 .awaitAll()
                 .mapNotNull { it.getOrElse { null }?.data }
                 .flatten()
@@ -225,10 +236,11 @@ class MangaHandler {
     private suspend fun fetchOffset(
         mangaUUID: String,
         langs: List<String>,
+        includeUnavailable: Boolean,
         offset: Int,
     ): Result<ChapterListDto, ResultError> {
         return service
-            .viewChapters(mangaUUID, langs, offset)
+            .viewChapters(mangaUUID, langs, includeUnavailable.toInt().toString(), offset)
             .getOrResultError("Trying to view chapters")
     }
 

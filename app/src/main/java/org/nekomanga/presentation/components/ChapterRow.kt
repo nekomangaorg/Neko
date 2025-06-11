@@ -80,6 +80,7 @@ fun ChapterRow(
     read: Boolean,
     bookmark: Boolean,
     isMerged: Boolean,
+    isUnavailable: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
     shouldHideChapterTitles: Boolean = false,
@@ -163,6 +164,7 @@ fun ChapterRow(
                 onDownload = onDownload,
                 markPrevious = markPrevious,
                 isMerged = isMerged,
+                isUnavailable = isUnavailable,
                 blockScanlator = blockScanlator,
                 uploader = uploader,
             )
@@ -207,6 +209,7 @@ private fun ChapterInfo(
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
+    isUnavailable: Boolean,
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
@@ -381,7 +384,7 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator)) {
+        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator) || isUnavailable) {
             Icon(
                 imageVector = Icons.Outlined.Lock,
                 contentDescription = null,

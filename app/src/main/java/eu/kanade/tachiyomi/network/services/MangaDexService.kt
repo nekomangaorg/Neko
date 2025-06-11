@@ -78,6 +78,7 @@ interface MangaDexService {
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("includeUnavailable") includeUnavailable: String,
         @Query("offset") offset: Int,
     ): ApiResponse<ChapterListDto>
 
