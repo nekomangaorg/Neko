@@ -208,6 +208,8 @@ class MangaDetailController(private val mangaId: Long) :
                 MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
             context.toast("${chapter.scanlator} not supported, try WebView")
+        } else if (chapter.isUnavailable) {
+            context.toast("Chapter is not available")
         } else {
             startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
         }

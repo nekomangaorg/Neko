@@ -98,6 +98,8 @@ object PreferenceKeys {
 
     const val dataSaver = "data_saver_bool"
 
+    const val includeUnavailable = "include_unavailable"
+
     const val readingSync = "reading_sync_bool"
 
     const val showContentRatingFilter = "show_R18_filter"
