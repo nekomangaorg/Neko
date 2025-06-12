@@ -222,6 +222,7 @@ class SettingsLibraryController : SettingsController() {
                 switchPreference {
                     key = libraryPreferences.includeUnavailable().key()
                     titleRes = R.string.include_unavailable
+                    summaryRes = R.string.include_unavailable_summary
                     defaultValue = false
                 }
 

@@ -69,6 +69,8 @@ fun SimpleStats(
                     context.getString(R.string.chapters_read),
                 numberFormat.format(statsState.bookmarkCount).toString() to
                     context.getString(R.string.chapters_bookmarked),
+                numberFormat.format(statsState.unavailableCount).toString() to
+                    context.getString(R.string.chapters_unavailable),
                 statsState.readDuration to context.getString(R.string.read_duration),
                 libUpdates to context.getString(R.string.last_library_update),
                 libUpdateAttempt to context.getString(R.string.last_library_update_attempt),
@@ -87,7 +89,7 @@ fun SimpleStats(
                 numberFormat.format(statsState.mangaLifeMergeCount).toString() to
                     context.getString(R.string.mangalife_merged),
                 numberFormat.format(statsState.comickMergeCount).toString() to
-                    context.getString(R.string.mangalife_merged),
+                    context.getString(R.string.comick_merged),
                 numberFormat.format(statsState.suwayomiMergeCount).toString() to
                     context.getString(R.string.suwayomi_merged),
                 numberFormat.format(statsState.toonilyMergeCount).toString() to

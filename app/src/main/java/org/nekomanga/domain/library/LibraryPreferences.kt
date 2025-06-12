@@ -115,6 +115,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun filterBookmarked() = this.preferenceStore.getInt("pref_filter_bookmarked_key")
 
+    fun filterUnavailable() = this.preferenceStore.getInt("pref_filter_unavailable_key")
+
     fun filterTracked() = this.preferenceStore.getInt("pref_filter_tracked_key")
 
     fun filterMangaType() = this.preferenceStore.getInt("pref_filter_manga_type_key")
