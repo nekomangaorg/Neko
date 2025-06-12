@@ -189,8 +189,12 @@ class MangaDetailController(private val mangaId: Long) :
                     blockScanlator = presenter::blockScanlator,
                     openComment = { chapterId -> presenter.openComment(context, chapterId) },
                     openInBrowser = { chapterItem ->
-                        val url = presenter.getChapterUrl(chapterItem.chapter)
-                        context.openInBrowser(url)
+                        if (chapterItem.chapter.isUnavailable) {
+                            context.toast("Chapter is not available")
+                        } else {
+                            val url = presenter.getChapterUrl(chapterItem.chapter)
+                            context.openInBrowser(url)
+                        }
                     },
                 ),
             onBackPressed = {
