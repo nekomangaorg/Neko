@@ -57,6 +57,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private val hasTracking
         get() = trackManager.hasLoggedServices()
 
+    private val includeUnavailable
+        get() = libraryPreferences.includeUnavailable().get()
+
     private lateinit var downloaded: FilterTagGroup
 
     private lateinit var unreadProgress: FilterTagGroup
@@ -70,6 +73,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private lateinit var missingChapters: FilterTagGroup
 
     private lateinit var bookmarked: FilterTagGroup
+
+    private var unavailable: FilterTagGroup? = null
 
     private var tracked: FilterTagGroup? = null
 
@@ -95,6 +100,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         list.add(merged)
         list.add(missingChapters)
+        if (includeUnavailable) {
+            unavailable?.let { list.add(it) }
+        }
         list
     }
 
@@ -273,6 +281,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             libraryPreferences.filterMerged().get() > 0 ||
             libraryPreferences.filterMissingChapters().get() > 0 ||
             libraryPreferences.filterBookmarked().get() > 0 ||
+            libraryPreferences.filterUnavailable().get() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -301,6 +310,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (hasTracking) {
             tracked = inflate(R.layout.filter_tag_group) as FilterTagGroup
             tracked?.setup(this, R.string.tracked, R.string.not_tracked)
+        }
+
+        if (includeUnavailable) {
+            unavailable = inflate(R.layout.filter_tag_group) as FilterTagGroup
+            unavailable?.setup(this, R.string.unavailable, R.string.available)
         }
 
         reSortViews()
@@ -397,6 +411,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 unreadProgress.state = unreadP - 3
             }
             tracked?.setState(libraryPreferences.filterTracked())
+            unavailable?.setState(libraryPreferences.filterUnavailable())
             reorderFilters()
             reSortViews()
         }
@@ -417,6 +432,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 bookmarked,
                 tracked,
                 missingChapters,
+                unavailable,
                 merged,
             )
             .forEach {
@@ -439,6 +455,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             Filters.SeriesType -> mangaType
             Filters.Bookmarked -> bookmarked
             Filters.MissingChapters -> missingChapters
+            Filters.Unavailable -> if (includeUnavailable) unavailable else null
             Filters.Merged -> merged
             Filters.Tracked -> if (hasTracking) tracked else null
             else -> null
@@ -474,6 +491,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 tracked -> libraryPreferences.filterTracked()
                 merged -> libraryPreferences.filterMerged()
                 missingChapters -> libraryPreferences.filterMissingChapters()
+                unavailable -> libraryPreferences.filterUnavailable()
                 mangaType -> {
                     val newIndex =
                         when (view.nameOf(index)) {
@@ -519,6 +537,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryPreferences.filterTracked().set(0)
         libraryPreferences.filterMerged().set(0)
         libraryPreferences.filterMissingChapters().set(0)
+        libraryPreferences.filterUnavailable().set(0)
         libraryPreferences.filterMangaType().set(0)
         FILTER_TRACKER = ""
 
@@ -569,6 +588,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         SeriesType('m', R.string.series_type),
         Bookmarked('b', R.string.bookmarked),
         MissingChapters('o', R.string.missing_chapters),
+        Unavailable('w', R.string.unavailable),
         Merged('n', R.string.merged),
         Tracked('t', R.string.tracked);
 
@@ -582,6 +602,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         SeriesType,
                         Bookmarked,
                         MissingChapters,
+                        Unavailable,
                         Merged,
                         Tracked,
                     )

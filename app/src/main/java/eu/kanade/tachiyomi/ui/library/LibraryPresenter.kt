@@ -305,6 +305,8 @@ class LibraryPresenter(
 
         val filterBookmarked = libraryPreferences.filterBookmarked().get()
 
+        val filterUnavailable = libraryPreferences.filterUnavailable().get()
+
         val showEmptyCategoriesWhileFiltering =
             libraryPreferences.showEmptyCategoriesWhileFiltering().get()
 
@@ -319,7 +321,8 @@ class LibraryPresenter(
                 filterUnread == 0 &&
                 filterCompleted == 0 &&
                 filterTracked == 0 &&
-                filterMangaType == 0
+                filterMangaType == 0 &&
+                filterUnavailable == 0
         hasActiveFilters = !filtersOff
         val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
         val filteredItems =
@@ -343,6 +346,7 @@ class LibraryPresenter(
                                     filterTracked,
                                     filterMangaType,
                                     filterBookmarked,
+                                    filterUnavailable,
                                     filterTrackers,
                                     filterMerged,
                                     filterMissingChapters,
@@ -366,6 +370,7 @@ class LibraryPresenter(
                             filterTracked,
                             filterMangaType,
                             filterBookmarked,
+                            filterUnavailable,
                             filterTrackers,
                             filterMerged,
                             filterMissingChapters,
@@ -390,6 +395,7 @@ class LibraryPresenter(
         filterTracked: Int,
         filterMangaType: Int,
         filterBookmarked: Int,
+        filterUnavailable: Int,
         filterTrackers: String,
         filterMerged: Int,
         filterMissingChapters: Int,
@@ -404,6 +410,9 @@ class LibraryPresenter(
 
         if (filterBookmarked == STATE_INCLUDE && item.manga.bookmarkCount == 0) return false
         if (filterBookmarked == STATE_EXCLUDE && item.manga.bookmarkCount > 0) return false
+
+        if (filterUnavailable == STATE_INCLUDE && item.manga.unavailableCount == 0) return false
+        if (filterUnavailable == STATE_EXCLUDE && item.manga.availableCount == 0) return false
 
         if (filterMangaType > 0) {
             if (

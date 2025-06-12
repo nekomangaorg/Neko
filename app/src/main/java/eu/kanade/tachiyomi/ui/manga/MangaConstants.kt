@@ -110,6 +110,7 @@ object MangaConstants {
         val downloaded: ToggleableState = ToggleableState.Off,
         val bookmarked: ToggleableState = ToggleableState.Off,
         val hideChapterTitles: ToggleableState = ToggleableState.Off,
+        val unavailable: ToggleableState = ToggleableState.Off,
         val matchesGlobalDefaults: Boolean = true,
     )
 
@@ -123,6 +124,7 @@ object MangaConstants {
         Unread,
         Downloaded,
         Bookmarked,
+        Unavailable,
         HideTitles,
     }
 

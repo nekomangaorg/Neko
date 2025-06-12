@@ -384,7 +384,9 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator) || isUnavailable) {
+        val unavailable = isUnavailable && downloadState != Download.State.DOWNLOADED
+
+        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator) || unavailable) {
             Icon(
                 imageVector = Icons.Outlined.Lock,
                 contentDescription = null,
