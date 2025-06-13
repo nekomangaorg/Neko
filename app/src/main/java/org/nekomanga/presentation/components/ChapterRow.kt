@@ -332,10 +332,9 @@ private fun ChapterInfo(
                 }
                 statuses.add(scanlator)
 
-                if(isMerged && uploader.isNotBlank()){
+                if (isMerged && uploader.isNotBlank()) {
                     statuses.add(uploader)
                 }
-
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
