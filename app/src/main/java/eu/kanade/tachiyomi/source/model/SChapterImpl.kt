@@ -22,6 +22,8 @@ class SChapterImpl : SChapter {
 
     override var language: String? = null
 
+    override var isUnavailable: Boolean = false
+
     override var mangadex_chapter_id: String = ""
 
     override var old_mangadex_id: String? = null

@@ -11,7 +11,7 @@ val libraryQuery =
     """
     SELECT M.*, COALESCE(MC.${MangaCategory.COL_CATEGORY_ID}, 0) AS ${Manga.COL_CATEGORY}
     FROM (
-        SELECT ${Manga.TABLE}.*, COALESCE(C.unread, '') AS ${Manga.COL_UNREAD}, COALESCE(R.hasread, '') AS ${Manga.COL_HAS_READ}, COALESCE(B.bookmarkCount, 0) AS ${Manga.COL_BOOKMARK_COUNT}
+        SELECT ${Manga.TABLE}.*, COALESCE(C.unread, '') AS ${Manga.COL_UNREAD}, COALESCE(R.hasread, '') AS ${Manga.COL_HAS_READ}, COALESCE(B.bookmarkCount, 0) AS ${Manga.COL_BOOKMARK_COUNT}, COALESCE(U.unavailableCount,0) as ${Manga.COL_UNAVAILABLE_COUNT}
         FROM ${Manga.TABLE}
         LEFT JOIN (
             SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS unread
@@ -34,6 +34,13 @@ val libraryQuery =
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS B
         ON ${Manga.COL_ID} = B.${Chapter.COL_MANGA_ID}
+        LEFT JOIN (
+            SELECT ${Chapter.COL_MANGA_ID}, COUNT(*) AS unavailableCount
+            FROM ${Chapter.TABLE}
+            WHERE ${Chapter.COL_UNAVAILABLE} = true
+            GROUP BY ${Chapter.COL_MANGA_ID}
+        ) AS U
+        ON ${Manga.COL_ID} = U.${Chapter.COL_MANGA_ID}
         WHERE ${Manga.COL_FAVORITE} = 1
         GROUP BY ${Manga.COL_ID}
         ORDER BY ${Manga.COL_TITLE}

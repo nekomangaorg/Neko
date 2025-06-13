@@ -9,6 +9,11 @@ class LibraryManga : MangaImpl() {
 
     var bookmarkCount: Int = 0
 
+    var unavailableCount: Int = 0
+
+    val availableCount
+        get() = totalChapters - unavailableCount
+
     val totalChapters
         get() = read + unread
 

@@ -197,6 +197,8 @@ class ApiMangaParser {
 
         chapter.language = attributes.translatedLanguage
 
+        chapter.isUnavailable = attributes.isUnavailable
+
         return chapter
     }
 }

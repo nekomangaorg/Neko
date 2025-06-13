@@ -729,7 +729,10 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
                 stringResource(id = R.string.chapters_bookmarked),
                 manga.bookmarkedChapters.toString(),
             )
-
+            Line(
+                stringResource(id = R.string.chapters_unavailable),
+                manga.unavailableChapters.toString(),
+            )
             Line(stringResource(id = R.string.categories), manga.categories.joinToString(", "))
         }
     }

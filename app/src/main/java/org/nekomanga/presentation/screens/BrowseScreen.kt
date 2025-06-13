@@ -363,7 +363,7 @@ private fun ScreenTypeFooter(
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.small),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item { Gap(Size.tiny) }

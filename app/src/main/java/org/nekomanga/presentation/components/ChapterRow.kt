@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
@@ -58,7 +59,6 @@ import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -80,6 +80,7 @@ fun ChapterRow(
     read: Boolean,
     bookmark: Boolean,
     isMerged: Boolean,
+    isUnavailable: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
     shouldHideChapterTitles: Boolean = false,
@@ -163,6 +164,7 @@ fun ChapterRow(
                 onDownload = onDownload,
                 markPrevious = markPrevious,
                 isMerged = isMerged,
+                isUnavailable = isUnavailable,
                 blockScanlator = blockScanlator,
                 uploader = uploader,
             )
@@ -207,6 +209,7 @@ private fun ChapterInfo(
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
+    isUnavailable: Boolean,
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
@@ -328,6 +331,10 @@ private fun ChapterInfo(
                     statuses.add(uploader)
                 }
                 statuses.add(scanlator)
+
+                if (isMerged && uploader.isNotBlank()) {
+                    statuses.add(uploader)
+                }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -381,23 +388,41 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator)) {
-            Icon(
-                imageVector = Icons.Outlined.Lock,
-                contentDescription = null,
-                modifier =
-                    Modifier.align(Alignment.CenterVertically).padding(Size.small).size(Size.large),
-                tint = themeColorState.altContainerColor,
-            )
-        } else {
+        val noLocalCopy = isUnavailable && downloadState != Download.State.DOWNLOADED
+        val localCopy = isUnavailable && downloadState == Download.State.DOWNLOADED
 
-            DownloadButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                themeColorState = themeColorState,
-                downloadState = downloadState,
-                downloadProgress = downloadProgress,
-                onDownload = onDownload,
-            )
+        when {
+            noLocalCopy -> {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .padding(Size.medium)
+                            .size(Size.large),
+                    tint = themeColorState.buttonColor,
+                )
+            }
+            localCopy -> {
+                Icon(
+                    imageVector = Icons.Outlined.FolderOpen,
+                    contentDescription = null,
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .padding(Size.medium)
+                            .size(Size.large),
+                    tint = themeColorState.buttonColor,
+                )
+            }
+            else -> {
+                DownloadButton(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    themeColorState = themeColorState,
+                    downloadState = downloadState,
+                    downloadProgress = downloadProgress,
+                    onDownload = onDownload,
+                )
+            }
         }
     }
 }

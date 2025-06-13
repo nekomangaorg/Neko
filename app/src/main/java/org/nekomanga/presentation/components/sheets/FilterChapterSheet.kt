@@ -240,7 +240,16 @@ private fun Filter(
             text = stringResource(id = R.string.show_bookmarked_chapters),
             changeFilter = changeFilter,
         )
-
+        FilterLine(
+            themeColorState = themeColorState,
+            state =
+                MangaConstants.ChapterDisplayOptions(
+                    displayType = MangaConstants.ChapterDisplayType.Unavailable,
+                    displayState = filter.unavailable,
+                ),
+            text = stringResource(id = R.string.show_unavailable_chapters),
+            changeFilter = changeFilter,
+        )
         CheckboxLine(
             themeColorState = themeColorState,
             checked = filter.hideChapterTitles == ToggleableState.On,
