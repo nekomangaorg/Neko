@@ -162,7 +162,7 @@ class Suwayomi : MergedServerSource() {
         val parts = mangaUrl.split(" ", limit = 3)
         val mangaId = parts[0]
         val sourceName = parts.getOrNull(1)
-        val language = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
+        val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
 
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
@@ -207,7 +207,7 @@ class Suwayomi : MergedServerSource() {
                                                 chapter.scanlator?.takeIf { it != "Unknown" },
                                             )
                                             .joinToString(Constants.SEPARATOR)
-                                    language = language
+                                    language = lang
                                     date_upload = chapter.uploadDate
                                 },
                                 chapter.isRead,
