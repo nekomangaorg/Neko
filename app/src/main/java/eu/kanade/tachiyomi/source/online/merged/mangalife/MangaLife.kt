@@ -167,10 +167,9 @@ class MangaLife : ReducedHttpSource() {
                                     .getOrElse { 0L }
 
                             scanlator = this@MangaLife.name
-                        }
+                        } to false
                     }
                 }
-                .map { it.map { chp -> Pair(chp, false) } }
                 .mapError {
                     TimberKt.e(it) { "Error merging with manga life" }
                     "Unknown Exception with merge".toResultError()

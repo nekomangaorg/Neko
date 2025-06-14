@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.merged.weebcentral
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -130,10 +129,10 @@ class WeebCentral : ReducedHttpSource() {
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
 
-        return parseChapters(response).map { it.map { chapter -> Pair(chapter, false) } }
+        return parseChapters(response)
     }
 
-    private fun parseChapters(response: Response): Result<List<SChapter>, ResultError> {
+    private fun parseChapters(response: Response): Result<List<SChapterStatusPair>, ResultError> {
         val document = response.asJsoup()
         response.closeQuietly()
 
@@ -197,7 +196,7 @@ class WeebCentral : ReducedHttpSource() {
                             element.selectFirst("time[datetime]")?.attr("datetime").parseDate()
                         scanlator = WeebCentral.name
                         mangadex_chapter_id = url.substringAfter("chapters/")
-                    }
+                    } to false
                 }
             }
         return Ok(chapters)

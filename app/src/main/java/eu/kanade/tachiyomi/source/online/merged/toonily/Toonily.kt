@@ -127,10 +127,12 @@ class Toonily : ReducedHttpSource() {
             response.close()
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
-        return parseChapterList(response).map { it.map { chapter -> Pair(chapter, false) } }
+        return parseChapterList(response)
     }
 
-    private fun parseChapterList(response: Response): Result<List<SChapter>, ResultError> {
+    private fun parseChapterList(
+        response: Response
+    ): Result<List<SChapterStatusPair>, ResultError> {
         val document = response.asJsoup()
         response.closeQuietly()
         var currentVolume = 1
@@ -219,7 +221,7 @@ class Toonily : ReducedHttpSource() {
                             element.select("span.chapter-release-date").firstOrNull()?.text()
                         )
 
-                chapter
+                chapter to false
             }
         return Ok(chapters)
     }

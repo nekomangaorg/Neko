@@ -163,18 +163,15 @@ class Komga : MergedServerSource() {
                         }
                     val r =
                         page.map { book ->
-                            Pair(
-                                SChapter.create().apply {
-                                    chapter_number = book.metadata.numberSort
-                                    name = "${book.metadata.number} - ${book.metadata.title}"
-                                    url = "/api/v1/books/${book.id}"
-                                    scanlator = this@Komga.name
-                                    date_upload =
-                                        book.metadata.releaseDate?.toDate()
-                                            ?: book.fileLastModified.toDateTime()
-                                },
-                                book.readProgress.completed,
-                            )
+                            SChapter.create().apply {
+                                chapter_number = book.metadata.numberSort
+                                name = "${book.metadata.number} - ${book.metadata.title}"
+                                url = "/api/v1/books/${book.id}"
+                                scanlator = this@Komga.name
+                                date_upload =
+                                    book.metadata.releaseDate?.toDate()
+                                        ?: book.fileLastModified.toDateTime()
+                            } to book.readProgress.completed
                         }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
