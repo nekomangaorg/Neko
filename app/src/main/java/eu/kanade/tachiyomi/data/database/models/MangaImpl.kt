@@ -79,6 +79,8 @@ open class MangaImpl : Manga {
 
     override var merge_manga_image_url: String? = null
 
+    override var last_volume_number: Int? = null
+
     override var last_chapter_number: Int? = null
 
     override var alt_titles: String? = null

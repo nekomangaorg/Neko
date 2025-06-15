@@ -56,6 +56,8 @@ interface SManga : Serializable {
 
     var merge_manga_image_url: String?
 
+    var last_volume_number: Int?
+
     var last_chapter_number: Int?
 
     var alt_titles: String?
@@ -117,6 +119,10 @@ interface SManga : Serializable {
 
         if (other.other_urls != null) {
             other_urls = other.other_urls
+        }
+
+        if (other.last_volume_number != null) {
+            last_volume_number = other.last_volume_number
         }
 
         if (other.last_chapter_number != null) {

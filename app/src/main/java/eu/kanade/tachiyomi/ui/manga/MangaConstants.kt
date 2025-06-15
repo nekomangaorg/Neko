@@ -69,6 +69,8 @@ object MangaConstants {
         val originalTitle: String = "",
         val stats: Stats? = null,
         val status: Int = 0,
+        val lastVolume: Int? = null,
+        val lastChapter: Int? = null,
     )
 
     data class MangaScreenTrackMergeState(
