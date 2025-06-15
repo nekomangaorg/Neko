@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
+import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
@@ -80,4 +82,9 @@ interface MangaDexAuthorizedUserService {
 
     @DELETE("${MdConstants.Api.rating}/{id}")
     suspend fun removeRating(@Path("id") mangaId: String): ApiResponse<ResultDto>
+
+    @POST(MdConstants.Api.createThread)
+    suspend fun createForumThread(
+        @Body forumThreadDto: ForumThreadDto
+    ): ApiResponse<ForumThreadResponseDto>
 }

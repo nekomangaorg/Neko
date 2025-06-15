@@ -1,15 +1,18 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.orElse
 import com.github.michaelbull.result.zip
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
@@ -19,6 +22,7 @@ import eu.kanade.tachiyomi.source.model.uuid
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -41,6 +45,9 @@ import uy.kohesive.injekt.injectLazy
 class MangaHandler {
     private val artworkHandler: ArtworkHandler by injectLazy()
     val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
+    val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
     private val preferencesHelper: PreferencesHelper by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
@@ -230,7 +237,18 @@ class MangaHandler {
         return service
             .chapterStatistics(chapterUUID)
             .getOrResultError("Trying to get chapter comments")
-            .andThen { Ok(it.statistics[chapterUUID]?.comments?.threadId?.toString()) }
+            .andThen {
+                Ok(
+                    it.statistics[chapterUUID]?.comments?.threadId?.toString()
+                        ?: return@andThen Err("No thread exists")
+                )
+            }
+            .orElse {
+                authService
+                    .createForumThread(ForumThreadDto(chapterUUID, "chapter"))
+                    .getOrResultError("Trying to create forum thread")
+                    .andThen { Ok(it.data.id.toString()) }
+            }
     }
 
     private suspend fun fetchOffset(
