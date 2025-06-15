@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANGUAGE_FILTER_F
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_CHAPTER
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_VOLUME
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_IMAGE_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
@@ -97,6 +98,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
             put(COL_THREAD_ID, obj.thread_id)
             put(COL_REPLIES_COUNT, obj.replies_count)
             put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
+            put(COL_MANGA_LAST_VOLUME, obj.last_volume_number)
             put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
             put(COL_MERGE_MANGA_IMAGE_URL, obj.merge_manga_image_url)
             put(COL_ALT_TITLE, obj.alt_titles)
@@ -138,6 +140,7 @@ interface BaseMangaGetResolver {
             rating = cursor.getString(cursor.getColumnIndex(COL_RATING))
             users = cursor.getString(cursor.getColumnIndex(COL_USERS))
             merge_manga_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
+            last_volume_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_VOLUME))
             last_chapter_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_CHAPTER))
             follow_status =
                 cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let {

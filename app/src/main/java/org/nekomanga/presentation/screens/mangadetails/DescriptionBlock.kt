@@ -74,6 +74,7 @@ fun DescriptionBlock(
     isInitializedProvider: () -> Boolean,
     altTitlesProvider: () -> ImmutableList<String>,
     genresProvider: () -> ImmutableList<String>,
+    lastChapterProvider: () -> Pair<Int?, Int?>,
     themeColorState: ThemeColorState,
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
@@ -184,6 +185,8 @@ fun DescriptionBlock(
             }
 
             if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
+                Gap(Size.tiny)
+                LastChapter(lastChapterProvider(), tagColor)
                 Gap(Size.tiny)
                 AltTitles(
                     altTitles = altTitlesProvider(),
@@ -483,6 +486,57 @@ private fun ColumnScope.Genres(
                         },
                     )
                     .toPersistentList(),
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.LastChapter(lastChapter: Pair<Int?, Int?>, tagColor: Color) {
+    val (volume, chapter) = lastChapter
+    val last =
+        if (chapter != null) {
+            "Chapter"
+        } else if (volume != null) {
+            "Volume"
+        } else {
+            Gap(Size.tiny)
+            return
+        }
+
+    val lastText =
+        listOfNotNull(volume?.let { "Volume $it" }, chapter?.let { "Chapter $it" }).joinToString()
+
+    Row(
+        modifier = Modifier.padding(Size.none),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Final ${last}:",
+            style = MaterialTheme.typography.labelMedium,
+            color =
+                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        )
+        Gap(Size.small)
+        AssistChip(
+            colors =
+                AssistChipDefaults.assistChipColors(
+                    containerColor = tagColor,
+                    labelColor =
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = NekoColors.mediumAlphaHighContrast
+                        ),
+                ),
+            border = null,
+            modifier = Modifier.padding(Size.none),
+            label = {
+                Text(
+                    text = lastText,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(Size.none),
+                )
+            },
+            onClick = {},
         )
     }
 }
