@@ -59,6 +59,7 @@ import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -395,15 +396,16 @@ private fun ChapterInfo(
         }
         val noLocalCopy = isUnavailable && downloadState != Download.State.DOWNLOADED
         val localCopy = isUnavailable && downloadState == Download.State.DOWNLOADED
+        val unsupported = MdConstants.UnsupportedOfficialGroupList.contains(scanlator)
 
         when {
-            noLocalCopy -> {
+            noLocalCopy || unsupported -> {
                 Icon(
                     imageVector = Icons.Outlined.Lock,
                     contentDescription = null,
                     modifier =
                         Modifier.align(Alignment.CenterVertically)
-                            .padding(Size.medium)
+                            .padding(Size.smedium)
                             .size(Size.large),
                     tint = themeColorState.buttonColor,
                 )
@@ -414,7 +416,7 @@ private fun ChapterInfo(
                     contentDescription = null,
                     modifier =
                         Modifier.align(Alignment.CenterVertically)
-                            .padding(Size.medium)
+                            .padding(Size.smedium)
                             .size(Size.large),
                     tint = themeColorState.buttonColor,
                 )
