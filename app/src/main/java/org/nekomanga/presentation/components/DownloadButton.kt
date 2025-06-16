@@ -294,6 +294,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             progress = { animatedProgress },
             modifier = Modifier.size(size.dp),
             color = progressColor,
+            trackColor = progressColor.copy(alpha = .4f),
             strokeWidth = borderSize.dp,
         )
         DownloadIcon(color = iconColor, icon = iconPainter, alpha = alpha.value)
