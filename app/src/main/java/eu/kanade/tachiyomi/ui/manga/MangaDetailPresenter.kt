@@ -805,7 +805,7 @@ class MangaDetailPresenter(
 
             if (allDownloads.size > 0) {
                 TimberKt.d { "ESCO Still has chapters ${allDownloads.size}" }
-               //TODO need to create a new DB manga insert it resort chapter list, then call this method updateChapterFlows and return out
+               //TODO need to create a new DB manga insert it restore chapter list, then call this method updateChapterFlows and return out
             }
 
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
