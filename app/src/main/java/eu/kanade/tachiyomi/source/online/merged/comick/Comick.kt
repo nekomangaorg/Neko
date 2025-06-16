@@ -115,8 +115,9 @@ class Comick : ReducedHttpSource() {
                         url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap ?: ""}-en"
                         date_upload = chapter.createdAt?.parseDate() ?: 0L
                         chapter_number = chapter.chap?.toFloatOrNull() ?: -1f
-                        scanlator = Comick.name
-                        uploader = chapter.groupName?.joinToString(Constants.SCANLATOR_SEPARATOR)
+
+                        val scanlatorList = listOf(Comick.name) + (chapter.groupName ?: emptyList())
+                        scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
                     } to false
                 }
             )
