@@ -70,6 +70,8 @@ class ApiMangaParser {
             manga.lang_flag = mangaAttributesDto.originalLanguage
             val lastChapter = mangaAttributesDto.lastChapter?.toFloatOrNull()
             lastChapter?.let { manga.last_chapter_number = floor(it).toInt() }
+            val lastVolume = mangaAttributesDto.lastVolume?.toIntOrNull()
+            manga.last_volume_number = lastVolume
 
             val otherUrls = mutableListOf<String>()
             mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
