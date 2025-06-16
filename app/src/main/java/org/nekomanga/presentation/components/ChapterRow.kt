@@ -118,7 +118,7 @@ fun ChapterRow(
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                         themeColor.buttonColor,
-                        8.dp,
+                        Size.small,
                     ),
                 onSwipe = onRead,
             )
@@ -135,7 +135,7 @@ fun ChapterRow(
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                         themeColor.buttonColor,
-                        8.dp,
+                        Size.small,
                     ),
                 onSwipe = onBookmark,
             )
@@ -143,6 +143,11 @@ fun ChapterRow(
         ChapterSwipe(
             startSwipeActions = listOf(markBookmarkAction),
             endSwipeActions = listOf(markReadSwipeAction),
+            backgroundInitialSwipeColor =
+                MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                    themeColor.buttonColor,
+                    Size.medium,
+                ),
         ) {
             ChapterInfo(
                 themeColorState = themeColor,
@@ -339,7 +344,7 @@ private fun ChapterInfo(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!language.isNullOrEmpty() && !language.equals("en", true)) {
-                    val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
+                    val iconRes = MdLang.fromIsoCode(language)?.iconResId
 
                     when (iconRes == null) {
                         true -> {
