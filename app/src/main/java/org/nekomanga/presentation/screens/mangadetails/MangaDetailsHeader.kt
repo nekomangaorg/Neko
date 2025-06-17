@@ -134,6 +134,9 @@ fun MangaDetailsHeader(
                         statsProvider = { mangaState.value.stats },
                         langFlagProvider = { mangaState.value.langFlag },
                         statusProvider = { mangaState.value.status },
+                        lastChapterProvider = {
+                            mangaState.value.lastVolume to mangaState.value.lastChapter
+                        },
                         isPornographicProvider = { mangaState.value.isPornographic },
                         missingChaptersProvider = { mangaState.value.missingChapters },
                         estimatedMissingChapterProvider = {
@@ -216,9 +219,6 @@ fun MangaDetailsHeader(
                     isInitializedProvider = { mangaState.value.initialized },
                     altTitlesProvider = { mangaState.value.alternativeTitles },
                     genresProvider = { mangaState.value.genres },
-                    lastChapterProvider = {
-                        mangaState.value.lastVolume to mangaState.value.lastChapter
-                    },
                     themeColorState = themeColorState,
                     isExpanded = isExpanded.value,
                     wrapAltTitles = generalState.value.wrapAltTitles,
