@@ -530,7 +530,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                                 // only download scanlators not filtered out
                                 chaptersToDl =
-                                    chaptersToDl.filter { it.scanlator !in scanlatorsToIgnore }.filter{!it.isUnavailable}
+                                    chaptersToDl
+                                        .filter { it.scanlator !in scanlatorsToIgnore }
                             }
 
                             downloadChapters(manga, chaptersToDl)
