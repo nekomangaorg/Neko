@@ -79,7 +79,7 @@ fun SChapter.isLegacyMergedChapter() = this.scanlator?.equals(MangaLife.oldName)
 fun SChapter.isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
 fun SChapter.isMergedChapterOfType(mergeType: MergeType) =
-    MergeType.getMergeTypeName(mergeType) == this.scanlator
+    this.scanlator?.contains(MergeType.getMergeTypeName(mergeType)) == true
 
 fun SChapter.getHttpSource(sourceManager: SourceManager): HttpSource {
     val mergeType = MergeType.getMergeTypeFromName(this.scanlator)
