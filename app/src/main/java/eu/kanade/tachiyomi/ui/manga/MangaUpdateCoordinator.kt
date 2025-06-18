@@ -190,7 +190,6 @@ class MangaUpdateCoordinator {
                         downloadChapters(
                             manga,
                             newChapters.first
-                                .filterNot { it.isUnavailable }
                                 .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
                                 .sortedBy { it.chapter.chapterNumber },
                         )

@@ -314,7 +314,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         if (includeUnavailable) {
             unavailable = inflate(R.layout.filter_tag_group) as FilterTagGroup
-            unavailable?.setup(this, R.string.unavailable, R.string.available)
+            unavailable?.setup(this, R.string.has_unavailable, R.string.has_available)
         }
 
         reSortViews()
@@ -588,7 +588,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         SeriesType('m', R.string.series_type),
         Bookmarked('b', R.string.bookmarked),
         MissingChapters('o', R.string.missing_chapters),
-        Unavailable('w', R.string.unavailable),
+        Unavailable('w', R.string.has_unavailable),
         Merged('n', R.string.merged),
         Tracked('t', R.string.tracked);
 

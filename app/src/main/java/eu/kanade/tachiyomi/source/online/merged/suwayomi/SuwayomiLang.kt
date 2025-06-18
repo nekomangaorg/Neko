@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.merged.suwayomi
 
 enum class SuwayomiLang(val suwayomi: String, val mangadex: String) {
+    ALL("all",""),
     CHINESE_SIMPLIFIED("zh-Hans", "zh"),
     CHINESE_TRADITIONAL("zh-Hant", "zh-hk"),
     FILIPINO("fil", "tl"),
