@@ -49,6 +49,7 @@ class FeedRepository(
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters =
             chapterHistories
+                .filterNot { it.chapter.isUnavailable }
                 .mapNotNull { chpHistory ->
                     chpHistory.chapter
                         .toSimpleChapter(chpHistory.history.last_read)!!
@@ -71,6 +72,7 @@ class FeedRepository(
                     .get()!!
                     .second
                     .filter { it.chapters.none { it.chapter.read || it.chapter.lastPageRead != 0 } }
+                    .filter { it.chapters.any { !it.chapter.isUnavailable } }
                     .groupBy { it.mangaId }
                     .entries
                     .map { it.value.last() }
@@ -136,27 +138,25 @@ class FeedRepository(
                                 entry.value
                                     .map { it.chapters }
                                     .flatten()
-                                    .firstOrNull()
+                                    .firstOrNull { !it.chapter.isUnavailable }
                                     ?.chapter
                                     ?.name ?: ""
                             val manga = db.getManga(entry.key).executeOnIO()!!
-                            val chapters = db.getChapters(manga).executeOnIO()
-                            val chapter = ChapterSort(manga).getNextUnreadChapter(chapters)
-                            if (chapter == null) {
-                                return@mapNotNull null
-                            } else {
-                                FeedManga(
-                                    mangaId = manga.id!!,
-                                    mangaTitle = manga.title,
-                                    date = 0L,
-                                    artwork = manga.toDisplayManga().currentArtwork,
-                                    lastReadChapter = lastReadChapter,
-                                    chapters =
-                                        persistentListOf(
-                                            chapter.toSimpleChapter()!!.toChapterItem()
-                                        ),
-                                )
-                            }
+                            val chapters =
+                                db.getChapters(manga).executeOnIO().filterNot { it.isUnavailable }
+                            val chapter =
+                                ChapterSort(manga).getNextUnreadChapter(chapters)
+                                    ?: return@mapNotNull null
+
+                            FeedManga(
+                                mangaId = manga.id!!,
+                                mangaTitle = manga.title,
+                                date = 0L,
+                                artwork = manga.toDisplayManga().currentArtwork,
+                                lastReadChapter = lastReadChapter,
+                                chapters =
+                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                            )
                         }
                     }
                     .take(6)
@@ -190,9 +190,10 @@ class FeedRepository(
                         }
 
                         val simpleChapter =
-                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
-
-                        simpleChapter ?: return@mapNotNull null
+                            chapters
+                                .filterNot { it.isUnavailable }
+                                .maxByOrNull { it.source_order }
+                                ?.toSimpleChapter() ?: return@mapNotNull null
 
                         val displayManga = manga.toDisplayManga()
                         FeedManga(
@@ -226,9 +227,10 @@ class FeedRepository(
                             return@mapNotNull null
                         }
                         val simpleChapter =
-                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
-
-                        simpleChapter ?: return@mapNotNull null
+                            chapters
+                                .filterNot { it.isUnavailable }
+                                .maxByOrNull { it.source_order }
+                                ?.toSimpleChapter() ?: return@mapNotNull null
 
                         val displayManga = manga.toDisplayManga()
                         FeedManga(
@@ -272,6 +274,7 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
+                                .filterNot { it.chapter.isUnavailable }
                                 .mapNotNull { history ->
                                     history.manga.id ?: return@mapNotNull null
                                     history.chapter.id ?: return@mapNotNull null
@@ -322,6 +325,7 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
+                                .filterNot { it.chapter.isUnavailable }
                                 .groupBy {
                                     val date = it.history.last_read
                                     it.manga to
@@ -356,6 +360,7 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
+                                .filterNot { it.chapter.isUnavailable }
                                 .mapNotNull {
                                     it.manga.id ?: return@mapNotNull null
                                     it.chapter.id ?: return@mapNotNull null
@@ -406,6 +411,7 @@ class FeedRepository(
                             sortByFetched = uploadsFetchSort,
                         )
                         .executeAsBlocking()
+                        .filterNot { it.chapter.isUnavailable }
                         .mapNotNull {
                             val chapterItem =
                                 getChapterItem(it.manga, it.chapter.toSimpleChapter()!!)
