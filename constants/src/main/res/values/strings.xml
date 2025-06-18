@@ -362,6 +362,7 @@
     <string name="clear_history">Clear history</string>
     <string name="clear_download_queue">Clear download queue</string>
     <string name="clear_download_queue_confirmation">Are you sure?</string>
+    <string name="clear_download_queue_completed">Download queue cleared</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation_1">Clear all history?</string>
     <string name="clear_history_confirmation_2">All history will be lost, and is not recoverable.</string>

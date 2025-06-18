@@ -261,6 +261,19 @@ class SettingsAdvancedController : SettingsController() {
                         ctrl.showDialog(router)
                     }
                 }
+
+                preference {
+                    key = "clear_download_queue"
+                    titleRes = R.string.clear_download_queue
+
+                    onClick {
+                        launchIO {
+                            downloadManager.clearQueue()
+                            launchUI { activity?.toast(R.string.clear_download_queue_completed) }
+                        }
+                    }
+                }
+
                 preference {
                     key = "pref_clear_webview_data"
                     titleRes = R.string.pref_clear_webview_data
