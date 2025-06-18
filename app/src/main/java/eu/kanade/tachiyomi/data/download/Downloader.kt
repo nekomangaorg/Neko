@@ -108,6 +108,7 @@ class Downloader(
             return false
         }
 
+        queueState.value.apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
         val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
         pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
 
