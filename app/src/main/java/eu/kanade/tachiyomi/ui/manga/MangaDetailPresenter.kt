@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.MergedServerSource
@@ -42,6 +43,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
+import eu.kanade.tachiyomi.util.chapter.ChapterRecognition
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
@@ -805,7 +807,19 @@ class MangaDetailPresenter(
 
             if (allDownloads.size > 0) {
                 TimberKt.d { "ESCO Still has chapters ${allDownloads.size}" }
-               //TODO need to create a new DB manga insert it restore chapter list, then call this method updateChapterFlows and return out
+                val chapters =
+                    allDownloads.map { download ->
+                        TimberKt.d { "ESCO download $download" }
+                        SChapter.create()
+                            .apply {
+                                url = "local/$download"
+                                name = download
+                                // date_upload = chapterFile.lastModified()
+                                ChapterRecognition.parseChapterNumber(this, currentManga())
+                            }
+                            .toChapter()
+                    }
+                db.insertChapters(chapters).executeOnIO()
             }
 
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
