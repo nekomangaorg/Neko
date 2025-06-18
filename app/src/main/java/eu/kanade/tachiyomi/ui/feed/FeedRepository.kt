@@ -49,7 +49,6 @@ class FeedRepository(
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters =
             chapterHistories
-                .filterNot { it.chapter.isUnavailable }
                 .mapNotNull { chpHistory ->
                     chpHistory.chapter
                         .toSimpleChapter(chpHistory.history.last_read)!!
@@ -72,7 +71,6 @@ class FeedRepository(
                     .get()!!
                     .second
                     .filter { it.chapters.none { it.chapter.read || it.chapter.lastPageRead != 0 } }
-                    .filter { it.chapters.any { !it.chapter.isUnavailable } }
                     .groupBy { it.mangaId }
                     .entries
                     .map { it.value.last() }
@@ -138,7 +136,7 @@ class FeedRepository(
                                 entry.value
                                     .map { it.chapters }
                                     .flatten()
-                                    .firstOrNull { !it.chapter.isUnavailable }
+                                    .firstOrNull()
                                     ?.chapter
                                     ?.name ?: ""
                             val manga = db.getManga(entry.key).executeOnIO()!!
@@ -274,7 +272,6 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
-                                .filterNot { it.chapter.isUnavailable }
                                 .mapNotNull { history ->
                                     history.manga.id ?: return@mapNotNull null
                                     history.chapter.id ?: return@mapNotNull null
@@ -325,7 +322,6 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
-                                .filterNot { it.chapter.isUnavailable }
                                 .groupBy {
                                     val date = it.history.last_read
                                     it.manga to
@@ -360,7 +356,6 @@ class FeedRepository(
                                     isResuming = false,
                                 )
                                 .executeOnIO()
-                                .filterNot { it.chapter.isUnavailable }
                                 .mapNotNull {
                                     it.manga.id ?: return@mapNotNull null
                                     it.chapter.id ?: return@mapNotNull null
@@ -411,7 +406,6 @@ class FeedRepository(
                             sortByFetched = uploadsFetchSort,
                         )
                         .executeAsBlocking()
-                        .filterNot { it.chapter.isUnavailable }
                         .mapNotNull {
                             val chapterItem =
                                 getChapterItem(it.manga, it.chapter.toSimpleChapter()!!)
