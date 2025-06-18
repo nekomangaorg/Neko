@@ -179,7 +179,7 @@ class WeebCentral : ReducedHttpSource() {
 
                             // get chapter
 
-                            this.chapter_txt =
+                            val text =
                                 when {
                                     chapterPrefixes.none { prefix ->
                                         chapterText.startsWith(prefix)
@@ -187,10 +187,11 @@ class WeebCentral : ReducedHttpSource() {
                                     else -> chapterText
                                 }
 
-                            chapterName.add(this.chapter_txt)
+                            chapterName.add(text)
                         }
 
                         this.name = chapterName.joinToString(" ")
+                        this.chapter_txt = this.name
 
                         date_upload =
                             element.selectFirst("time[datetime]")?.attr("datetime").parseDate()
