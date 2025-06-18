@@ -170,8 +170,12 @@ class Downloader(
                                 val activeDownloads =
                                     queue
                                         .asSequence()
+                                        .apply {
+                                            removeFromQueueIf { it.chapterItem.isUnavailable }
+                                        }
                                         .filter {
-                                            it.status.value <= Download.State.DOWNLOADING.value
+                                            it.status.value <= Download.State.DOWNLOADING.value &&
+                                                !it.chapterItem.isUnavailable
                                         } // Ignore completed downloads, leave them in the queue
                                         .groupBy { it.source }
                                         .toList()
