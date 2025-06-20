@@ -31,7 +31,7 @@ data class ChapterAttributesDto(
     val readableAt: String,
     val pages: Int,
     val externalUrl: String? = null,
-    val isUnavailable: Boolean,
+    val isUnavailable: Boolean? = null,
 )
 
 @Serializable
