@@ -5,11 +5,14 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
+import org.nekomanga.constants.Constants
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -31,8 +34,48 @@ fun syncChaptersWithSource(
     val downloadManager: DownloadManager = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
+
+    // Check for local chapter to add
+    val allDownloads = downloadManager.getAllDownloads(manga).toHashSet()
+    dbChapters.forEach { dbChapter ->
+        if (downloadManager.isChapterDownloaded(dbChapter, manga)) {
+            val file =
+                allDownloads.firstOrNull {
+                    it.name == downloadManager.downloadedChapterName(dbChapter, manga)
+                }
+            allDownloads.remove(file)
+        }
+    }
+
+    val finalRawSourceChapters =
+        if (allDownloads.isNotEmpty()) {
+            val localSourceChapters =
+                allDownloads.map { file ->
+                    val chapterName = file.nameWithoutExtension!!.substringAfter("_")
+                    val dateUploaded = file.lastModified()
+                    val fileNameSuffix = file.name?.substringAfter("_")
+                    file.renameTo("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                    SChapter.create().apply {
+                        url = "${Constants.LOCAL_SOURCE}/$file"
+                        name = chapterName
+                        chapter_txt = chapterName
+                        scanlator = Constants.LOCAL_SOURCE
+                        date_upload = dateUploaded
+                        isUnavailable = true
+                    }
+                }
+            downloadManager.refreshCache()
+            rawSourceChapters + localSourceChapters
+        } else {
+            val localSourceChapters =
+                dbChapters
+                    .filter { it.isLocalSource() && downloadManager.isChapterDownloaded(it, manga) }
+                    .map { dbChapter -> SChapter.create().apply { copyFrom(dbChapter) } }
+            rawSourceChapters + localSourceChapters
+        }
+
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val sortedChapters = reorderChapters(rawSourceChapters, manga)
+    val sortedChapters = reorderChapters(finalRawSourceChapters, manga)
 
     val sourceChapters =
         sortedChapters.mapIndexed { i, sChapter ->
@@ -55,7 +98,10 @@ fun syncChaptersWithSource(
     for (sourceChapter in sourceChapters) {
         val dbChapter =
             dbChapters.find {
-                if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
+                if (
+                    sourceChapter.isMergedChapter() && it.isMergedChapter() ||
+                        (sourceChapter.isLocalSource() && it.isLocalSource())
+                ) {
                     it.url == sourceChapter.url
                 } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
                     (it.mangadex_chapter_id.isNotBlank() &&
@@ -105,6 +151,8 @@ fun syncChaptersWithSource(
             // ignore to delete when there is a site error
             if (dbChapter.isMergedChapter() && errorFromMerged) {
                 true
+            } else if (dbChapter.isLocalSource()) {
+                downloadManager.isChapterDownloaded(dbChapter, manga, true)
             } else {
                 sourceChapters.any { sourceChapter ->
                     dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
