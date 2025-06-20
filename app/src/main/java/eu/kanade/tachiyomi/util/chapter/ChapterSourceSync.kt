@@ -5,10 +5,12 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
+import org.nekomanga.constants.Constants
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
@@ -52,20 +54,24 @@ fun syncChaptersWithSource(
                     val chapterName = file.nameWithoutExtension!!.substringAfter("_")
                     val dateUploaded = file.lastModified()
                     val fileNameSuffix = file.name?.substringAfter("_")
-                    file.renameTo("local_${fileNameSuffix}")
+                    file.renameTo("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
                     SChapter.create().apply {
-                        url = "local/$file"
+                        url = "${Constants.LOCAL_SOURCE}/$file"
                         name = chapterName
-                        scanlator = "local"
+                        chapter_txt = chapterName
+                        scanlator = Constants.LOCAL_SOURCE
                         date_upload = dateUploaded
-                        ChapterRecognition.parseChapterNumber(this, manga)
-                        isLocal = true
+                        isUnavailable = true
                     }
                 }
             downloadManager.refreshCache()
             rawSourceChapters + localSourceChapters
         } else {
-            rawSourceChapters
+            val localSourceChapters =
+                dbChapters
+                    .filter { it.isLocalSource() && downloadManager.isChapterDownloaded(it, manga) }
+                    .map { dbChapter -> SChapter.create().apply { copyFrom(dbChapter) } }
+            rawSourceChapters + localSourceChapters
         }
 
     // no need to handle cache in dedupe because rawsource already has the correct chapters
@@ -92,7 +98,10 @@ fun syncChaptersWithSource(
     for (sourceChapter in sourceChapters) {
         val dbChapter =
             dbChapters.find {
-                if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
+                if (
+                    sourceChapter.isMergedChapter() && it.isMergedChapter() ||
+                        (sourceChapter.isLocalSource() && it.isLocalSource())
+                ) {
                     it.url == sourceChapter.url
                 } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
                     (it.mangadex_chapter_id.isNotBlank() &&
@@ -142,19 +151,14 @@ fun syncChaptersWithSource(
             // ignore to delete when there is a site error
             if (dbChapter.isMergedChapter() && errorFromMerged) {
                 true
+            } else if (dbChapter.isLocalSource()) {
+                downloadManager.isChapterDownloaded(dbChapter, manga, true)
             } else {
                 sourceChapters.any { sourceChapter ->
                     dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
                 }
             }
         }
-
-    // remove local files that were removed
-    toDelete =
-        toDelete +
-            dbChapters
-                .filter { it.isUnavailable && it.scanlator == "local" }
-                .filter { !downloadManager.isChapterDownloaded(it, manga, skipCache = true) }
 
     val dupes =
         dbChapters
