@@ -59,6 +59,7 @@ fun InformationBlock(
     statsProvider: () -> Stats?,
     langFlagProvider: () -> String?,
     statusProvider: () -> Int,
+    lastChapterProvider: () -> Pair<Int?, Int?>,
     isPornographicProvider: () -> Boolean,
     missingChaptersProvider: () -> String?,
     estimatedMissingChapterProvider: () -> String?,
@@ -139,22 +140,43 @@ fun InformationBlock(
                         .toPersistentList(),
             )
         }
+        val (volume, chapter) = lastChapterProvider()
+        val status = statusProvider()
 
-        if (statusProvider() != 0) {
+        if (status != 0 || volume != null || chapter != null) {
             Gap(Size.tiny)
-            val statusRes =
-                when (statusProvider()) {
-                    SManga.ONGOING -> R.string.ongoing
-                    SManga.COMPLETED -> R.string.completed
-                    SManga.LICENSED -> R.string.licensed
-                    SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-                    SManga.HIATUS -> R.string.hiatus
-                    SManga.CANCELLED -> R.string.cancelled
-                    else -> R.string.unknown
-                }
+
+            val statusLine = mutableListOf<String>()
+
+            if (status != 0) {
+                val statusRes =
+                    when (status) {
+                        SManga.ONGOING -> R.string.ongoing
+                        SManga.COMPLETED -> R.string.completed
+                        SManga.LICENSED -> R.string.licensed
+                        SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                        SManga.HIATUS -> R.string.hiatus
+                        SManga.CANCELLED -> R.string.cancelled
+                        else -> R.string.unknown
+                    }
+                statusLine.add(stringResource(id = statusRes))
+            }
+            if (volume != null || chapter != null) {
+                val last =
+                    if (chapter != null) {
+                        "Chapter"
+                    } else {
+                        "Volume"
+                    }
+                val lastText =
+                    "Final ${last}: " +
+                        listOfNotNull(volume?.let { "Vol.$it" }, chapter?.let { "Ch.$it" })
+                            .joinToString()
+                statusLine.add(lastText)
+            }
 
             NoRippleText(
-                text = stringResource(id = statusRes),
+                text = statusLine.joinToString(Constants.SEPARATOR),
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )

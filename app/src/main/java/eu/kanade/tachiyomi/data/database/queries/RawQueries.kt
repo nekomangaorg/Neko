@@ -64,6 +64,7 @@ fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: 
     WHERE ${Manga.COL_FAVORITE} = 1
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
+    AND ${Chapter.COL_UNAVAILABLE} = 0
     ORDER BY $orderBy DESC
     LIMIT $limit
     OFFSET $offset
@@ -95,6 +96,7 @@ fun getRecentHistoryUngrouped(
     FROM ${Manga.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    AND ${Chapter.TABLE}.${Chapter.COL_UNAVAILABLE} = 0
     JOIN ${History.TABLE}
     ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND ${History.TABLE}.${History.COL_LAST_READ} > 0
@@ -115,6 +117,7 @@ fun getAllChapterHistoryByMangaId(mangaId: Long) =
     FROM ${Manga.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    AND ${Chapter.TABLE}.${Chapter.COL_UNAVAILABLE} = 0
     JOIN ${History.TABLE}
     ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND ${History.TABLE}.${History.COL_LAST_READ} > 0
@@ -140,6 +143,7 @@ fun getRecentMangasLimitQuery(
     FROM ${Manga.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    AND ${Chapter.TABLE}.${Chapter.COL_UNAVAILABLE} = 0
     JOIN ${History.TABLE}
     ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     JOIN (

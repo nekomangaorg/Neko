@@ -61,8 +61,8 @@
     <string name="not_bookmarked">Not bookmarked</string>
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
-    <string name="unavailable">Has unavailable</string>
-    <string name="available">Has available</string>
+    <string name="unavailable">Unavailable</string>
+    <string name="available">Available</string>
     <string name="removed_bookmark">Removed bookmark</string>
     <string name="chapters_removed">Chapters removed.</string>
     <string name="chapter_not_found">Chapter not found</string>
@@ -362,6 +362,7 @@
     <string name="clear_history">Clear history</string>
     <string name="clear_download_queue">Clear download queue</string>
     <string name="clear_download_queue_confirmation">Are you sure?</string>
+    <string name="clear_download_queue_completed">Download queue cleared</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation_1">Clear all history?</string>
     <string name="clear_history_confirmation_2">All history will be lost, and is not recoverable.</string>
@@ -1323,6 +1324,8 @@
     <string name="has_missing_chp">Missing chapters</string>
     <string name="not_merged">Not merged</string>
     <string name="merged">Merged</string>
+    <string name="has_unavailable">Has unavailable</string>
+    <string name="has_available">Has available</string>
 
 
     <!-- Library Sort -->

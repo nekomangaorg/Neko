@@ -140,23 +140,21 @@ class FeedRepository(
                                     ?.chapter
                                     ?.name ?: ""
                             val manga = db.getManga(entry.key).executeOnIO()!!
-                            val chapters = db.getChapters(manga).executeOnIO()
-                            val chapter = ChapterSort(manga).getNextUnreadChapter(chapters)
-                            if (chapter == null) {
-                                return@mapNotNull null
-                            } else {
-                                FeedManga(
-                                    mangaId = manga.id!!,
-                                    mangaTitle = manga.title,
-                                    date = 0L,
-                                    artwork = manga.toDisplayManga().currentArtwork,
-                                    lastReadChapter = lastReadChapter,
-                                    chapters =
-                                        persistentListOf(
-                                            chapter.toSimpleChapter()!!.toChapterItem()
-                                        ),
-                                )
-                            }
+                            val chapters =
+                                db.getChapters(manga).executeOnIO().filterNot { it.isUnavailable }
+                            val chapter =
+                                ChapterSort(manga).getNextUnreadChapter(chapters)
+                                    ?: return@mapNotNull null
+
+                            FeedManga(
+                                mangaId = manga.id!!,
+                                mangaTitle = manga.title,
+                                date = 0L,
+                                artwork = manga.toDisplayManga().currentArtwork,
+                                lastReadChapter = lastReadChapter,
+                                chapters =
+                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                            )
                         }
                     }
                     .take(6)
@@ -190,9 +188,10 @@ class FeedRepository(
                         }
 
                         val simpleChapter =
-                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
-
-                        simpleChapter ?: return@mapNotNull null
+                            chapters
+                                .filterNot { it.isUnavailable }
+                                .maxByOrNull { it.source_order }
+                                ?.toSimpleChapter() ?: return@mapNotNull null
 
                         val displayManga = manga.toDisplayManga()
                         FeedManga(
@@ -226,9 +225,10 @@ class FeedRepository(
                             return@mapNotNull null
                         }
                         val simpleChapter =
-                            chapters.sortedBy { it.source_order }.lastOrNull()?.toSimpleChapter()
-
-                        simpleChapter ?: return@mapNotNull null
+                            chapters
+                                .filterNot { it.isUnavailable }
+                                .maxByOrNull { it.source_order }
+                                ?.toSimpleChapter() ?: return@mapNotNull null
 
                         val displayManga = manga.toDisplayManga()
                         FeedManga(

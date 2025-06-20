@@ -1483,6 +1483,8 @@ class MangaDetailPresenter(
                     repliesCount = m.replies_count,
                 ),
             status = m.status,
+            lastVolume = m.last_volume_number,
+            lastChapter = m.last_chapter_number,
         )
     }
 

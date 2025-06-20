@@ -9,7 +9,14 @@ import kotlinx.serialization.Serializable
 @Serializable data class SuwayomiNodesDto(val nodes: List<SuwayomiSeriesDto>)
 
 @Serializable
-data class SuwayomiSeriesDto(val id: Long, val title: String, val thumbnailUrl: String)
+data class SuwayomiSeriesDto(
+    val id: Long,
+    val title: String,
+    val thumbnailUrl: String,
+    val source: SuwayomiSourceDto,
+)
+
+@Serializable data class SuwayomiSourceDto(val name: String, val lang: String)
 
 @Serializable data class SuwayomiFetchChaptersDto(val fetchChapters: SuwayomiChaptersDto)
 
@@ -23,6 +30,7 @@ data class SuwayomiChapterDto(
     val uploadDate: Long,
     val sourceOrder: Long,
     val isRead: Boolean,
+    val scanlator: String?,
 )
 
 @Serializable data class SuwayomiFetchChapterPagesDto(val fetchChapterPages: SuwayomiPagesDto)

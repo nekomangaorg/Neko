@@ -128,6 +128,7 @@ class DownloadManager(val context: Context) {
 
     fun startDownloadNow(chapter: Chapter) {
         chapter.id ?: return
+        if (chapter.isUnavailable) return
         val existingDownload = getQueuedDownloadOrNull(chapter.id!!)
         // If not in queue try to start a new download
         val toAdd =
@@ -157,7 +158,7 @@ class DownloadManager(val context: Context) {
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun downloadChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean = true) {
-        downloader.queueChapters(manga, chapters, autoStart)
+        downloader.queueChapters(manga, chapters.filterNot { it.isUnavailable }, autoStart)
     }
 
     /**

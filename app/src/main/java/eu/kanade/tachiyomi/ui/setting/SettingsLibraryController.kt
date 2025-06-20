@@ -223,7 +223,7 @@ class SettingsLibraryController : SettingsController() {
                     key = libraryPreferences.includeUnavailable().key()
                     titleRes = R.string.include_unavailable
                     summaryRes = R.string.include_unavailable_summary
-                    defaultValue = false
+                    defaultValue = true
                 }
 
                 intListPreference(activity) {

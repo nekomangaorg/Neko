@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import org.nekomanga.constants.Constants
 
 data class MergeMangaImpl(
     val id: Long? = null,
@@ -39,11 +40,12 @@ enum class MergeType(val id: Int, val scanlatorName: String) {
 
     companion object {
         fun getById(id: Int): MergeType {
-            return values().firstOrNull { it.id == id } ?: MangaLife
+            return entries.firstOrNull { it.id == id } ?: MangaLife
         }
 
         fun getMergeTypeFromName(name: String?): MergeType? {
-            return when (name) {
+            val splitName = name?.split(Constants.SCANLATOR_SEPARATOR)?.firstOrNull()
+            return when (splitName) {
                 MangaLife.scanlatorName -> MangaLife
                 Komga.scanlatorName -> Komga
                 Toonily.scanlatorName -> Toonily
