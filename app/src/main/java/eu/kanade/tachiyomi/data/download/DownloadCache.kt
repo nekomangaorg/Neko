@@ -156,17 +156,6 @@ class DownloadCache(
             .toList()
     }
 
-    fun getAllDownloads(manga: Manga, forceCheckFolder: Boolean = false): List<String> {
-        checkRenew()
-
-        if (forceCheckFolder) {
-            return getAllDownloadFiles(manga).mapNotNull { it.name }.toList()
-        } else {
-            mangaFiles[manga.id] ?: return emptyList()
-            return mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
-        }
-    }
-
     /** Checks if the cache needs a renewal and performs it if needed. */
     @Synchronized
     private fun checkRenew() {
