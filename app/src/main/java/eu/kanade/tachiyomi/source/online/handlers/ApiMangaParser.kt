@@ -149,7 +149,7 @@ class ApiMangaParser {
                 Ok(
                     chapterListResponse
                         .asSequence()
-                        .map { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
+                        .mapNotNull { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
                         .toList()
                 )
             }
@@ -165,7 +165,7 @@ class ApiMangaParser {
         lastChapterNumber: Int?,
         groups: Map<String, String>,
         uploaders: Map<String, String>,
-    ): SChapter {
+    ): SChapter? {
         val chapter = SChapter.create()
         val attributes = networkChapter.attributes
         chapter.url = MdConstants.chapterSuffix + networkChapter.id
@@ -199,7 +199,7 @@ class ApiMangaParser {
 
         chapter.language = attributes.translatedLanguage
 
-        chapter.isUnavailable = attributes.isUnavailable
+        chapter.isUnavailable = attributes.isUnavailable ?: return null
 
         return chapter
     }
