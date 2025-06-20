@@ -196,26 +196,19 @@ class Suwayomi : MergedServerSource() {
                         }
                     val r =
                         chapters.map { chapter ->
-                            Pair(
-                                SChapter.create().apply {
-                                    chapter_number = chapter.chapterNumber
-                                    name = chapter.name
-                                    url =
-                                        "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
-                                            " " +
-                                            "${chapter.id}"
-                                    scanlator = this@Suwayomi.name
-                                    uploader =
-                                        listOfNotNull(
-                                                sourceName,
-                                                chapter.scanlator?.takeIf { it != "Unknown" },
-                                            )
-                                            .joinToString(Constants.SEPARATOR)
-                                    language = lang
-                                    date_upload = chapter.uploadDate
-                                },
-                                chapter.isRead,
-                            )
+                            SChapter.create().apply {
+                                chapter_number = chapter.chapterNumber
+                                name = chapter.name
+                                url =
+                                    "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
+                                        " " +
+                                        "${chapter.id}"
+                                scanlator =
+                                    listOfNotNull(this@Suwayomi.name, sourceName, chapter.scanlator)
+                                        .joinToString(Constants.SCANLATOR_SEPARATOR)
+                                language = lang
+                                date_upload = chapter.uploadDate
+                            } to chapter.isRead
                         }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
