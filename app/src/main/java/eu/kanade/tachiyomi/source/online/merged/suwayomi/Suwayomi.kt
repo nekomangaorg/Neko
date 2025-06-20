@@ -91,7 +91,8 @@ class Suwayomi : MergedServerSource() {
         get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
 
     override fun getMangaUrl(url: String): String {
-        return hostUrl() + "/manga/" + url.split(" ", limit = 2)[0]
+        val separator = if (url.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
+        return hostUrl() + "/manga/" + url.split(separator, limit = 2)[0]
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
@@ -132,7 +133,9 @@ class Suwayomi : MergedServerSource() {
                 data.mangas.nodes.map { manga ->
                     SManga.create().apply {
                         this.title = manga.title
-                        this.url = "${manga.id} ${manga.source.name} ${manga.source.lang}"
+                        this.url =
+                            listOf(manga.id, manga.source.name, manga.source.lang)
+                                .joinToString(Constants.SEPARATOR)
                         this.thumbnail_url = hostUrl() + manga.thumbnailUrl
                     }
                 }
@@ -159,7 +162,8 @@ class Suwayomi : MergedServerSource() {
     override suspend fun fetchChapters(
         mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError> {
-        val parts = mangaUrl.split(" ", limit = 3)
+        val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
+        val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
         val sourceName = parts.getOrNull(1)
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
