@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -31,8 +32,44 @@ fun syncChaptersWithSource(
     val downloadManager: DownloadManager = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
+
+    // Check for local chapter to add
+    val allDownloads = downloadManager.getAllDownloads(manga).toHashSet()
+    dbChapters.forEach { dbChapter ->
+        if (downloadManager.isChapterDownloaded(dbChapter, manga)) {
+            val file =
+                allDownloads.firstOrNull {
+                    it.name == downloadManager.downloadedChapterName(dbChapter, manga)
+                }
+            allDownloads.remove(file)
+        }
+    }
+
+    val finalRawSourceChapters =
+        if (allDownloads.isNotEmpty()) {
+            val localSourceChapters =
+                allDownloads.map { file ->
+                    val chapterName = file.nameWithoutExtension!!.substringAfter("_")
+                    val dateUploaded = file.lastModified()
+                    val fileNameSuffix = file.name?.substringAfter("_")
+                    file.renameTo("local_${fileNameSuffix}")
+                    SChapter.create().apply {
+                        url = "local/$file"
+                        name = chapterName
+                        scanlator = "local"
+                        date_upload = dateUploaded
+                        ChapterRecognition.parseChapterNumber(this, manga)
+                        isLocal = true
+                    }
+                }
+            downloadManager.refreshCache()
+            rawSourceChapters + localSourceChapters
+        } else {
+            rawSourceChapters
+        }
+
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val sortedChapters = reorderChapters(rawSourceChapters, manga)
+    val sortedChapters = reorderChapters(finalRawSourceChapters, manga)
 
     val sourceChapters =
         sortedChapters.mapIndexed { i, sChapter ->
@@ -111,6 +148,13 @@ fun syncChaptersWithSource(
                 }
             }
         }
+
+    // remove local files that were removed
+    toDelete =
+        toDelete +
+            dbChapters
+                .filter { it.isUnavailable && it.scanlator == "local" }
+                .filter { !downloadManager.isChapterDownloaded(it, manga, skipCache = true) }
 
     val dupes =
         dbChapters

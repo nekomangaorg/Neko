@@ -146,19 +146,21 @@ class DownloadCache(
         }
     }
 
+    fun getAllDownloadFiles(manga: Manga): List<UniFile> {
+        val mangaDir = provider.findMangaDir(manga)
+
+        mangaDir ?: return emptyList()
+        return mangaDir
+            .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            .orEmpty()
+            .toList()
+    }
+
     fun getAllDownloads(manga: Manga, forceCheckFolder: Boolean = false): List<String> {
         checkRenew()
 
         if (forceCheckFolder) {
-            val mangaDir = provider.findMangaDir(manga)
-
-            mangaDir ?: return emptyList()
-
-            return mangaDir
-                .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
-                .orEmpty()
-                .mapNotNull { it.name }
-                .toList()
+            return getAllDownloadFiles(manga).mapNotNull { it.name }.toList()
         } else {
             mangaFiles[manga.id] ?: return emptyList()
             return mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }

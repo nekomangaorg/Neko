@@ -220,8 +220,8 @@ class DownloadManager(val context: Context) {
     }
 
     /** Returns the list of downloaded file names */
-    fun getAllDownloads(manga: Manga): List<String> {
-        return cache.getAllDownloads(manga)
+    fun getAllDownloads(manga: Manga): List<UniFile> {
+        return cache.getAllDownloadFiles(manga)
     }
 
     /**

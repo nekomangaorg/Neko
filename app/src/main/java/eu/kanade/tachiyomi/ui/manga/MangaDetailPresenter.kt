@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.MergedServerSource
@@ -43,7 +42,6 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
-import eu.kanade.tachiyomi.util.chapter.ChapterRecognition
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
@@ -755,7 +753,6 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             // possibly move this into a chapter repository
             val blockedScanlators = preferences.blockedScanlators().get()
-            val allDownloads = downloadManager.getAllDownloads(currentManga()).toMutableSet()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
@@ -771,19 +768,10 @@ class MangaDetailPresenter(
                                 downloadManager.isChapterDownloaded(
                                     chapter.toDbChapter(),
                                     currentManga(),
-                                ) -> {
-                                    allDownloads.remove(
-                                        downloadManager.downloadedChapterName(
-                                            chapter.toDbChapter(),
-                                            currentManga(),
-                                        )
-                                    )
-                                    Download.State.DOWNLOADED
-                                }
+                                ) -> Download.State.DOWNLOADED
                                 else -> {
                                     val download =
                                         downloadManager.getQueuedDownloadOrNull(chapter.id)
-
                                     when (download == null) {
                                         true -> Download.State.NOT_DOWNLOADED
                                         false -> download.status
@@ -804,24 +792,6 @@ class MangaDetailPresenter(
                                 },
                         )
                     }
-
-            if (allDownloads.size > 0) {
-                TimberKt.d { "ESCO Still has chapters ${allDownloads.size}" }
-                val chapters =
-                    allDownloads.map { download ->
-                        TimberKt.d { "ESCO download $download" }
-                        SChapter.create()
-                            .apply {
-                                url = "local/$download"
-                                name = download
-                                // date_upload = chapterFile.lastModified()
-                                ChapterRecognition.parseChapterNumber(this, currentManga())
-                            }
-                            .toChapter()
-                    }
-                db.insertChapters(chapters).executeOnIO()
-            }
-
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
 
             val allChapterScanlators =
