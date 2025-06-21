@@ -59,7 +59,9 @@ class ChapterFilter(
         manga: Manga,
         selectedChapter: T? = null,
     ): List<T> {
-        var filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
+        var filteredChapters = chapters.filterNot { it.isUnavailable }
+        filteredChapters =
+            filterChaptersByScanlatorsAndLanguage(filteredChapters, manga, preferences)
 
         // if filter preferences are not enabled don't even filter
         if (
