@@ -288,9 +288,13 @@ class Suwayomi : MergedServerSource() {
         val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
 
         val chapterIds = chapters.map { it.url.split(" ", limit = 2)[1].toLong() }
-        customClient()
-            .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
-            .await()
+        try {
+            customClient()
+                .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
+                .await()
+        } catch (e: Exception) {
+            TimberKt.w(e) { "error updating chapter status in suwayomi" }
+        }
     }
 
     fun updateChapterFormBuilder(chapterIds: List<Long>, read: Boolean): RequestBody {
