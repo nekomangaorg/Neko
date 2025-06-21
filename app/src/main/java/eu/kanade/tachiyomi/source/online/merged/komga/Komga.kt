@@ -211,7 +211,11 @@ class Komga : MergedServerSource() {
             val chapterUrl = "${hostUrl()}${chapter.url}/read-progress"
             val body =
                 "{\"completed\":${read},\"page\":0}".toRequestBody("application/json".toMediaType())
-            customClient().newCall(PATCH(chapterUrl, headers, body)).await()
+            try {
+                customClient().newCall(PATCH(chapterUrl, headers, body)).await()
+            } catch (e: Exception) {
+                TimberKt.w(e) { "error updating chapter status in komga" }
+            }
         }
     }
 
