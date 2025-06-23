@@ -1541,6 +1541,13 @@ class MangaDetailPresenter(
                             chapterItems.map { it.chapter.toDbChapter() },
                             currentManga(),
                         )
+                        val localDbChapters =
+                            chapterItems
+                                .filter { it.chapter.isLocalSource() }
+                                .map { it.chapter.toDbChapter() }
+                        if (localDbChapters.isNotEmpty()) {
+                            db.deleteChapters(localDbChapters).executeAsBlocking()
+                        }
                     }
                 }
                 if (canUndo) {

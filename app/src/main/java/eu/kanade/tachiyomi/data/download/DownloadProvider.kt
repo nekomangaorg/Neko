@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -262,7 +263,7 @@ class DownloadProvider(
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return when (chapter.isMergedChapter()) {
+        return when (chapter.isMergedChapter() || chapter.isLocalSource()) {
             true -> getJ2kChapterName(chapter)
             false -> DiskUtil.buildValidFilename(chapter.name, " - ${chapter.mangadex_chapter_id}")
         }
