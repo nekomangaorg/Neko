@@ -14,7 +14,7 @@ abstract class MergedServerSource : ReducedHttpSource() {
 
     abstract suspend fun isLoggedIn(): Boolean
 
-    abstract fun hasCredentials(): Boolean
+    abstract fun isConfigured(): Boolean
 
     abstract suspend fun updateStatusChapters(chapters: List<SChapter>, read: Boolean)
 }

@@ -66,6 +66,8 @@
     <string name="not_bookmarked">Not bookmarked</string>
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
+    <string name="unavailable">Unavailable</string>
+    <string name="available">Available</string>
     <string name="removed_bookmark">Removed bookmark</string>
     <string name="chapters_removed">Chapters removed.</string>
     <string name="chapter_not_found">Chapter not found</string>
@@ -301,6 +303,8 @@
 
 
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
+    <string name="include_unavailable">Include unavailable chapters</string>
+    <string name="include_unavailable_summary">Library filters for unavailable chapters only shows after app restart</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
@@ -364,6 +368,7 @@
     <string name="clear_history">Clear history</string>
     <string name="clear_download_queue">Clear download queue</string>
     <string name="clear_download_queue_confirmation">Are you sure?</string>
+    <string name="clear_download_queue_completed">Download queue cleared</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation_1">Clear all history?</string>
     <string name="clear_history_confirmation_2">All history will be lost, and is not recoverable.</string>
@@ -641,6 +646,7 @@
     <string name="show_unread_chapters">Show unread chapters</string>
     <string name="show_read_chapters">Show read chapters</string>
     <string name="hide_chapter_titles">Hide chapter titles</string>
+    <string name="show_unavailable_chapters">Show unavailable chapters</string>
     <string name="sort_by_source_s_order">Sort by source\'s order</string>
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
@@ -1072,6 +1078,7 @@
     <string name="total_manga">Total manga</string>
     <string name="chapters_read">Read chapters</string>
     <string name="chapters_bookmarked">Bookmarked chapters</string>
+    <string name="chapters_unavailable">Unavailable chapters</string>
     <string name="most_entries">Most entries</string>
     <string name="read_chapter_count">Read chapters count</string>
     <string name="average_score">Avg manga score</string>
@@ -1080,6 +1087,7 @@
     <string name="chapters_downloaded">Downloaded chapters</string>
     <string name="komga_merged">Komga merged</string>
     <string name="mangalife_merged">MangaLife merged</string>
+    <string name="comick_merged">Comick merged</string>
     <string name="suwayomi_merged">Suwayomi merged</string>
     <string name="toonily_merged">Toonily merged</string>
     <string name="weebcentral_merged">Weeb Central merged</string>
@@ -1322,6 +1330,8 @@
     <string name="has_missing_chp">Missing chapters</string>
     <string name="not_merged">Not merged</string>
     <string name="merged">Merged</string>
+    <string name="has_unavailable">Has unavailable</string>
+    <string name="has_available">Has available</string>
 
 
     <!-- Library Sort -->

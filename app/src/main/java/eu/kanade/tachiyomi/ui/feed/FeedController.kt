@@ -75,6 +75,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                             context.toast(
                                 "${chapterItem.chapter.scanlator} not supported, try WebView"
                             )
+                        } else if (chapterItem.chapter.isUnavailable) {
+                            context.toast("Chapter is not available")
                         } else {
                             presenter.downloadChapter(chapterItem, feedManga, downloadAction)
                         }

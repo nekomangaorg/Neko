@@ -30,6 +30,8 @@ interface SChapter : Serializable {
 
     var language: String?
 
+    var isUnavailable: Boolean
+
     // chapter id from mangadex
     var mangadex_chapter_id: String
 
@@ -49,6 +51,7 @@ interface SChapter : Serializable {
         chapter_number = other.chapter_number
         scanlator = other.scanlator
         uploader = other.uploader
+        isUnavailable = other.isUnavailable
         mangadex_chapter_id = other.mangadex_chapter_id
         language = other.language
     }
@@ -76,7 +79,7 @@ fun SChapter.isLegacyMergedChapter() = this.scanlator?.equals(MangaLife.oldName)
 fun SChapter.isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
 fun SChapter.isMergedChapterOfType(mergeType: MergeType) =
-    MergeType.getMergeTypeName(mergeType) == this.scanlator
+    this.scanlator?.contains(MergeType.getMergeTypeName(mergeType)) == true
 
 fun SChapter.getHttpSource(sourceManager: SourceManager): HttpSource {
     val mergeType = MergeType.getMergeTypeFromName(this.scanlator)

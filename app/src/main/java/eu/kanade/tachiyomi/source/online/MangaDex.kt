@@ -280,7 +280,11 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchChapterList(manga: SManga): Result<List<SChapter>, ResultError> {
-        return mangaHandler.fetchChapterList(manga.uuid(), manga.last_chapter_number)
+        return mangaHandler.fetchChapterList(
+            manga.uuid(),
+            manga.last_chapter_number,
+            preferences.includeUnavailable().get(),
+        )
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {

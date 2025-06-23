@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.SuwayomiLang.Companion.fromSuwayomiLang
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -62,16 +64,13 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    override fun hasCredentials(): Boolean {
-        val username = preferences.sourceUsername(this@Suwayomi).get()
-        val password = preferences.sourcePassword(this@Suwayomi).get()
-        val url = hostUrl()
-        return listOf(username, password, url).none { it.isBlank() }
+    override fun isConfigured(): Boolean {
+        return hostUrl().isNotBlank()
     }
 
     override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
-            if (!hasCredentials()) return@withIOContext false
+            if (!isConfigured()) return@withIOContext false
             val username = preferences.sourceUsername(this@Suwayomi).get()
             val password = preferences.sourcePassword(this@Suwayomi).get()
             val url = hostUrl()
@@ -92,26 +91,13 @@ class Suwayomi : MergedServerSource() {
         get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
 
     override fun getMangaUrl(url: String): String {
-        return hostUrl() + "/manga/" + url
+        val separator = if (url.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
+        return hostUrl() + "/manga/" + url.split(separator, limit = 2)[0]
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return hostUrl() + simpleChapter.url.split(" ", limit = 2)[0]
     }
-
-    fun getChapterInfoFormBuilder(chapterId: String): RequestBody =
-        buildJsonObject {
-                put("operationName", JsonPrimitive("CHAPTER_INFO"))
-                put(
-                    "query",
-                    JsonPrimitive(
-                        "query CHAPTER_INFO {chapter(id:${chapterId.toInt()}){" +
-                            "mangaId sourceOrder }}"
-                    ),
-                )
-            }
-            .toString()
-            .toRequestBody("application/json".toMediaType())
 
     private fun createClient(username: String, password: String): OkHttpClient {
         return client
@@ -147,7 +133,9 @@ class Suwayomi : MergedServerSource() {
                 data.mangas.nodes.map { manga ->
                     SManga.create().apply {
                         this.title = manga.title
-                        this.url = "${manga.id}"
+                        this.url =
+                            listOf(manga.id, manga.source.name, manga.source.lang)
+                                .joinToString(Constants.SEPARATOR)
                         this.thumbnail_url = hostUrl() + manga.thumbnailUrl
                     }
                 }
@@ -164,7 +152,7 @@ class Suwayomi : MergedServerSource() {
                         "query SEARCH_MANGA{" +
                             "mangas(condition:{inLibrary:true}," +
                             "filter:{title:{includesInsensitive:\"${query}\"}}){" +
-                            "nodes{id title thumbnailUrl}}}"
+                            "nodes{id title thumbnailUrl source{name lang}}}}"
                     ),
                 )
             }
@@ -174,6 +162,12 @@ class Suwayomi : MergedServerSource() {
     override suspend fun fetchChapters(
         mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError> {
+        val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
+        val parts = mangaUrl.split(separator, limit = 3)
+        val mangaId = parts[0]
+        val sourceName = parts.getOrNull(1)
+        val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
+
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
                 .runCatching {
@@ -184,7 +178,7 @@ class Suwayomi : MergedServerSource() {
                     val response =
                         customClient()
                             .newCall(
-                                POST(apiUrl, headers, fetchChaptersFormBuilder(mangaUrl.toLong()))
+                                POST(apiUrl, headers, fetchChaptersFormBuilder(mangaId.toLong()))
                             )
                             .await()
 
@@ -202,19 +196,19 @@ class Suwayomi : MergedServerSource() {
                         }
                     val r =
                         chapters.map { chapter ->
-                            Pair(
-                                SChapter.create().apply {
-                                    chapter_number = chapter.chapterNumber
-                                    name = chapter.name
-                                    url =
-                                        "/manga/${mangaUrl}/chapter/${chapter.sourceOrder}" +
-                                            " " +
-                                            "${chapter.id}"
-                                    scanlator = this@Suwayomi.name
-                                    date_upload = chapter.uploadDate
-                                },
-                                chapter.isRead,
-                            )
+                            SChapter.create().apply {
+                                chapter_number = chapter.chapterNumber
+                                name = chapter.name
+                                url =
+                                    "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
+                                        " " +
+                                        "${chapter.id}"
+                                scanlator =
+                                    listOfNotNull(this@Suwayomi.name, sourceName, chapter.scanlator)
+                                        .joinToString(Constants.SCANLATOR_SEPARATOR)
+                                language = lang
+                                date_upload = chapter.uploadDate
+                            } to chapter.isRead
                         }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
@@ -235,8 +229,8 @@ class Suwayomi : MergedServerSource() {
                     "query",
                     JsonPrimitive(
                         "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!){" +
-                            "fetchChapters(input: \$input) {" +
-                            "chapters{id name chapterNumber sourceOrder uploadDate isRead}}}"
+                            "fetchChapters(input: \$input) { chapters{" +
+                            "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
                     ),
                 )
                 put("variables", variables)

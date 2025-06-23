@@ -220,6 +220,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 
+    fun includeUnavailable() = this.preferenceStore.getBoolean(Keys.includeUnavailable, true)
+
     fun thumbnailQuality() = this.preferenceStore.getInt(Keys.thumbnailQuality, 0)
 
     fun usePort443Only() = this.preferenceStore.getBoolean(Keys.enablePort443Only, false)

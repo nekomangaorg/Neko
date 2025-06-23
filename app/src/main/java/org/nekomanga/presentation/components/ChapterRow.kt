@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
@@ -80,6 +81,7 @@ fun ChapterRow(
     read: Boolean,
     bookmark: Boolean,
     isMerged: Boolean,
+    isUnavailable: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
     shouldHideChapterTitles: Boolean = false,
@@ -117,7 +119,7 @@ fun ChapterRow(
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                         themeColor.buttonColor,
-                        8.dp,
+                        Size.small,
                     ),
                 onSwipe = onRead,
             )
@@ -134,7 +136,7 @@ fun ChapterRow(
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                         themeColor.buttonColor,
-                        8.dp,
+                        Size.small,
                     ),
                 onSwipe = onBookmark,
             )
@@ -142,6 +144,11 @@ fun ChapterRow(
         ChapterSwipe(
             startSwipeActions = listOf(markBookmarkAction),
             endSwipeActions = listOf(markReadSwipeAction),
+            backgroundInitialSwipeColor =
+                MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                    themeColor.buttonColor,
+                    Size.medium,
+                ),
         ) {
             ChapterInfo(
                 themeColorState = themeColor,
@@ -163,6 +170,7 @@ fun ChapterRow(
                 onDownload = onDownload,
                 markPrevious = markPrevious,
                 isMerged = isMerged,
+                isUnavailable = isUnavailable,
                 blockScanlator = blockScanlator,
                 uploader = uploader,
             )
@@ -207,6 +215,7 @@ private fun ChapterInfo(
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
+    isUnavailable: Boolean,
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
@@ -328,11 +337,15 @@ private fun ChapterInfo(
                     statuses.add(uploader)
                 }
                 statuses.add(scanlator)
+
+                if (isMerged && uploader.isNotBlank()) {
+                    statuses.add(uploader)
+                }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!language.isNullOrEmpty() && !language.equals("en", true)) {
-                    val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
+                    val iconRes = MdLang.fromIsoCode(language)?.iconResId
 
                     when (iconRes == null) {
                         true -> {
@@ -381,23 +394,42 @@ private fun ChapterInfo(
                 statuses.joinToString(Constants.SEPARATOR)
             }
         }
-        if (MdConstants.UnsupportedOfficialGroupList.contains(scanlator)) {
-            Icon(
-                imageVector = Icons.Outlined.Lock,
-                contentDescription = null,
-                modifier =
-                    Modifier.align(Alignment.CenterVertically).padding(Size.small).size(Size.large),
-                tint = themeColorState.altContainerColor,
-            )
-        } else {
+        val noLocalCopy = isUnavailable && downloadState != Download.State.DOWNLOADED
+        val localCopy = isUnavailable && downloadState == Download.State.DOWNLOADED
+        val unsupported = MdConstants.UnsupportedOfficialGroupList.contains(scanlator)
 
-            DownloadButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                themeColorState = themeColorState,
-                downloadState = downloadState,
-                downloadProgress = downloadProgress,
-                onDownload = onDownload,
-            )
+        when {
+            noLocalCopy || unsupported -> {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .padding(Size.smedium)
+                            .size(Size.large),
+                    tint = themeColorState.buttonColor,
+                )
+            }
+            localCopy -> {
+                Icon(
+                    imageVector = Icons.Outlined.FolderOpen,
+                    contentDescription = null,
+                    modifier =
+                        Modifier.align(Alignment.CenterVertically)
+                            .padding(Size.smedium)
+                            .size(Size.large),
+                    tint = themeColorState.buttonColor,
+                )
+            }
+            else -> {
+                DownloadButton(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    themeColorState = themeColorState,
+                    downloadState = downloadState,
+                    downloadProgress = downloadProgress,
+                    onDownload = onDownload,
+                )
+            }
         }
     }
 }

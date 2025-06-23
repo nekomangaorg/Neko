@@ -89,7 +89,7 @@ class MergedLoginDialog(
             dialog?.setCanceledOnTouchOutside(true)
             binding.progress.visibility = View.GONE
             binding.login.visibility = View.VISIBLE
-            scope.launch { context.toast(R.string.unknown_error) }
+            scope.launch { context.toast(R.string.could_not_log_in) }
         }
     }
 

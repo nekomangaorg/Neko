@@ -218,6 +218,13 @@ class SettingsLibraryController : AbstractSettingsController() {
                     defaultValue = false
                 }
 
+                switchPreference {
+                    key = libraryPreferences.includeUnavailable().key()
+                    titleRes = R.string.include_unavailable
+                    summaryRes = R.string.include_unavailable_summary
+                    defaultValue = true
+                }
+
                 intListPreference(activity) {
                     key = libraryPreferences.updatePrioritization().key()
                     titleRes = R.string.library_update_order

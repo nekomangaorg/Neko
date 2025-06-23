@@ -93,6 +93,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 
+    fun includeUnavailable() = this.preferenceStore.getBoolean("include_unavailable")
+
     fun updateCovers() = this.preferenceStore.getBoolean("refresh_covers_too", true)
 
     fun outlineOnCovers() = this.preferenceStore.getBoolean("outline_on_covers", true)
@@ -114,6 +116,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun filterCompleted() = this.preferenceStore.getInt("pref_filter_completed_key")
 
     fun filterBookmarked() = this.preferenceStore.getInt("pref_filter_bookmarked_key")
+
+    fun filterUnavailable() = this.preferenceStore.getInt("pref_filter_unavailable_key")
 
     fun filterTracked() = this.preferenceStore.getInt("pref_filter_tracked_key")
 

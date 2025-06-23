@@ -24,6 +24,7 @@ object MdConstants {
         const val manga = "/manga"
         const val list = "/list"
         const val statistics = "/statistics"
+        const val createThread = "/forums/thread"
         const val chapter = "/chapter"
         const val cover = "/cover"
         const val group = "/group"

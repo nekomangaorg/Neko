@@ -217,7 +217,9 @@ fun syncChaptersWithSource(
         }
         db.updateLastUpdated(manga).executeAsBlocking()
     }
-    return Pair(toAdd.subtract(readded.toSet()).toList(), toDelete - readded.toSet())
+    val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
+
+    return Pair(newChapters, toDelete - readded.toSet())
 }
 
 // checks if the chapter in db needs updated

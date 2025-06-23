@@ -400,23 +400,23 @@ private fun ScreenFooter(
             )
         }
         Row(
-            horizontalArrangement = Arrangement.spacedBy(Size.small),
+            horizontalArrangement = Arrangement.spacedBy(Size.tiny),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Gap(Size.tiny)
             FooterFilterChip(
-                selected = screenType == FeedScreenType.Summary && downloadsSelected == false,
+                selected = screenType == FeedScreenType.Summary && !downloadsSelected,
                 onClick = { screenTypeClick(FeedScreenType.Summary) },
                 name = stringResource(R.string.summary),
             )
             FooterFilterChip(
-                selected = screenType == FeedScreenType.History && downloadsSelected == false,
+                selected = screenType == FeedScreenType.History && !downloadsSelected,
                 onClick = { screenTypeClick(FeedScreenType.History) },
                 name = stringResource(R.string.history),
             )
 
             FooterFilterChip(
-                selected = screenType == FeedScreenType.Updates && downloadsSelected == false,
+                selected = screenType == FeedScreenType.Updates && !downloadsSelected,
                 onClick = { screenTypeClick(FeedScreenType.Updates) },
                 name = stringResource(R.string.updates),
             )

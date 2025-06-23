@@ -70,6 +70,8 @@ class ApiMangaParser {
             manga.lang_flag = mangaAttributesDto.originalLanguage
             val lastChapter = mangaAttributesDto.lastChapter?.toFloatOrNull()
             lastChapter?.let { manga.last_chapter_number = floor(it).toInt() }
+            val lastVolume = mangaAttributesDto.lastVolume?.toIntOrNull()
+            manga.last_volume_number = lastVolume
 
             val otherUrls = mutableListOf<String>()
             mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
@@ -147,7 +149,7 @@ class ApiMangaParser {
                 Ok(
                     chapterListResponse
                         .asSequence()
-                        .map { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
+                        .mapNotNull { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
                         .toList()
                 )
             }
@@ -163,7 +165,7 @@ class ApiMangaParser {
         lastChapterNumber: Int?,
         groups: Map<String, String>,
         uploaders: Map<String, String>,
-    ): SChapter {
+    ): SChapter? {
         val chapter = SChapter.create()
         val attributes = networkChapter.attributes
         chapter.url = MdConstants.chapterSuffix + networkChapter.id
@@ -196,6 +198,8 @@ class ApiMangaParser {
         chapter.mangadex_chapter_id = MdUtil.getChapterUUID(chapter.url)
 
         chapter.language = attributes.translatedLanguage
+
+        chapter.isUnavailable = attributes.isUnavailable ?: return null
 
         return chapter
     }

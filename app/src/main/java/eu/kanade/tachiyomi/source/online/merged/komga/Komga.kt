@@ -58,7 +58,7 @@ class Komga : MergedServerSource() {
         }
     }
 
-    override fun hasCredentials(): Boolean {
+    override fun isConfigured(): Boolean {
         val username = preferences.sourceUsername(this@Komga).get()
         val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
@@ -67,7 +67,7 @@ class Komga : MergedServerSource() {
 
     override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
-            if (!hasCredentials()) return@withIOContext false
+            if (!isConfigured()) return@withIOContext false
             val username = preferences.sourceUsername(this@Komga).get()
             val password = preferences.sourcePassword(this@Komga).get()
             val url = hostUrl()
@@ -163,18 +163,15 @@ class Komga : MergedServerSource() {
                         }
                     val r =
                         page.map { book ->
-                            Pair(
-                                SChapter.create().apply {
-                                    chapter_number = book.metadata.numberSort
-                                    name = "${book.metadata.number} - ${book.metadata.title}"
-                                    url = "/api/v1/books/${book.id}"
-                                    scanlator = this@Komga.name
-                                    date_upload =
-                                        book.metadata.releaseDate?.toDate()
-                                            ?: book.fileLastModified.toDateTime()
-                                },
-                                book.readProgress.completed,
-                            )
+                            SChapter.create().apply {
+                                chapter_number = book.metadata.numberSort
+                                name = "${book.metadata.number} - ${book.metadata.title}"
+                                url = "/api/v1/books/${book.id}"
+                                scanlator = this@Komga.name
+                                date_upload =
+                                    book.metadata.releaseDate?.toDate()
+                                        ?: book.fileLastModified.toDateTime()
+                            } to book.readProgress.completed
                         }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }

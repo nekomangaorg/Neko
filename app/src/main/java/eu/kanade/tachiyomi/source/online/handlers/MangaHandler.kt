@@ -1,15 +1,18 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.orElse
 import com.github.michaelbull.result.zip
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
@@ -19,10 +22,12 @@ import eu.kanade.tachiyomi.source.model.uuid
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +45,9 @@ import uy.kohesive.injekt.injectLazy
 class MangaHandler {
     private val artworkHandler: ArtworkHandler by injectLazy()
     val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
+    val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
     private val preferencesHelper: PreferencesHelper by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
@@ -54,7 +62,11 @@ class MangaHandler {
                 withContext(Dispatchers.Default) { fetchMangaDetails(manga.uuid(), fetchArtwork) }
             val chapterList =
                 withContext(Dispatchers.Default) {
-                    fetchChapterList(manga.uuid(), manga.last_chapter_number)
+                    fetchChapterList(
+                        manga.uuid(),
+                        manga.last_chapter_number,
+                        preferencesHelper.includeUnavailable().get(),
+                    )
                 }
 
             return@withContext zip(
@@ -164,11 +176,12 @@ class MangaHandler {
     suspend fun fetchChapterList(
         mangaUUID: String,
         lastChapterNumber: Int?,
+        includeUnavailable: Boolean,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-            fetchOffset(mangaUUID, langs, 0)
+            fetchOffset(mangaUUID, langs, includeUnavailable, 0)
                 .andThen { chapterListDto ->
                     Ok(
                         when (chapterListDto.total > chapterListDto.limit) {
@@ -177,9 +190,11 @@ class MangaHandler {
                                     fetchRestOfChapters(
                                         mangaUUID,
                                         langs,
+                                        includeUnavailable,
                                         chapterListDto.limit,
                                         chapterListDto.total,
                                     )
+
                             false -> chapterListDto.data
                         }
                     )
@@ -201,6 +216,7 @@ class MangaHandler {
     private suspend fun fetchRestOfChapters(
         mangaUUID: String,
         langs: List<String>,
+        includeUnavailable: Boolean,
         limit: Int,
         total: Int,
     ): List<ChapterDataDto> {
@@ -208,7 +224,9 @@ class MangaHandler {
             val totalRequestNo = (total / limit)
 
             (1..totalRequestNo)
-                .map { pos -> async { fetchOffset(mangaUUID, langs, pos * limit) } }
+                .map { pos ->
+                    async { fetchOffset(mangaUUID, langs, includeUnavailable, pos * limit) }
+                }
                 .awaitAll()
                 .mapNotNull { it.getOrElse { null }?.data }
                 .flatten()
@@ -219,16 +237,28 @@ class MangaHandler {
         return service
             .chapterStatistics(chapterUUID)
             .getOrResultError("Trying to get chapter comments")
-            .andThen { Ok(it.statistics[chapterUUID]?.comments?.threadId?.toString()) }
+            .andThen {
+                Ok(
+                    it.statistics[chapterUUID]?.comments?.threadId?.toString()
+                        ?: return@andThen Err("No thread exists")
+                )
+            }
+            .orElse {
+                authService
+                    .createForumThread(ForumThreadDto(chapterUUID, "chapter"))
+                    .getOrResultError("Trying to create forum thread")
+                    .andThen { Ok(it.data.id.toString()) }
+            }
     }
 
     private suspend fun fetchOffset(
         mangaUUID: String,
         langs: List<String>,
+        includeUnavailable: Boolean,
         offset: Int,
     ): Result<ChapterListDto, ResultError> {
         return service
-            .viewChapters(mangaUUID, langs, offset)
+            .viewChapters(mangaUUID, langs, includeUnavailable.toInt().toString(), offset)
             .getOrResultError("Trying to view chapters")
     }
 

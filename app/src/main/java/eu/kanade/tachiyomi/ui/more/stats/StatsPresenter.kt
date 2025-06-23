@@ -95,6 +95,7 @@ class StatsPresenter(
                         chapterCount = libraryList.sumOf { it.totalChapters },
                         readCount = libraryList.sumOf { it.read },
                         bookmarkCount = libraryList.sumOf { it.bookmarkCount },
+                        unavailableCount = libraryList.sumOf { it.unavailableCount },
                         trackedCount = getMangaByTrackCount(libraryList, tracks),
                         komgaMergeCount = mergedMangaList.count { it.mergeType == MergeType.Komga },
                         mangaLifeMergeCount =
@@ -149,6 +150,7 @@ class StatsPresenter(
                                     totalChapters = it.totalChapters,
                                     readChapters = it.read,
                                     bookmarkedChapters = it.bookmarkCount,
+                                    unavailableChapters = it.unavailableCount,
                                     readDuration = getReadDurationFromHistory(history),
                                     startYear = getStartYear(history),
                                     rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
