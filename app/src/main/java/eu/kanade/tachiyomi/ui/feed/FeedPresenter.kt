@@ -299,7 +299,8 @@ class FeedPresenter(
             if (updatedChapterItem.chapter.read) {
                 if (
                     preferences.removeAfterMarkedAsRead().get() &&
-                        !updatedChapterItem.chapter.bookmark
+                        !updatedChapterItem.chapter.bookmark &&
+                        !updatedChapterItem.chapter.isLocalSource()
                 ) {
                     feedRepository.deleteChapter(updatedChapterItem)
                 }

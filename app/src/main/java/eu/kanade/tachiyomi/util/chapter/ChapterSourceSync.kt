@@ -33,17 +33,23 @@ fun syncChaptersWithSource(
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
     // Chapters from db.
-    val dbChapters = db.getChapters(manga).executeAsBlocking()
+    var dbChapters = db.getChapters(manga).executeAsBlocking()
 
     // Check for local chapter to add
     val allDownloads = downloadManager.getAllDownloads(manga).toHashSet()
     dbChapters.forEach { dbChapter ->
-        if (downloadManager.isChapterDownloaded(dbChapter, manga)) {
+        if (
+            (!dbChapter.isLocalSource() && downloadManager.isChapterDownloaded(dbChapter, manga)) ||
+                (dbChapter.isLocalSource() &&
+                    downloadManager.isChapterDownloaded(dbChapter, manga, true))
+        ) {
             val file =
                 allDownloads.firstOrNull {
                     it.name == downloadManager.downloadedChapterName(dbChapter, manga)
                 }
             allDownloads.remove(file)
+        } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
+            db.deleteChapter(dbChapter).executeAsBlocking()
         }
     }
 
@@ -54,7 +60,10 @@ fun syncChaptersWithSource(
                     val chapterName = file.nameWithoutExtension!!.substringAfter("_")
                     val dateUploaded = file.lastModified()
                     val fileNameSuffix = file.name?.substringAfter("_")
-                    file.renameTo("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                    if (file.name != "${Constants.LOCAL_SOURCE}_${fileNameSuffix}") {
+                        file.renameTo("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                    }
+
                     SChapter.create().apply {
                         url = "${Constants.LOCAL_SOURCE}/$file"
                         name = chapterName
@@ -88,6 +97,8 @@ fun syncChaptersWithSource(
                 source_order = i
             }
         }
+
+    dbChapters = db.getChapters(manga).executeAsBlocking()
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()

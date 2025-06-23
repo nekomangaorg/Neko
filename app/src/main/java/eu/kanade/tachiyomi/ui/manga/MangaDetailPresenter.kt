@@ -1681,7 +1681,7 @@ class MangaDetailPresenter(
                         // dont delete bookmarked chapters
                         deleteChapters(
                             updatedChapterList
-                                .filter { !it.chapter.bookmark }
+                                .filter { !it.chapter.bookmark && !it.chapter.isLocalSource() }
                                 .map { ChapterItem(chapter = it.chapter) },
                             updatedChapterList.size == generalState.value.allChapters.size,
                         )

@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -1095,7 +1096,10 @@ class LibraryPresenter(
             // Create a set of the list
             val mangaToDeleteChapters = mangaList.distinctBy { it.id }
             mangaToDeleteChapters.forEach {
-                val chapters = db.getChapters(it.id!!).executeOnIO()
+                val chapters =
+                    db.getChapters(it.id!!).executeOnIO().filter { ch ->
+                        !ch.isLocalSource() && !ch.bookmark
+                    }
                 deleteChapters(it, chapters)
             }
             getLibrary()
@@ -1388,7 +1392,10 @@ class LibraryPresenter(
         }
 
         if (preferences.removeAfterMarkedAsRead().get() && markRead) {
-            mangaList.forEach { (manga, oldChapters) -> deleteChapters(manga, oldChapters) }
+            mangaList.forEach { (manga, oldChapters) ->
+                val chaptersToDelete = oldChapters.filter { !it.bookmark && !it.isLocalSource() }
+                deleteChapters(manga, chaptersToDelete)
+            }
             if (libraryPreferences.showDownloadBadge().get()) {
                 requestDownloadBadgesUpdate()
             }
