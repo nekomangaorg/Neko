@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -254,7 +255,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 chapter
             }
         if (preferences.removeAfterMarkedAsRead().get()) {
-            downloadManager.deleteChapters(dbChapters, manga)
+            val chaptersToDelete = dbChapters.filter { !it.bookmark && !it.isLocalSource() }
+            downloadManager.deleteChapters(chaptersToDelete, manga)
         }
 
         if (preferences.readingSync().get()) {

@@ -206,6 +206,10 @@ class DownloadManager(val context: Context) {
         return cache.isChapterDownloaded(chapter, manga, skipCache)
     }
 
+    fun downloadedChapterName(chapter: Chapter, manga: Manga, skipCache: Boolean = false): String {
+        return cache.findChapterDirName(chapter, manga)
+    }
+
     /**
      * Returns the amount of downloaded chapters for a manga.
      *
@@ -213,6 +217,11 @@ class DownloadManager(val context: Context) {
      */
     fun getDownloadCount(manga: Manga): Int {
         return cache.getDownloadCount(manga)
+    }
+
+    /** Returns the list of downloaded file names */
+    fun getAllDownloads(manga: Manga): List<UniFile> {
+        return cache.getAllDownloadFiles(manga)
     }
 
     /**

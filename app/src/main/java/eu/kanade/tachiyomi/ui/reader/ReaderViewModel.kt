@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -560,7 +561,8 @@ class ReaderViewModel(
         if (
             removeAfterReadSlots != -1 &&
                 chapterToDelete != null &&
-                !currentChapter.chapter.bookmark
+                !currentChapter.chapter.bookmark &&
+                !currentChapter.chapter.isLocalSource()
         ) {
             enqueueDeleteReadChapters(chapterToDelete)
         }

@@ -101,6 +101,10 @@ class DownloadCache(
         return validChapterDirNames.any { it in fileNames || "$it.cbz" in fileNames }
     }
 
+    fun findChapterDirName(chapter: Chapter, manga: Manga): String {
+        return provider.findChapterDir(chapter, manga)?.name ?: ""
+    }
+
     /**
      * Returns the amount of downloaded chapters for a manga.
      *
@@ -140,6 +144,16 @@ class DownloadCache(
             }
             return count
         }
+    }
+
+    fun getAllDownloadFiles(manga: Manga): List<UniFile> {
+        val mangaDir = provider.findMangaDir(manga)
+
+        mangaDir ?: return emptyList()
+        return mangaDir
+            .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            .orEmpty()
+            .toList()
     }
 
     /** Checks if the cache needs a renewal and performs it if needed. */

@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -179,6 +180,10 @@ class DownloadProvider(
                 if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
                     return@filter true
                 }
+                if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
+                    return@filter false
+                }
+
                 val mangadexId = fileName.substringAfterLast("- ", "")
                 if (mangadexId.isNotEmpty() && (mangadexId.isDigitsOnly() || mangadexId.isUUID())) {
                     return@filter !idHashSet.contains(mangadexId)
