@@ -88,6 +88,7 @@ fun ChapterRow(
     read: Boolean,
     bookmark: Boolean,
     isMerged: Boolean,
+    isLocal: Boolean,
     isUnavailable: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
@@ -177,6 +178,7 @@ fun ChapterRow(
                 onDownload = onDownload,
                 markPrevious = markPrevious,
                 isMerged = isMerged,
+                isLocal = isLocal,
                 isUnavailable = isUnavailable,
                 blockScanlator = blockScanlator,
                 uploader = uploader,
@@ -222,6 +224,7 @@ private fun ChapterInfo(
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
+    isLocal: Boolean = false,
     isUnavailable: Boolean,
     blockScanlator: (String) -> Unit,
 ) {
@@ -270,8 +273,9 @@ private fun ChapterInfo(
         onDismiss = { dropdown = false },
         dropDownItems =
             getDropDownItems(
-                showScanlator = scanlator.isNotBlank() && !isMerged,
-                showComments = !isMerged,
+                isLocal = isLocal,
+                showScanlator = scanlator.isNotBlank() && !isMerged && !isLocal,
+                showComments = !isMerged && !isLocal,
                 scanlators = splitScanlator,
                 onWebView = onWebView,
                 onComment = onComment,
@@ -476,6 +480,7 @@ private fun ChapterInfo(
 
 @Composable
 private fun getDropDownItems(
+    isLocal: Boolean,
     showScanlator: Boolean,
     showComments: Boolean,
     scanlators: ImmutableList<SimpleDropDownItem>,
@@ -483,47 +488,61 @@ private fun getDropDownItems(
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
 ): ImmutableList<SimpleDropDownItem> {
-    return (listOf(
-            SimpleDropDownItem.Action(
-                text = UiText.StringResource(R.string.open_in_webview),
-                onClick = { onWebView() },
-            ),
-            SimpleDropDownItem.Parent(
-                text = UiText.StringResource(R.string.mark_previous_as),
-                children =
-                    listOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.read),
-                            onClick = { markPrevious(true) },
-                        ),
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.unread),
-                            onClick = { markPrevious(false) },
-                        ),
-                    ),
+    return (getList(
+            !isLocal,
+            listOf(
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.open_in_webview),
+                    onClick = { onWebView() },
+                )
             ),
         ) +
-            if (showScanlator) {
+            listOf(
+                SimpleDropDownItem.Parent(
+                    text = UiText.StringResource(R.string.mark_previous_as),
+                    children =
+                        listOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.read),
+                                onClick = { markPrevious(true) },
+                            ),
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.unread),
+                                onClick = { markPrevious(false) },
+                            ),
+                        ),
+                )
+            ) +
+            getList(
+                showScanlator,
                 listOf(
                     SimpleDropDownItem.Parent(
                         text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
                     )
-                )
-            } else {
-                emptyList()
-            } +
-            if (showComments) {
+                ),
+            ) +
+            getList(
+                showComments,
                 listOf(
                     SimpleDropDownItem.Action(
                         text = UiText.StringResource(R.string.comments),
                         onClick = onComment,
                     )
-                )
-            } else {
-                emptyList()
-            })
+                ),
+            ))
         .toPersistentList()
+}
+
+private fun getList(
+    booleanCondition: Boolean,
+    trueList: List<SimpleDropDownItem>,
+): List<SimpleDropDownItem> {
+    return if (booleanCondition) {
+        trueList
+    } else {
+        emptyList()
+    }
 }
 
 val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
