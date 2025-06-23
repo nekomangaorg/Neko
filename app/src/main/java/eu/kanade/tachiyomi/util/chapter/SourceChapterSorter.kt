@@ -9,7 +9,7 @@ import kotlin.math.floor
 
 /** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
-    if (sourceChapters.all { !it.isMergedChapter()  && !it.isLocalSource()}) {
+    if (sourceChapters.all { !it.isMergedChapter() && !it.isLocalSource() }) {
         return sourceChapters
     }
 

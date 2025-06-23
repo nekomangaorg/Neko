@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -28,7 +29,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
-import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -561,8 +561,7 @@ class ReaderViewModel(
         if (
             removeAfterReadSlots != -1 &&
                 chapterToDelete != null &&
-                !currentChapter.chapter.bookmark &&
-                !currentChapter.chapter.isLocalSource()
+                currentChapter.chapter.canDeleteChapter()
         ) {
             enqueueDeleteReadChapters(chapterToDelete)
         }

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
 import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -20,7 +21,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
-import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -255,7 +255,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 chapter
             }
         if (preferences.removeAfterMarkedAsRead().get()) {
-            val chaptersToDelete = dbChapters.filter { !it.bookmark && !it.isLocalSource() }
+            val chaptersToDelete = dbChapters.filter { it.canDeleteChapter() }
             downloadManager.deleteChapters(chaptersToDelete, manga)
         }
 

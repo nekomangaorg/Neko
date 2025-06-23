@@ -41,6 +41,8 @@ data class SimpleChapter(
 
     fun isLocalSource() = this.scanlator == Constants.LOCAL_SOURCE && this.isUnavailable
 
+    fun canDeleteChapter() = !this.isLocalSource() && !this.bookmark && !this.isUnavailable
+
     fun isMergedChapterOfType(mergeType: MergeType) =
         MergeType.getMergeTypeName(mergeType) == this.scanlator
 

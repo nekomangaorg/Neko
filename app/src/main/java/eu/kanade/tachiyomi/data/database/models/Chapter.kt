@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.io.Serializable
@@ -47,6 +48,8 @@ interface Chapter : SChapter, Serializable {
         copyFrom(other as SChapter)
     }
 }
+
+fun Chapter.canDeleteChapter() = !this.isLocalSource() && !this.bookmark && !this.isUnavailable
 
 fun Chapter.scanlatorList(): List<String> {
     this.scanlator ?: return emptyList()
