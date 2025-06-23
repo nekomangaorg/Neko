@@ -41,7 +41,9 @@ class ChapterItemSort(
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
             }
-        return chapters.sortedWith(sortComparator(manga, true)).find { !it.chapter.read }
+        return chapters.sortedWith(sortComparator(manga, true)).find {
+            !it.chapter.read && !it.chapter.isUnavailable
+        }
     }
 
     fun <T : ChapterItem> sortComparator(manga: Manga, ignoreAsc: Boolean = false): Comparator<T> {
