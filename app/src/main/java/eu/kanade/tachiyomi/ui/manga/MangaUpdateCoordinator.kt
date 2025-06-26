@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -50,7 +51,7 @@ class MangaUpdateCoordinator {
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     /** Channel flow for updating the Manga/Chapters in the given scope */
-    suspend fun update(manga: Manga, scope: CoroutineScope) =
+    suspend fun update(manga: Manga, scope: CoroutineScope, isMerging: Boolean) =
         channelFlow {
                 val mangaWasInitialized = manga.initialized
 
@@ -71,7 +72,7 @@ class MangaUpdateCoordinator {
                 val mangaJob = startMangaJob(scope, manga)
 
                 if (mangaJob.isCompleted || mangaJob.isActive) {
-                    val chapterJob = startChapterJob(scope, manga, mangaWasInitialized)
+                    val chapterJob = startChapterJob(scope, manga, mangaWasInitialized, isMerging)
                     mangaJob.join()
                     chapterJob.join()
 
@@ -141,6 +142,7 @@ class MangaUpdateCoordinator {
         scope: CoroutineScope,
         manga: Manga,
         mangaWasAlreadyInitialized: Boolean,
+        isMerging: Boolean,
     ): Job {
         return scope.launchIO {
             val deferredChapters = async {
@@ -181,15 +183,16 @@ class MangaUpdateCoordinator {
 
             val allChapters = deferredChapters.await() + deferredMergedChapters.awaitAll().flatten()
 
-            val newChapters = syncChaptersWithSource(db, allChapters, manga)
+            val (newChapters, removedChapters) = syncChaptersWithSource(db, allChapters, manga)
             // chapters that were added
-            if (newChapters.first.isNotEmpty()) {
+            if (newChapters.isNotEmpty()) {
                 val downloadNew = preferences.downloadNewChapters().get()
-                if (downloadNew && mangaWasAlreadyInitialized) {
+                if (downloadNew && mangaWasAlreadyInitialized && !isMerging) {
                     if (manga.shouldDownloadNewChapters(db, preferences)) {
                         downloadChapters(
                             manga,
-                            newChapters.first
+                            newChapters
+                                .filterNot { isMerging && it.isMergedChapter() }
                                 .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
                                 .sortedBy { it.chapter.chapterNumber },
                         )
@@ -198,8 +201,8 @@ class MangaUpdateCoordinator {
                 mangaShortcutManager.updateShortcuts()
             }
             // chapters that were removed
-            if (newChapters.second.isNotEmpty()) {
-                val removedChaptersId = newChapters.second.mapNotNull { it.id }
+            if (removedChapters.isNotEmpty()) {
+                val removedChaptersId = removedChapters.mapNotNull { it.id }
                 send(MangaResult.ChaptersRemoved(removedChaptersId))
             }
 

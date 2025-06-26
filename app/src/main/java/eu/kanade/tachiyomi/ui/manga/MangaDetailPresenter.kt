@@ -191,7 +191,7 @@ class MangaDetailPresenter(
                 updateCategoryFlows()
                 updateMangaFlow()
                 updateArtworkFlow()
-                onRefresh()
+                onRefresh(false)
             } else {
                 updateAllFlows()
                 refreshTracking(false)
@@ -227,7 +227,7 @@ class MangaDetailPresenter(
     }
 
     /** Refresh manga info, and chapters */
-    fun onRefresh() {
+    fun onRefresh(isMerging: Boolean) {
         presenterScope.launchIO {
             if (!isOnline()) {
                 _snackbarState.emit(SnackbarState(messageRes = R.string.no_network_connection))
@@ -236,7 +236,8 @@ class MangaDetailPresenter(
 
             _isRefreshing.value = true
 
-            mangaUpdateCoordinator.update(currentManga(), presenterScope).collect { result ->
+            mangaUpdateCoordinator.update(currentManga(), presenterScope, isMerging).collect {
+                result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(
@@ -691,7 +692,7 @@ class MangaDetailPresenter(
             val newMergedManga = mergeManga.toMergeMangaImpl(mangaId)
             db.insertMergeManga(newMergedManga).executeOnIO()
             updateMangaFlow()
-            onRefresh()
+            onRefresh(true)
         }
     }
 
