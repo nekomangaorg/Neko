@@ -81,7 +81,7 @@ class MangaDetailController(private val mangaId: Long) :
             windowSizeClass = windowSizeClass,
             isRefreshing = presenter.isRefreshing.collectAsStateWithLifecycle(),
             isSearching = presenter.isSearching.collectAsStateWithLifecycle(),
-            onRefresh = { presenter.onRefresh(false) },
+            onRefresh = presenter::onRefresh,
             onSearch = presenter::onSearch,
             categoryActions =
                 CategoryActions(

@@ -191,7 +191,7 @@ class MangaDetailPresenter(
                 updateCategoryFlows()
                 updateMangaFlow()
                 updateArtworkFlow()
-                onRefresh(false)
+                onRefresh()
             } else {
                 updateAllFlows()
                 refreshTracking(false)
@@ -227,7 +227,7 @@ class MangaDetailPresenter(
     }
 
     /** Refresh manga info, and chapters */
-    fun onRefresh(isMerging: Boolean) {
+    fun onRefresh(isMerging: Boolean = false) {
         presenterScope.launchIO {
             if (!isOnline()) {
                 _snackbarState.emit(SnackbarState(messageRes = R.string.no_network_connection))
