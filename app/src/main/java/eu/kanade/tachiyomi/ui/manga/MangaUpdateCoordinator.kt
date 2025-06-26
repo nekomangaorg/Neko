@@ -187,7 +187,7 @@ class MangaUpdateCoordinator {
             // chapters that were added
             if (newChapters.isNotEmpty()) {
                 val downloadNew = preferences.downloadNewChapters().get()
-                if (downloadNew && mangaWasAlreadyInitialized && !isMerging) {
+                if (downloadNew && mangaWasAlreadyInitialized) {
                     if (manga.shouldDownloadNewChapters(db, preferences)) {
                         downloadChapters(
                             manga,
