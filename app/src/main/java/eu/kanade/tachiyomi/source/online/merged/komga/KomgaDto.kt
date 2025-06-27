@@ -44,7 +44,7 @@ data class KomgaBookDto(
     val sizeBytes: Long,
     val size: String,
     val metadata: KomgaBookMetadataDto,
-    val readProgress: KomgaBookReadProgressDto,
+    val readProgress: KomgaBookReadProgressDto?,
 )
 
 @Serializable

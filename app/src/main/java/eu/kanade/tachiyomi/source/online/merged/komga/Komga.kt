@@ -171,7 +171,7 @@ class Komga : MergedServerSource() {
                                 date_upload =
                                     book.metadata.releaseDate?.toDate()
                                         ?: book.fileLastModified.toDateTime()
-                            } to book.readProgress.completed
+                            } to (book.readProgress?.completed ?: false)
                         }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
