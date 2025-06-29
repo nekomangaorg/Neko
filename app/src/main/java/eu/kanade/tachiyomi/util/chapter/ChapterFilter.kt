@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
@@ -59,7 +60,7 @@ class ChapterFilter(
         manga: Manga,
         selectedChapter: T? = null,
     ): List<T> {
-        var filteredChapters = chapters.filterNot { it.isUnavailable }
+        var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
         filteredChapters =
             filterChaptersByScanlatorsAndLanguage(filteredChapters, manga, preferences)
 
