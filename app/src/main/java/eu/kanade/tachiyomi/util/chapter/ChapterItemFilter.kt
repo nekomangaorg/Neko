@@ -56,8 +56,8 @@ class ChapterItemFilter(
                         !downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
                     (notDownloadEnabled &&
                         downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
-                    (unavailableEnabled && !chapter.isUnavailable) ||
-                    (availableEnabled && chapter.isUnavailable))
+                    (unavailableEnabled && chapter.isUnavailable) ||
+                    (availableEnabled && !chapter.isUnavailable && chapter.isLocalSource()))
             }
         } else {
             filteredChapters
@@ -96,7 +96,7 @@ class ChapterItemFilter(
     }
 
     /** filters chapters for scanlators */
-    fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
+    private fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
         chapters: List<T>,
         manga: Manga,
         preferences: PreferencesHelper,
