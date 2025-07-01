@@ -147,6 +147,7 @@ fun syncChaptersWithSource(
                 dbChapter.chapter_number = sourceChapter.chapter_number
                 dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
                 dbChapter.language = sourceChapter.language
+                dbChapter.isUnavailable = sourceChapter.isUnavailable
                 dbChapter.source_order = sourceChapter.source_order
                 toChange.add(dbChapter)
             }
@@ -293,5 +294,6 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: Chapter): B
         dbChapter.chapter_txt != sourceChapter.chapter_txt ||
         dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id ||
         dbChapter.language != sourceChapter.language ||
+        dbChapter.isUnavailable != sourceChapter.isUnavailable ||
         dbChapter.source_order != sourceChapter.source_order
 }
