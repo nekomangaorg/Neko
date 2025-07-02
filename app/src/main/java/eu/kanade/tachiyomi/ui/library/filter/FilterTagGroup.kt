@@ -82,7 +82,7 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun setState(text: String) {
-        state = buttons.indexOfFirst { it.text == text && it.visibility == View.VISIBLE }
+        state = buttons.indexOfFirst { it.text == text && it.isVisible }
     }
 
     fun reset() {
@@ -118,8 +118,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                         R.attr.colorOnSecondary
                     } else {
                         R.attr.colorOnBackground
-                    }
-                )
+                    },
+                ),
             )
             listener?.onFilterClicked(
                 this,
@@ -153,8 +153,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                     R.attr.colorOnSecondary
                 } else {
                     R.attr.colorOnBackground
-                }
-            )
+                },
+            ),
         )
     }
 }
