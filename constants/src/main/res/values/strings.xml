@@ -296,6 +296,9 @@
     <string name="smart_library_tracking_is_plan_to_read">Skip manga with tracking status "Plan to read"</string>
 
 
+    <string name="enable_local_manga">Enable local manga support</string>
+    <string name="enable_local_manga_summary">When enabled, this causes updates to scan the filesystem for each manga, looking for local downloads, not tied to MangaDex or an External source.  Disable if you have slow library updates.</string>
+
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="include_unavailable">Include unavailable chapters</string>
     <string name="include_unavailable_summary">Library filters for unavailable chapters only shows after app restart</string>

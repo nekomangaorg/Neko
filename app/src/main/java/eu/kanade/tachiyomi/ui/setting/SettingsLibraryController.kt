@@ -40,6 +40,14 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.library
             preferenceCategory {
                 titleRes = R.string.general
+
+                switchPreference {
+                    key = libraryPreferences.enableLocalChapters().key()
+                    titleRes = R.string.enable_local_manga
+                    summaryRes = R.string.enable_local_manga_summary
+                    defaultValue = true
+                }
+
                 switchPreference {
                     key = libraryPreferences.removeArticles().key()
                     titleRes = R.string.sort_by_ignoring_articles
