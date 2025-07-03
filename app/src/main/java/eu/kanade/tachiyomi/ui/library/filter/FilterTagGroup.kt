@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
@@ -118,8 +117,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                         R.attr.colorOnSecondary
                     } else {
                         R.attr.colorOnBackground
-                    },
-                ),
+                    }
+                )
             )
             listener?.onFilterClicked(
                 this,
@@ -153,8 +152,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                     R.attr.colorOnSecondary
                 } else {
                     R.attr.colorOnBackground
-                },
-            ),
+                }
+            )
         )
     }
 }

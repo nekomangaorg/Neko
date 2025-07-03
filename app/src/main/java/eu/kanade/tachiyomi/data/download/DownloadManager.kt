@@ -206,8 +206,8 @@ class DownloadManager(val context: Context) {
         return cache.isChapterDownloaded(chapter, manga, skipCache)
     }
 
-    fun downloadedChapterName(chapter: Chapter, manga: Manga, skipCache: Boolean = false): String {
-        return cache.findChapterDirName(chapter, manga)
+    fun downloadedChapterName(chapter: Chapter): Set<String> {
+        return provider.getValidChapterDirNames(chapter).toHashSet()
     }
 
     /**

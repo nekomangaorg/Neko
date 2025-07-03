@@ -45,9 +45,12 @@ fun syncChaptersWithSource(
 
     if (localChapterLookupEnabled) {
 
-        val allDownloads = downloadManager.getAllDownloads(manga).toHashSet()
+        TimberKt.d { "local chapter enabled, checking for orphans" }
 
-        if (allDownloads.isNotEmpty()) {
+        val allDownloadsMap =
+            downloadManager.getAllDownloads(manga).associateBy { it.name }.toMutableMap()
+
+        if (allDownloadsMap.isNotEmpty()) {
             dbChapters.forEach { dbChapter ->
                 if (
                     (!dbChapter.isLocalSource() &&
@@ -55,16 +58,24 @@ fun syncChaptersWithSource(
                         (dbChapter.isLocalSource() &&
                             downloadManager.isChapterDownloaded(dbChapter, manga, true))
                 ) {
-                    val file =
-                        allDownloads.firstOrNull {
-                            it.name == downloadManager.downloadedChapterName(dbChapter, manga)
+                    val validName =
+                        downloadManager.downloadedChapterName(dbChapter).firstOrNull {
+                            it in allDownloadsMap
                         }
-                    allDownloads.remove(file)
+                    allDownloadsMap.remove(validName)
+
+                    /*  val file =
+                        allDownloads.firstOrNull {
+                            it.name in downloadManager.downloadedChapterName(dbChapter)
+                        }
+                    allDownloads.remove(file)*/
                 } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
                     db.deleteChapter(dbChapter).executeAsBlocking()
                 }
             }
         }
+
+        val allDownloads = allDownloadsMap.values.toList()
 
         finalRawSourceChapters =
             if (allDownloads.isNotEmpty()) {
