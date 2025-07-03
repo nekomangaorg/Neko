@@ -62,13 +62,10 @@ fun syncChaptersWithSource(
                         downloadManager.downloadedChapterName(dbChapter).firstOrNull {
                             it in allDownloadsMap
                         }
-                    allDownloadsMap.remove(validName)
+                    if(validName != null) {
+                        allDownloadsMap.remove(validName)
+                    }
 
-                    /*  val file =
-                        allDownloads.firstOrNull {
-                            it.name in downloadManager.downloadedChapterName(dbChapter)
-                        }
-                    allDownloads.remove(file)*/
                 } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
                     db.deleteChapter(dbChapter).executeAsBlocking()
                 }
