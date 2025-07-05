@@ -246,21 +246,39 @@ class Suwayomi : MergedServerSource() {
 
         var title = rawName
         val chapterName = mutableListOf<String>()
-        val volumePrefixes = arrayOf("Volume", "Vol.", "Season", "S", "(S")
-        val chapterPrefixes = arrayOf("Chapter", "Chap", "Ch.", "Ch", "Episode", "Ep.", "Ep")
+        val volumePrefixes =
+            arrayOf("Volume", "Vol.", "volume", "vol.", "Season", "S", "(S", "season", "s", "(s")
+        val chapterPrefixes =
+            arrayOf(
+                "Chapter",
+                "Chap",
+                "Ch.",
+                "Ch",
+                "chapter",
+                "chap",
+                "ch.",
+                "ch",
+                "#",
+                "Episode",
+                "Ep.",
+                "Ep",
+                "episode",
+                "ep.",
+                "ep",
+            )
 
         volumePrefixes.any { prefix ->
             if (title.startsWith(prefix)) {
-                if (prefix == "S" && !Regex("S\\d+.*").matches(title)) return@any false
+                if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
                 val delimiter =
-                    when (prefix == "(S") {
+                    when (prefix.startsWith('(')) {
                         true -> ")"
                         false -> " "
                     }
-                title = title.replace(prefix, "").trimStart()
-                vol = title.substringBefore(delimiter)
+                title = title.replace(prefix, "").trimStart('0')
+                vol = title.substringBefore(delimiter, "")
                 title = title.substringAfter(delimiter)
-                chapterName.add("Vol.$vol")
+                if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
                 return@any true
             }
             false
@@ -270,7 +288,7 @@ class Suwayomi : MergedServerSource() {
         if (
             !chapterPrefixes.any { prefix ->
                 if (title.startsWith(prefix)) {
-                    title = title.replaceFirst(prefix, "").trimStart()
+                    title = title.replaceFirst(prefix, "").trimStart('0')
                     title = title.replaceFirst(ch, "").trimStart()
                     return@any true
                 }
