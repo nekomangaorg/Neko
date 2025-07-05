@@ -16,39 +16,48 @@ fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter
     }
 
     var (withVolume, nullVolume) = sourceChapters.partition { getVolumeNum(it) == null }
-    nullVolume = nullVolume.sortedWith(compareBy { getChapterNum(it) })
+    nullVolume = nullVolume.sortedWith(compareByDescending { getChapterNum(it) })
 
     // mangalife tends to not include a volume number for manga
     val sorter =
         if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
-            compareBy<SChapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) }
+            compareByDescending<SChapter> { getChapterNum(it) == null }
+                .thenByDescending { getChapterNum(it) }
         } else {
-            compareBy<SChapter> { getVolumeNum(it) }.thenBy { getChapterNum(it) }
+            compareByDescending<SChapter> { getVolumeNum(it) }
+                .thenByDescending { getChapterNum(it) }
         }
     withVolume = withVolume.sortedWith(sorter)
 
-    return listOf(withVolume.asSequence(), nullVolume.asSequence())
-        .mergeSorted(compareBy<SChapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) })
-        .toList()
-        .reversed()
+    return listOf(withVolume, nullVolume).mergeSorted()
 }
 
-fun <T> List<Sequence<T>>.mergeSorted(comparator: Comparator<T>): Sequence<T> {
+// Adapted from https://stackoverflow.com/a/69041133
+private fun List<List<SChapter>>.mergeSorted(): List<SChapter> {
     val iteratorToCurrentValues =
-        map { it.iterator() }.filter { it.hasNext() }.associateWith { it.next() }.toMutableMap()
+        map { it.reversed().iterator() }
+            .filter { it.hasNext() }
+            .associateWith { it.next() }
+            .toMutableMap()
 
-    val c: Comparator<Map.Entry<Iterator<T>, T>> = Comparator.comparing({ it.value }, comparator)
+    val c: Comparator<Map.Entry<Iterator<SChapter>, SChapter>> =
+        Comparator.comparing(
+            { it.value },
+            compareBy<SChapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) },
+        )
 
     return sequence {
-        while (iteratorToCurrentValues.isNotEmpty()) {
-            val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
+            while (iteratorToCurrentValues.isNotEmpty()) {
+                val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
 
-            yield(smallestEntry.value)
+                yield(smallestEntry.value)
 
-            if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
-            else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
+                if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
+                else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
+            }
         }
-    }
+        .toList()
+        .reversed()
 }
 
 fun getChapterNum(chapter: SChapter): Float? {
@@ -62,13 +71,13 @@ fun getChapterNum(chapter: SChapter): Float? {
         false -> {
             val txt = chapter.chapter_txt
             txt.subStringfloatOrNull("Ch.")
-                ?: txt.subStringfloatOrNull("Chp.")
-                ?: txt.subStringfloatOrNull("Chapter")
+                ?: txt.subStringFloatOrNull("Chp.")
+                ?: txt.subStringFloatOrNull("Chapter")
         }
     }
 }
 
-private fun String.subStringfloatOrNull(delimiter: String): Float? {
+private fun String.subStringFloatOrNull(delimiter: String): Float? {
     return this.substringAfter(delimiter).toFloatOrNull()
 }
 
