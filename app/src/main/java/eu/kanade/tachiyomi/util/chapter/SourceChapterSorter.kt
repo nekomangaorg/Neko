@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.util.system.toInt
 import kotlin.math.floor
-import org.nekomanga.logging.TimberKt
 
 /** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
@@ -61,11 +60,6 @@ private fun List<List<SChapter>>.mergeSorted(): List<SChapter> {
 }
 
 fun getChapterNum(chapter: SChapter): Float? {
-    TimberKt.d {
-        "${getVolumeNum(chapter)} ${chapter.chapter_txt} ${
-            chapter.isMergedChapter().toInt()
-        } ${chapter.name} "
-    }
     return when (chapter.name.contains("oneshot", true) && !chapter.isMergedChapter()) {
         true -> 0f
         false -> {
