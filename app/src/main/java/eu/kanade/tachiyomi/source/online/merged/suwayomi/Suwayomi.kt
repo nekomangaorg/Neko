@@ -233,6 +233,7 @@ class Suwayomi : MergedServerSource() {
     fun sanitizeName(rawName: String, chapter: Float): Name {
         if (chapter < 0) {
             // Source info is not sane, sanitizing won't work
+            TimberKt.d { "not sane $rawName" }
             return Name.NotSane
         }
         var vol = ""
@@ -269,18 +270,20 @@ class Suwayomi : MergedServerSource() {
 
         volumePrefixes.any { prefix ->
             if (title.startsWith(prefix)) {
+                TimberKt.d { "Matched $prefix" }
                 if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
                 val delimiter =
                     when (prefix.startsWith('(')) {
                         true -> ")"
                         false -> " "
                     }
-                title = title.replace(prefix, "").trimStart('0')
-                vol = title.substringBefore(delimiter, "")
+                title = title.replace(prefix, "").trimStart()
+                vol = title.trimStart('0').substringBefore(delimiter, "")
                 title = title.substringAfter(delimiter)
                 if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
                 return@any true
             }
+            TimberKt.d { "No match $prefix" }
             false
         }
         val chtxt = "Ch.$ch"
@@ -288,14 +291,16 @@ class Suwayomi : MergedServerSource() {
         if (
             !chapterPrefixes.any { prefix ->
                 if (title.startsWith(prefix)) {
-                    title = title.replaceFirst(prefix, "").trimStart('0')
-                    title = title.replaceFirst(ch, "").trimStart()
+                    title = title.replaceFirst(prefix, "").trimStart()
+                    title = title.trimStart('0').replaceFirst(ch, "").trimStart()
                     return@any true
                 }
                 false
             }
-        )
+        ) {
+            TimberKt.d { "chapter sanity $rawName" }
             return Name.NotSane
+        }
         if (title.startsWith(":")) {
             title = title.replaceFirst(":", "").trimStart()
         }
@@ -306,7 +311,7 @@ class Suwayomi : MergedServerSource() {
             chapterName.add("-")
             chapterName.add(title)
         }
-
+        TimberKt.d { Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title).toString() }
         return Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title)
     }
 
