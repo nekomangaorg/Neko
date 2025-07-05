@@ -196,9 +196,20 @@ class Suwayomi : MergedServerSource() {
                         }
                     val r =
                         chapters.map { chapter ->
+                            val sanitized = sanitizeName(chapter.name, chapter.chapterNumber)
                             SChapter.create().apply {
                                 chapter_number = chapter.chapterNumber
-                                name = chapter.name
+                                if (sanitized is Name.Sanitized) {
+                                    name = sanitized.name
+                                    vol = sanitized.vol
+                                    chapter_txt = sanitized.chapter_txt
+                                    chapter_title = sanitized.chapter_title
+                                } else {
+                                    name = chapter.name
+                                    chapter_txt = "Ch.${chapter.chapterNumber}"
+                                }
+
+                                this.vol = vol
                                 url =
                                     "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
                                         " " +
@@ -217,6 +228,91 @@ class Suwayomi : MergedServerSource() {
                     (it.localizedMessage ?: "Suwayomi Error").toResultError()
                 }
         }
+    }
+
+    fun sanitizeName(rawName: String, chapter: Float): Name {
+        if (chapter < 0) {
+            // Source info is not sane, sanitizing won't work
+            TimberKt.d { "not sane $rawName" }
+            return Name.NotSane
+        }
+        var vol = ""
+        var ch =
+            if (chapter == chapter.toLong().toFloat()) {
+                    chapter.toLong()
+                } else {
+                    chapter
+                }
+                .toString()
+
+        var title = rawName
+        val chapterName = mutableListOf<String>()
+        val volumePrefixes =
+            arrayOf("Volume", "Vol.", "volume", "vol.", "Season", "S", "(S", "season", "s", "(s")
+        val chapterPrefixes =
+            arrayOf(
+                "Chapter",
+                "Chap",
+                "Ch.",
+                "Ch",
+                "chapter",
+                "chap",
+                "ch.",
+                "ch",
+                "#",
+                "Episode",
+                "Ep.",
+                "Ep",
+                "episode",
+                "ep.",
+                "ep",
+            )
+
+        volumePrefixes.any { prefix ->
+            if (title.startsWith(prefix)) {
+                TimberKt.d { "Matched $prefix" }
+                if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
+                val delimiter =
+                    when (prefix.startsWith('(')) {
+                        true -> ")"
+                        false -> " "
+                    }
+                title = title.replace(prefix, "").trimStart()
+                vol = title.trimStart('0').substringBefore(delimiter, "")
+                title = title.substringAfter(delimiter)
+                if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
+                return@any true
+            }
+            TimberKt.d { "No match $prefix" }
+            false
+        }
+        val chtxt = "Ch.$ch"
+        chapterName.add(chtxt)
+        if (
+            !chapterPrefixes.any { prefix ->
+                if (title.startsWith(prefix)) {
+                    title = title.replaceFirst(prefix, "").trimStart()
+                    title = title.trimStart('0').replaceFirst(ch, "").trimStart()
+                    return@any true
+                }
+                false
+            }
+        ) {
+            TimberKt.d { "chapter sanity $rawName" }
+            return Name.NotSane
+        }
+        if (title.startsWith(":")) {
+            title = title.replaceFirst(":", "").trimStart()
+        }
+        if (title.startsWith("-")) {
+            title = title.replaceFirst("-", "").trimStart()
+        }
+        if (title.isNotEmpty()) {
+            chapterName.add("-")
+            chapterName.add(title)
+        }
+        TimberKt.d { Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title).toString() }
+        return Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title)
     }
 
     fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
@@ -327,4 +423,15 @@ class Suwayomi : MergedServerSource() {
         private val supportedImageTypes =
             listOf("image/jpeg", "image/png", "image/gif", "image/webp")
     }
+}
+
+sealed class Name {
+    data class Sanitized(
+        val name: String,
+        val vol: String,
+        val chapter_txt: String,
+        val chapter_title: String,
+    ) : Name()
+
+    data object NotSane : Name()
 }
