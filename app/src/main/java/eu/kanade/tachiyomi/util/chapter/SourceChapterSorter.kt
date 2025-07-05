@@ -15,7 +15,7 @@ fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter
         return sourceChapters
     }
 
-    var (withVolume, nullVolume) = sourceChapters.partition { getVolumeNum(it) == null }
+    var (nullVolume, withVolume) = sourceChapters.partition { getVolumeNum(it) == null }
     nullVolume = nullVolume.sortedWith(compareByDescending { getChapterNum(it) })
 
     // mangalife tends to not include a volume number for manga
