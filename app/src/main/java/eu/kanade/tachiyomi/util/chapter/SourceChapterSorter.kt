@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.util.system.toInt
 import kotlin.math.floor
 
@@ -14,21 +13,17 @@ fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter
         return sourceChapters
     }
 
+    // mangalife tends to not include a volume number for manga
     var (nullVolume, withVolume) = sourceChapters.partition { getVolumeNum(it) == null }
     nullVolume = nullVolume.sortedWith(compareByDescending { getChapterNum(it) })
-
-    // mangalife tends to not include a volume number for manga
-    val sorter =
-        if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
-            compareByDescending<SChapter> { getChapterNum(it) == null }
-                .thenByDescending { getChapterNum(it) }
-        } else {
+    withVolume =
+        withVolume.sortedWith(
             compareByDescending<SChapter> { getVolumeNum(it) }
+                .thenByDescending { getChapterNum(it) == null }
                 .thenByDescending { getChapterNum(it) }
-        }
-    withVolume = withVolume.sortedWith(sorter)
+        )
 
-    return listOf(withVolume, nullVolume).mergeSorted()
+    return listOf(nullVolume, withVolume).mergeSorted()
 }
 
 // Adapted from https://stackoverflow.com/a/69041133
