@@ -62,10 +62,9 @@ fun syncChaptersWithSource(
                         downloadManager.downloadedChapterName(dbChapter).firstOrNull {
                             it in allDownloadsMap
                         }
-                    if(validName != null) {
+                    if (validName != null) {
                         allDownloadsMap.remove(validName)
                     }
-
                 } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
                     db.deleteChapter(dbChapter).executeAsBlocking()
                 }
