@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.util.system.toInt
 import kotlin.math.floor
 
 /** This attempts to create a smart source order used when a manga is merged */
