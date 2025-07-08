@@ -107,7 +107,7 @@ fun syncChaptersWithSource(
     }
 
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val sortedChapters = reorderChapters(finalRawSourceChapters, manga)
+    val sortedChapters = reorderChapters(finalRawSourceChapters)
 
     val sourceChapters =
         sortedChapters.mapIndexed { i, sChapter ->
