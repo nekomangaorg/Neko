@@ -1,23 +1,21 @@
 package eu.kanade.tachiyomi.util.chapter
 
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import kotlin.math.floor
 
 /** This attempts to create a smart source order used when a manga is merged */
-fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
+fun reorderChapters(sourceChapters: List<SChapter>): List<SChapter> {
     if (sourceChapters.all { !it.isMergedChapter() && !it.isLocalSource() }) {
         return sourceChapters
     }
 
-    // mangalife tends to not include a volume number for manga
+    // MangaLife tends to not include a volume number for manga
     var (nullVolume, withVolume) = sourceChapters.partition { getVolumeNum(it) == null }
     nullVolume =
         nullVolume.sortedWith(
             compareByDescending<SChapter> { getChapterNum(it) == null }
-                .thenByDescending { getChapterNum(it) },
+                .thenByDescending { getChapterNum(it) }
         )
     withVolume =
         withVolume.sortedWith(
@@ -44,15 +42,15 @@ private fun List<List<SChapter>>.mergeSorted(): List<SChapter> {
         )
 
     return sequence {
-        while (iteratorToCurrentValues.isNotEmpty()) {
-            val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
+            while (iteratorToCurrentValues.isNotEmpty()) {
+                val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
 
-            yield(smallestEntry.value)
+                yield(smallestEntry.value)
 
-            if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
-            else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
+                if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
+                else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
+            }
         }
-    }
         .toList()
         .reversed()
 }
@@ -73,13 +71,13 @@ private fun String.subStringFloatOrNull(delimiter: String): Float? {
     return this.substringAfter(delimiter).toFloatOrNull()
 }
 
-fun getChapterNumInt(chapter: SChapter): Int? {
-    val float = getChapterNum(chapter)
-    return when (float != null) {
-        true -> floor(float).toInt()
-        else -> null
-    }
-}
+// fun getChapterNumInt(chapter: SChapter): Int? {
+//    val float = getChapterNum(chapter)
+//    return when (float != null) {
+//        true -> floor(float).toInt()
+//        else -> null
+//    }
+// }
 
 fun getVolumeNum(chapter: SChapter): Int? {
     return chapter.vol.toIntOrNull()

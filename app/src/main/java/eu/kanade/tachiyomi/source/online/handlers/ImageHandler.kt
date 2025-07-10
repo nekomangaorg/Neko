@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -46,6 +47,7 @@ class ImageHandler {
     private val mangaPlusHandler: MangaPlusHandler by injectLazy()
     private val bilibiliHandler: BilibiliHandler by injectLazy()
     private val comikeyHandler: ComikeyHandler by injectLazy()
+    private val namiComiHandler: NamiComiHandler by injectLazy()
 
     // chapter id and last request time
     private val tokenTracker = hashMapOf<String, Long>()
@@ -65,6 +67,8 @@ class ImageHandler {
                     getImageResponse(mangaHotHandler.client, mangaHotHandler.headers, page)
                 isExternal(page, "/bfs/comic/") ->
                     getImageResponse(bilibiliHandler.client, bilibiliHandler.headers, page)
+                isExternal(page, "namicomi") ->
+                    getImageResponse(namiComiHandler.client, namiComiHandler.headers, page)
                 else -> {
                     val request = imageRequest(page, isLogged)
                     requestImage(request, page)
