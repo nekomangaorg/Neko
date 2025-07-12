@@ -163,6 +163,10 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         super.destroy()
         scope.cancel()
         subscriptions.unsubscribe()
+
+        // Clear activity references
+        recycler.adapter = null
+        frame.removeAllViews()
     }
 
     /**
