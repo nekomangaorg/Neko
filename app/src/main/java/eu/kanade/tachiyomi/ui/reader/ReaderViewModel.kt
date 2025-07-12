@@ -575,7 +575,7 @@ class ReaderViewModel(
         }
     }
 
-    fun saveCurrentChapterReadingProgress() = {
+    fun saveCurrentChapterReadingProgress() {
         viewModelScope.launchNonCancellable { getCurrentChapter()?.let { saveReadingProgress(it) } }
     }
 
