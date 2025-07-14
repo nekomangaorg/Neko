@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.mapSuccess
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -148,7 +150,10 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             coroutineBinding {
                 val seasonal = async {
-                    fetchList(MdConstants.currentSeasonalId)
+                    fetchList(
+                            networkServices.service.getSeasonalList().mapSuccess { id }.getOrNull()
+                                ?: return@async null
+                        )
                         .andThen { listResults ->
                             Ok(
                                 listResults.copy(
@@ -232,7 +237,7 @@ open class MangaDex : HttpSource() {
                         .bind()
                 }
 
-                listOf(
+                listOfNotNull(
                     popularNewTitles.await(),
                     latestChapter.await(),
                     seasonal.await(),
