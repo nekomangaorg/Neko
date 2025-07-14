@@ -278,7 +278,7 @@ class Suwayomi : MergedServerSource() {
                         false -> " "
                     }
                 title = title.replace(prefix, "").trimStart()
-                vol = title.trimStart('0').substringBefore(delimiter, "")
+                vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
                 title = title.substringAfter(delimiter)
                 if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
                 return@any true
