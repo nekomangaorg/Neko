@@ -13,6 +13,7 @@ import java.util.TreeSet
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -80,8 +81,9 @@ fun syncChaptersWithSource(
                         val chapterName = file.nameWithoutExtension!!.substringAfter("_")
                         val dateUploaded = file.lastModified()
                         val fileNameSuffix = file.name?.substringAfter("_")
-                        if (file.name != "${Constants.LOCAL_SOURCE}_${fileNameSuffix}") {
-                            file.renameTo("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                        val expectedFileName = DiskUtil.buildValidFilename("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                        if (file.name != expectedFileName) {
+                            file.renameTo(expectedFileName)
                         }
 
                         SChapter.create().apply {
