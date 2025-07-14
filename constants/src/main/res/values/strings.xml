@@ -1469,8 +1469,7 @@
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
-    <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
-    <string name="add_favorites_as_planned_to_read_summary">When enabled manga added to your library will be updated with Plan To Read Status on MangaDex</string>
+    <string name="auto_add_to_mangadex_library">Add to MangaDex library with status</string>
     <string name="use_cache_source">Use cached source</string>
     <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
 

@@ -919,12 +919,19 @@ class MangaDetailPresenter(
                             }
                             db.insertTrack(track).executeOnIO()
                         }
+                        val autoAddStatus = preferences.autoAddToMangadexLibrary().get()
                         val shouldAddAsPlanToRead =
                             currentManga().favorite &&
-                                preferences.addToLibraryAsPlannedToRead().get() &&
+                                autoAddStatus in 1..3 &&
                                 FollowStatus.isUnfollowed(track.status)
                         if (shouldAddAsPlanToRead && isOnline()) {
-                            track.status = FollowStatus.PLAN_TO_READ.int
+                            track.status =
+                                when (autoAddStatus) {
+                                    1 -> FollowStatus.PLAN_TO_READ.int
+                                    3 -> FollowStatus.READING.int
+                                    2 -> FollowStatus.ON_HOLD.int
+                                    else -> track.status // Unreachable
+                                }
                             trackingCoordinator.updateTrackingService(
                                 track.toTrackItem(),
                                 trackManager.mdList.toTrackServiceItem(),
