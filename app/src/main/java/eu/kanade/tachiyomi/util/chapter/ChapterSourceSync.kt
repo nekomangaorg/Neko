@@ -81,7 +81,10 @@ fun syncChaptersWithSource(
                         val chapterName = file.nameWithoutExtension!!.substringAfter("_")
                         val dateUploaded = file.lastModified()
                         val fileNameSuffix = file.name?.substringAfter("_")
-                        val expectedFileName = DiskUtil.buildValidFilename("${Constants.LOCAL_SOURCE}_${fileNameSuffix}")
+                        val expectedFileName =
+                            DiskUtil.buildValidFilename(
+                                "${Constants.LOCAL_SOURCE}_${fileNameSuffix}"
+                            )
                         if (file.name != expectedFileName) {
                             file.renameTo(expectedFileName)
                         }
