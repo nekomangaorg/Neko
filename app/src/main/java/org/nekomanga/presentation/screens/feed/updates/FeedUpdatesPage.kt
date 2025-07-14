@@ -90,7 +90,8 @@ private fun Grouped(
                     it.value
                         .groupBy { it.mangaId }
                         .map {
-                            val chapters = it.value.flatMap { it.chapters }.toImmutableList()
+                            val chapters =
+                                it.value.flatMap { it.chapters }.reversed().toImmutableList()
                             it.value.first().copy(chapters = chapters)
                         }
                 }

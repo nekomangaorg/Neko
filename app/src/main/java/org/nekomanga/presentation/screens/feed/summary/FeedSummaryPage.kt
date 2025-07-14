@@ -69,7 +69,7 @@ fun FeedSummaryPage(
             }
         }
 
-        item { SummaryHeader(stringResource(R.string.new_chapters_unread)) }
+        item { SummaryHeader(stringResource(R.string.recently_updated_manga)) }
         if (updatingUpdates) {
             item {
                 LinearProgressIndicator(

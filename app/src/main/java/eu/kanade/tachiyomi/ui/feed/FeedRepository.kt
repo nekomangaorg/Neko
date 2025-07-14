@@ -74,7 +74,34 @@ class FeedRepository(
                     .filter { it.chapters.none { it.chapter.read || it.chapter.lastPageRead != 0 } }
                     .groupBy { it.mangaId }
                     .entries
-                    .map { it.value.last() }
+                    .mapNotNull { entry ->
+                        val manga = db.getManga(entry.key).executeOnIO()!!
+                        val chapters =
+                            db.getChapters(manga).executeOnIO().filterNot {
+                                it.isUnavailable && !it.isLocalSource()
+                            }
+                        val recentUploadDate =
+                            entry.value
+                                .mapNotNull { feedManga ->
+                                    if (feedManga.chapters.isNotEmpty()) {
+                                        feedManga.chapters.first().chapter.dateUpload
+                                    } else {
+                                        null
+                                    }
+                                }
+                                .max()
+                        val chapter =
+                            ChapterSort(manga).getNextUnreadChapter(chapters)
+                                ?: return@mapNotNull null
+
+                        FeedManga(
+                            mangaId = manga.id!!,
+                            mangaTitle = manga.title,
+                            date = recentUploadDate,
+                            artwork = manga.toDisplayManga().currentArtwork,
+                            chapters = persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                        )
+                    }
                     .take(6)
             }
             .mapError { err ->
