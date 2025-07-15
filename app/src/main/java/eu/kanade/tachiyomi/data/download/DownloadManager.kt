@@ -207,7 +207,7 @@ class DownloadManager(val context: Context) {
     }
 
     fun downloadedChapterName(chapter: Chapter): Set<String> {
-        return provider.getValidChapterDirNames(chapter).toHashSet()
+        return provider.getValidChapterDirOrFileNames(chapter).toHashSet()
     }
 
     /**

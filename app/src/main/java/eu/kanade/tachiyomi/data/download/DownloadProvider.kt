@@ -292,4 +292,20 @@ class DownloadProvider(
             )
             .filter { it.isNotEmpty() }
     }
+
+    /**
+     * Returns valid downloaded chapter directory names or cbz
+     *
+     * @param chapter the chapter to query.
+     */
+    fun getValidChapterDirOrFileNames(chapter: Chapter): List<String> {
+        return listOf(
+                getChapterDirName(chapter),
+                getChapterDirName(chapter) + ".cbz",
+                getJ2kChapterName(chapter) + ".cbz",
+                // chapter names from j2k
+                getJ2kChapterName(chapter),
+            )
+            .filter { it.isNotEmpty() }
+    }
 }

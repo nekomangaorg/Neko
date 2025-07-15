@@ -53,21 +53,23 @@ fun syncChaptersWithSource(
 
         if (allDownloadsMap.isNotEmpty()) {
             dbChapters.forEach { dbChapter ->
-                if (
-                    (!dbChapter.isLocalSource() &&
-                        downloadManager.isChapterDownloaded(dbChapter, manga)) ||
-                        (dbChapter.isLocalSource() &&
-                            downloadManager.isChapterDownloaded(dbChapter, manga, true))
-                ) {
-                    val validName =
-                        downloadManager.downloadedChapterName(dbChapter).firstOrNull {
-                            it in allDownloadsMap
+                if (allDownloadsMap.isNotEmpty()) {
+                    if (
+                        (!dbChapter.isLocalSource() &&
+                            downloadManager.isChapterDownloaded(dbChapter, manga)) ||
+                            (dbChapter.isLocalSource() &&
+                                downloadManager.isChapterDownloaded(dbChapter, manga, true))
+                    ) {
+                        val validName =
+                            downloadManager.downloadedChapterName(dbChapter).firstOrNull {
+                                it in allDownloadsMap
+                            }
+                        if (validName != null) {
+                            allDownloadsMap.remove(validName)
                         }
-                    if (validName != null) {
-                        allDownloadsMap.remove(validName)
+                    } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
+                        db.deleteChapter(dbChapter).executeAsBlocking()
                     }
-                } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
-                    db.deleteChapter(dbChapter).executeAsBlocking()
                 }
             }
         }
