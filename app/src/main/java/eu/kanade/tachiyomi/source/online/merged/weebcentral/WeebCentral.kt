@@ -191,7 +191,7 @@ class WeebCentral : ReducedHttpSource() {
                         }
 
                         this.name = chapterName.joinToString(" ")
-                        this.chapter_txt = this.name
+                        this.chapter_txt = chapterName.find { it.startsWith("Ch.") } ?: this.name
 
                         date_upload =
                             element.selectFirst("time[datetime]")?.attr("datetime").parseDate()

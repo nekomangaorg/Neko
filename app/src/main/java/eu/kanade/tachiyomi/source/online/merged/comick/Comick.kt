@@ -113,7 +113,8 @@ class Comick : ReducedHttpSource() {
                     SChapter.create().apply {
                         vol = chapter.vol ?: ""
                         name = chapterName
-                        chapter_txt = chapterName
+                        chapter_txt = "Ch.${chapter.chap}"
+                        chapter_title = chapter.title ?: ""
                         url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap ?: ""}-en"
                         date_upload = chapter.createdAt?.parseDate() ?: 0L
                         chapter_number = chapter.chap?.toFloatOrNull() ?: -1f

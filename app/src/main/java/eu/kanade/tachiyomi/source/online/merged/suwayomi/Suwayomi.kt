@@ -270,7 +270,6 @@ class Suwayomi : MergedServerSource() {
 
         volumePrefixes.any { prefix ->
             if (title.startsWith(prefix)) {
-                TimberKt.d { "Matched $prefix" }
                 if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
                 val delimiter =
                     when (prefix.startsWith('(')) {
@@ -279,11 +278,10 @@ class Suwayomi : MergedServerSource() {
                     }
                 title = title.replace(prefix, "").trimStart()
                 vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
-                title = title.substringAfter(delimiter)
+                title = title.substringAfter(delimiter).trimStart()
                 if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
                 return@any true
             }
-            TimberKt.d { "No match $prefix" }
             false
         }
         val chtxt = "Ch.$ch"
