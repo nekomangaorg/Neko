@@ -82,14 +82,8 @@ class FeedRepository(
                             }
                         val recentUploadDate =
                             entry.value
-                                .mapNotNull { feedManga ->
-                                    if (feedManga.chapters.isNotEmpty()) {
-                                        feedManga.chapters.first().chapter.dateUpload
-                                    } else {
-                                        null
-                                    }
-                                }
-                                .max()
+                                .mapNotNull { it.chapters.firstOrNull() }
+                                .maxOfOrNull { it.chapter.dateUpload }
                         val chapter =
                             ChapterSort(manga).getNextUnreadChapter(chapters)
                                 ?: return@mapNotNull null
@@ -97,7 +91,7 @@ class FeedRepository(
                         FeedManga(
                             mangaId = manga.id!!,
                             mangaTitle = manga.title,
-                            date = recentUploadDate,
+                            date = recentUploadDate ?: 0L,
                             artwork = manga.toDisplayManga().currentArtwork,
                             chapters = persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
                         )

@@ -34,6 +34,7 @@ import org.nekomanga.presentation.theme.Size
 fun UpdatesCard(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
+    updateDate: Long? = null,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
@@ -62,6 +63,7 @@ fun UpdatesCard(
         UpdatesRow(
             modifier = modifier,
             chapterItem = chapterItem,
+            updateDate = updateDate,
             numberOfChapters = numberOfChapters,
             mangaTitle = mangaTitle,
             artwork = artwork,
@@ -78,6 +80,7 @@ fun UpdatesCard(
 private fun UpdatesRow(
     modifier: Modifier = Modifier,
     chapterItem: ChapterItem,
+    updateDate: Long?,
     numberOfChapters: Int,
     isGrouped: Boolean,
     mangaTitle: String,
@@ -124,8 +127,9 @@ private fun UpdatesRow(
                 style = MaterialTheme.typography.bodyMedium,
                 textColor = updatedColor,
             )
+            val date = (updateDate ?: chapterItem.chapter.dateUpload).timeSpanFromNow
             Text(
-                text = "Updated ${chapterItem.chapter.dateUpload.timeSpanFromNow}",
+                text = "Updated $date",
                 style = MaterialTheme.typography.labelSmall,
                 color = updatedColor,
                 maxLines = 1,

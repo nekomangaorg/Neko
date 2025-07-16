@@ -84,6 +84,7 @@ fun FeedSummaryPage(
                 val chapter = feedManga.chapters.first()
                 UpdatesCard(
                     chapterItem = chapter,
+                    updateDate = feedManga.date,
                     isGrouped = false,
                     mangaTitle = feedManga.mangaTitle,
                     artwork = feedManga.artwork,
