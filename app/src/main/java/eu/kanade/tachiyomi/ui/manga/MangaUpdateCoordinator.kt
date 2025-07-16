@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -164,7 +163,6 @@ class MangaUpdateCoordinator {
                             // in the future check the merge type
                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                 .fetchChapters(mergeManga.url)
-                                .map { it.map { pair -> pair.first } }
                                 .onFailure {
                                     send(
                                         MangaResult.Error(
@@ -181,9 +179,12 @@ class MangaUpdateCoordinator {
                     emptyList()
                 }
 
-            val allChapters = deferredChapters.await() + deferredMergedChapters.awaitAll().flatten()
+            val mergedChapters = deferredMergedChapters.awaitAll().flatten()
+            val readFromMerged = mergedChapters.filter { it.second }.map { it.first.url }.toSet()
 
-            val (newChapters, removedChapters) = syncChaptersWithSource(db, allChapters, manga)
+            val allChapters = deferredChapters.await() + mergedChapters.map { it.first }
+            val (newChapters, removedChapters) =
+                syncChaptersWithSource(db, allChapters, manga, readFromMerged = readFromMerged)
             // chapters that were added
             if (newChapters.isNotEmpty()) {
                 val downloadNew = preferences.downloadNewChapters().get()
