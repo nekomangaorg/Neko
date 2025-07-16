@@ -244,10 +244,10 @@ private fun Filter(
             themeColorState = themeColorState,
             state =
                 MangaConstants.ChapterDisplayOptions(
-                    displayType = MangaConstants.ChapterDisplayType.Unavailable,
-                    displayState = filter.unavailable,
+                    displayType = MangaConstants.ChapterDisplayType.Available,
+                    displayState = filter.available,
                 ),
-            text = stringResource(id = R.string.show_unavailable_chapters),
+            text = stringResource(id = R.string.show_available_chapters),
             changeFilter = changeFilter,
         )
         CheckboxLine(
