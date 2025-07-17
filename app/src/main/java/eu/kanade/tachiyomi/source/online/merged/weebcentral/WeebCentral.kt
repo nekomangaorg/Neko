@@ -183,7 +183,7 @@ class WeebCentral : ReducedHttpSource() {
                                 when {
                                     chapterPrefixes.none { prefix ->
                                         chapterText.startsWith(prefix)
-                                    } -> "Ch.${chapterText.substringAfter(" ")}"
+                                    } -> "Ch.${chapterText.substringAfterLast(" ")}"
                                     else -> chapterText
                                 }
 
