@@ -4,12 +4,15 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
@@ -32,9 +35,11 @@ fun syncChaptersWithSource(
     rawSourceChapters: List<SChapter>,
     manga: Manga,
     errorFromMerged: Boolean = false,
+    readFromMerged: Set<String> = emptySet(),
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 
     // Chapters from db.
     var dbChapters = db.getChapters(manga).executeAsBlocking()
@@ -136,6 +141,9 @@ fun syncChaptersWithSource(
     // Chapters whose metadata have changed.
     val toChange = mutableListOf<Chapter>()
 
+    // Read chapters to push to  remote hosted source.
+    val toSync = mutableListOf<Chapter>()
+
     for (sourceChapter in sourceChapters) {
         val dbChapter =
             dbChapters.find {
@@ -156,11 +164,14 @@ fun syncChaptersWithSource(
         // Add the chapter if not in db already, or update if the metadata changed.
 
         if (dbChapter == null) {
-            toAdd.add(sourceChapter)
+            val chapter = sourceChapter.apply { if (this.url in readFromMerged) this.read = true }
+            toAdd.add(chapter)
         } else {
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
-
-            if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
+            val isMergedRead = sourceChapter.url in readFromMerged
+            if (
+                shouldUpdateDbChapter(dbChapter, sourceChapter) || (!dbChapter.read && isMergedRead)
+            ) {
                 if (
                     dbChapter.name != sourceChapter.name &&
                         downloadManager.isChapterDownloaded(dbChapter, manga)
@@ -179,9 +190,16 @@ fun syncChaptersWithSource(
                 dbChapter.language = sourceChapter.language
                 dbChapter.isUnavailable = sourceChapter.isUnavailable
                 dbChapter.source_order = sourceChapter.source_order
+                if (isMergedRead) dbChapter.read = true
                 toChange.add(dbChapter)
             }
+            if (!isMergedRead && dbChapter.read) {
+                toSync.add(dbChapter)
+            }
         }
+    }
+    if (preferences.readingSync().get()) {
+        runBlocking { Injekt.get<StatusHandler>().markMergedChaptersStatus(toSync, true) }
     }
 
     // Recognize number for new chapters.
