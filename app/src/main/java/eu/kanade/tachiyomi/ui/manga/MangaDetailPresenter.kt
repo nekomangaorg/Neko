@@ -1125,10 +1125,10 @@ class MangaDetailPresenter(
                 else -> ToggleableState.Off
             }
 
-        val unavailable =
-            when (manga.unavailableFilter(mangaDetailsPreferences)) {
-                Manga.CHAPTER_SHOW_UNAVAILABLE -> ToggleableState.On
-                Manga.CHAPTER_SHOW_AVAILABLE -> ToggleableState.Indeterminate
+        val available =
+            when (manga.availableFilter(mangaDetailsPreferences)) {
+                Manga.CHAPTER_SHOW_AVAILABLE -> ToggleableState.On
+                Manga.CHAPTER_SHOW_UNAVAILABLE -> ToggleableState.Indeterminate
                 else -> ToggleableState.Off
             }
 
@@ -1136,7 +1136,7 @@ class MangaDetailPresenter(
             read == ToggleableState.Off &&
                 bookmark == ToggleableState.Off &&
                 downloaded == ToggleableState.Off &&
-                unavailable == ToggleableState.Off
+                available == ToggleableState.Off
 
         val matchesDefaults = mangaFilterMatchesDefault(manga)
 
@@ -1146,7 +1146,7 @@ class MangaDetailPresenter(
             downloaded = downloaded,
             bookmarked = bookmark,
             hideChapterTitles = hideTitle,
-            unavailable = unavailable,
+            available = available,
             matchesGlobalDefaults = matchesDefaults,
         )
     }
@@ -1209,10 +1209,10 @@ class MangaDetailPresenter(
             else null
         )
         filtersId.add(
-            if (chapterDisplay.unavailable == ToggleableState.On) R.string.unavailable else null
+            if (chapterDisplay.available == ToggleableState.On) R.string.available else null
         )
         filtersId.add(
-            if (chapterDisplay.unavailable == ToggleableState.Indeterminate) R.string.available
+            if (chapterDisplay.available == ToggleableState.Indeterminate) R.string.unavailable
             else null
         )
         filtersId.add(if (hasDiabledLanguageFilters) R.string.language else null)
@@ -1260,12 +1260,12 @@ class MangaDetailPresenter(
                     manga.readFilter(mangaDetailsPreferences) == Manga.SHOW_ALL &&
                     manga.downloadedFilter(mangaDetailsPreferences) == Manga.SHOW_ALL &&
                     manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.SHOW_ALL &&
-                    manga.unavailableFilter(mangaDetailsPreferences) == Manga.SHOW_ALL
+                    manga.availableFilter(mangaDetailsPreferences) == Manga.SHOW_ALL
             ) {
                 manga.readFilter = Manga.SHOW_ALL
                 manga.bookmarkedFilter = Manga.SHOW_ALL
                 manga.downloadedFilter = Manga.SHOW_ALL
-                manga.unavailableFilter = Manga.SHOW_ALL
+                manga.availableFilter = Manga.SHOW_ALL
             }
 
             if (filterOption == null) {
@@ -1276,7 +1276,7 @@ class MangaDetailPresenter(
                         manga.readFilter = Manga.SHOW_ALL
                         manga.bookmarkedFilter = Manga.SHOW_ALL
                         manga.downloadedFilter = Manga.SHOW_ALL
-                        manga.unavailableFilter = Manga.SHOW_ALL
+                        manga.availableFilter = Manga.SHOW_ALL
                     }
                     MangaConstants.ChapterDisplayType.Unread -> {
                         manga.readFilter =
@@ -1309,11 +1309,11 @@ class MangaDetailPresenter(
                                 else -> Manga.CHAPTER_DISPLAY_NAME
                             }
                     }
-                    MangaConstants.ChapterDisplayType.Unavailable -> {
-                        manga.unavailableFilter =
+                    MangaConstants.ChapterDisplayType.Available -> {
+                        manga.availableFilter =
                             when (filterOption.displayState) {
-                                ToggleableState.On -> Manga.CHAPTER_SHOW_UNAVAILABLE
-                                ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_AVAILABLE
+                                ToggleableState.On -> Manga.CHAPTER_SHOW_AVAILABLE
+                                ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_UNAVAILABLE
                                 else -> Manga.SHOW_ALL
                             }
                     }
@@ -1392,9 +1392,7 @@ class MangaDetailPresenter(
                     mangaDetailsPreferences
                         .hideChapterTitlesByDefault()
                         .set(manga.hideChapterTitles)
-                    mangaDetailsPreferences
-                        .filterChapterByUnavailable()
-                        .set(manga.unavailableFilter)
+                    mangaDetailsPreferences.filterChapterByAvailable().set(manga.availableFilter)
                     manga.setFilterToGlobal()
                 }
             }
@@ -1416,7 +1414,7 @@ class MangaDetailPresenter(
             manga.bookmarkedFilter == mangaDetailsPreferences.filterChapterByBookmarked().get() &&
             manga.hideChapterTitles ==
                 mangaDetailsPreferences.hideChapterTitlesByDefault().get()) &&
-            manga.unavailableFilter == mangaDetailsPreferences.filterChapterByUnavailable().get() ||
+            manga.availableFilter == mangaDetailsPreferences.filterChapterByAvailable().get() ||
             !manga.usesLocalFilter
     }
 

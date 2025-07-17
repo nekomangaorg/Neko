@@ -21,7 +21,7 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
 
     fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean("hide_chapter_titles")
 
-    fun filterChapterByUnavailable() =
+    fun filterChapterByAvailable() =
         this.preferenceStore.getInt("hide_unavailable_chapters", Manga.SHOW_ALL)
 
     fun chaptersDescAsDefault() = this.preferenceStore.getBoolean("chapters_desc_as_default", true)

@@ -110,9 +110,9 @@ interface Manga : SManga {
         if (usesLocalFilter) hideChapterTitles
         else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
 
-    fun unavailableFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
-        if (usesLocalFilter) unavailableFilter
-        else mangaDetailsPreferences.filterChapterByUnavailable().get()
+    fun availableFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalFilter) availableFilter
+        else mangaDetailsPreferences.filterChapterByAvailable().get()
 
     fun showChapterTitle(defaultShow: Boolean): Boolean =
         chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
@@ -254,7 +254,7 @@ interface Manga : SManga {
         get() = chapter_flags and CHAPTER_BOOKMARKED_MASK
         set(filter) = setChapterFlags(filter, CHAPTER_BOOKMARKED_MASK)
 
-    var unavailableFilter: Int
+    var availableFilter: Int
         get() = chapter_flags and CHAPTER_UNAVAILABLE_MASK
         set(filter) = setChapterFlags(filter, CHAPTER_UNAVAILABLE_MASK)
 

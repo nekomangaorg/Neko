@@ -643,7 +643,7 @@
     <string name="show_unread_chapters">Show unread chapters</string>
     <string name="show_read_chapters">Show read chapters</string>
     <string name="hide_chapter_titles">Hide chapter titles</string>
-    <string name="show_unavailable_chapters">Show unavailable chapters</string>
+    <string name="show_available_chapters">Show available chapters</string>
     <string name="sort_by_source_s_order">Sort by source\'s order</string>
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
