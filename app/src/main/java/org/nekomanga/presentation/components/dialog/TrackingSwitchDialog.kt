@@ -23,7 +23,7 @@ fun TrackingSwitchDialog(
     name: String,
     oldName: String,
     newName: String,
-    onConfirm: (Boolean) -> Unit,
+    onConfirm: (Boolean, Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -34,21 +34,42 @@ fun TrackingSwitchDialog(
             title = { Text(text = stringResource(id = R.string.remove_previous_tracker)) },
             text = {
                 Column {
-                    TextButton(onClick = { onConfirm(true) }, modifier = Modifier.fillMaxWidth()) {
+                    val isReplacing = oldName != newName
+                    TextButton(
+                        onClick = { onConfirm(true, isReplacing) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
                         Text(
                             text =
-                                stringResource(
-                                    id = R.string.remove_x_from_service_and_add_y,
-                                    oldName,
-                                    name,
-                                    newName,
-                                )
+                                if (isReplacing) {
+                                    stringResource(
+                                        id = R.string.remove_x_from_service_and_add_y,
+                                        oldName,
+                                        name,
+                                        newName,
+                                    )
+                                } else {
+                                    stringResource(
+                                        id = R.string.remove_x_from_service,
+                                        oldName,
+                                        name,
+                                    )
+                                }
                         )
                     }
-
                     Gap(Size.small)
-                    TextButton(onClick = { onConfirm(false) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = stringResource(id = R.string.keep_both_on_service, name))
+                    TextButton(
+                        onClick = { onConfirm(false, isReplacing) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text =
+                                if (isReplacing) {
+                                    stringResource(id = R.string.keep_both_on_service, name)
+                                } else {
+                                    stringResource(id = R.string.keep_on_service, name)
+                                }
+                        )
                     }
                 }
             },
