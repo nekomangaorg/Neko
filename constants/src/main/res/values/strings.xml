@@ -701,7 +701,9 @@
     <string name="cannot_remove_tracking_while_offline">Tracker cannot be removed from %1$s while offline</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
     <string name="remove_previous_tracker">Remove previous tracker?</string>
+    <string name="remove_x_from_service">Remove %1$s from %2$s</string>
     <string name="remove_x_from_service_and_add_y">Remove %1$s from %2$s and add %3$s</string>
+    <string name="keep_on_service">Keep on %1$s and only remove locally</string>
     <string name="keep_both_on_service">Keep both on %1$s and only replace locally</string>
     <string name="anilist" translatable="false">AniList</string>
     <string name="myanimelist" translatable="false">MyAnimeList</string>
