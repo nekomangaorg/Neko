@@ -288,6 +288,7 @@ open class MangaDex : HttpSource() {
         return mangaHandler.fetchChapterList(
             manga.uuid(),
             manga.last_chapter_number,
+            manga.last_volume_number,
             preferences.includeUnavailable().get(),
         )
     }

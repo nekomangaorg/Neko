@@ -233,11 +233,10 @@ class Suwayomi : MergedServerSource() {
     fun sanitizeName(rawName: String, chapter: Float): Name {
         if (chapter < 0) {
             // Source info is not sane, sanitizing won't work
-            TimberKt.d { "not sane $rawName" }
             return Name.NotSane
         }
         var vol = ""
-        var ch =
+        val ch =
             if (chapter == chapter.toLong().toFloat()) {
                     chapter.toLong()
                 } else {
@@ -296,20 +295,18 @@ class Suwayomi : MergedServerSource() {
                 false
             }
         ) {
-            TimberKt.d { "chapter sanity $rawName" }
             return Name.NotSane
         }
-        if (title.startsWith(":")) {
-            title = title.replaceFirst(":", "").trimStart()
+
+        if (Regex("\\[end].*", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringAfter("]").trimStart()
         }
-        if (title.startsWith("-")) {
-            title = title.replaceFirst("-", "").trimStart()
-        }
+        title = title.trimStart(':', '-').trimStart()
         if (title.isNotEmpty()) {
             chapterName.add("-")
             chapterName.add(title)
         }
-        TimberKt.d { Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title).toString() }
+
         return Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title)
     }
 
@@ -418,8 +415,6 @@ class Suwayomi : MergedServerSource() {
 
     companion object {
         val name = "Suwayomi"
-        private val supportedImageTypes =
-            listOf("image/jpeg", "image/png", "image/gif", "image/webp")
     }
 }
 

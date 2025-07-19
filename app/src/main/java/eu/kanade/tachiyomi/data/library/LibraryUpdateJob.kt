@@ -447,6 +447,22 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                     "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
                                             }
                                             .getOrElse { emptyList() }
+                                            .map { (sChapter, status) ->
+                                                val sameVolume =
+                                                    sChapter.vol == "" ||
+                                                        manga.last_volume_number == null ||
+                                                        sChapter.vol ==
+                                                            manga.last_volume_number.toString()
+                                                if (
+                                                    manga.last_chapter_number != null &&
+                                                        sChapter.chapter_number ==
+                                                            manga.last_chapter_number?.toFloat() &&
+                                                        sameVolume
+                                                ) {
+                                                    sChapter.name += " [END]"
+                                                }
+                                                sChapter to status
+                                            }
                                     }
                                     .flatten()
                             }
