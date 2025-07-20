@@ -261,6 +261,7 @@ fun getAllRecentsType(
         Null as pages_left,
         Null as chapter_number,
         Null as source_order,
+        Null as smart_order,
         Null as vol,
         Null as chapter_txt,
         Null as chapter_title,

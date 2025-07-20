@@ -45,6 +45,8 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -473,11 +475,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val blockedGroups = preferences.blockedScanlators().get()
 
                 val fetchedChapters =
-                    (holder.sChapters + merged.map { it.first }).filter {
-                        ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
-                            scanlator in blockedGroups
+                    listOf(holder.sChapters, merged.map { it.first })
+                        .mergeSorted(compareBy { getChapterNum(it) })
+                        .filter {
+                            ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
+                                scanlator in blockedGroups
+                            }
                         }
-                    }
 
                 // delete cover cache image if the thumbnail from network is not empty
                 // note: we preload the covers here so we can view everything offline if they change

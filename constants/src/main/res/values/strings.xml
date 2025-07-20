@@ -71,7 +71,7 @@
     <string name="remove_all_downloads">Remove all downloads?</string>
     <string name="no_chapters_to_delete">No chapters to delete</string>
     <string name="by_source_order">By source\'s order</string>
-    <string name="by_chapter_number">By chapter number</string>
+    <string name="by_smart_order">By smart order</string>
     <string name="by_update_date">By upload date</string>
     <string name="scanlators">Scanlators</string>
 

@@ -24,6 +24,8 @@ interface Chapter : SChapter, Serializable {
 
     var source_order: Int
 
+    var smart_order: Int
+
     val isRecognizedNumber: Boolean
         get() = chapter_number >= 0f
 
@@ -45,6 +47,7 @@ interface Chapter : SChapter, Serializable {
         pages_left = other.pages_left
         date_fetch = other.date_fetch
         source_order = other.source_order
+        smart_order = other.smart_order
         copyFrom(other as SChapter)
     }
 }

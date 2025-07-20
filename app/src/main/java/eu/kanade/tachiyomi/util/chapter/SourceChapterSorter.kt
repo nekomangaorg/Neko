@@ -1,45 +1,48 @@
 package eu.kanade.tachiyomi.util.chapter
 
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 
 /** This attempts to create a smart source order used when a manga is merged */
-fun reorderChapters(sourceChapters: List<SChapter>): List<SChapter> {
-    if (sourceChapters.all { !it.isMergedChapter() && !it.isLocalSource() }) {
-        return sourceChapters
-    }
+fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
+    // Mangadex and other sources tend to not always include a volume number, so we'll try to
+    // interpolate
+    // We can assume the null volume is a positive value, so Vol.0 always come before null volume
+    // chapters
+    var (zeroVolume, nonZeroVolume) = sourceChapters.partition { getVolumeNum(it) == 0 }
+    zeroVolume =
+        zeroVolume.sortedWith(
+            compareByDescending<Chapter> { getChapterNum(it) == null }
+                .thenByDescending { getChapterNum(it) }
+        )
 
-    // MangaLife tends to not include a volume number for manga
-    var (nullVolume, withVolume) = sourceChapters.partition { getVolumeNum(it) == null }
+    var (nullVolume, withVolume) = nonZeroVolume.partition { getVolumeNum(it) == null }
     nullVolume =
         nullVolume.sortedWith(
-            compareByDescending<SChapter> { getChapterNum(it) == null }
+            compareByDescending<Chapter> { getChapterNum(it) == null }
                 .thenByDescending { getChapterNum(it) }
         )
     withVolume =
         withVolume.sortedWith(
-            compareByDescending<SChapter> { getVolumeNum(it) }
+            compareByDescending<Chapter> { getVolumeNum(it) }
                 .thenByDescending { getChapterNum(it) == null }
                 .thenByDescending { getChapterNum(it) }
         )
 
-    return listOf(nullVolume, withVolume).mergeSorted()
+    val comp = compareBy<Chapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) }
+    return listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
 }
 
 // Adapted from https://stackoverflow.com/a/69041133
-private fun List<List<SChapter>>.mergeSorted(): List<SChapter> {
+fun <T> List<List<T>>.mergeSorted(comparator: Comparator<T>): List<T> {
     val iteratorToCurrentValues =
         map { it.reversed().iterator() }
             .filter { it.hasNext() }
             .associateWith { it.next() }
             .toMutableMap()
 
-    val c: Comparator<Map.Entry<Iterator<SChapter>, SChapter>> =
-        Comparator.comparing(
-            { it.value },
-            compareBy<SChapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) },
-        )
+    val c: Comparator<Map.Entry<Iterator<T>, T>> = Comparator.comparing({ it.value }, comparator)
 
     return sequence {
             while (iteratorToCurrentValues.isNotEmpty()) {

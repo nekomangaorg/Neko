@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -194,10 +196,21 @@ class MangaUpdateCoordinator {
                     emptyList()
                 }
 
-            val mergedChapters = deferredMergedChapters.awaitAll().flatten()
+            val mergedChapters =
+                if (deferredMergedChapters.size > 1) {
+                    deferredMergedChapters
+                        .awaitAll()
+                        .mergeSorted(compareBy { getChapterNum(it.first) })
+                } else {
+                    deferredMergedChapters.awaitAll().flatten()
+                }
             val readFromMerged = mergedChapters.filter { it.second }.map { it.first.url }.toSet()
 
-            val allChapters = deferredChapters.await() + mergedChapters.map { it.first }
+            val allChapters =
+                listOf(deferredChapters.await(), mergedChapters.map { it.first })
+                    .mergeSorted(compareBy { getChapterNum(it) })
+            TimberKt.d { "defer ${deferredChapters.await().map { it.name }}" }
+            TimberKt.d { "merge ${mergedChapters.map { it.first.name }}" }
             val (newChapters, removedChapters) =
                 syncChaptersWithSource(db, allChapters, manga, readFromMerged = readFromMerged)
             // chapters that were added

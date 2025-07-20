@@ -1078,9 +1078,9 @@ class MangaDetailPresenter(
         val matchesDefaults = mangaSortMatchesDefault(manga)
 
         return when (sortOrder) {
-            Manga.CHAPTER_SORTING_NUMBER ->
+            Manga.CHAPTER_SORTING_SOURCE ->
                 MangaConstants.SortFilter(
-                    chapterNumberSort = status,
+                    sourceOrderSort = status,
                     matchesGlobalDefaults = matchesDefaults,
                 )
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
@@ -1090,7 +1090,7 @@ class MangaDetailPresenter(
                 )
             else ->
                 MangaConstants.SortFilter(
-                    sourceOrderSort = status,
+                    smartOrderSort = status,
                     matchesGlobalDefaults = matchesDefaults,
                 )
         }
@@ -1230,7 +1230,7 @@ class MangaDetailPresenter(
             } else {
                 val sortInt =
                     when (sortOption.sortType) {
-                        MangaConstants.SortType.ChapterNumber -> Manga.CHAPTER_SORTING_NUMBER
+                        MangaConstants.SortType.ChapterNumber -> Manga.CHAPTER_SORTING_SMART
                         MangaConstants.SortType.SourceOrder -> Manga.CHAPTER_SORTING_SOURCE
                         MangaConstants.SortType.UploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
                     }
