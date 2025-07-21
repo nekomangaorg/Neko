@@ -141,6 +141,7 @@ class ApiMangaParser {
 
     fun chapterListParse(
         lastChapterNumber: Int?,
+        lastVolumeNumber: Int?,
         chapterListResponse: List<ChapterDataDto>,
         groupMap: Map<String, String>,
         uploaderMap: Map<String, String>,
@@ -149,7 +150,15 @@ class ApiMangaParser {
                 Ok(
                     chapterListResponse
                         .asSequence()
-                        .mapNotNull { mapChapter(it, lastChapterNumber, groupMap, uploaderMap) }
+                        .mapNotNull {
+                            mapChapter(
+                                it,
+                                lastChapterNumber,
+                                lastVolumeNumber,
+                                groupMap,
+                                uploaderMap,
+                            )
+                        }
                         .toList()
                 )
             }
@@ -163,6 +172,7 @@ class ApiMangaParser {
     private fun mapChapter(
         networkChapter: ChapterDataDto,
         lastChapterNumber: Int?,
+        lastVolumeNumber: Int?,
         groups: Map<String, String>,
         uploaders: Map<String, String>,
     ): SChapter? {
@@ -170,7 +180,7 @@ class ApiMangaParser {
         val attributes = networkChapter.attributes
         chapter.url = MdConstants.chapterSuffix + networkChapter.id
 
-        chapter.name = networkChapter.buildChapterName(chapter, lastChapterNumber)
+        chapter.name = networkChapter.buildChapterName(chapter, lastChapterNumber, lastVolumeNumber)
         // Convert from unix time
 
         chapter.date_upload = MdUtil.parseDate(attributes.readableAt)
@@ -208,6 +218,7 @@ class ApiMangaParser {
 fun ChapterDataDto.buildChapterName(
     chapter: SChapter? = null,
     lastChapterNumber: Int? = null,
+    lastVolumeNumber: Int? = null,
 ): String {
     val chapterName = mutableListOf<String>()
     // Build chapter name
@@ -235,7 +246,17 @@ fun ChapterDataDto.buildChapterName(
     if (chapterName.isEmpty()) {
         chapterName.add("Oneshot")
     }
-    if (lastChapterNumber != null && attributes.chapter == lastChapterNumber.toString()) {
+
+    val sameVolume =
+        attributes.volume == null ||
+            lastVolumeNumber == null ||
+            attributes.volume == lastVolumeNumber.toString()
+
+    if (
+        lastChapterNumber != null &&
+            attributes.chapter == lastChapterNumber.toString() &&
+            sameVolume
+    ) {
         chapterName.add("[END]")
     }
 
