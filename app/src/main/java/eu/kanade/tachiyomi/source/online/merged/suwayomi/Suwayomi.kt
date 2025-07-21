@@ -300,6 +300,8 @@ class Suwayomi : MergedServerSource() {
 
         if (Regex("\\[end].*", RegexOption.IGNORE_CASE).matches(title)) {
             title = title.substringAfter("]").trimStart()
+        } else if (Regex(".*\\[end]", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringBefore("[").trimEnd()
         }
         title = title.trimStart(':', '-').trimStart()
         if (title.isNotEmpty()) {
