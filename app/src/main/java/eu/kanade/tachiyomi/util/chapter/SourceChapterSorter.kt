@@ -8,9 +8,14 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
     // Mangadex and other sources tend to not always include a volume number, so we'll try to
     // interpolate
+
+    // Specials from Weebcentral have null chapter and should go at the end
+    var (specials, nonSpecials) = sourceChapters.partition { it.name.startsWith("Special") }
+    specials = specials.sortedWith(compareByDescending { getVolumeNum(it) })
+
     // We can assume the null volume is a positive value, so Vol.0 always come before null volume
     // chapters
-    var (zeroVolume, nonZeroVolume) = sourceChapters.partition { getVolumeNum(it) == 0 }
+    var (zeroVolume, nonZeroVolume) = nonSpecials.partition { getVolumeNum(it) == 0 }
     zeroVolume =
         zeroVolume.sortedWith(
             compareByDescending<Chapter> { getChapterNum(it) == null }
@@ -31,7 +36,7 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
         )
 
     val comp = compareBy<Chapter> { getChapterNum(it) != null }.thenBy { getChapterNum(it) }
-    return listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
+    return specials + listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
 }
 
 // Adapted from https://stackoverflow.com/a/69041133
