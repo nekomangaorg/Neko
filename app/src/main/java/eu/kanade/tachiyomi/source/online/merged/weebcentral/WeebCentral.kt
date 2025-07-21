@@ -153,7 +153,7 @@ class WeebCentral : ReducedHttpSource() {
                         if (volumePrefixes.any { prefix -> chapterText.startsWith(prefix) }) {
                             this.vol = chapterText.substringAfter(" ")
                             val prefix =
-                                when (chapterText.startsWith("Volume")) {
+                                when (chapterText.startsWith("Special")) {
                                     true -> "${chapterText.substringBefore(" ")} "
                                     false -> "Vol."
                                 }
