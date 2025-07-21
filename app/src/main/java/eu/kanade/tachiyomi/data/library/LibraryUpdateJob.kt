@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -475,7 +476,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                 val fetchedChapters =
                     (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
-                        .mergeSorted(compareBy { getChapterNum(it) })
+                        .mergeSorted(
+                            compareBy<SChapter> { getChapterNum(it) != null }
+                                .thenBy { getChapterNum(it) }
+                        )
                         .filter {
                             ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
                                 scanlator in blockedGroups

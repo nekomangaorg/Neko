@@ -27,7 +27,8 @@ import uy.kohesive.injekt.api.get
  * @param db the database.
  * @param rawSourceChapters a list of chapters from the source.
  * @param manga the manga of the chapters.
- * @param source the source of the chapters.
+ * @param errorFromMerged whether there is an error is from a merged source
+ * @param readFromMerged a set of merged chapters that have a read status
  * @return a pair of new insertions and deletions.
  */
 fun syncChaptersWithSource(
@@ -107,7 +108,10 @@ fun syncChaptersWithSource(
                     }
                 downloadManager.refreshCache()
                 listOf(rawSourceChapters, localSourceChapters)
-                    .mergeSorted(compareByDescending { it.chapter_number })
+                    .mergeSorted(
+                        compareBy<SChapter> { getChapterNum(it) != null }
+                            .thenBy { getChapterNum(it) }
+                    )
             } else {
                 val localSourceChapters =
                     dbChapters
@@ -116,7 +120,10 @@ fun syncChaptersWithSource(
                         }
                         .map { dbChapter -> SChapter.create().apply { copyFrom(dbChapter) } }
                 listOf(rawSourceChapters, localSourceChapters)
-                    .mergeSorted(compareByDescending { it.chapter_number })
+                    .mergeSorted(
+                        compareBy<SChapter> { getChapterNum(it) != null }
+                            .thenBy { getChapterNum(it) }
+                    )
             }
     }
 

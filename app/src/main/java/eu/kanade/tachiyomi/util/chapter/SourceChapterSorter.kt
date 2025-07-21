@@ -30,7 +30,7 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
                 .thenByDescending { getChapterNum(it) }
         )
 
-    val comp = compareBy<Chapter> { getChapterNum(it) == null }.thenBy { getChapterNum(it) }
+    val comp = compareBy<Chapter> { getChapterNum(it) != null }.thenBy { getChapterNum(it) }
     return listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
 }
 
