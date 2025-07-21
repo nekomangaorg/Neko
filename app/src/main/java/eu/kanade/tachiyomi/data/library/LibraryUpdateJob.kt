@@ -434,7 +434,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
                 }
                 val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
-                val merged =
+                val mergedList =
                     when (mergeMangaList.isNotEmpty()) {
                         true -> {
                             withIOContext {
@@ -466,7 +466,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 sChapter to status
                                             }
                                     }
-                                    .flatten()
                             }
                         }
                         false -> emptyList()
@@ -475,7 +474,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val blockedGroups = preferences.blockedScanlators().get()
 
                 val fetchedChapters =
-                    listOf(holder.sChapters, merged.map { it.first })
+                    (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
                         .mergeSorted(compareBy { getChapterNum(it) })
                         .filter {
                             ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
@@ -605,7 +604,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             }
                             if (mergedChapters.isNotEmpty()) {
                                 val readChapters =
-                                    merged
+                                    mergedList
+                                        .flatten()
                                         .filter { it.second }
                                         .map { Pair(it.first.scanlator, it.first.url) }
                                 val markRead =
