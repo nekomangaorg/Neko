@@ -65,6 +65,7 @@ class MangaHandler {
                     fetchChapterList(
                         manga.uuid(),
                         manga.last_chapter_number,
+                        manga.last_volume_number,
                         preferencesHelper.includeUnavailable().get(),
                     )
                 }
@@ -176,6 +177,7 @@ class MangaHandler {
     suspend fun fetchChapterList(
         mangaUUID: String,
         lastChapterNumber: Int?,
+        lastVolumeNumber: Int?,
         includeUnavailable: Boolean,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
@@ -205,6 +207,7 @@ class MangaHandler {
 
                     apiMangaParser.chapterListParse(
                         lastChapterNumber,
+                        lastVolumeNumber,
                         results,
                         groupMap,
                         uploaderMap,
