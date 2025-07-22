@@ -68,35 +68,51 @@ class FeedRepository(
     suspend fun getSummaryUpdatesList(): Result<List<FeedManga>, ResultError.Generic> {
         return com.github.michaelbull.result
             .runCatching {
-                getUpdatesPage(offset = 0, limit = 200, uploadsFetchSort = false)
-                    .get()!!
-                    .second
-                    .filter { it.chapters.none { it.chapter.read || it.chapter.lastPageRead != 0 } }
-                    .groupBy { it.mangaId }
-                    .entries
-                    .mapNotNull { entry ->
-                        val manga = db.getManga(entry.key).executeOnIO()!!
-                        val chapters =
-                            db.getChapters(manga).executeOnIO().filterNot {
-                                it.isUnavailable && !it.isLocalSource()
+                suspend fun lookup(offset: Int, limit: Int): List<FeedManga> {
+                    return getUpdatesPage(offset = offset, limit = limit, uploadsFetchSort = false)
+                        .get()!!
+                        .second
+                        .filter {
+                            it.chapters.none { chapterItem ->
+                                chapterItem.chapter.read || chapterItem.chapter.lastPageRead != 0
                             }
-                        val recentUploadDate =
-                            entry.value
-                                .mapNotNull { it.chapters.firstOrNull() }
-                                .maxOfOrNull { it.chapter.dateUpload }
-                        val chapter =
-                            ChapterSort(manga).getNextUnreadChapter(chapters)
-                                ?: return@mapNotNull null
+                        }
+                        .groupBy { it.mangaId }
+                        .entries
+                        .mapNotNull { entry ->
+                            val manga = db.getManga(entry.key).executeOnIO()!!
+                            val chapters =
+                                db.getChapters(manga).executeOnIO().filterNot {
+                                    it.isUnavailable && !it.isLocalSource()
+                                }
+                            val recentUploadDate =
+                                entry.value
+                                    .mapNotNull { it.chapters.firstOrNull() }
+                                    .maxOfOrNull { it.chapter.dateUpload }
+                            val chapter =
+                                ChapterSort(manga).getNextUnreadChapter(chapters)
+                                    ?: return@mapNotNull null
 
-                        FeedManga(
-                            mangaId = manga.id!!,
-                            mangaTitle = manga.title,
-                            date = recentUploadDate ?: 0L,
-                            artwork = manga.toDisplayManga().currentArtwork,
-                            chapters = persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
-                        )
-                    }
-                    .take(6)
+                            FeedManga(
+                                mangaId = manga.id!!,
+                                mangaTitle = manga.title,
+                                date = recentUploadDate ?: 0L,
+                                artwork = manga.toDisplayManga().currentArtwork,
+                                chapters =
+                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                            )
+                        }
+                        .take(6)
+                }
+
+                var offset = 0
+                val limit = 100
+                val results = emptyList<FeedManga>().toMutableList()
+                while (results.size < 6 && offset < 2000) {
+                    results += lookup(offset, limit)
+                    offset += limit
+                }
+                results
             }
             .mapError { err ->
                 TimberKt.e(err)
@@ -109,79 +125,95 @@ class FeedRepository(
 
         return com.github.michaelbull.result
             .runCatching {
-                db.getRecentMangaLimit(offset = 0, limit = 50, isResuming = false)
-                    .executeOnIO()
-                    .mapNotNull { history ->
-                        history.manga.id ?: return@mapNotNull null
-                        history.chapter.id ?: return@mapNotNull null
-
-                        val chapter =
-                            getChapterItem(
-                                history.manga,
-                                history.chapter.toSimpleChapter(history.history.last_read)!!,
-                            )
-
-                        if (
-                            chapter.chapter.scanlatorList().fastAny { scanlator ->
-                                scanlator in blockedScanlators
-                            }
-                        ) {
-                            return@mapNotNull null
-                        }
-
-                        FeedManga(
-                            mangaId = history.manga.id!!,
-                            mangaTitle = history.manga.title,
-                            date = history.history.last_read,
-                            artwork = history.manga.toDisplayManga().currentArtwork,
-                            chapters = persistentListOf(chapter),
+                suspend fun lookup(offset: Int, limit: Int): List<FeedManga> {
+                    return db.getRecentMangaLimit(
+                            offset = offset,
+                            limit = limit,
+                            isResuming = false,
                         )
-                    }
-                    .groupBy { it.mangaId }
-                    .entries
-                    .mapNotNull { entry ->
-                        val feedMangaFiltered =
-                            entry.value.mapNotNull { feedManga ->
-                                if (
-                                    feedManga.chapters.isNotEmpty() &&
-                                        feedManga.chapters.none { it.chapter.read }
-                                ) {
-                                    feedManga
-                                } else {
-                                    null
-                                }
-                            }
-                        if (feedMangaFiltered.isNotEmpty()) {
-                            feedMangaFiltered.last()
-                        } else {
-                            val lastReadChapter =
-                                entry.value
-                                    .map { it.chapters }
-                                    .flatten()
-                                    .firstOrNull()
-                                    ?.chapter
-                                    ?.name ?: ""
-                            val manga = db.getManga(entry.key).executeOnIO()!!
-                            val chapters =
-                                db.getChapters(manga).executeOnIO().filterNot {
-                                    it.isUnavailable && !it.isLocalSource()
-                                }
+                        .executeOnIO()
+                        .mapNotNull { history ->
+                            history.manga.id ?: return@mapNotNull null
+                            history.chapter.id ?: return@mapNotNull null
+
                             val chapter =
-                                ChapterSort(manga).getNextUnreadChapter(chapters)
-                                    ?: return@mapNotNull null
+                                getChapterItem(
+                                    history.manga,
+                                    history.chapter.toSimpleChapter(history.history.last_read)!!,
+                                )
+
+                            if (
+                                chapter.chapter.scanlatorList().fastAny { scanlator ->
+                                    scanlator in blockedScanlators
+                                }
+                            ) {
+                                return@mapNotNull null
+                            }
 
                             FeedManga(
-                                mangaId = manga.id!!,
-                                mangaTitle = manga.title,
-                                date = 0L,
-                                artwork = manga.toDisplayManga().currentArtwork,
-                                lastReadChapter = lastReadChapter,
-                                chapters =
-                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                                mangaId = history.manga.id!!,
+                                mangaTitle = history.manga.title,
+                                date = history.history.last_read,
+                                artwork = history.manga.toDisplayManga().currentArtwork,
+                                chapters = persistentListOf(chapter),
                             )
                         }
-                    }
-                    .take(6)
+                        .groupBy { it.mangaId }
+                        .entries
+                        .mapNotNull { entry ->
+                            val feedMangaFiltered =
+                                entry.value.mapNotNull { feedManga ->
+                                    if (
+                                        feedManga.chapters.isNotEmpty() &&
+                                            feedManga.chapters.none { it.chapter.read }
+                                    ) {
+                                        feedManga
+                                    } else {
+                                        null
+                                    }
+                                }
+                            if (feedMangaFiltered.isNotEmpty()) {
+                                feedMangaFiltered.last()
+                            } else {
+                                val lastReadChapter =
+                                    entry.value
+                                        .map { it.chapters }
+                                        .flatten()
+                                        .firstOrNull()
+                                        ?.chapter
+                                        ?.name ?: ""
+                                val manga = db.getManga(entry.key).executeOnIO()!!
+                                val chapters =
+                                    db.getChapters(manga).executeOnIO().filterNot {
+                                        it.isUnavailable && !it.isLocalSource()
+                                    }
+                                val chapter =
+                                    ChapterSort(manga).getNextUnreadChapter(chapters)
+                                        ?: return@mapNotNull null
+
+                                FeedManga(
+                                    mangaId = manga.id!!,
+                                    mangaTitle = manga.title,
+                                    date = 0L,
+                                    artwork = manga.toDisplayManga().currentArtwork,
+                                    lastReadChapter = lastReadChapter,
+                                    chapters =
+                                        persistentListOf(
+                                            chapter.toSimpleChapter()!!.toChapterItem()
+                                        ),
+                                )
+                            }
+                        }
+                        .take(6)
+                }
+                var offset = 0
+                val limit = 50
+                var results = emptyList<FeedManga>()
+                while (results.size < 6 && offset < 2000) {
+                    results = lookup(offset, limit)
+                    offset += limit
+                }
+                results
             }
             .mapError { err ->
                 TimberKt.e(err)
@@ -211,43 +243,6 @@ class FeedRepository(
                             return@mapNotNull null
                         }
 
-                        val simpleChapter =
-                            chapters
-                                .filterNot { it.isUnavailable && !it.isLocalSource() }
-                                .maxByOrNull { it.source_order }
-                                ?.toSimpleChapter() ?: return@mapNotNull null
-
-                        val displayManga = manga.toDisplayManga()
-                        FeedManga(
-                            mangaId = displayManga.mangaId,
-                            mangaTitle = displayManga.title,
-                            date = manga.date_added,
-                            artwork = displayManga.currentArtwork,
-                            chapters = persistentListOf(getChapterItem(manga, simpleChapter)),
-                        )
-                    }
-                    .takeLast(6)
-                    .reversed()
-            }
-            .mapError { err ->
-                TimberKt.e(err)
-                ResultError.Generic("Error : ${err.message}")
-            }
-    }
-
-    suspend fun getNewlyAddedPage(): Result<List<FeedManga>, ResultError.Generic> {
-        return com.github.michaelbull.result
-            .runCatching {
-                db.getFavoriteMangaList()
-                    .executeOnIO()
-                    .distinctBy { it.id }
-                    .sortedBy { it.date_added }
-                    .takeLast(100)
-                    .mapNotNull { manga ->
-                        val chapters = db.getChapters(manga).executeOnIO()
-                        if (chapters.any { it.read }) {
-                            return@mapNotNull null
-                        }
                         val simpleChapter =
                             chapters
                                 .filterNot { it.isUnavailable && !it.isLocalSource() }
