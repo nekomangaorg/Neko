@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.MergedServerSource
@@ -43,6 +44,8 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
@@ -823,6 +826,7 @@ class MangaDetailPresenter(
             // do this after so the texts gets updated
             updateNextUnreadChapter()
             updateMissingChapters()
+            updateMangaStatus()
         }
     }
 
@@ -1814,6 +1818,37 @@ class MangaDetailPresenter(
                 editManga.apply { this.missing_chapters = currentMissingChapters }
                 db.insertManga(editManga)
                 updateMangaFlow()
+            }
+        }
+    }
+
+    private fun updateMangaStatus() {
+        val manga = currentManga()
+        val cancelledOrCompleted =
+            manga.status == SManga.PUBLICATION_COMPLETE || manga.status == SManga.CANCELLED
+        if (
+            cancelledOrCompleted &&
+                manga.missing_chapters == null &&
+                manga.last_chapter_number != null
+        ) {
+            val chapters = generalState.value.allChapters
+            val final =
+                chapters
+                    .filter {
+                        !it.chapter.isUnavailable || it.chapter.isLocalSource() || it.isDownloaded
+                    }
+                    .filter {
+                        getChapterNum(it.chapter.toSChapter())?.toInt() == manga.last_chapter_number
+                    }
+                    .filter {
+                        getVolumeNum(it.chapter.toSChapter()) == manga.last_volume_number ||
+                            getVolumeNum(it.chapter.toSChapter()) == null ||
+                            manga.last_volume_number == null
+                    }
+            if (final.isNotEmpty()) {
+                manga.status = SManga.COMPLETED
+                db.insertManga(manga).executeAsBlocking()
+                _mangaState.update { it.copy(status = SManga.COMPLETED) }
             }
         }
     }

@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -47,6 +48,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
@@ -646,11 +648,50 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         val allChaps = db.getChapters(manga).executeAsBlocking()
         val missingChapters =
             allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
+
+        var updated = false
+        if (missingChapters == null) {
+            val status = updateMangaStatus(allChaps, manga)
+            if (manga.status != status) {
+                manga.status = status
+                updated = true
+            }
+        }
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
-            db.insertManga(manga).executeOnIO()
+            updated = true
         }
+
+        if (updated) db.insertManga(manga).executeOnIO()
         return manga
+    }
+
+    private fun updateMangaStatus(chapters: List<Chapter>, manga: LibraryManga): Int {
+        val cancelledOrCompleted =
+            manga.status == SManga.PUBLICATION_COMPLETE || manga.status == SManga.CANCELLED
+        if (
+            cancelledOrCompleted &&
+                manga.missing_chapters == null &&
+                manga.last_chapter_number != null
+        ) {
+            val final =
+                chapters
+                    .filter {
+                        !it.isUnavailable ||
+                            it.isLocalSource() ||
+                            downloadManager.isChapterDownloaded(it, manga)
+                    }
+                    .filter { getChapterNum(it)?.toInt() == manga.last_chapter_number }
+                    .filter {
+                        getVolumeNum(it) == manga.last_volume_number ||
+                            getVolumeNum(it) == null ||
+                            manga.last_volume_number == null
+                    }
+            if (final.isNotEmpty()) {
+                return SManga.COMPLETED
+            }
+        }
+        return manga.status
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) = coroutineScope {
