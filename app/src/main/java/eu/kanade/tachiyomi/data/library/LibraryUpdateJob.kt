@@ -439,34 +439,33 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     when (mergeMangaList.isNotEmpty()) {
                         true -> {
                             withIOContext {
-                                mergeMangaList
-                                    .map { mergeManga ->
-                                        // in the future check the merge type
-                                        MergeType.getSource(mergeManga.mergeType, sourceManager)
-                                            .fetchChapters(mergeManga.url)
-                                            .onFailure {
-                                                errorFromMerged = true
-                                                failedUpdates[manga] =
-                                                    "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+                                mergeMangaList.map { mergeManga ->
+                                    // in the future check the merge type
+                                    MergeType.getSource(mergeManga.mergeType, sourceManager)
+                                        .fetchChapters(mergeManga.url)
+                                        .onFailure {
+                                            errorFromMerged = true
+                                            failedUpdates[manga] =
+                                                "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+                                        }
+                                        .getOrElse { emptyList() }
+                                        .map { (sChapter, status) ->
+                                            val sameVolume =
+                                                sChapter.vol == "" ||
+                                                    manga.last_volume_number == null ||
+                                                    sChapter.vol ==
+                                                        manga.last_volume_number.toString()
+                                            if (
+                                                manga.last_chapter_number != null &&
+                                                    sChapter.chapter_number ==
+                                                        manga.last_chapter_number?.toFloat() &&
+                                                    sameVolume
+                                            ) {
+                                                sChapter.name += " [END]"
                                             }
-                                            .getOrElse { emptyList() }
-                                            .map { (sChapter, status) ->
-                                                val sameVolume =
-                                                    sChapter.vol == "" ||
-                                                        manga.last_volume_number == null ||
-                                                        sChapter.vol ==
-                                                            manga.last_volume_number.toString()
-                                                if (
-                                                    manga.last_chapter_number != null &&
-                                                        sChapter.chapter_number ==
-                                                            manga.last_chapter_number?.toFloat() &&
-                                                        sameVolume
-                                                ) {
-                                                    sChapter.name += " [END]"
-                                                }
-                                                sChapter to status
-                                            }
-                                    }
+                                            sChapter to status
+                                        }
+                                }
                             }
                         }
                         false -> emptyList()
