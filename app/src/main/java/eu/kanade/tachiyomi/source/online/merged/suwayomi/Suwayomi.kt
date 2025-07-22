@@ -185,16 +185,18 @@ class Suwayomi : MergedServerSource() {
                     val responseBody = response.body
 
                     val chapters =
-                        responseBody.use {
-                            json
-                                .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
-                                    it.string()
-                                )
-                                .data
-                                .fetchChapters
-                                .chapters
-                        }
-                    val r =
+                        responseBody
+                            .use {
+                                json
+                                    .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
+                                        it.string()
+                                    )
+                                    .data
+                                    .fetchChapters
+                                    .chapters
+                            }
+                            .sortedByDescending { it.sourceOrder }
+                    val chapterPairs =
                         chapters.map { chapter ->
                             val sanitized = sanitizeName(chapter.name, chapter.chapterNumber)
                             SChapter.create().apply {
@@ -221,7 +223,7 @@ class Suwayomi : MergedServerSource() {
                                 date_upload = chapter.uploadDate
                             } to chapter.isRead
                         }
-                    return@runCatching r.sortedByDescending { it.first.chapter_number }
+                    return@runCatching chapterPairs
                 }
                 .mapError {
                     TimberKt.e(it) { "Error fetching suwayomi chapters" }

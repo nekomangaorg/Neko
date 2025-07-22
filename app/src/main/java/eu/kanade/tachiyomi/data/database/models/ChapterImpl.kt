@@ -36,6 +36,8 @@ class ChapterImpl : Chapter {
 
     override var source_order: Int = 0
 
+    override var smart_order: Int = 0
+
     override var language: String? = null
 
     override var isUnavailable: Boolean = false

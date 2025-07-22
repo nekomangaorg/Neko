@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -45,6 +46,8 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -432,7 +435,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
                 }
                 val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
-                val merged =
+                val mergedList =
                     when (mergeMangaList.isNotEmpty()) {
                         true -> {
                             withIOContext {
@@ -464,7 +467,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 sChapter to status
                                             }
                                     }
-                                    .flatten()
                             }
                         }
                         false -> emptyList()
@@ -473,11 +475,16 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val blockedGroups = preferences.blockedScanlators().get()
 
                 val fetchedChapters =
-                    (holder.sChapters + merged.map { it.first }).filter {
-                        ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
-                            scanlator in blockedGroups
+                    (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
+                        .mergeSorted(
+                            compareBy<SChapter> { getChapterNum(it) != null }
+                                .thenBy { getChapterNum(it) }
+                        )
+                        .filter {
+                            ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
+                                scanlator in blockedGroups
+                            }
                         }
-                    }
 
                 // delete cover cache image if the thumbnail from network is not empty
                 // note: we preload the covers here so we can view everything offline if they change
@@ -601,7 +608,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             }
                             if (mergedChapters.isNotEmpty()) {
                                 val readChapters =
-                                    merged
+                                    mergedList
+                                        .flatten()
                                         .filter { it.second }
                                         .map { Pair(it.first.scanlator, it.first.url) }
                                 val markRead =

@@ -223,7 +223,7 @@ class Toonily : ReducedHttpSource() {
 
                 chapter to false
             }
-        return Ok(chapters)
+        return Ok(chapters.reversed())
     }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {

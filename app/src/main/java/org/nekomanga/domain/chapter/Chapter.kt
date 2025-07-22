@@ -19,6 +19,7 @@ data class SimpleChapter(
     val lastPageRead: Int,
     val dateFetch: Long,
     val sourceOrder: Int,
+    val smartOrder: Int,
     val url: String,
     val name: String,
     val dateUpload: Long,
@@ -102,6 +103,7 @@ data class SimpleChapter(
                 lastPageRead = 0,
                 dateFetch = 0,
                 sourceOrder = 0,
+                smartOrder = 0,
                 url = "",
                 name = "",
                 dateUpload = -1,
@@ -135,6 +137,7 @@ data class SimpleChapter(
             it.date_upload = dateUpload
             it.chapter_number = chapterNumber
             it.source_order = sourceOrder
+            it.smart_order = smartOrder
             it.language = language
             it.isUnavailable = isUnavailable
             it.vol = volume
@@ -166,6 +169,7 @@ fun Chapter.toSimpleChapter(lastRead: Long = 0L): SimpleChapter? {
         pagesLeft = pages_left,
         dateFetch = date_fetch,
         sourceOrder = source_order,
+        smartOrder = smart_order,
         url = url,
         name = name,
         dateUpload = date_upload,

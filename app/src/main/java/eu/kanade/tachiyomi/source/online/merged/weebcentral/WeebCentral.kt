@@ -157,7 +157,7 @@ class WeebCentral : ReducedHttpSource() {
                                     true -> "${chapterText.substringBefore(" ")} "
                                     false -> "Vol."
                                 }
-                            chapterName.add("$prefix${this.vol}")
+                            chapterName.add("$prefix ${this.vol}")
                         } else {
                             // The old logic would apply the name from either the "ChapterName"
                             // or Type + chapterNumber

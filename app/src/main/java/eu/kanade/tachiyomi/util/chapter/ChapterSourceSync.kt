@@ -27,7 +27,8 @@ import uy.kohesive.injekt.api.get
  * @param db the database.
  * @param rawSourceChapters a list of chapters from the source.
  * @param manga the manga of the chapters.
- * @param source the source of the chapters.
+ * @param errorFromMerged whether there is an error is from a merged source
+ * @param readFromMerged a set of merged chapters that have a read status
  * @return a pair of new insertions and deletions.
  */
 fun syncChaptersWithSource(
@@ -106,7 +107,11 @@ fun syncChaptersWithSource(
                         }
                     }
                 downloadManager.refreshCache()
-                rawSourceChapters + localSourceChapters
+                listOf(rawSourceChapters, localSourceChapters)
+                    .mergeSorted(
+                        compareBy<SChapter> { getChapterNum(it) != null }
+                            .thenBy { getChapterNum(it) }
+                    )
             } else {
                 val localSourceChapters =
                     dbChapters
@@ -114,22 +119,32 @@ fun syncChaptersWithSource(
                             it.isLocalSource() && downloadManager.isChapterDownloaded(it, manga)
                         }
                         .map { dbChapter -> SChapter.create().apply { copyFrom(dbChapter) } }
-                rawSourceChapters + localSourceChapters
+                listOf(rawSourceChapters, localSourceChapters)
+                    .mergeSorted(
+                        compareBy<SChapter> { getChapterNum(it) != null }
+                            .thenBy { getChapterNum(it) }
+                    )
             }
     }
 
-    // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val sortedChapters = reorderChapters(finalRawSourceChapters)
-
     val sourceChapters =
-        sortedChapters.mapIndexed { i, sChapter ->
+        finalRawSourceChapters.mapIndexed { i, sChapter ->
             Chapter.create().apply {
                 copyFrom(sChapter)
-                TimberKt.d {
-                    "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${i}"
-                }
                 manga_id = manga.id
                 source_order = i
+            }
+        }
+
+    val sortedChapters = reorderChapters(sourceChapters)
+    val finalChapters =
+        sortedChapters.mapIndexed { i, chapter ->
+            Chapter.create().apply {
+                copyFrom(chapter)
+                TimberKt.d {
+                    "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${this.source_order} smartOrder=${i}"
+                }
+                smart_order = i
             }
         }
 
@@ -144,7 +159,7 @@ fun syncChaptersWithSource(
     // Read chapters to push to  remote hosted source.
     val toSync = mutableListOf<Chapter>()
 
-    for (sourceChapter in sourceChapters) {
+    for (sourceChapter in finalChapters) {
         val dbChapter =
             dbChapters.find {
                 if (
@@ -190,6 +205,7 @@ fun syncChaptersWithSource(
                 dbChapter.language = sourceChapter.language
                 dbChapter.isUnavailable = sourceChapter.isUnavailable
                 dbChapter.source_order = sourceChapter.source_order
+                dbChapter.smart_order = sourceChapter.smart_order
                 if (isMergedRead) dbChapter.read = true
                 toChange.add(dbChapter)
             }
@@ -343,5 +359,6 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: Chapter): B
         dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id ||
         dbChapter.language != sourceChapter.language ||
         dbChapter.isUnavailable != sourceChapter.isUnavailable ||
-        dbChapter.source_order != sourceChapter.source_order
+        dbChapter.source_order != sourceChapter.source_order ||
+        dbChapter.smart_order != sourceChapter.smart_order
 }

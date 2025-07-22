@@ -124,14 +124,14 @@ private fun Sort(
         Gap(Size.small)
         SortLine(
             themeColorState,
-            SortOption(sortFilter.sourceOrderSort, SourceOrder),
-            stringResource(id = R.string.by_source_order),
+            SortOption(sortFilter.smartOrderSort, ChapterNumber),
+            stringResource(id = R.string.by_smart_order),
             changeSort,
         )
         SortLine(
             themeColorState,
-            SortOption(sortFilter.chapterNumberSort, ChapterNumber),
-            stringResource(id = R.string.by_chapter_number),
+            SortOption(sortFilter.sourceOrderSort, SourceOrder),
+            stringResource(id = R.string.by_source_order),
             changeSort,
         )
         SortLine(

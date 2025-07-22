@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_OLD_MANGADEX_CH
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_PAGES_LEFT
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_READ
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SCANLATOR
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SMART_ORDER
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SOURCE_ORDER
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_UNAVAILABLE
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_UPLOADER
@@ -66,6 +67,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
             put(COL_PAGES_LEFT, obj.pages_left)
             put(COL_CHAPTER_NUMBER, obj.chapter_number)
             put(COL_SOURCE_ORDER, obj.source_order)
+            put(COL_SMART_ORDER, obj.smart_order)
             put(COL_MANGADEX_CHAPTER_ID, obj.mangadex_chapter_id)
             put(COL_LANGUAGE, obj.language)
             put(COL_OLD_MANGADEX_CHAPTER_ID, obj.old_mangadex_id)
@@ -94,6 +96,7 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
             pages_left = cursor.getInt(cursor.getColumnIndex(COL_PAGES_LEFT))
             chapter_number = cursor.getFloat(cursor.getColumnIndex(COL_CHAPTER_NUMBER))
             source_order = cursor.getInt(cursor.getColumnIndex(COL_SOURCE_ORDER))
+            smart_order = cursor.getInt(cursor.getColumnIndex(COL_SMART_ORDER))
             mangadex_chapter_id = cursor.getString(cursor.getColumnIndex(COL_MANGADEX_CHAPTER_ID))
             language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE))
             isUnavailable = cursor.getInt(cursor.getColumnIndex(COL_UNAVAILABLE)) == 1

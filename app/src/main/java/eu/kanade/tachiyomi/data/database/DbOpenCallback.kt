@@ -21,7 +21,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_NAME = "tachiyomi.db"
 
         /** Version of the database. */
-        const val DATABASE_VERSION = 40
+        const val DATABASE_VERSION = 41
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -178,6 +178,10 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 40) {
             db.execSQL(MangaTable.addMangaLastVolume)
+        }
+
+        if (oldVersion < 41) {
+            db.execSQL(ChapterTable.addSmartOrder)
         }
     }
 }

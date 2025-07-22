@@ -91,7 +91,7 @@ object MangaConstants {
 
     data class SortFilter(
         val sourceOrderSort: SortState = SortState.None,
-        val chapterNumberSort: SortState = SortState.None,
+        val smartOrderSort: SortState = SortState.None,
         val uploadDateSort: SortState = SortState.None,
         val matchesGlobalDefaults: Boolean = true,
     )
