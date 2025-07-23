@@ -12,8 +12,9 @@ OUTPUT=$(curl -H "Accept: application/vnd.github.v3+json" \
       | sub("^fix\\(deps\\)"; "chore(deps)")  # 1. fix(deps) -> chore(deps)
       | sub("^feature/"; "feat:")           # 2. feature/ -> feat:
       | sub("^fix/"; "fix:")                 # 3. fix/ -> fix:
-      | sub("^chore/"; "chore:")             # 4. chore/ -> chore:
-      | sub("^chore\\(deps\\):"; "chore:");   # 5. chore(deps): -> chore:
+      | sub("fix "; :fix: ")                 # 4. fix -> fix:
+      | sub("^chore/"; "chore:")             # 5. chore/ -> chore:
+      | sub("^chore\\(deps\\):"; "chore:");   # 6. chore(deps): -> chore:
 
     # Assign priority for sorting using the normalized message
     def get_sort_priority:
