@@ -69,12 +69,12 @@ jobs:
         with:
           repository: ${{ github.repository }}
           excludes: prerelease, draft
-          tokens: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare build
         run: |
           set -e
-
+          chmod +x ./.github/scripts/commit_log_generation.sh
           current_sha=$(git rev-parse --short HEAD)
           echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
