@@ -142,7 +142,13 @@ class SimilarHandler {
         // Get data from db
         return dbDto.similarManga
             ?.map { it.toSourceManga() }
-            ?.sortedByDescending { it.displayText.split("%")[0].toDouble() } ?: emptyList()
+            ?.sortedByDescending {
+                val double = it.displayText.split("%")[0].toDoubleOrNull()
+                if(double == null){
+                    TimberKt.e { "NumberFormatIssue this should be a double ${it.displayText.split("%")[0]} for manga ${it.title} ${it.title} ${it.displayText}" }
+                }
+            double
+            } ?: emptyList()
     }
 
     private suspend fun similarMangaParse(dexId: String, similarDto: SimilarMangaDto?) {
