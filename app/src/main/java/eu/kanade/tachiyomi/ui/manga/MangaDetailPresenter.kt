@@ -1949,12 +1949,13 @@ class MangaDetailPresenter(
      * reader)
      */
     override fun onResume() {
+        super.onResume()
         presenterScope.launch {
             updateMangaFlow()
             updateChapterFlows()
             updateTrackingFlows()
-            observeDownloads()
         }
+        observeDownloads()
     }
 
     private fun observeDownloads() {

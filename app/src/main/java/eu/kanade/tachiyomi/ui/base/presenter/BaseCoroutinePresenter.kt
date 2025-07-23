@@ -36,7 +36,9 @@ open class BaseCoroutinePresenter<T> {
     }
 
     open fun onResume() {
-        pausablePresenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        if (!pausablePresenterScope.isActive) {
+            pausablePresenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
     }
 
     open fun onDestroy() {
