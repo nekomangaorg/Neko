@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -102,23 +103,30 @@ class ChapterItemFilter(
     ): List<T> {
 
         val blockedGroupList = preferences.blockedScanlators().get()
-        val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators)
-        val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language)
+        val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+        val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
-        return chapters.filter {
-            val languages = ChapterUtil.getLanguages(it.chapter.language)
-            val languageNotFound = languages.none { language -> language in filteredLanguagesList }
+        val filteringOutMangaDex = MdConstants.name in filteredGroupList
 
-            val groups = ChapterUtil.getScanlators(it.chapter.scanlator)
-
-            val groupNotFound =
-                groups.none { group ->
-                    val inBlocked = group in blockedGroupList
-                    val inFiltered = group in filteredGroupList
-                    inBlocked || inFiltered
+        return chapters.filter { chapterItem ->
+            val sourceFilter =
+                if (filteringOutMangaDex) {
+                    chapterItem.chapter.isMergedChapter()
+                } else {
+                    true
                 }
 
-            languageNotFound && groupNotFound
+            val languageNotFound =
+                ChapterUtil.getLanguages(chapterItem.chapter.language).none { language ->
+                    language in filteredLanguagesList
+                }
+
+            val groupNotFound =
+                ChapterUtil.getScanlators(chapterItem.chapter.scanlator).none { group ->
+                    group in blockedGroupList || group in filteredGroupList
+                }
+
+            sourceFilter && languageNotFound && groupNotFound
         }
     }
 }

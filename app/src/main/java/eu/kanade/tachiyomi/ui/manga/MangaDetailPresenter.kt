@@ -799,12 +799,18 @@ class MangaDetailPresenter(
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
 
             val allChapterScanlators =
-                allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
+                allChapters
+                    .flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }
+                    .toMutableSet()
             if (
                 allChapterScanlators.size == 1 &&
                     !currentManga().filtered_scanlators.isNullOrEmpty()
             ) {
                 updateMangaScanlator(emptySet())
+            }
+
+            if (_mangaState.value.isMerged is Yes) {
+                allChapterScanlators.add(MdConstants.name)
             }
 
             val allLanguages =
@@ -1161,7 +1167,15 @@ class MangaDetailPresenter(
             ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions =
             generalState.value.allScanlators
-                .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
+                .sortedWith(
+                    java.util.Comparator { a, b ->
+                        when {
+                            a.equals(MdConstants.name, ignoreCase = true) -> -1
+                            b.equals(MdConstants.name, ignoreCase = true) -> 1
+                            else -> a.compareTo(b, ignoreCase = true)
+                        }
+                    }
+                )
                 .map { scanlator ->
                     MangaConstants.ScanlatorOption(
                         name = scanlator,
