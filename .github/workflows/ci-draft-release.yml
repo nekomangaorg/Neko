@@ -41,6 +41,9 @@ jobs:
           distribution: adopt
           java-version: 17
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.3
         with:
@@ -49,9 +52,7 @@ jobs:
           write-mode: overwrite # optional, default is preserve
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v3
-        with:
-          arguments: assembleStandardRelease
+        run: ./gradlew assembleStandardRelease
 
       - name: Sign APK
         id: sign_app

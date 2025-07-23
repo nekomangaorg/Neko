@@ -26,7 +26,10 @@ jobs:
           distribution: adopt
           java-version: 17
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build app
-        uses: eskatos/gradle-command-action@v3.5.0
-        with:
-          arguments: assembleDebug
+        run: ./gradlew assembleDebug
+
+
