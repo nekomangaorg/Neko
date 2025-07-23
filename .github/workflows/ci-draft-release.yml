@@ -68,7 +68,7 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ${{ github.repository }}
-          excludes: prerelease, draft
+          excludes: 'prerelease,draft'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare build
@@ -76,10 +76,8 @@ jobs:
           set -e
           chmod +x ./.github/scripts/commit_log_generation.sh
           current_sha=$(git rev-parse --short HEAD)
-          echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
-          echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
           echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
 
