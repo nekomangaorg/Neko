@@ -69,6 +69,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           excludes: prerelease, draft
+          tokens: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare build
         run: |
