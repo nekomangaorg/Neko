@@ -29,11 +29,7 @@ class ApiMangaParser {
     val preferencesHelper: PreferencesHelper by injectLazy()
 
     /** Parse the manga details json into manga object */
-    fun mangaDetailsParse(
-        mangaDto: MangaDataDto,
-        stats: Stats,
-        simpleChapters: List<String>,
-    ): Result<SManga, ResultError> {
+    fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
             val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
@@ -91,15 +87,7 @@ class ApiMangaParser {
                 manga.other_urls = otherUrls.joinToString("||")
             }
 
-            val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
-            val publishedOrCancelled =
-                (tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED)
-            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter)) {
-                manga.status = SManga.COMPLETED
-                manga.missing_chapters = null
-            } else {
-                manga.status = tempStatus
-            }
+            manga.status = parseStatus(mangaAttributesDto.status ?: "")
 
             val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 

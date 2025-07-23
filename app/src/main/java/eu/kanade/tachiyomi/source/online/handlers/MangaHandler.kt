@@ -102,17 +102,12 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             val artworks = artworkAsync(mangaUUID, fetchArtwork)
             val stats = statsAsync(mangaUUID)
-            val simpleChapters = simpleChaptersAsync(mangaUUID)
             val manga = mangaAsync(mangaUUID)
 
             manga
                 .await()
                 .andThen { mangaDto ->
-                    apiMangaParser.mangaDetailsParse(
-                        mangaDto.data,
-                        stats.await(),
-                        simpleChapters.await(),
-                    )
+                    apiMangaParser.mangaDetailsParse(mangaDto.data, stats.await())
                 }
                 .andThen { sManga -> Ok(sManga to artworks.await()) }
         }

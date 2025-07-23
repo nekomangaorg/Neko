@@ -13,6 +13,9 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     if (this.isNotEmpty()) {
         val chapterNumberArray =
             this.asSequence()
+                .filter {
+                    !it.chapter.isUnavailable || it.isDownloaded || it.chapter.isLocalSource()
+                }
                 .distinctBy {
                     if (it.chapter.chapterText.isNotEmpty()) {
                         it.chapter.volume + it.chapter.chapterText

@@ -217,8 +217,7 @@ class MangaUpdateCoordinator {
                         compareBy<SChapter> { getChapterNum(it) != null }
                             .thenBy { getChapterNum(it) }
                     )
-            TimberKt.d { "defer ${deferredChapters.await().map { it.name }}" }
-            TimberKt.d { "merge ${mergedChapters.map { it.first.name }}" }
+
             val (newChapters, removedChapters) =
                 syncChaptersWithSource(db, allChapters, manga, readFromMerged = readFromMerged)
             // chapters that were added
