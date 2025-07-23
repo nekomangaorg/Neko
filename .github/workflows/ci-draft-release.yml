@@ -83,12 +83,8 @@ jobs:
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
           echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
 
-          ./commit_log_generation.sh $prev_release_sha $current_sha
-
-          echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
-
           echo "COMMIT_LOGS<<{delimiter}
-          $(./commit_log_generation.sh $prev_release_sha $current_sha)
+          $(./.github/scripts/commit_log_generation.sh $prev_release_sha $current_sha)
           {delimiter}" >> $GITHUB_ENV
 
       - name: Prep build artifacts for release
