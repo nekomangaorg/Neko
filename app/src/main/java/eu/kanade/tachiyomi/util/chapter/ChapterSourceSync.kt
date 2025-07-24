@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
 import kotlinx.coroutines.runBlocking
@@ -148,9 +147,10 @@ fun syncChaptersWithSource(
             }
         }
 
-    TimberKt.d { "ChapterSourceSync get existing chapters from db" }
-
     dbChapters = db.getChapters(manga).executeAsBlocking()
+
+    val dbChaptersByUrl = dbChapters.associateBy { it.url }
+    val dbChaptersByChapterId = dbChapters.associateBy { it.mangadex_chapter_id }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -162,23 +162,9 @@ fun syncChaptersWithSource(
     val toSync = mutableListOf<Chapter>()
 
     for (sourceChapter in finalChapters) {
-        TimberKt.d { "ChapterSourceSync finding db chapter" }
         val dbChapter =
-            dbChapters.find {
-                if (
-                    sourceChapter.isMergedChapter() && it.isMergedChapter() ||
-                        (sourceChapter.isLocalSource() && it.isLocalSource())
-                ) {
-                    it.url == sourceChapter.url
-                } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
-                    (it.mangadex_chapter_id.isNotBlank() &&
-                        it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                        MdUtil.getChapterUUID(it.url) == sourceChapter.mangadex_chapter_id
-                } else {
-                    false
-                }
-            }
-        TimberKt.d { "ChapterSourceSync db chapter found" }
+            dbChaptersByChapterId[sourceChapter.mangadex_chapter_id]
+                ?: dbChaptersByUrl[sourceChapter.url]
 
         // Add the chapter if not in db already, or update if the metadata changed.
 
@@ -348,6 +334,14 @@ fun syncChaptersWithSource(
     val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
 
     return Pair(newChapters, toDelete - readded.toSet())
+}
+
+private fun bothMerged(dbChapter: Chapter, sourceChapter: Chapter): Boolean {
+    return dbChapter.isMergedChapter() && sourceChapter.isMergedChapter()
+}
+
+private fun bothLocal(dbChapter: Chapter, sourceChapter: Chapter): Boolean {
+    return dbChapter.isLocalSource() && sourceChapter.isLocalSource()
 }
 
 // checks if the chapter in db needs updated

@@ -41,9 +41,9 @@ class ChapterItemFilter(
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
-        TimberKt.d { "ESCO filtering by scanlators and langauge" }
+        TimberKt.d { "Filtering by scanlators and language" }
         val filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
-        TimberKt.d { "ESCO filtering by scanlators and langauge done" }
+        TimberKt.d { "Filtering by scanlators and language done" }
 
         return if (
             readEnabled ||
