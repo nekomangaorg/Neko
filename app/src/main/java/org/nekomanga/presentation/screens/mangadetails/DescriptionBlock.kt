@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.rememberMarkdownState
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -70,7 +71,7 @@ import org.nekomanga.presentation.theme.Size
 fun DescriptionBlock(
     windowSizeClass: WindowSizeClass,
     titleProvider: () -> String,
-    descriptionProvider: () -> String,
+    description: String,
     isInitializedProvider: () -> Boolean,
     altTitlesProvider: () -> ImmutableList<String>,
     genresProvider: () -> ImmutableList<String>,
@@ -102,12 +103,15 @@ fun DescriptionBlock(
             )
         }
 
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp).then(clickable)
-        // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
-    ) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp).then(clickable)) {
         if (!isExpanded) {
-            val text = descriptionProvider().split("\n").take(2).joinToString("\n")
+            val text = description.split("\n").take(2).joinToString("\n")
+            val markdownState =
+                rememberMarkdownState(
+                    content = text,
+                    flavour = CommonMarkFlavourDescriptor(),
+                    immediate = true,
+                )
 
             val lineHeight =
                 with(LocalDensity.current) {
@@ -121,10 +125,9 @@ fun DescriptionBlock(
 
             Box {
                 Markdown(
-                    content = text,
+                    markdownState = markdownState,
                     colors = nekoMarkdownColors(),
                     typography = nekoMarkdownTypography(),
-                    flavour = CommonMarkFlavourDescriptor(),
                     modifier =
                         Modifier.align(Alignment.TopStart)
                             .fillMaxWidth()
@@ -171,14 +174,18 @@ fun DescriptionBlock(
                 Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
-            val text = descriptionProvider().trim()
-
+            val text = description.trim()
+            val markdownState =
+                rememberMarkdownState(
+                    content = text,
+                    flavour = CommonMarkFlavourDescriptor(),
+                    immediate = true,
+                )
             SelectionContainer {
                 Markdown(
-                    content = text,
+                    markdownState = markdownState,
                     colors = nekoMarkdownColors(),
                     typography = nekoMarkdownTypography(),
-                    flavour = CommonMarkFlavourDescriptor(),
                     modifier = clickable,
                 )
             }
@@ -491,8 +498,6 @@ private fun ColumnScope.Genres(
 private fun nekoMarkdownColors() =
     markdownColor(
         text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        codeText =
-            MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
     )
 
