@@ -26,7 +26,7 @@ subprojects {
                 jvmTarget.set(JvmTarget.JVM_17)
                 freeCompilerArgs.addAll(
                     listOf(
-                        "-Xcontext-receivers",
+                        "-Xcontext-parameters",
                         "-opt-in=kotlin.Experimental",
                         "-opt-in=kotlin.RequiresOptIn",
                         "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
