@@ -6,12 +6,12 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FooterFilterChip(
@@ -39,19 +39,22 @@ fun FooterFilterChip(
         },
         colors =
             FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                labelColor = MaterialTheme.colorScheme.secondary,
-                selectedContainerColor = MaterialTheme.colorScheme.secondary,
-                selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
-                selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                        MaterialTheme.colorScheme.primary,
+                        Size.small,
+                    ),
+                labelColor = MaterialTheme.colorScheme.primary,
+                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary,
             ),
         border =
             FilterChipDefaults.filterChipBorder(
                 enabled = true,
                 selected = false,
-                borderColor = MaterialTheme.colorScheme.secondary,
+                borderColor = MaterialTheme.colorScheme.primary.copy(NekoColors.veryLowContrast),
                 selectedBorderColor = Color.Transparent,
-                borderWidth = 2.dp,
             ),
     )
 }
