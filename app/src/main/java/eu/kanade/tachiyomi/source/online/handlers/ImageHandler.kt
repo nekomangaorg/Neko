@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
-import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
@@ -45,7 +44,6 @@ class ImageHandler {
     private val azukiHandler: AzukiHandler by injectLazy()
     private val mangaHotHandler: MangaHotHandler by injectLazy()
     private val mangaPlusHandler: MangaPlusHandler by injectLazy()
-    private val bilibiliHandler: BilibiliHandler by injectLazy()
     private val comikeyHandler: ComikeyHandler by injectLazy()
     private val namiComiHandler: NamiComiHandler by injectLazy()
 
@@ -65,8 +63,6 @@ class ImageHandler {
                     getImageResponse(azukiHandler.client, azukiHandler.headers, page)
                 isExternal(page, "mangahot") ->
                     getImageResponse(mangaHotHandler.client, mangaHotHandler.headers, page)
-                isExternal(page, "/bfs/comic/") ->
-                    getImageResponse(bilibiliHandler.client, bilibiliHandler.headers, page)
                 isExternal(page, "namicomi") ->
                     getImageResponse(namiComiHandler.client, namiComiHandler.headers, page)
                 else -> {
