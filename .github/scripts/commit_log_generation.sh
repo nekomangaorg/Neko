@@ -21,8 +21,9 @@ OUTPUT=$(curl -H "Accept: application/vnd.github.v3+json" \
       get_normalized_line as $line |
       if ($line | startswith("feat")) then 0
       elif ($line | startswith("fix")) then 1
-      elif ($line | startswith("chore")) then 2
-      else 3 # For "anything else"
+      elif ($line | startswith("refactor")) then 2
+      elif ($line | startswith("chore")) then 3
+      else 4 # For "anything else"
       end;
 
     # --- Main processing starts here ---
