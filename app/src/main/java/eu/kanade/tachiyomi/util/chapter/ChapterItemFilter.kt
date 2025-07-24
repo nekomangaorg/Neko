@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -121,12 +122,27 @@ class ChapterItemFilter(
                     language in filteredLanguagesList
                 }
 
-            val groupNotFound =
+            val groupNotBlocked =
                 ChapterUtil.getScanlators(chapterItem.chapter.scanlator).none { group ->
-                    group in blockedGroupList || group in filteredGroupList
+                    group in blockedGroupList
                 }
 
-            sourceFilter && languageNotFound && groupNotFound
+            // Filter only if the merge source is filtered or all of the chapter groups are filtered
+            val groupNotFiltered =
+                if (chapterItem.chapter.isMergedChapter()) {
+                    val scanlators =
+                        ChapterUtil.getScanlators(chapterItem.chapter.scanlator).toMutableList()
+                    val first = scanlators.removeAt(0)
+                    first !in filteredGroupList &&
+                        !(first == Suwayomi.name && scanlators.removeAt(0) in filteredGroupList) &&
+                        scanlators.any { group -> group !in filteredGroupList }
+                } else {
+                    ChapterUtil.getScanlators(chapterItem.chapter.scanlator).any { group ->
+                        group !in filteredGroupList
+                    }
+                }
+
+            sourceFilter && languageNotFound && groupNotBlocked && groupNotFiltered
         }
     }
 }
