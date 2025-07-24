@@ -93,6 +93,7 @@ data class ComickChapter(
 )
 
 @Serializable data class MDGroups(@SerialName("md_groups") val mdGroup: MDGroup)
+
 @Serializable data class MDGroup(val title: String)
 
 @Serializable

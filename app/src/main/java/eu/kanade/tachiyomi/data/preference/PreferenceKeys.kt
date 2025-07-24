@@ -117,5 +117,5 @@ object PreferenceKeys {
 
     const val savedFilters = "browse_saved_filters"
 
-    const val chapterFilterOption = "chapter_filter_option"
+    const val chapterScanlatorFilterOption = "chapter__scanlator_filter_option"
 }

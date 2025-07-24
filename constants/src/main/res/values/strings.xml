@@ -176,9 +176,9 @@
     <string name="delete_downloads">Delete downloads</string>
     <string name="deleted_downloads">Deleted downloads</string>
     <string name="delete_downloads_question">Delete downloaded chapters?</string>
-    <string name="chapter_filter_option">Chapter scanlator filter type</string>
-    <string name="chapter_filter_any">Hard filter: if any of the scanlator groups matches the filter</string>
-    <string name="chapter_filter_all">"Soft filter: only if all of the scanlator groups match the filter"</string>
+    <string name="chapter_scanlator_filter_option">Chapter scanlator filter type</string>
+    <string name="chapter_filter_any">If any of the scanlator groups matches the filter, the chapter will be filtered out.</string>
+    <string name="chapter_filter_all">"If all of the scanlator groups match the filter, the chapter will be filtered out."</string>
 
 
     <string name="library_search_hint">Search title, tags</string>

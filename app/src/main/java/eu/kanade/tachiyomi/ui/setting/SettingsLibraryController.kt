@@ -88,14 +88,14 @@ class SettingsLibraryController : SettingsController() {
                 }
 
                 intListPreference(activity) {
-                    key = Keys.chapterFilterOption
-                    titleRes = R.string.chapter_filter_option
-                    dialogTitleRes = R.string.chapter_filter_option
-                    entries = listOf("Hard", "Soft")
+                    key = Keys.chapterScanlatorFilterOption
+                    titleRes = R.string.chapter_scanlator_filter_option
+                    dialogTitleRes = R.string.chapter_scanlator_filter_option
+                    entries = listOf("Any", "All")
                     entryValues = listOf(1, 0)
                     defaultValue = 1
                     summaryRes =
-                        when (preferences.chapterFilterOption().get()) {
+                        when (preferences.chapterScanlatorFilterOption().get()) {
                             0 -> R.string.chapter_filter_all
                             else -> R.string.chapter_filter_any
                         }

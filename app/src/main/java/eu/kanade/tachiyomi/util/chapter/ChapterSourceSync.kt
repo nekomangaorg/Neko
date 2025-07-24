@@ -148,6 +148,8 @@ fun syncChaptersWithSource(
             }
         }
 
+    TimberKt.d { "ChapterSourceSync get existing chapters from db" }
+
     dbChapters = db.getChapters(manga).executeAsBlocking()
 
     // Chapters from the source not in db.
@@ -160,6 +162,7 @@ fun syncChaptersWithSource(
     val toSync = mutableListOf<Chapter>()
 
     for (sourceChapter in finalChapters) {
+        TimberKt.d { "ChapterSourceSync finding db chapter" }
         val dbChapter =
             dbChapters.find {
                 if (
@@ -175,6 +178,7 @@ fun syncChaptersWithSource(
                     false
                 }
             }
+        TimberKt.d { "ChapterSourceSync db chapter found" }
 
         // Add the chapter if not in db already, or update if the metadata changed.
 
