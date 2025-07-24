@@ -230,6 +230,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun showContentRatingFilter() =
         this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 
+    fun chapterFilterOption() = this.preferenceStore.getInt(Keys.chapterFilterOption, 1)
+
     // Remove after a few releases
     fun addToLibraryAsPlannedToRead() =
         this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)

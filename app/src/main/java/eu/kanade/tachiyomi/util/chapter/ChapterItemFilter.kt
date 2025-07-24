@@ -104,6 +104,7 @@ class ChapterItemFilter(
     ): List<T> {
 
         val blockedGroupList = preferences.blockedScanlators().get()
+        val chapterFilterOption = preferences.chapterFilterOption().get() != 0
         val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
@@ -125,22 +126,28 @@ class ChapterItemFilter(
             val groupNotBlocked =
                 ChapterUtil.getScanlators(chapterItem.chapter.scanlator).none { group ->
                     group in blockedGroupList
+                    // No need to check if using soft filter
+                    || (chapterFilterOption && group in filteredGroupList)
                 }
 
-            // Filter only if the merge source is filtered or all of the chapter groups are filtered
+            // No need to check if using hard filter
             val groupNotFiltered =
-                if (chapterItem.chapter.isMergedChapter()) {
-                    val scanlators =
-                        ChapterUtil.getScanlators(chapterItem.chapter.scanlator).toMutableList()
-                    val first = scanlators.removeAt(0)
-                    first !in filteredGroupList &&
-                        !(first == Suwayomi.name && scanlators.removeAt(0) in filteredGroupList) &&
-                        scanlators.any { group -> group !in filteredGroupList }
-                } else {
-                    ChapterUtil.getScanlators(chapterItem.chapter.scanlator).any { group ->
-                        group !in filteredGroupList
+                chapterFilterOption ||
+                    // Filter only if the merge source is filtered or all of the chapter groups are
+                    // filtered
+                    if (chapterItem.chapter.isMergedChapter()) {
+                        val scanlators =
+                            ChapterUtil.getScanlators(chapterItem.chapter.scanlator).toMutableList()
+                        val first = scanlators.removeAt(0)
+                        first !in filteredGroupList &&
+                            !(first == Suwayomi.name &&
+                                scanlators.removeAt(0) in filteredGroupList) &&
+                            scanlators.any { group -> group !in filteredGroupList }
+                    } else {
+                        ChapterUtil.getScanlators(chapterItem.chapter.scanlator).any { group ->
+                            group !in filteredGroupList
+                        }
                     }
-                }
 
             sourceFilter && languageNotFound && groupNotBlocked && groupNotFiltered
         }

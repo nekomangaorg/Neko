@@ -116,4 +116,6 @@ object PreferenceKeys {
     const val thumbnailQuality = "mangadex_thumbnail_quality"
 
     const val savedFilters = "browse_saved_filters"
+
+    const val chapterFilterOption = "chapter_filter_option"
 }
