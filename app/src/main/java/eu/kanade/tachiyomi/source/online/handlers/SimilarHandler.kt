@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
@@ -144,10 +143,12 @@ class SimilarHandler {
             ?.map { it.toSourceManga() }
             ?.sortedByDescending {
                 val double = it.displayText.split("%")[0].toDoubleOrNull()
-                if(double == null){
-                    TimberKt.e { "NumberFormatIssue this should be a double ${it.displayText.split("%")[0]} for manga ${it.title} ${it.title} ${it.displayText}" }
+                if (double == null) {
+                    TimberKt.e {
+                        "NumberFormatIssue this should be a double ${it.displayText.split("%")[0]} for manga ${it.title} ${it.title} ${it.displayText}"
+                    }
                 }
-            double
+                double
             } ?: emptyList()
     }
 

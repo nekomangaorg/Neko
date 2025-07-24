@@ -86,6 +86,29 @@ class SettingsLibraryController : SettingsController() {
 
                     onClick { TabbedLibraryDisplaySheet(this@SettingsLibraryController).show() }
                 }
+
+                intListPreference(activity) {
+                    key = Keys.chapterFilterOption
+                    titleRes = R.string.chapter_filter_option
+                    dialogTitleRes = R.string.chapter_filter_option
+                    entries = listOf("Hard", "Soft")
+                    entryValues = listOf(1, 0)
+                    defaultValue = 1
+                    summaryRes =
+                        when (preferences.chapterFilterOption().get()) {
+                            0 -> R.string.chapter_filter_all
+                            else -> R.string.chapter_filter_any
+                        }
+                    onChange {
+                        it as Int
+                        summaryRes =
+                            when (it) {
+                                0 -> R.string.chapter_filter_all
+                                else -> R.string.chapter_filter_any
+                            }
+                        true
+                    }
+                }
             }
 
             val dbCategories = db.getCategories().executeAsBlocking()

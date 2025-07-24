@@ -165,7 +165,7 @@ class Suwayomi : MergedServerSource() {
         val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
         val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
-        val sourceName = parts.getOrNull(1)
+        val sourceName = parts.getOrElse(1, { "placeholder" })
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
 
         return withContext(Dispatchers.IO) {
@@ -216,8 +216,9 @@ class Suwayomi : MergedServerSource() {
                                     "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
                                         " " +
                                         "${chapter.id}"
+                                val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
                                 scanlator =
-                                    listOfNotNull(this@Suwayomi.name, sourceName, chapter.scanlator)
+                                    (listOf(this@Suwayomi.name, sourceName) + scanlators)
                                         .joinToString(Constants.SCANLATOR_SEPARATOR)
                                 language = lang
                                 date_upload = chapter.uploadDate
