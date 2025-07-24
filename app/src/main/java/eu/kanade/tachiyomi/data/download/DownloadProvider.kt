@@ -213,16 +213,6 @@ class DownloadProvider(
         mangaDir?.renameTo(toFileName)
     }
 
-    fun renameChapterFoldersForLegacyMerged(manga: Manga) {
-        val mangaDir = findMangaDir(manga) ?: return
-        mangaDir
-            .listFiles()
-            ?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }
-            ?.forEach { file ->
-                val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
-                file.renameTo(newFileName)
-            }
-    }
 
     /**
      * Returns a list of downloaded directories for the chapters that exist.

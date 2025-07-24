@@ -1422,10 +1422,8 @@ class LibraryPresenter(
         private val randomTags = arrayOf(0, 1, 2)
         private const val randomSource = 4
         private const val randomTitle = 3
-        private const val randomTag = 0
         private val randomGroupOfTags = arrayOf(1, 2)
         private const val randomGroupOfTagsNormal = 1
-        private const val randomGroupOfTagsNegate = 2
 
         fun onLowMemory() {
             lastLibraryItems = null
@@ -1498,66 +1496,5 @@ class LibraryPresenter(
             libraryPreferences.lastSearchSuggestion().set(Date().time)
         }
 
-        /** Update the library manga with new merge manga info */
-        fun updateMergeMangaDBAndFiles() {
-            val db: DatabaseHelper = Injekt.get()
-            val context by injectLazy<Application>()
-            val downloadProvider = DownloadProvider(context)
-            val libraryManga = db.getLibraryMangaList().executeAsBlocking()
-            val mergeManga = libraryManga.filter { it.merge_manga_url != null }
-
-            db.inTransaction {
-                mergeManga.forEach { manga ->
-                    GlobalScope.launchIO {
-                        downloadProvider.renameChapterFoldersForLegacyMerged(manga)
-                    }
-                    db.insertMergeManga(
-                            MergeMangaImpl(
-                                mangaId = manga.id!!,
-                                url = manga.merge_manga_url!!,
-                                mergeType = MergeType.MangaLife,
-                            )
-                        )
-                        .executeAsBlocking()
-                    manga.merge_manga_url = null
-                    db.insertManga(manga).executeAsBlocking()
-                    db.getChapters(manga)
-                        .executeAsBlocking()
-                        .filter { it.scanlator?.equals(MangaLife.oldName) == true }
-                        .map { chp ->
-                            chp.scanlator = MangaLife.name
-                            db.insertChapter(chp).executeAsBlocking()
-                        }
-                }
-            }
-        }
-
-        /** Remove any saved filters that have invalid languages */
-        fun updateSavedFilters() {
-            val db: DatabaseHelper = Injekt.get()
-            val updatedFilters =
-                db.getBrowseFilters().executeAsBlocking().map { filter ->
-                    filter.copy(
-                        dexFilters =
-                            filter.dexFilters
-                                .replace(""",{"language":"OTHER","state":true}""", "")
-                                .replace(""",{"language":"OTHER","state":false}""", "")
-                                .replace(""",{"language":"SERBO_CROATIAN","state":false}""", "")
-                                .replace(""",{"language":"SERBO_CROATIAN","state":true}""", "")
-                    )
-                }
-            db.insertBrowseFilters(updatedFilters).executeAsBlocking()
-        }
-
-        suspend fun updateRatiosAndColors() {
-            val db: DatabaseHelper = Injekt.get()
-            val libraryManga = db.getFavoriteMangaList().executeOnIO()
-            libraryManga.forEach { manga ->
-                try {
-                    withUIContext { MangaCoverMetadata.setRatioAndColors(manga) }
-                } catch (_: Exception) {}
-            }
-            MangaCoverMetadata.savePrefs()
-        }
     }
 }
