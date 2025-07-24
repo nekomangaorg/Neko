@@ -163,8 +163,11 @@ fun syncChaptersWithSource(
 
     for (sourceChapter in finalChapters) {
         val dbChapter =
-            dbChaptersByChapterId[sourceChapter.mangadex_chapter_id]
-                ?: dbChaptersByUrl[sourceChapter.url]
+            when {
+                sourceChapter.isMergedChapter() || sourceChapter.isLocalSource() ->
+                    dbChaptersByUrl[sourceChapter.url]
+                else -> dbChaptersByUrl[sourceChapter.url]
+            }
 
         // Add the chapter if not in db already, or update if the metadata changed.
 
