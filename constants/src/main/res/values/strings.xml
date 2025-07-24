@@ -1363,8 +1363,8 @@
     <string name="start_reading_">Start reading %1$s</string>
     <string name="continue_reading_">Continue reading %1$s</string>
     <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
+    <string name="filter_source">Filter Source</string>
     <string name="filter_groups">Filter Scanlator Groups</string>
-    <string name="filter_groups_title">Scanlator groups to show</string>
     <string name="filter_languages">Filter Languages</string>
 
     <string name="scanlator_groups">Scanlator groups</string>

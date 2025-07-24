@@ -4,13 +4,9 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.merged.comick.Comick
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
-import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
-import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -155,48 +151,20 @@ class ChapterFilter(
                     MdConstants.name,
                     chapter.scanlator ?: "",
                     chapter.isMergedChapter(),
+                    chapter.isLocalSource(),
                     filteredGroups,
                 )
             }
             .filterNot { chapter ->
-                ChapterUtil.filteredBySource(
-                    Comick.name,
-                    chapter.scanlator ?: "",
-                    chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapter ->
-                ChapterUtil.filteredBySource(
-                    Komga.name,
-                    chapter.scanlator ?: "",
-                    chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapter ->
-                ChapterUtil.filteredBySource(
-                    Suwayomi.name,
-                    chapter.scanlator ?: "",
-                    chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapter ->
-                ChapterUtil.filteredBySource(
-                    Toonily.name,
-                    chapter.scanlator ?: "",
-                    chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapter ->
-                ChapterUtil.filteredBySource(
-                    WeebCentral.name,
-                    chapter.scanlator ?: "",
-                    chapter.isMergedChapter(),
-                    filteredGroups,
-                )
+                SourceManager.mergeSourceNames.any { sourceName ->
+                    ChapterUtil.filteredBySource(
+                        sourceName,
+                        chapter.scanlator ?: "",
+                        chapter.isMergedChapter(),
+                        chapter.isLocalSource(),
+                        filteredGroups,
+                    )
+                }
             }
             .filterNot { chapter ->
                 ChapterUtil.filterByLanguage(chapter.language ?: "", filteredLanguages)

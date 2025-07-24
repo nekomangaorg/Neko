@@ -76,6 +76,7 @@ class ChapterUtil {
             sourceName: String,
             scanlatorStr: String,
             isMerged: Boolean,
+            isLocal: Boolean,
             filteredGroups: Set<String>,
         ): Boolean {
             if (filteredGroups.isEmpty()) {
@@ -87,10 +88,16 @@ class ChapterUtil {
                 return false
             }
 
-            if (sourceName == MdConstants.name) {
+            if (sourceName == MdConstants.name && !isLocal) {
                 return !isMerged
             }
-            // at this point if the chapter is not merged and the source is Not MangaDex then we
+
+            if (sourceName == Constants.LOCAL_SOURCE) {
+                return isLocal
+            }
+
+            // at this point if the chapter is not merged and the source is Not MangaDex or Local
+            // then we
             // already
             // know its not a matching chapter
             if (!isMerged) {

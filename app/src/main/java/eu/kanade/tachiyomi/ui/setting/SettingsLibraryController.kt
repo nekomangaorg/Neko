@@ -91,7 +91,7 @@ class SettingsLibraryController : SettingsController() {
                     key = Keys.chapterScanlatorFilterOption
                     titleRes = R.string.chapter_scanlator_filter_option
                     dialogTitleRes = R.string.chapter_scanlator_filter_option
-                    entries = listOf("Any", "All")
+                    entries = listOf("Match Any", "Match All")
                     entryValues = listOf(1, 0)
                     defaultValue = 1
                     summaryRes =

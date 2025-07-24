@@ -798,6 +798,8 @@ class MangaDetailPresenter(
                     }
             _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
 
+            val allSources = mutableSetOf(MdConstants.name)
+
             val allChapterScanlators =
                 allChapters
                     .flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }
@@ -809,8 +811,11 @@ class MangaDetailPresenter(
                 updateMangaScanlator(emptySet())
             }
 
-            if (_mangaState.value.isMerged is Yes) {
-                allChapterScanlators.add(MdConstants.name)
+            SourceManager.mergeSourceNames.forEach { name ->
+                val removed = allChapterScanlators.remove(name)
+                if (removed) {
+                    allSources.add(name)
+                }
             }
 
             val allLanguages =
@@ -824,6 +829,7 @@ class MangaDetailPresenter(
                             .toImmutableList(),
                     allChapters = allChapters.toImmutableList(),
                     allScanlators = allChapterScanlators.toImmutableSet(),
+                    allSources = allSources.toImmutableSet(),
                     allLanguages = allLanguages.toImmutableSet(),
                 )
             }
@@ -1161,21 +1167,29 @@ class MangaDetailPresenter(
         )
     }
 
+    /** Get sources filter */
+    private fun getSourceFilter(): MangaConstants.ScanlatorFilter {
+        val filteredScanlators =
+            ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
+        val scanlatorOptions =
+            generalState.value.allSources
+                .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
+                .map { scanlator ->
+                    MangaConstants.ScanlatorOption(
+                        name = scanlator,
+                        disabled = filteredScanlators.contains(scanlator),
+                    )
+                }
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
+    }
+
     /** Get scanlator filter */
     private fun getScanlatorFilter(): MangaConstants.ScanlatorFilter {
         val filteredScanlators =
             ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions =
             generalState.value.allScanlators
-                .sortedWith(
-                    java.util.Comparator { a, b ->
-                        when {
-                            a.equals(MdConstants.name, ignoreCase = true) -> -1
-                            b.equals(MdConstants.name, ignoreCase = true) -> 1
-                            else -> a.compareTo(b, ignoreCase = true)
-                        }
-                    }
-                )
+                .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
                 .map { scanlator ->
                     MangaConstants.ScanlatorOption(
                         name = scanlator,
@@ -1202,11 +1216,13 @@ class MangaDetailPresenter(
 
     private fun getFilterText(
         chapterDisplay: MangaConstants.ChapterDisplay,
+        chapterSourceFilter: MangaConstants.ScanlatorFilter,
         chapterScanlatorFilter: MangaConstants.ScanlatorFilter,
         languageFilter: MangaConstants.LanguageFilter,
     ): String {
         val hasDisabledScanlators = chapterScanlatorFilter.scanlators.any { it.disabled }
-        val hasDiabledLanguageFilters = languageFilter.languages.any { it.disabled }
+        val hasDisabledSources = chapterSourceFilter.scanlators.any { it.disabled }
+        val hasDisabledLanguageFilters = languageFilter.languages.any { it.disabled }
         val filtersId = mutableListOf<Int?>()
         filtersId.add(
             if (chapterDisplay.unread == ToggleableState.Indeterminate) R.string.read else null
@@ -1233,8 +1249,10 @@ class MangaDetailPresenter(
             if (chapterDisplay.available == ToggleableState.Indeterminate) R.string.unavailable
             else null
         )
-        filtersId.add(if (hasDiabledLanguageFilters) R.string.language else null)
+        filtersId.add(if (hasDisabledLanguageFilters) R.string.language else null)
         filtersId.add(if (hasDisabledScanlators) R.string.scanlators else null)
+        filtersId.add(if (hasDisabledSources) R.string.sources else null)
+
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 
@@ -1503,6 +1521,7 @@ class MangaDetailPresenter(
     private fun updateFilterFlow() {
         presenterScope.launchIO {
             val filter = getFilter()
+            val sourceFilter = getSourceFilter()
             val scanlatorFilter = getScanlatorFilter()
             val languageFilter = getLanguageFilter()
 
@@ -1510,8 +1529,10 @@ class MangaDetailPresenter(
                 it.copy(
                     chapterSortFilter = getSortFilter(),
                     chapterFilter = filter,
-                    chapterFilterText = getFilterText(filter, scanlatorFilter, languageFilter),
+                    chapterFilterText =
+                        getFilterText(filter, sourceFilter, scanlatorFilter, languageFilter),
                     chapterScanlatorFilter = scanlatorFilter,
+                    chapterSourceFilter = sourceFilter,
                     chapterLanguageFilter = languageFilter,
                 )
             }

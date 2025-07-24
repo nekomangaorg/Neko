@@ -3,11 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.merged.comick.Comick
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
-import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
-import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
+import eu.kanade.tachiyomi.source.SourceManager
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -115,6 +111,7 @@ class ChapterItemFilter(
         val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
+        SourceManager.mergeSourceNames
         return chapters
             .asSequence()
             .filterNot { chapterItem ->
@@ -122,48 +119,20 @@ class ChapterItemFilter(
                     MdConstants.name,
                     chapterItem.chapter.scanlator,
                     chapterItem.chapter.isMergedChapter(),
+                    chapterItem.chapter.isLocalSource(),
                     filteredGroups,
                 )
             }
             .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    Comick.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    Komga.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    Suwayomi.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    Toonily.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    WeebCentral.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    filteredGroups,
-                )
+                SourceManager.mergeSourceNames.any { sourceName ->
+                    ChapterUtil.filteredBySource(
+                        sourceName,
+                        chapterItem.chapter.scanlator,
+                        chapterItem.chapter.isMergedChapter(),
+                        chapterItem.chapter.isLocalSource(),
+                        filteredGroups,
+                    )
+                }
             }
             .filterNot { chapterItem ->
                 ChapterUtil.filterByLanguage(chapterItem.chapter.language, filteredLanguages)
