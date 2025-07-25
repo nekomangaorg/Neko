@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
@@ -212,7 +211,6 @@ class DownloadProvider(
         val toFileName = DiskUtil.buildValidFilename(to)
         mangaDir?.renameTo(toFileName)
     }
-
 
     /**
      * Returns a list of downloaded directories for the chapters that exist.
