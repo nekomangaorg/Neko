@@ -50,11 +50,11 @@ class FeedUpdatesHandler {
             return@withContext authService
                 .feedUpdates(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                 .getOrResultError("getting latest chapters")
-                .andThen { latestChapterParse(it) }
+                .andThen { feedUpdatesParse(it) }
         }
     }
 
-    private suspend fun latestChapterParse(
+    private suspend fun feedUpdatesParse(
         chapterListDto: ChapterListDto
     ): Result<MangaListPage, ResultError> {
         return runCatching {
@@ -90,7 +90,7 @@ class FeedUpdatesHandler {
 
                 service
                     .search(ProxyRetrofitQueryMap(queryParameters))
-                    .getOrResultError("trying to search manga from latest feed uploads")
+                    .getOrResultError("trying to search manga from feed uploads")
                     .andThen { mangaListDto ->
                         val hasMoreResults =
                             chapterListDto.limit + chapterListDto.offset < chapterListDto.total
@@ -123,9 +123,9 @@ class FeedUpdatesHandler {
             }
             .getOrElse { e ->
                 if (e !is CancellationException) {
-                    TimberKt.e(e) { "Error parsing latest chapters" }
+                    TimberKt.e(e) { "Error parsing feed uploads" }
                 }
-                Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
+                Err(ResultError.Generic(errorString = "Error parsing feed uploads response"))
             }
     }
 }
