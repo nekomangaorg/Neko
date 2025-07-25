@@ -45,7 +45,6 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.domain.backup.BackupPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -186,8 +185,6 @@ class PreferenceModule(val application: Application) : InjektModule {
                 preferenceStore = get(),
             )
         }
-
-        addSingletonFactory { BackupPreferences(get()) }
 
         addSingletonFactory { SecurityPreferences(get()) }
 

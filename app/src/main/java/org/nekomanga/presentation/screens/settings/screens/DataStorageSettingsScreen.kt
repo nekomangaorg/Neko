@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.presentation.components.dialog.CreateBackupDialog
@@ -27,6 +28,7 @@ import org.nekomanga.presentation.components.dialog.RestoreDialog
 import org.nekomanga.presentation.components.storage.storageLocationPicker
 import org.nekomanga.presentation.components.storage.storageLocationText
 import org.nekomanga.presentation.screens.settings.Preference
+import org.nekomanga.presentation.screens.settings.PreferenceItem
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class DataStorageSettingsScreen(
@@ -133,6 +135,20 @@ internal class DataStorageSettingsScreen(
                             }
                         },
                     ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = storagePreferences.backupInterval(),
+                        title = stringResource(R.string.automatic_backups),
+                        entries =
+                            persistentMapOf(
+                                0 to stringResource(R.string.off),
+                                6 to stringResource(R.string.every_6_hours),
+                                12 to stringResource(R.string.every_12_hours),
+                                24 to stringResource(R.string.daily),
+                                48 to stringResource(R.string.every_2_days),
+                                168 to stringResource(R.string.weekly),
+                            ),
+                    ),
+                    Preference.PreferenceItem.InfoPreference(stringResource(R.string.backup_info)),
                 ),
         )
     }
@@ -140,7 +156,12 @@ internal class DataStorageSettingsScreen(
     companion object : SearchTermProvider {
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
-            return persistentListOf()
+            return persistentListOf(
+                SearchTerm(stringResource(R.string.storage_location)),
+                SearchTerm(stringResource(R.string.create_backup),stringResource(R.string.can_be_used_to_restore) ),
+                SearchTerm(stringResource(R.string.restore_backup), stringResource(R.string.restore_from_backup_file)),
+                SearchTerm(stringResource(R.string.automatic_backups))
+            )
         }
     }
 }

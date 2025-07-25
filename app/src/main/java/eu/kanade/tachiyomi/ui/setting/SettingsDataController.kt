@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
-import org.nekomanga.domain.backup.BackupPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import uy.kohesive.injekt.Injekt
@@ -37,7 +36,6 @@ import uy.kohesive.injekt.api.get
 class SettingsDataController : AbstractSettingsController() {
     private val storagePreferences: StoragePreferences = Injekt.get()
     private val storageManager: StorageManager = Injekt.get()
-    private val backupPreferences: BackupPreferences = Injekt.get()
 
     /** Flags containing information of what to backup. */
     private var backupFlags = 0
@@ -111,7 +109,7 @@ class SettingsDataController : AbstractSettingsController() {
                 titleRes = R.string.automatic_backups
 
                 intListPreference(activity) {
-                    bindTo(backupPreferences.backupInterval())
+                    bindTo(storagePreferences.backupInterval())
                     titleRes = R.string.backup_frequency
                     entriesRes =
                         arrayOf(
