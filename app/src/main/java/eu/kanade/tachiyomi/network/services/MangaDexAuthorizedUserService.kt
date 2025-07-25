@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
 import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
@@ -87,4 +88,14 @@ interface MangaDexAuthorizedUserService {
     suspend fun createForumThread(
         @Body forumThreadDto: ForumThreadDto
     ): ApiResponse<ForumThreadResponseDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdConstants.Api.updates}?order[readableAt]=desc")
+    suspend fun feedUpdates(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Query("translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("contentRating[]") contentRating: List<String>,
+        @Query("excludedGroups[]") blockedScanlators: List<String>,
+    ): ApiResponse<ChapterListDto>
 }

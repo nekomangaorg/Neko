@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
+import eu.kanade.tachiyomi.source.online.handlers.FeedUpdatesHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
@@ -65,6 +66,8 @@ open class MangaDex : HttpSource() {
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
     private val latestChapterHandler: LatestChapterHandler by injectLazy()
+
+    private val feedUpdatesHandler: FeedUpdatesHandler by injectLazy()
 
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
@@ -206,6 +209,26 @@ open class MangaDex : HttpSource() {
                         .bind()
                 }
 
+                val latestFeed = async {
+                    if (!loginHelper.isLoggedIn()) {
+                        return@async null
+                    }
+                    feedUpdatesHandler
+                        .getPage(
+                            blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            limit = MdConstants.Limits.latestSmaller,
+                        )
+                        .andThen { mangaListPage ->
+                            Ok(
+                                ListResults(
+                                    displayScreenType = DisplayScreenType.FeedUpdates(),
+                                    sourceManga = mangaListPage.sourceManga,
+                                )
+                            )
+                        }
+                        .bind()
+                }
+
                 val latestChapter = async {
                     latestChapterHandler
                         .getPage(
@@ -238,6 +261,7 @@ open class MangaDex : HttpSource() {
                 }
 
                 listOfNotNull(
+                    latestFeed.await(),
                     popularNewTitles.await(),
                     latestChapter.await(),
                     seasonal.await(),
@@ -262,6 +286,13 @@ open class MangaDex : HttpSource() {
         blockedScanlatorUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
         return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
+    }
+
+    suspend fun feedUpdates(
+        page: Int,
+        blockedScanlatorUUIDs: List<String>,
+    ): Result<MangaListPage, ResultError> {
+        return feedUpdatesHandler.getPage(page, blockedScanlatorUUIDs)
     }
 
     suspend fun getMangaDetails(
