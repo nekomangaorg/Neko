@@ -22,6 +22,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
+import coil3.SingletonImageLoader
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -29,7 +30,7 @@ import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
-import eu.kanade.tachiyomi.data.image.coil.CoilSetup
+import eu.kanade.tachiyomi.data.image.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -51,7 +52,7 @@ import uy.kohesive.injekt.injectLazy
 
 private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
 
-open class App : Application(), DefaultLifecycleObserver {
+open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
     val preferences: PreferencesHelper by injectLazy()
     val networkPreferences: NetworkPreferences by injectLazy()
@@ -99,7 +100,6 @@ open class App : Application(), DefaultLifecycleObserver {
             TimberKt.plant(DebugReportingTree())
         }
 
-        CoilSetup(this)
         setupNotificationChannels()
 
         Iconics.init(applicationContext)
@@ -171,6 +171,8 @@ open class App : Application(), DefaultLifecycleObserver {
         super.onLowMemory()
         LibraryPresenter.onLowMemory()
     }
+
+    override fun newImageLoader(context: Context) = coilImageLoader(context)
 
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)

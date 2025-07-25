@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -48,8 +49,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
@@ -196,11 +197,8 @@ private fun ArtworkButton(text: String, color: Color, modifier: Modifier, onClic
 @Composable
 private fun Thumbnail(artwork: Artwork, thumbnailSize: Dp, thumbnailClicked: () -> Unit) {
     AsyncImage(
-        model =
-            ImageRequest.Builder(LocalContext.current)
-                .data(artwork)
-                .placeholder(Pastel.getColorLight())
-                .build(),
+        model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
+        placeholder = ColorPainter(Color(Pastel.getColorLight())),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier =

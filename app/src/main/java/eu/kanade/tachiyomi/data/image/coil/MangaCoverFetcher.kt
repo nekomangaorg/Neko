@@ -1,16 +1,14 @@
 package eu.kanade.tachiyomi.data.image.coil
 
 import android.webkit.MimeTypeMap
-import coil.ImageLoader
-import coil.decode.DataSource
-import coil.decode.ImageSource
-import coil.disk.DiskCache
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.fetch.SourceResult
-import coil.network.HttpException
-import coil.request.Options
-import coil.request.Parameters
+import coil3.ImageLoader
+import coil3.decode.DataSource
+import coil3.decode.ImageSource
+import coil3.disk.DiskCache
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.SourceFetchResult
+import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
@@ -29,6 +27,7 @@ import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
 import okhttp3.Response
+import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
@@ -145,7 +144,7 @@ class MangaCoverFetcher(
                     inLibrary = inLibrary,
                     originalThumbnail = originalThumbnailUrl,
                 )
-                return SourceResult(
+                return SourceFetchResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
                     dataSource = DataSource.DISK,
@@ -170,7 +169,7 @@ class MangaCoverFetcher(
                 // Read from disk cache
                 snapshot = writeToDiskCache(response)
                 if (snapshot != null) {
-                    return SourceResult(
+                    return SourceFetchResult(
                         source = snapshot.toImageSource(),
                         mimeType = "image/*",
                         dataSource = DataSource.NETWORK,
@@ -178,8 +177,9 @@ class MangaCoverFetcher(
                 }
 
                 // Read from response if cache is unused or unusable
-                return SourceResult(
-                    source = ImageSource(source = responseBody.source(), context = options.context),
+                return SourceFetchResult(
+                    source =
+                        ImageSource(source = responseBody.source(), fileSystem = FileSystem.SYSTEM),
                     mimeType = "image/*",
                     dataSource =
                         if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
@@ -202,7 +202,7 @@ class MangaCoverFetcher(
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != HTTP_NOT_MODIFIED) {
             response.close()
-            throw HttpException(response)
+            throw Exception(response.message)
         }
         return response
     }
@@ -217,8 +217,6 @@ class MangaCoverFetcher(
                         .add("x-request-id", "Neko-" + UUID.randomUUID())
                         .build()
                 )
-                // Support attaching custom data to the network request.
-                .tag(Parameters::class.java, options.parameters)
 
         when {
             options.networkCachePolicy.readEnabled -> {
@@ -275,15 +273,20 @@ class MangaCoverFetcher(
     }
 
     private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value[diskCacheKey!!]
+        return if (options.diskCachePolicy.readEnabled)
+            diskCacheLazy.value.openSnapshot(diskCacheKey!!)
         else null
     }
 
     private fun writeToDiskCache(response: Response): DiskCache.Snapshot? {
-        val editor = diskCacheLazy.value.edit(diskCacheKey!!) ?: return null
+        if (!options.diskCachePolicy.writeEnabled) {
+            return null
+        }
+        val editor = diskCacheLazy.value.openEditor(diskCacheKey!!) ?: return null
+
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
-                response.body!!.source().readAll(this)
+                response.body.source().readAll(this)
             }
             return editor.commitAndOpenSnapshot()
         } catch (e: Exception) {
@@ -295,7 +298,12 @@ class MangaCoverFetcher(
     }
 
     private fun DiskCache.Snapshot.toImageSource(): ImageSource {
-        return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
+        return ImageSource(
+            file = data,
+            fileSystem = FileSystem.SYSTEM,
+            diskCacheKey = diskCacheKey,
+            closeable = this,
+        )
     }
 
     private fun setRatioAndColorsInScope(
@@ -335,8 +343,13 @@ class MangaCoverFetcher(
     }
 
     private fun fileLoader(file: File): FetchResult {
-        return SourceResult(
-            source = ImageSource(file = file.toOkioPath(), diskCacheKey = diskCacheKey),
+        return SourceFetchResult(
+            source =
+                ImageSource(
+                    file = file.toOkioPath(),
+                    fileSystem = FileSystem.SYSTEM,
+                    diskCacheKey = diskCacheKey,
+                ),
             mimeType = "image/*",
             dataSource = DataSource.DISK,
         )
