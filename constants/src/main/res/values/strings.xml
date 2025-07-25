@@ -893,7 +893,7 @@
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Failed to restore backup</string>
-    <string name="restore_missing_sources">Missing sources:</string>
+    <string name="restore_missing_mangadex">Warning! No MangaDex manga found in the backup.</string>
     <string name="restore_missing_trackers">Trackers not logged into:</string>
     <string name="restore_content">Restore uses sources to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="restore_content_full">Data from the backup file will be restored.\n\nYou will need to install any missing extensions and log in to tracking services afterwards to use them.</string>
@@ -904,7 +904,7 @@
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
-    <string name="restore_miui_warning">Backup/restore may not function properly if MIUI Optimization is disabled.</string>
+    <string name="restore_miui_warning">Backup/Restore may not function properly if MIUI Optimization is disabled.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>
     <plurals name="restore_completed_message">
@@ -1163,6 +1163,7 @@
     <string name="select_cover_image">Select cover image</string>
     <string name="select_backup_file">Select backup file</string>
     <string name="file_picker_error">No file picker app found</string>
+    <string name="file_picker_uri_permission_unsupported">Failed to acquire persistent folder access. The app may behave unexpectedly.</string>
 
     <!-- Webview -->
     <string name="information_cloudflare_bypass_failure">Failed to bypass Cloudflare</string>

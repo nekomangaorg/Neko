@@ -26,6 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
@@ -36,9 +37,9 @@ import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.screens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsDataStorageScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMangaDexScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
@@ -52,6 +53,7 @@ fun SettingsScreen(
     preferencesHelper: PreferencesHelper,
     mangaDetailsPreferences: MangaDetailsPreferences,
     libraryPreferences: LibraryPreferences,
+    storagePreferences: StoragePreferences,
     categories: State<List<Category>>,
     windowSizeClass: WindowSizeClass,
     setLibrarySearchSuggestion: () -> Unit,
@@ -147,13 +149,11 @@ fun SettingsScreen(
         }
 
         composable<Screens.Settings.DataStorage> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.data_storage),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsDataStorageScreen(contentPadding = contentPadding)
-            }
+            DataStorageSettingsScreen(
+                    onNavigationIconClick = { navController.popBackStack() },
+                    storagePreferences = storagePreferences,
+                )
+                .Content()
         }
 
         composable<Screens.Settings.MangaDex> {

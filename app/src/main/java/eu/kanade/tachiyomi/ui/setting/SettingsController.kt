@@ -16,6 +16,7 @@ class SettingsController : BaseComposeController<SettingsPresenter>() {
             preferencesHelper = presenter.preferencesHelper,
             mangaDetailsPreferences = presenter.mangaDetailsPreferences,
             libraryPreferences = presenter.libraryPreferences,
+            storagePreferences = presenter.storagePreferences,
             setLibrarySearchSuggestion = presenter::setLibrarySearchSuggestion,
             categories = presenter.dbCategories.collectAsState(),
             windowSizeClass = windowSizeClass,
