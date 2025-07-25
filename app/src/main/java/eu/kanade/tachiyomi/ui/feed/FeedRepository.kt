@@ -68,10 +68,11 @@ class FeedRepository(
     suspend fun getSummaryUpdatesList(): Result<List<FeedManga>, ResultError.Generic> {
         return com.github.michaelbull.result
             .runCatching {
-                suspend fun lookup(offset: Int, limit: Int): List<FeedManga> {
+                suspend fun lookup(current: List<Long>, offset: Int, limit: Int): List<FeedManga> {
                     return getUpdatesPage(offset = offset, limit = limit, uploadsFetchSort = false)
                         .get()!!
                         .second
+                        .filterNot { current.contains(it.mangaId) }
                         .filter {
                             it.chapters.none { chapterItem ->
                                 chapterItem.chapter.read || chapterItem.chapter.lastPageRead != 0
@@ -102,17 +103,16 @@ class FeedRepository(
                                     persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
                             )
                         }
-                        .take(6)
                 }
 
                 var offset = 0
                 val limit = 100
                 val results = emptyList<FeedManga>().toMutableList()
                 while (results.size < 6 && offset < 2000) {
-                    results += lookup(offset, limit)
+                    results += lookup(results.map { it.mangaId }, offset, limit)
                     offset += limit
                 }
-                results
+                results.take(6)
             }
             .mapError { err ->
                 TimberKt.e(err)
@@ -125,13 +125,14 @@ class FeedRepository(
 
         return com.github.michaelbull.result
             .runCatching {
-                suspend fun lookup(offset: Int, limit: Int): List<FeedManga> {
+                suspend fun lookup(current: List<Long>, offset: Int, limit: Int): List<FeedManga> {
                     return db.getRecentMangaLimit(
                             offset = offset,
                             limit = limit,
                             isResuming = false,
                         )
                         .executeOnIO()
+                        .filterNot { current.contains(it.manga.id) }
                         .mapNotNull { history ->
                             history.manga.id ?: return@mapNotNull null
                             history.chapter.id ?: return@mapNotNull null
@@ -204,16 +205,15 @@ class FeedRepository(
                                 )
                             }
                         }
-                        .take(6)
                 }
                 var offset = 0
                 val limit = 50
-                var results = emptyList<FeedManga>()
+                val results = emptyList<FeedManga>().toMutableList()
                 while (results.size < 6 && offset < 2000) {
-                    results = lookup(offset, limit)
+                    results += lookup(results.map { it.mangaId }, offset, limit)
                     offset += limit
                 }
-                results
+                results.take(6)
             }
             .mapError { err ->
                 TimberKt.e(err)
