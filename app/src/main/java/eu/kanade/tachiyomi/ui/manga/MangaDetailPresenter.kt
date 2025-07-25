@@ -197,6 +197,7 @@ class MangaDetailPresenter(
                 onRefresh()
             } else {
                 updateAllFlows()
+                if (generalState.value.allChapters.all { it.chapter.smartOrder == 0 }) onRefresh()
                 refreshTracking(false)
                 syncChaptersReadStatus()
             }
