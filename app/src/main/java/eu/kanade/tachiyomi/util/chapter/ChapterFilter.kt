@@ -9,12 +9,14 @@ import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterFilter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
     val readerPreferences: ReaderPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
@@ -38,7 +40,8 @@ class ChapterFilter(
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
-        val filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
+        val filteredChapters =
+            filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences, libraryPreferences)
 
         return if (
             readEnabled ||
@@ -75,7 +78,12 @@ class ChapterFilter(
     ): List<T> {
         var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
         filteredChapters =
-            filterChaptersByScanlatorsAndLanguage(filteredChapters, manga, preferences)
+            filterChaptersByScanlatorsAndLanguage(
+                filteredChapters,
+                manga,
+                preferences,
+                libraryPreferences,
+            )
 
         // if filter preferences are not enabled don't even filter
         if (
@@ -137,10 +145,11 @@ class ChapterFilter(
         chapters: List<T>,
         manga: Manga,
         preferences: PreferencesHelper,
+        libraryPreferences: LibraryPreferences,
     ): List<T> {
 
         val blockedGroups = preferences.blockedScanlators().get().toSet()
-        val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
+        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 

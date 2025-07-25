@@ -65,6 +65,11 @@ internal class LibrarySettingsScreen(
             preferenceItems =
                 persistentListOf(
                     Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.enableLocalChapters(),
+                        title = stringResource(R.string.enable_local_manga),
+                        subtitle = stringResource(R.string.enable_local_manga_summary),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
                         pref = libraryPreferences.removeArticles(),
                         title = stringResource(R.string.sort_by_ignoring_articles),
                         subtitle = stringResource(R.string.when_sorting_ignore_articles),
@@ -85,6 +90,21 @@ internal class LibrarySettingsScreen(
                     ),
                     Preference.PreferenceItem.InfoPreference(
                         stringResource(R.string.display_options_can_be)
+                    ),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = libraryPreferences.chapterScanlatorFilterOption(),
+                        title = stringResource(R.string.chapter_scanlator_filter_option),
+                        subtitleProvider = { value, options ->
+                            when (value == 0) {
+                                true -> stringResource(R.string.chapter_filter_all_summary)
+                                false -> stringResource(R.string.chapter_filter_any_summary)
+                            }
+                        },
+                        entries =
+                            persistentMapOf(
+                                0 to stringResource(R.string.chapter_filter_all),
+                                1 to stringResource(R.string.chapter_filter_any),
+                            ),
                     ),
                 ),
         )
@@ -233,6 +253,11 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.updateFaster(),
                         title = stringResource(R.string.faster_library_update),
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.includeUnavailable(),
+                        title = stringResource(R.string.include_unavailable),
+                        subtitle = stringResource(R.string.include_unavailable_summary),
+                    ),
                     Preference.PreferenceItem.ListPreference(
                         pref = libraryPreferences.updatePrioritization(),
                         title = stringResource(R.string.library_update_order),
@@ -267,6 +292,10 @@ internal class LibrarySettingsScreen(
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
+                    stringResource(R.string.enable_local_manga),
+                    stringResource(R.string.enable_local_manga_summary),
+                ),
+                SearchTerm(
                     stringResource(R.string.sort_by_ignoring_articles),
                     stringResource(R.string.when_sorting_ignore_articles),
                 ),
@@ -275,12 +304,17 @@ internal class LibrarySettingsScreen(
                     stringResource(R.string.search_tips_show_periodically),
                 ),
                 SearchTerm(stringResource(R.string.display_options_can_be)),
+                SearchTerm(stringResource(R.string.chapter_scanlator_filter_option)),
                 SearchTerm(stringResource(R.string.add_edit_categories)),
                 SearchTerm(stringResource(R.string.default_category)),
                 SearchTerm(stringResource(R.string.global_updates)),
                 SearchTerm(stringResource(R.string.library_update_device_restriction)),
                 SearchTerm(stringResource(R.string.smart_library_update_restrictions)),
                 SearchTerm(stringResource(R.string.faster_library_update)),
+                SearchTerm(
+                    stringResource(R.string.include_unavailable),
+                    stringResource(R.string.include_unavailable_summary),
+                ),
                 SearchTerm(stringResource(R.string.library_update_order)),
                 SearchTerm(stringResource(R.string.categories)),
                 SearchTerm(stringResource(R.string.categories_on_manual)),

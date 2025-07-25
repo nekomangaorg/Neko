@@ -136,6 +136,9 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
+    fun chapterScanlatorFilterOption() =
+        this.preferenceStore.getInt("chapter_scanlator_filter_option", 1)
+
     companion object {
 
         const val MANGA_NOT_COMPLETED = "manga_status_not_completed"

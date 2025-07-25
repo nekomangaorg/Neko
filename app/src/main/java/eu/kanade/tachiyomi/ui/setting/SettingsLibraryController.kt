@@ -87,14 +87,14 @@ class SettingsLibraryController : AbstractSettingsController() {
                 }
 
                 intListPreference(activity) {
-                    key = Keys.chapterScanlatorFilterOption
+                    key = "chapter_scanlator_filter_option"
                     titleRes = R.string.chapter_scanlator_filter_option
                     dialogTitleRes = R.string.chapter_scanlator_filter_option
                     entries = listOf("Match Any", "Match All")
                     entryValues = listOf(1, 0)
                     defaultValue = 1
                     summaryRes =
-                        when (preferences.chapterScanlatorFilterOption().get()) {
+                        when (libraryPreferences.chapterScanlatorFilterOption().get()) {
                             0 -> R.string.chapter_filter_all
                             else -> R.string.chapter_filter_any
                         }
