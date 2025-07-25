@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import coil.ImageLoader
-import coil.fetch.Fetcher
-import coil.request.Options
+import coil3.ImageLoader
+import coil3.fetch.Fetcher
+import coil3.request.Options
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.source.SourceManager
 import org.nekomanga.domain.manga.MergeArtwork

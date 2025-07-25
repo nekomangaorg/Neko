@@ -5,9 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -50,7 +50,7 @@ class SaveImageNotifier(private val context: Context) {
                     }
                 )
                 .build()
-        Coil.imageLoader(context).enqueue(request)
+        context.imageLoader.enqueue(request)
     }
 
     private fun showCompleteNotification(file: UniFile, image: Bitmap) {

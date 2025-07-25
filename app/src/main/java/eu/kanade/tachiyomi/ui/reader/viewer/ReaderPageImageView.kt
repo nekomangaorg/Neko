@@ -17,10 +17,13 @@ import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
-import coil.dispose
-import coil.imageLoader
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import coil3.asDrawable
+import coil3.dispose
+import coil3.imageLoader
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
@@ -300,14 +303,16 @@ constructor(
                     .diskCachePolicy(CachePolicy.DISABLED)
                     .target(
                         onSuccess = { result ->
-                            setImageDrawable(result)
-                            (result as? Animatable)?.start()
+                            val drawable = result.asDrawable(context.resources)
+                            setImageDrawable(drawable)
+                            (drawable as? Animatable)?.start()
                             isVisible = true
                             this@ReaderPageImageView.onImageLoaded()
                         },
                         onError = { this@ReaderPageImageView.onImageLoadError() },
                     )
                     .crossfade(false)
+                    .allowHardware(false) // Disable hardware acceleration for GIFs
                     .build()
             context.imageLoader.enqueue(request)
         }
