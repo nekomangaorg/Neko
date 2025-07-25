@@ -180,11 +180,11 @@
         <item name="colorSurface">@color/lavender_surface</item>
         <item name="actionBarTintColor">@color/lavender_on_surface</item>
         <item name="elevationOverlayColor">@color/lavender_elevation_overlay</item>
-        <item name="unreadBadgeColor">?attr/colorPrimaryInverse</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorDownloadBadge">@color/lavender_tertiary</item>
-        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+        <item name="colorDownloadBadge">@color/lavender_primary_variant</item>
+        <item name="colorOnDownloadBadge">@color/md_black_1000</item>
 
     </style>
 

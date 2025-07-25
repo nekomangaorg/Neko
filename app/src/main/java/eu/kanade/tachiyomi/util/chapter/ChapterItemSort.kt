@@ -41,7 +41,9 @@ class ChapterItemSort(
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
             }
-        return chapters.sortedWith(sortComparator(manga, true)).find { !it.chapter.read }
+        return chapters.sortedWith(sortComparator(manga, true)).find {
+            !it.chapter.read && !it.chapter.isUnavailable
+        }
     }
 
     fun <T : ChapterItem> sortComparator(manga: Manga, ignoreAsc: Boolean = false): Comparator<T> {
@@ -57,13 +59,11 @@ class ChapterItemSort(
                                 c2.chapter.sourceOrder.compareTo(c1.chapter.sourceOrder)
                             }
                     }
-                Manga.CHAPTER_SORTING_NUMBER ->
+                Manga.CHAPTER_SORTING_SMART ->
                     when (sortDescending) {
-                        true -> { c1, c2 ->
-                                c2.chapter.chapterNumber.compareTo(c1.chapter.chapterNumber)
-                            }
+                        true -> { c1, c2 -> c1.chapter.smartOrder.compareTo(c2.chapter.smartOrder) }
                         false -> { c1, c2 ->
-                                c1.chapter.chapterNumber.compareTo(c2.chapter.chapterNumber)
+                                c2.chapter.smartOrder.compareTo(c1.chapter.smartOrder)
                             }
                     }
                 Manga.CHAPTER_SORTING_UPLOAD_DATE ->

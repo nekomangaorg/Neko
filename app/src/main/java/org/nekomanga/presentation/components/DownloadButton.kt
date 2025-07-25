@@ -49,7 +49,6 @@ import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-private const val size = 24
 private const val iconSize = 20
 private const val borderSize = 2.5
 
@@ -233,7 +232,7 @@ private fun Queued(modifier: Modifier) {
 
     Background(color = Color.Transparent, modifier = modifier) {
         CircularProgressIndicator(
-            modifier = Modifier.size(size.dp),
+            modifier = Modifier.size(Size.large),
             color = disabledColor,
             strokeWidth = borderSize.dp,
         )
@@ -292,7 +291,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
     Background(color = backgroundColor, modifier = modifier) {
         CircularProgressIndicator(
             progress = { animatedProgress },
-            modifier = Modifier.size(size.dp),
+            modifier = Modifier.size(Size.large),
             color = progressColor,
             trackColor = progressColor.copy(alpha = .4f),
             strokeWidth = borderSize.dp,
@@ -323,7 +322,7 @@ private fun Background(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            modifier = Modifier.size(size.dp),
+            modifier = Modifier.size(Size.large),
             shape = CircleShape,
             border = borderStroke,
             color = color,

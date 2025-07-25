@@ -112,9 +112,11 @@ fun TrackingSearchSheet(
                                     name = stringResource(id = service.nameRes),
                                     oldName = alreadySelectedTrack?.title ?: "",
                                     newName = trackSearchItem!!.trackItem.title,
-                                    onConfirm = { alsoRemoveFromTracker ->
+                                    onConfirm = { alsoRemoveFromTracker, isReplacing ->
                                         trackingRemoved(alsoRemoveFromTracker, service)
-                                        trackSearchItemClick(trackSearchItem!!)
+                                        if (isReplacing) {
+                                            trackSearchItemClick(trackSearchItem!!)
+                                        }
                                         cancelClick()
                                     },
                                     onDismiss = { trackSearchItem = null },

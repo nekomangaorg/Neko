@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -113,11 +112,16 @@ class Comick : ReducedHttpSource() {
                     SChapter.create().apply {
                         vol = chapter.vol ?: ""
                         name = chapterName
-                        chapter_txt = chapterName
+                        chapter_txt = "Ch.${chapter.chap}"
+                        chapter_title = chapter.title ?: ""
                         url = "$mangaUrl/${chapter.hid}-chapter-${chapter.chap ?: ""}-en"
                         date_upload = chapter.createdAt?.parseDate() ?: 0L
                         chapter_number = chapter.chap?.toFloatOrNull() ?: -1f
-                        val scanlatorList = listOf(Comick.name) + (chapter.groupName ?: emptyList())
+                        val groupName =
+                            chapter.mdGroupName
+                                ?.map { it.mdGroup.title }
+                                .takeIf { !it.isNullOrEmpty() } ?: chapter.groupName
+                        val scanlatorList = listOf(Comick.name) + (groupName ?: emptyList())
                         scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
                     } to false
                 }

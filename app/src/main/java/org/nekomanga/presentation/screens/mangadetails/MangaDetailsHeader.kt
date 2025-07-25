@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -101,7 +100,7 @@ fun MangaDetailsHeader(
             }
 
         Column {
-            BoxWithConstraints {
+            Box {
                 BackDrop(
                     themeColorState = themeColorState,
                     artworkProvider = { mangaState.value.currentArtwork },
@@ -215,7 +214,7 @@ fun MangaDetailsHeader(
                 DescriptionBlock(
                     windowSizeClass = windowSizeClass,
                     titleProvider = { mangaState.value.currentTitle },
-                    descriptionProvider = { mangaState.value.currentDescription },
+                    description = mangaState.value.currentDescription,
                     isInitializedProvider = { mangaState.value.initialized },
                     altTitlesProvider = { mangaState.value.alternativeTitles },
                     genresProvider = { mangaState.value.genres },

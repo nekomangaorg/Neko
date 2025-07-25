@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
+import org.nekomanga.constants.Constants
 
 /** Currently hardcoded to always return the same English [MangaDex] instance */
 open class SourceManager {
@@ -36,6 +37,16 @@ open class SourceManager {
     }
 
     companion object {
+
+        val mergeSourceNames =
+            listOf<String>(
+                Comick.name,
+                Komga.name,
+                Constants.LOCAL_SOURCE,
+                Suwayomi.name,
+                Toonily.name,
+                WeebCentral.name,
+            )
 
         val possibleIds = MdLang.entries.map { getId(it.lang) }
 

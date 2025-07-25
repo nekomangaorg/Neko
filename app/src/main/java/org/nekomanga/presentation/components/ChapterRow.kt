@@ -3,6 +3,7 @@ package org.nekomanga.presentation.components
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -24,12 +27,14 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,12 +59,14 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -81,6 +88,7 @@ fun ChapterRow(
     read: Boolean,
     bookmark: Boolean,
     isMerged: Boolean,
+    isLocal: Boolean,
     isUnavailable: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
@@ -170,6 +178,7 @@ fun ChapterRow(
                 onDownload = onDownload,
                 markPrevious = markPrevious,
                 isMerged = isMerged,
+                isLocal = isLocal,
                 isUnavailable = isUnavailable,
                 blockScanlator = blockScanlator,
                 uploader = uploader,
@@ -215,6 +224,7 @@ private fun ChapterInfo(
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
+    isLocal: Boolean = false,
     isUnavailable: Boolean,
     blockScanlator: (String) -> Unit,
 ) {
@@ -263,8 +273,9 @@ private fun ChapterInfo(
         onDismiss = { dropdown = false },
         dropDownItems =
             getDropDownItems(
-                showScanlator = scanlator.isNotBlank() && !isMerged,
-                showComments = !isMerged,
+                isLocal = isLocal,
+                showScanlator = scanlator.isNotBlank() && !isMerged && !isLocal,
+                showComments = !isMerged && !isLocal,
                 scanlators = splitScanlator,
                 onWebView = onWebView,
                 onComment = onComment,
@@ -398,6 +409,9 @@ private fun ChapterInfo(
         val localCopy = isUnavailable && downloadState == Download.State.DOWNLOADED
         val unsupported = MdConstants.UnsupportedOfficialGroupList.contains(scanlator)
 
+        var showLocalDropdown by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
         when {
             noLocalCopy || unsupported -> {
                 Icon(
@@ -411,15 +425,45 @@ private fun ChapterInfo(
                 )
             }
             localCopy -> {
-                Icon(
-                    imageVector = Icons.Outlined.FolderOpen,
-                    contentDescription = null,
-                    modifier =
-                        Modifier.align(Alignment.CenterVertically)
-                            .padding(Size.smedium)
-                            .size(Size.large),
-                    tint = themeColorState.buttonColor,
-                )
+                Box(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    SimpleDropdownMenu(
+                        expanded = showLocalDropdown,
+                        themeColorState = themeColorState,
+                        onDismiss = { showLocalDropdown = false },
+                        dropDownItems =
+                            persistentListOf(
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.remove),
+                                    onClick = {
+                                        scope.launchDelayed { onDownload(DownloadAction.Remove) }
+                                    },
+                                )
+                            ),
+                    )
+                    Box(
+                        modifier =
+                            Modifier.clip(CircleShape).size(Size.huge).clickable {
+                                showLocalDropdown = !showLocalDropdown
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(24.dp),
+                            shape = CircleShape,
+                            color = Color.Transparent,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.FolderOpen,
+                                contentDescription = null,
+                                modifier = Modifier.requiredSize(24.dp),
+                                tint = themeColorState.buttonColor,
+                            )
+                        }
+                    }
+                }
             }
             else -> {
                 DownloadButton(
@@ -436,6 +480,7 @@ private fun ChapterInfo(
 
 @Composable
 private fun getDropDownItems(
+    isLocal: Boolean,
     showScanlator: Boolean,
     showComments: Boolean,
     scanlators: ImmutableList<SimpleDropDownItem>,
@@ -443,47 +488,61 @@ private fun getDropDownItems(
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
 ): ImmutableList<SimpleDropDownItem> {
-    return (listOf(
-            SimpleDropDownItem.Action(
-                text = UiText.StringResource(R.string.open_in_webview),
-                onClick = { onWebView() },
-            ),
-            SimpleDropDownItem.Parent(
-                text = UiText.StringResource(R.string.mark_previous_as),
-                children =
-                    listOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.read),
-                            onClick = { markPrevious(true) },
-                        ),
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.unread),
-                            onClick = { markPrevious(false) },
-                        ),
-                    ),
+    return (getList(
+            !isLocal,
+            listOf(
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.open_in_webview),
+                    onClick = { onWebView() },
+                )
             ),
         ) +
-            if (showScanlator) {
+            listOf(
+                SimpleDropDownItem.Parent(
+                    text = UiText.StringResource(R.string.mark_previous_as),
+                    children =
+                        listOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.read),
+                                onClick = { markPrevious(true) },
+                            ),
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.unread),
+                                onClick = { markPrevious(false) },
+                            ),
+                        ),
+                )
+            ) +
+            getList(
+                showScanlator,
                 listOf(
                     SimpleDropDownItem.Parent(
                         text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
                     )
-                )
-            } else {
-                emptyList()
-            } +
-            if (showComments) {
+                ),
+            ) +
+            getList(
+                showComments,
                 listOf(
                     SimpleDropDownItem.Action(
                         text = UiText.StringResource(R.string.comments),
                         onClick = onComment,
                     )
-                )
-            } else {
-                emptyList()
-            })
+                ),
+            ))
         .toPersistentList()
+}
+
+private fun getList(
+    booleanCondition: Boolean,
+    trueList: List<SimpleDropDownItem>,
+): List<SimpleDropDownItem> {
+    return if (booleanCondition) {
+        trueList
+    } else {
+        emptyList()
+    }
 }
 
 val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })

@@ -69,6 +69,7 @@ data class ComickChapter(
     val chapter: String? = "",
     val vol: String? = "",
     @SerialName("group_name") val groupName: List<String>? = emptyList(),
+    @SerialName("md_chapters_groups") val mdGroupName: List<MDGroups>? = emptyList(),
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("uploaded_at") val uploadedAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
@@ -90,6 +91,10 @@ data class ComickChapter(
     val matureContent: Boolean? = null,
     val mdGroups: List<MDcovers>? = null,
 )
+
+@Serializable data class MDGroups(@SerialName("md_groups") val mdGroup: MDGroup)
+
+@Serializable data class MDGroup(val title: String)
 
 @Serializable
 data class MDChapter(

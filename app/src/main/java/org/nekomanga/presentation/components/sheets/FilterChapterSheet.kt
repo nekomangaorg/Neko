@@ -39,6 +39,7 @@ fun FilterChapterSheet(
     sortFilter: MangaConstants.SortFilter,
     filter: MangaConstants.ChapterDisplay,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
+    sourceFilter: MangaConstants.ScanlatorFilter,
     languageFilter: MangaConstants.LanguageFilter,
     changeSort: (SortOption?) -> Unit,
     changeFilter: (MangaConstants.ChapterDisplayOptions?) -> Unit,
@@ -65,11 +66,19 @@ fun FilterChapterSheet(
                         setAsGlobal(MangaConstants.SetGlobal.Filter)
                     }
                 }
-
+                item {
+                    Scanlator(
+                        themeColorState = themeColorState,
+                        sourceFilter,
+                        true,
+                        changeScanlatorFilter,
+                    )
+                }
                 item {
                     Scanlator(
                         themeColorState = themeColorState,
                         scanlatorFilter,
+                        false,
                         changeScanlatorFilter,
                     )
                 }
@@ -124,14 +133,14 @@ private fun Sort(
         Gap(Size.small)
         SortLine(
             themeColorState,
-            SortOption(sortFilter.sourceOrderSort, SourceOrder),
-            stringResource(id = R.string.by_source_order),
+            SortOption(sortFilter.smartOrderSort, ChapterNumber),
+            stringResource(id = R.string.by_smart_order),
             changeSort,
         )
         SortLine(
             themeColorState,
-            SortOption(sortFilter.chapterNumberSort, ChapterNumber),
-            stringResource(id = R.string.by_chapter_number),
+            SortOption(sortFilter.sourceOrderSort, SourceOrder),
+            stringResource(id = R.string.by_source_order),
             changeSort,
         )
         SortLine(
@@ -244,10 +253,10 @@ private fun Filter(
             themeColorState = themeColorState,
             state =
                 MangaConstants.ChapterDisplayOptions(
-                    displayType = MangaConstants.ChapterDisplayType.Unavailable,
-                    displayState = filter.unavailable,
+                    displayType = MangaConstants.ChapterDisplayType.Available,
+                    displayState = filter.available,
                 ),
-            text = stringResource(id = R.string.show_unavailable_chapters),
+            text = stringResource(id = R.string.show_available_chapters),
             changeFilter = changeFilter,
         )
         CheckboxLine(
@@ -308,6 +317,7 @@ private fun CheckboxLine(
 private fun Scanlator(
     themeColorState: ThemeColorState,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
+    isSourceFilter: Boolean,
     changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -318,7 +328,10 @@ private fun Scanlator(
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
-                text = stringResource(id = R.string.filter_groups),
+                text =
+                    stringResource(
+                        id = if (isSourceFilter) R.string.filter_source else R.string.filter_groups
+                    ),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )

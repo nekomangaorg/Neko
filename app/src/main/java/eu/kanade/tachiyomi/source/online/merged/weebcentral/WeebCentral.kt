@@ -153,11 +153,11 @@ class WeebCentral : ReducedHttpSource() {
                         if (volumePrefixes.any { prefix -> chapterText.startsWith(prefix) }) {
                             this.vol = chapterText.substringAfter(" ")
                             val prefix =
-                                when (chapterText.startsWith("Volume")) {
+                                when (chapterText.startsWith("Special")) {
                                     true -> "${chapterText.substringBefore(" ")} "
                                     false -> "Vol."
                                 }
-                            chapterName.add("$prefix${this.vol}")
+                            chapterName.add("$prefix ${this.vol}")
                         } else {
                             // The old logic would apply the name from either the "ChapterName"
                             // or Type + chapterNumber
@@ -183,7 +183,7 @@ class WeebCentral : ReducedHttpSource() {
                                 when {
                                     chapterPrefixes.none { prefix ->
                                         chapterText.startsWith(prefix)
-                                    } -> "Ch.${chapterText.substringAfter(" ")}"
+                                    } -> "Ch.${chapterText.substringAfterLast(" ")}"
                                     else -> chapterText
                                 }
 
@@ -191,7 +191,7 @@ class WeebCentral : ReducedHttpSource() {
                         }
 
                         this.name = chapterName.joinToString(" ")
-                        this.chapter_txt = this.name
+                        this.chapter_txt = chapterName.find { it.startsWith("Ch.") } ?: this.name
 
                         date_upload =
                             element.selectFirst("time[datetime]")?.attr("datetime").parseDate()

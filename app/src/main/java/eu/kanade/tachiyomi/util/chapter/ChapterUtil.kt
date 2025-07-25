@@ -1,18 +1,13 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import android.content.Context
-import android.content.res.ColorStateList
-import android.widget.TextView
-import androidx.core.widget.TextViewCompat
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.util.system.contextCompatColor
-import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 
 class ChapterUtil {
     companion object {
@@ -28,29 +23,6 @@ class ChapterUtil {
             return when (chapterDate > 0) {
                 true -> chapterDate.timeSpanFromNow
                 false -> null
-            }
-        }
-
-        private fun setBookmark(textView: TextView, chapter: Chapter) {
-            if (chapter.bookmark) {
-                val context = textView.context
-                val drawable =
-                    VectorDrawableCompat.create(
-                        textView.resources,
-                        R.drawable.ic_bookmark_24dp,
-                        context.theme,
-                    )
-                drawable?.setBounds(0, 0, textView.textSize.toInt(), textView.textSize.toInt())
-                textView.setCompoundDrawablesRelative(drawable, null, null, null)
-                TextViewCompat.setCompoundDrawableTintList(
-                    textView,
-                    ColorStateList.valueOf(bookmarkedColor(context)),
-                )
-                textView.compoundDrawablePadding = 3.dpToPx
-                textView.translationX = (-2f).dpToPxEnd
-            } else {
-                textView.setCompoundDrawablesRelative(null, null, null, null)
-                textView.translationX = 0f
             }
         }
 
@@ -94,6 +66,79 @@ class ChapterUtil {
 
         fun getLanguageString(languages: Set<String>): String {
             return languages.toList().sorted().joinToString(Constants.SCANLATOR_SEPARATOR)
+        }
+
+        /**
+         * returns true for a list filter, if the source name exists in the filtered sources, and
+         * the chapter has the scanlator
+         */
+        fun filteredBySource(
+            sourceName: String,
+            scanlatorStr: String,
+            isMerged: Boolean,
+            isLocal: Boolean,
+            filteredGroups: Set<String>,
+        ): Boolean {
+            if (filteredGroups.isEmpty()) {
+                return false
+            }
+
+            val shouldCheck = sourceName in filteredGroups
+            if (!shouldCheck) {
+                return false
+            }
+
+            if (sourceName == MdConstants.name && !isLocal) {
+                return !isMerged
+            }
+
+            if (sourceName == Constants.LOCAL_SOURCE) {
+                return isLocal
+            }
+
+            // at this point if the chapter is not merged and the source is Not MangaDex or Local
+            // then we
+            // already
+            // know its not a matching chapter
+            if (!isMerged) {
+                return false
+            }
+
+            return getScanlators(scanlatorStr).any { group -> group == sourceName }
+        }
+
+        /**
+         * returns true for a list filter, if the language of the chapter exists in the filtered
+         * language set
+         */
+        fun filterByLanguage(languageStr: String, filteredLanguages: Set<String>): Boolean {
+            return when {
+                filteredLanguages.isEmpty() -> false
+                else -> {
+                    getLanguages(languageStr).any { language -> language in filteredLanguages }
+                }
+            }
+        }
+
+        /**
+         * returns true for a list filter, if the group of the chapter exists in the group set and
+         * the any filter is used. if the all filter is used then all the groups for the chapter
+         * need to be in the group set.
+         */
+        fun filterByGroup(
+            scanlatorStr: String,
+            all: Boolean,
+            filteredGroups: Set<String>,
+        ): Boolean {
+            return when {
+                filteredGroups.isEmpty() -> false
+                all -> {
+                    getScanlators(scanlatorStr).all { group -> group in filteredGroups }
+                }
+                else -> {
+                    getScanlators(scanlatorStr).any { group -> group in filteredGroups }
+                }
+            }
         }
     }
 }

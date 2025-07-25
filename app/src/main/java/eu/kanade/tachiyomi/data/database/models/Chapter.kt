@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.io.Serializable
@@ -23,6 +24,8 @@ interface Chapter : SChapter, Serializable {
 
     var source_order: Int
 
+    var smart_order: Int
+
     val isRecognizedNumber: Boolean
         get() = chapter_number >= 0f
 
@@ -44,9 +47,12 @@ interface Chapter : SChapter, Serializable {
         pages_left = other.pages_left
         date_fetch = other.date_fetch
         source_order = other.source_order
+        smart_order = other.smart_order
         copyFrom(other as SChapter)
     }
 }
+
+fun Chapter.canDeleteChapter() = !this.isLocalSource() && !this.bookmark && !this.isUnavailable
 
 fun Chapter.scanlatorList(): List<String> {
     this.scanlator ?: return emptyList()

@@ -165,7 +165,7 @@ class Suwayomi : MergedServerSource() {
         val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
         val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
-        val sourceName = parts.getOrNull(1)
+        val sourceName = parts.getOrElse(1, { "placeholder" })
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
 
         return withContext(Dispatchers.IO) {
@@ -185,38 +185,134 @@ class Suwayomi : MergedServerSource() {
                     val responseBody = response.body
 
                     val chapters =
-                        responseBody.use {
-                            json
-                                .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
-                                    it.string()
-                                )
-                                .data
-                                .fetchChapters
-                                .chapters
-                        }
-                    val r =
+                        responseBody
+                            .use {
+                                json
+                                    .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
+                                        it.string()
+                                    )
+                                    .data
+                                    .fetchChapters
+                                    .chapters
+                            }
+                            .sortedByDescending { it.sourceOrder }
+                    val chapterPairs =
                         chapters.map { chapter ->
+                            val sanitized = sanitizeName(chapter.name, chapter.chapterNumber)
                             SChapter.create().apply {
                                 chapter_number = chapter.chapterNumber
-                                name = chapter.name
+                                if (sanitized is Name.Sanitized) {
+                                    name = sanitized.name
+                                    vol = sanitized.vol
+                                    chapter_txt = sanitized.chapter_txt
+                                    chapter_title = sanitized.chapter_title
+                                } else {
+                                    name = chapter.name
+                                    chapter_txt = "Ch.${chapter.chapterNumber}"
+                                }
+
+                                this.vol = vol
                                 url =
                                     "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
                                         " " +
                                         "${chapter.id}"
+                                val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
                                 scanlator =
-                                    listOfNotNull(this@Suwayomi.name, sourceName, chapter.scanlator)
+                                    (listOf(this@Suwayomi.name, sourceName) + scanlators)
                                         .joinToString(Constants.SCANLATOR_SEPARATOR)
                                 language = lang
                                 date_upload = chapter.uploadDate
                             } to chapter.isRead
                         }
-                    return@runCatching r.sortedByDescending { it.first.chapter_number }
+                    return@runCatching chapterPairs
                 }
                 .mapError {
                     TimberKt.e(it) { "Error fetching suwayomi chapters" }
                     (it.localizedMessage ?: "Suwayomi Error").toResultError()
                 }
         }
+    }
+
+    fun sanitizeName(rawName: String, chapter: Float): Name {
+        if (chapter < 0) {
+            // Source info is not sane, sanitizing won't work
+            return Name.NotSane
+        }
+        var vol = ""
+        val ch =
+            if (chapter == chapter.toLong().toFloat()) {
+                    chapter.toLong()
+                } else {
+                    chapter
+                }
+                .toString()
+
+        var title = rawName
+        val chapterName = mutableListOf<String>()
+        val volumePrefixes =
+            arrayOf("Volume", "Vol.", "volume", "vol.", "Season", "S", "(S", "season", "s", "(s")
+        val chapterPrefixes =
+            arrayOf(
+                "Chapter",
+                "Chap",
+                "Ch.",
+                "Ch",
+                "chapter",
+                "chap",
+                "ch.",
+                "ch",
+                "#",
+                "Episode",
+                "Ep.",
+                "Ep",
+                "episode",
+                "ep.",
+                "ep",
+            )
+
+        volumePrefixes.any { prefix ->
+            if (title.startsWith(prefix)) {
+                if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
+                val delimiter =
+                    when (prefix.startsWith('(')) {
+                        true -> ")"
+                        false -> " "
+                    }
+                title = title.replace(prefix, "").trimStart()
+                vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
+                title = title.substringAfter(delimiter).trimStart()
+                if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
+                return@any true
+            }
+            false
+        }
+        val chtxt = "Ch.$ch"
+        chapterName.add(chtxt)
+        if (
+            !chapterPrefixes.any { prefix ->
+                if (title.startsWith(prefix)) {
+                    title = title.replaceFirst(prefix, "").trimStart()
+                    title = title.trimStart('0').replaceFirst(ch, "").trimStart()
+                    return@any true
+                }
+                false
+            }
+        ) {
+            return Name.NotSane
+        }
+
+        if (Regex("\\[end].*", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringAfter("]").trimStart()
+        } else if (Regex(".*\\[end]", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringBefore("[").trimEnd()
+        }
+        title = title.trimStart(':', '-').trimStart()
+        if (title.isNotEmpty()) {
+            chapterName.add("-")
+            chapterName.add(title)
+        }
+
+        return Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title)
     }
 
     fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
@@ -288,9 +384,13 @@ class Suwayomi : MergedServerSource() {
         val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
 
         val chapterIds = chapters.map { it.url.split(" ", limit = 2)[1].toLong() }
-        customClient()
-            .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
-            .await()
+        try {
+            customClient()
+                .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
+                .await()
+        } catch (e: Exception) {
+            TimberKt.w(e) { "error updating chapter status in suwayomi" }
+        }
     }
 
     fun updateChapterFormBuilder(chapterIds: List<Long>, read: Boolean): RequestBody {
@@ -320,7 +420,16 @@ class Suwayomi : MergedServerSource() {
 
     companion object {
         val name = "Suwayomi"
-        private val supportedImageTypes =
-            listOf("image/jpeg", "image/png", "image/gif", "image/webp")
     }
+}
+
+sealed class Name {
+    data class Sanitized(
+        val name: String,
+        val vol: String,
+        val chapter_txt: String,
+        val chapter_title: String,
+    ) : Name()
+
+    data object NotSane : Name()
 }

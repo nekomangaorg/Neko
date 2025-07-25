@@ -28,12 +28,14 @@ object MangaConstants {
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val allSources: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
         val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
         val chapterFilter: ChapterDisplay = ChapterDisplay(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
+        val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
         val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val hasDefaultCategory: Boolean = false,
@@ -91,7 +93,7 @@ object MangaConstants {
 
     data class SortFilter(
         val sourceOrderSort: SortState = SortState.None,
-        val chapterNumberSort: SortState = SortState.None,
+        val smartOrderSort: SortState = SortState.None,
         val uploadDateSort: SortState = SortState.None,
         val matchesGlobalDefaults: Boolean = true,
     )
@@ -112,7 +114,7 @@ object MangaConstants {
         val downloaded: ToggleableState = ToggleableState.Off,
         val bookmarked: ToggleableState = ToggleableState.Off,
         val hideChapterTitles: ToggleableState = ToggleableState.Off,
-        val unavailable: ToggleableState = ToggleableState.Off,
+        val available: ToggleableState = ToggleableState.Off,
         val matchesGlobalDefaults: Boolean = true,
     )
 
@@ -126,7 +128,7 @@ object MangaConstants {
         Unread,
         Downloaded,
         Bookmarked,
-        Unavailable,
+        Available,
         HideTitles,
     }
 
@@ -158,21 +160,21 @@ object MangaConstants {
     sealed class DownloadAction {
         data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()
 
-        object DownloadAll : DownloadAction()
+        data object DownloadAll : DownloadAction()
 
-        object DownloadUnread : DownloadAction()
+        data object DownloadUnread : DownloadAction()
 
-        object Download : DownloadAction()
+        data object Download : DownloadAction()
 
-        object ImmediateDownload : DownloadAction()
+        data object ImmediateDownload : DownloadAction()
 
-        object Remove : DownloadAction()
+        data object Remove : DownloadAction()
 
-        object RemoveRead : DownloadAction()
+        data object RemoveRead : DownloadAction()
 
-        object RemoveAll : DownloadAction()
+        data object RemoveAll : DownloadAction()
 
-        object Cancel : DownloadAction()
+        data object Cancel : DownloadAction()
     }
 
     class CategoryActions(

@@ -467,6 +467,7 @@ private fun ChapterRow(
         read = chapterItem.chapter.read,
         bookmark = chapterItem.chapter.bookmark,
         isMerged = chapterItem.chapter.isMergedChapter(),
+        isLocal = chapterItem.chapter.isLocalSource(),
         isUnavailable = chapterItem.chapter.isUnavailable,
         downloadStateProvider = { chapterItem.downloadState },
         downloadProgressProvider = { chapterItem.downloadProgress },

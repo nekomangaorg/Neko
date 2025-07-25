@@ -76,7 +76,7 @@
     <string name="remove_all_downloads">Remove all downloads?</string>
     <string name="no_chapters_to_delete">No chapters to delete</string>
     <string name="by_source_order">By source\'s order</string>
-    <string name="by_chapter_number">By chapter number</string>
+    <string name="by_smart_order">By smart order</string>
     <string name="by_update_date">By upload date</string>
     <string name="scanlators">Scanlators</string>
 
@@ -181,6 +181,9 @@
     <string name="delete_downloads">Delete downloads</string>
     <string name="deleted_downloads">Deleted downloads</string>
     <string name="delete_downloads_question">Delete downloaded chapters?</string>
+    <string name="chapter_scanlator_filter_option">Chapter scanlator filter type</string>
+    <string name="chapter_filter_any">If any of the scanlator groups matches the filter, the chapter will be filtered out.</string>
+    <string name="chapter_filter_all">"If all of the scanlator groups match the filter, the chapter will be filtered out."</string>
 
 
     <string name="library_search_hint">Search title, tags</string>
@@ -302,6 +305,9 @@
     <string name="smart_library_tracking_is_plan_to_read">Skip manga with tracking status "Plan to read"</string>
 
 
+    <string name="enable_local_manga">Enable local manga support</string>
+    <string name="enable_local_manga_summary">When enabled, this causes updates to scan the filesystem for each manga, looking for local downloads, not tied to MangaDex or an External source.  Disable if you have slow library updates.</string>
+
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="include_unavailable">Include unavailable chapters</string>
     <string name="include_unavailable_summary">Library filters for unavailable chapters only shows after app restart</string>
@@ -326,7 +332,7 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Unstarted library manga</string>
     <string name="feed_continue_reading">Continue reading</string>
-    <string name="new_chapters_unread">New unread chapters</string>
+    <string name="recently_updated_manga">Recently updated manga</string>
     <string name="history">History</string>
     <string name="summary">Summary</string>
     <string name="entire_series">Entire series</string>
@@ -646,7 +652,7 @@
     <string name="show_unread_chapters">Show unread chapters</string>
     <string name="show_read_chapters">Show read chapters</string>
     <string name="hide_chapter_titles">Hide chapter titles</string>
-    <string name="show_unavailable_chapters">Show unavailable chapters</string>
+    <string name="show_available_chapters">Show available chapters</string>
     <string name="sort_by_source_s_order">Sort by source\'s order</string>
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
@@ -704,7 +710,9 @@
     <string name="cannot_remove_tracking_while_offline">Tracker cannot be removed from %1$s while offline</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
     <string name="remove_previous_tracker">Remove previous tracker?</string>
+    <string name="remove_x_from_service">Remove %1$s from %2$s</string>
     <string name="remove_x_from_service_and_add_y">Remove %1$s from %2$s and add %3$s</string>
+    <string name="keep_on_service">Keep on %1$s and only remove locally</string>
     <string name="keep_both_on_service">Keep both on %1$s and only replace locally</string>
     <string name="anilist" translatable="false">AniList</string>
     <string name="myanimelist" translatable="false">MyAnimeList</string>
@@ -1361,8 +1369,8 @@
     <string name="start_reading_">Start reading %1$s</string>
     <string name="continue_reading_">Continue reading %1$s</string>
     <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
+    <string name="filter_source">Filter Source</string>
     <string name="filter_groups">Filter Scanlator Groups</string>
-    <string name="filter_groups_title">Scanlator groups to show</string>
     <string name="filter_languages">Filter Languages</string>
 
     <string name="scanlator_groups">Scanlator groups</string>
@@ -1472,8 +1480,7 @@
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
-    <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
-    <string name="add_favorites_as_planned_to_read_summary">When enabled manga added to your library will be updated with Plan To Read Status on MangaDex</string>
+    <string name="auto_add_to_mangadex_library">Add to MangaDex library with status</string>
     <string name="use_cache_source">Use cached source</string>
     <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
 

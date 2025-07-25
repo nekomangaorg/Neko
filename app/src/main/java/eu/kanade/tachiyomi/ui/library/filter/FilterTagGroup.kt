@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
@@ -82,7 +81,7 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun setState(text: String) {
-        state = buttons.indexOfFirst { it.text == text && it.visibility == View.VISIBLE }
+        state = buttons.indexOfFirst { it.text == text && it.isVisible }
     }
 
     fun reset() {

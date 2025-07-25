@@ -61,7 +61,6 @@ fun AppUpdateDialog(
 private fun nekoMarkdownColors() =
     markdownColor(
         text = MaterialTheme.colorScheme.onSurface,
-        codeText = MaterialTheme.colorScheme.onSurface,
         codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
     )
 

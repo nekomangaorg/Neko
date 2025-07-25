@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -560,7 +561,7 @@ class ReaderViewModel(
         if (
             removeAfterReadSlots != -1 &&
                 chapterToDelete != null &&
-                !currentChapter.chapter.bookmark
+                currentChapter.chapter.canDeleteChapter()
         ) {
             enqueueDeleteReadChapters(chapterToDelete)
         }
@@ -574,7 +575,7 @@ class ReaderViewModel(
         }
     }
 
-    fun saveCurrentChapterReadingProgress() = {
+    fun saveCurrentChapterReadingProgress() {
         viewModelScope.launchNonCancellable { getCurrentChapter()?.let { saveReadingProgress(it) } }
     }
 

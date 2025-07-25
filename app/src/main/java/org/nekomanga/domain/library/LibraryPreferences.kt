@@ -8,6 +8,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun defaultCategory() = this.preferenceStore.getInt("default_category", -1)
 
+    fun enableLocalChapters() = this.preferenceStore.getBoolean("enable_local_chapters", true)
+
     fun searchSuggestions() = this.preferenceStore.getString("library_search_suggestion")
 
     fun showSearchSuggestions() = this.preferenceStore.getBoolean("show_library_search_suggestions")

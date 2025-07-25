@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -41,7 +40,6 @@ class DownloadCache(
     private val context: Context,
     private val provider: DownloadProvider,
     private val sourceManager: SourceManager,
-    private val preferences: PreferencesHelper = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
 ) {
 
@@ -101,6 +99,10 @@ class DownloadCache(
         return validChapterDirNames.any { it in fileNames || "$it.cbz" in fileNames }
     }
 
+    fun findChapterDirName(chapter: Chapter, manga: Manga): String {
+        return provider.findChapterDir(chapter, manga)?.name ?: ""
+    }
+
     /**
      * Returns the amount of downloaded chapters for a manga.
      *
@@ -140,6 +142,16 @@ class DownloadCache(
             }
             return count
         }
+    }
+
+    fun getAllDownloadFiles(manga: Manga): List<UniFile> {
+        val mangaDir = provider.findMangaDir(manga)
+
+        mangaDir ?: return emptyList()
+        return mangaDir
+            .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            .orEmpty()
+            .toList()
     }
 
     /** Checks if the cache needs a renewal and performs it if needed. */

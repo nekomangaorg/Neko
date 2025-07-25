@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
-import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -31,7 +31,7 @@ class PageHandler {
     val comikeyHandler: ComikeyHandler by injectLazy()
     val azukiHandler: AzukiHandler by injectLazy()
     val mangaHotHandler: MangaHotHandler by injectLazy()
-    val bilibiliHandler: BilibiliHandler by injectLazy()
+    val namiComiHandler: NamiComiHandler by injectLazy()
     val imageHandler: ImageHandler by injectLazy()
 
     suspend fun fetchPageList(chapter: SChapter): List<Page> {
@@ -69,8 +69,8 @@ class PageHandler {
                         "comikey".equals(chapter.scanlator, true) -> {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
                         }
-                        "bilibili comics".equals(chapter.scanlator, true) -> {
-                            return@withContext bilibiliHandler.fetchPageList(externalUrl)
+                        "namicomi".equals(chapter.scanlator, true) -> {
+                            return@withContext namiComiHandler.fetchPageList(externalUrl)
                         }
                         else -> throw Exception("${chapter.scanlator} not supported, try WebView")
                     }

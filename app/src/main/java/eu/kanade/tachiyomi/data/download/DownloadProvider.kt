@@ -7,10 +7,11 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -179,6 +180,10 @@ class DownloadProvider(
                 if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
                     return@filter true
                 }
+                if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
+                    return@filter false
+                }
+
                 val mangadexId = fileName.substringAfterLast("- ", "")
                 if (mangadexId.isNotEmpty() && (mangadexId.isDigitsOnly() || mangadexId.isUUID())) {
                     return@filter !idHashSet.contains(mangadexId)
@@ -205,17 +210,6 @@ class DownloadProvider(
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
         val toFileName = DiskUtil.buildValidFilename(to)
         mangaDir?.renameTo(toFileName)
-    }
-
-    fun renameChapterFoldersForLegacyMerged(manga: Manga) {
-        val mangaDir = findMangaDir(manga) ?: return
-        mangaDir
-            .listFiles()
-            ?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }
-            ?.forEach { file ->
-                val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
-                file.renameTo(newFileName)
-            }
     }
 
     /**
@@ -257,7 +251,7 @@ class DownloadProvider(
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return when (chapter.isMergedChapter()) {
+        return when (chapter.isMergedChapter() || chapter.isLocalSource()) {
             true -> getJ2kChapterName(chapter)
             false -> DiskUtil.buildValidFilename(chapter.name, " - ${chapter.mangadex_chapter_id}")
         }
@@ -281,6 +275,22 @@ class DownloadProvider(
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
                 getChapterDirName(chapter),
+                // chapter names from j2k
+                getJ2kChapterName(chapter),
+            )
+            .filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Returns valid downloaded chapter directory names or cbz
+     *
+     * @param chapter the chapter to query.
+     */
+    fun getValidChapterDirOrFileNames(chapter: Chapter): List<String> {
+        return listOf(
+                getChapterDirName(chapter),
+                getChapterDirName(chapter) + ".cbz",
+                getJ2kChapterName(chapter) + ".cbz",
                 // chapter names from j2k
                 getJ2kChapterName(chapter),
             )

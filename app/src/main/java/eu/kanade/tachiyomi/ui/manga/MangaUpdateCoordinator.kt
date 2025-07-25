@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -13,6 +12,11 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -50,7 +54,7 @@ class MangaUpdateCoordinator {
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     /** Channel flow for updating the Manga/Chapters in the given scope */
-    suspend fun update(manga: Manga, scope: CoroutineScope) =
+    suspend fun update(manga: Manga, scope: CoroutineScope, isMerging: Boolean) =
         channelFlow {
                 val mangaWasInitialized = manga.initialized
 
@@ -71,7 +75,7 @@ class MangaUpdateCoordinator {
                 val mangaJob = startMangaJob(scope, manga)
 
                 if (mangaJob.isCompleted || mangaJob.isActive) {
-                    val chapterJob = startChapterJob(scope, manga, mangaWasInitialized)
+                    val chapterJob = startChapterJob(scope, manga, mangaWasInitialized, isMerging)
                     mangaJob.join()
                     chapterJob.join()
 
@@ -141,6 +145,7 @@ class MangaUpdateCoordinator {
         scope: CoroutineScope,
         manga: Manga,
         mangaWasAlreadyInitialized: Boolean,
+        isMerging: Boolean,
     ): Job {
         return scope.launchIO {
             val deferredChapters = async {
@@ -162,7 +167,6 @@ class MangaUpdateCoordinator {
                             // in the future check the merge type
                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                 .fetchChapters(mergeManga.url)
-                                .map { it.map { pair -> pair.first } }
                                 .onFailure {
                                     send(
                                         MangaResult.Error(
@@ -173,23 +177,58 @@ class MangaUpdateCoordinator {
                                     this.cancel()
                                 }
                                 .getOrElse { emptyList() }
+                                .map { (sChapter, status) ->
+                                    val sameVolume =
+                                        sChapter.vol == "" ||
+                                            manga.last_volume_number == null ||
+                                            sChapter.vol == manga.last_volume_number.toString()
+                                    if (
+                                        manga.last_chapter_number != null &&
+                                            sChapter.chapter_number ==
+                                                manga.last_chapter_number?.toFloat() &&
+                                            sameVolume
+                                    ) {
+                                        sChapter.name += " [END]"
+                                    }
+                                    sChapter to status
+                                }
                         }
                     }
                 } else {
                     emptyList()
                 }
 
-            val allChapters = deferredChapters.await() + deferredMergedChapters.awaitAll().flatten()
+            val mergedChapters =
+                if (deferredMergedChapters.size > 1) {
+                    deferredMergedChapters
+                        .awaitAll()
+                        .mergeSorted(
+                            compareBy<SChapterStatusPair> { getChapterNum(it.first) != null }
+                                .thenBy { getChapterNum(it.first) }
+                        )
+                } else {
+                    deferredMergedChapters.awaitAll().flatten()
+                }
+            val readFromMerged = mergedChapters.filter { it.second }.map { it.first.url }.toSet()
 
-            val newChapters = syncChaptersWithSource(db, allChapters, manga)
+            val allChapters =
+                listOf(deferredChapters.await(), mergedChapters.map { it.first })
+                    .mergeSorted(
+                        compareBy<SChapter> { getChapterNum(it) != null }
+                            .thenBy { getChapterNum(it) }
+                    )
+
+            val (newChapters, removedChapters) =
+                syncChaptersWithSource(db, allChapters, manga, readFromMerged = readFromMerged)
             // chapters that were added
-            if (newChapters.first.isNotEmpty()) {
+            if (newChapters.isNotEmpty()) {
                 val downloadNew = preferences.downloadNewChapters().get()
                 if (downloadNew && mangaWasAlreadyInitialized) {
                     if (manga.shouldDownloadNewChapters(db, preferences)) {
                         downloadChapters(
                             manga,
-                            newChapters.first
+                            newChapters
+                                .filterNot { isMerging && it.isMergedChapter() }
                                 .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
                                 .sortedBy { it.chapter.chapterNumber },
                         )
@@ -198,8 +237,8 @@ class MangaUpdateCoordinator {
                 mangaShortcutManager.updateShortcuts()
             }
             // chapters that were removed
-            if (newChapters.second.isNotEmpty()) {
-                val removedChaptersId = newChapters.second.mapNotNull { it.id }
+            if (removedChapters.isNotEmpty()) {
+                val removedChaptersId = removedChapters.mapNotNull { it.id }
                 send(MangaResult.ChaptersRemoved(removedChaptersId))
             }
 

@@ -359,6 +359,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         super.onDestroy()
         viewModel.deletePendingChapters()
         viewer?.destroy()
+        binding.viewerContainer.removeAllViews()
         binding.chaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
         config = null

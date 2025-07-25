@@ -227,6 +227,7 @@ fun DetailsBottomSheet(
                 changeFilter = chapterFilterActions.changeFilter,
                 filter = generalState.value.chapterFilter,
                 scanlatorFilter = generalState.value.chapterScanlatorFilter,
+                sourceFilter = generalState.value.chapterSourceFilter,
                 languageFilter = generalState.value.chapterLanguageFilter,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
                 changeLanguageFilter = chapterFilterActions.changeLanguage,

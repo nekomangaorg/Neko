@@ -40,6 +40,8 @@ object ChapterTable {
 
     const val COL_SOURCE_ORDER = "source_order"
 
+    const val COL_SMART_ORDER = "smart_order"
+
     const val COL_MANGADEX_CHAPTER_ID = "mangadex_chapter_id"
 
     const val COL_OLD_MANGADEX_CHAPTER_ID = "old_mangadex_chapter_id"
@@ -65,6 +67,7 @@ object ChapterTable {
             $COL_PAGES_LEFT INT NOT NULL,
             $COL_CHAPTER_NUMBER FLOAT NOT NULL,
             $COL_SOURCE_ORDER INTEGER NOT NULL,
+            $COL_SMART_ORDER INTEGER NOT NULL,
             $COL_DATE_FETCH LONG NOT NULL,
             $COL_DATE_UPLOAD LONG NOT NULL,
             $COL_MANGADEX_CHAPTER_ID String TEXT,
@@ -109,4 +112,7 @@ object ChapterTable {
 
     val addUnavailable: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UNAVAILABLE BOOL DEFAULT 0"
+
+    val addSmartOrder: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_SMART_ORDER INTEGER DEFAULT 0"
 }

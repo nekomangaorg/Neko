@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlin.collections.contains
+import eu.kanade.tachiyomi.source.SourceManager
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -30,12 +32,15 @@ class ChapterItemFilter(
         val notBookmarkEnabled =
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
         val unavailableEnabled =
-            manga.unavailableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
+            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
         val availableEnabled =
-            manga.unavailableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
+            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
+        TimberKt.d { "Filtering by scanlators and language" }
         val filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
+        TimberKt.d { "Filtering by scanlators and language done" }
+
         return if (
             readEnabled ||
                 unreadEnabled ||
@@ -48,16 +53,16 @@ class ChapterItemFilter(
         ) {
             filteredChapters.filter { chapterItem ->
                 val chapter = chapterItem.chapter
+                val isDownloaded = downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)
+                val isAvailable = !chapter.isUnavailable || isDownloaded || chapter.isLocalSource()
                 return@filter !(readEnabled && !chapter.read ||
                     (unreadEnabled && chapter.read) ||
                     (bookmarkEnabled && !chapter.bookmark) ||
                     (notBookmarkEnabled && chapter.bookmark) ||
-                    (downloadEnabled &&
-                        !downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
-                    (notDownloadEnabled &&
-                        downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
-                    (unavailableEnabled && !chapter.isUnavailable) ||
-                    (availableEnabled && chapter.isUnavailable))
+                    (downloadEnabled && !isDownloaded) ||
+                    (notDownloadEnabled && isDownloaded) ||
+                    (unavailableEnabled && !isAvailable) ||
+                    (availableEnabled && isAvailable))
             }
         } else {
             filteredChapters
@@ -96,30 +101,53 @@ class ChapterItemFilter(
     }
 
     /** filters chapters for scanlators */
-    fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
+    private fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
         chapters: List<T>,
         manga: Manga,
         preferences: PreferencesHelper,
     ): List<T> {
 
-        val blockedGroupList = preferences.blockedScanlators().get()
-        val filteredGroupList = ChapterUtil.getScanlators(manga.filtered_scanlators)
-        val filteredLanguagesList = ChapterUtil.getLanguages(manga.filtered_language)
-
-        return chapters.filter {
-            val languages = ChapterUtil.getLanguages(it.chapter.language)
-            val languageNotFound = languages.none { language -> language in filteredLanguagesList }
-
-            val groups = ChapterUtil.getScanlators(it.chapter.scanlator)
-
-            val groupNotFound =
-                groups.none { group ->
-                    val inBlocked = group in blockedGroupList
-                    val inFiltered = group in filteredGroupList
-                    inBlocked || inFiltered
+        val blockedGroups = preferences.blockedScanlators().get().toSet()
+        val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
+        val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+        val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
+        SourceManager.mergeSourceNames
+        return chapters
+            .asSequence()
+            .filterNot { chapterItem ->
+                ChapterUtil.filteredBySource(
+                    MdConstants.name,
+                    chapterItem.chapter.scanlator,
+                    chapterItem.chapter.isMergedChapter(),
+                    chapterItem.chapter.isLocalSource(),
+                    filteredGroups,
+                )
+            }
+            .filterNot { chapterItem ->
+                SourceManager.mergeSourceNames.any { sourceName ->
+                    ChapterUtil.filteredBySource(
+                        sourceName,
+                        chapterItem.chapter.scanlator,
+                        chapterItem.chapter.isMergedChapter(),
+                        chapterItem.chapter.isLocalSource(),
+                        filteredGroups,
+                    )
                 }
-
-            languageNotFound && groupNotFound
-        }
+            }
+            .filterNot { chapterItem ->
+                ChapterUtil.filterByLanguage(chapterItem.chapter.language, filteredLanguages)
+            }
+            // blocked groups are always Any
+            .filterNot { chapterItem ->
+                ChapterUtil.filterByGroup(chapterItem.chapter.scanlator, false, blockedGroups)
+            }
+            .filterNot { chapterItem ->
+                ChapterUtil.filterByGroup(
+                    chapterItem.chapter.scanlator,
+                    chapterScanlatorMatchAll,
+                    filteredGroups,
+                )
+            }
+            .toList()
     }
 }

@@ -49,10 +49,10 @@ class ChapterSort(
                         true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
                         false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
                     }
-                Manga.CHAPTER_SORTING_NUMBER ->
+                Manga.CHAPTER_SORTING_SMART ->
                     when (sortDescending) {
-                        true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-                        false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
+                        true -> { c1, c2 -> c1.smart_order.compareTo(c2.smart_order) }
+                        false -> { c1, c2 -> c2.smart_order.compareTo(c1.smart_order) }
                     }
                 Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                     when (sortDescending) {

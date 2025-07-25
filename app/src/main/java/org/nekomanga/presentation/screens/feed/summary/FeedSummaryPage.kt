@@ -69,7 +69,7 @@ fun FeedSummaryPage(
             }
         }
 
-        item { SummaryHeader(stringResource(R.string.new_chapters_unread)) }
+        item { SummaryHeader(stringResource(R.string.recently_updated_manga)) }
         if (updatingUpdates) {
             item {
                 LinearProgressIndicator(
@@ -84,6 +84,7 @@ fun FeedSummaryPage(
                 val chapter = feedManga.chapters.first()
                 UpdatesCard(
                     chapterItem = chapter,
+                    updateDate = feedManga.date,
                     isGrouped = false,
                     mangaTitle = feedManga.mangaTitle,
                     artwork = feedManga.artwork,

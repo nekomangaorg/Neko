@@ -254,11 +254,45 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                 onClick { StatusSyncJob.startNow(context, StatusSyncJob.entireLibraryToDex) }
             }
 
-            switchPreference {
-                key = PreferenceKeys.addToLibraryAsPlannedToRead
-                titleRes = R.string.add_favorites_as_planned_to_read
-                summaryRes = R.string.add_favorites_as_planned_to_read_summary
-                defaultValue = false
+            intListPreference(activity) {
+                key = PreferenceKeys.autoAddToMangadexLibrary
+                titleRes = R.string.auto_add_to_mangadex_library
+                summaryRes =
+                    when (preferences.autoAddToMangadexLibrary().get()) {
+                        1 -> R.string.follows_plan_to_read
+                        2 -> R.string.follows_on_hold
+                        3 -> R.string.follows_reading
+                        else -> R.string.disabled
+                    }
+                entriesRes =
+                    arrayOf(
+                        R.string.disabled,
+                        R.string.follows_plan_to_read,
+                        R.string.follows_on_hold,
+                        R.string.follows_reading,
+                    )
+                entryValues = (0..3).toList()
+                defaultValue = 0
+                customSelectedValue =
+                    when (val value = preferences.autoAddToMangadexLibrary().get()) {
+                        in 0..3 -> value
+                        else -> 0
+                    }
+                onChange { newValue ->
+                    summaryRes =
+                        when (preferences.autoAddToMangadexLibrary().get()) {
+                            1 -> R.string.follows_plan_to_read
+                            2 -> R.string.follows_on_hold
+                            3 -> R.string.follows_reading
+                            else -> R.string.disabled
+                        }
+                    customSelectedValue =
+                        when (newValue) {
+                            in 0..3 -> newValue as Int
+                            else -> 0
+                        }
+                    true
+                }
             }
         }
 

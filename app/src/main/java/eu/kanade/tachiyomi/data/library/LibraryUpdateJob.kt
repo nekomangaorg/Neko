@@ -38,13 +38,18 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.getChapterNum
+import eu.kanade.tachiyomi.util.chapter.getVolumeNum
+import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -432,23 +437,37 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
                 }
                 val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
-                val merged =
+                val mergedList =
                     when (mergeMangaList.isNotEmpty()) {
                         true -> {
                             withIOContext {
-                                mergeMangaList
-                                    .map { mergeManga ->
-                                        // in the future check the merge type
-                                        MergeType.getSource(mergeManga.mergeType, sourceManager)
-                                            .fetchChapters(mergeManga.url)
-                                            .onFailure {
-                                                errorFromMerged = true
-                                                failedUpdates[manga] =
-                                                    "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+                                mergeMangaList.map { mergeManga ->
+                                    // in the future check the merge type
+                                    MergeType.getSource(mergeManga.mergeType, sourceManager)
+                                        .fetchChapters(mergeManga.url)
+                                        .onFailure {
+                                            errorFromMerged = true
+                                            failedUpdates[manga] =
+                                                "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+                                        }
+                                        .getOrElse { emptyList() }
+                                        .map { (sChapter, status) ->
+                                            val sameVolume =
+                                                sChapter.vol == "" ||
+                                                    manga.last_volume_number == null ||
+                                                    sChapter.vol ==
+                                                        manga.last_volume_number.toString()
+                                            if (
+                                                manga.last_chapter_number != null &&
+                                                    sChapter.chapter_number ==
+                                                        manga.last_chapter_number?.toFloat() &&
+                                                    sameVolume
+                                            ) {
+                                                sChapter.name += " [END]"
                                             }
-                                            .getOrElse { emptyList() }
-                                    }
-                                    .flatten()
+                                            sChapter to status
+                                        }
+                                }
                             }
                         }
                         false -> emptyList()
@@ -457,11 +476,16 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 val blockedGroups = preferences.blockedScanlators().get()
 
                 val fetchedChapters =
-                    (holder.sChapters + merged.map { it.first }).filter {
-                        ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
-                            scanlator in blockedGroups
+                    (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
+                        .mergeSorted(
+                            compareBy<SChapter> { getChapterNum(it) != null }
+                                .thenBy { getChapterNum(it) }
+                        )
+                        .filter {
+                            ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
+                                scanlator in blockedGroups
+                            }
                         }
-                    }
 
                 // delete cover cache image if the thumbnail from network is not empty
                 // note: we preload the covers here so we can view everything offline if they change
@@ -585,7 +609,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             }
                             if (mergedChapters.isNotEmpty()) {
                                 val readChapters =
-                                    merged
+                                    mergedList
+                                        .flatten()
                                         .filter { it.second }
                                         .map { Pair(it.first.scanlator, it.first.url) }
                                 val markRead =
@@ -623,11 +648,50 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         val allChaps = db.getChapters(manga).executeAsBlocking()
         val missingChapters =
             allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
+
+        var updated = false
+        if (missingChapters == null) {
+            val status = updateMangaStatus(allChaps, manga)
+            if (manga.status != status) {
+                manga.status = status
+                updated = true
+            }
+        }
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
-            db.insertManga(manga).executeOnIO()
+            updated = true
         }
+
+        if (updated) db.insertManga(manga).executeOnIO()
         return manga
+    }
+
+    private fun updateMangaStatus(chapters: List<Chapter>, manga: LibraryManga): Int {
+        val cancelledOrCompleted =
+            manga.status == SManga.PUBLICATION_COMPLETE || manga.status == SManga.CANCELLED
+        if (
+            cancelledOrCompleted &&
+                manga.missing_chapters == null &&
+                manga.last_chapter_number != null
+        ) {
+            val final =
+                chapters
+                    .filter {
+                        !it.isUnavailable ||
+                            it.isLocalSource() ||
+                            downloadManager.isChapterDownloaded(it, manga)
+                    }
+                    .filter { getChapterNum(it)?.toInt() == manga.last_chapter_number }
+                    .filter {
+                        getVolumeNum(it) == manga.last_volume_number ||
+                            getVolumeNum(it) == null ||
+                            manga.last_volume_number == null
+                    }
+            if (final.isNotEmpty()) {
+                return SManga.COMPLETED
+            }
+        }
+        return manga.status
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) = coroutineScope {

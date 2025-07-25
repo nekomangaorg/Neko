@@ -110,9 +110,9 @@ interface Manga : SManga {
         if (usesLocalFilter) hideChapterTitles
         else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
 
-    fun unavailableFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
-        if (usesLocalFilter) unavailableFilter
-        else mangaDetailsPreferences.filterChapterByUnavailable().get()
+    fun availableFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalFilter) availableFilter
+        else mangaDetailsPreferences.filterChapterByAvailable().get()
 
     fun showChapterTitle(defaultShow: Boolean): Boolean =
         chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
@@ -254,7 +254,7 @@ interface Manga : SManga {
         get() = chapter_flags and CHAPTER_BOOKMARKED_MASK
         set(filter) = setChapterFlags(filter, CHAPTER_BOOKMARKED_MASK)
 
-    var unavailableFilter: Int
+    var availableFilter: Int
         get() = chapter_flags and CHAPTER_UNAVAILABLE_MASK
         set(filter) = setChapterFlags(filter, CHAPTER_UNAVAILABLE_MASK)
 
@@ -298,7 +298,7 @@ interface Manga : SManga {
         const val CHAPTER_BOOKMARKED_MASK = 0x00000060
 
         const val CHAPTER_SORTING_SOURCE = 0x00000000
-        const val CHAPTER_SORTING_NUMBER = 0x00000100
+        const val CHAPTER_SORTING_SMART = 0x00000100
         const val CHAPTER_SORTING_UPLOAD_DATE = 0x00000200
         const val CHAPTER_SORTING_MASK = 0x00000300
 

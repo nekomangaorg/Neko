@@ -107,10 +107,13 @@ object PreferenceKeys {
     const val enablePort443Only = "use_port_443_only_for_image_server"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
+    const val autoAddToMangadexLibrary = "auto_add_to_mangadex_library"
 
     const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
 
     const val thumbnailQuality = "mangadex_thumbnail_quality"
 
     const val savedFilters = "browse_saved_filters"
+
+    const val chapterScanlatorFilterOption = "chapter__scanlator_filter_option"
 }

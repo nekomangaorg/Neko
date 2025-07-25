@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
+import eu.kanade.tachiyomi.util.system.toInt
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -229,8 +230,18 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun showContentRatingFilter() =
         this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 
+    fun chapterScanlatorFilterOption() =
+        this.preferenceStore.getInt(Keys.chapterScanlatorFilterOption, 1)
+
+    // Remove after a few releases
     fun addToLibraryAsPlannedToRead() =
         this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
+
+    fun autoAddToMangadexLibrary() =
+        this.preferenceStore.getInt(
+            Keys.autoAddToMangadexLibrary,
+            addToLibraryAsPlannedToRead().get().toInt(),
+        )
 
     fun contentRatingSelections() =
         this.preferenceStore.getStringSet(

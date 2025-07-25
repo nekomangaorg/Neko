@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
+import eu.kanade.tachiyomi.source.online.models.dto.SeasonalDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.UploaderDto
 import org.nekomanga.constants.MdConstants
@@ -122,4 +123,6 @@ interface MangaDexService {
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
+
+    @GET(MdConstants.seasonalApi) suspend fun getSeasonalList(): ApiResponse<SeasonalDto>
 }

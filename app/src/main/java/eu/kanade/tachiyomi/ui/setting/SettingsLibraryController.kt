@@ -39,6 +39,14 @@ class SettingsLibraryController : AbstractSettingsController() {
             titleRes = R.string.library
             preferenceCategory {
                 titleRes = R.string.general
+
+                switchPreference {
+                    key = libraryPreferences.enableLocalChapters().key()
+                    titleRes = R.string.enable_local_manga
+                    summaryRes = R.string.enable_local_manga_summary
+                    defaultValue = true
+                }
+
                 switchPreference {
                     key = libraryPreferences.removeArticles().key()
                     titleRes = R.string.sort_by_ignoring_articles
@@ -76,6 +84,29 @@ class SettingsLibraryController : AbstractSettingsController() {
                     summaryRes = R.string.can_be_found_in_library_filters
 
                     onClick { TabbedLibraryDisplaySheet(this@SettingsLibraryController).show() }
+                }
+
+                intListPreference(activity) {
+                    key = Keys.chapterScanlatorFilterOption
+                    titleRes = R.string.chapter_scanlator_filter_option
+                    dialogTitleRes = R.string.chapter_scanlator_filter_option
+                    entries = listOf("Match Any", "Match All")
+                    entryValues = listOf(1, 0)
+                    defaultValue = 1
+                    summaryRes =
+                        when (preferences.chapterScanlatorFilterOption().get()) {
+                            0 -> R.string.chapter_filter_all
+                            else -> R.string.chapter_filter_any
+                        }
+                    onChange {
+                        it as Int
+                        summaryRes =
+                            when (it) {
+                                0 -> R.string.chapter_filter_all
+                                else -> R.string.chapter_filter_any
+                            }
+                        true
+                    }
                 }
             }
 

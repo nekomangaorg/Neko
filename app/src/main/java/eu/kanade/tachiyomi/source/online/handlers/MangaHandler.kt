@@ -65,6 +65,7 @@ class MangaHandler {
                     fetchChapterList(
                         manga.uuid(),
                         manga.last_chapter_number,
+                        manga.last_volume_number,
                         preferencesHelper.includeUnavailable().get(),
                     )
                 }
@@ -101,17 +102,12 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             val artworks = artworkAsync(mangaUUID, fetchArtwork)
             val stats = statsAsync(mangaUUID)
-            val simpleChapters = simpleChaptersAsync(mangaUUID)
             val manga = mangaAsync(mangaUUID)
 
             manga
                 .await()
                 .andThen { mangaDto ->
-                    apiMangaParser.mangaDetailsParse(
-                        mangaDto.data,
-                        stats.await(),
-                        simpleChapters.await(),
-                    )
+                    apiMangaParser.mangaDetailsParse(mangaDto.data, stats.await())
                 }
                 .andThen { sManga -> Ok(sManga to artworks.await()) }
         }
@@ -176,6 +172,7 @@ class MangaHandler {
     suspend fun fetchChapterList(
         mangaUUID: String,
         lastChapterNumber: Int?,
+        lastVolumeNumber: Int?,
         includeUnavailable: Boolean,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
@@ -205,6 +202,7 @@ class MangaHandler {
 
                     apiMangaParser.chapterListParse(
                         lastChapterNumber,
+                        lastVolumeNumber,
                         results,
                         groupMap,
                         uploaderMap,
