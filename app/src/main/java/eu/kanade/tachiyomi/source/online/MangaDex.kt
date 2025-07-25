@@ -210,9 +210,7 @@ open class MangaDex : HttpSource() {
                 }
 
                 val latestFeed = async {
-                    if (!loginHelper.isLoggedIn()) {
-                        return@async null
-                    }
+                    if (!loginHelper.isLoggedIn()) return@async null
                     feedUpdatesHandler
                         .getPage(
                             blockedScanlatorUUIDs = blockedScanlatorUUIDs,
