@@ -160,7 +160,7 @@ private fun SearchResult(
 @Composable
 @NonRestartableComposable
 private fun searchTerms() =
-    persistentListOf<SettingsData>(
+    persistentListOf(
         SettingsData(
             settingScreenType = SettingsScreenType.General,
             contents = GeneralSettingsScreen.getSearchTerms(),
@@ -172,6 +172,10 @@ private fun searchTerms() =
         SettingsData(
             settingScreenType = SettingsScreenType.Library,
             contents = LibrarySettingsScreen.getSearchTerms(),
+        ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.DataAndStorage,
+            contents = DataStorageSettingsScreen.getSearchTerms(),
         ),
     )
 

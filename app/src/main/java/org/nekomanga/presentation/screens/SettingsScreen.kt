@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -18,14 +17,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.setting.SettingsDataStorageViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
-import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
@@ -52,11 +50,8 @@ import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScree
 fun SettingsScreen(
     preferencesHelper: PreferencesHelper,
     mangaDetailsPreferences: MangaDetailsPreferences,
-    libraryPreferences: LibraryPreferences,
     storagePreferences: StoragePreferences,
-    categories: State<List<Category>>,
     windowSizeClass: WindowSizeClass,
-    setLibrarySearchSuggestion: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val navController = rememberNavController()
@@ -148,10 +143,14 @@ fun SettingsScreen(
                 .Content()
         }
 
-        composable<Screens.Settings.DataStorage> {
+        composable<Screens.Settings.DataStorage> { entry ->
+            val vm =
+                ViewModelProvider.create(entry.viewModelStore)[SettingsDataStorageViewModel::class]
+
             DataStorageSettingsScreen(
                     onNavigationIconClick = { navController.popBackStack() },
                     storagePreferences = storagePreferences,
+                    cacheData = vm.cacheData.collectAsState().value,
                 )
                 .Content()
         }

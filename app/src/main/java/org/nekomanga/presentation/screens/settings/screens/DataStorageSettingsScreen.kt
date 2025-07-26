@@ -5,6 +5,8 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
+import eu.kanade.tachiyomi.ui.setting.CacheData
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.ImmutableList
@@ -28,11 +31,11 @@ import org.nekomanga.presentation.components.dialog.RestoreDialog
 import org.nekomanga.presentation.components.storage.storageLocationPicker
 import org.nekomanga.presentation.components.storage.storageLocationText
 import org.nekomanga.presentation.screens.settings.Preference
-import org.nekomanga.presentation.screens.settings.PreferenceItem
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class DataStorageSettingsScreen(
     val storagePreferences: StoragePreferences,
+    val cacheData: CacheData,
     onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
@@ -50,6 +53,7 @@ internal class DataStorageSettingsScreen(
                 onClick = { pickStorageLocation.launch(null) },
             ),
             backupAndRestoreGroup(context),
+            dataManagementGroup(context, cacheData),
         )
     }
 
@@ -153,14 +157,47 @@ internal class DataStorageSettingsScreen(
         )
     }
 
+    @Composable
+    private fun dataManagementGroup(
+        context: Context,
+        cacheData: CacheData,
+    ): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.data_management),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.CustomPreference(
+                        title = stringResource(R.string.total_cache_usage),
+                        content = {
+                            Column {
+                                Text(text = "Parent cache folder: ${cacheData.parentCacheSize}")
+                                /*  Text(text = "Chapter disk cache: ${DiskUtil.readableDiskSize(context, chapterCache.cacheDir)}")
+                                Text(text = "Cover cache: $coverCacheSize")
+                                Text(text = "Online cover cache: $onlineCoverCacheSize")
+                                Text(text = "Image cache: ${DiskUtil.readableDiskSize(context, CoilDiskCache.get(context).size)}")
+                                Text(text = "Network cache: ${DiskUtil.readableDiskSize(context, network.cacheDir)}")
+                                Text(text = "Temp file cache: ${DiskUtil.readableDiskSize(context, DiskUtil.getCacheDirSize(context))}")*/
+                            }
+                        },
+                    )
+                ),
+        )
+    }
+
     companion object : SearchTermProvider {
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(stringResource(R.string.storage_location)),
-                SearchTerm(stringResource(R.string.create_backup),stringResource(R.string.can_be_used_to_restore) ),
-                SearchTerm(stringResource(R.string.restore_backup), stringResource(R.string.restore_from_backup_file)),
-                SearchTerm(stringResource(R.string.automatic_backups))
+                SearchTerm(
+                    stringResource(R.string.create_backup),
+                    stringResource(R.string.can_be_used_to_restore),
+                ),
+                SearchTerm(
+                    stringResource(R.string.restore_backup),
+                    stringResource(R.string.restore_from_backup_file),
+                ),
+                SearchTerm(stringResource(R.string.automatic_backups)),
             )
         }
     }

@@ -3,16 +3,50 @@ package tachiyomi.core.util.storage
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import android.os.StatFs
 import android.text.format.Formatter
+import androidx.core.content.ContextCompat
 import com.hippo.unifile.UniFile
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import tachiyomi.core.util.lang.Hash
 
 object DiskUtil {
 
+    /** Returns the root folders of all the available external storages. */
+    fun getExternalStorages(context: Context): List<File> {
+        return ContextCompat.getExternalFilesDirs(context, null).filterNotNull().mapNotNull {
+            val file = File(it.absolutePath.substringBefore("/Android/"))
+            val state = Environment.getExternalStorageState(file)
+            if (
+                state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY
+            ) {
+                file
+            } else {
+                null
+            }
+        }
+    }
+
     fun hashKeyForDisk(key: String): String {
         return Hash.md5(key)
+    }
+
+    fun getCacheDirSize(context: Context): Long {
+        return File(context.cacheDir, "")
+            .listFiles()!!
+            .mapNotNull {
+                if (it.isFile && (it.name.endsWith(".tmp"))) {
+                    getDirectorySize(it)
+                } else {
+                    null
+                }
+            }
+            .sum()
     }
 
     fun getDirectorySize(f: File): Long {
@@ -123,6 +157,13 @@ object DiskUtil {
     /** Returns real size of directory in human readable format. */
     fun readableDiskSize(context: Context, bytes: Long): String {
         return Formatter.formatFileSize(context, bytes)
+    }
+
+    fun observeDiskSpace(directory: File, isTmpFileLookup: Boolean = false): Flow<String> = flow {
+        while (true) {
+
+            delay(3.seconds)
+        }
     }
 
     const val NOMEDIA_FILE = ".nomedia"

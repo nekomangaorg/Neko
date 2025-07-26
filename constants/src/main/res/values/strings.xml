@@ -912,10 +912,12 @@
         <item quantity="other">Done in %1$s with %2$s errors</item>
     </plurals>
     <string name="not_logged_into_">Not logged into %1$s</string>
+    <string name="data_management">Data Management</string>
+    <string name="total_cache_usage">Total cache usage</string>
+
 
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
-    <string name="data_management">Data Management</string>
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
     <string name="saves_error_logs">Saves error logs to a file for sharing with the developers.  If verbose logging is enabled, extra debug logs will be included.</string>
