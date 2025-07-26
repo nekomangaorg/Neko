@@ -1598,6 +1598,7 @@ class MangaDetailPresenter(
                             db.deleteChapters(localDbChapters).executeAsBlocking()
                         }
                     }
+                    updateChapterFlows()
                 }
                 if (canUndo) {
                     _snackbarState.emit(
@@ -1614,7 +1615,6 @@ class MangaDetailPresenter(
             } else {
                 _snackbarState.emit(SnackbarState(messageRes = R.string.no_chapters_to_delete))
             }
-            updateChapterFlows()
         }
     }
 
