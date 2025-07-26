@@ -50,7 +50,7 @@ subprojects {
             this.dependsOn("ktfmtFormat")
         }
 
-        withType<Test>() {
+        withType<Test> {
             useJUnitPlatform()
             testLogging { events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED) }
         }
