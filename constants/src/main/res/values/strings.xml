@@ -412,6 +412,7 @@
     <string name="global_search">Global search…</string>
     <string name="label_global_search">Global search</string>
     <string name="latest">Latest uploads</string>
+    <string name="feed_updates">Feed updates</string>
     <string name="recently_added">Recently added</string>
     <string name="popularNewTitles">Popular new titles</string>
     <string name="browse">Browse</string>

@@ -184,8 +184,7 @@
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorDownloadBadge">@color/lavender_primary_variant</item>
-        <item name="colorOnDownloadBadge">@color/md_black_1000</item>
-
+        <item name="colorOnDownloadBadge">@color/lavender_on_download</item>
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">

@@ -26,5 +26,6 @@
     <color name="lavender_on_background">#DEE8FF</color>
     <color name="lavender_surface">#111129</color>
     <color name="lavender_on_surface">#DEE8FF</color>
+    <color name="lavender_on_download">@color/md_white_1000</color>
     <color name="lavender_elevation_overlay">@color/lavender_primary</color>
 </resources>
