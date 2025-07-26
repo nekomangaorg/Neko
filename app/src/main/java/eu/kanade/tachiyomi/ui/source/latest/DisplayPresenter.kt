@@ -42,6 +42,7 @@ class DisplayPresenter(
                 title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
                 titleRes =
                     (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes
+                        ?: (displayScreenType as? DisplayScreenType.FeedUpdates)?.titleRes
                         ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
                         ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
