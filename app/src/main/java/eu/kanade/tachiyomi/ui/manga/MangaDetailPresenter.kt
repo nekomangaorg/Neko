@@ -196,10 +196,12 @@ class MangaDetailPresenter(
                 updateArtworkFlow()
                 onRefresh()
             } else {
-                updateAllFlows()
-                if (generalState.value.allChapters.all { it.chapter.smartOrder == 0 }) onRefresh()
-                refreshTracking(false)
-                syncChaptersReadStatus()
+                if (!db.getChapters(mangaId).executeOnIO().any { it.smart_order != 0 }) onRefresh()
+                else {
+                    updateAllFlows()
+                    refreshTracking()
+                    syncChaptersReadStatus()
+                }
             }
         }
         observeDownloads()
@@ -251,6 +253,7 @@ class MangaDetailPresenter(
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
+                        refreshTracking()
                         syncChaptersReadStatus()
                         _isRefreshing.value = false
                     }
