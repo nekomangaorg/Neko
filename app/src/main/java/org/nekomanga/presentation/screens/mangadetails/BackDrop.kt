@@ -8,8 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.asDrawable
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -29,6 +32,7 @@ fun BackDrop(
                         .background(themeColorState.buttonColor.copy(alpha = .25f))
             )
         }
+        val resources = LocalContext.current.resources
         AsyncImage(
             model =
                 ImageRequest.Builder(LocalContext.current)
@@ -40,7 +44,7 @@ fun BackDrop(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier.alpha(.2f),
-            onSuccess = { generatePalette(it.result.drawable) },
+            onSuccess = { generatePalette(it.result.image.asDrawable(resources)) },
         )
     }
 }

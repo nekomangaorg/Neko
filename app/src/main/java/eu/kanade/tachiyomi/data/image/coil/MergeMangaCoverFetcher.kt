@@ -1,13 +1,11 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import coil.decode.DataSource
-import coil.decode.ImageSource
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.fetch.SourceResult
-import coil.network.HttpException
-import coil.request.Options
-import coil.request.Parameters
+import coil3.decode.DataSource
+import coil3.decode.ImageSource
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.SourceFetchResult
+import coil3.request.Options
 import eu.kanade.tachiyomi.source.online.HttpSource
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import kotlinx.coroutines.CancellationException
@@ -17,6 +15,7 @@ import kotlinx.coroutines.Job
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
+import okio.FileSystem
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
@@ -40,8 +39,9 @@ class MergeMangaCoverFetcher(
             val responseBody = checkNotNull(response.body) { "Null response source" }
             try {
                 // Read from response if cache is unused or unusable
-                return SourceResult(
-                    source = ImageSource(source = responseBody.source(), context = options.context),
+                return SourceFetchResult(
+                    source =
+                        ImageSource(source = responseBody.source(), fileSystem = FileSystem.SYSTEM),
                     mimeType = "image/*",
                     dataSource = DataSource.NETWORK,
                 )
@@ -62,18 +62,13 @@ class MergeMangaCoverFetcher(
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != HTTP_NOT_MODIFIED) {
             response.close()
-            throw HttpException(response)
+            throw Exception(response.message)
         }
         return response
     }
 
     private fun newRequest(): Request {
-        val request =
-            Request.Builder()
-                .url(url)
-                .headers(sourceLazy.value.headers)
-                // Support attaching custom data to the network request.
-                .tag(Parameters::class.java, options.parameters)
+        val request = Request.Builder().url(url).headers(sourceLazy.value.headers)
 
         when {
             options.networkCachePolicy.readEnabled -> {

@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.data.cache
 
 import android.content.Context
 import android.text.format.Formatter
-import coil.imageLoader
-import coil.memory.MemoryCache
+import coil3.imageLoader
+import coil3.memory.MemoryCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoilDiskCache
