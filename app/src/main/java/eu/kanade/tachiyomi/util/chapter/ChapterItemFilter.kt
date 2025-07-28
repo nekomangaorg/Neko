@@ -129,8 +129,11 @@ class ChapterItemFilter(
         libraryPreferences: LibraryPreferences,
     ): List<T> {
 
-        val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
-        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get().toSet()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
+        val blocked = blockedScanlators + blockedUploaders
+
+        val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
         SourceManager.mergeSourceNames
@@ -165,7 +168,7 @@ class ChapterItemFilter(
                     chapterItem.chapter.scanlator,
                     chapterItem.chapter.uploader,
                     false,
-                    blockedGroups,
+                    blocked.toMutableSet(),
                 )
             }
             .filterNot { chapterItem ->
@@ -173,7 +176,7 @@ class ChapterItemFilter(
                     chapterItem.chapter.scanlator,
                     chapterItem.chapter.uploader,
                     chapterScanlatorMatchAll,
-                    filteredGroups,
+                    filteredGroups.toMutableSet(),
                 )
             }
             .toList()

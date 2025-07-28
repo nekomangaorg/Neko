@@ -131,23 +131,28 @@ class ChapterUtil {
             scanlatorStr: String,
             uploaderStr: String,
             all: Boolean,
-            filteredGroups: Set<String>,
+            filtered: MutableSet<String>,
         ): Boolean {
             val scanlators =
                 getScanlators(scanlatorStr)
                     .filterNot { it in SourceManager.mergeSourceNames }
                     .toMutableList()
-            // Match all should ignore No Group if uploader is filtered
-            if (all && uploaderStr.isNotEmpty()) {
-                if ("No Group" !in filteredGroups) {
+
+            if (uploaderStr.isNotEmpty()) {
+                // Check uploaders if there is no group
+                if ("No Group" in scanlators) {
+                    scanlators.add(uploaderStr)
+                }
+                // Match all should ignore No Group if uploader is filtered
+                if (all && "No Group" !in filtered) {
                     scanlators.remove("No Group")
                 }
-                scanlators.add(uploaderStr)
             }
+
             return when {
-                scanlators.isEmpty() || filteredGroups.isEmpty() -> false
-                all -> scanlators.all { group -> group in filteredGroups }
-                else -> scanlators.any { group -> group in filteredGroups }
+                scanlators.isEmpty() || filtered.isEmpty() -> false
+                all -> scanlators.all { group -> group in filtered }
+                else -> scanlators.any { group -> group in filtered }
             }
         }
     }

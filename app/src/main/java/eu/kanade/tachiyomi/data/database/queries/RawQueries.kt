@@ -14,14 +14,14 @@ val libraryQuery =
         SELECT ${Manga.TABLE}.*, COALESCE(C.unread, '') AS ${Manga.COL_UNREAD}, COALESCE(R.hasread, '') AS ${Manga.COL_HAS_READ}, COALESCE(B.bookmarkCount, 0) AS ${Manga.COL_BOOKMARK_COUNT}, COALESCE(U.unavailableCount,0) as ${Manga.COL_UNAVAILABLE_COUNT}
         FROM ${Manga.TABLE}
         LEFT JOIN (
-            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS unread
+            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A') || ' [;] ' || IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A'), ' [.] ') AS unread
             FROM ${Chapter.TABLE}
             WHERE ${Chapter.COL_READ} = 0
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS C
         ON ${Manga.COL_ID} = C.${Chapter.COL_MANGA_ID}
         LEFT JOIN (
-            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS hasread
+            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A') || ' [;] ' || IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A'), ' [.] ') AS hasread
             FROM ${Chapter.TABLE}
             WHERE ${Chapter.COL_READ} = 1
             GROUP BY ${Chapter.COL_MANGA_ID}

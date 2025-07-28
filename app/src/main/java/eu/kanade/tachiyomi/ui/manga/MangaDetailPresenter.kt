@@ -767,14 +767,15 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             // possibly move this into a chapter repository
             val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+            val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
                     .mapNotNull { it.toSimpleChapter() }
                     .filter {
-                        it.scanlatorList().none { scanlator ->
-                            blockedScanlators.contains(scanlator)
-                        }
+                        val scanlators = it.scanlatorList()
+                        scanlators.none { scanlator -> blockedScanlators.contains(scanlator) } &&
+                            ("No Group" !in scanlators || it.uploader !in blockedUploaders)
                     }
                     .map { chapter ->
                         val downloadState =
@@ -1948,7 +1949,7 @@ class MangaDetailPresenter(
             _snackbarState.emit(
                 SnackbarState(
                     messageRes = R.string.globally_blocked_group_,
-                    message = scanlator,
+                    message = scanlator ?: uploader!!,
                     actionLabelRes = R.string.undo,
                     action = {
                         presenterScope.launch {

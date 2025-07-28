@@ -55,21 +55,24 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val list = split(" [.] ")
 
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-        val chapterScanlatorList =
-            list.filterNot { scanlators ->
-                ChapterUtil.filterByGroup(scanlators, false, blockedScanlators)
+        val chapterList =
+            list.filter {
+                val (scanlator, uploader) = it.split(" [;] ")
+                !ChapterUtil.filterByGroup(scanlators, false, blockedScanlators) &&
+                    (!scanlator.contains("No Group") || uploader !in blockedUploaders)
             }
 
         return when (manga.filtered_scanlators == null) {
-            true -> chapterScanlatorList.size
+            true -> chapterList.size
             false -> {
                 val filteredScanlators =
                     ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
                 val chapterScanlatorMatchAll =
                     libraryPreferences.chapterScanlatorFilterOption().get() == 0
                 val sources = SourceManager.mergeSourceNames + MdConstants.name
-                chapterScanlatorList
+                chapterList
                     .filterNot { scanlators ->
                         sources.any { source ->
                             ChapterUtil.filteredBySource(

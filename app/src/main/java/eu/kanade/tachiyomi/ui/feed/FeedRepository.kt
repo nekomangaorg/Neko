@@ -46,6 +46,7 @@ class FeedRepository(
 
     suspend fun getUpdatedFeedMangaForHistoryBySeries(feedManga: FeedManga): FeedManga {
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters =
@@ -59,6 +60,10 @@ class FeedRepository(
                     it.chapter.scanlatorList().fastAny { scanlator ->
                         scanlator in blockedScanlators
                     }
+                }
+                .filterNot {
+                    it.chapter.uploader in blockedUploaders &&
+                        "No Group" !in it.chapter.scanlatorList()
                 }
                 .toPersistentList()
 
@@ -121,6 +126,7 @@ class FeedRepository(
 
     suspend fun getSummaryContinueReadingList(): Result<List<FeedManga>, ResultError.Generic> {
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         return com.github.michaelbull.result
             .runCatching {
@@ -142,10 +148,13 @@ class FeedRepository(
                                     history.chapter.toSimpleChapter(history.history.last_read)!!,
                                 )
 
+                            val scanlators = chapter.chapter.scanlatorList()
                             if (
-                                chapter.chapter.scanlatorList().fastAny { scanlator ->
+                                scanlators.fastAny { scanlator ->
                                     scanlator in blockedScanlators
-                                }
+                                } ||
+                                    ("No Group" in scanlators &&
+                                        chapter.chapter.uploader in blockedUploaders)
                             ) {
                                 return@mapNotNull null
                             }
@@ -222,6 +231,7 @@ class FeedRepository(
 
     suspend fun getSummaryNewlyAddedList(): Result<List<FeedManga>, ResultError.Generic> {
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         return com.github.michaelbull.result
             .runCatching {
@@ -232,11 +242,17 @@ class FeedRepository(
                     .takeLast(100)
                     .mapNotNull { manga ->
                         val chapters =
-                            db.getChapters(manga).executeOnIO().filterNot {
-                                it.scanlatorList().fastAny { scanlator ->
-                                    scanlator in blockedScanlators
+                            db.getChapters(manga)
+                                .executeOnIO()
+                                .filterNot {
+                                    it.scanlatorList().fastAny { scanlator ->
+                                        scanlator in blockedScanlators
+                                    }
                                 }
-                            }
+                                .filterNot {
+                                    it.uploader in blockedUploaders &&
+                                        "No Group" in it.scanlatorList()
+                                }
 
                         if (chapters.any { it.read || it.last_page_read != 0 }) {
                             return@mapNotNull null
@@ -410,6 +426,7 @@ class FeedRepository(
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
 
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         if (offset > 0) {
             delay(300L)
@@ -433,10 +450,13 @@ class FeedRepository(
                                     false -> it.chapter.date_upload
                                 }
 
+                            val scanlators = chapterItem.chapter.scanlatorList()
                             if (
-                                chapterItem.chapter.scanlatorList().fastAny { scanlator ->
+                                scanlators.fastAny { scanlator ->
                                     scanlator in blockedScanlators
-                                }
+                                } ||
+                                    ("No Group" in scanlators &&
+                                        chapterItem.chapter.uploader in blockedUploaders)
                             ) {
                                 return@mapNotNull null
                             }
