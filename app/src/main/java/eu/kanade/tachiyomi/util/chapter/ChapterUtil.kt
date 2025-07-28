@@ -135,12 +135,8 @@ class ChapterUtil {
                 getScanlators(scanlatorStr).filterNot { it in SourceManager.mergeSourceNames }
             return when {
                 scanlators.isEmpty() || filteredGroups.isEmpty() -> false
-                all -> {
-                    scanlators.all { group -> group in filteredGroups }
-                }
-                else -> {
-                    scanlators.any { group -> group in filteredGroups }
-                }
+                all -> scanlators.all { group -> group in filteredGroups }
+                else -> scanlators.any { group -> group in filteredGroups }
             }
         }
     }
