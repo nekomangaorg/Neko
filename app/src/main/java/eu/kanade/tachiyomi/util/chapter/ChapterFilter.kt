@@ -139,7 +139,9 @@ class ChapterFilter(
         preferences: PreferencesHelper,
     ): List<T> {
 
-        val blockedGroups = preferences.blockedScanlators().get().toSet()
+        val blockedScanlators = preferences.blockedScanlators().get().toSet()
+        val blockedUploaders = preferences.blockedUploaders().get().toSet()
+        val blocked = blockedScanlators + blockedUploaders
         val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
@@ -175,7 +177,7 @@ class ChapterFilter(
                     chapter.scanlator ?: "",
                     chapter.uploader ?: "",
                     false,
-                    blockedGroups,
+                    blocked.toMutableSet(),
                 )
             }
             .filterNot { chapter ->
@@ -183,7 +185,7 @@ class ChapterFilter(
                     chapter.scanlator ?: "",
                     chapter.uploader ?: "",
                     chapterScanlatorMatchAll,
-                    filteredGroups,
+                    filteredGroups.toMutableSet(),
                 )
             }
             .toList()

@@ -253,15 +253,16 @@ class MangaUpdateCoordinator {
      */
     fun downloadChapters(manga: Manga, chapters: List<ChapterItem>) {
         val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedUploaders = preferences.blockedUploaders().get()
 
         downloadManager.downloadChapters(
             manga,
             chapters
                 .filter {
+                    val scanlators = it.chapter.scanlatorList()
                     !it.isDownloaded &&
-                        it.chapter.scanlatorList().none { scanlator ->
-                            scanlator in blockedScanlators
-                        }
+                        scanlators.none { scanlator -> scanlator in blockedScanlators } &&
+                        ("No Group" !in scanlators || it.chapter.uploader !in blockedUploaders)
                 }
                 .map { it.chapter.toDbChapter() },
         )
