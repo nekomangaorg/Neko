@@ -512,7 +512,9 @@ private fun ChapterRow(
                 }
             chapterActions.mark(chaptersToMark, action)
         },
-        blockScanlator = { scanlator -> chapterActions.blockScanlator(scanlator) },
+        blockScanlator = { scanlator, uploader ->
+            chapterActions.blockScanlator(scanlator, uploader)
+        },
     )
 }
 

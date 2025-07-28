@@ -129,11 +129,21 @@ class ChapterUtil {
          */
         fun filterByGroup(
             scanlatorStr: String,
+            uploaderStr: String,
             all: Boolean,
             filteredGroups: Set<String>,
         ): Boolean {
             val scanlators =
-                getScanlators(scanlatorStr).filterNot { it in SourceManager.mergeSourceNames }
+                getScanlators(scanlatorStr)
+                    .filterNot { it in SourceManager.mergeSourceNames }
+                    .toMutableList()
+            // Match all should ignore No Group if uploader is filtered
+            if (all && uploaderStr.isNotEmpty()) {
+                if ("No Group" !in filteredGroups) {
+                    scanlators.remove("No Group")
+                }
+                scanlators.add(uploaderStr)
+            }
             return when {
                 scanlators.isEmpty() || filteredGroups.isEmpty() -> false
                 all -> scanlators.all { group -> group in filteredGroups }

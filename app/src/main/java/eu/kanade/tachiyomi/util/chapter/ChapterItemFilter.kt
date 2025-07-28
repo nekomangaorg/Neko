@@ -161,11 +161,17 @@ class ChapterItemFilter(
             }
             // blocked groups are always Any
             .filterNot { chapterItem ->
-                ChapterUtil.filterByGroup(chapterItem.chapter.scanlator, false, blockedGroups)
+                ChapterUtil.filterByGroup(
+                    chapterItem.chapter.scanlator,
+                    chapterItem.chapter.uploader,
+                    false,
+                    blockedGroups,
+                )
             }
             .filterNot { chapterItem ->
                 ChapterUtil.filterByGroup(
                     chapterItem.chapter.scanlator,
+                    chapterItem.chapter.uploader,
                     chapterScanlatorMatchAll,
                     filteredGroups,
                 )
