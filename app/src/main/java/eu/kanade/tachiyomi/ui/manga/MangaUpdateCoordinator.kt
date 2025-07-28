@@ -274,12 +274,17 @@ class MangaUpdateCoordinator {
 
     suspend fun updateScanlator(scanlator: String) {
         sourceManager.mangaDex.getScanlator(scanlator).onSuccess {
-            db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
+            // Sanity check for merged
+            val scanlatorImpl = it.toScanlatorImpl()
+            if (scanlator == scanlatorImpl.name) {
+                db.insertScanlators(listOf(scanlatorImpl)).executeAsBlocking()
+            }
         }
     }
 
     suspend fun updateUploader(uploader: String) {
         sourceManager.mangaDex.getUploader(uploader).onSuccess {
+            // Uploader only comes from the MD source
             db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
         }
     }

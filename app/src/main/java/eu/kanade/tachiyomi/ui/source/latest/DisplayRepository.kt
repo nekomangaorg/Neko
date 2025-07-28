@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -95,10 +96,12 @@ class DisplayRepository(
                 .mapNotNull {
                     var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
                     if (scanlatorImpl == null) {
-                        mangaDex.getScanlator(scanlator = it).map { scanlator ->
-                            scanlatorImpl = scanlator.toScanlatorImpl()
-                        }
-                        db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                        mangaDex
+                            .getScanlator(scanlator = it)
+                            .map { scanlator -> scanlatorImpl = scanlator.toScanlatorImpl() }
+                            .onSuccess {
+                                db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                            }
                     }
                     scanlatorImpl
                 }
@@ -110,10 +113,10 @@ class DisplayRepository(
                 .mapNotNull {
                     var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
                     if (uploaderImpl == null) {
-                        mangaDex.getUploader(uploader = it).map { uploader ->
-                            uploaderImpl = uploader.toUploaderImpl()
-                        }
-                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
+                        mangaDex
+                            .getUploader(uploader = it)
+                            .map { uploader -> uploaderImpl = uploader.toUploaderImpl() }
+                            .onSuccess { db.insertUploader(listOf(uploaderImpl!!)).executeOnIO() }
                     }
                     uploaderImpl
                 }

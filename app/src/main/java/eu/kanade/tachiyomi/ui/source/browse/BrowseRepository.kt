@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.filterErrors
 import com.github.michaelbull.result.filterValues
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -114,27 +112,21 @@ class BrowseRepository(
                 }
             }
 
-        return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
-            Err(blockedScanlatorUUIDs.filterErrors().first())
-        } else if (blockedUploaderUUIDs.filterErrors().isNotEmpty()) {
-            Err(blockedUploaderUUIDs.filterErrors().first())
-        } else {
-            val scanlatorUUIDs = blockedScanlatorUUIDs.filterValues().map { it.uuid }
-            val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
-            mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
-                Ok(
-                    listResults.map { listResult ->
-                        HomePageManga(
-                            displayScreenType = listResult.displayScreenType,
-                            displayManga =
-                                listResult.sourceManga
-                                    .map { it.toDisplayManga(db, mangaDex.id) }
-                                    .distinctBy { it.url }
-                                    .toPersistentList(),
-                        )
-                    }
-                )
-            }
+        val scanlatorUUIDs = blockedScanlatorUUIDs.filterValues().map { it.uuid }
+        val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
+        return mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
+            Ok(
+                listResults.map { listResult ->
+                    HomePageManga(
+                        displayScreenType = listResult.displayScreenType,
+                        displayManga =
+                            listResult.sourceManga
+                                .map { it.toDisplayManga(db, mangaDex.id) }
+                                .distinctBy { it.url }
+                                .toPersistentList(),
+                    )
+                }
+            )
         }
     }
 
