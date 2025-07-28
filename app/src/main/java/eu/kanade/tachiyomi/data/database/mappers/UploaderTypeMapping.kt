@@ -32,7 +32,7 @@ class UploaderPutResolver : DefaultPutResolver<UploaderImpl>() {
             .build()
 
     override fun mapToContentValues(obj: UploaderImpl) =
-        ContentValues(4).apply {
+        ContentValues(3).apply {
             put(UploaderTable.COL_ID, obj.id)
             put(UploaderTable.COL_USERNAME, obj.username)
             put(UploaderTable.COL_UUID, obj.uuid)
