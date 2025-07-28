@@ -1936,8 +1936,12 @@ class MangaDetailPresenter(
                 blockedScanlators.add(scanlator)
                 mangaDexPreferences.blockedGroups().set(blockedScanlators)
             } else {
+                val uploaderImpl = db.getUploaderByName(uploader!!).executeAsBlocking()
+                if (uploaderImpl == null) {
+                    launchIO { mangaUpdateCoordinator.updateUploader(uploader) }
+                }
                 val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toMutableSet()
-                blockedUploaders.add(uploader!!)
+                blockedUploaders.add(uploader)
                 mangaDexPreferences.blockedUploaders().set(blockedUploaders)
             }
             updateChapterFlows()
@@ -1955,6 +1959,7 @@ class MangaDetailPresenter(
                                 allBlockedScanlators.remove(scanlator)
                                 mangaDexPreferences.blockedGroups().set(allBlockedScanlators)
                             } else {
+                                db.deleteUploader(uploader!!).executeOnIO()
                                 val allBlockedUploaders =
                                     mangaDexPreferences.blockedUploaders().get().toMutableSet()
                                 allBlockedUploaders.remove(uploader)

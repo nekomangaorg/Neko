@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.database.mappers.ScanlatorTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SearchMetadataTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.TrackTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.UploaderTypeMapping
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
 import eu.kanade.tachiyomi.data.database.models.SearchMetadata
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.UploaderImpl
 import eu.kanade.tachiyomi.data.database.queries.ArtworkQueries
 import eu.kanade.tachiyomi.data.database.queries.BrowseFilterQueries
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
@@ -39,6 +41,7 @@ import eu.kanade.tachiyomi.data.database.queries.ScanlatorQueries
 import eu.kanade.tachiyomi.data.database.queries.SearchMetadataQueries
 import eu.kanade.tachiyomi.data.database.queries.SimilarQueries
 import eu.kanade.tachiyomi.data.database.queries.TrackQueries
+import eu.kanade.tachiyomi.data.database.queries.UploaderQueries
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
 /** This class provides operations to manage the database through its interfaces. */
@@ -54,6 +57,7 @@ open class DatabaseHelper(context: Context) :
     HistoryQueries,
     SearchMetadataQueries,
     ScanlatorQueries,
+    UploaderQueries,
     SimilarQueries {
 
     private val configuration =
@@ -74,8 +78,8 @@ open class DatabaseHelper(context: Context) :
             .addTypeMapping(History::class.java, HistoryTypeMapping())
             .addTypeMapping(MangaSimilar::class.java, SimilarTypeMapping())
             .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
-            .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
             .addTypeMapping(ScanlatorImpl::class.java, ScanlatorTypeMapping())
+            .addTypeMapping(UploaderImpl::class.java, UploaderTypeMapping())
             .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
             .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())
             .build()

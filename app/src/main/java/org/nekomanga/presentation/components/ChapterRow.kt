@@ -241,6 +241,7 @@ private fun ChapterInfo(
             Suwayomi.name -> scanlators.subList(0, 2).clear()
             in SourceManager.mergeSourceNames -> scanlators.removeAt(0)
         }
+
         scanlators
             .map { if (it == "No Group") null to uploader else it to null }
             .filterNot { it == null to null }
@@ -251,6 +252,7 @@ private fun ChapterInfo(
                 )
             }
             .toImmutableList()
+            .apply { TimberKt.d { this.toString() } }
     }
 
     val haptic = LocalHapticFeedback.current

@@ -276,6 +276,12 @@ class MangaUpdateCoordinator {
             db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
         }
     }
+
+    suspend fun updateUploader(uploader: String) {
+        sourceManager.mangaDex.getUploader(uploader).onSuccess {
+            db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
+        }
+    }
 }
 
 /** Types of Results that can be returned by the parent class */

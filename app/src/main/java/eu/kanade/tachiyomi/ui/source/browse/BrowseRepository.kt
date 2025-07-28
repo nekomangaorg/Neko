@@ -100,12 +100,28 @@ class BrowseRepository(
                     Ok(scanlatorImpl!!)
                 }
             }
+        val blockedUploaderUUIDs =
+            preferenceHelper.blockedUploaders().get().map {
+                var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
+                if (uploaderImpl == null) {
+                    mangaDex.getUploader(uploader = it).map { uploader ->
+                        uploaderImpl = uploader.toUploaderImpl()
+                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
+                        uploaderImpl!!
+                    }
+                } else {
+                    Ok(uploaderImpl!!)
+                }
+            }
 
         return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
             Err(blockedScanlatorUUIDs.filterErrors().first())
+        } else if (blockedUploaderUUIDs.filterErrors().isNotEmpty()) {
+            Err(blockedUploaderUUIDs.filterErrors().first())
         } else {
-            val uuids = blockedScanlatorUUIDs.filterValues().map { it.uuid }
-            mangaDex.fetchHomePageInfo(uuids).andThen { listResults ->
+            val scanlatorUUIDs = blockedScanlatorUUIDs.filterValues().map { it.uuid }
+            val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
+            mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
                 Ok(
                     listResults.map { listResult ->
                         HomePageManga(

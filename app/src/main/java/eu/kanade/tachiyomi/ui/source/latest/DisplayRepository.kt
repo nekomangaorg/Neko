@@ -56,8 +56,23 @@ class DisplayRepository(
                     scanlatorImpl
                 }
                 .map { it.uuid }
+        val blockedUploaderUUIDs =
+            preferenceHelper
+                .blockedUploaders()
+                .get()
+                .mapNotNull {
+                    var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
+                    if (uploaderImpl == null) {
+                        mangaDex.getUploader(uploader = it).map { uploader ->
+                            uploaderImpl = uploader.toUploaderImpl()
+                        }
+                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
+                    }
+                    uploaderImpl
+                }
+                .map { it.uuid }
         return mangaDex
-            .feedUpdates(page, blockedScanlatorUUIDs)
+            .feedUpdates(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
                     val displayMangaList =
@@ -88,8 +103,23 @@ class DisplayRepository(
                     scanlatorImpl
                 }
                 .map { it.uuid }
+        val blockedUploaderUUIDs =
+            preferenceHelper
+                .blockedUploaders()
+                .get()
+                .mapNotNull {
+                    var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
+                    if (uploaderImpl == null) {
+                        mangaDex.getUploader(uploader = it).map { uploader ->
+                            uploaderImpl = uploader.toUploaderImpl()
+                        }
+                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
+                    }
+                    uploaderImpl
+                }
+                .map { it.uuid }
         return mangaDex
-            .latestChapters(page, blockedScanlatorUUIDs)
+            .latestChapters(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
                     val displayMangaList =

@@ -10,6 +10,8 @@ import com.skydoves.sandwich.mapSuccess
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.Uploader
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -123,6 +125,23 @@ open class MangaDex : HttpSource() {
         }
     }
 
+    suspend fun getUploader(uploader: String): Result<Uploader, ResultError> {
+        return withIOContext {
+            networkServices.service
+                .uploader(uploader)
+                .getOrResultError("Trying to get uploader")
+                .andThen { userListDto ->
+                    val userDto = userListDto.data.firstOrNull()
+                    when (userDto == null) {
+                        true -> Err("User not found".toResultError())
+                        false -> {
+                            Ok(Uploader(username = userDto.attributes.username, uuid = userDto.id))
+                        }
+                    }
+                }
+        }
+    }
+
     suspend fun search(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
         return searchHandler.search(page, filters)
     }
@@ -148,7 +167,8 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchHomePageInfo(
-        blockedScanlatorUUIDs: List<String>
+        blockedScanlatorUUIDs: List<String>,
+        blockedUploaderUUIDs: List<String>,
     ): Result<List<ListResults>, ResultError> {
         return withIOContext {
             coroutineBinding {
@@ -214,6 +234,7 @@ open class MangaDex : HttpSource() {
                     feedUpdatesHandler
                         .getPage(
                             blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            blockedUploaderUUIDs = blockedUploaderUUIDs,
                             limit = MdConstants.Limits.latestSmaller,
                         )
                         .andThen { mangaListPage ->
@@ -231,6 +252,7 @@ open class MangaDex : HttpSource() {
                     latestChapterHandler
                         .getPage(
                             blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            blockedUploaderUUIDs = blockedUploaderUUIDs,
                             limit = MdConstants.Limits.latestSmaller,
                         )
                         .andThen { mangaListPage ->
@@ -282,15 +304,17 @@ open class MangaDex : HttpSource() {
     suspend fun latestChapters(
         page: Int,
         blockedScanlatorUUIDs: List<String>,
+        blockedUploaderUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
-        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
+        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
     }
 
     suspend fun feedUpdates(
         page: Int,
         blockedScanlatorUUIDs: List<String>,
+        blockedUploaderUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
-        return feedUpdatesHandler.getPage(page, blockedScanlatorUUIDs)
+        return feedUpdatesHandler.getPage(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
     }
 
     suspend fun getMangaDetails(
