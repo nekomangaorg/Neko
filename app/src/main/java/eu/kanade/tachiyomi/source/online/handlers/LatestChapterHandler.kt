@@ -33,6 +33,7 @@ class LatestChapterHandler {
     suspend fun getPage(
         page: Int = 1,
         blockedScanlatorUUIDs: List<String>,
+        blockedUploaderUUIDs: List<String>,
         limit: Int = MdConstants.Limits.latest,
     ): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
@@ -44,7 +45,14 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext service
-                .latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                .latestChapters(
+                    limit,
+                    offset,
+                    langs,
+                    contentRatings,
+                    blockedScanlatorUUIDs,
+                    blockedUploaderUUIDs,
+                )
                 .getOrResultError("getting latest chapters")
                 .andThen { latestChapterParse(it) }
         }

@@ -37,6 +37,7 @@ class FeedUpdatesHandler {
     suspend fun getPage(
         page: Int = 1,
         blockedScanlatorUUIDs: List<String>,
+        blockedUploaderUUIDs: List<String>,
         limit: Int = MdConstants.Limits.latest,
     ): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
@@ -48,7 +49,14 @@ class FeedUpdatesHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext authService
-                .feedUpdates(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                .feedUpdates(
+                    limit,
+                    offset,
+                    langs,
+                    contentRatings,
+                    blockedScanlatorUUIDs,
+                    blockedUploaderUUIDs,
+                )
                 .getOrResultError("getting latest chapters")
                 .andThen { feedUpdatesParse(it) }
         }

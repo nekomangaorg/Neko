@@ -1930,8 +1930,13 @@ class MangaDetailPresenter(
                 blockedScanlators.add(scanlator)
                 preferences.blockedScanlators().set(blockedScanlators)
             } else {
+                TimberKt.d { uploader!! }
+                val uploaderImpl = db.getUploaderByName(uploader!!).executeAsBlocking()
+                if (uploaderImpl == null) {
+                    launchIO { mangaUpdateCoordinator.updateUploader(uploader) }
+                }
                 val blockedUploaders = preferences.blockedUploaders().get().toMutableSet()
-                blockedUploaders.add(uploader!!)
+                blockedUploaders.add(uploader)
                 preferences.blockedUploaders().set(blockedUploaders)
             }
             updateChapterFlows()
@@ -1949,6 +1954,7 @@ class MangaDetailPresenter(
                                 allBlockedScanlators.remove(scanlator)
                                 preferences.blockedScanlators().set(allBlockedScanlators)
                             } else {
+                                db.deleteUploader(uploader!!).executeOnIO()
                                 val allBlockedUploaders =
                                     preferences.blockedUploaders().get().toMutableSet()
                                 allBlockedUploaders.remove(uploader)

@@ -97,5 +97,6 @@ interface MangaDexAuthorizedUserService {
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
         @Query("excludedGroups[]") blockedScanlators: List<String>,
+        @Query("excludedUploaders[]") blockedUploaders: List<String>,
     ): ApiResponse<ChapterListDto>
 }
