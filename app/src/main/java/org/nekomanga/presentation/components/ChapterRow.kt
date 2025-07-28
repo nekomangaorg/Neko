@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -98,7 +100,7 @@ fun ChapterRow(
     onWebView: () -> Unit,
     onComment: () -> Unit,
     onRead: () -> Unit,
-    blockScanlator: (String) -> Unit,
+    blockScanlator: (String?, String?) -> Unit,
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
@@ -226,7 +228,7 @@ private fun ChapterInfo(
     isMerged: Boolean = false,
     isLocal: Boolean = false,
     isUnavailable: Boolean,
-    blockScanlator: (String) -> Unit,
+    blockScanlator: (String?, String?) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
 
@@ -234,11 +236,18 @@ private fun ChapterInfo(
     val downloadProgress = remember(downloadProgressProvider()) { downloadProgressProvider() }
 
     val splitScanlator = remember {
-        ChapterUtil.getScanlators(scanlator)
-            .map {
+        val scanlators = ChapterUtil.getScanlators(scanlator).toMutableList()
+        when (scanlators.first()) {
+            Suwayomi.name -> scanlators.subList(0, 2).clear()
+            in SourceManager.mergeSourceNames -> scanlators.removeAt(0)
+        }
+        scanlators
+            .map { if (it == "No Group") null to uploader else it to null }
+            .filterNot { it == null to null }
+            .map { (scanlator, uploader) ->
                 SimpleDropDownItem.Action(
-                    text = UiText.String(it),
-                    onClick = { blockScanlator(it) },
+                    text = UiText.String(scanlator ?: uploader!!),
+                    onClick = { blockScanlator(scanlator, uploader) },
                 )
             }
             .toImmutableList()
@@ -274,7 +283,7 @@ private fun ChapterInfo(
         dropDownItems =
             getDropDownItems(
                 isLocal = isLocal,
-                showScanlator = scanlator.isNotBlank() && !isMerged && !isLocal,
+                showScanlator = scanlator.isNotBlank() && splitScanlator.isNotEmpty() && !isLocal,
                 showComments = !isMerged && !isLocal,
                 scanlators = splitScanlator,
                 onWebView = onWebView,
