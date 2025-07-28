@@ -8,4 +8,7 @@ object Constants {
     const val SEPARATOR = " · "
 
     const val SCANLATOR_SEPARATOR = " & "
+
+    const val TMP_DIR_SUFFIX = "_tmp"
+    const val TMP_FILE_SUFFIX = ".tmp"
 }

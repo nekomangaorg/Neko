@@ -39,14 +39,13 @@ class CoverCache(val context: Context) {
     }
 
     /** Cache directory used for cache management. */
-    private val cacheDir = getCacheDir(COVERS_DIR)
+    val cacheDir = getCacheDir(COVERS_DIR)
 
     /** Cache directory used for custom cover cache management. */
-    private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
+    val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
 
     /** Cache directory used for covers not in library management. */
-    private val onlineCoverDirectory =
-        File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
+    val onlineCoverDirectory = File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
 
     private val maxOnlineCacheSize = 50L * 1024L * 1024L // 50 MB
 

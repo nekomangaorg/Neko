@@ -48,6 +48,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.logging.TimberKt
 import rx.Observable
@@ -163,7 +164,7 @@ class SettingsAdvancedController : AbstractSettingsController() {
                         File(context.cacheDir, "")
                             .listFiles()!!
                             .mapNotNull {
-                                if (it.isFile && (it.name.endsWith(".tmp"))) {
+                                if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
                                     DiskUtil.getDirectorySize(it)
                                 } else {
                                     null

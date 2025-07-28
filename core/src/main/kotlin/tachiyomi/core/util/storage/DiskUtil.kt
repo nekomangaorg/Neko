@@ -13,6 +13,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import tachiyomi.core.util.lang.Hash
 
 object DiskUtil {
@@ -40,7 +41,7 @@ object DiskUtil {
         return File(context.cacheDir, "")
             .listFiles()!!
             .mapNotNull {
-                if (it.isFile && (it.name.endsWith(".tmp"))) {
+                if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
                     getDirectorySize(it)
                 } else {
                     null
@@ -159,9 +160,29 @@ object DiskUtil {
         return Formatter.formatFileSize(context, bytes)
     }
 
-    fun observeDiskSpace(directory: File, isTmpFileLookup: Boolean = false): Flow<String> = flow {
+    fun observeDiskSpace(
+        directory: File,
+        context: Context,
+        isTmpFileLookup: Boolean = false,
+    ): Flow<String> = flow {
         while (true) {
+            if (isTmpFileLookup) {
+                val tmpFiles =
+                    File(context.cacheDir, "")
+                        .listFiles()!!
+                        .mapNotNull {
+                            if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
+                                getDirectorySize(it)
+                            } else {
+                                null
+                            }
+                        }
+                        .sum()
+                emit(readableDiskSize(context, tmpFiles))
+            } else {
 
+                emit(readableDiskSize(context, directory))
+            }
             delay(3.seconds)
         }
     }

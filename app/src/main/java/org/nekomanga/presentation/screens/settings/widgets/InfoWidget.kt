@@ -29,7 +29,7 @@ internal fun InfoWidget(text: String) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
-        Gap(Size.medium)
+        Gap(Size.small)
         Text(
             modifier = Modifier.weight(1f),
             text = text,
