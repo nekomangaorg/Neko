@@ -150,7 +150,6 @@ fun syncChaptersWithSource(
     dbChapters = db.getChapters(manga).executeAsBlocking()
 
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
-    val dbChaptersByChapterId = dbChapters.associateBy { it.mangadex_chapter_id }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
