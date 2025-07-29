@@ -79,12 +79,6 @@ class SettingsDataStorageViewModel : ViewModel() {
             .distinctUntilChanged()
             .onEach { newSize -> _cacheData.update { it.copy(tempFileCacheSize = newSize) } }
             .launchIn(viewModelScope)
-
-        /*
-
-        Text(text = "Image cache: ${DiskUtil.readableDiskSize(context, CoilDiskCache.get(context).size)}")
-        Text(text = "Network cache: ${DiskUtil.readableDiskSize(context, network.cacheDir)}")
-        Text(text = "Temp file cache: ${DiskUtil.readableDiskSize(context, DiskUtil.getCacheDirSize(context))}")*/
     }
 }
 

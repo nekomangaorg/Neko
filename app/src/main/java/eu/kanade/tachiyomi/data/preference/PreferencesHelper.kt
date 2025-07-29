@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.Context
-import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -12,7 +11,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.util.system.toInt
-import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -96,16 +94,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun sourceUrl(source: Source) = this.preferenceStore.getString(Keys.sourceUrl(source.id), "")
 
-    fun mangaDexUserName() = this.preferenceStore.getString(Keys.mangadexUserName, "")
-
-    fun removeMangaDexUserName() = mangaDexUserName().delete()
-
-    fun removeOldCredentials(source: Source) {
-
-        this.preferenceStore.getString(Keys.sourceUsername(source.id)).delete()
-        this.preferenceStore.getString(Keys.sourcePassword(source.id)).delete()
-    }
-
     fun setSourceCredentials(source: Source, username: String, password: String, url: String) {
         this.preferenceStore.getString(Keys.sourceUsername(source.id)).set(username)
         this.preferenceStore.getString(Keys.sourcePassword(source.id)).set(password)
@@ -160,8 +148,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun excludeCategoriesInDownloadNew() =
         this.preferenceStore.getStringSet("download_new_categories_exclude")
 
-    fun langsToShow() = this.preferenceStore.getString(Keys.langToShow, "en")
-
     fun autoDownloadWhileReading() = this.preferenceStore.getInt("auto_download_while_reading", 0)
 
     fun feedViewType() = this.preferenceStore.getEnum("feed_view_type", FeedScreenType.Updates)
@@ -190,22 +176,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
 
-    fun shownChapterSwipeTutorial() = this.preferenceStore.getBoolean("shown_swipe_tutorial", false)
-
-    fun shownDownloadQueueTutorial() =
-        this.preferenceStore.getBoolean("shown_download_queue", false)
-
-    fun shownDownloadSwipeTutorial() =
-        this.preferenceStore.getBoolean("shown_download_tutorial", false)
-
     fun hideBottomNavOnScroll() =
         this.preferenceStore.getBoolean(
             "false_key"
         ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
-
-    fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
 
@@ -216,8 +192,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)
-
-    fun blockedScanlators() = this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 
@@ -267,50 +241,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         autoAddTracker().set(trackersToAutoAdd)
     }
 
-    fun sessionToken() = this.preferenceStore.getString(Keys.sessionToken)
-
-    fun refreshToken() = this.preferenceStore.getString(Keys.refreshToken)
-
-    fun removeTokens() {
-        sessionToken().delete()
-        refreshToken().delete()
-        lastRefreshTime().delete()
-        codeVerifier().delete()
-    }
-
-    fun setTokens(refresh: String, session: String) {
-        val time =
-            if (refresh.isBlank() && session.isBlank()) {
-                0
-            } else {
-                System.currentTimeMillis()
-            }
-
-        sessionToken().set(session)
-        refreshToken().set(refresh)
-        lastRefreshTime().set(time)
-    }
-
-    fun lastRefreshTime() = this.preferenceStore.getLong(Keys.lastRefreshTokenTime, 0)
-
-    fun readingSync() = this.preferenceStore.getBoolean(Keys.readingSync, false)
-
     fun mangadexSyncToLibraryIndexes() =
         this.preferenceStore.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
-
-    fun codeVerifier(): Preference<String> {
-        val codeVerifier = this.preferenceStore.getString(Keys.mangadexCodeVerifier)
-        return when (codeVerifier.get().isEmpty()) {
-            false -> codeVerifier
-            true -> {
-                val secureRandom = SecureRandom()
-                val bytes = ByteArray(64)
-                secureRandom.nextBytes(bytes)
-                val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
-                val newCodeVerifier = Base64.encodeToString(bytes, encoding)
-                this.preferenceStore.getString(Keys.mangadexCodeVerifier).set(newCodeVerifier)
-                this.preferenceStore.getString(Keys.mangadexCodeVerifier)
-            }
-        }
-    }
 }

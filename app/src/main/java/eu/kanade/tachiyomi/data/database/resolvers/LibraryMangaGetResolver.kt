@@ -7,11 +7,14 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGetResolver {
 
     private val preferenceHelper: PreferencesHelper by injectLazy()
+
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     companion object {
         val INSTANCE = LibraryMangaGetResolver()
@@ -45,7 +48,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         if (isEmpty()) return 0
         val list = split(" [.] ")
 
-        val blockedScanlators = preferenceHelper.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         val chapterList = list.filter { it !in blockedScanlators }
 

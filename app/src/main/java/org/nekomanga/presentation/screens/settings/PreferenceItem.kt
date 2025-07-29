@@ -26,6 +26,7 @@ import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.widgets.InfoWidget
 import org.nekomanga.presentation.screens.settings.widgets.ListPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.MultiSelectListPreferenceWidget
+import org.nekomanga.presentation.screens.settings.widgets.SitePreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
@@ -161,6 +162,14 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                     checked = isLoggedIn,
                     onClick = { if (isLoggedIn) item.logout() else item.login() },
                 )*/
+            }
+            is Preference.PreferenceItem.SitePreference -> {
+                SitePreferenceWidget(
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    loggedIn = item.isLoggedIn,
+                    onClick = { if (item.isLoggedIn) item.logout() else item.login() },
+                )
             }
             is Preference.PreferenceItem.InfoPreference -> {
                 InfoWidget(text = item.title)

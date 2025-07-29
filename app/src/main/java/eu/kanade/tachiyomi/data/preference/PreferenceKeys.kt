@@ -37,12 +37,7 @@ object PreferenceKeys {
 
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
-    const val blockedScanlators = "blocked_scanlators"
-
-    const val langToShow = "mangadex_languages_new"
-
     const val dateFormat = "app_date_format"
-
     const val showDLsInRecents = "show_dls_in_recents"
     const val showRemHistoryInRecents = "show_rem_history_in_recents"
     const val showReadInAllRecents = "show_read_in_all_recents"
@@ -72,16 +67,6 @@ object PreferenceKeys {
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
 
-    const val sessionToken = "mangadex_session_token"
-
-    const val refreshToken = "mangadex_refresh_token"
-
-    const val lastRefreshTokenTime = "mangadex_refresh_token_time"
-
-    const val mangadexCodeVerifier = "mangadex_code_verifier"
-
-    const val mangadexUserName = "mangadex_username"
-
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
@@ -97,8 +82,6 @@ object PreferenceKeys {
     const val dataSaver = "data_saver_bool"
 
     const val includeUnavailable = "include_unavailable"
-
-    const val readingSync = "reading_sync_bool"
 
     const val showContentRatingFilter = "show_R18_filter"
 

@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.setting.SettingsDataStorageViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryViewModel
+import eu.kanade.tachiyomi.ui.setting.SettingsMangaDexViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
@@ -38,8 +39,8 @@ import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScr
 import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsMangaDexScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
@@ -155,14 +156,17 @@ fun SettingsScreen(
                 .Content()
         }
 
-        composable<Screens.Settings.MangaDex> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.site_specific_settings),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsMangaDexScreen(contentPadding = contentPadding)
-            }
+        composable<Screens.Settings.MangaDex> { entry ->
+            val vm =
+                ViewModelProvider.create(entry.viewModelStore)[SettingsMangaDexViewModel::class]
+
+            MangaDexSettingsScreen(
+                    onNavigationIconClick = { navController.popBackStack() },
+                    mangaDexPreferences = vm.mangaDexPreference,
+                    mangaDexSettingsState = vm.state.collectAsState().value,
+                    logout = vm::logout,
+                )
+                .Content()
         }
 
         composable<Screens.Settings.MergeSource> {

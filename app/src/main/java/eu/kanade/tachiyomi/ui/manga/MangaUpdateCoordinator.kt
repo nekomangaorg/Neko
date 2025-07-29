@@ -36,6 +36,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -48,6 +49,9 @@ import uy.kohesive.injekt.injectLazy
 class MangaUpdateCoordinator {
     private val db: DatabaseHelper by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
+
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
     private val downloadManager: DownloadManager by injectLazy()
@@ -252,7 +256,7 @@ class MangaUpdateCoordinator {
      * @param chapters the list of chapters to download.
      */
     fun downloadChapters(manga: Manga, chapters: List<ChapterItem>) {
-        val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         downloadManager.downloadChapters(
             manga,

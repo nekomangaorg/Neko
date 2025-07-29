@@ -19,6 +19,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -27,6 +28,8 @@ import uy.kohesive.injekt.injectLazy
 class LatestChapterHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
+
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     private val uniqueManga = mutableSetOf<String>()
 
@@ -39,7 +42,7 @@ class LatestChapterHandler {
         return withContext(Dispatchers.IO) {
             val offset = MdUtil.getLatestChapterListOffset(page)
 
-            val langs = MdUtil.getLangsToShow(preferencesHelper)
+            val langs = MdUtil.getLangsToShow(mangaDexPreferences)
 
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 

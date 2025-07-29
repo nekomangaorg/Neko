@@ -92,6 +92,7 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -104,6 +105,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
     private val preferences by injectLazy<PreferencesHelper>()
+
+    private val mangaDexPreferences by injectLazy<MangaDexPreferences>()
     private val libraryPreferences by injectLazy<LibraryPreferences>()
     private val downloadManager by injectLazy<DownloadManager>()
     private val trackManager by injectLazy<TrackManager>()
@@ -473,7 +476,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         false -> emptyList()
                     }
 
-                val blockedGroups = preferences.blockedScanlators().get()
+                val blockedGroups = mangaDexPreferences.blockedGroups().get()
 
                 val fetchedChapters =
                     (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
@@ -583,7 +586,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                 coroutineScope {
                     launch {
-                        if (preferences.readingSync().get()) {
+                        if (mangaDexPreferences.readingSync().get()) {
                             val dbChapters = db.getChapters(manga).executeAsBlocking()
                             val (mergedChapters, nonMergedChapters) =
                                 dbChapters.partition { it.isMergedChapter() }

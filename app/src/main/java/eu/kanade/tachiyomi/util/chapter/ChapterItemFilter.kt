@@ -9,12 +9,14 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterItemFilter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val readerPreferences: ReaderPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
@@ -41,7 +43,12 @@ class ChapterItemFilter(
         // if none of the filters are enabled skip the filtering of them
         TimberKt.d { "Filtering by scanlators and language" }
         val filteredChapters =
-            filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences, libraryPreferences)
+            filterChaptersByScanlatorsAndLanguage(
+                chapters,
+                manga,
+                mangaDexPreferences,
+                libraryPreferences,
+            )
         TimberKt.d { "Filtering by scanlators and language done" }
 
         return if (
@@ -79,7 +86,12 @@ class ChapterItemFilter(
         selectedChapter: T? = null,
     ): List<T> {
         var filteredChapters =
-            filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences, libraryPreferences)
+            filterChaptersByScanlatorsAndLanguage(
+                chapters,
+                manga,
+                mangaDexPreferences,
+                libraryPreferences,
+            )
         // if neither preference is enabled don't even filter
         if (!readerPreferences.skipRead().get() && !readerPreferences.skipFiltered().get()) {
             return filteredChapters
@@ -108,11 +120,11 @@ class ChapterItemFilter(
     private fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
         chapters: List<T>,
         manga: Manga,
-        preferences: PreferencesHelper,
+        mangaDexPreferences: MangaDexPreferences,
         libraryPreferences: LibraryPreferences,
     ): List<T> {
 
-        val blockedGroups = preferences.blockedScanlators().get().toSet()
+        val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
         val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()

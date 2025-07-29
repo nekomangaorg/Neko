@@ -260,6 +260,7 @@ internal class DataStorageSettingsScreen(
                     stringResource(R.string.restore_from_backup_file),
                 ),
                 SearchTerm(stringResource(R.string.automatic_backups)),
+                SearchTerm(stringResource(R.string.total_cache_usage)),
             )
         }
     }

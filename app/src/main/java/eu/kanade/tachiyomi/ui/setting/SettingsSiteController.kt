@@ -1,17 +1,12 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.app.Dialog
-import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -23,14 +18,18 @@ import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialog.Listener {
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
     private val db by lazy { Injekt.get<DatabaseHelper>() }
+
+    private val mangaDexPreferences by injectLazy<MangaDexPreferences>()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) =
         screen.apply {
@@ -39,7 +38,7 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             val sourcePreference =
                 SiteLoginPreference(context, mangaDexLoginHelper).apply {
                     title = "MangaDex Login"
-                    key = PreferenceKeys.refreshToken
+                    key = "mangadex_refresh_token"
 
                     setOnLoginClickListener {
                         when (mangaDexLoginHelper.isLoggedIn()) {
@@ -50,7 +49,9 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                             }
                             false -> {
                                 val url =
-                                    MdConstants.Login.authUrl(preferences.codeVerifier().get())
+                                    MdConstants.Login.authUrl(
+                                        mangaDexPreferences.codeVerifier().get()
+                                    )
                                 when (BuildConfig.DEBUG) {
                                     true -> activity?.openInFirefox(url)
                                     false -> activity?.openInBrowser(url)
@@ -62,15 +63,6 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                 }
 
             addPreference(sourcePreference)
-
-            preference {
-                titleRes = R.string.show_languages
-                onClick {
-                    val ctrl = ChooseLanguagesDialog(preferences)
-                    ctrl.targetController = this@SettingsSiteController
-                    ctrl.showDialog(router)
-                }
-            }
 
             multiSelectListPreferenceMat(activity) {
                 key = PreferenceKeys.contentRating
@@ -143,25 +135,25 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
 
             preference {
-                titleRes = R.string.currently_blocked_scanlators
-                summaryRes = R.string.currently_blocked_scanlators_description
+                titleRes = R.string.currently_blocked_groups
+                summaryRes = R.string.currently_blocked_groups_description
 
                 onClick {
-                    when (preferences.blockedScanlators().get().isEmpty()) {
-                        true -> context.toast(R.string.no_blocked_scanlator)
+                    when (mangaDexPreferences.blockedGroups().get().isEmpty()) {
+                        true -> context.toast(R.string.no_blocked_groups)
                         false -> {
                             activity!!
                                 .materialAlertDialog()
-                                .setTitle(R.string.unblock_scanlator)
+                                .setTitle(R.string.unblock_group)
                                 .setNegativeButton(android.R.string.cancel, null)
                                 .setMultiChoiceItems(
-                                    preferences
-                                        .blockedScanlators()
+                                    mangaDexPreferences
+                                        .blockedGroups()
                                         .get()
                                         .toTypedArray()
                                         .sortedArrayDescending(),
-                                    preferences
-                                        .blockedScanlators()
+                                    mangaDexPreferences
+                                        .blockedGroups()
                                         .get()
                                         .map { false }
                                         .toBooleanArray(),
@@ -172,8 +164,8 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                                 .setPositiveButton(R.string.remove) { dialog, t ->
                                     val listView = (dialog as AlertDialog).listView
                                     val blockedScanlators =
-                                        preferences
-                                            .blockedScanlators()
+                                        mangaDexPreferences
+                                            .blockedGroups()
                                             .get()
                                             .toList()
                                             .sortedDescending()
@@ -188,7 +180,7 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                                             blockedScanlators
                                                 .filter { it !in selectedToRemove }
                                                 .toSet()
-                                        preferences.blockedScanlators().set(newBlocks)
+                                        mangaDexPreferences.blockedGroups().set(newBlocks)
                                         selectedToRemove.map {
                                             viewScope.launch {
                                                 db.deleteScanlator(it).executeOnIO()
@@ -203,7 +195,7 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
 
             switchPreference {
-                key = PreferenceKeys.readingSync
+                key = "reading_sync_bool"
                 titleRes = R.string.reading_sync
                 summaryRes = R.string.reading_sync_summary
                 defaultValue = false
@@ -296,7 +288,7 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
         }
 
-    class ChooseLanguagesDialog() : DialogController() {
+    /*class ChooseLanguagesDialog() : DialogController() {
 
         constructor(preferences: PreferencesHelper) : this() {
             this.preferences = preferences
@@ -338,16 +330,16 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                 }
                 .create()
         }
-    }
+    }*/
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        val pref = findPreference(PreferenceKeys.refreshToken) as? SiteLoginPreference
+        val pref = findPreference("mangadex_refresh_token") as? SiteLoginPreference
         pref?.notifyChanged()
     }
 
     override fun siteLogoutDialogClosed() {
-        val pref = findPreference(PreferenceKeys.refreshToken) as? SiteLoginPreference
+        val pref = findPreference("mangadex_refresh_token") as? SiteLoginPreference
         pref?.notifyChanged()
     }
 }

@@ -177,6 +177,10 @@ private fun searchTerms() =
             settingScreenType = SettingsScreenType.DataAndStorage,
             contents = DataStorageSettingsScreen.getSearchTerms(),
         ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.MangaDex,
+            contents = MangaDexSettingsScreen.getSearchTerms(),
+        ),
     )
 
 private data class SettingsData(

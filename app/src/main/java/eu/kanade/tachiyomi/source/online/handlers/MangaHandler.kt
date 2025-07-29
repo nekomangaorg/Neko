@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -49,6 +50,8 @@ class MangaHandler {
         Injekt.get<NetworkServices>().authService
     }
     private val preferencesHelper: PreferencesHelper by injectLazy()
+
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
     suspend fun fetchMangaAndChapterDetails(
@@ -115,7 +118,7 @@ class MangaHandler {
 
     private fun CoroutineScope.simpleChaptersAsync(mangaUUID: String) = async {
         service
-            .aggregateChapters(mangaUUID, MdUtil.getLangsToShow(preferencesHelper))
+            .aggregateChapters(mangaUUID, MdUtil.getLangsToShow(mangaDexPreferences))
             .getOrResultError("trying to aggregate for $mangaUUID")
             .mapBoth(
                 success = { aggregateDto ->
@@ -176,7 +179,7 @@ class MangaHandler {
         includeUnavailable: Boolean,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
-            val langs = MdUtil.getLangsToShow(preferencesHelper)
+            val langs = MdUtil.getLangsToShow(mangaDexPreferences)
 
             fetchOffset(mangaUUID, langs, includeUnavailable, 0)
                 .andThen { chapterListDto ->

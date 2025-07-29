@@ -1236,11 +1236,11 @@
     <string name="mark_all_as_unread">Mark all as unread</string>
     <string name="mark_range_as">Mark range as</string>
     <string name="mark_previous_as">Mark Previous as</string>
-    <string name="block_scanlator">Block scanlator</string>
-    <string name="currently_blocked_scanlators">Currently blocked scanlators</string>
-    <string name="currently_blocked_scanlators_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
-    <string name="unblock_scanlator">Unblock scanlator</string>
-    <string name="no_blocked_scanlator">No blocked scanlators</string>
+    <string name="block_group">Block group</string>
+    <string name="currently_blocked_groups">Currently blocked groups</string>
+    <string name="currently_blocked_groups_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
+    <string name="unblock_group">Unblock groups</string>
+    <string name="no_blocked_groups">No blocked groups</string>
     <string name="delete_saved_filters">Delete saved filters</string>
     <string name="delete_saved_filters_description">Use this if you get a parse exception clicking the search button in browse, or want to delete all your saved search filters.</string>
 
@@ -1453,6 +1453,8 @@
 
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex</string>
+    <string name="chapter_group">Chapter</string>
+
     <string name="content_rating_title">Content Ratings</string>
     <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
     <string name="auto_track_content_rating_title">Auto track content ratings</string>
@@ -1462,7 +1464,7 @@
     <string name="content_rating_suggestive">Suggestive (Manga usually tagged Ecchi)</string>
     <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
     <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
-    <string name="show_languages">Choose languages to show</string>
+    <string name="show_languages">Languages to show</string>
     <string name="data_saver">Data Saver</string>
     <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>

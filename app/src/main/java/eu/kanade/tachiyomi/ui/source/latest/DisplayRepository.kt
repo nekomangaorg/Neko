@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -21,6 +22,7 @@ class DisplayRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     private val db: DatabaseHelper = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
 
     suspend fun getPage(
@@ -40,8 +42,8 @@ class DisplayRepository(
         page: Int
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         val blockedScanlatorUUIDs =
-            preferenceHelper
-                .blockedScanlators()
+            mangaDexPreferences
+                .blockedGroups()
                 .get()
                 .mapNotNull {
                     var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
@@ -72,8 +74,8 @@ class DisplayRepository(
         page: Int
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         val blockedScanlatorUUIDs =
-            preferenceHelper
-                .blockedScanlators()
+            mangaDexPreferences
+                .blockedGroups()
                 .get()
                 .mapNotNull {
                     var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()

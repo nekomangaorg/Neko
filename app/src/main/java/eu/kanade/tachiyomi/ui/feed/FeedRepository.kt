@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
@@ -28,6 +27,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import uy.kohesive.injekt.Injekt
@@ -37,7 +37,7 @@ class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -45,7 +45,7 @@ class FeedRepository(
     private val bySeriesSet = mutableSetOf<Long>()
 
     suspend fun getUpdatedFeedMangaForHistoryBySeries(feedManga: FeedManga): FeedManga {
-        val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters =
@@ -121,7 +121,7 @@ class FeedRepository(
     }
 
     suspend fun getSummaryContinueReadingList(): Result<List<FeedManga>, ResultError.Generic> {
-        val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         return com.github.michaelbull.result
             .runCatching {
@@ -222,7 +222,7 @@ class FeedRepository(
     }
 
     suspend fun getSummaryNewlyAddedList(): Result<List<FeedManga>, ResultError.Generic> {
-        val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         return com.github.michaelbull.result
             .runCatching {
@@ -410,7 +410,7 @@ class FeedRepository(
         uploadsFetchSort: Boolean,
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
 
-        val blockedScanlators = preferences.blockedScanlators().get()
+        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
 
         if (offset > 0) {
             delay(300L)

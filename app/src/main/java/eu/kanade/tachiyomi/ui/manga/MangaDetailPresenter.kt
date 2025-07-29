@@ -95,6 +95,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.track.TrackServiceItem
@@ -110,6 +111,7 @@ import uy.kohesive.injekt.api.get
 class MangaDetailPresenter(
     private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
@@ -449,7 +451,9 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline())
+            if (
+                !mangaDexPreferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline()
+            )
                 return@launchIO
 
             runCatching {
@@ -762,7 +766,7 @@ class MangaDetailPresenter(
     private fun updateChapterFlows() {
         presenterScope.launchIO {
             // possibly move this into a chapter repository
-            val blockedScanlators = preferences.blockedScanlators().get()
+            val blockedScanlators = mangaDexPreferences.blockedGroups().get()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
@@ -1927,9 +1931,9 @@ class MangaDetailPresenter(
             if (scanlatorImpl == null) {
                 launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
             }
-            val blockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+            val blockedScanlators = mangaDexPreferences.blockedGroups().get().toMutableSet()
             blockedScanlators.add(scanlator)
-            preferences.blockedScanlators().set(blockedScanlators)
+            mangaDexPreferences.blockedGroups().set(blockedScanlators)
             updateChapterFlows()
             _snackbarState.emit(
                 SnackbarState(
@@ -1940,9 +1944,9 @@ class MangaDetailPresenter(
                         presenterScope.launch {
                             db.deleteScanlator(scanlator).executeOnIO()
                             val allBlockedScanlators =
-                                preferences.blockedScanlators().get().toMutableSet()
+                                mangaDexPreferences.blockedGroups().get().toMutableSet()
                             allBlockedScanlators.remove(scanlator)
-                            preferences.blockedScanlators().set(allBlockedScanlators)
+                            mangaDexPreferences.blockedGroups().set(allBlockedScanlators)
                             updateChapterFlows()
                         }
                     },

@@ -44,6 +44,7 @@ private enum class State {
 fun <T> TriStateListDialog(
     title: String,
     message: String? = null,
+    negativeOnly: Boolean = false,
     items: List<T>,
     initialChecked: List<T>,
     initialInversed: List<T>,
@@ -83,7 +84,9 @@ fun <T> TriStateListDialog(
                                         .clickable {
                                             selected[index] =
                                                 when (state) {
-                                                    State.UNCHECKED -> State.CHECKED
+                                                    State.UNCHECKED ->
+                                                        if (negativeOnly) State.INVERSED
+                                                        else State.CHECKED
                                                     State.CHECKED -> State.INVERSED
                                                     State.INVERSED -> State.UNCHECKED
                                                 }

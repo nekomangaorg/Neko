@@ -26,6 +26,7 @@ import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -34,6 +35,8 @@ import uy.kohesive.injekt.injectLazy
 class SearchHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
+
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
         return service
@@ -144,7 +147,7 @@ class SearchHandler {
 
             if (filters.hasAvailableChapters.state) {
                 queryParameters[MdConstants.SearchParameters.availableTranslatedLanguage] =
-                    MdUtil.getLangsToShow(preferencesHelper)
+                    MdUtil.getLangsToShow(mangaDexPreferences)
             }
 
             queryParameters[MdConstants.SearchParameters.includedTagModeParam] =

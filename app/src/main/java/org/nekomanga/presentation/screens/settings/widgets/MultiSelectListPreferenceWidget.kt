@@ -43,7 +43,7 @@ fun MultiSelectListPreferenceWidget(
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
             onDismissRequest = { isDialogShown = false },
-            title = { Text(text = preference.title) },
+            title = { Text(text = preference.dialogTitle ?: preference.title) },
             text = {
                 LazyColumn {
                     preference.entries.forEach { current ->

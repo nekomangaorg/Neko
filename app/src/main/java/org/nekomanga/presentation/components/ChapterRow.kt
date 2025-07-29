@@ -517,7 +517,7 @@ private fun getDropDownItems(
                 showScanlator,
                 listOf(
                     SimpleDropDownItem.Parent(
-                        text = UiText.StringResource(R.string.block_scanlator),
+                        text = UiText.StringResource(R.string.block_group),
                         children = scanlators,
                     )
                 ),
