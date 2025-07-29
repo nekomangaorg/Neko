@@ -283,7 +283,7 @@ class MangaHandler {
             .associate {
                 it.id to
                     service
-                        .user(it.id)
+                        .uploader(it.id)
                         .getOrResultError("Trying to get uploader username")
                         .mapBoth(
                             success = { user -> user.data.attributes.username },
