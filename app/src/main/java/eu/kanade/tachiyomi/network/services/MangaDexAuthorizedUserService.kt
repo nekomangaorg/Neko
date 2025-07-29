@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
+import eu.kanade.tachiyomi.source.online.models.dto.UserListDto
 import org.nekomanga.constants.MdConstants
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -99,4 +100,8 @@ interface MangaDexAuthorizedUserService {
         @Query("excludedGroups[]") blockedScanlators: List<String>,
         @Query("excludedUploaders[]") blockedUploaders: List<String>,
     ): ApiResponse<ChapterListDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdConstants.Api.user)
+    suspend fun uploader(@Query("username") username: String): ApiResponse<UserListDto>
 }

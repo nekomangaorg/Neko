@@ -127,7 +127,7 @@ open class MangaDex : HttpSource() {
 
     suspend fun getUploader(uploader: String): Result<Uploader, ResultError> {
         return withIOContext {
-            networkServices.service
+            networkServices.authService
                 .uploader(uploader)
                 .getOrResultError("Trying to get uploader")
                 .andThen { userListDto ->
