@@ -91,11 +91,8 @@ private fun Grouped(
                         .groupBy { it.mangaId }
                         .map {
                             val (read, unread) =
-                                it.value
-                                    .flatMap { it.chapters }
-                                    .reversed()
-                                    .partition { it.chapter.read }
-                            val chapters = (unread + read).toImmutableList()
+                                it.value.flatMap { it.chapters }.partition { it.chapter.read }
+                            val chapters = (unread.reversed() + read).toImmutableList()
                             it.value.first().copy(chapters = chapters)
                         }
                 }
