@@ -11,7 +11,6 @@ import com.github.michaelbull.result.zip
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -49,8 +48,6 @@ class MangaHandler {
     val authService: MangaDexAuthorizedUserService by lazy {
         Injekt.get<NetworkServices>().authService
     }
-    private val preferencesHelper: PreferencesHelper by injectLazy()
-
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
@@ -69,7 +66,7 @@ class MangaHandler {
                         manga.uuid(),
                         manga.last_chapter_number,
                         manga.last_volume_number,
-                        preferencesHelper.includeUnavailable().get(),
+                        mangaDexPreferences.includeUnavailableChapters().get(),
                     )
                 }
 

@@ -95,8 +95,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 
-    fun includeUnavailable() = this.preferenceStore.getBoolean("include_unavailable")
-
     fun updateCovers() = this.preferenceStore.getBoolean("refresh_covers_too", true)
 
     fun outlineOnCovers() = this.preferenceStore.getBoolean("outline_on_covers", true)

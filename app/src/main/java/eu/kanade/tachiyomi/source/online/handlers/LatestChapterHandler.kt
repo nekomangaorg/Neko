@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.MangaListPage
@@ -27,10 +26,7 @@ import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
-    private val preferencesHelper: PreferencesHelper by injectLazy()
-
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
-
     private val uniqueManga = mutableSetOf<String>()
 
     suspend fun getPage(
@@ -44,7 +40,7 @@ class LatestChapterHandler {
 
             val langs = MdUtil.getLangsToShow(mangaDexPreferences)
 
-            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
+            val contentRatings = mangaDexPreferences.visibleContentRatings().get().toList()
 
             return@withContext service
                 .latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
@@ -96,7 +92,7 @@ class LatestChapterHandler {
 
                         val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
-                        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+                        val thumbQuality = mangaDexPreferences.coverQuality().get()
                         val mangaList =
                             mangaIds
                                 .mapNotNull { mangaDtoMap[it] }

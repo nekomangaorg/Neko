@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -21,18 +20,19 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
-    val preferencesHelper: PreferencesHelper by injectLazy()
+    val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     /** Parse the manga details json into manga object */
     fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
-            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
+            val manga = mangaDto.toBasicManga(mangaDexPreferences.coverQuality().get())
 
             manga.rating = stats.rating
             manga.users = stats.follows

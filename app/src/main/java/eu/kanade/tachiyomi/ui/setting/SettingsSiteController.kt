@@ -65,7 +65,7 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             addPreference(sourcePreference)
 
             multiSelectListPreferenceMat(activity) {
-                key = PreferenceKeys.contentRating
+                key = "content_rating_options"
                 titleRes = R.string.content_rating_title
                 summaryRes = R.string.content_rating_summary
                 entriesRes =
@@ -91,20 +91,20 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
 
             switchPreference {
-                key = PreferenceKeys.showContentRatingFilter
+                key = "show_R18_filter"
                 titleRes = R.string.show_content_rating_filter_in_search
                 defaultValue = true
             }
 
             switchPreference {
-                key = PreferenceKeys.enablePort443Only
+                key = "use_port_443_only_for_image_server"
                 titleRes = R.string.use_port_443_title
                 summaryRes = R.string.use_port_443_summary
                 defaultValue = true
             }
 
             switchPreference {
-                key = PreferenceKeys.dataSaver
+                key = "data_saver_bool"
                 titleRes = R.string.data_saver
                 summaryRes = R.string.data_saver_summary
                 defaultValue = false
@@ -112,26 +112,15 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
 
             intListPreference(activity) {
                 key = PreferenceKeys.thumbnailQuality
-                titleRes = R.string.thumbnail_quality
+                titleRes = R.string.cover_quality
                 entriesRes =
-                    arrayOf(R.string.original_thumb, R.string.medium_thumb, R.string.low_thumb)
+                    arrayOf(
+                        R.string.original_cover_quality,
+                        R.string.medium_cover_quality,
+                        R.string.low_cover_quality,
+                    )
                 entryRange = 0..2
                 defaultValue = 0
-            }
-
-            preference {
-                titleRes = R.string.delete_saved_filters
-                summaryRes = R.string.delete_saved_filters_description
-                onClick {
-                    activity!!
-                        .materialAlertDialog()
-                        .setTitle(R.string.delete_saved_filters)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(R.string.delete) { dialog, t ->
-                            viewScope.launch { db.deleteAllBrowseFilters().executeAsBlocking() }
-                        }
-                        .show()
-                }
             }
 
             preference {
@@ -202,8 +191,8 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
 
             preference {
-                titleRes = R.string.sync_follows_to_library
-                summaryRes = R.string.sync_follows_to_library_summary
+                titleRes = R.string.pull_follows_to_library
+                summaryRes = R.string.pull_follows_to_library_summary
 
                 onClick {
                     activity!!
@@ -228,8 +217,8 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                                 }
                             }
                             if (indiciesSelected.size > 0) {
-                                preferences
-                                    .mangadexSyncToLibraryIndexes()
+                                mangaDexPreferences
+                                    .mangaDexPullToLibraryIndices()
                                     .set(indiciesSelected.toSet())
                                 TimberKt.d { "Starting sync job" }
                                 StatusSyncJob.startNow(context, StatusSyncJob.entireFollowsFromDex)
@@ -247,10 +236,10 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
             }
 
             intListPreference(activity) {
-                key = PreferenceKeys.autoAddToMangadexLibrary
+                key = "auto_add_to_mangadex_library"
                 titleRes = R.string.auto_add_to_mangadex_library
                 summaryRes =
-                    when (preferences.autoAddToMangadexLibrary().get()) {
+                    when (mangaDexPreferences.autoAddToMangaDexLibrary().get()) {
                         1 -> R.string.follows_plan_to_read
                         2 -> R.string.follows_on_hold
                         3 -> R.string.follows_reading
@@ -266,13 +255,13 @@ class SettingsSiteController : AbstractSettingsController(), MangadexLogoutDialo
                 entryValues = (0..3).toList()
                 defaultValue = 0
                 customSelectedValue =
-                    when (val value = preferences.autoAddToMangadexLibrary().get()) {
+                    when (val value = mangaDexPreferences.autoAddToMangaDexLibrary().get()) {
                         in 0..3 -> value
                         else -> 0
                     }
                 onChange { newValue ->
                     summaryRes =
-                        when (preferences.autoAddToMangadexLibrary().get()) {
+                        when (mangaDexPreferences.autoAddToMangaDexLibrary().get()) {
                             1 -> R.string.follows_plan_to_read
                             2 -> R.string.follows_on_hold
                             3 -> R.string.follows_reading

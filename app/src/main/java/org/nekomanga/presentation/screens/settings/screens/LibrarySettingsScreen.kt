@@ -253,11 +253,6 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.updateFaster(),
                         title = stringResource(R.string.faster_library_update),
                     ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = libraryPreferences.includeUnavailable(),
-                        title = stringResource(R.string.include_unavailable),
-                        subtitle = stringResource(R.string.include_unavailable_summary),
-                    ),
                     Preference.PreferenceItem.ListPreference(
                         pref = libraryPreferences.updatePrioritization(),
                         title = stringResource(R.string.library_update_order),

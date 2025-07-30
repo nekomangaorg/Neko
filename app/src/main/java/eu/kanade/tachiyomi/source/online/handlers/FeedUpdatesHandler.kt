@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -31,7 +30,6 @@ class FeedUpdatesHandler {
         Injekt.get<NetworkServices>().authService
     }
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
-    private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
@@ -48,7 +46,7 @@ class FeedUpdatesHandler {
 
             val langs = MdUtil.getLangsToShow(mangaDexPreferences)
 
-            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
+            val contentRatings = mangaDexPreferences.visibleContentRatings().get().toList()
 
             return@withContext authService
                 .feedUpdates(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
@@ -100,7 +98,7 @@ class FeedUpdatesHandler {
 
                         val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
-                        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+                        val thumbQuality = mangaDexPreferences.coverQuality().get()
                         val mangaList =
                             mangaIds
                                 .mapNotNull { mangaDtoMap[it] }

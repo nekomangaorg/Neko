@@ -73,26 +73,9 @@ object PreferenceKeys {
 
     fun sourceUrl(sourceId: Long) = "pref_source_url_$sourceId"
 
-    const val contentRating = "content_rating_options"
-
     const val autoTrackContentRating = "auto_track_content_rating_options"
 
-    const val coverQuality = "coverQuality"
-
-    const val dataSaver = "data_saver_bool"
-
-    const val includeUnavailable = "include_unavailable"
-
-    const val showContentRatingFilter = "show_R18_filter"
-
     const val autoAddTracker = "auto_add_tracker"
-
-    const val enablePort443Only = "use_port_443_only_for_image_server"
-
-    const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
-    const val autoAddToMangadexLibrary = "auto_add_to_mangadex_library"
-
-    const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
 
     const val thumbnailQuality = "mangadex_thumbnail_quality"
 }

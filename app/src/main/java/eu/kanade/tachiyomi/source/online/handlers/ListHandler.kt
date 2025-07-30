@@ -6,7 +6,6 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -24,6 +23,7 @@ import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -31,7 +31,7 @@ import uy.kohesive.injekt.injectLazy
 // If the List Changes ever go live this entire file can be overridden by that branch
 class ListHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
-    private val preferencesHelper: PreferencesHelper by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     suspend fun retrieveMangaFromList(
         listUUID: String,
@@ -66,7 +66,7 @@ class ListHandler {
                             }
 
                         val enabledContentRatings =
-                            preferencesHelper.contentRatingSelections().get()
+                            mangaDexPreferences.visibleContentRatings().get()
                         val contentRatings =
                             MangaContentRating.getOrdered()
                                 .filter { enabledContentRatings.contains(it.key) }
@@ -79,7 +79,7 @@ class ListHandler {
                                 MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
                                 MdConstants.SearchParameters.contentRatingParam to contentRatings,
                             )
-                        val coverQuality = preferencesHelper.thumbnailQuality().get()
+                        val coverQuality = mangaDexPreferences.coverQuality().get()
                         service
                             .search(ProxyRetrofitQueryMap(queryParameters))
                             .getOrResultError("Error trying to load manga list")

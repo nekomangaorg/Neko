@@ -314,7 +314,7 @@
 
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="include_unavailable">Include unavailable chapters</string>
-    <string name="include_unavailable_summary">Library filters for unavailable chapters only shows after app restart</string>
+    <string name="include_unavailable_summary">If a chapter was removed from MangaDex this shows the placeholder for the removed chapter.  Note: Library filters for unavailable chapters only shows after app restart</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
@@ -1004,6 +1004,8 @@
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_out">Sign out</string>
     <string name="log_in">Log in</string>
     <string name="log_out">Log out</string>
     <string name="log_out_from_">Log out from %1$s?</string>
@@ -1454,6 +1456,7 @@
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex</string>
     <string name="chapter_group">Chapter</string>
+    <string name="image_group">Image</string>
 
     <string name="content_rating_title">Content Ratings</string>
     <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
@@ -1461,40 +1464,34 @@
     <string name="auto_track_content_rating_summary">Choose which ratings you want to auto track (when enabled). Choosing none is the same as choosing all.</string>
 
     <string name="content_rating_safe">Safe (No sexual themes)</string>
-    <string name="content_rating_suggestive">Suggestive (Manga usually tagged Ecchi)</string>
-    <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
-    <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
+    <string name="content_rating_suggestive">Suggestive (Usually tagged Ecchi)</string>
+    <string name="content_rating_erotica">Erotica (Usually tagged smut)</string>
+    <string name="content_rating_pornographic">Pornographic (Usually tagged Hentai)</string>
     <string name="show_languages">Languages to show</string>
     <string name="data_saver">Data Saver</string>
     <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
-    <string name="thumbnail_quality">Thumbnail quality</string>
-    <string name="original_thumb">Original</string>
-    <string name="medium_thumb">Medium</string>
-    <string name="low_thumb">Low</string>
+    <string name="cover_quality">Cover image quality</string>
+    <string name="original_cover_quality">Original</string>
+    <string name="medium_cover_quality">Medium</string>
+    <string name="low_cover_quality">Low</string>
 
 
-    <string name="sync_follows_to_library">Sync MangaDex Follows</string>
-    <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
-    <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
-    <string name="push_favorites_to_mangadex">Sync Library Manga to Follows</string>
-    <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MangaDex Follows List with a Reading Status</string>
+    <string name="pull_follows_to_library">Pull MangaDex follows</string>
+    <string name="pull_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
+    <string name="pull_follows_to_library_toast">Pulled %d new manga from MangaDex</string>
+    <string name="push_favorites_to_mangadex">Push library to MangaDex Follows</string>
+    <string name="push_favorites_to_mangadex_summary">Pushes your entire library to your MangaDex Follows List with a Reading Status</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
-    <string name="use_new_api_server">Use the new api cache server</string>
-    <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
-    <string name="low_quality_covers">Use low quality thumbnails</string>
+    <string name="low_quality_covers">Use low quality covers</string>
     <string name="reading_sync">Auto sync read status</string>
     <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex and self-hosted merge sources.  This only pulls read to prevent accidentally marking chapters unread</string>
     <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
-    <string name="auto_add_to_mangadex_library">Add to MangaDex library with status</string>
-    <string name="use_cache_source">Use cached source</string>
-    <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
-
-    <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
+    <string name="auto_add_to_mangadex_library">Auto attach MangaDex status to new library entries</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

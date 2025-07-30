@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.MangaListPage
@@ -34,8 +33,6 @@ import uy.kohesive.injekt.injectLazy
 
 class SearchHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
-    private val preferencesHelper: PreferencesHelper by injectLazy()
-
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
@@ -45,10 +42,7 @@ class SearchHandler {
             .andThen { mangaDto ->
                 val sourceManga =
                     persistentListOf(
-                        mangaDto.data.toSourceManga(
-                            preferencesHelper.thumbnailQuality().get(),
-                            false,
-                        )
+                        mangaDto.data.toSourceManga(mangaDexPreferences.coverQuality().get(), false)
                     )
                 Ok(MangaListPage(sourceManga = sourceManga, hasNextPage = false))
             }
@@ -179,11 +173,11 @@ class SearchHandler {
             val queryParameters = mutableMapOf<String, Any>()
             queryParameters[MdConstants.SearchParameters.limit] = MdConstants.Limits.manga
             queryParameters[MdConstants.SearchParameters.offset] = MdUtil.getMangaListOffset(page)
-            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
+            val contentRatings = mangaDexPreferences.visibleContentRatings().get().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
             }
-            val thumbQuality = preferencesHelper.thumbnailQuality().get()
+            val thumbQuality = mangaDexPreferences.coverQuality().get()
             service
                 .recentlyAdded(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
@@ -215,11 +209,11 @@ class SearchHandler {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
             calendar.add(Calendar.MONTH, -1)
             queryParameters["createdAtSince"] = MdUtil.apiDateFormat.format(calendar.time)
-            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
+            val contentRatings = mangaDexPreferences.visibleContentRatings().get().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
             }
-            val thumbQuality = preferencesHelper.thumbnailQuality().get()
+            val thumbQuality = mangaDexPreferences.coverQuality().get()
             service
                 .popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
@@ -249,7 +243,7 @@ class SearchHandler {
         return com.github.michaelbull.result
             .runCatching {
                 val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
-                val thumbQuality = preferencesHelper.thumbnailQuality().get()
+                val thumbQuality = mangaDexPreferences.coverQuality().get()
                 val mangaList =
                     mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
                 MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)

@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
-import eu.kanade.tachiyomi.util.system.toInt
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -193,33 +192,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)
 
-    fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
-
-    fun includeUnavailable() = this.preferenceStore.getBoolean(Keys.includeUnavailable, true)
-
-    fun thumbnailQuality() = this.preferenceStore.getInt(Keys.thumbnailQuality, 0)
-
-    fun usePort443Only() = this.preferenceStore.getBoolean(Keys.enablePort443Only, false)
-
-    fun showContentRatingFilter() =
-        this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
-
-    // Remove after a few releases
-    fun addToLibraryAsPlannedToRead() =
-        this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-
-    fun autoAddToMangadexLibrary() =
-        this.preferenceStore.getInt(
-            Keys.autoAddToMangadexLibrary,
-            addToLibraryAsPlannedToRead().get().toInt(),
-        )
-
-    fun contentRatingSelections() =
-        this.preferenceStore.getStringSet(
-            Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
-        )
-
     fun autoTrackContentRatingSelections() =
         this.preferenceStore.getStringSet(
             Keys.autoTrackContentRating,
@@ -240,7 +212,4 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)
     }
-
-    fun mangadexSyncToLibraryIndexes() =
-        this.preferenceStore.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
 }

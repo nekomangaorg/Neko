@@ -10,7 +10,6 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -32,6 +31,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -39,7 +39,7 @@ import uy.kohesive.injekt.injectLazy
 
 class FollowsHandler {
 
-    val preferences: PreferencesHelper by injectLazy()
+    val mangaDexPreferences: MangaDexPreferences by injectLazy()
     private val statusHandler: StatusHandler by injectLazy()
     private val authService: MangaDexAuthorizedUserService by lazy {
         Injekt.get<NetworkServices>().authService
@@ -96,7 +96,7 @@ class FollowsHandler {
         mangaDataDtoList: List<MangaDataDto>,
         readingStatusMap: Map<String, String?>,
     ): List<SourceManga> {
-        val coverQuality = preferences.thumbnailQuality().get()
+        val coverQuality = mangaDexPreferences.coverQuality().get()
         return mangaDataDtoList
             .asSequence()
             .map {

@@ -32,6 +32,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
@@ -41,6 +42,8 @@ class ImageHandler {
     val network: NetworkHelper by injectLazy()
     val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
+
+    val mangaDexPreferences: MangaDexPreferences by injectLazy()
     private val azukiHandler: AzukiHandler by injectLazy()
     private val mangaHotHandler: MangaHotHandler by injectLazy()
     private val mangaPlusHandler: MangaPlusHandler by injectLazy()
@@ -172,7 +175,10 @@ class ImageHandler {
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
                     networkServices.atHomeService
-                        .getAtHomeServer(page.mangaDexChapterId, preferences.usePort443Only().get())
+                        .getAtHomeServer(
+                            page.mangaDexChapterId,
+                            mangaDexPreferences.usePort443ForImageServer().get(),
+                        )
                         .getOrResultError("getting image")
                         .getOrThrow { Exception(it.message()) }
                         .baseUrl

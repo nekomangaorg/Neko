@@ -49,7 +49,6 @@ fun RestoreDialog(uri: Uri, onDismiss: () -> Unit, onConfirm: () -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    // figureOut flags
                     onConfirm()
                     onDismiss()
                 }

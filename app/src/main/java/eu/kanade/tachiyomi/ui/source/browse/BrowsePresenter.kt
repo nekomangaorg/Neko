@@ -45,6 +45,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -55,6 +56,7 @@ class BrowsePresenter(
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<BrowseController>() {
@@ -70,14 +72,14 @@ class BrowsePresenter(
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(incomingQuery),
                 defaultContentRatings =
-                    preferences.contentRatingSelections().get().toImmutableSet(),
+                    mangaDexPreferences.visibleContentRatings().get().toImmutableSet(),
                 screenType = BrowseScreenType.Homepage,
             )
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
-        val enabledContentRatings = preferences.contentRatingSelections().get()
+        val enabledContentRatings = mangaDexPreferences.visibleContentRatings().get()
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
@@ -86,7 +88,7 @@ class BrowsePresenter(
         return DexFilters(
             query = Filter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
-            contentRatingVisible = preferences.showContentRatingFilter().get(),
+            contentRatingVisible = mangaDexPreferences.showContentRatingFilter().get(),
         )
     }
 

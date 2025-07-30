@@ -735,7 +735,7 @@ class MangaDetailPresenter(
     }
 
     private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
-        val quality = preferences.thumbnailQuality().get()
+        val quality = mangaDexPreferences.coverQuality().get()
 
         return db.getArtwork(mangaId)
             .executeAsBlocking()
@@ -945,7 +945,7 @@ class MangaDetailPresenter(
                             }
                             db.insertTrack(track).executeOnIO()
                         }
-                        val autoAddStatus = preferences.autoAddToMangadexLibrary().get()
+                        val autoAddStatus = mangaDexPreferences.autoAddToMangaDexLibrary().get()
                         val shouldAddAsPlanToRead =
                             currentManga().favorite &&
                                 autoAddStatus in 1..3 &&
