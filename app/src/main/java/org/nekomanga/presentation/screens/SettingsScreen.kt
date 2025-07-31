@@ -12,17 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entry
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.setting.SettingsDataStorageViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsMangaDexViewModel
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.storage.StoragePreferences
@@ -31,8 +33,6 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.screens.settings.Preference
-import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.screens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
@@ -40,12 +40,7 @@ import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsSc
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsDownloadsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsMergeSourceScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsReaderScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsSecurityScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsTrackingScreen
 
 @Composable
 fun SettingsScreen(
@@ -55,188 +50,123 @@ fun SettingsScreen(
     windowSizeClass: WindowSizeClass,
     onBackPressed: () -> Unit,
 ) {
-    val navController = rememberNavController()
     val context = LocalContext.current
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
-    NavHost(navController = navController, startDestination = Screens.Settings.Main) {
-        composable<Screens.Settings.Main> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.settings),
-                onNavigationIconClicked = onBackPressed,
-                actions = {
-                    AppBarActions(
-                        actions =
-                            listOf(
-                                AppBar.Action(
-                                    title = UiText.StringResource(R.string.search_settings),
-                                    icon = Icons.Outlined.Search,
-                                    onClick = { navController.navigate(Screens.Settings.Search) },
-                                )
+    val backStack = rememberNavBackStack(Screens.Settings.Main)
+
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators =
+            listOf(
+                rememberSceneSetupNavEntryDecorator(),
+                rememberSavedStateNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+        entryProvider =
+            entryProvider {
+                entry<Screens.Settings.Main> {
+                    NekoScaffold(
+                        type = NekoScaffoldType.Title,
+                        title = stringResource(R.string.settings),
+                        onNavigationIconClicked = onBackPressed,
+                        actions = {
+                            AppBarActions(
+                                actions =
+                                    listOf(
+                                        AppBar.Action(
+                                            title = UiText.StringResource(R.string.search_settings),
+                                            icon = Icons.Outlined.Search,
+                                            onClick = { backStack.add(Screens.Settings.Search) },
+                                        )
+                                    )
                             )
-                    )
-                },
-            ) { contentPadding ->
-                SettingsMainScreen(
-                    contentPadding = contentPadding,
-                    onGeneralClick = { navController.navigate(Screens.Settings.General) },
-                    onAppearanceClick = { navController.navigate(Screens.Settings.Appearance) },
-                    onLibraryClick = { navController.navigate(Screens.Settings.Library) },
-                    onDataStorageClick = { navController.navigate(Screens.Settings.DataStorage) },
-                    onSiteSpecificClick = { navController.navigate(Screens.Settings.MangaDex) },
-                    onMergeSourceClick = { navController.navigate(Screens.Settings.MergeSource) },
-                    onReaderClick = { navController.navigate(Screens.Settings.Reader) },
-                    onDownloadsClick = { navController.navigate(Screens.Settings.Downloads) },
-                    onTrackingClick = { navController.navigate(Screens.Settings.Tracking) },
-                    onSecurityClick = { navController.navigate(Screens.Settings.Security) },
-                    onAdvancedClick = { navController.navigate(Screens.Settings.Advanced) },
-                )
-            }
-        }
-
-        composable<Screens.Settings.Search> {
-            SettingsSearchScreen(
-                onNavigationIconClicked = { navController.popBackStack() },
-                navigate = { route ->
-                    navController.navigate(route) {
-                        popUpTo(Screens.Settings.Main) { inclusive = false }
+                        },
+                    ) { contentPadding ->
+                        SettingsMainScreen(
+                            contentPadding = contentPadding,
+                            onGeneralClick = { backStack.add(Screens.Settings.General) },
+                            onAppearanceClick = { backStack.add(Screens.Settings.Appearance) },
+                            onLibraryClick = { backStack.add(Screens.Settings.Library) },
+                            onDataStorageClick = { backStack.add(Screens.Settings.DataStorage) },
+                            onSiteSpecificClick = { backStack.add(Screens.Settings.MangaDex) },
+                            onMergeSourceClick = { backStack.add(Screens.Settings.MergeSource) },
+                            onReaderClick = { backStack.add(Screens.Settings.Reader) },
+                            onDownloadsClick = { backStack.add(Screens.Settings.Downloads) },
+                            onTrackingClick = { backStack.add(Screens.Settings.Tracking) },
+                            onSecurityClick = { backStack.add(Screens.Settings.Security) },
+                            onAdvancedClick = { backStack.add(Screens.Settings.Advanced) },
+                        )
                     }
-                },
-            )
-        }
+                }
+                entry<Screens.Settings.Search> {
+                    SettingsSearchScreen(
+                        onNavigationIconClicked = { backStack.removeLastOrNull() },
+                        navigate = { route ->
+                            backStack.clear()
+                            backStack.addAll(listOf(Screens.Settings.Main, route))
+                        },
+                    )
+                }
+                entry<Screens.Settings.General> {
+                    GeneralSettingsScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            preferencesHelper = preferencesHelper,
+                            showNotificationSetting = sdkMinimumO,
+                            manageNotificationsClicked = {
+                                manageNotificationClick(context, sdkMinimumO)
+                            },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Appearance> {
+                    AppearanceSettingsScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            preferences = preferencesHelper,
+                            mangaDetailsPreferences = mangaDetailsPreferences,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Library> {
+                    val vm: SettingsLibraryViewModel = viewModel()
+                    LibrarySettingsScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            libraryPreferences = vm.libraryPreferences,
+                            setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
+                            categories = vm.dbCategories.collectAsState().value,
+                            viewModelScope = vm.viewModelScope,
+                            onAddEditCategoryClick = { backStack.add(Screens.Settings.Categories) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Categories> {
+                    AddEditCategoriesScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() }
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.DataStorage> {
+                    val vm: SettingsDataStorageViewModel = viewModel()
 
-        composable<Screens.Settings.General> {
-            GeneralSettingsScreen(
-                    onNavigationIconClick = { navController.popBackStack() },
-                    preferencesHelper = preferencesHelper,
-                    showNotificationSetting = sdkMinimumO,
-                    manageNotificationsClicked = { manageNotificationClick(context, sdkMinimumO) },
-                )
-                .Content()
-        }
-
-        composable<Screens.Settings.Appearance> {
-            AppearanceSettingsScreen(
-                    preferences = preferencesHelper,
-                    mangaDetailsPreferences = mangaDetailsPreferences,
-                    onNavigationIconClick = { navController.popBackStack() },
-                )
-                .Content()
-        }
-
-        composable<Screens.Settings.Library> { entry ->
-            val vm = ViewModelProvider.create(entry.viewModelStore)[SettingsLibraryViewModel::class]
-
-            LibrarySettingsScreen(
-                    onNavigationIconClick = { navController.popBackStack() },
-                    libraryPreferences = vm.libraryPreferences,
-                    setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
-                    categories = vm.dbCategories.collectAsState().value,
-                    viewModelScope = vm.viewModelScope,
-                    onAddEditCategoryClick = { navController.navigate(Screens.Settings.Categories) },
-                )
-                .Content()
-        }
-
-        composable<Screens.Settings.Categories> {
-            AddEditCategoriesScreen(onNavigationIconClick = { navController.popBackStack() })
-                .Content()
-        }
-
-        composable<Screens.Settings.DataStorage> { entry ->
-            val vm =
-                ViewModelProvider.create(entry.viewModelStore)[SettingsDataStorageViewModel::class]
-
-            DataStorageSettingsScreen(
-                    onNavigationIconClick = { navController.popBackStack() },
-                    storagePreferences = storagePreferences,
-                    cacheData = vm.cacheData.collectAsState().value,
-                )
-                .Content()
-        }
-
-        composable<Screens.Settings.MangaDex> { entry ->
-            val vm =
-                ViewModelProvider.create(entry.viewModelStore)[SettingsMangaDexViewModel::class]
-
-            MangaDexSettingsScreen(
-                    onNavigationIconClick = { navController.popBackStack() },
-                    mangaDexPreferences = vm.mangaDexPreference,
-                    mangaDexSettingsState = vm.state.collectAsState().value,
-                    logout = vm::logout,
-                )
-                .Content()
-        }
-
-        composable<Screens.Settings.MergeSource> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.merge_source_settings),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsMergeSourceScreen(contentPadding = contentPadding)
-            }
-        }
-        composable<Screens.Settings.Reader> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.reader_settings),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsReaderScreen(contentPadding = contentPadding)
-            }
-        }
-        composable<Screens.Settings.Downloads> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.downloads),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsDownloadsScreen(contentPadding = contentPadding)
-            }
-        }
-        composable<Screens.Settings.Tracking> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.tracking),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsTrackingScreen(contentPadding = contentPadding)
-            }
-        }
-        composable<Screens.Settings.Security> {
-            NekoScaffold(
-                type = NekoScaffoldType.Title,
-                title = stringResource(R.string.security),
-                onNavigationIconClicked = { navController.popBackStack() },
-            ) { contentPadding ->
-                SettingsSecurityScreen(contentPadding = contentPadding)
-            }
-        }
-        composable<Screens.Settings.Advanced> {
-            PreferenceScaffold(
-                title = stringResource(R.string.advanced),
-                onNavigationIconClicked = { navController.popBackStack() },
-                preferenceList = persistentListOf(),
-            )
-        }
-    }
-}
-
-@Composable
-private fun PreferenceScaffold(
-    title: String,
-    preferenceList: ImmutableList<Preference>,
-    onNavigationIconClicked: () -> Unit,
-) {
-    NekoScaffold(
-        type = NekoScaffoldType.Title,
-        title = title,
-        onNavigationIconClicked = onNavigationIconClicked,
-    ) { contentPadding ->
-        PreferenceScreen(contentPadding = contentPadding, items = preferenceList)
-    }
+                    DataStorageSettingsScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            storagePreferences = storagePreferences,
+                            cacheData = vm.cacheData.collectAsState().value,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.MangaDex> {
+                    val vm: SettingsMangaDexViewModel = viewModel()
+                    MangaDexSettingsScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            mangaDexPreferences = vm.mangaDexPreference,
+                            mangaDexSettingsState = vm.state.collectAsState().value,
+                            logout = vm::logout,
+                        )
+                        .Content()
+                }
+            },
+    )
 }
 
 @SuppressLint("InlinedApi")

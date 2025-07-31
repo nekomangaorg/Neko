@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -39,7 +40,7 @@ import org.nekomanga.presentation.theme.Size
 fun SettingsSearchScreen(
     modifier: Modifier = Modifier,
     onNavigationIconClicked: () -> Unit,
-    navigate: (Any) -> Unit,
+    navigate: (NavKey) -> Unit,
 ) {
     // Hide keyboard on change screen
     val softKeyboardController = LocalSoftwareKeyboardController.current

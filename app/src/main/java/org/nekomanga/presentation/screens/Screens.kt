@@ -1,36 +1,37 @@
 package org.nekomanga.presentation.screens
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 object Screens {
 
     object Settings {
-        @Serializable object Main
+        @Serializable data object Main : NavKey
 
-        @Serializable object General
+        @Serializable data object General : NavKey
 
-        @Serializable object Appearance
+        @Serializable data object Appearance : NavKey
 
-        @Serializable object Categories
+        @Serializable data object Categories : NavKey
 
-        @Serializable object Library
+        @Serializable data object Library : NavKey
 
-        @Serializable object DataStorage
+        @Serializable data object DataStorage : NavKey
 
-        @Serializable object MangaDex
+        @Serializable data object MangaDex : NavKey
 
-        @Serializable object MergeSource
+        @Serializable data object MergeSource : NavKey
 
-        @Serializable object Reader
+        @Serializable data object Reader : NavKey
 
-        @Serializable object Downloads
+        @Serializable data object Downloads : NavKey
 
-        @Serializable object Search
+        @Serializable data object Search : NavKey
 
-        @Serializable object Tracking
+        @Serializable data object Tracking : NavKey
 
-        @Serializable object Security
+        @Serializable data object Security : NavKey
 
-        @Serializable object Advanced
+        @Serializable data object Advanced : NavKey
     }
 }
