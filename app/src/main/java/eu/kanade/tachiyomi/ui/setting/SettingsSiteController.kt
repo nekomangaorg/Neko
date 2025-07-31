@@ -147,24 +147,24 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 summaryRes = R.string.currently_blocked_scanlators_description
 
                 onClick {
-                    when (preferences.blockedScanlators().get().isEmpty()) {
+                    when (
+                        preferences.blockedScanlators().get().isEmpty() &&
+                            preferences.blockedUploaders().get().isEmpty()
+                    ) {
                         true -> context.toast(R.string.no_blocked_scanlator)
                         false -> {
+                            val blockedScanlators =
+                                preferences.blockedScanlators().get().map { it to true }
+                            val blockedUploaders =
+                                preferences.blockedUploaders().get().map { it to false }
+                            val blocked = blockedScanlators + blockedUploaders
                             activity!!
                                 .materialAlertDialog()
                                 .setTitle(R.string.unblock_scanlator)
                                 .setNegativeButton(android.R.string.cancel, null)
                                 .setMultiChoiceItems(
-                                    preferences
-                                        .blockedScanlators()
-                                        .get()
-                                        .toTypedArray()
-                                        .sortedArrayDescending(),
-                                    preferences
-                                        .blockedScanlators()
-                                        .get()
-                                        .map { false }
-                                        .toBooleanArray(),
+                                    blocked.map { it.first }.toTypedArray().sortedArrayDescending(),
+                                    blocked.map { false }.toBooleanArray(),
                                 ) { dialog, position, bool ->
                                     val listView = (dialog as AlertDialog).listView
                                     listView.setItemChecked(position, bool)
@@ -172,26 +172,29 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                                 .setPositiveButton(R.string.remove) { dialog, t ->
                                     val listView = (dialog as AlertDialog).listView
                                     val blockedScanlators =
-                                        preferences
-                                            .blockedScanlators()
-                                            .get()
-                                            .toList()
-                                            .sortedDescending()
-                                    val selectedToRemove = HashSet<String>()
+                                        blocked.toList().sortedByDescending { it.first }
+                                    val selectedToRemove = HashSet<Pair<String, Boolean>>()
                                     for (i in 0 until listView.count) {
                                         if (listView.isItemChecked(i)) {
                                             selectedToRemove.add(blockedScanlators[i])
                                         }
                                     }
                                     if (selectedToRemove.size > 0) {
-                                        val newBlocks =
+                                        val (newScanlatorBlocks, newUploaderBlocks) =
                                             blockedScanlators
                                                 .filter { it !in selectedToRemove }
-                                                .toSet()
-                                        preferences.blockedScanlators().set(newBlocks)
+                                                .partition { it.second }
+                                        preferences
+                                            .blockedScanlators()
+                                            .set(newScanlatorBlocks.map { it.first }.toSet())
+                                        preferences
+                                            .blockedUploaders()
+                                            .set(newUploaderBlocks.map { it.first }.toSet())
                                         selectedToRemove.map {
                                             viewScope.launch {
-                                                db.deleteScanlator(it).executeOnIO()
+                                                if (it.second)
+                                                    db.deleteScanlator(it.first).executeOnIO()
+                                                else db.deleteUploader(it.first).executeOnIO()
                                             }
                                         }
                                     }

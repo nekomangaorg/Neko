@@ -46,8 +46,14 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val list = split(" [.] ")
 
         val blockedScanlators = preferenceHelper.blockedScanlators().get()
+        val blockedUploaders = preferenceHelper.blockedUploaders().get()
 
-        val chapterList = list.filter { it !in blockedScanlators }
+        val chapterList =
+            list.filter {
+                val (scanlator, uploader) = it.split(" [;] ")
+                scanlator !in blockedScanlators &&
+                    (!scanlator.contains("No Group") || uploader !in blockedUploaders)
+            }
 
         return when (manga.filtered_scanlators == null) {
             true -> chapterList.size
