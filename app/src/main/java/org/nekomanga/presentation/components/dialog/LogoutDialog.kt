@@ -17,7 +17,7 @@ import org.nekomanga.presentation.theme.Size
 fun LogoutDialog(sourceName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
-        title = { Text(text = stringResource(id = R.string.log_out_from_, sourceName)) },
+        title = { Text(text = stringResource(id = R.string.sign_out_from_, sourceName)) },
         text = {},
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -27,7 +27,7 @@ fun LogoutDialog(sourceName: String, onDismiss: () -> Unit, onConfirm: () -> Uni
                     onDismiss()
                 }
             ) {
-                Text(text = stringResource(id = R.string.log_out))
+                Text(text = stringResource(id = R.string.sign_out))
             }
         },
         dismissButton = {

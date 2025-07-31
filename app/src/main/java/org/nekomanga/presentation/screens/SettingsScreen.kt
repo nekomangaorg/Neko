@@ -21,13 +21,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.setting.SettingsDataStorageViewModel
-import eu.kanade.tachiyomi.ui.setting.SettingsLibraryViewModel
-import eu.kanade.tachiyomi.ui.setting.SettingsMangaDexViewModel
+import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.LibrarySettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
 import org.nekomanga.R
-import org.nekomanga.domain.details.MangaDetailsPreferences
-import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
@@ -40,16 +39,11 @@ import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsSc
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.MergeSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
 
 @Composable
-fun SettingsScreen(
-    preferencesHelper: PreferencesHelper,
-    mangaDetailsPreferences: MangaDetailsPreferences,
-    storagePreferences: StoragePreferences,
-    windowSizeClass: WindowSizeClass,
-    onBackPressed: () -> Unit,
-) {
+fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) {
     val context = LocalContext.current
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
@@ -109,9 +103,11 @@ fun SettingsScreen(
                     )
                 }
                 entry<Screens.Settings.General> {
+                    val vm: SettingsViewModel = viewModel()
+
                     GeneralSettingsScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
-                            preferencesHelper = preferencesHelper,
+                            preferencesHelper = vm.preferences,
                             showNotificationSetting = sdkMinimumO,
                             manageNotificationsClicked = {
                                 manageNotificationClick(context, sdkMinimumO)
@@ -120,15 +116,16 @@ fun SettingsScreen(
                         .Content()
                 }
                 entry<Screens.Settings.Appearance> {
+                    val vm: SettingsViewModel = viewModel()
                     AppearanceSettingsScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
-                            preferences = preferencesHelper,
-                            mangaDetailsPreferences = mangaDetailsPreferences,
+                            preferences = vm.preferences,
+                            mangaDetailsPreferences = vm.mangaDetailsPreferences,
                         )
                         .Content()
                 }
                 entry<Screens.Settings.Library> {
-                    val vm: SettingsLibraryViewModel = viewModel()
+                    val vm: LibrarySettingsViewModel = viewModel()
                     LibrarySettingsScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
                             libraryPreferences = vm.libraryPreferences,
@@ -146,22 +143,34 @@ fun SettingsScreen(
                         .Content()
                 }
                 entry<Screens.Settings.DataStorage> {
-                    val vm: SettingsDataStorageViewModel = viewModel()
+                    val vm: DataStorageSettingsViewModel = viewModel()
 
                     DataStorageSettingsScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
-                            storagePreferences = storagePreferences,
+                            storagePreferences = vm.storagePreferences,
                             cacheData = vm.cacheData.collectAsState().value,
                         )
                         .Content()
                 }
                 entry<Screens.Settings.MangaDex> {
-                    val vm: SettingsMangaDexViewModel = viewModel()
+                    val vm: MangaDexSettingsViewModel = viewModel()
                     MangaDexSettingsScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
                             mangaDexPreferences = vm.mangaDexPreference,
                             mangaDexSettingsState = vm.state.collectAsState().value,
                             logout = vm::logout,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.MergeSource> {
+                    val vm: MergeSettingsViewModel = viewModel()
+                    MergeSettingsScreen(
+                            login = vm::login,
+                            logout = vm::logout,
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            loginEvent = vm.loginEvent,
+                            komgaState = vm.komgaMergeScreenState.collectAsState().value,
+                            suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
                         )
                         .Content()
                 }

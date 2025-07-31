@@ -182,6 +182,10 @@ private fun searchTerms() =
             settingScreenType = SettingsScreenType.MangaDex,
             contents = MangaDexSettingsScreen.getSearchTerms(),
         ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.MergeSource,
+            contents = MergeSettingsScreen.getSearchTerms(),
+        ),
     )
 
 private data class SettingsData(

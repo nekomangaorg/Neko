@@ -17,23 +17,25 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.storage.StoragePreferences
 import tachiyomi.core.util.storage.DiskUtil
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SettingsDataStorageViewModel : ViewModel() {
+class DataStorageSettingsViewModel : ViewModel() {
 
-    val libraryPreferences by injectLazy<LibraryPreferences>()
+    val libraryPreferences: LibraryPreferences by injectLazy()
 
-    val applicationContext by injectLazy<Application>()
+    val storagePreferences: StoragePreferences by injectLazy()
 
-    val chapterCache by injectLazy<ChapterCache>()
+    val applicationContext: Application by injectLazy()
 
-    val coverCache by injectLazy<CoverCache>()
+    val chapterCache: ChapterCache by injectLazy()
 
-    val network by injectLazy<NetworkHelper>()
+    val coverCache: CoverCache by injectLazy()
 
-    val db by injectLazy<DatabaseHelper>()
+    val network: NetworkHelper by injectLazy()
+
+    val db: DatabaseHelper by injectLazy()
 
     private val _cacheData = MutableStateFlow(CacheData())
 

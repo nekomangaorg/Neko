@@ -999,25 +999,22 @@
     <string name="open_source_licenses">Open source licenses</string>
     <string name="privacy_policy">Privacy policy</string>
 
-    <!-- Login/Logout dialog -->
-    <string name="log_in_to_">Log in to %1$s</string>
+    <!-- Signin/Signout dialog -->
+    <string name="sign_in_to_">Sign in to %1$s</string>
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
-    <string name="log_in">Log in</string>
-    <string name="log_out">Log out</string>
-    <string name="log_out_from_">Log out from %1$s?</string>
+    <string name="sign_out_from_">Sign out from %1$s?</string>
     <string name="show_password">Show password</string>
 
-    <string name="successfully_logged_in">Successfully logged in</string>
+    <string name="successfully_signed_in">Successfully signed in</string>
     <string name="username_must_not_be_blank">Username or password cannot be blank</string>
 
-    <string name="successfully_logged_out">You are now logged out</string>
-    <string name="unsuccessful_logged_out">Error logging out</string>
+    <string name="successfully_signed_out">You are now signed out</string>
 
-    <string name="could_not_log_in">Error could not log in</string>
+    <string name="could_not_sign_in">Error could not sign in</string>
 
     <!-- Downloads -->
     <string name="downloads">Downloads</string>
@@ -1449,6 +1446,9 @@
 
     <!-- Merge Settings -->
     <string name="merge_source_settings">Merge source</string>
+    <string name="komga">Komga</string>
+    <string name="suwayomi">Suwayomi</string>
+    <string name="signed_in_to">Signed in to: %1$s</string>
     <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
     <string name="minimum_suwayomi_version">Minimum required Suwayomi-Server version: 1.0.0</string>
 

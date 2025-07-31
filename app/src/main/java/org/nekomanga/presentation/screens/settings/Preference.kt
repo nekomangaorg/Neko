@@ -179,6 +179,7 @@ sealed class Preference {
     data class PreferenceGroup(
         override val title: String,
         override val enabled: Boolean = true,
+        val subtitle: String? = null,
         val preferenceItems: ImmutableList<PreferenceItem<out Any>>,
     ) : Preference()
 }

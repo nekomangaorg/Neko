@@ -18,7 +18,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
-class SettingsMangaDexViewModel : ViewModel() {
+class MangaDexSettingsViewModel : ViewModel() {
 
     val mangaDexLoginHelper by injectLazy<MangaDexLoginHelper>()
 

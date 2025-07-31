@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.ui.setting.SettingsMangaDexViewModel
+import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.util.system.toast
@@ -33,7 +33,7 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class MangaDexSettingsScreen(
     onNavigationIconClick: () -> Unit,
     val mangaDexPreferences: MangaDexPreferences,
-    val mangaDexSettingsState: SettingsMangaDexViewModel.MangaDexSettingsState,
+    val mangaDexSettingsState: MangaDexSettingsViewModel.MangaDexSettingsState,
     val logout: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 

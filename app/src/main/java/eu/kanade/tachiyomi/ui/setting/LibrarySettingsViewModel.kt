@@ -19,7 +19,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SettingsLibraryViewModel : ViewModel() {
+class LibrarySettingsViewModel : ViewModel() {
 
     val libraryPreferences by injectLazy<LibraryPreferences>()
 

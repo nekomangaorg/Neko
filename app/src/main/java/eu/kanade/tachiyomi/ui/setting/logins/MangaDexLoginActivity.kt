@@ -16,7 +16,7 @@ class MangaDexLoginActivity : BaseOAuthLoginActivity() {
                     lifecycleScope.launchUI {
                         Toast.makeText(
                                 this@MangaDexLoginActivity.applicationContext,
-                                R.string.could_not_log_in,
+                                R.string.could_not_sign_in,
                                 Toast.LENGTH_SHORT,
                             )
                             .show()
