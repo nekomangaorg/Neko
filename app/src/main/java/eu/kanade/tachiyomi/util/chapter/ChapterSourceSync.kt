@@ -150,7 +150,6 @@ fun syncChaptersWithSource(
     dbChapters = db.getChapters(manga).executeAsBlocking()
 
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
-    val dbChaptersByChapterId = dbChapters.associateBy { it.mangadex_chapter_id }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -162,12 +161,7 @@ fun syncChaptersWithSource(
     val toSync = mutableListOf<Chapter>()
 
     for (sourceChapter in finalChapters) {
-        val dbChapter =
-            when {
-                sourceChapter.isMergedChapter() || sourceChapter.isLocalSource() ->
-                    dbChaptersByUrl[sourceChapter.url]
-                else -> dbChaptersByUrl[sourceChapter.url]
-            }
+        val dbChapter = dbChaptersByUrl[sourceChapter.url]
 
         // Add the chapter if not in db already, or update if the metadata changed.
 

@@ -166,17 +166,14 @@ class Suwayomi : MergedServerSource() {
         val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
         val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
-        val sourceName =
-            parts
-                .getOrElse(1) { "placeholder" }
-                .let {
-                    when {
-                        // Add backspace so that it doesn't match in filteredBySource()
-                        it in SourceManager.mergeSourceNames -> "$it\b"
-                        else -> it
-                    }
-                }
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
+        var sourceName = parts.getOrElse(1) { "placeholder" }
+        sourceName =
+            when (sourceName) {
+                // Add backspace so that it doesn't match in filteredBySource()
+                in SourceManager.mergeSourceNames -> sourceName + "\b"
+                else -> sourceName
+            }
 
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
