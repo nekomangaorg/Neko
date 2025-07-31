@@ -186,7 +186,7 @@ class ApiMangaParser {
                 .firstOrNull()
 
         if (scanlatorName.isEmpty()) {
-            scanlatorName.add("No Group")
+            scanlatorName.add(Constants.NO_GROUP)
         }
 
         chapter.scanlator = MdUtil.cleanString(ChapterUtil.getScanlatorString(scanlatorName))

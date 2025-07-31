@@ -344,7 +344,7 @@ private fun ChapterInfo(
             }
 
             if (scanlator.isNotBlank()) {
-                if (scanlator == "No Group") {
+                if (scanlator == Constants.NO_GROUP) {
                     statuses.add(uploader)
                 }
                 statuses.add(scanlator)
@@ -355,7 +355,7 @@ private fun ChapterInfo(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!language.isNullOrEmpty() && !language.equals("en", true)) {
+                if (!language.isNullOrEmpty() && !language.equals(MdLang.ENGLISH.lang, true)) {
                     val iconRes = MdLang.fromIsoCode(language)?.iconResId
 
                     when (iconRes == null) {
@@ -383,7 +383,7 @@ private fun ChapterInfo(
                             Image(
                                 painter = painter,
                                 modifier =
-                                    Modifier.height(16.dp).clip(RoundedCornerShape(Size.tiny)),
+                                    Modifier.height(Size.medium).clip(RoundedCornerShape(Size.tiny)),
                                 contentDescription = "flag",
                             )
                             Gap(Size.tiny)
