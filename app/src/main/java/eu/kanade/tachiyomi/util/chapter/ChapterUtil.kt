@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.chapter
 
 import android.content.Context
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
@@ -130,14 +131,12 @@ class ChapterUtil {
             all: Boolean,
             filteredGroups: Set<String>,
         ): Boolean {
+            val scanlators =
+                getScanlators(scanlatorStr).filterNot { it in SourceManager.mergeSourceNames }
             return when {
-                filteredGroups.isEmpty() -> false
-                all -> {
-                    getScanlators(scanlatorStr).all { group -> group in filteredGroups }
-                }
-                else -> {
-                    getScanlators(scanlatorStr).any { group -> group in filteredGroups }
-                }
+                scanlators.isEmpty() || filteredGroups.isEmpty() -> false
+                all -> scanlators.all { group -> group in filteredGroups }
+                else -> scanlators.any { group -> group in filteredGroups }
             }
         }
     }
