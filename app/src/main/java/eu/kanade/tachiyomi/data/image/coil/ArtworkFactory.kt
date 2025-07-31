@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.fetch.Fetcher
-import coil.request.Options
+import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.fetch.Fetcher
+import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.SourceManager
 import okhttp3.Call

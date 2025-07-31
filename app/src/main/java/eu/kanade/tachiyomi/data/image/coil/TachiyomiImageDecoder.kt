@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.data.image.coil
 
 import android.os.Build
-import androidx.core.graphics.drawable.toDrawable
-import coil.ImageLoader
-import coil.decode.DecodeResult
-import coil.decode.Decoder
-import coil.decode.ImageDecoderDecoder
-import coil.decode.ImageSource
-import coil.fetch.SourceResult
-import coil.request.Options
+import coil3.ImageLoader
+import coil3.asImage
+import coil3.decode.DecodeResult
+import coil3.decode.Decoder
+import coil3.decode.ImageSource
+import coil3.fetch.SourceFetchResult
+import coil3.request.Options
+import coil3.request.allowRgb565
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import okio.BufferedSource
 import tachiyomi.decoder.ImageDecoder
@@ -32,16 +32,13 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
 
         check(bitmap != null) { "Failed to decode image." }
 
-        return DecodeResult(
-            drawable = bitmap.toDrawable(options.context.resources),
-            isSampled = false,
-        )
+        return DecodeResult(image = bitmap.asImage(), isSampled = false)
     }
 
     class Factory : Decoder.Factory {
 
         override fun create(
-            result: SourceResult,
+            result: SourceFetchResult,
             options: Options,
             imageLoader: ImageLoader,
         ): Decoder? {
@@ -59,7 +56,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
             }
         }
 
-        override fun equals(other: Any?) = other is ImageDecoderDecoder.Factory
+        override fun equals(other: Any?) = other is Factory
 
         override fun hashCode() = javaClass.hashCode()
     }
