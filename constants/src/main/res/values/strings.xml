@@ -110,12 +110,15 @@
     <string name="categories_on_manual">Categories to update when manually refreshing</string>
     <string name="categories_in_global_update">All categories in global update</string>
     <string name="confirm_category_deletion">Delete category?</string>
+    <string name="confirm_category_deletion_message_in">Manga in \"%1$s\" will be moved into the
+        default category.</string>
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>
     <string name="already_in_category">Manga already in category</string>
     <string name="add_categories">Add categories</string>
     <string name="add_edit_categories">Add/Edit categories</string>
     <string name="edit_categories">Edit categories</string>
+    <string name="edit_category">Edit category</string>
     <string name="manage_category">Manage category</string>
     <string name="move_to_categories">Move to categories</string>
     <plurals name="category_plural">

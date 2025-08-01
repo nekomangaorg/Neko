@@ -13,58 +13,55 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import jp.wasabeef.gap.Gap
+import androidx.compose.ui.text.input.TextFieldValue
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 /** Simple Dialog to add a new category */
 @Composable
-fun AddCategoryDialog(
-    themeColorState: ThemeColorState,
+fun AddEditCategoryDialog(
+    themeColorState: ThemeColorState = defaultThemeColorState(),
+    categorySelected: String = "",
     currentCategories: List<CategoryItem>,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    var categoryText by remember { mutableStateOf("") }
-    var saveEnabled by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var categoryText by
+        rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(TextFieldValue(categorySelected))
+        }
+    var validCategory by rememberSaveable { mutableStateOf(false) }
 
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        LaunchedEffect(categoryText, currentCategories) {
-            if (categoryText.isEmpty()) {
-                saveEnabled = false
-                errorMessage = ""
-            } else if (currentCategories.any { it.name.equals(categoryText, true) }) {
-                saveEnabled = false
-                errorMessage = context.getString(R.string.category_with_name_exists)
-            } else {
-                saveEnabled = true
-                errorMessage = ""
-            }
-        }
-
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.tiny),
-            title = { Text(text = stringResource(id = R.string.new_category)) },
+            title = {
+                Text(
+                    text =
+                        if (categorySelected.isBlank()) stringResource(id = R.string.new_category)
+                        else stringResource(R.string.edit_category)
+                )
+            },
             text = {
                 Column {
                     OutlinedTextField(
                         value = categoryText,
-                        onValueChange = { categoryText = it },
-                        label = { Text(text = stringResource(id = R.string.category)) },
+                        onValueChange = { newCategory ->
+                            categoryText = newCategory
+                            validCategory =
+                                currentCategories.none { it.name.equals(categoryText.text, true) }
+                        },
                         singleLine = true,
                         maxLines = 1,
                         colors =
@@ -73,14 +70,19 @@ fun AddCategoryDialog(
                                 focusedLabelColor = themeColorState.buttonColor,
                                 focusedBorderColor = themeColorState.buttonColor,
                             ),
-                    )
-                    Gap(Size.extraTiny)
-                    Text(
-                        text = errorMessage,
-                        style =
-                            MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.error
-                            ),
+                        isError =
+                            !categoryText.text.isBlank() &&
+                                (!validCategory && categorySelected.isBlank() ||
+                                    (!validCategory && categoryText.text != categorySelected)),
+                        supportingText = {
+                            if (
+                                !categoryText.text.isBlank() &&
+                                    (!validCategory && categorySelected.isBlank() ||
+                                        (!validCategory && categoryText.text != categorySelected))
+                            ) {
+                                Text(text = stringResource(R.string.category_with_name_exists))
+                            }
+                        },
                     )
                 }
             },
@@ -88,10 +90,13 @@ fun AddCategoryDialog(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onConfirm(categoryText)
+                        onConfirm(categoryText.text)
                         onDismiss()
                     },
-                    enabled = saveEnabled,
+                    enabled =
+                        validCategory &&
+                            categoryText.text.isNotBlank() &&
+                            (categorySelected.isBlank() || categorySelected != categoryText.text),
                     colors =
                         ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {

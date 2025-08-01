@@ -7,12 +7,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.nekomanga.R
 
-/** Simple Dialog to add a new category */
 @Composable
-fun DeleteAllHistoryDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+fun ConfirmationDialog(
+    title: String,
+    body: String,
+    confirmButton: String = stringResource(R.string.ok),
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
     AlertDialog(
-        title = { Text(text = stringResource(R.string.clear_history_confirmation_1)) },
-        text = { Text(text = stringResource(R.string.clear_history_confirmation_2)) },
+        title = { Text(text = title) },
+        text = { Text(text = body) },
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
@@ -21,7 +26,7 @@ fun DeleteAllHistoryDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     onDismiss()
                 }
             ) {
-                Text(text = stringResource(id = R.string.clear))
+                Text(text = confirmButton)
             }
         },
         dismissButton = {

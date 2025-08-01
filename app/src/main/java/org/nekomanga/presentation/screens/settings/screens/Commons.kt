@@ -3,25 +3,26 @@ package org.nekomanga.presentation.screens.settings.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.data.database.models.Category
+import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.R
+import org.nekomanga.domain.category.CategoryItem
 
 /** Returns a string of categories name for settings subtitle */
 @ReadOnlyComposable
 @Composable
 fun getCategoriesLabel(
-    allCategories: List<Category>,
+    allCategories: ImmutableList<CategoryItem>,
     included: Set<String>,
     excluded: Set<String>,
 ): String {
 
     val includedCategories =
         included
-            .mapNotNull { id -> allCategories.find { it.id!!.toLong() == id.toLong() } }
+            .mapNotNull { id -> allCategories.find { it.id.toLong() == id.toLong() } }
             .sortedBy { it.order }
     val excludedCategories =
         excluded
-            .mapNotNull { id -> allCategories.find { it.id!!.toLong() == id.toLong() } }
+            .mapNotNull { id -> allCategories.find { it.id.toLong() == id.toLong() } }
             .sortedBy { it.order }
     val allExcluded = excludedCategories.size == allCategories.size
 

@@ -35,7 +35,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.CheckboxRow
-import org.nekomanga.presentation.components.dialog.AddCategoryDialog
+import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -74,11 +74,11 @@ fun EditCategorySheet(
             bottomPaddingAroundContent = bottomContentPadding,
         ) {
             if (showAddCategoryDialog) {
-                AddCategoryDialog(
+                AddEditCategoryDialog(
                     themeColorState = themeColorState,
                     currentCategories = categories,
                     onDismiss = { showAddCategoryDialog = false },
-                    onConfirm = { addNewCategory(it) },
+                    onConfirm = { category -> addNewCategory(category) },
                 )
             }
 

@@ -61,7 +61,7 @@ import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
-import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.download.DownloadScreen
@@ -363,7 +363,10 @@ fun FeedScreen(
         }
     }
     if (showClearHistoryDialog) {
-        DeleteAllHistoryDialog(
+        ConfirmationDialog(
+            title = stringResource(R.string.clear_history_confirmation_1),
+            body = stringResource(R.string.clear_history_confirmation_2),
+            confirmButton = stringResource(id = R.string.clear),
             onDismiss = { showClearHistoryDialog = false },
             onConfirm = { feedSettingActions.clearHistoryClick() },
         )

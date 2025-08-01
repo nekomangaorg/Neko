@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
@@ -20,6 +19,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
@@ -39,7 +39,7 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class LibrarySettingsScreen(
     val libraryPreferences: LibraryPreferences,
     onNavigationIconClick: () -> Unit,
-    val categories: List<Category>,
+    val categories: ImmutableList<CategoryItem>,
     val viewModelScope: CoroutineScope,
     val setLibrarySearchSuggestion: () -> Unit,
     val onAddEditCategoryClick: () -> Unit,
@@ -111,12 +111,14 @@ internal class LibrarySettingsScreen(
     }
 
     @Composable
-    private fun categoriesGroup(categories: List<Category>): Preference.PreferenceGroup {
+    private fun categoriesGroup(
+        categories: ImmutableList<CategoryItem>
+    ): Preference.PreferenceGroup {
         val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
 
         val categoryMap =
             remember(categories) {
-                (listOf(alwaysAsk) + categories.map { it.id!! to it.name }).toMap().toImmutableMap()
+                (listOf(alwaysAsk) + categories.map { it.id to it.name }).toMap().toImmutableMap()
             }
         return Preference.PreferenceGroup(
             title = stringResource(R.string.categories),
@@ -124,13 +126,13 @@ internal class LibrarySettingsScreen(
                 persistentListOf(
                     Preference.PreferenceItem.TextPreference(
                         title =
-                            if (categories.isNotEmpty()) stringResource(R.string.edit_categories)
+                            if (categories.size > 1) stringResource(R.string.edit_categories)
                             else stringResource(R.string.add_categories),
                         subtitle =
                             pluralStringResource(
                                 R.plurals.category_plural,
-                                categories.size,
-                                categories.size,
+                                categories.size - 1,
+                                categories.size - 1,
                             ),
                         onClick = onAddEditCategoryClick,
                     ),
@@ -146,7 +148,7 @@ internal class LibrarySettingsScreen(
     @Composable
     private fun globalUpdateGroup(
         context: Context,
-        allCategoryList: List<Category>,
+        allCategoryList: ImmutableList<CategoryItem>,
     ): Preference.PreferenceGroup {
 
         val libraryUpdateInterval by libraryPreferences.updateInterval().collectAsState()

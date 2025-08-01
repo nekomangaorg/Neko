@@ -34,7 +34,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
-import org.nekomanga.presentation.screens.settings.screens.AddEditCategoriesScreen
+import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
@@ -138,7 +138,14 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                         .Content()
                 }
                 entry<Screens.Settings.Categories> {
-                    AddEditCategoriesScreen(onNavigationIconClick = { reset(backStack) }).Content()
+                    val vm: LibrarySettingsViewModel = viewModel()
+                    AddEditCategoriesScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            categories = vm.dbCategories.collectAsState().value,
+                            addUpdateCategory = vm::addUpdateCategory,
+                            deleteCategory = vm::deleteCategory,
+                        )
+                        .Content()
                 }
                 entry<Screens.Settings.DataStorage> {
                     val vm: DataStorageSettingsViewModel = viewModel()
