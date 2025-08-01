@@ -61,7 +61,7 @@ internal class AddEditCategoriesScreen(
             AddEditCategoryDialog(
                 categorySelected = editCategoryName,
                 currentCategories = categories,
-                onDismiss = { editCategoryName == "" },
+                onDismiss = { editCategoryName = "" },
                 onConfirm = { categoryName ->
                     val id = categories.first { it.name.equals(editCategoryName, true) }.id
                     addUpdateCategory(categoryName, id)
