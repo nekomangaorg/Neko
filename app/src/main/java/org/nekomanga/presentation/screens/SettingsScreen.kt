@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -95,7 +96,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 }
                 entry<Screens.Settings.Search> {
                     SettingsSearchScreen(
-                        onNavigationIconClicked = { backStack.removeLastOrNull() },
+                        onNavigationIconClicked = { reset(backStack) },
                         navigate = { route ->
                             backStack.clear()
                             backStack.addAll(listOf(Screens.Settings.Main, route))
@@ -106,7 +107,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     val vm: SettingsViewModel = viewModel()
 
                     GeneralSettingsScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             preferencesHelper = vm.preferences,
                             showNotificationSetting = sdkMinimumO,
                             manageNotificationsClicked = {
@@ -118,7 +119,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 entry<Screens.Settings.Appearance> {
                     val vm: SettingsViewModel = viewModel()
                     AppearanceSettingsScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             preferences = vm.preferences,
                             mangaDetailsPreferences = vm.mangaDetailsPreferences,
                         )
@@ -127,7 +128,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 entry<Screens.Settings.Library> {
                     val vm: LibrarySettingsViewModel = viewModel()
                     LibrarySettingsScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             libraryPreferences = vm.libraryPreferences,
                             setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
                             categories = vm.dbCategories.collectAsState().value,
@@ -137,16 +138,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                         .Content()
                 }
                 entry<Screens.Settings.Categories> {
-                    AddEditCategoriesScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() }
-                        )
-                        .Content()
+                    AddEditCategoriesScreen(onNavigationIconClick = { reset(backStack) }).Content()
                 }
                 entry<Screens.Settings.DataStorage> {
                     val vm: DataStorageSettingsViewModel = viewModel()
 
                     DataStorageSettingsScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             storagePreferences = vm.storagePreferences,
                             cacheData = vm.cacheData.collectAsState().value,
                         )
@@ -155,7 +153,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 entry<Screens.Settings.MangaDex> {
                     val vm: MangaDexSettingsViewModel = viewModel()
                     MangaDexSettingsScreen(
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             mangaDexPreferences = vm.mangaDexPreference,
                             mangaDexSettingsState = vm.state.collectAsState().value,
                             logout = vm::logout,
@@ -167,7 +165,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     MergeSettingsScreen(
                             login = vm::login,
                             logout = vm::logout,
-                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            onNavigationIconClick = { reset(backStack) },
                             loginEvent = vm.loginEvent,
                             komgaState = vm.komgaMergeScreenState.collectAsState().value,
                             suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
@@ -176,6 +174,11 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 }
             },
     )
+}
+
+private fun reset(backstack: NavBackStack) {
+    backstack.clear()
+    backstack.add(Screens.Settings.Main)
 }
 
 @SuppressLint("InlinedApi")
