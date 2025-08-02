@@ -13,7 +13,7 @@ data class SuwayomiSeriesDto(
     val id: Long,
     val title: String,
     val thumbnailUrl: String,
-    val source: SuwayomiSourceDto,
+    val source: SuwayomiSourceDto?,
 )
 
 @Serializable data class SuwayomiSourceDto(val name: String, val lang: String)
