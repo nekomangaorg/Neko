@@ -131,7 +131,8 @@ class Suwayomi : MergedServerSource() {
 
         return responseBody.use { body ->
             with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
-                data.mangas.nodes.map { manga ->
+                data.mangas.nodes.mapNotNull { manga ->
+                    manga.source ?: return@mapNotNull null
                     SManga.create().apply {
                         this.title = manga.title
                         this.url =
