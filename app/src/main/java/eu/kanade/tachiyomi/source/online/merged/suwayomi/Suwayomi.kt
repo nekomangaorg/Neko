@@ -171,8 +171,8 @@ class Suwayomi : MergedServerSource() {
         var sourceName = parts.getOrElse(1) { "placeholder" }
         sourceName =
             when (sourceName) {
-                // Add backspace so that it doesn't match in filteredBySource()
-                in SourceManager.mergeSourceNames -> sourceName + "\b"
+                // Add zero-width space so that it doesn't match in filteredBySource()
+                in SourceManager.mergeSourceNames -> sourceName + '\u200B'
                 else -> sourceName
             }
 
