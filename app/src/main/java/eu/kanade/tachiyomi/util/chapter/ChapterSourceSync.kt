@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
 import kotlinx.coroutines.runBlocking
@@ -43,6 +44,24 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     var dbChapters = db.getChapters(manga).executeAsBlocking()
+
+    // Dedup unavailable with local prefix
+    val chapterUUIDs =
+        dbChapters
+            .filterNot { it.isLocalSource() || it.isMergedChapter() }
+            .map { MdUtil.getChapterUUID(it.url) }
+            .toHashSet()
+    dbChapters =
+        dbChapters.mapNotNull { dbChapter ->
+            if (
+                dbChapter.isLocalSource() &&
+                    dbChapter.name.substringAfterLast(" - ") in chapterUUIDs
+            ) {
+                db.deleteChapter(dbChapter).executeAsBlocking()
+                return@mapNotNull null
+            }
+            dbChapter
+        }
 
     val localChapterLookupEnabled = libraryPreferences.enableLocalChapters().get()
     var finalRawSourceChapters = rawSourceChapters
@@ -84,8 +103,11 @@ fun syncChaptersWithSource(
         finalRawSourceChapters =
             if (allDownloads.isNotEmpty()) {
                 val localSourceChapters =
-                    allDownloads.map { file ->
+                    allDownloads.mapNotNull { file ->
                         val chapterName = file.nameWithoutExtension!!.substringAfter("_")
+                        if (chapterName.substringAfterLast(" - ") in chapterUUIDs) {
+                            return@mapNotNull null
+                        }
                         val dateUploaded = file.lastModified()
                         val fileNameSuffix = file.name?.substringAfter("_")
                         val expectedFileName =
