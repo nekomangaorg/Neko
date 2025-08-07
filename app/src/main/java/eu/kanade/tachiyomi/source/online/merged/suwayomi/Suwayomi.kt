@@ -131,7 +131,8 @@ class Suwayomi : MergedServerSource() {
 
         return responseBody.use { body ->
             with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
-                data.mangas.nodes.map { manga ->
+                data.mangas.nodes.mapNotNull { manga ->
+                    manga.source ?: return@mapNotNull null
                     SManga.create().apply {
                         this.title = manga.title
                         this.url =
@@ -170,8 +171,8 @@ class Suwayomi : MergedServerSource() {
         var sourceName = parts.getOrElse(1) { "placeholder" }
         sourceName =
             when (sourceName) {
-                // Add backspace so that it doesn't match in filteredBySource()
-                in SourceManager.mergeSourceNames -> sourceName + "\b"
+                // Add zero-width space so that it doesn't match in filteredBySource()
+                in SourceManager.mergeSourceNames -> sourceName + '\u200B'
                 else -> sourceName
             }
 
