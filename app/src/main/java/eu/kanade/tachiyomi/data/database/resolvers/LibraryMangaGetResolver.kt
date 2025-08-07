@@ -47,17 +47,25 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
         val blockedScanlators = preferenceHelper.blockedScanlators().get()
 
-        val chapterList = list.filter { it !in blockedScanlators }
+        val chapterScanlatorList =
+            list.filterNot { scanlators ->
+                ChapterUtil.filterByGroup(scanlators, false, blockedScanlators)
+            }
 
         return when (manga.filtered_scanlators == null) {
-            true -> chapterList.size
+            true -> chapterScanlatorList.size
             false -> {
-                val filteredScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators)
-                chapterList
-                    .filter {
-                        ChapterUtil.getScanlators(it).none { group ->
-                            filteredScanlators.contains(group)
-                        }
+                val filteredScanlators =
+                    ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+                val chapterScanlatorMatchAll =
+                    preferenceHelper.chapterScanlatorFilterOption().get() == 0
+                chapterScanlatorList
+                    .filterNot { scanlators ->
+                        ChapterUtil.filterByGroup(
+                            scanlators,
+                            chapterScanlatorMatchAll,
+                            filteredScanlators,
+                        )
                     }
                     .size
             }
