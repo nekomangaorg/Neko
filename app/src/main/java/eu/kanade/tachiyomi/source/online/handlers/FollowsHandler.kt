@@ -118,7 +118,9 @@ class FollowsHandler {
             val readingStatusDto = ReadingStatusDto(status)
 
             withIOContext {
-                if (followStatus == FollowStatus.UNFOLLOWED) {
+                if (
+                    followStatus == FollowStatus.UNFOLLOWED || followStatus == FollowStatus.DROPPED
+                ) {
                     authService.unfollowManga(mangaId).onFailure {
                         this.log("trying to unfollow manga $mangaId")
                     }

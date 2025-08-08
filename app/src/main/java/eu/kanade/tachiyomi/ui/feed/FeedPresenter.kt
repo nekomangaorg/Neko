@@ -932,10 +932,10 @@ class FeedPresenter(
                     chapterId,
                     mangaId,
                     download,
-                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
                 )
             if (updatesFeedUpdated) {
-                _updatesScreenPagingState.update {
+                _summaryScreenPagingState.update {
                     it.copy(updatesFeedMangaList = updatesFeedMangaList.toImmutableList())
                 }
             }
