@@ -761,14 +761,15 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             // possibly move this into a chapter repository
             val blockedScanlators = preferences.blockedScanlators().get()
+            val blockedUploaders = preferences.blockedUploaders().get()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
                     .mapNotNull { it.toSimpleChapter() }
                     .filter {
-                        it.scanlatorList().none { scanlator ->
-                            blockedScanlators.contains(scanlator)
-                        }
+                        val scanlators = it.scanlatorList()
+                        scanlators.none { scanlator -> blockedScanlators.contains(scanlator) } &&
+                            ("No Group" !in scanlators || it.uploader !in blockedUploaders)
                     }
                     .map { chapter ->
                         val downloadState =
@@ -1919,28 +1920,47 @@ class MangaDetailPresenter(
         }
     }
 
-    fun blockScanlator(scanlator: String) {
+    fun blockScanlator(scanlator: String?, uploader: String?) {
         presenterScope.launchIO {
-            val scanlatorImpl = db.getScanlatorByName(scanlator).executeAsBlocking()
-            if (scanlatorImpl == null) {
-                launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
+            if (scanlator != null) {
+                val scanlatorImpl = db.getScanlatorByName(scanlator).executeAsBlocking()
+                if (scanlatorImpl == null) {
+                    launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
+                }
+                val blockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+                blockedScanlators.add(scanlator)
+                preferences.blockedScanlators().set(blockedScanlators)
+            } else {
+                TimberKt.d { uploader!! }
+                val uploaderImpl = db.getUploaderByName(uploader!!).executeAsBlocking()
+                if (uploaderImpl == null) {
+                    launchIO { mangaUpdateCoordinator.updateUploader(uploader) }
+                }
+                val blockedUploaders = preferences.blockedUploaders().get().toMutableSet()
+                blockedUploaders.add(uploader)
+                preferences.blockedUploaders().set(blockedUploaders)
             }
-            val blockedScanlators = preferences.blockedScanlators().get().toMutableSet()
-            blockedScanlators.add(scanlator)
-            preferences.blockedScanlators().set(blockedScanlators)
             updateChapterFlows()
             _snackbarState.emit(
                 SnackbarState(
                     messageRes = R.string.globally_blocked_group_,
-                    message = scanlator,
+                    message = scanlator ?: uploader!!,
                     actionLabelRes = R.string.undo,
                     action = {
                         presenterScope.launch {
-                            db.deleteScanlator(scanlator).executeOnIO()
-                            val allBlockedScanlators =
-                                preferences.blockedScanlators().get().toMutableSet()
-                            allBlockedScanlators.remove(scanlator)
-                            preferences.blockedScanlators().set(allBlockedScanlators)
+                            if (scanlator != null) {
+                                db.deleteScanlator(scanlator).executeOnIO()
+                                val allBlockedScanlators =
+                                    preferences.blockedScanlators().get().toMutableSet()
+                                allBlockedScanlators.remove(scanlator)
+                                preferences.blockedScanlators().set(allBlockedScanlators)
+                            } else {
+                                db.deleteUploader(uploader!!).executeOnIO()
+                                val allBlockedUploaders =
+                                    preferences.blockedUploaders().get().toMutableSet()
+                                allBlockedUploaders.remove(uploader)
+                                preferences.blockedUploaders().set(allBlockedUploaders)
+                            }
                             updateChapterFlows()
                         }
                     },

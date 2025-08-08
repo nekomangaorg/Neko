@@ -48,7 +48,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
         UpdateQuery.builder().table(TABLE).where("$COL_ID = ?").whereArgs(obj.id).build()
 
     override fun mapToContentValues(obj: Chapter) =
-        ContentValues(11).apply {
+        ContentValues(22).apply {
             put(COL_ID, obj.id)
             put(COL_MANGA_ID, obj.manga_id)
             put(COL_URL, obj.url)
