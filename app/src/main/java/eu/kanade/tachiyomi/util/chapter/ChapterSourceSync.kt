@@ -172,6 +172,7 @@ fun syncChaptersWithSource(
     dbChapters = db.getChapters(manga).executeAsBlocking()
 
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
+    val sourceChaptersByUrl = sourceChapters.associateBy { it.url }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -239,9 +240,7 @@ fun syncChaptersWithSource(
             } else if (dbChapter.isLocalSource()) {
                 downloadManager.isChapterDownloaded(dbChapter, manga, true)
             } else {
-                sourceChapters.any { sourceChapter ->
-                    dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
-                }
+                sourceChaptersByUrl[dbChapter.url] != null
             }
         }
 
