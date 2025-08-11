@@ -76,6 +76,8 @@ class ChapterFilter(
         var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
         filteredChapters =
             filterChaptersByScanlatorsAndLanguage(filteredChapters, manga, preferences)
+        filteredChapters =
+            filteredChapters.filter { it.scanlator !in MdConstants.UnsupportedOfficialGroupList }
 
         // if filter preferences are not enabled don't even filter
         if (
