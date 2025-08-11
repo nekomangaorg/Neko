@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
@@ -40,7 +41,7 @@ class ChapterItemSort(
             when {
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
-            }
+            }.filter { it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList }
         return chapters.sortedWith(sortComparator(manga, true)).find {
             !it.chapter.read && !it.chapter.isUnavailable
         }

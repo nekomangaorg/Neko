@@ -76,6 +76,11 @@ class ChapterItemFilter(
         selectedChapter: T? = null,
     ): List<T> {
         var filteredChapters = filterChaptersByScanlatorsAndLanguage(chapters, manga, preferences)
+        filteredChapters =
+            filteredChapters.filter {
+                it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList
+            }
+
         // if neither preference is enabled don't even filter
         if (!readerPreferences.skipRead().get() && !readerPreferences.skipFiltered().get()) {
             return filteredChapters
