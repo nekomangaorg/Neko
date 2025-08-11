@@ -514,7 +514,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
                 }
             webviewButton.isVisible = ReaderBottomButton.WebView.isIn(enabledButtons)
-
+            grayscaleButton.isVisible = ReaderBottomButton.Grayscale.isIn(enabledButtons)
             commentsButton.isVisible = ReaderBottomButton.Comment.isIn(enabledButtons)
             chaptersButton.isVisible = ReaderBottomButton.ViewChapters.isIn(enabledButtons)
             shiftPageButton.isVisible =
@@ -719,6 +719,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             displayOptions.setOnLongClickListener {
                 TabbedReaderSettingsSheet(this@ReaderActivity, true).show()
                 true
+            }
+
+            grayscaleButton.setOnClickListener {
+                readerPreferences.grayscale().set(!readerPreferences.grayscale().get())
             }
 
             readingMode.setOnClickListener { readingMode ->
