@@ -7,12 +7,13 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGetResolver {
 
-    private val preferenceHelper: PreferencesHelper by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
@@ -61,7 +62,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 val filteredScanlators =
                     ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
                 val chapterScanlatorMatchAll =
-                    preferenceHelper.chapterScanlatorFilterOption().get() == 0
+                    libraryPreferences.chapterScanlatorFilterOption().get() == 0
                 chapterScanlatorList
                     .filterNot { scanlators ->
                         ChapterUtil.filterByGroup(

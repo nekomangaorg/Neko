@@ -1320,7 +1320,8 @@ class LibraryPresenter(
                         chapterFilter.filterChaptersByScanlatorsAndLanguage(
                             db.getChapters(manga).executeAsBlocking().filter { !it.read },
                             manga,
-                            preferences,
+                            mangaDexPreferences,
+                            libraryPreferences,
                         )
                     downloadManager.downloadChapters(manga, chapters)
                 }
