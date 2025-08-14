@@ -4,12 +4,12 @@ cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 coilVersion = "2.7.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "34.0.0"
-firebasePluginVersion = "3.0.5"
+firebaseBomVersion = "34.1.0"
+firebasePluginVersion = "3.0.6"
 googleServicesPluginVersion = "4.4.3"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "1.16.1"
-kotlinResultVersion = "2.0.1"
+kotlinResultVersion = "2.1.0"
 ktfmtVersion = "0.23.0"
 okhttpVersion = "5.1.0"
 photoViewVersion = "2.3.0"
@@ -92,7 +92,7 @@ flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c801
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpVersion" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttpVersion" }
-okio = "com.squareup.okio:okio:3.15.0"
+okio = "com.squareup.okio:okio:3.16.0"
 
 sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVersion" }
 sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }

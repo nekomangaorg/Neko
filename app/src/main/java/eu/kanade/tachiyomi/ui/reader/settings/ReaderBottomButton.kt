@@ -11,6 +11,7 @@ enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) 
     Rotation("rot", R.string.rotation),
     CropBordersPaged("cbp", R.string.crop_borders_paged),
     CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
+    Grayscale("gs", R.string.grayscale_toggle),
     PageLayout("pl", R.string.page_layout),
     ShiftDoublePage("sdp", R.string.shift_double_pages);
 

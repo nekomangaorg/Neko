@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.merged.suwayomi
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -130,7 +131,8 @@ class Suwayomi : MergedServerSource() {
 
         return responseBody.use { body ->
             with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
-                data.mangas.nodes.map { manga ->
+                data.mangas.nodes.mapNotNull { manga ->
+                    manga.source ?: return@mapNotNull null
                     SManga.create().apply {
                         this.title = manga.title
                         this.url =
@@ -165,8 +167,14 @@ class Suwayomi : MergedServerSource() {
         val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
         val parts = mangaUrl.split(separator, limit = 3)
         val mangaId = parts[0]
-        val sourceName = parts.getOrElse(1, { "placeholder" })
         val lang = parts.getOrNull(2)?.let { fromSuwayomiLang(it) }
+        var sourceName = parts.getOrElse(1) { "placeholder" }
+        sourceName =
+            when (sourceName) {
+                // Add zero-width space so that it doesn't match in filteredBySource()
+                in SourceManager.mergeSourceNames -> sourceName + '\u200B'
+                else -> sourceName
+            }
 
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result
@@ -213,9 +221,7 @@ class Suwayomi : MergedServerSource() {
 
                                 this.vol = vol
                                 url =
-                                    "/manga/${mangaId}/chapter/${chapter.sourceOrder}" +
-                                        " " +
-                                        "${chapter.id}"
+                                    "/manga/${mangaId}/chapter/${chapter.sourceOrder} ${chapter.id}"
                                 val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
                                 scanlator =
                                     (listOf(this@Suwayomi.name, sourceName) + scanlators)

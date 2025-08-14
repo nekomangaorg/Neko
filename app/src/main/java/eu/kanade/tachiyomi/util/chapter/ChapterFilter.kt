@@ -91,6 +91,8 @@ class ChapterFilter(
                 mangaDexPreferences,
                 libraryPreferences,
             )
+        filteredChapters =
+            filteredChapters.filter { it.scanlator !in MdConstants.UnsupportedOfficialGroupList }
 
         // if filter preferences are not enabled don't even filter
         if (

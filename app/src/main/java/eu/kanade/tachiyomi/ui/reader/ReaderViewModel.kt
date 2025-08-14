@@ -410,7 +410,9 @@ class ReaderViewModel(
     private suspend fun preload(chapter: ReaderChapter) {
         if (chapter.pageLoader is HttpPageLoader) {
             val manga = manga ?: return
-            val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga)
+            val isDownloaded = withIOContext {
+                downloadManager.isChapterDownloaded(chapter.chapter, manga)
+            }
             if (isDownloaded) {
                 chapter.state = ReaderChapter.State.Wait
             }

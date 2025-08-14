@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -36,7 +37,7 @@ class ChapterSort(
             when {
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
-            }
+            }.filter { it.scanlator !in MdConstants.UnsupportedOfficialGroupList }
         return chapters.sortedWith(sortComparator(true)).find { !it.read }
     }
 

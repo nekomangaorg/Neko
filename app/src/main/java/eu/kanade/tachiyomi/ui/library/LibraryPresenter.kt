@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
-import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
@@ -43,7 +42,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
-import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
@@ -1318,14 +1316,12 @@ class LibraryPresenter(
         presenterScope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach { manga ->
-                    val scanlatorsToIgnore = ChapterUtil.getScanlators(manga.filtered_scanlators)
                     val chapters =
-                        db.getChapters(manga).executeAsBlocking().filter { chapter ->
-                            !chapter.read &&
-                                chapter.scanlatorList().none { scanlator ->
-                                    scanlator in scanlatorsToIgnore
-                                }
-                        }
+                        chapterFilter.filterChaptersByScanlatorsAndLanguage(
+                            db.getChapters(manga).executeAsBlocking().filter { !it.read },
+                            manga,
+                            preferences,
+                        )
                     downloadManager.downloadChapters(manga, chapters)
                 }
             }

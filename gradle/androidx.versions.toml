@@ -1,5 +1,5 @@
 [versions]
-agp_version = "8.11.1"
+agp_version = "8.12.0"
 lifecycle_version = "2.9.2"
 
 [libraries]
@@ -13,13 +13,13 @@ webkit = "androidx.webkit:webkit:1.14.0"
 recyclerview = "androidx.recyclerview:recyclerview:1.4.0"
 preferencektx = "androidx.preference:preference-ktx:1.2.1"
 annotation = "androidx.annotation:annotation:1.9.1"
-browser = "androidx.browser:browser:1.8.0"
+browser = "androidx.browser:browser:1.9.0"
 biometric = "androidx.biometric:biometric:1.1.0"
 palette = "androidx.palette:palette:1.0.0"
-core-ktx = "androidx.core:core-ktx:1.16.0"
+core-ktx = "androidx.core:core-ktx:1.17.0"
 constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.1"
 multidex = "androidx.multidex:multidex:2.0.1"
-work = "androidx.work:work-runtime-ktx:2.10.2"
+work = "androidx.work:work-runtime-ktx:2.10.3"
 
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle_version" }

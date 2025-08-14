@@ -120,8 +120,10 @@ class Comick : ReducedHttpSource() {
                         val groupName =
                             chapter.mdGroupName
                                 ?.map { it.mdGroup.title }
-                                .takeIf { !it.isNullOrEmpty() } ?: chapter.groupName
-                        val scanlatorList = listOf(Comick.name) + (groupName ?: emptyList())
+                                .takeIf { !it.isNullOrEmpty() }
+                                ?: chapter.groupName.takeIf { !it.isNullOrEmpty() }
+                                ?: listOf(Constants.NO_GROUP)
+                        val scanlatorList = listOf(Comick.name) + groupName
                         scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
                     } to false
                 }

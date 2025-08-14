@@ -597,7 +597,7 @@ private fun NoTitleSearchTopAppBar(
                     showTextField = !showTextField
                 },
             )
-            actions()
+            Row { actions() }
         },
         colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         scrollBehavior = scrollBehavior,
