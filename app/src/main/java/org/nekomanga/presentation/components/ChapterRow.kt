@@ -383,7 +383,8 @@ private fun ChapterInfo(
                             Image(
                                 painter = painter,
                                 modifier =
-                                    Modifier.height(Size.medium).clip(RoundedCornerShape(Size.tiny)),
+                                    Modifier.height(Size.medium)
+                                        .clip(RoundedCornerShape(Size.tiny)),
                                 contentDescription = "flag",
                             )
                             Gap(Size.tiny)
