@@ -614,9 +614,8 @@ class FeedPresenter(
         }
         val mangaIndexWithMatchingChapter =
             indexOfFeedMangaList.firstOrNull { index ->
-                mutableFeedMangaList[index].chapters.indexOfFirst {
-                    it.chapter.id == chapterId
-                } != -1
+                mutableFeedMangaList[index].chapters.indexOfFirst { it.chapter.id == chapterId } !=
+                    -1
             }
 
         if (mangaIndexWithMatchingChapter == null) {
@@ -856,6 +855,7 @@ class FeedPresenter(
                     it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toImmutableList())
                 }
             }
+
             val (continueReadingFeedUpdated, continueReadingList) =
                 updateChapterReadStatus(
                     chapterItem,
@@ -874,6 +874,7 @@ class FeedPresenter(
     }
 
     private fun updateDownloadOnFeed(chapterId: Long, mangaId: Long, download: Download?) {
+
         presenterScope.launchIO {
             val (searchHistoryFeedUpdated, searchHistoryFeedMangaList) =
                 updateChapterDownloadForManga(
@@ -938,7 +939,6 @@ class FeedPresenter(
         }
 
         presenterScope.launchIO {
-            // Skip continue reading
             val (summaryUpdatesFeedUpdated, summaryUpdatesFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
