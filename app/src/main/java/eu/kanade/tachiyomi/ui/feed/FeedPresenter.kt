@@ -613,13 +613,10 @@ class FeedPresenter(
             return false to emptyList()
         }
         val mangaIndexWithMatchingChapter =
-            indexOfFeedMangaList
-                .filter { index ->
-                    mutableFeedMangaList[index].chapters.indexOfFirst {
-                        it.chapter.id == chapterId
-                    } != -1
-                }
-                .firstOrNull()
+            indexOfFeedMangaList.firstOrNull { index ->
+                mutableFeedMangaList[index].chapters.indexOfFirst { it.chapter.id == chapterId } !=
+                    -1
+            }
 
         if (mangaIndexWithMatchingChapter == null) {
             return false to emptyList()
@@ -932,39 +929,39 @@ class FeedPresenter(
                     chapterId,
                     mangaId,
                     download,
-                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
                 )
             if (updatesFeedUpdated) {
-                _summaryScreenPagingState.update {
+                _updatesScreenPagingState.update {
                     it.copy(updatesFeedMangaList = updatesFeedMangaList.toImmutableList())
                 }
             }
         }
 
         presenterScope.launchIO {
-            val (updatesFeedUpdated, updatesFeedMangaList) =
+            val (summaryUpdatesFeedUpdated, summaryUpdatesFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
                     _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
                 )
-            if (updatesFeedUpdated) {
+            if (summaryUpdatesFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toImmutableList())
+                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList.toImmutableList())
                 }
             }
         }
 
         presenterScope.launchIO {
-            val (updatesFeedUpdated, newlyAddedFeedMangaList) =
+            val (newlyAddedFeedUpdated, newlyAddedFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
                     _summaryScreenPagingState.value.newlyAddedFeedMangaList.map { it }.toList(),
                 )
-            if (updatesFeedUpdated) {
+            if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
                     it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toImmutableList())
                 }
