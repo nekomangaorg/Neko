@@ -65,9 +65,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
                 val chapterScanlatorMatchAll =
                     preferenceHelper.chapterScanlatorFilterOption().get() == 0
-                val sources =
-                    listOf(MdConstants.name, Constants.LOCAL_SOURCE) +
-                        SourceManager.mergeSourceNames
+                val sources = SourceManager.mergeSourceNames + MdConstants.name
                 chapterScanlatorList
                     .filterNot { scanlators ->
                         sources.any { source ->
