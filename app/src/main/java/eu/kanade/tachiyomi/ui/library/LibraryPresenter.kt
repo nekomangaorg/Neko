@@ -198,9 +198,7 @@ class LibraryPresenter(
         }
         presenterScope.launch {
             val (library, hiddenItems) = withContext(Dispatchers.IO) { getLibraryFromDB() }
-            setDownloadCount(library)
             setUnreadBadge(library)
-            setDownloadCount(hiddenItems)
             setUnreadBadge(hiddenItems)
             allLibraryItems = library
             hiddenLibraryItems = hiddenItems
@@ -209,6 +207,12 @@ class LibraryPresenter(
             mangaMap = applySort(mangaMap)
             val freshStart = libraryItems.isEmpty()
             sectionLibrary(mangaMap, freshStart)
+
+            setDownloadCount(allLibraryItems)
+            setDownloadCount(hiddenLibraryItems)
+            mangaMap = applyFilters(allLibraryItems)
+            mangaMap = applySort(mangaMap)
+            sectionLibrary(mangaMap)
         }
     }
 
