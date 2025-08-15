@@ -37,7 +37,7 @@ subprojects {
                         "-opt-in=kotlin.time.ExperimentalTime",
                         "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
                         "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-                        "-opt-in=coil.annotation.ExperimentalCoilApi",
+                        "-opt-in=coil3.annotation.ExperimentalCoilApi",
                         "-opt-in=kotlin.ExperimentalStdlibApi",
                         "-opt-in=kotlinx.coroutines.FlowPreview",
                         "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
