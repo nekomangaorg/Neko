@@ -5,7 +5,6 @@ import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences

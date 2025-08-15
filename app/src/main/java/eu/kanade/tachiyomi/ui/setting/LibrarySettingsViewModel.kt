@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.asFlow
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.getValue
 import kotlinx.collections.immutable.PersistentList
@@ -32,15 +33,16 @@ class LibrarySettingsViewModel : ViewModel() {
 
     val db by injectLazy<DatabaseHelper>()
 
-    private val _dbCategories = MutableStateFlow<PersistentList<CategoryItem>>((persistentListOf()))
-
-    val dbCategories = _dbCategories.asStateFlow()
+    private val _allCategories =
+        MutableStateFlow<PersistentList<CategoryItem>>((persistentListOf()))
+    val allCategories = _allCategories.asStateFlow()
 
     init {
         viewModelScope.launch {
             db.getCategories().asFlow().distinctUntilChanged().collectLatest { categories ->
-                _dbCategories.value =
+                _allCategories.value =
                     (listOf(Category.createDefault()) + categories)
+                        .sortedBy { it.order }
                         .map { it.toCategoryItem() }
                         .toPersistentList()
             }
@@ -57,7 +59,7 @@ class LibrarySettingsViewModel : ViewModel() {
     fun addNewCategory(categoryName: String) {
         viewModelScope.launchIO {
             val category = Category.create(categoryName)
-            category.order = (_dbCategories.value.maxOfOrNull { it.order } ?: 0) + 1
+            category.order = (_allCategories.value.maxOfOrNull { it.order } ?: 0) + 1
 
             // Insert into database.
             category.mangaSort = LibrarySort.Title.categoryValue
@@ -70,7 +72,7 @@ class LibrarySettingsViewModel : ViewModel() {
             if (id == null) {
                 addNewCategory(newCategoryName)
             } else {
-                val category = _dbCategories.value.firstOrNull { it.id == id }
+                val category = _allCategories.value.firstOrNull { it.id == id }
                 if (category != null) {
                     category.copy(name = newCategoryName)
                     db.insertCategory(category.toDbCategory()).executeAsBlocking()
@@ -81,10 +83,25 @@ class LibrarySettingsViewModel : ViewModel() {
 
     fun deleteCategory(id: Int) {
         viewModelScope.launchIO {
-            val category = _dbCategories.value.firstOrNull { it.id == id }
+            val category = _allCategories.value.firstOrNull { it.id == id }
             if (category != null) {
                 db.deleteCategory(category.toDbCategory()).executeAsBlocking()
             }
+        }
+    }
+
+    fun onChangeOrder(category: CategoryItem, newIndex: Int) {
+        viewModelScope.launchIO {
+            val dbCategories = db.getCategories().executeOnIO().toMutableList()
+
+            val currentIndex = dbCategories.indexOfFirst { category.id == it.id }
+
+            dbCategories.add(newIndex, dbCategories.removeAt(currentIndex))
+
+            // Default category is not saved to DB and is always 0 order
+            dbCategories.forEachIndexed { index, dbCategory -> dbCategory.order = index + 1 }
+
+            db.insertCategories(dbCategories).executeOnIO()
         }
     }
 }

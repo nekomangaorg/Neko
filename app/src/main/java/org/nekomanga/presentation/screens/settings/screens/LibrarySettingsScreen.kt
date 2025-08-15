@@ -115,7 +115,8 @@ internal class LibrarySettingsScreen(
         categories: ImmutableList<CategoryItem>
     ): Preference.PreferenceGroup {
         val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
-
+        val nonSystemCategories =
+            remember(categories) { categories.filterNot { it.isSystemCategory } }
         val categoryMap =
             remember(categories) {
                 (listOf(alwaysAsk) + categories.map { it.id to it.name }).toMap().toImmutableMap()
@@ -126,14 +127,19 @@ internal class LibrarySettingsScreen(
                 persistentListOf(
                     Preference.PreferenceItem.TextPreference(
                         title =
-                            if (categories.size > 1) stringResource(R.string.edit_categories)
+                            if (nonSystemCategories.isNotEmpty())
+                                stringResource(R.string.edit_categories)
                             else stringResource(R.string.add_categories),
                         subtitle =
-                            pluralStringResource(
-                                R.plurals.category_plural,
-                                categories.size - 1,
-                                categories.size - 1,
-                            ),
+                            if (nonSystemCategories.isNotEmpty()) {
+                                pluralStringResource(
+                                    R.plurals.category_plural,
+                                    nonSystemCategories.size,
+                                    nonSystemCategories.size,
+                                )
+                            } else {
+                                null
+                            },
                         onClick = onAddEditCategoryClick,
                     ),
                     Preference.PreferenceItem.ListPreference(

@@ -131,7 +131,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             onNavigationIconClick = { reset(backStack) },
                             libraryPreferences = vm.libraryPreferences,
                             setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
-                            categories = vm.dbCategories.collectAsState().value,
+                            categories = vm.allCategories.collectAsState().value,
                             viewModelScope = vm.viewModelScope,
                             onAddEditCategoryClick = { backStack.add(Screens.Settings.Categories) },
                         )
@@ -141,9 +141,10 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     val vm: LibrarySettingsViewModel = viewModel()
                     AddEditCategoriesScreen(
                             onNavigationIconClick = { backStack.removeLastOrNull() },
-                            categories = vm.dbCategories.collectAsState().value,
+                            categories = vm.allCategories.collectAsState().value,
                             addUpdateCategory = vm::addUpdateCategory,
                             deleteCategory = vm::deleteCategory,
+                            onChangeOrder = vm::onChangeOrder,
                         )
                         .Content()
                 }

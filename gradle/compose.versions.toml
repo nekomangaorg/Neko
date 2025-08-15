@@ -5,6 +5,7 @@ compose_material3_version = "1.3.2"
 navigation3 = "1.0.0-alpha04"
 lifecycleViewmodel = "1.0.0-alpha04"
 markdown_version = "0.36.0-b02"
+reorderable = "2.5.1"
 
 [libraries]
 
@@ -32,6 +33,8 @@ material-motion = "io.github.fornewid:material-motion-compose-core:1.2.1"
 
 charty = "com.himanshoe:charty:1.1.3-alpha05"
 
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+
 gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
@@ -49,5 +52,5 @@ swipe = "me.saket.swipe:swipe:1.3.0"
 
 [bundles]
 accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller"]
-compose = ["activity", "lifecycle-viewmodel-navigation3", "navigation3-runtime", "navigation3-ui", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion"]
+compose = ["activity", "lifecycle-viewmodel-navigation3", "navigation3-runtime", "navigation3-ui", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion", "reorderable"]
 charting = ["charty"]

@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -96,12 +97,17 @@ class CategoryPresenter(
      */
     fun reorderCategories(categories: List<Category>) {
         scope.launch {
+            categories.forEach { TimberKt.d { "ESCO ${it.name} ${it.order}" } }
+
             categories.forEachIndexed { i, category ->
                 if (category.order != CREATE_CATEGORY_ORDER) category.order = i - 1
             }
             db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER })
                 .executeOnIO()
             this@CategoryPresenter.categories = categories.sortedBy { it.order }.toMutableList()
+
+            categories.forEach { TimberKt.d { "ESCO ${it.name} ${it.order}" } }
+
             withContext(Dispatchers.Main) {
                 controller.setCategories(this@CategoryPresenter.categories.map(::CategoryItem))
             }
