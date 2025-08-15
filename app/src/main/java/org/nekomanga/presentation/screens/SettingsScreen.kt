@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.LibrarySettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.ReaderSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
@@ -170,6 +171,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             komgaState = vm.komgaMergeScreenState.collectAsState().value,
                             suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
                         )
+                        .Content()
+                }
+                entry<Screens.Settings.Reader> {
+                    val vm: ReaderSettingsViewModel = viewModel()
+                    MergeSettingsScreen(
+                        onNavigationIconClick = { reset(backStack) },
+                    )
                         .Content()
                 }
             },

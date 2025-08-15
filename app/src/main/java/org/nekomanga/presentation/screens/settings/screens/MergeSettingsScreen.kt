@@ -32,8 +32,6 @@ internal class MergeSettingsScreen(
 
     @Composable
     override fun getPreferences(): ImmutableList<Preference> {
-        val context = LocalContext.current
-
         return persistentListOf(
             mergeGroup(
                 mergeState = komgaState,
@@ -109,7 +107,10 @@ internal class MergeSettingsScreen(
     companion object : SearchTermProvider {
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
-            return persistentListOf()
+            return persistentListOf(
+                SearchTerm(stringResource(R.string.komga)),
+                SearchTerm(stringResource(R.string.suwayomi))
+            )
         }
     }
 }
