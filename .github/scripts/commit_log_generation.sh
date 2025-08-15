@@ -12,7 +12,7 @@ OUTPUT=$(curl -H "Accept: application/vnd.github.v3+json" \
       | sub("^fix\\(deps\\)"; "chore(deps)")  # 1. fix(deps) -> chore(deps)
       | sub("^feature/"; "feat:")           # 2. feature/ -> feat:
       | sub("^fix/"; "fix:")                 # 3. fix/ -> fix:
-      | sub("fix "; "fix: ")                 # 4. fix -> fix:
+      | sub("^fix "; "fix: ")                 # 4. fix -> fix:
       | sub("^chore/"; "chore:")             # 5. chore/ -> chore:
       | sub("^chore\\(deps\\):"; "chore:");   # 6. chore(deps): -> chore:
 

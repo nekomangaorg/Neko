@@ -10,10 +10,11 @@ import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
+import coil3.imageLoader
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.request.transformations
+import coil3.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -190,8 +191,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                             .size(width = ICON_SIZE, height = ICON_SIZE)
                                             .build()
 
-                                    Coil.imageLoader(context).execute(request).drawable?.let {
-                                        drawable ->
+                                    context.imageLoader.execute(request).image?.let { drawable ->
                                         setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
                                     }
                                 } catch (e: Exception) {}

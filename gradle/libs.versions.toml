@@ -2,7 +2,7 @@
 aboutlibVersion = "12.2.4"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
-coilVersion = "2.7.0"
+coilVersion = "3.3.0"
 fastAdapterVersion = "5.7.0"
 firebaseBomVersion = "34.1.0"
 firebasePluginVersion = "3.0.6"
@@ -36,10 +36,12 @@ flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 guava-fix = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
 
 
-coil = { module = "io.coil-kt:coil", version.ref = "coilVersion" }
-coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilVersion" }
-coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilVersion" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilVersion" }
+coil3 = { module = "io.coil-kt.coil3:coil", version.ref = "coilVersion" }
+coil3-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilVersion" }
+coil3-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilVersion" }
+coil3-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilVersion" }
+
+coil3-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilVersion" }
 
 disklrue = "com.jakewharton:disklrucache:2.0.2"
 
@@ -128,7 +130,7 @@ firebase = { id = "com.google.firebase.crashlytics", version.ref = "firebasePlug
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmtVersion" }
 
 [bundles]
-coil = ["coil", "coil-gif", "coil-svg", "coil-compose"]
+coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]
 conductor = ["conductor", "conductor-supportpref"]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]

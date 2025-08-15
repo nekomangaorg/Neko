@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import coil.key.Keyer
-import coil.request.Options
+import coil3.key.Keyer
+import coil3.request.Options
 import org.nekomanga.domain.manga.Artwork
 import tachiyomi.core.util.storage.DiskUtil
 

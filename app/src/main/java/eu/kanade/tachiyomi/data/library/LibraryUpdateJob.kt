@@ -18,9 +18,9 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
@@ -510,7 +510,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     .data(manga)
                                     .memoryCachePolicy(CachePolicy.DISABLED)
                                     .build()
-                            Coil.imageLoader(applicationContext).execute(request)
+                            context.imageLoader.execute(request)
                         }
                     }
                     db.insertManga(manga).executeOnIO()
