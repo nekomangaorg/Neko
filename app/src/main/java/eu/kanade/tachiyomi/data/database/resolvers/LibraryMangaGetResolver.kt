@@ -1,12 +1,17 @@
 package eu.kanade.tachiyomi.data.database.resolvers
 
+import android.annotation.SuppressLint
 import android.database.Cursor
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGetResolver {
@@ -17,6 +22,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val INSTANCE = LibraryMangaGetResolver()
     }
 
+    @SuppressLint("Range")
     override fun mapFromCursor(cursor: Cursor): LibraryManga {
         val manga = LibraryManga()
 
@@ -59,7 +65,19 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
                 val chapterScanlatorMatchAll =
                     preferenceHelper.chapterScanlatorFilterOption().get() == 0
+                val sources = SourceManager.mergeSourceNames + MdConstants.name
                 chapterScanlatorList
+                    .filterNot { scanlators ->
+                        sources.any { source ->
+                            ChapterUtil.filteredBySource(
+                                source,
+                                scanlators,
+                                MergeType.containsMergeSourceName(scanlators),
+                                scanlators == Constants.LOCAL_SOURCE,
+                                filteredScanlators,
+                            )
+                        }
+                    }
                     .filterNot { scanlators ->
                         ChapterUtil.filterByGroup(
                             scanlators,
