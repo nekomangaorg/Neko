@@ -92,6 +92,7 @@ class FeedRepository(
                                     .maxOfOrNull { it.chapter.dateUpload }
                             val chapter =
                                 ChapterSort(manga).getNextUnreadChapter(chapters)
+                                    ?.toSimpleChapter()
                                     ?: return@mapNotNull null
 
                             FeedManga(
@@ -100,8 +101,9 @@ class FeedRepository(
                                 date = recentUploadDate ?: 0L,
                                 artwork = manga.toDisplayManga().currentArtwork,
                                 chapters =
-                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
-                            )
+                                    persistentListOf(
+                                        getChapterItem(manga, chapter),
+                                    )
                         }
                 }
 
@@ -127,10 +129,10 @@ class FeedRepository(
             .runCatching {
                 suspend fun lookup(current: List<Long>, offset: Int, limit: Int): List<FeedManga> {
                     return db.getRecentMangaLimit(
-                            offset = offset,
-                            limit = limit,
-                            isResuming = false,
-                        )
+                        offset = offset,
+                        limit = limit,
+                        isResuming = false,
+                    )
                         .executeOnIO()
                         .filterNot { current.contains(it.manga.id) }
                         .mapNotNull { history ->
@@ -166,7 +168,7 @@ class FeedRepository(
                                 entry.value.mapNotNull { feedManga ->
                                     if (
                                         feedManga.chapters.isNotEmpty() &&
-                                            feedManga.chapters.none { it.chapter.read }
+                                        feedManga.chapters.none { it.chapter.read }
                                     ) {
                                         feedManga
                                     } else {
@@ -200,12 +202,13 @@ class FeedRepository(
                                     lastReadChapter = lastReadChapter,
                                     chapters =
                                         persistentListOf(
-                                            chapter.toSimpleChapter()!!.toChapterItem()
+                                            chapter.toSimpleChapter()!!.toChapterItem(),
                                         ),
                                 )
                             }
                         }
                 }
+
                 var offset = 0
                 val limit = 50
                 val results = emptyList<FeedManga>().toMutableList()
@@ -285,11 +288,11 @@ class FeedRepository(
                                 bySeriesSet.clear()
                             }
                             db.getRecentMangaLimit(
-                                    search = searchQuery,
-                                    offset = offset,
-                                    limit = limit,
-                                    isResuming = false,
-                                )
+                                search = searchQuery,
+                                offset = offset,
+                                limit = limit,
+                                isResuming = false,
+                            )
                                 .executeOnIO()
                                 .mapNotNull { history ->
                                     history.manga.id ?: return@mapNotNull null
@@ -307,7 +310,7 @@ class FeedRepository(
                                                 getChapterItem(
                                                     chpHistory.manga,
                                                     chpHistory.chapter.toSimpleChapter(
-                                                        chpHistory.history.last_read
+                                                        chpHistory.history.last_read,
                                                     )!!,
                                                 )
                                             }
@@ -324,8 +327,10 @@ class FeedRepository(
                                     )
                                 }
                         }
+
                         FeedHistoryGroup.Day,
-                        FeedHistoryGroup.Week -> {
+                        FeedHistoryGroup.Week,
+                            -> {
                             val pattern =
                                 when (group == FeedHistoryGroup.Week) {
                                     true -> "yyyy-w"
@@ -335,11 +340,11 @@ class FeedRepository(
                             val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
                             dateFormat.calendar.firstDayOfWeek = dayOfWeek
                             db.getHistoryUngrouped(
-                                    search = searchQuery,
-                                    offset = offset,
-                                    limit = limit,
-                                    isResuming = false,
-                                )
+                                search = searchQuery,
+                                offset = offset,
+                                limit = limit,
+                                isResuming = false,
+                            )
                                 .executeOnIO()
                                 .groupBy {
                                     val date = it.history.last_read
@@ -353,7 +358,7 @@ class FeedRepository(
                                                 getChapterItem(
                                                     it.manga,
                                                     it.chapter.toSimpleChapter(
-                                                        it.history.last_read
+                                                        it.history.last_read,
                                                     )!!,
                                                 )
                                             }
@@ -367,13 +372,14 @@ class FeedRepository(
                                     )
                                 }
                         }
+
                         else -> {
                             db.getHistoryUngrouped(
-                                    search = searchQuery,
-                                    offset = offset,
-                                    limit = limit,
-                                    isResuming = false,
-                                )
+                                search = searchQuery,
+                                offset = offset,
+                                limit = limit,
+                                isResuming = false,
+                            )
                                 .executeOnIO()
                                 .mapNotNull {
                                     it.manga.id ?: return@mapNotNull null
@@ -419,11 +425,11 @@ class FeedRepository(
             .runCatching {
                 val chapters =
                     db.getRecentChapters(
-                            search = searchQuery,
-                            offset = offset,
-                            limit = limit,
-                            sortByFetched = uploadsFetchSort,
-                        )
+                        search = searchQuery,
+                        offset = offset,
+                        limit = limit,
+                        sortByFetched = uploadsFetchSort,
+                    )
                         .executeAsBlocking()
                         .mapNotNull {
                             val chapterItem =
@@ -489,6 +495,7 @@ class FeedRepository(
             when {
                 downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga) ->
                     Download.State.DOWNLOADED
+
                 else ->
                     downloadManager.getQueuedDownloadOrNull(chapter.id)?.status
                         ?: Download.State.NOT_DOWNLOADED
@@ -535,12 +542,16 @@ class FeedRepository(
         when (downloadAction) {
             is MangaConstants.DownloadAction.ImmediateDownload ->
                 downloadManager.startDownloadNow(dbChapter)
+
             is MangaConstants.DownloadAction.Download ->
                 downloadManager.downloadChapters(dbManga, listOf(dbChapter))
+
             is MangaConstants.DownloadAction.Remove ->
                 downloadManager.deleteChapters(listOf(dbChapter), dbManga)
+
             is MangaConstants.DownloadAction.Cancel ->
                 downloadManager.deleteChapters(listOf(dbChapter), dbManga)
+
             else -> Unit
         }
     }
