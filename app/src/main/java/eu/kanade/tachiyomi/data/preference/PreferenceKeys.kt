@@ -38,6 +38,7 @@ object PreferenceKeys {
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
     const val blockedScanlators = "blocked_scanlators"
+    const val blockedUploaders = "blocked_uploaders"
 
     const val langToShow = "mangadex_languages_new"
 

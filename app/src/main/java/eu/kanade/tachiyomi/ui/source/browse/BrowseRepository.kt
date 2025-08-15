@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.filterErrors
 import com.github.michaelbull.result.filterValues
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -100,25 +98,35 @@ class BrowseRepository(
                     Ok(scanlatorImpl!!)
                 }
             }
-
-        return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
-            Err(blockedScanlatorUUIDs.filterErrors().first())
-        } else {
-            val uuids = blockedScanlatorUUIDs.filterValues().map { it.uuid }
-            mangaDex.fetchHomePageInfo(uuids).andThen { listResults ->
-                Ok(
-                    listResults.map { listResult ->
-                        HomePageManga(
-                            displayScreenType = listResult.displayScreenType,
-                            displayManga =
-                                listResult.sourceManga
-                                    .map { it.toDisplayManga(db, mangaDex.id) }
-                                    .distinctBy { it.url }
-                                    .toPersistentList(),
-                        )
+        val blockedUploaderUUIDs =
+            preferenceHelper.blockedUploaders().get().map {
+                var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
+                if (uploaderImpl == null) {
+                    mangaDex.getUploader(uploader = it).map { uploader ->
+                        uploaderImpl = uploader.toUploaderImpl()
+                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
+                        uploaderImpl!!
                     }
-                )
+                } else {
+                    Ok(uploaderImpl!!)
+                }
             }
+
+        val scanlatorUUIDs = blockedScanlatorUUIDs.filterValues().map { it.uuid }
+        val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
+        return mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
+            Ok(
+                listResults.map { listResult ->
+                    HomePageManga(
+                        displayScreenType = listResult.displayScreenType,
+                        displayManga =
+                            listResult.sourceManga
+                                .map { it.toDisplayManga(db, mangaDex.id) }
+                                .distinctBy { it.url }
+                                .toPersistentList(),
+                    )
+                }
+            )
         }
     }
 

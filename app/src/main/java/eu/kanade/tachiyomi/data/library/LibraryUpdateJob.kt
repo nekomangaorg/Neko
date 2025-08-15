@@ -474,6 +474,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
 
                 val blockedGroups = preferences.blockedScanlators().get()
+                val blockedUploaders = preferences.blockedUploaders().get()
 
                 val fetchedChapters =
                     (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
@@ -482,9 +483,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 .thenBy { getChapterNum(it) }
                         )
                         .filter {
-                            ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
-                                scanlator in blockedGroups
-                            }
+                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
+                            scanlators.none { scanlator -> scanlator in blockedGroups } &&
+                                ("No Group" !in scanlators || it.uploader !in blockedUploaders)
                         }
 
                 // delete cover cache image if the thumbnail from network is not empty
