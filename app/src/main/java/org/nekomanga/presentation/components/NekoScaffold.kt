@@ -67,7 +67,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import org.nekomanga.R
-import org.nekomanga.presentation.extensions.runOnEnterKeyPressed
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -90,6 +89,8 @@ fun NekoScaffold(
     navigationIconLabel: String = stringResource(id = R.string.back),
     searchNavigationEnabled: Boolean = false,
     onSearch: (String?) -> Unit = {},
+    onSearchEnabled: () -> Unit = {},
+    onSearchDisabled: () -> Unit = {},
     snackBarHost: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
@@ -154,6 +155,20 @@ fun NekoScaffold(
                             onSearchText = onSearch,
                             searchPlaceHolder = searchPlaceHolder,
                             color = color,
+                            navigationEnabled = searchNavigationEnabled,
+                            navigationIconLabel = navigationIconLabel,
+                            navigationIcon = navigationIcon,
+                            focusRequester = focusRequester,
+                            onNavigationIconClicked = onNavigationIconClicked,
+                            onSearchDisabled = onSearchDisabled,
+                            actions = actions,
+                            scrollBehavior = scrollBehavior,
+                        )
+                    NekoScaffoldType.SearchOutlineDummy ->
+                        SearchOutlineDummyTopAppBar(
+                            searchPlaceHolder = searchPlaceHolder,
+                            color = color,
+                            onSearchEnabled = onSearchEnabled,
                             navigationEnabled = searchNavigationEnabled,
                             navigationIconLabel = navigationIconLabel,
                             navigationIcon = navigationIcon,
@@ -254,6 +269,7 @@ fun SearchOutlineTopAppBar(
     navigationIcon: ImageVector,
     focusRequester: FocusRequester,
     onNavigationIconClicked: () -> Unit,
+    onSearchDisabled: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
@@ -324,6 +340,7 @@ fun SearchOutlineTopAppBar(
                                             searchText = ""
                                             searchEnabled = false
                                             focusManager.clearFocus()
+                                            onSearchDisabled()
                                         },
                                     )
                                 } else {
@@ -369,21 +386,18 @@ fun SearchOutlineTopAppBar(
 }
 
 @Composable
-fun SearchOutlineInstantTopAppBar(
-    onSearchText: (String?) -> Unit,
+fun SearchOutlineDummyTopAppBar(
+    onSearchEnabled: () -> Unit,
     searchPlaceHolder: String,
     color: Color,
     navigationEnabled: Boolean,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    focusRequester: FocusRequester,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    var searchText by rememberSaveable { mutableStateOf("") }
-    var searchEnabled by rememberSaveable { mutableStateOf(false) }
-
-    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     TopAppBar(
         title = {},
@@ -396,11 +410,10 @@ fun SearchOutlineInstantTopAppBar(
                         .padding(horizontal = Size.small)
                         .onFocusChanged {
                             if (it.hasFocus) {
-                                searchEnabled = true
+                                onSearchEnabled()
                             }
                         }
-                        .focusRequester(focusRequester)
-                        .runOnEnterKeyPressed { focusManager.clearFocus() },
+                        .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
                 colors =
@@ -409,13 +422,10 @@ fun SearchOutlineInstantTopAppBar(
                     ),
                 inputField = {
                     SearchBarDefaults.InputField(
-                        query = searchText,
+                        query = "",
                         expanded = false,
                         onExpandedChange = {},
-                        onQueryChange = {
-                            searchText = it
-                            onSearchText(it)
-                        },
+                        onQueryChange = {},
                         colors =
                             TextFieldDefaults.colors(
                                 focusedContainerColor = Color.Green,
@@ -423,7 +433,7 @@ fun SearchOutlineInstantTopAppBar(
                                 disabledContainerColor = Color.Gray,
                                 errorContainerColor = Color.Red,
                             ),
-                        onSearch = { onSearchText(it) },
+                        onSearch = {},
                         placeholder = {
                             Text(
                                 text = searchPlaceHolder,
@@ -438,47 +448,26 @@ fun SearchOutlineInstantTopAppBar(
                                         icon = navigationIcon,
                                         buttonClicked = onNavigationIconClicked,
                                     )
-                                }
-                                if (searchEnabled) {
-                                    ToolTipButton(
-                                        toolTipLabel = stringResource(id = R.string.cancel_search),
-                                        icon = Icons.Filled.SearchOff,
-                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
-                                            onSearchText("")
-                                            searchText = ""
-                                            searchEnabled = false
-                                            focusManager.clearFocus()
-                                        },
-                                    )
                                 } else {
                                     ToolTipButton(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = { searchEnabled = true },
+                                        buttonClicked = { onSearchEnabled() },
                                     )
                                 }
                             }
                         },
                         trailingIcon = {
                             Row {
-                                AnimatedVisibility(
-                                    visible = searchText.isNotBlank(),
-                                    enter = fadeIn(),
-                                    exit = fadeOut(),
-                                ) {
+                                if (navigationEnabled) {
                                     ToolTipButton(
-                                        toolTipLabel = stringResource(id = R.string.clear),
-                                        icon = Icons.Filled.Close,
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
-                                            onSearchText("")
-                                            searchText = ""
-                                        },
+                                        buttonClicked = { onSearchEnabled() },
                                     )
-                                }
-                                if (!searchEnabled) {
+                                } else {
                                     actions()
                                 }
                             }
@@ -659,4 +648,5 @@ enum class NekoScaffoldType {
     NoTitle,
     Search,
     SearchOutline,
+    SearchOutlineDummy,
 }

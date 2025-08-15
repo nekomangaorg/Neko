@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -28,11 +27,8 @@ import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
 import org.nekomanga.R
-import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
@@ -62,37 +58,33 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
             entryProvider {
                 entry<Screens.Settings.Main> {
                     NekoScaffold(
-                        type = NekoScaffoldType.Title,
-                        title = stringResource(R.string.settings),
+                        type = NekoScaffoldType.SearchOutlineDummy,
                         onNavigationIconClicked = onBackPressed,
-                        actions = {
-                            AppBarActions(
-                                actions =
-                                    listOf(
-                                        AppBar.Action(
-                                            title = UiText.StringResource(R.string.search_settings),
-                                            icon = Icons.Outlined.Search,
-                                            onClick = { backStack.add(Screens.Settings.Search) },
-                                        )
-                                    )
+                        title = stringResource(R.string.settings),
+                        searchPlaceHolder = stringResource(R.string.search_settings),
+                        searchNavigationEnabled = true,
+                        onSearchEnabled = { backStack.add(Screens.Settings.Search) },
+                        content = { contentPadding ->
+                            SettingsMainScreen(
+                                contentPadding = contentPadding,
+                                onGeneralClick = { backStack.add(Screens.Settings.General) },
+                                onAppearanceClick = { backStack.add(Screens.Settings.Appearance) },
+                                onLibraryClick = { backStack.add(Screens.Settings.Library) },
+                                onDataStorageClick = {
+                                    backStack.add(Screens.Settings.DataStorage)
+                                },
+                                onSiteSpecificClick = { backStack.add(Screens.Settings.MangaDex) },
+                                onMergeSourceClick = {
+                                    backStack.add(Screens.Settings.MergeSource)
+                                },
+                                onReaderClick = { backStack.add(Screens.Settings.Reader) },
+                                onDownloadsClick = { backStack.add(Screens.Settings.Downloads) },
+                                onTrackingClick = { backStack.add(Screens.Settings.Tracking) },
+                                onSecurityClick = { backStack.add(Screens.Settings.Security) },
+                                onAdvancedClick = { backStack.add(Screens.Settings.Advanced) },
                             )
                         },
-                    ) { contentPadding ->
-                        SettingsMainScreen(
-                            contentPadding = contentPadding,
-                            onGeneralClick = { backStack.add(Screens.Settings.General) },
-                            onAppearanceClick = { backStack.add(Screens.Settings.Appearance) },
-                            onLibraryClick = { backStack.add(Screens.Settings.Library) },
-                            onDataStorageClick = { backStack.add(Screens.Settings.DataStorage) },
-                            onSiteSpecificClick = { backStack.add(Screens.Settings.MangaDex) },
-                            onMergeSourceClick = { backStack.add(Screens.Settings.MergeSource) },
-                            onReaderClick = { backStack.add(Screens.Settings.Reader) },
-                            onDownloadsClick = { backStack.add(Screens.Settings.Downloads) },
-                            onTrackingClick = { backStack.add(Screens.Settings.Tracking) },
-                            onSecurityClick = { backStack.add(Screens.Settings.Security) },
-                            onAdvancedClick = { backStack.add(Screens.Settings.Advanced) },
-                        )
-                    }
+                    )
                 }
                 entry<Screens.Settings.Search> {
                     SettingsSearchScreen(

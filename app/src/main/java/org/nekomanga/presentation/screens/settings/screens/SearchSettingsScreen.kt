@@ -66,6 +66,7 @@ fun SettingsSearchScreen(
         focusRequester = focusRequester,
         onNavigationIconClicked = onNavigationIconClicked,
         searchPlaceHolder = stringResource(R.string.search_settings),
+        onSearchDisabled = onNavigationIconClicked,
         onSearch = { searchText = it },
     ) { contentPadding ->
         contentPadding.toString()

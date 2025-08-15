@@ -17,21 +17,23 @@ class LicensesController : BasicComposeController() {
     @Composable
     override fun ScreenContent() {
         NekoScaffold(
-            title = stringResource(id = R.string.open_source_licenses),
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = router::handleBack,
-        ) { contentPadding ->
-            LibrariesContainer(
-                contentPadding = contentPadding,
-                colors =
-                    LibraryDefaults.libraryColors(
-                        backgroundColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        badgeBackgroundColor = MaterialTheme.colorScheme.primary,
-                        badgeContentColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
-                padding = LibraryDefaults.libraryPadding(contentPadding = PaddingValues(Size.tiny)),
-            )
-        }
+            title = stringResource(id = R.string.open_source_licenses),
+            content = { contentPadding ->
+                LibrariesContainer(
+                    contentPadding = contentPadding,
+                    colors =
+                        LibraryDefaults.libraryColors(
+                            backgroundColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            badgeBackgroundColor = MaterialTheme.colorScheme.primary,
+                            badgeContentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    padding =
+                        LibraryDefaults.libraryPadding(contentPadding = PaddingValues(Size.tiny)),
+                )
+            },
+        )
     }
 }

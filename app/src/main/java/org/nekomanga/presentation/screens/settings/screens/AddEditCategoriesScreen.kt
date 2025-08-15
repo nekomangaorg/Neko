@@ -123,92 +123,96 @@ internal class AddEditCategoriesScreen(
 
         NekoScaffold(
             type = NekoScaffoldType.Title,
-            title = stringResource(R.string.edit_categories),
             onNavigationIconClicked = onNavigationIconClick,
-        ) { contentPadding ->
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
-                    state = lazyListState,
-                    verticalArrangement = Arrangement.spacedBy(Size.small),
-                ) {
-                    items(items = categoriesState, key = { category -> category.name }) { category
-                        ->
-                        // skip the default category
-                        if (category.id != 0) {
-                            ReorderableItem(reorderableState, category.name) { isDragging ->
-                                val interactionSource = remember { MutableInteractionSource() }
-                                ElevatedCard(
-                                    modifier =
-                                        Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                                    onClick = {},
-                                    interactionSource = interactionSource,
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(Size.small),
-                                        verticalAlignment = Alignment.CenterVertically,
+            title = stringResource(R.string.edit_categories),
+            content = { contentPadding ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                        state = lazyListState,
+                        verticalArrangement = Arrangement.spacedBy(Size.small),
+                    ) {
+                        items(items = categoriesState, key = { category -> category.name }) {
+                            category ->
+                            // skip the default category
+                            if (category.id != 0) {
+                                ReorderableItem(reorderableState, category.name) { isDragging ->
+                                    val interactionSource = remember { MutableInteractionSource() }
+                                    ElevatedCard(
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                                .padding(horizontal = Size.medium),
+                                        onClick = {},
+                                        interactionSource = interactionSource,
                                     ) {
-                                        IconButton(
-                                            modifier =
-                                                Modifier.draggableHandle(
-                                                    onDragStarted = {
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType
-                                                                .GestureThresholdActivate
-                                                        )
-                                                    },
-                                                    onDragStopped = {
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType.GestureEnd
-                                                        )
-                                                    },
-                                                    interactionSource = interactionSource,
-                                                ),
-                                            onClick = {},
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(Size.small),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
-                                                Icons.Rounded.DragHandle,
-                                                contentDescription = "Reorder",
-                                            )
-                                        }
-                                        Text(text = category.name)
+                                            IconButton(
+                                                modifier =
+                                                    Modifier.draggableHandle(
+                                                        onDragStarted = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType
+                                                                    .GestureThresholdActivate
+                                                            )
+                                                        },
+                                                        onDragStopped = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.GestureEnd
+                                                            )
+                                                        },
+                                                        interactionSource = interactionSource,
+                                                    ),
+                                                onClick = {},
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.DragHandle,
+                                                    contentDescription = "Reorder",
+                                                )
+                                            }
+                                            Text(text = category.name)
 
-                                        Spacer(modifier = Modifier.weight(1f))
+                                            Spacer(modifier = Modifier.weight(1f))
 
-                                        IconButton(onClick = { editCategoryName = category.name }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Edit,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { deleteCategoryName = category.name }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Delete,
-                                                contentDescription = null,
-                                            )
+                                            IconButton(
+                                                onClick = { editCategoryName = category.name }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Edit,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { deleteCategoryName = category.name }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Delete,
+                                                    contentDescription = null,
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                ExtendedFloatingActionButton(
-                    modifier =
-                        Modifier.align(Alignment.BottomEnd)
-                            .padding(
-                                bottom = contentPadding.calculateBottomPadding(),
-                                end = Size.small,
-                            ),
-                    onClick = { showAddDialog = true },
-                    icon = { Icon(Icons.Default.Add, null) },
-                    text = { Text(text = stringResource(R.string.add)) },
-                )
-            }
-        }
+                    ExtendedFloatingActionButton(
+                        modifier =
+                            Modifier.align(Alignment.BottomEnd)
+                                .padding(
+                                    bottom = contentPadding.calculateBottomPadding(),
+                                    end = Size.small,
+                                ),
+                        onClick = { showAddDialog = true },
+                        icon = { Icon(Icons.Default.Add, null) },
+                        text = { Text(text = stringResource(R.string.add)) },
+                    )
+                }
+            },
+        )
     }
 }

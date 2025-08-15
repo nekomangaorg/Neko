@@ -175,10 +175,6 @@ fun FeedScreen(
                         Size.extraLarge,
             ) {
                 NekoScaffold(
-                    title =
-                        if (feedScreenType == FeedScreenType.Summary)
-                            stringResource(R.string.summary)
-                        else "",
                     type =
                         if (
                             feedScreenState.value.showingDownloads ||
@@ -186,8 +182,12 @@ fun FeedScreen(
                         )
                             NekoScaffoldType.Title
                         else NekoScaffoldType.SearchOutline,
-                    incognitoMode = feedScreenState.value.incognitoMode,
+                    title =
+                        if (feedScreenType == FeedScreenType.Summary)
+                            stringResource(R.string.summary)
+                        else "",
                     searchPlaceHolder = searchHint,
+                    incognitoMode = feedScreenState.value.incognitoMode,
                     isRoot = true,
                     onSearch = feedScreenActions.search,
                     actions = {
@@ -222,135 +222,142 @@ fun FeedScreen(
                                     )
                         )
                     },
-                ) { incomingContentPadding ->
-                    val recyclerContentPadding =
-                        PaddingValues(
-                            top = incomingContentPadding.calculateTopPadding(),
-                            bottom =
-                                if (actualSideNav) {
-                                    Size.navBarSize
-                                } else {
-                                    Size.navBarSize
-                                } +
-                                    WindowInsets.navigationBars
-                                        .asPaddingValues()
-                                        .calculateBottomPadding(),
-                        )
+                    content = { incomingContentPadding ->
+                        val recyclerContentPadding =
+                            PaddingValues(
+                                top = incomingContentPadding.calculateTopPadding(),
+                                bottom =
+                                    if (actualSideNav) {
+                                        Size.navBarSize
+                                    } else {
+                                        Size.navBarSize
+                                    } +
+                                        WindowInsets.navigationBars
+                                            .asPaddingValues()
+                                            .calculateBottomPadding(),
+                            )
 
-                    Box(
-                        modifier =
-                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                                .fillMaxSize()
-                    ) {
-                        val (feedManga, hasMoreResults) =
-                            when (feedScreenType) {
-                                FeedScreenType.Summary -> {
-                                    if (
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
-                                            false
-                                    } else {
-                                        historyPagingScreenState.value.historyFeedMangaList to
-                                            historyPagingScreenState.value.hasMoreResults
+                        Box(
+                            modifier =
+                                Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
+                                    .fillMaxSize()
+                        ) {
+                            val (feedManga, hasMoreResults) =
+                                when (feedScreenType) {
+                                    FeedScreenType.Summary -> {
+                                        if (
+                                            historyPagingScreenState.value
+                                                .searchHistoryFeedMangaList
+                                                .isNotEmpty()
+                                        ) {
+                                            historyPagingScreenState.value
+                                                .searchHistoryFeedMangaList to false
+                                        } else {
+                                            historyPagingScreenState.value.historyFeedMangaList to
+                                                historyPagingScreenState.value.hasMoreResults
+                                        }
+                                    }
+
+                                    FeedScreenType.History -> {
+                                        if (
+                                            historyPagingScreenState.value
+                                                .searchHistoryFeedMangaList
+                                                .isNotEmpty()
+                                        ) {
+                                            historyPagingScreenState.value
+                                                .searchHistoryFeedMangaList to false
+                                        } else {
+                                            historyPagingScreenState.value.historyFeedMangaList to
+                                                historyPagingScreenState.value.hasMoreResults
+                                        }
+                                    }
+
+                                    FeedScreenType.Updates -> {
+                                        if (
+                                            updatesPagingScreenState.value
+                                                .searchUpdatesFeedMangaList
+                                                .isNotEmpty()
+                                        ) {
+                                            updatesPagingScreenState.value
+                                                .searchUpdatesFeedMangaList to false
+                                        } else {
+                                            updatesPagingScreenState.value.updatesFeedMangaList to
+                                                updatesPagingScreenState.value.hasMoreResults
+                                        }
                                     }
                                 }
-                                FeedScreenType.History -> {
-                                    if (
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
-                                            false
-                                    } else {
-                                        historyPagingScreenState.value.historyFeedMangaList to
-                                            historyPagingScreenState.value.hasMoreResults
-                                    }
-                                }
-                                FeedScreenType.Updates -> {
-                                    if (
-                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList to
-                                            false
-                                    } else {
-                                        updatesPagingScreenState.value.updatesFeedMangaList to
-                                            updatesPagingScreenState.value.hasMoreResults
-                                    }
+
+                            if (
+                                feedScreenState.value.showingDownloads &&
+                                    feedScreenState.value.downloads.isEmpty()
+                            ) {
+                                feedScreenActions.toggleShowingDownloads()
+                            }
+
+                            when (downloadScreenVisible) {
+                                true ->
+                                    DownloadScreen(
+                                        contentPadding = recyclerContentPadding,
+                                        downloads = feedScreenState.value.downloads,
+                                        downloaderStatus = feedScreenState.value.downloaderStatus,
+                                        downloadScreenActions = downloadScreenActions,
+                                    )
+
+                                false -> {
+                                    FeedPage(
+                                        contentPadding = recyclerContentPadding,
+                                        summaryScreenPagingState = summaryScreenPagingState,
+                                        feedMangaList = feedManga,
+                                        hasMoreResults = hasMoreResults,
+                                        loadingResults =
+                                            if (
+                                                feedScreenState.value.feedScreenType ==
+                                                    FeedScreenType.History
+                                            )
+                                                historyPagingScreenState.value.pageLoading
+                                            else updatesPagingScreenState.value.pageLoading,
+                                        groupedBySeries = feedScreenState.value.groupUpdateChapters,
+                                        feedScreenType = feedScreenState.value.feedScreenType,
+                                        historyGrouping =
+                                            historyPagingScreenState.value.historyGrouping,
+                                        outlineCovers = feedScreenState.value.outlineCovers,
+                                        outlineCards = feedScreenState.value.outlineCards,
+                                        updatesFetchSort =
+                                            updatesPagingScreenState.value.updatesSortedByFetch,
+                                        feedScreenActions = feedScreenActions,
+                                        loadNextPage = loadNextPage,
+                                    )
                                 }
                             }
 
-                        if (
-                            feedScreenState.value.showingDownloads &&
-                                feedScreenState.value.downloads.isEmpty()
-                        ) {
-                            feedScreenActions.toggleShowingDownloads()
-                        }
-
-                        when (downloadScreenVisible) {
-                            true ->
-                                DownloadScreen(
-                                    contentPadding = recyclerContentPadding,
-                                    downloads = feedScreenState.value.downloads,
-                                    downloaderStatus = feedScreenState.value.downloaderStatus,
-                                    downloadScreenActions = downloadScreenActions,
-                                )
-                            false -> {
-                                FeedPage(
-                                    contentPadding = recyclerContentPadding,
-                                    summaryScreenPagingState = summaryScreenPagingState,
-                                    feedMangaList = feedManga,
-                                    hasMoreResults = hasMoreResults,
-                                    loadingResults =
+                            if (!feedScreenState.value.firstLoad) {
+                                ScreenFooter(
+                                    screenType = feedScreenType,
+                                    modifier = Modifier.align(Alignment.BottomStart),
+                                    loadingMore =
                                         if (
                                             feedScreenState.value.feedScreenType ==
                                                 FeedScreenType.History
                                         )
                                             historyPagingScreenState.value.pageLoading
                                         else updatesPagingScreenState.value.pageLoading,
-                                    groupedBySeries = feedScreenState.value.groupUpdateChapters,
-                                    feedScreenType = feedScreenState.value.feedScreenType,
-                                    historyGrouping =
-                                        historyPagingScreenState.value.historyGrouping,
-                                    outlineCovers = feedScreenState.value.outlineCovers,
-                                    outlineCards = feedScreenState.value.outlineCards,
-                                    updatesFetchSort =
-                                        updatesPagingScreenState.value.updatesSortedByFetch,
-                                    feedScreenActions = feedScreenActions,
-                                    loadNextPage = loadNextPage,
+                                    showDownloads = feedScreenState.value.downloads.isNotEmpty(),
+                                    downloadsSelected = feedScreenState.value.showingDownloads,
+                                    downloadsClicked = feedScreenActions.toggleShowingDownloads,
+                                    screenTypeClick = { newScreenType: FeedScreenType ->
+                                        scope.launch { sheetState.hide() }
+                                        if (feedScreenState.value.showingDownloads) {
+                                            feedScreenActions.toggleShowingDownloads()
+                                        }
+                                        if (feedScreenType != newScreenType) {
+                                            feedScreenActions.switchViewType(newScreenType)
+                                        }
+                                    },
                                 )
                             }
                         }
-
-                        if (!feedScreenState.value.firstLoad) {
-                            ScreenFooter(
-                                screenType = feedScreenType,
-                                modifier = Modifier.align(Alignment.BottomStart),
-                                loadingMore =
-                                    if (
-                                        feedScreenState.value.feedScreenType ==
-                                            FeedScreenType.History
-                                    )
-                                        historyPagingScreenState.value.pageLoading
-                                    else updatesPagingScreenState.value.pageLoading,
-                                showDownloads = feedScreenState.value.downloads.isNotEmpty(),
-                                downloadsSelected = feedScreenState.value.showingDownloads,
-                                downloadsClicked = feedScreenActions.toggleShowingDownloads,
-                                screenTypeClick = { newScreenType: FeedScreenType ->
-                                    scope.launch { sheetState.hide() }
-                                    if (feedScreenState.value.showingDownloads) {
-                                        feedScreenActions.toggleShowingDownloads()
-                                    }
-                                    if (feedScreenType != newScreenType) {
-                                        feedScreenActions.switchViewType(newScreenType)
-                                    }
-                                },
-                            )
-                        }
-                    }
-                }
+                    },
+                )
             }
         }
         // this is needed for Android SDK where blur isn't available

@@ -161,11 +161,11 @@ fun BrowseScreen(
             },
         ) {
             NekoScaffold(
-                incognitoMode = browseScreenState.value.incognitoMode,
-                isRoot = true,
-                title = browseScreenState.value.title.asString(),
                 type = NekoScaffoldType.Title,
                 onNavigationIconClicked = onBackPress,
+                title = browseScreenState.value.title.asString(),
+                incognitoMode = browseScreenState.value.incognitoMode,
+                isRoot = true,
                 actions = {
                     AppBarActions(
                         actions =
@@ -208,142 +208,151 @@ fun BrowseScreen(
                                 }
                     )
                 },
-            ) { incomingContentPadding ->
-                val recyclerContentPadding =
-                    PaddingValues(
-                        top = incomingContentPadding.calculateTopPadding(),
-                        bottom =
-                            if (actualSideNav) {
-                                Size.navBarSize
-                            } else {
-                                Size.navBarSize
-                            } +
-                                WindowInsets.navigationBars
-                                    .asPaddingValues()
-                                    .calculateBottomPadding(),
-                    )
+                content = { incomingContentPadding ->
+                    val recyclerContentPadding =
+                        PaddingValues(
+                            top = incomingContentPadding.calculateTopPadding(),
+                            bottom =
+                                if (actualSideNav) {
+                                    Size.navBarSize
+                                } else {
+                                    Size.navBarSize
+                                } +
+                                    WindowInsets.navigationBars
+                                        .asPaddingValues()
+                                        .calculateBottomPadding(),
+                        )
 
-                val haptic = LocalHapticFeedback.current
-                fun mangaLongClick(displayManga: DisplayManga) {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    if (!displayManga.inLibrary && browseScreenState.value.promptForCategories) {
-                        scope.launch {
-                            longClickedMangaId = displayManga.mangaId
-                            openSheet(
-                                BrowseBottomSheetScreen.CategoriesSheet(
-                                    setCategories = { selectedCategories ->
-                                        scope.launch { sheetState.hide() }
-                                        longClickedMangaId?.let {
-                                            toggleFavorite(it, selectedCategories)
+                    val haptic = LocalHapticFeedback.current
+                    fun mangaLongClick(displayManga: DisplayManga) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (
+                            !displayManga.inLibrary && browseScreenState.value.promptForCategories
+                        ) {
+                            scope.launch {
+                                longClickedMangaId = displayManga.mangaId
+                                openSheet(
+                                    BrowseBottomSheetScreen.CategoriesSheet(
+                                        setCategories = { selectedCategories ->
+                                            scope.launch { sheetState.hide() }
+                                            longClickedMangaId?.let {
+                                                toggleFavorite(it, selectedCategories)
+                                            }
                                         }
-                                    }
+                                    )
                                 )
-                            )
+                            }
+                        } else {
+                            toggleFavorite(displayManga.mangaId, emptyList())
                         }
-                    } else {
-                        toggleFavorite(displayManga.mangaId, emptyList())
                     }
-                }
 
-                Box(
-                    modifier =
-                        Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                            .fillMaxSize()
-                ) {
-                    if (browseScreenState.value.initialLoading) {
-                        Loading(
-                            Modifier.zIndex(1f)
-                                .padding(Size.small)
-                                .padding(recyclerContentPadding)
-                                .align(Alignment.TopCenter)
-                        )
-                    } else if (browseScreenState.value.error != null) {
-                        EmptyScreen(
-                            icon = Icons.Default.ErrorOutline,
-                            iconSize = 176.dp,
-                            message = browseScreenState.value.error!!.asString(),
-                            actions = persistentListOf(Action(R.string.retry, retryClick)),
-                            contentPadding = recyclerContentPadding,
-                        )
-                    } else {
-                        Crossfade(targetState = browseScreenType) { type ->
-                            when (type) {
-                                BrowseScreenType.Homepage ->
-                                    BrowseHomePage(
-                                        browseHomePageManga = browseScreenState.value.homePageManga,
-                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                        titleClick = homeScreenTitleClick,
-                                        randomClick = randomClick,
-                                        onClick = { id -> openManga(id) },
-                                        onLongClick = ::mangaLongClick,
-                                        contentPadding = recyclerContentPadding,
-                                    )
-                                BrowseScreenType.Follows -> {
-                                    BrowseFollowsPage(
-                                        displayMangaHolder =
-                                            browseScreenState.value.displayMangaHolder,
-                                        isList = browseScreenState.value.isList,
-                                        isComfortableGrid =
-                                            browseScreenState.value.isComfortableGrid,
-                                        outlineCovers = browseScreenState.value.outlineCovers,
-                                        rawColumnCount = browseScreenState.value.rawColumnCount,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                    )
+                    Box(
+                        modifier =
+                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
+                                .fillMaxSize()
+                    ) {
+                        if (browseScreenState.value.initialLoading) {
+                            Loading(
+                                Modifier.zIndex(1f)
+                                    .padding(Size.small)
+                                    .padding(recyclerContentPadding)
+                                    .align(Alignment.TopCenter)
+                            )
+                        } else if (browseScreenState.value.error != null) {
+                            EmptyScreen(
+                                icon = Icons.Default.ErrorOutline,
+                                iconSize = 176.dp,
+                                message = browseScreenState.value.error!!.asString(),
+                                actions = persistentListOf(Action(R.string.retry, retryClick)),
+                                contentPadding = recyclerContentPadding,
+                            )
+                        } else {
+                            Crossfade(targetState = browseScreenType) { type ->
+                                when (type) {
+                                    BrowseScreenType.Homepage ->
+                                        BrowseHomePage(
+                                            browseHomePageManga =
+                                                browseScreenState.value.homePageManga,
+                                            shouldOutlineCover =
+                                                browseScreenState.value.outlineCovers,
+                                            titleClick = homeScreenTitleClick,
+                                            randomClick = randomClick,
+                                            onClick = { id -> openManga(id) },
+                                            onLongClick = ::mangaLongClick,
+                                            contentPadding = recyclerContentPadding,
+                                        )
+
+                                    BrowseScreenType.Follows -> {
+                                        BrowseFollowsPage(
+                                            displayMangaHolder =
+                                                browseScreenState.value.displayMangaHolder,
+                                            isList = browseScreenState.value.isList,
+                                            isComfortableGrid =
+                                                browseScreenState.value.isComfortableGrid,
+                                            outlineCovers = browseScreenState.value.outlineCovers,
+                                            rawColumnCount = browseScreenState.value.rawColumnCount,
+                                            contentPadding = recyclerContentPadding,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
+                                        )
+                                    }
+
+                                    BrowseScreenType.Other -> {
+                                        BrowseOtherPage(
+                                            results = browseScreenState.value.otherResults,
+                                            contentPadding = recyclerContentPadding,
+                                            onClick = otherClick,
+                                        )
+                                    }
+
+                                    BrowseScreenType.Filter -> {
+                                        BrowseFilterPage(
+                                            displayMangaHolder =
+                                                browseScreenState.value.displayMangaHolder,
+                                            isList = browseScreenState.value.isList,
+                                            isComfortableGrid =
+                                                browseScreenState.value.isComfortableGrid,
+                                            outlineCovers = browseScreenState.value.outlineCovers,
+                                            rawColumnCount = browseScreenState.value.rawColumnCount,
+                                            pageLoading = browseScreenState.value.pageLoading,
+                                            lastPage = browseScreenState.value.endReached,
+                                            contentPadding = recyclerContentPadding,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
+                                            loadNextPage = loadNextPage,
+                                        )
+                                    }
+
+                                    BrowseScreenType.None -> Unit
                                 }
-                                BrowseScreenType.Other -> {
-                                    BrowseOtherPage(
-                                        results = browseScreenState.value.otherResults,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = otherClick,
-                                    )
-                                }
-                                BrowseScreenType.Filter -> {
-                                    BrowseFilterPage(
-                                        displayMangaHolder =
-                                            browseScreenState.value.displayMangaHolder,
-                                        isList = browseScreenState.value.isList,
-                                        isComfortableGrid =
-                                            browseScreenState.value.isComfortableGrid,
-                                        outlineCovers = browseScreenState.value.outlineCovers,
-                                        rawColumnCount = browseScreenState.value.rawColumnCount,
-                                        pageLoading = browseScreenState.value.pageLoading,
-                                        lastPage = browseScreenState.value.endReached,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                        loadNextPage = loadNextPage,
-                                    )
-                                }
-                                BrowseScreenType.None -> Unit
                             }
                         }
-                    }
 
-                    // hide these on initial load
-                    if (!browseScreenState.value.hideFooterButton) {
-                        ScreenTypeFooter(
-                            screenType = browseScreenType,
-                            modifier = Modifier.align(Alignment.BottomStart),
-                            isLoggedIn = browseScreenState.value.isLoggedIn,
-                            screenTypeClick = { newScreenType: BrowseScreenType ->
-                                scope.launch { sheetState.hide() }
-                                val sameScreen = browseScreenType == newScreenType
-                                val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+                        // hide these on initial load
+                        if (!browseScreenState.value.hideFooterButton) {
+                            ScreenTypeFooter(
+                                screenType = browseScreenType,
+                                modifier = Modifier.align(Alignment.BottomStart),
+                                isLoggedIn = browseScreenState.value.isLoggedIn,
+                                screenTypeClick = { newScreenType: BrowseScreenType ->
+                                    scope.launch { sheetState.hide() }
+                                    val sameScreen = browseScreenType == newScreenType
+                                    val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
 
-                                if (sameScreen && !newIsFilterScreen) {
-                                    // do nothing
-                                } else if (newIsFilterScreen) {
-                                    openSheet(BrowseBottomSheetScreen.FilterSheet())
-                                } else {
-                                    changeScreenType(newScreenType)
-                                }
-                            },
-                        )
+                                    if (sameScreen && !newIsFilterScreen) {
+                                        // do nothing
+                                    } else if (newIsFilterScreen) {
+                                        openSheet(BrowseBottomSheetScreen.FilterSheet())
+                                    } else {
+                                        changeScreenType(newScreenType)
+                                    }
+                                },
+                            )
+                        }
                     }
-                }
-            }
+                },
+            )
         }
         // this is needed for Android SDK where blur isn't available
         if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {

@@ -54,10 +54,10 @@ fun WebViewScreen(
     val navigator = rememberWebViewNavigator()
 
     NekoScaffold(
-        title = title,
-        subtitle = currentUrl,
         type = NekoScaffoldType.TitleAndSubtitle,
         onNavigationIconClicked = onClose,
+        title = title,
+        subtitle = currentUrl,
         navigationIcon = Icons.Filled.Close,
         navigationIconLabel = stringResource(id = R.string.close),
         actions = {
@@ -115,61 +115,64 @@ fun WebViewScreen(
                         )
             )
         },
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            val loadingState = state.loadingState
-            if (loadingState is LoadingState.Loading) {
-                LinearProgressIndicator(
-                    progress = { loadingState.progress },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+        content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                val loadingState = state.loadingState
+                if (loadingState is LoadingState.Loading) {
+                    LinearProgressIndicator(
+                        progress = { loadingState.progress },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
-            val webClient = remember {
-                object : AccompanistWebViewClient() {
+                val webClient = remember {
+                    object : AccompanistWebViewClient() {
 
-                    override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-                        super.onPageStarted(view, url, favicon)
-                        url?.let { currentUrl = it }
-                    }
+                        override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+                            super.onPageStarted(view, url, favicon)
+                            url?.let { currentUrl = it }
+                        }
 
-                    override fun doUpdateVisitedHistory(
-                        view: WebView,
-                        url: String?,
-                        isReload: Boolean,
-                    ) {
-                        super.doUpdateVisitedHistory(view, url, isReload)
-                        url?.let { currentUrl = it }
-                    }
+                        override fun doUpdateVisitedHistory(
+                            view: WebView,
+                            url: String?,
+                            isReload: Boolean,
+                        ) {
+                            super.doUpdateVisitedHistory(view, url, isReload)
+                            url?.let { currentUrl = it }
+                        }
 
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?,
-                    ): Boolean {
-                        request?.let { view?.loadUrl(it.url.toString(), headers) }
-                        return super.shouldOverrideUrlLoading(view, request)
+                        override fun shouldOverrideUrlLoading(
+                            view: WebView?,
+                            request: WebResourceRequest?,
+                        ): Boolean {
+                            request?.let { view?.loadUrl(it.url.toString(), headers) }
+                            return super.shouldOverrideUrlLoading(view, request)
+                        }
                     }
                 }
+                WebView(
+                    state = state,
+                    modifier = Modifier.fillMaxSize(),
+                    navigator = navigator,
+                    onCreated = { webView ->
+                        webView.setDefaultSettings()
+
+                        // Debug mode (chrome://inspect/#devices)
+                        if (
+                            BuildConfig.DEBUG &&
+                                0 !=
+                                    context.applicationInfo.flags and
+                                        ApplicationInfo.FLAG_DEBUGGABLE
+                        ) {
+                            WebView.setWebContentsDebuggingEnabled(true)
+                        }
+
+                        headers["User-Agent"]?.let { webView.settings.userAgentString = it }
+                    },
+                    client = webClient,
+                )
             }
-            WebView(
-                state = state,
-                modifier = Modifier.fillMaxSize(),
-                navigator = navigator,
-                onCreated = { webView ->
-                    webView.setDefaultSettings()
-
-                    // Debug mode (chrome://inspect/#devices)
-                    if (
-                        BuildConfig.DEBUG &&
-                            0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
-                    ) {
-                        WebView.setWebContentsDebuggingEnabled(true)
-                    }
-
-                    headers["User-Agent"]?.let { webView.settings.userAgentString = it }
-                },
-                client = webClient,
-            )
-        }
-    }
+        },
+    )
 }

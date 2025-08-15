@@ -64,131 +64,133 @@ fun AboutScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     NekoScaffold(
-        title = stringResource(id = R.string.about),
         type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPressed,
+        title = stringResource(id = R.string.about),
         snackBarHost = snackbarHost(snackbarHostState),
-    ) { contentPadding ->
-        LaunchedEffect(snackbarHostState.currentSnackbarData) {
-            snackbar.collect { state ->
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    val result =
-                        snackbarHostState.showSnackbar(
-                            message = state.getFormattedMessage(context),
-                            actionLabel = state.getFormattedActionLabel(context),
-                            withDismissAction = true,
-                        )
-                    when (result) {
-                        SnackbarResult.ActionPerformed -> state.action?.invoke()
-                        SnackbarResult.Dismissed -> state.dismissAction?.invoke()
+        content = { contentPadding ->
+            LaunchedEffect(snackbarHostState.currentSnackbarData) {
+                snackbar.collect { state ->
+                    scope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        val result =
+                            snackbarHostState.showSnackbar(
+                                message = state.getFormattedMessage(context),
+                                actionLabel = state.getFormattedActionLabel(context),
+                                withDismissAction = true,
+                            )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> state.action?.invoke()
+                            SnackbarResult.Dismissed -> state.dismissAction?.invoke()
+                        }
                     }
                 }
             }
-        }
 
-        if (
-            aboutScreenState.value.shouldShowUpdateDialog &&
-                aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate
-        ) {
-            AppUpdateDialog(
-                release =
-                    (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
-                onDismissRequest = dismissDialog,
-                onConfirm = onDownloadClicked,
-            )
-        }
-
-        LazyColumn(contentPadding = contentPadding) {
-            item { LogoHeader() }
-            item { Spacer(modifier = Modifier.size(Size.large)) }
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.version),
-                    subtitle =
-                        when {
-                            BuildConfig.DEBUG -> {
-                                "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
-                            }
-                            else -> {
-                                "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
-                            }
-                        },
-                    onClick = { onVersionClicked(context) },
+            if (
+                aboutScreenState.value.shouldShowUpdateDialog &&
+                    aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate
+            ) {
+                AppUpdateDialog(
+                    release =
+                        (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
+                    onDismissRequest = dismissDialog,
+                    onConfirm = onDownloadClicked,
                 )
             }
 
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.check_for_updates),
-                    onClick = {
-                        if (!context.isOnline()) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    context.getString(R.string.no_network_connection),
-                                    withDismissAction = true,
-                                )
-                            }
-                        } else {
-                            checkForUpdate(context)
-                        }
-                    },
-                )
-            }
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.whats_new),
-                    onClick = {
-                        val url =
-                            if (BuildConfig.DEBUG) {
-                                "https://github.com/nekomangaorg/Neko/commits/master"
-                            } else {
-                                RELEASE_URL
-                            }
-                        uriHandler.openUri(url)
-                    },
-                )
-            }
+            LazyColumn(contentPadding = contentPadding) {
+                item { LogoHeader() }
+                item { Spacer(modifier = Modifier.size(Size.large)) }
+                item {
+                    PreferenceRow(
+                        title = stringResource(R.string.version),
+                        subtitle =
+                            when {
+                                BuildConfig.DEBUG -> {
+                                    "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
+                                }
 
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.open_source_licenses),
-                    onClick = onClickLicenses,
-                )
-            }
-
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.privacy_policy),
-                    onClick = {
-                        uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy")
-                    },
-                )
-            }
-            item { Spacer(modifier = Modifier.size(16.dp)) }
-
-            item {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(Size.medium),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    val modifier = Modifier.size(Size.extraLarge)
-                    LinkIcon(
-                        label = "Discord",
-                        modifier = modifier,
-                        icon = SimpleIcons.Discord,
-                        url = "https://discord.gg/4vmK42QuKG",
-                    )
-                    LinkIcon(
-                        modifier = modifier,
-                        label = "GitHub",
-                        icon = SimpleIcons.Github,
-                        url = "https://nekomanga.org/",
+                                else -> {
+                                    "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
+                                }
+                            },
+                        onClick = { onVersionClicked(context) },
                     )
                 }
+
+                item {
+                    PreferenceRow(
+                        title = stringResource(R.string.check_for_updates),
+                        onClick = {
+                            if (!context.isOnline()) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.no_network_connection),
+                                        withDismissAction = true,
+                                    )
+                                }
+                            } else {
+                                checkForUpdate(context)
+                            }
+                        },
+                    )
+                }
+                item {
+                    PreferenceRow(
+                        title = stringResource(R.string.whats_new),
+                        onClick = {
+                            val url =
+                                if (BuildConfig.DEBUG) {
+                                    "https://github.com/nekomangaorg/Neko/commits/master"
+                                } else {
+                                    RELEASE_URL
+                                }
+                            uriHandler.openUri(url)
+                        },
+                    )
+                }
+
+                item {
+                    PreferenceRow(
+                        title = stringResource(R.string.open_source_licenses),
+                        onClick = onClickLicenses,
+                    )
+                }
+
+                item {
+                    PreferenceRow(
+                        title = stringResource(R.string.privacy_policy),
+                        onClick = {
+                            uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy")
+                        },
+                    )
+                }
+                item { Spacer(modifier = Modifier.size(16.dp)) }
+
+                item {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        val modifier = Modifier.size(Size.extraLarge)
+                        LinkIcon(
+                            label = "Discord",
+                            modifier = modifier,
+                            icon = SimpleIcons.Discord,
+                            url = "https://discord.gg/4vmK42QuKG",
+                        )
+                        LinkIcon(
+                            modifier = modifier,
+                            label = "GitHub",
+                            icon = SimpleIcons.Github,
+                            url = "https://nekomanga.org/",
+                        )
+                    }
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable

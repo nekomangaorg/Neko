@@ -13,9 +13,10 @@ internal fun PreferenceScaffold(
 ) {
     NekoScaffold(
         type = NekoScaffoldType.Title,
-        title = title,
         onNavigationIconClicked = onNavigationIconClicked,
-    ) { contentPadding ->
-        PreferenceScreen(contentPadding = contentPadding, items = itemsProvider())
-    }
+        title = title,
+        content = { contentPadding ->
+            PreferenceScreen(contentPadding = contentPadding, items = itemsProvider())
+        },
+    )
 }

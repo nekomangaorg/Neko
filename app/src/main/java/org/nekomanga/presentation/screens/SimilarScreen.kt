@@ -88,9 +88,9 @@ fun SimilarScreen(
         },
     ) {
         NekoScaffold(
-            title = stringResource(id = R.string.similar),
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
+            title = stringResource(id = R.string.similar),
             actions = {
                 AppBarActions(
                     actions =
@@ -102,35 +102,37 @@ fun SimilarScreen(
                         )
                 )
             },
-        ) { incomingPaddingValues ->
-            PullRefresh(
-                refreshing = similarScreenState.value.isRefreshing,
-                onRefresh = onRefresh,
-                indicatorOffset = (incomingPaddingValues.calculateTopPadding() + Size.huge),
-            ) {
-                val haptic = LocalHapticFeedback.current
+            content = { incomingPaddingValues ->
+                PullRefresh(
+                    refreshing = similarScreenState.value.isRefreshing,
+                    onRefresh = onRefresh,
+                    indicatorOffset = (incomingPaddingValues.calculateTopPadding() + Size.huge),
+                ) {
+                    val haptic = LocalHapticFeedback.current
 
-                SimilarContent(
-                    similarScreenState = similarScreenState,
-                    paddingValues = incomingPaddingValues,
-                    refreshing = onRefresh,
-                    mangaClick = mangaClick,
-                    mangaLongClick = { displayManga: DisplayManga ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (
-                            !displayManga.inLibrary && similarScreenState.value.promptForCategories
-                        ) {
-                            scope.launch {
-                                longClickedMangaId = displayManga.mangaId
-                                sheetState.show()
+                    SimilarContent(
+                        similarScreenState = similarScreenState,
+                        paddingValues = incomingPaddingValues,
+                        refreshing = onRefresh,
+                        mangaClick = mangaClick,
+                        mangaLongClick = { displayManga: DisplayManga ->
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (
+                                !displayManga.inLibrary &&
+                                    similarScreenState.value.promptForCategories
+                            ) {
+                                scope.launch {
+                                    longClickedMangaId = displayManga.mangaId
+                                    sheetState.show()
+                                }
+                            } else {
+                                toggleFavorite(displayManga.mangaId, emptyList())
                             }
-                        } else {
-                            toggleFavorite(displayManga.mangaId, emptyList())
-                        }
-                    },
-                )
-            }
-        }
+                        },
+                    )
+                }
+            },
+        )
     }
 }
 
