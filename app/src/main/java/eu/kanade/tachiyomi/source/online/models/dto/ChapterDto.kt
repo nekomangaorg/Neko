@@ -47,8 +47,17 @@ data class GroupListDto(
 
 @Serializable data class GroupAttributesDto(val name: String, val description: String?)
 
-@Serializable data class UploaderDto(val result: String, val data: UserDto)
+@Serializable
+data class UserListDto(
+    val limit: Int,
+    val offset: Int,
+    val total: Int,
+    val result: String,
+    val data: List<UserDto>,
+)
 
-@Serializable data class UserDto(val attributes: UserAttributesDto)
+@Serializable data class UserResultDto(val result: String, val data: UserDto)
+
+@Serializable data class UserDto(val id: String, val attributes: UserAttributesDto)
 
 @Serializable data class UserAttributesDto(val username: String)

@@ -52,10 +52,13 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val list = split(" [.] ")
 
         val blockedScanlators = preferenceHelper.blockedScanlators().get()
+        val blockedUploaders = preferenceHelper.blockedUploaders().get()
 
-        val chapterScanlatorList =
-            list.filterNot { scanlators ->
-                ChapterUtil.filterByGroup(scanlators, false, blockedScanlators)
+        val chapterList =
+            list.filterNot {
+                val (scanlator, uploader) = it.split(" [;] ")
+                scanlator in blockedScanlators ||
+                    (scanlator.contains("No Group") && uploader in blockedUploaders)
             }
 
         return when (manga.filtered_scanlators == null) {
