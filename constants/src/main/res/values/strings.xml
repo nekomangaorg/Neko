@@ -600,7 +600,7 @@
     <string name="ignore_cutout_areas">Ignore cutout areas</string>
     <string name="cutout_behavior_only_applies">Cutout area behavior only applies in portrait mode with certain scale types</string>
     <string name="page_layout">Page layout</string>
-    <string name="automatic_can_still_switch">While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
+    <string name="automatic_can_still_switch">This feature is still in Beta. While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
     <string name="automatic_orientation">Automatic (based on orientation)</string>
     <string name="actions">Actions</string>
     <string name="show_on_long_press">Show on long press</string>

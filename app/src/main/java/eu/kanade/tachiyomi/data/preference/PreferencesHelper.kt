@@ -130,8 +130,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
-    fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
-
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
     fun removeAfterMarkedAsRead() =

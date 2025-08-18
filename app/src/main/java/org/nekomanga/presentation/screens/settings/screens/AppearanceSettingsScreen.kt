@@ -165,10 +165,6 @@ internal class AppearanceSettingsScreen(
                     stringResource(R.string.force_portrait_details_description),
                 ),
                 SearchTerm(stringResource(R.string.details_page)),
-                SearchTerm(
-                    stringResource(R.string.force_portrait_details),
-                    stringResource(R.string.force_portrait_details_description),
-                ),
                 SearchTerm(stringResource(R.string.theme_buttons_based_on_cover)),
                 SearchTerm(stringResource(R.string.hide_button_text)),
                 SearchTerm(stringResource(R.string.extra_large_backdrop)),

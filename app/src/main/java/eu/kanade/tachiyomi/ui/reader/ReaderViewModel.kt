@@ -827,7 +827,7 @@ class ReaderViewModel(
             try {
                 var directory = storageManager.getPagesDirectory()
 
-                if (preferences.folderPerManga().get() && directory != null) {
+                if (readerPreferences.folderPerManga().get() && directory != null) {
                     directory =
                         directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
                 }
@@ -862,7 +862,7 @@ class ReaderViewModel(
             try {
                 var directory = storageManager.getPagesDirectory()!!
 
-                if (preferences.folderPerManga().get()) {
+                if (readerPreferences.folderPerManga().get()) {
                     directory =
                         directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
                 }

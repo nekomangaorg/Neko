@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.MergeScreenState
@@ -109,7 +108,7 @@ internal class MergeSettingsScreen(
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(stringResource(R.string.komga)),
-                SearchTerm(stringResource(R.string.suwayomi))
+                SearchTerm(stringResource(R.string.suwayomi)),
             )
         }
     }

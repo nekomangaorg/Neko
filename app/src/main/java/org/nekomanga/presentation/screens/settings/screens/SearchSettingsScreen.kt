@@ -187,6 +187,10 @@ private fun searchTerms() =
             settingScreenType = SettingsScreenType.MergeSource,
             contents = MergeSettingsScreen.getSearchTerms(),
         ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Reader,
+            contents = ReaderSettingsScreen.getSearchTerms(),
+        ),
     )
 
 private data class SettingsData(

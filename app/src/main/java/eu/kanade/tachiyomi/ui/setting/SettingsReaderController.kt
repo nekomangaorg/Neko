@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.os.Build
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
@@ -475,7 +474,7 @@ class SettingsReaderController : AbstractSettingsController() {
                     defaultValue = true
                 }
                 switchPreference {
-                    key = Keys.folderPerManga
+                    key = readerPreferences.folderPerManga().key()
                     titleRes = R.string.save_pages_separately
                     summaryRes = R.string.create_folders_by_manga_title
                     defaultValue = false

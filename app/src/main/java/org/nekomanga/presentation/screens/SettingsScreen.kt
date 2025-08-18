@@ -38,6 +38,7 @@ import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MergeSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.ReaderSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
 
 @Composable
@@ -175,9 +176,10 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                 }
                 entry<Screens.Settings.Reader> {
                     val vm: ReaderSettingsViewModel = viewModel()
-                    MergeSettingsScreen(
-                        onNavigationIconClick = { reset(backStack) },
-                    )
+                    ReaderSettingsScreen(
+                            readerPreferences = vm.readerPreferences,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
                         .Content()
                 }
             },
