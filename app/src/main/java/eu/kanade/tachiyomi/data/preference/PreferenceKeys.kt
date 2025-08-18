@@ -27,13 +27,9 @@ object PreferenceKeys {
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
 
-    const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
-
     const val removeAfterReadSlots = "remove_after_read_slots"
 
     const val deleteRemovedChapters = "delete_removed_chapters"
-
-    const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
     const val dateFormat = "app_date_format"
     const val showDLsInRecents = "show_dls_in_recents"
@@ -56,8 +52,6 @@ object PreferenceKeys {
     const val sideNavMode = "side_nav_mode"
 
     const val shouldAutoUpdate = "should_auto_update"
-
-    const val saveChaptersAsCBZ = "save_chapter_as_cbz"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

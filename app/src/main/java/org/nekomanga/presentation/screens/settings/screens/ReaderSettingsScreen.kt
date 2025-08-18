@@ -523,7 +523,10 @@ internal class ReaderSettingsScreen(
                 SearchTerm(stringResource(R.string.volume_keys)),
                 SearchTerm(stringResource(R.string.invert_volume_keys)),
                 SearchTerm(stringResource(R.string.show_on_long_press)),
-                SearchTerm(stringResource(R.string.save_pages_separately), stringResource(R.string.create_folders_by_manga_title)),
+                SearchTerm(
+                    stringResource(R.string.save_pages_separately),
+                    stringResource(R.string.create_folders_by_manga_title),
+                ),
             )
         }
     }

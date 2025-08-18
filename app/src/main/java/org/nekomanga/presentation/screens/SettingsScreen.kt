@@ -22,6 +22,7 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.DownloadSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.LibrarySettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
@@ -34,6 +35,7 @@ import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.DownloadSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
@@ -178,6 +180,18 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     val vm: ReaderSettingsViewModel = viewModel()
                     ReaderSettingsScreen(
                             readerPreferences = vm.readerPreferences,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Downloads> {
+                    val vm: DownloadSettingsViewModel = viewModel()
+
+                    DownloadSettingsScreen(
+                            preferences = vm.preferences,
+                            readerPreferences = vm.readerPreferences,
+                            allCategories = vm.allCategories.collectAsState().value,
                             onNavigationIconClick = { reset(backStack) },
                         )
                         .Content()

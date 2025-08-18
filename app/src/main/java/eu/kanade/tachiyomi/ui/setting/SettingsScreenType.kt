@@ -4,6 +4,7 @@ enum class SettingsScreenType {
     Advanced,
     Appearance,
     DataAndStorage,
+    Downloads,
     General,
     Library,
     MangaDex,

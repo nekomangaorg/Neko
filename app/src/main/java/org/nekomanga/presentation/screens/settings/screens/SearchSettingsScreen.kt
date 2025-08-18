@@ -81,6 +81,7 @@ fun SettingsSearchScreen(
                     SettingsScreenType.Advanced -> Screens.Settings.Advanced
                     SettingsScreenType.Appearance -> Screens.Settings.Appearance
                     SettingsScreenType.DataAndStorage -> Screens.Settings.DataStorage
+                    SettingsScreenType.Downloads -> Screens.Settings.Downloads
                     SettingsScreenType.General -> Screens.Settings.General
                     SettingsScreenType.Library -> Screens.Settings.Library
                     SettingsScreenType.MangaDex -> Screens.Settings.MangaDex
@@ -190,6 +191,10 @@ private fun searchTerms() =
         SettingsData(
             settingScreenType = SettingsScreenType.Reader,
             contents = ReaderSettingsScreen.getSearchTerms(),
+        ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Downloads,
+            contents = DownloadSettingsScreen.getSearchTerms(),
         ),
     )
 

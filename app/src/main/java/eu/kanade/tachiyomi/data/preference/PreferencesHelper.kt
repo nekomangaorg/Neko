@@ -128,12 +128,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun dateFormatPreference() = this.preferenceStore.getString(Keys.dateFormat, "")
 
-    fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
+    fun downloadOnlyOverWifi() =
+        this.preferenceStore.getBoolean("pref_download_only_over_wifi_key", true)
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
     fun removeAfterMarkedAsRead() =
-        this.preferenceStore.getBoolean(Keys.removeAfterMarkedAsRead, false)
+        this.preferenceStore.getBoolean("pref_remove_after_marked_as_read_key", false)
 
     fun saveChaptersAsCBZ() = this.preferenceStore.getBoolean("save_chapter_as_cbz", true)
 

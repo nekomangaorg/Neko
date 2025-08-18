@@ -18,12 +18,12 @@ class SettingsDownloadController : AbstractSettingsController() {
             titleRes = R.string.downloads
 
             switchPreference {
-                key = Keys.downloadOnlyOverWifi
+                key = "pref_download_only_over_wifi_key"
                 titleRes = R.string.only_download_over_wifi
                 defaultValue = true
             }
             switchPreference {
-                key = Keys.saveChaptersAsCBZ
+                key = "save_chapter_as_cbz"
                 titleRes = R.string.save_chapters_as_cbz
                 defaultValue = true
             }
@@ -37,7 +37,7 @@ class SettingsDownloadController : AbstractSettingsController() {
                 titleRes = R.string.remove_after_read
 
                 switchPreference {
-                    key = Keys.removeAfterMarkedAsRead
+                    key = "pref_remove_after_marked_as_read_key"
                     titleRes = R.string.remove_when_marked_as_read
                     defaultValue = false
                 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.LibrarySort
@@ -30,6 +31,8 @@ import uy.kohesive.injekt.injectLazy
 class LibrarySettingsViewModel : ViewModel() {
 
     val libraryPreferences by injectLazy<LibraryPreferences>()
+
+    val preferences by injectLazy<PreferencesHelper>()
 
     val db by injectLazy<DatabaseHelper>()
 
