@@ -29,6 +29,7 @@ import org.nekomanga.presentation.screens.settings.widgets.MultiSelectListPrefer
 import org.nekomanga.presentation.screens.settings.widgets.SitePreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.SwitchPreferenceWidget
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
+import org.nekomanga.presentation.screens.settings.widgets.TrackingPreferenceWidget
 import org.nekomanga.presentation.theme.Size
 
 val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
@@ -60,6 +61,17 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
     val scope = rememberCoroutineScope()
     StatusWrapper(item = item, highlightKey = highlightKey) {
         when (item) {
+            is Preference.PreferenceItem.BasicSwitchPreference -> {
+                SwitchPreferenceWidget(
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    icon = item.icon,
+                    checked = item.checked,
+                    onCheckedChanged = { newValue ->
+                        scope.launch { item.onValueChanged(newValue) }
+                    },
+                )
+            }
             is Preference.PreferenceItem.SwitchPreference -> {
                 val value by item.pref.collectAsState()
                 SwitchPreferenceWidget(
@@ -153,15 +165,13 @@ internal fun PreferenceItem(item: Preference.PreferenceItem<*>, highlightKey: St
                 )*/
             }
             is Preference.PreferenceItem.TrackerPreference -> {
-                /*  val isLoggedIn by
-                    item.tracker.let { tracker ->
-                        tracker.isLoggedInFlow.collectAsState(tracker.isLoggedIn)
-                    }
                 TrackingPreferenceWidget(
                     tracker = item.tracker,
-                    checked = isLoggedIn,
-                    onClick = { if (isLoggedIn) item.logout() else item.login() },
-                )*/
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    loggedIn = item.isLoggedIn,
+                    onClick = { if (item.isLoggedIn) item.logout() else item.login() },
+                )
             }
             is Preference.PreferenceItem.SitePreference -> {
                 SitePreferenceWidget(

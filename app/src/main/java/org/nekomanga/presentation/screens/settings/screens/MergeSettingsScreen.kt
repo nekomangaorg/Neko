@@ -70,6 +70,7 @@ internal class MergeSettingsScreen(
         if (showLoginDialog) {
             LoginDialog(
                 sourceName,
+                showUrlField = true,
                 requiresCredential = mergeState.requiresCredentials,
                 onDismiss = { showLoginDialog = false },
                 onConfirm = login,

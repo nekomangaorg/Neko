@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.ReaderSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -42,6 +43,7 @@ import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScree
 import org.nekomanga.presentation.screens.settings.screens.MergeSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.ReaderSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
+import org.nekomanga.presentation.screens.settings.screens.TrackingSettingsScreen
 
 @Composable
 fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) {
@@ -192,6 +194,21 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             preferences = vm.preferences,
                             readerPreferences = vm.readerPreferences,
                             allCategories = vm.allCategories.collectAsState().value,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Tracking> {
+                    val vm: TrackingSettingsViewModel = viewModel()
+
+                    TrackingSettingsScreen(
+                            preferences = vm.preferences,
+                            trackingScreenState = vm.state.collectAsState().value,
+                            updateAutoAddTrack = vm::updateAutoAddTrack,
+                            loginEvent = vm.loginEvent,
+                            login = vm::login,
+                            logout = vm::logout,
                             onNavigationIconClick = { reset(backStack) },
                         )
                         .Content()

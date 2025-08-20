@@ -38,9 +38,11 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LoginDialog(
     sourceName: String,
-    requiresCredential: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (String, String, String) -> Unit,
+    requiresCredential: Boolean = true,
+    showUrlField: Boolean = false,
+    usernameLabel: String = stringResource(R.string.username),
     loginEvent: SharedFlow<MergeLoginEvent>,
 ) {
 
@@ -56,6 +58,9 @@ fun LoginDialog(
     var showLoading by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        if (!showUrlField) {
+            url = TextFieldValue("dummy")
+        }
         loginEvent.collect { event ->
             when (event) {
                 is MergeLoginEvent.Success -> onDismiss()
@@ -78,7 +83,7 @@ fun LoginDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 OutlinedTextField(
-                    label = { Text(stringResource(R.string.username)) },
+                    label = { Text(usernameLabel) },
                     value = username,
                     onValueChange = { username = it },
                     singleLine = true,
@@ -107,13 +112,15 @@ fun LoginDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
-                    label = { Text(stringResource(R.string.url)) },
-                    value = url,
-                    onValueChange = { url = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (showUrlField) {
+                    OutlinedTextField(
+                        label = { Text(stringResource(R.string.url)) },
+                        value = url,
+                        onValueChange = { url = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 if (showLoginError) {
                     Text(
                         stringResource(R.string.could_not_sign_in),

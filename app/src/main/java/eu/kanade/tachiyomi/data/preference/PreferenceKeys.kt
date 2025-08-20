@@ -19,10 +19,6 @@ object PreferenceKeys {
 
     const val showNavigationOverlayNewUserWebtoon = "reader_navigation_overlay_new_user_webtoon"
 
-    const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
-
-    const val trackMarkedAsRead = "track_marked_as_read"
-
     const val catalogueAsList = "pref_display_catalogue_as_list"
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
@@ -64,8 +60,6 @@ object PreferenceKeys {
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
 
     fun sourceUrl(sourceId: Long) = "pref_source_url_$sourceId"
-
-    const val autoTrackContentRating = "auto_track_content_rating_options"
 
     const val autoAddTracker = "auto_add_tracker"
 

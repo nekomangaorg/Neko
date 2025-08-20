@@ -94,7 +94,7 @@ fun SettingsMainScreen(
         }
         item {
             IconItem(
-                labelText = UiText.StringResource(R.string.tracked),
+                labelText = UiText.StringResource(R.string.tracking),
                 icon = Icons.Outlined.Autorenew,
                 onClick = onTrackingClick,
             )

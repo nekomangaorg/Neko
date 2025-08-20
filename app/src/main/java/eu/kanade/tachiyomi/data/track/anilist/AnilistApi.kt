@@ -195,7 +195,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return OAuth(token, "Bearer", System.currentTimeMillis() + yearToMS, yearToMS)
     }
 
-    suspend fun getCurrentUser(): Pair<Int, String> {
+    suspend fun getCurrentUser(): Pair<String, String> {
         return withIOContext {
             val payload = buildJsonObject { put("query", currentUserQuery()) }
             with(json) {
@@ -207,7 +207,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                         val data = it["data"]!!.jsonObject
                         val viewer = data["Viewer"]!!.jsonObject
                         Pair(
-                            viewer["id"]!!.jsonPrimitive.int,
+                            viewer["name"]!!.jsonPrimitive.content,
                             viewer["mediaListOptions"]!!
                                 .jsonObject["scoreFormat"]!!
                                 .jsonPrimitive
@@ -443,7 +443,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             """
             |query User {
                 |Viewer {
-                    |id
+                    |name
                     |mediaListOptions {
                         |scoreFormat
                     |}

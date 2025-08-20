@@ -32,17 +32,17 @@ class SettingsTrackingController :
             titleRes = R.string.tracking
 
             switchPreference {
-                key = Keys.autoUpdateTrack
+                key = "pref_auto_update_manga_sync_key"
                 titleRes = R.string.update_tracking_after_reading
                 defaultValue = true
             }
             switchPreference {
-                key = Keys.trackMarkedAsRead
+                key = "track_marked_as_read"
                 titleRes = R.string.update_tracking_marked_read
                 defaultValue = false
             }
             multiSelectListPreferenceMat(activity) {
-                key = eu.kanade.tachiyomi.data.preference.PreferenceKeys.autoTrackContentRating
+                key = "auto_track_content_rating_options"
                 titleRes = R.string.auto_track_content_rating_title
                 summaryRes = R.string.auto_track_content_rating_summary
                 entriesRes =

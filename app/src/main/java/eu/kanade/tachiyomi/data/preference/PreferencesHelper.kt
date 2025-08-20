@@ -75,9 +75,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun showNavigationOverlayNewUserWebtoon() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
-    fun autoUpdateTrack() = this.preferenceStore.getBoolean(Keys.autoUpdateTrack, true)
+    fun autoUpdateTrack() = this.preferenceStore.getBoolean("pref_auto_update_manga_sync_key", true)
 
-    fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
+    fun trackMarkedAsRead() = this.preferenceStore.getBoolean("track_marked_as_read", false)
 
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
@@ -193,7 +193,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun autoTrackContentRatingSelections() =
         this.preferenceStore.getStringSet(
-            Keys.autoTrackContentRating,
+            "auto_track_content_rating_options",
             setOf(
                 MdConstants.ContentRating.safe,
                 MdConstants.ContentRating.suggestive,

@@ -39,6 +39,16 @@ sealed class Preference {
             override val onValueChanged: suspend (newValue: Boolean) -> Boolean = { true },
         ) : PreferenceItem<Boolean>()
 
+        /** [SwitchPreference] but with no connection to a [PreferenceData] */
+        data class BasicSwitchPreference(
+            override val title: String,
+            val checked: Boolean,
+            override val subtitle: String? = null,
+            override val icon: ImageVector? = null,
+            override val enabled: Boolean = true,
+            override val onValueChanged: suspend (newValue: Boolean) -> Boolean = { true },
+        ) : PreferenceItem<Boolean>()
+
         /** A [PreferenceItem] that provides a slider to select an integer number. */
         data class SliderPreference(
             val value: Int,
@@ -136,11 +146,12 @@ sealed class Preference {
         data class TrackerPreference(
             val tracker: TrackServiceItem,
             override val title: String,
+            override val subtitle: String?,
+            val isLoggedIn: Boolean,
             val login: () -> Unit,
             val logout: () -> Unit,
         ) : PreferenceItem<String>() {
             override val enabled: Boolean = true
-            override val subtitle: String? = null
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true }
         }

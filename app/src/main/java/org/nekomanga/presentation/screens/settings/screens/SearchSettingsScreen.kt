@@ -196,6 +196,10 @@ private fun searchTerms() =
             settingScreenType = SettingsScreenType.Downloads,
             contents = DownloadSettingsScreen.getSearchTerms(),
         ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Tracking,
+            contents = TrackingSettingsScreen.getSearchTerms(),
+        ),
     )
 
 private data class SettingsData(
