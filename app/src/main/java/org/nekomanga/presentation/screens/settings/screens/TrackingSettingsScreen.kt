@@ -281,6 +281,11 @@ internal class TrackingSettingsScreen(
                     stringResource(R.string.refresh_tracking_metadata),
                     stringResource(R.string.updates_tracking_details),
                 ),
+                SearchTerm(stringResource(R.string.kitsu)),
+                SearchTerm(stringResource(R.string.anilist)),
+                SearchTerm(stringResource(R.string.myanimelist)),
+                SearchTerm(stringResource(R.string.manga_updates)),
+                SearchTerm(stringResource(R.string.auto_track)),
             )
         }
     }
