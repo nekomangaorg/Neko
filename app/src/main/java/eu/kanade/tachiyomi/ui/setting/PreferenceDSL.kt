@@ -231,18 +231,20 @@ fun SwitchPreferenceCompat.requireAuthentication(
                     callback =
                         object : AuthenticatorUtil.AuthenticationCallback() {
                             override fun onAuthenticationSucceeded(
-                                result: BiometricPrompt.AuthenticationResult
+                                activity: FragmentActivity?,
+                                result: BiometricPrompt.AuthenticationResult,
                             ) {
-                                super.onAuthenticationSucceeded(result)
+                                super.onAuthenticationSucceeded(activity, result)
                                 isChecked = newValue
                             }
 
                             override fun onAuthenticationError(
+                                activity: FragmentActivity?,
                                 errorCode: Int,
                                 errString: CharSequence,
                             ) {
-                                super.onAuthenticationError(errorCode, errString)
-                                activity.toast(errString.toString())
+                                super.onAuthenticationError(activity, errorCode, errString)
+                                activity?.toast(errString.toString())
                             }
                         },
                 )

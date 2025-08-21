@@ -42,6 +42,7 @@ import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.MergeSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.ReaderSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.SecuritySettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
 import org.nekomanga.presentation.screens.settings.screens.TrackingSettingsScreen
 
@@ -209,6 +210,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             loginEvent = vm.loginEvent,
                             login = vm::login,
                             logout = vm::logout,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Security> {
+                    val vm: SettingsViewModel = viewModel()
+
+                    SecuritySettingsScreen(
+                            securityPreferences = vm.securityPreferences,
                             onNavigationIconClick = { reset(backStack) },
                         )
                         .Content()

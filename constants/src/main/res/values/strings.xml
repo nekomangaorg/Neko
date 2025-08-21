@@ -53,6 +53,8 @@
     <string name="unlock">Unlock</string>
     <string name="lock_with_biometrics">Require unlock</string>
     <string name="lock_when_idle">Lock when idle</string>
+    <string name="confirm_lock_change">Authenticate to confirm change</string>
+
 
     <!-- Chapters -->
     <string name="chapters">Chapters</string>

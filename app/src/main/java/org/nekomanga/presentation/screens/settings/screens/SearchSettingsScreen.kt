@@ -200,6 +200,10 @@ private fun searchTerms() =
             settingScreenType = SettingsScreenType.Tracking,
             contents = TrackingSettingsScreen.getSearchTerms(),
         ),
+        SettingsData(
+            settingScreenType = SettingsScreenType.Security,
+            contents = SecuritySettingsScreen.getSearchTerms(),
+        ),
     )
 
 private data class SettingsData(

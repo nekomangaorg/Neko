@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -23,6 +24,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -322,6 +324,17 @@ fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
 fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+}
+
+fun Context.getActivity(): AppCompatActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is AppCompatActivity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return null
 }
 
 suspend fun CoroutineWorker.tryToSetForeground() {
