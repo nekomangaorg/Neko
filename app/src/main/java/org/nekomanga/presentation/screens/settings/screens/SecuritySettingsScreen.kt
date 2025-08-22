@@ -89,7 +89,7 @@ internal class SecuritySettingsScreen(
                 SearchTerm(stringResource(R.string.lock_when_idle)),
                 SearchTerm(stringResource(R.string.hide_notification_content)),
                 SearchTerm(stringResource(R.string.secure_screen)),
-                )
+            )
         }
     }
 }

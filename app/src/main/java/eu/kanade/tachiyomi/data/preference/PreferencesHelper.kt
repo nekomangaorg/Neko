@@ -99,6 +99,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         this.preferenceStore.getString(Keys.sourceUrl(source.id)).set(url)
     }
 
+    fun sendCrashReports() = this.preferenceStore.getBoolean("acra.enabled", true)
+
     fun trackUsername(sync: TrackService) =
         this.preferenceStore.getString(Keys.trackUsername(sync.id))
 

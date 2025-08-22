@@ -928,6 +928,7 @@
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
     <string name="saves_error_logs">Saves error logs to a file for sharing with the developers.  If verbose logging is enabled, extra debug logs will be included.</string>
+    <string name="dont_kill_my_app">Don\'t kill my app!</string>
     <string name="about_dont_kill_my_app">Some manufacturers have additional app restrictions that kill background services. This website has more info on how to fix it.</string>
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
@@ -976,6 +977,7 @@
     <string name="clean_read_manga_not_in_library">Clean manga not in library</string>
     <string name="starting_cleanup">Starting cleanup</string>
     <string name="no_folders_to_cleanup">No folders to cleanup</string>
+    <string name="background_activity">Background activity</string>
     <string name="disable_battery_optimization">Disable battery optimization</string>
     <string name="disable_if_issues_with_updating">Disable this if you are experiencing issues
         with updating or restoring your library</string>
@@ -1247,6 +1249,7 @@
     <string name="unblock_group">Unblock groups</string>
     <string name="no_blocked_groups">No blocked groups</string>
     <string name="delete_saved_filters">Delete saved filters</string>
+    <string name="saved_filters_deleted">Saved filters deleted</string>
     <string name="delete_saved_filters_description">Use this if you get a parse exception clicking the search button in browse, or want to delete all your saved search filters.</string>
 
     <string name="menu">menu</string>
@@ -1440,12 +1443,17 @@
         For more information and to view the source code:\n%s
     </string>
 
-    <!-- Cache Source -->
-    <string name="cache">Cache Source</string>
-    <string name="cache_loading_progress_start">Downloading data file…</string>
-    <string name="cache_loading_percent">Updating cache manga (%1$d / %2$d updated)</string>
-    <string name="cache_loading_complete">Updating cache manga complete!</string>
-    <string name="cache_loading_complete_error">Error trying to load/process cache manga</string>
+    <!-- Cache -->
+    <string name="cache">Cache</string>
+    <string name="parent_cache_folder">Clear parent cache folder</string>
+    <string name="chapter_disk_cache">Clear chapter disk cache</string>
+    <string name="cover_cache">Clear cover cache</string>
+    <string name="custom_cover_cache">Clear custom cover cache</string>
+    <string name="online_cover_cache">Clear online cover cache</string>
+    <string name="image_cache">Clear image cache</string>
+    <string name="network_cache">Clear network cache</string>
+    <string name="temp_file_cache">Clear temp files</string>
+<string name="cache_cleared">Cache cleared</string>
 
     <!-- Reader Settings -->
     <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
@@ -1504,8 +1512,10 @@
     <string name="verbose_logging">Verbose Logging</string>
     <string name="verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
 
-    <string name="force_download_cache_refresh">Refresh the download cache</string>
-    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use this if  you copied downloads outside of this app using your file explorer.</string>
+    <string name="reindex_downloads">Reindex downloads</string>
+    <string name="reindex_downloads_summary">Force app toe recheck for downloaded chapters.</string>
+    <string name="reindex_downloads_invalidate">Reindexing downloads</string>
+    <string name="reindex_downloads_complete">Reindexing complete</string>
 
 
     <!-- Login dialog -->

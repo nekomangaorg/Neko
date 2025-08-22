@@ -10,14 +10,18 @@ import org.nekomanga.R
 @Composable
 fun ConfirmationDialog(
     title: String,
-    body: String,
+    body: String? = null,
     confirmButton: String = stringResource(R.string.ok),
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
         title = { Text(text = title) },
-        text = { Text(text = body) },
+        text = {
+            if (body != null) {
+                Text(text = body)
+            } else null
+        },
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(

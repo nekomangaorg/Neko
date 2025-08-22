@@ -6,6 +6,7 @@ import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.saveTo
+import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import java.io.IOException
 import kotlin.math.pow
@@ -16,11 +17,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Response
 import okio.buffer
 import okio.sink
+import org.nekomanga.R
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -121,22 +124,6 @@ class ChapterCache(private val context: Context) {
     }
 
     /**
-     * Get page list from cache.
-     *
-     * @param chapter the chapter.
-     * @return the list of pages.
-     */
-    fun getPageListFromCache(chapter: Chapter): List<Page> {
-        // Get the key for the chapter.
-        TimberKt.d { "get image pageList from cache" }
-
-        val key = DiskUtil.hashKeyForDisk(getKey(chapter))
-
-        // Convert JSON string to list of objects. Throws an exception if snapshot is null
-        return diskCache.get(key).use { json.decodeFromString(it.getString(0)) }
-    }
-
-    /**
      * Add page list to disk cache.
      *
      * @param chapter the chapter.
@@ -200,6 +187,22 @@ class ChapterCache(private val context: Context) {
         TimberKt.d { "get image file $imageUrl" }
         val imageName = DiskUtil.hashKeyForDisk(imageUrl) + ".0"
         return File(diskCache.directory, imageName)
+    }
+
+    /** Clear chapter cache */
+    suspend fun deleteCache() {
+        var deletedSize = 0L
+        val files = cacheDir.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        while (files.hasNext()) {
+            val file = files.next()
+            deletedSize += file.length()
+            file.delete()
+        }
+        withContext(Dispatchers.Main) {
+            context.toast(
+                context.getString(R.string.deleted_, Formatter.formatFileSize(context, deletedSize))
+            )
+        }
     }
 
     /**

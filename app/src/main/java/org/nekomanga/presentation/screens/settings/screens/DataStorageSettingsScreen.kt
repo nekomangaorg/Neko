@@ -5,42 +5,41 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.setting.CacheData
+import eu.kanade.tachiyomi.ui.setting.CacheType
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.domain.storage.StoragePreferences
-import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.CreateBackupDialog
 import org.nekomanga.presentation.components.dialog.RestoreDialog
 import org.nekomanga.presentation.components.storage.storageLocationPicker
 import org.nekomanga.presentation.components.storage.storageLocationText
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
-import org.nekomanga.presentation.theme.Size
 
 internal class DataStorageSettingsScreen(
     val storagePreferences: StoragePreferences,
     val cacheData: CacheData,
+    val clearCache: (CacheType) -> Unit,
+    val toastEvent: SharedFlow<UiText.StringResource>,
     onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
@@ -49,6 +48,9 @@ internal class DataStorageSettingsScreen(
     @Composable
     override fun getPreferences(): ImmutableList<Preference> {
         val context = LocalContext.current
+
+        LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event.resourceId) } }
+
         val pickStorageLocation = storageLocationPicker(storagePreferences.baseStorageDirectory())
 
         return persistentListOf(
@@ -58,7 +60,7 @@ internal class DataStorageSettingsScreen(
                 onClick = { pickStorageLocation.launch(null) },
             ),
             backupAndRestoreGroup(context),
-            dataManagementGroup(context, cacheData),
+            cacheGroup(context, cacheData, clearCache),
         )
     }
 
@@ -163,85 +165,55 @@ internal class DataStorageSettingsScreen(
     }
 
     @Composable
-    private fun dataManagementGroup(
+    private fun cacheGroup(
         context: Context,
         cacheData: CacheData,
+        clearCache: (CacheType) -> Unit,
     ): Preference.PreferenceGroup {
         return Preference.PreferenceGroup(
-            title = stringResource(R.string.data_management),
+            title = stringResource(R.string.cache),
             preferenceItems =
                 persistentListOf(
-                    Preference.PreferenceItem.CustomPreference(
-                        title = stringResource(R.string.total_cache_usage),
-                        content = {
-                            Column(modifier = Modifier.padding(start = Size.medium)) {
-                                Text(
-                                    text = "Parent cache folder: ${cacheData.parentCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Chapter disk cache: ${cacheData.chapterDiskCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Cover cache: ${cacheData.coverCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Custom cover cache: ${cacheData.customCoverCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Online cover cache: ${cacheData.onlineCoverCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Image cache: ${cacheData.imageCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Network cache: ${cacheData.networkCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                                Text(
-                                    text = "Temp files: ${cacheData.tempFileCacheSize}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        MaterialTheme.colorScheme.onSurface.copy(
-                                            alpha = NekoColors.mediumAlphaLowContrast
-                                        ),
-                                )
-                            }
-                        },
-                    )
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.parent_cache_folder),
+                        subtitle = stringResource(R.string.used_, cacheData.parentCacheSize),
+                        onClick = { clearCache(CacheType.Parent) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.chapter_disk_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.chapterDiskCacheSize),
+                        onClick = { clearCache(CacheType.ChapterDisk) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.cover_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.coverCacheSize),
+                        onClick = { clearCache(CacheType.Cover) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.custom_cover_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.customCoverCacheSize),
+                        onClick = { clearCache(CacheType.CustomCover) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.online_cover_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.onlineCoverCacheSize),
+                        onClick = { clearCache(CacheType.OnlineCover) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.image_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.imageCacheSize),
+                        onClick = { clearCache(CacheType.Image) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.network_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.networkCacheSize),
+                        onClick = { clearCache(CacheType.Network) },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.temp_file_cache),
+                        subtitle = stringResource(R.string.used_, cacheData.tempFileCacheSize),
+                        onClick = { clearCache(CacheType.Temp) },
+                    ),
                 ),
         )
     }

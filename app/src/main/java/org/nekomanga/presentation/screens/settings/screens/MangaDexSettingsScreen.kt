@@ -24,6 +24,7 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.dialog.LogoutDialog
 import org.nekomanga.presentation.components.dialog.PullMangaDexFollowDialog
 import org.nekomanga.presentation.screens.settings.Preference
@@ -34,6 +35,7 @@ internal class MangaDexSettingsScreen(
     onNavigationIconClick: () -> Unit,
     val mangaDexPreferences: MangaDexPreferences,
     val mangaDexSettingsState: MangaDexSettingsViewModel.MangaDexSettingsState,
+    val deleteSavedFilters: () -> Unit,
     val logout: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
@@ -44,7 +46,7 @@ internal class MangaDexSettingsScreen(
         val context = LocalContext.current
 
         return persistentListOf(
-                generalGroup(context, mangaDexPreferences),
+                generalGroup(context, deleteSavedFilters, mangaDexPreferences),
                 chapterGroup(context, mangaDexPreferences, mangaDexSettingsState.blockedGroups),
                 imageGroup(mangaDexPreferences),
                 libraryGroup(context, mangaDexPreferences),
@@ -55,8 +57,24 @@ internal class MangaDexSettingsScreen(
     @Composable
     fun generalGroup(
         context: Context,
+        deleteSavedFilters: () -> Unit,
         mangaDexPreferences: MangaDexPreferences,
     ): Preference.PreferenceGroup {
+
+        var showDeleteFilterDialog by rememberSaveable { mutableStateOf(false) }
+
+        if (showDeleteFilterDialog) {
+            ConfirmationDialog(
+                title = stringResource(R.string.delete_saved_filters),
+                confirmButton = stringResource(R.string.delete),
+                onConfirm = {
+                    deleteSavedFilters()
+                    context.toast(R.string.saved_filters_deleted)
+                },
+                onDismiss = { showDeleteFilterDialog = false },
+            )
+        }
+
         var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
 
         if (showLogoutDialog) {
@@ -110,6 +128,11 @@ internal class MangaDexSettingsScreen(
                                     stringResource(R.string.content_rating_pornographic),
                             ),
                         pref = mangaDexPreferences.visibleContentRatings(),
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.delete_saved_filters),
+                        subtitle = stringResource(R.string.delete_saved_filters_description),
+                        onClick = { showDeleteFilterDialog = true },
                     ),
                 ),
         )

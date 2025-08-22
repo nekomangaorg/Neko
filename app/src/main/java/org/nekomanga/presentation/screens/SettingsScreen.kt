@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,6 +20,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
+import eu.kanade.tachiyomi.ui.setting.AdvancedSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.DownloadSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.LibrarySettingsViewModel
@@ -34,6 +34,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
+import org.nekomanga.presentation.screens.settings.screens.AdvancedSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DownloadSettingsScreen
@@ -153,6 +154,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                     DataStorageSettingsScreen(
                             onNavigationIconClick = { reset(backStack) },
                             storagePreferences = vm.storagePreferences,
+                            clearCache = vm::clearParentCache,
+                            toastEvent = vm.toastEvent,
                             cacheData = vm.cacheData.collectAsState().value,
                         )
                         .Content()
@@ -163,6 +166,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             onNavigationIconClick = { reset(backStack) },
                             mangaDexPreferences = vm.mangaDexPreference,
                             mangaDexSettingsState = vm.state.collectAsState().value,
+                            deleteSavedFilters = vm::deleteAllBrowseFilters,
                             logout = vm::logout,
                         )
                         .Content()
@@ -219,6 +223,19 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
 
                     SecuritySettingsScreen(
                             securityPreferences = vm.securityPreferences,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Advanced> {
+                    val vm: AdvancedSettingsViewModel = viewModel()
+
+                    AdvancedSettingsScreen(
+                            preferences = vm.preferences,
+                            networkPreferences = vm.networkPreference,
+                            toastEvent = vm.toastEvent,
+                            clearNetworkCookies = vm::clearNetworkCookies,
+                            reindexDownloads = vm::reindexDownloads,
                             onNavigationIconClick = { reset(backStack) },
                         )
                         .Content()

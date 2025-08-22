@@ -160,6 +160,18 @@ object DiskUtil {
         return Formatter.formatFileSize(context, bytes)
     }
 
+    fun cleanupDiskSpace(directory: File, context: Context, isTmpFileLookup: Boolean = false) {
+        if (isTmpFileLookup) {
+            File(context.cacheDir, "").listFiles()!!.asSequence().forEach {
+                if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
+                    it.delete()
+                }
+            }
+        } else {
+            directory.listFiles()!!.asSequence().forEach { it.delete() }
+        }
+    }
+
     fun observeDiskSpace(
         directory: File,
         context: Context,

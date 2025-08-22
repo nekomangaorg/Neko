@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.getValue
 import kotlinx.collections.immutable.ImmutableSet
@@ -23,6 +25,8 @@ class MangaDexSettingsViewModel : ViewModel() {
     val mangaDexLoginHelper by injectLazy<MangaDexLoginHelper>()
 
     val mangaDexPreference by injectLazy<MangaDexPreferences>()
+
+    val db: DatabaseHelper by injectLazy()
 
     private val _state = MutableStateFlow(MangaDexSettingsState())
 
@@ -55,6 +59,10 @@ class MangaDexSettingsViewModel : ViewModel() {
                 }
                 .stateIn(viewModelScope)
         }
+    }
+
+    fun deleteAllBrowseFilters() {
+        viewModelScope.launchIO { db.deleteAllBrowseFilters().executeOnIO() }
     }
 
     fun logout() {

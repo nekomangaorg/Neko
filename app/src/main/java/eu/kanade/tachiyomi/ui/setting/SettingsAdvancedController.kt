@@ -195,8 +195,8 @@ class SettingsAdvancedController : AbstractSettingsController() {
                 }
 
                 preference {
-                    titleRes = R.string.force_download_cache_refresh
-                    summaryRes = R.string.force_download_cache_refresh_summary
+                    titleRes = R.string.reindex_downloads
+                    summaryRes = R.string.reindex_downloads_summary
                     onClick {
                         (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
                             downloadManager.refreshCache()

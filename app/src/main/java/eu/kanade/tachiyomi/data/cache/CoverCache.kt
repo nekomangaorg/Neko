@@ -112,6 +112,23 @@ class CoverCache(val context: Context) {
         lastClean = System.currentTimeMillis()
     }
 
+    /** Clear out custom covers */
+    suspend fun deleteAllCustomCachedCovers() {
+        val directory = customCoverCacheDir
+        var deletedSize = 0L
+        val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        while (files.hasNext()) {
+            val file = files.next()
+            deletedSize += file.length()
+            file.delete()
+        }
+        withContext(Dispatchers.Main) {
+            context.toast(
+                context.getString(R.string.deleted_, Formatter.formatFileSize(context, deletedSize))
+            )
+        }
+    }
+
     /** Clear out online covers until its under a certain size */
     suspend fun deleteCachedCovers() {
         withIOContext {
