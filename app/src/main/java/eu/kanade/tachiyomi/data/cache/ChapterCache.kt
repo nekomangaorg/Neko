@@ -192,7 +192,7 @@ class ChapterCache(private val context: Context) {
     /** Clear chapter cache */
     suspend fun deleteCache() {
         var deletedSize = 0L
-        val files = cacheDir.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        val files = cacheDir.listFiles()?.iterator() ?: return
         while (files.hasNext()) {
             val file = files.next()
             deletedSize += file.length()

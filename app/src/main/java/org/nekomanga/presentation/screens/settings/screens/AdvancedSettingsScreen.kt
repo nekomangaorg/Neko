@@ -10,6 +10,10 @@ import android.webkit.WebStorage
 import android.webkit.WebView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +34,8 @@ import org.nekomanga.constants.Constants.DONT_KILL_MY_APP_URL
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dialog.CleanDownloadsDialog
+import org.nekomanga.presentation.components.dialog.ClearDatabaseDialog
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 import tachiyomi.core.network.PREF_DOH_360
@@ -49,9 +55,11 @@ import tachiyomi.core.util.system.setDefaultSettings
 internal class AdvancedSettingsScreen(
     val preferences: PreferencesHelper,
     val networkPreferences: NetworkPreferences,
-    val toastEvent: SharedFlow<UiText.StringResource>,
+    val toastEvent: SharedFlow<UiText>,
     val clearNetworkCookies: () -> Unit,
+    val cleanupDownloads: (Boolean, Boolean) -> Unit,
     val reindexDownloads: () -> Unit,
+    val clearDatabase: (Boolean) -> Unit,
     onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
@@ -62,7 +70,7 @@ internal class AdvancedSettingsScreen(
     override fun getPreferences(): ImmutableList<Preference> {
         val context = LocalContext.current
 
-        LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event.resourceId) } }
+        LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event) } }
 
         return persistentListOf(
             Preference.PreferenceItem.SwitchPreference(
@@ -94,7 +102,7 @@ internal class AdvancedSettingsScreen(
             ),
             backgroundActivityGroup(context),
             networkGroup(context, clearNetworkCookies),
-            dataGroup(context, reindexDownloads),
+            dataGroup(cleanupDownloads, clearDatabase, reindexDownloads),
         )
     }
 
@@ -197,7 +205,29 @@ internal class AdvancedSettingsScreen(
     }
 
     @Composable
-    fun dataGroup(context: Context, reindexDownloads: () -> Unit): Preference.PreferenceGroup {
+    fun dataGroup(
+        cleanupDownloads: (Boolean, Boolean) -> Unit,
+        clearDatabase: (Boolean) -> Unit,
+        reindexDownloads: () -> Unit,
+    ): Preference.PreferenceGroup {
+
+        var showCleanDownloadsDialog by rememberSaveable { mutableStateOf(false) }
+        var showClearDatabaseDialog by rememberSaveable { mutableStateOf(false) }
+
+        if (showCleanDownloadsDialog) {
+            CleanDownloadsDialog(
+                onDismiss = { showCleanDownloadsDialog = false },
+                onConfirm = cleanupDownloads,
+            )
+        }
+
+        if (showClearDatabaseDialog) {
+            ClearDatabaseDialog(
+                onDismiss = { showClearDatabaseDialog = false },
+                onConfirm = clearDatabase,
+            )
+        }
+
         return Preference.PreferenceGroup(
             title = stringResource(R.string.data_management),
             preferenceItems =
@@ -206,7 +236,17 @@ internal class AdvancedSettingsScreen(
                         title = stringResource(R.string.reindex_downloads),
                         subtitle = stringResource(R.string.reindex_downloads_summary),
                         onClick = reindexDownloads,
-                    )
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.clean_up_downloaded_chapters),
+                        subtitle = stringResource(R.string.delete_unused_chapters),
+                        onClick = { showCleanDownloadsDialog = true },
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.clear_database),
+                        subtitle = stringResource(R.string.clear_database_summary),
+                        onClick = { showClearDatabaseDialog = true },
+                    ),
                 ),
         )
     }

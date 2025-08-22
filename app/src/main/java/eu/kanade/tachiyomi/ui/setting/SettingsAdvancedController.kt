@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.image.coil.CoilDiskCache
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -486,11 +485,9 @@ class SettingsAdvancedController : AbstractSettingsController() {
         activity?.toast(R.string.starting_cleanup)
         job =
             GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-                val sourceManager: SourceManager = Injekt.get()
                 val downloadProvider = DownloadProvider(activity!!)
                 var foldersCleared = 0
                 val mangaList = db.getMangaList().executeAsBlocking()
-                val source = sourceManager.mangaDex
                 val mangaFolders = downloadManager.getMangaFolders()
 
                 for (mangaFolder in mangaFolders) {

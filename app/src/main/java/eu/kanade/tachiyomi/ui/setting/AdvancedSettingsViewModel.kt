@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -25,13 +26,74 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     val downloadManager: DownloadManager by injectLazy()
 
-    private val _toastEvent = MutableSharedFlow<UiText.StringResource>()
+    val db: DatabaseHelper by injectLazy()
+
+    private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
 
     fun clearNetworkCookies() {
         viewModelScope.launchUI {
             networkHelper.cookieManager.removeAll()
             _toastEvent.emit(UiText.StringResource(R.string.cookies_cleared))
+        }
+    }
+
+    fun cleanupDownloads(removeRead: Boolean, removeNonFavorite: Boolean) {
+        viewModelScope.launchNonCancellable {
+            launchIO {
+                _toastEvent.emit(UiText.StringResource(R.string.starting_cleanup))
+                var foldersCleared = 0
+                val mangaMap =
+                    db.getMangaList().executeAsBlocking().associateBy {
+                        downloadManager.getMangaDirName(it)
+                    }
+                val mangaFolders = downloadManager.getMangaFolders()
+
+                for (mangaFolder in mangaFolders) {
+                    val manga = mangaMap[mangaFolder.name]
+                    if (manga == null) {
+                        // download is orphaned delete it if remove non favorited is enabled
+                        if (removeNonFavorite) {
+                            foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
+                            mangaFolder.delete()
+                        }
+                        continue
+                    }
+                    val chapterList = db.getChapters(manga).executeAsBlocking()
+                    foldersCleared +=
+                        downloadManager.cleanupChapters(
+                            chapterList,
+                            manga,
+                            removeRead,
+                            removeNonFavorite,
+                        )
+                }
+                val stringResource =
+                    if (foldersCleared == 0) {
+                        UiText.StringResource(R.string.no_folders_to_cleanup)
+                    } else {
+                        UiText.PluralsResource(
+                            R.plurals.cleanup_done,
+                            foldersCleared,
+                            foldersCleared,
+                        )
+                    }
+
+                _toastEvent.emit(stringResource)
+            }
+        }
+    }
+
+    fun clearDatabase(keepRead: Boolean) {
+        viewModelScope.launchUI {
+            if (keepRead) {
+                db.deleteAllMangaNotInLibraryAndNotRead().executeAsBlocking()
+            } else {
+                db.deleteAllMangaNotInLibrary().executeAsBlocking()
+            }
+            db.deleteHistoryNoLastRead().executeAsBlocking()
+
+            _toastEvent.emit(UiText.StringResource(R.string.clear_database_completed))
         }
     }
 

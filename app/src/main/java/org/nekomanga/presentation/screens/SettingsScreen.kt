@@ -235,6 +235,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             networkPreferences = vm.networkPreference,
                             toastEvent = vm.toastEvent,
                             clearNetworkCookies = vm::clearNetworkCookies,
+                            clearDatabase = vm::clearDatabase,
+                            cleanupDownloads = vm::cleanupDownloads,
                             reindexDownloads = vm::reindexDownloads,
                             onNavigationIconClick = { reset(backStack) },
                         )
