@@ -451,7 +451,7 @@ internal class ReaderSettingsScreen(
     @Composable
     private fun actionsGroup(): Preference.PreferenceGroup {
         return Preference.PreferenceGroup(
-            title = stringResource(R.string.navigation),
+            title = stringResource(R.string.actions),
             preferenceItems =
                 persistentListOf(
                     Preference.PreferenceItem.SwitchPreference(
@@ -471,61 +471,182 @@ internal class ReaderSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.default_reading_mode)),
-                SearchTerm(stringResource(R.string.double_tap_anim_speed)),
                 SearchTerm(
-                    stringResource(R.string.true_32bit_color),
-                    stringResource(R.string.reduces_banding_impacts_performance),
+                    title = stringResource(R.string.default_reading_mode),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.page_preload_amount),
-                    stringResource(R.string.amount_of_pages_to_preload),
+                    title = stringResource(R.string.double_tap_anim_speed),
+                    group = stringResource(R.string.general),
                 ),
-                SearchTerm(stringResource(R.string.display_buttons_bottom_reader)),
-                SearchTerm(stringResource(R.string.default_orientation)),
-                SearchTerm(stringResource(R.string.background_color)),
-                SearchTerm(stringResource(R.string.fullscreen)),
-                SearchTerm(stringResource(R.string.keep_screen_on)),
-                SearchTerm(stringResource(R.string.show_page_number)),
-                SearchTerm(stringResource(R.string.skip_read_chapters)),
-                SearchTerm(stringResource(R.string.skip_filtered_chapters)),
-                SearchTerm(stringResource(R.string.skip_duplicate_chapters)),
                 SearchTerm(
-                    stringResource(R.string.always_show_chapter_transition),
-                    stringResource(R.string.if_disabled_transition_will_skip),
+                    title = stringResource(R.string.true_32bit_color),
+                    subtitle = stringResource(R.string.reduces_banding_impacts_performance),
+                    group = stringResource(R.string.general),
                 ),
-                SearchTerm(stringResource(R.string.tap_zones)),
-                SearchTerm(stringResource(R.string.invert_tapping)),
-                SearchTerm(stringResource(R.string.scale_type)),
                 SearchTerm(
-                    stringResource(R.string.cutout_area_behavior),
-                    stringResource(R.string.cutout_behavior_only_applies),
+                    title = stringResource(R.string.page_preload_amount),
+                    subtitle = stringResource(R.string.amount_of_pages_to_preload),
+                    group = stringResource(R.string.general),
                 ),
-                SearchTerm(stringResource(R.string.zoom_double_page_spreads)),
-                SearchTerm(stringResource(R.string.zoom_start_position)),
-                SearchTerm(stringResource(R.string.crop_borders)),
-                SearchTerm(stringResource(R.string.animate_page_transitions)),
-                SearchTerm(stringResource(R.string.navigate_pan)),
-                SearchTerm(stringResource(R.string.page_layout)),
-                SearchTerm(stringResource(R.string.split_double_pages_portrait)),
-                SearchTerm(stringResource(R.string.invert_double_pages)),
-                SearchTerm(stringResource(R.string.double_page_rotate)),
-                SearchTerm(stringResource(R.string.double_page_rotate_reverse)),
-                SearchTerm(stringResource(R.string.tap_zones)),
-                SearchTerm(stringResource(R.string.invert_tapping)),
-                SearchTerm(stringResource(R.string.pref_hide_threshold)),
-                SearchTerm(stringResource(R.string.crop_borders)),
-                SearchTerm(stringResource(R.string.pref_webtoon_side_padding)),
-                SearchTerm(stringResource(R.string.page_layout)),
-                SearchTerm(stringResource(R.string.invert_double_pages)),
-                SearchTerm(stringResource(R.string.animate_page_transitions_webtoon)),
-                SearchTerm(stringResource(R.string.enable_zoom_out)),
-                SearchTerm(stringResource(R.string.volume_keys)),
-                SearchTerm(stringResource(R.string.invert_volume_keys)),
-                SearchTerm(stringResource(R.string.show_on_long_press)),
                 SearchTerm(
-                    stringResource(R.string.save_pages_separately),
-                    stringResource(R.string.create_folders_by_manga_title),
+                    title = stringResource(R.string.display_buttons_bottom_reader),
+                    group = stringResource(R.string.general),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.default_orientation),
+                    group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.background_color),
+                    group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.fullscreen),
+                    group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.keep_screen_on),
+                    group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.show_page_number),
+                    group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.skip_read_chapters),
+                    group = stringResource(R.string.reading),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.skip_filtered_chapters),
+                    group = stringResource(R.string.reading),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.skip_duplicate_chapters),
+                    group = stringResource(R.string.reading),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.always_show_chapter_transition),
+                    subtitle = stringResource(R.string.if_disabled_transition_will_skip),
+                    group = stringResource(R.string.reading),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.tap_zones),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.invert_tapping),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.scale_type),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.cutout_area_behavior),
+                    subtitle = stringResource(R.string.cutout_behavior_only_applies),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.zoom_double_page_spreads),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.zoom_start_position),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.crop_borders),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.animate_page_transitions),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.navigate_pan),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.page_layout),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.split_double_pages_portrait),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.invert_double_pages),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.double_page_rotate),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.double_page_rotate_reverse),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.double_page_gap),
+                    group = stringResource(R.string.paged),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.tap_zones),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.invert_tapping),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.pref_hide_threshold),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.crop_borders),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.pref_webtoon_side_padding),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.page_layout),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.invert_double_pages),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.animate_page_transitions_webtoon),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.enable_zoom_out),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.volume_keys),
+                    group = stringResource(R.string.navigation),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.invert_volume_keys),
+                    group = stringResource(R.string.navigation),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.show_on_long_press),
+                    group = stringResource(R.string.actions),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.save_pages_separately),
+                    subtitle = stringResource(R.string.create_folders_by_manga_title),
+                    group = stringResource(R.string.actions),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.save_pages_separately),
+                    subtitle = stringResource(R.string.create_folders_by_manga_title),
                 ),
             )
         }

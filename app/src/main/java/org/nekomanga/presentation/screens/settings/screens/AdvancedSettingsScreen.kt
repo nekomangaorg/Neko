@@ -254,7 +254,57 @@ internal class AdvancedSettingsScreen(
     companion object : SearchTermProvider {
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
-            return persistentListOf(SearchTerm(stringResource(R.string.lock_with_biometrics)))
+            return persistentListOf(
+                SearchTerm(
+                    title = stringResource(R.string.send_crash_report),
+                    subtitle = stringResource(R.string.helps_fix_bugs),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.dump_crash_logs),
+                    subtitle = stringResource(R.string.saves_error_logs),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.verbose_logging),
+                    subtitle = stringResource(R.string.verbose_logging_summary),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.disable_battery_optimization),
+                    subtitle = stringResource(R.string.disable_if_issues_with_updating),
+                    group = stringResource(R.string.background_activity),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.dont_kill_my_app),
+                    subtitle = stringResource(R.string.about_dont_kill_my_app),
+                    group = stringResource(R.string.background_activity),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.clear_cookies),
+                    group = stringResource(R.string.network),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.pref_clear_webview_data),
+                    group = stringResource(R.string.network),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.doh),
+                    group = stringResource(R.string.network),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.reindex_downloads),
+                    subtitle = stringResource(R.string.reindex_downloads_summary),
+                    group = stringResource(R.string.data_management),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.clean_up_downloaded_chapters),
+                    subtitle = stringResource(R.string.delete_unused_chapters),
+                    group = stringResource(R.string.data_management),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.clear_database),
+                    subtitle = stringResource(R.string.clear_database_summary),
+                    group = stringResource(R.string.data_management),
+                ),
+            )
         }
     }
 }

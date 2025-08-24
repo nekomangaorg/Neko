@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ChromeReaderMode
 import androidx.compose.material.icons.outlined.Autorenew
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.Download
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.icons.MergeIcon
@@ -34,6 +36,7 @@ fun SettingsMainScreen(
     onTrackingClick: () -> Unit,
     onSecurityClick: () -> Unit,
     onAdvancedClick: () -> Unit,
+    onDebugClick: () -> Unit,
 ) {
     LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
         item {
@@ -112,6 +115,15 @@ fun SettingsMainScreen(
                 icon = Icons.Outlined.Code,
                 onClick = onAdvancedClick,
             )
+        }
+        if (BuildConfig.DEBUG) {
+            item {
+                IconItem(
+                    labelText = UiText.StringResource(R.string.debug),
+                    icon = Icons.Outlined.BugReport,
+                    onClick = onDebugClick,
+                )
+            }
         }
     }
 }

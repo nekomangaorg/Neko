@@ -189,17 +189,33 @@ internal class DownloadSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.only_download_over_wifi)),
-                SearchTerm(stringResource(R.string.save_chapters_as_cbz)),
-                SearchTerm(stringResource(R.string.split_tall_images_summary)),
-                SearchTerm(stringResource(R.string.remove_when_marked_as_read)),
-                SearchTerm(stringResource(R.string.remove_after_read)),
-                SearchTerm(stringResource(R.string.download_new_chapters)),
-                SearchTerm(stringResource(R.string.categories)),
-                SearchTerm(stringResource(R.string.auto_download_while_reading)),
+                SearchTerm(title = stringResource(R.string.only_download_over_wifi)),
+                SearchTerm(title = stringResource(R.string.save_chapters_as_cbz)),
+                SearchTerm(title = stringResource(R.string.split_tall_images_summary)),
                 SearchTerm(
-                    stringResource(R.string.delete_removed_chapters),
-                    stringResource(R.string.delete_downloaded_if_removed_online),
+                    title = stringResource(R.string.remove_when_marked_as_read),
+                    group = stringResource(R.string.remove_after_read),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.remove_after_read),
+                    group = stringResource(R.string.remove_after_read),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.download_new_chapters),
+                    group = stringResource(R.string.download_new_chapters),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.categories),
+                    group = stringResource(R.string.download_new_chapters),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.auto_download_while_reading),
+                    group = stringResource(R.string.download_ahead),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.delete_removed_chapters),
+                    subtitle = stringResource(R.string.delete_downloaded_if_removed_online),
+                    group = stringResource(R.string.automatic_removal),
                 ),
             )
         }

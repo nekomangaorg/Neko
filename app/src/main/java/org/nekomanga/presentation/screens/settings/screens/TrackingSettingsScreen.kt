@@ -271,21 +271,21 @@ internal class TrackingSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.update_tracking_after_reading)),
-                SearchTerm(stringResource(R.string.update_tracking_marked_read)),
+                SearchTerm(title = stringResource(R.string.update_tracking_after_reading)),
+                SearchTerm(title = stringResource(R.string.update_tracking_marked_read)),
                 SearchTerm(
-                    stringResource(R.string.auto_track_content_rating_title),
-                    stringResource(R.string.auto_track_content_rating_summary),
+                    title = stringResource(R.string.auto_track_content_rating_title),
+                    subtitle = stringResource(R.string.auto_track_content_rating_summary),
                 ),
                 SearchTerm(
-                    stringResource(R.string.refresh_tracking_metadata),
-                    stringResource(R.string.updates_tracking_details),
+                    title = stringResource(R.string.refresh_tracking_metadata),
+                    subtitle = stringResource(R.string.updates_tracking_details),
                 ),
-                SearchTerm(stringResource(R.string.kitsu)),
-                SearchTerm(stringResource(R.string.anilist)),
-                SearchTerm(stringResource(R.string.myanimelist)),
-                SearchTerm(stringResource(R.string.manga_updates)),
-                SearchTerm(stringResource(R.string.auto_track)),
+                SearchTerm(title = stringResource(R.string.auto_track)),
+                SearchTerm(title = stringResource(R.string.anilist)),
+                SearchTerm(title = stringResource(R.string.kitsu)),
+                SearchTerm(title = stringResource(R.string.myanimelist)),
+                SearchTerm(title = stringResource(R.string.manga_updates)),
             )
         }
     }

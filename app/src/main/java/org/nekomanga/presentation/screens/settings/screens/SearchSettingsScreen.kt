@@ -124,6 +124,7 @@ private fun SearchResult(
                             // Map result data
                             .map { searchTerm ->
                                 SearchResultItem(
+                                    settingsStringTitle = settingsData.settingsStringTitle,
                                     settingScreenType = settingsData.settingScreenType,
                                     searchTerm = searchTerm,
                                     highlightKey = searchKey,
@@ -151,6 +152,7 @@ private fun SearchResult(
                         TextPreferenceWidget(
                             title = item.searchTerm.title,
                             subtitle = item.searchTerm.subtitle,
+                            footer = item.footer(),
                             onPreferenceClick = { onItemClick(item) },
                         )
                     }
@@ -166,57 +168,74 @@ private fun searchTerms() =
     persistentListOf(
         SettingsData(
             settingScreenType = SettingsScreenType.General,
+            settingsStringTitle = stringResource(R.string.general),
             contents = GeneralSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Appearance,
+            settingsStringTitle = stringResource(R.string.appearance),
             contents = AppearanceSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Library,
+            settingsStringTitle = stringResource(R.string.library),
             contents = LibrarySettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.DataAndStorage,
+            settingsStringTitle = stringResource(R.string.data_storage),
             contents = DataStorageSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.MangaDex,
+            settingsStringTitle = stringResource(R.string.site_specific_settings),
             contents = MangaDexSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.MergeSource,
+            settingsStringTitle = stringResource(R.string.merge_source_settings),
             contents = MergeSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Reader,
+            settingsStringTitle = stringResource(R.string.reader_settings),
             contents = ReaderSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Downloads,
+            settingsStringTitle = stringResource(R.string.downloads),
             contents = DownloadSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Tracking,
+            settingsStringTitle = stringResource(R.string.tracking),
             contents = TrackingSettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Security,
+            settingsStringTitle = stringResource(R.string.security),
             contents = SecuritySettingsScreen.getSearchTerms(),
         ),
         SettingsData(
             settingScreenType = SettingsScreenType.Advanced,
+            settingsStringTitle = stringResource(R.string.advanced),
             contents = AdvancedSettingsScreen.getSearchTerms(),
         ),
     )
 
 private data class SettingsData(
     val settingScreenType: SettingsScreenType,
+    val settingsStringTitle: String,
     val contents: ImmutableList<SearchTerm>,
 )
 
 private data class SearchResultItem(
+    val settingsStringTitle: String,
     val settingScreenType: SettingsScreenType,
     val searchTerm: SearchTerm,
     val highlightKey: String,
-)
+) {
+    fun footer(): String {
+        return listOf(settingsStringTitle, searchTerm.group).mapNotNull { it }.joinToString(" → ")
+    }
+}

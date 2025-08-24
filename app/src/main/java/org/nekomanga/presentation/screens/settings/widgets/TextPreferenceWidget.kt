@@ -24,6 +24,7 @@ fun TextPreferenceWidget(
     modifier: Modifier = Modifier,
     title: String? = null,
     subtitle: String? = null,
+    footer: String? = null,
     icon: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.onSurface,
     widget: @Composable (() -> Unit)? = null,
@@ -33,16 +34,26 @@ fun TextPreferenceWidget(
         modifier = modifier,
         title = title,
         subcomponent =
-            if (!subtitle.isNullOrBlank()) {
+            if (!subtitle.isNullOrBlank() || !footer.isNullOrBlank()) {
                 {
-                    Text(
-                        text = subtitle,
-                        modifier =
-                            Modifier.padding(horizontal = Size.medium)
-                                .alpha(NekoColors.mediumAlphaLowContrast),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 10,
-                    )
+                    Column(Modifier.padding(horizontal = Size.medium)) {
+                        if (!subtitle.isNullOrBlank()) {
+                            Text(
+                                text = subtitle,
+                                modifier = Modifier.alpha(NekoColors.mediumAlphaLowContrast),
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 10,
+                            )
+                        }
+                        if (!footer.isNullOrBlank()) {
+                            Text(
+                                text = footer,
+                                modifier = Modifier.alpha(NekoColors.disabledAlphaLowContrast),
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                            )
+                        }
+                    }
                 }
             } else {
                 null

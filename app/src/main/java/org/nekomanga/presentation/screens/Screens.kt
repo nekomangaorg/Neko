@@ -14,6 +14,8 @@ object Screens {
 
         @Serializable data object Categories : NavKey
 
+        @Serializable data object Debug : NavKey
+
         @Serializable data object Library : NavKey
 
         @Serializable data object DataStorage : NavKey

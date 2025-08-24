@@ -54,40 +54,48 @@ internal class GeneralSettingsScreen(
                 enabled = showNotificationSetting,
                 onClick = manageNotificationsClicked,
             ),
-            // AppShortcuts
-            Preference.PreferenceGroup(
-                title = stringResource(R.string.app_shortcuts),
-                preferenceItems =
-                    persistentListOf(
-                        Preference.PreferenceItem.SwitchPreference(
-                            pref = preferencesHelper.showSeriesInShortcuts(),
-                            title = stringResource(R.string.show_recent_series),
-                            subtitle = stringResource(R.string.includes_recently_read_updated_added),
-                        ),
-                        Preference.PreferenceItem.SwitchPreference(
-                            pref = preferencesHelper.openChapterInShortcuts(),
-                            title = stringResource(R.string.series_opens_new_chapters),
-                            subtitle = stringResource(R.string.no_new_chapters_open_details),
-                        ),
+            appShortcutsGroup(),
+            autoUpdatesGroup(),
+        )
+    }
+
+    @Composable
+    fun appShortcutsGroup(): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.app_shortcuts),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = preferencesHelper.showSeriesInShortcuts(),
+                        title = stringResource(R.string.show_recent_series),
+                        subtitle = stringResource(R.string.includes_recently_read_updated_added),
                     ),
-            ),
-            // Auto updates
-            Preference.PreferenceGroup(
-                title = stringResource(R.string.auto_updates),
-                preferenceItems =
-                    persistentListOf(
-                        Preference.PreferenceItem.ListPreference(
-                            pref = preferencesHelper.appShouldAutoUpdate(),
-                            title = stringResource(R.string.auto_update_app),
-                            entries =
-                                persistentMapOf(
-                                    0 to stringResource(R.string.over_any_network),
-                                    1 to stringResource(R.string.over_wifi_only),
-                                    2 to stringResource(R.string.dont_auto_update),
-                                ),
-                        )
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = preferencesHelper.openChapterInShortcuts(),
+                        title = stringResource(R.string.series_opens_new_chapters),
+                        subtitle = stringResource(R.string.no_new_chapters_open_details),
                     ),
-            ),
+                ),
+        )
+    }
+
+    @Composable
+    fun autoUpdatesGroup(): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.auto_updates),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.ListPreference(
+                        pref = preferencesHelper.appShouldAutoUpdate(),
+                        title = stringResource(R.string.auto_update_app),
+                        entries =
+                            persistentMapOf(
+                                0 to stringResource(R.string.over_any_network),
+                                1 to stringResource(R.string.over_wifi_only),
+                                2 to stringResource(R.string.dont_auto_update),
+                            ),
+                    )
+                ),
         )
     }
 
@@ -95,23 +103,27 @@ internal class GeneralSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.starting_screen)),
-                SearchTerm(stringResource(R.string.date_format)),
+                SearchTerm(title = stringResource(R.string.starting_screen)),
+                SearchTerm(title = stringResource(R.string.date_format)),
                 SearchTerm(
-                    stringResource(R.string.back_to_start),
-                    stringResource(R.string.pressing_back_to_start),
+                    title = stringResource(R.string.back_to_start),
+                    subtitle = stringResource(R.string.pressing_back_to_start),
                 ),
-                SearchTerm(stringResource(R.string.manage_notifications)),
-                SearchTerm(stringResource(R.string.app_shortcuts)),
+                SearchTerm(title = stringResource(R.string.manage_notifications)),
                 SearchTerm(
-                    stringResource(R.string.show_recent_series),
-                    stringResource(R.string.includes_recently_read_updated_added),
+                    title = stringResource(R.string.show_recent_series),
+                    subtitle = stringResource(R.string.includes_recently_read_updated_added),
+                    group = stringResource(R.string.app_shortcuts),
                 ),
                 SearchTerm(
-                    stringResource(R.string.series_opens_new_chapters),
-                    stringResource(R.string.no_new_chapters_open_details),
+                    title = stringResource(R.string.series_opens_new_chapters),
+                    subtitle = stringResource(R.string.no_new_chapters_open_details),
+                    group = stringResource(R.string.app_shortcuts),
                 ),
-                SearchTerm(stringResource(R.string.auto_update_app)),
+                SearchTerm(
+                    title = stringResource(R.string.auto_update_app),
+                    group = stringResource(R.string.auto_updates),
+                ),
             )
         }
     }

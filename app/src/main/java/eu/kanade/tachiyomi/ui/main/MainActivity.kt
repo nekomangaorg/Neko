@@ -79,9 +79,7 @@ import eu.kanade.tachiyomi.ui.more.about.AboutController
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.setting.AbstractSettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
-import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -398,7 +396,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     binding.searchToolbar.menu.forEach { it.isVisible = false }
                     lifecycleScope.launchUI {
                         (controller as? BaseController<*>)?.onActionViewExpand(item)
-                        (controller as? AbstractSettingsController)?.onActionViewExpand(item)
                         reEnableBackPressedCallBack()
                     }
                     return true
@@ -411,7 +408,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     setupSearchTBMenu(binding.toolbar.menu, true)
                     lifecycleScope.launchUI {
                         (controller as? BaseController<*>)?.onActionViewCollapse(item)
-                        (controller as? AbstractSettingsController)?.onActionViewCollapse(item)
                         reEnableBackPressedCallBack()
                     }
                     return true
@@ -485,7 +481,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         val navIcon = if (router.backstackSize > 1) backDrawable else null
         binding.toolbar.navigationIcon = navIcon
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
-        (router.backstack.lastOrNull()?.controller as? AbstractSettingsController)?.setTitle()
 
         if (savedInstanceState == null && this !is SearchActivity) {
             // Reset Incognito Mode on relaunch
@@ -549,8 +544,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         get() {
             return try {
                 (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.getSearchTitle()
-                    ?: (router.backstack.lastOrNull()?.controller as? AbstractSettingsController)
-                        ?.getSearchTitle()
             } catch (_: Exception) {
                 binding.searchToolbar.title?.toString()
             }
@@ -1077,10 +1070,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     }
 
     fun showSettings() {
-        router.pushController(SettingsMainController().withFadeTransaction())
-    }
-
-    fun showSettings2() {
         router.pushController(SettingsController().withFadeTransaction())
     }
 

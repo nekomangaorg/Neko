@@ -295,35 +295,64 @@ internal class LibrarySettingsScreen(
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
-                    stringResource(R.string.enable_local_manga),
-                    stringResource(R.string.enable_local_manga_summary),
+                    title = stringResource(R.string.enable_local_manga),
+                    subtitle = stringResource(R.string.enable_local_manga_summary),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.sort_by_ignoring_articles),
-                    stringResource(R.string.when_sorting_ignore_articles),
+                    title = stringResource(R.string.sort_by_ignoring_articles),
+                    subtitle = stringResource(R.string.when_sorting_ignore_articles),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.search_suggestions),
-                    stringResource(R.string.search_tips_show_periodically),
+                    title = stringResource(R.string.search_suggestions),
+                    subtitle = stringResource(R.string.search_tips_show_periodically),
+                    group = stringResource(R.string.general),
                 ),
-                SearchTerm(stringResource(R.string.display_options_can_be)),
-                SearchTerm(stringResource(R.string.chapter_scanlator_filter_option)),
-                SearchTerm(stringResource(R.string.add_edit_categories)),
-                SearchTerm(stringResource(R.string.default_category)),
-                SearchTerm(stringResource(R.string.global_updates)),
-                SearchTerm(stringResource(R.string.library_update_device_restriction)),
-                SearchTerm(stringResource(R.string.smart_library_update_restrictions)),
-                SearchTerm(stringResource(R.string.faster_library_update)),
                 SearchTerm(
-                    stringResource(R.string.include_unavailable),
-                    stringResource(R.string.include_unavailable_summary),
+                    title = stringResource(R.string.display_options_can_be),
+                    group = stringResource(R.string.general),
                 ),
-                SearchTerm(stringResource(R.string.library_update_order)),
-                SearchTerm(stringResource(R.string.categories)),
-                SearchTerm(stringResource(R.string.categories_on_manual)),
                 SearchTerm(
-                    stringResource(R.string.auto_refresh_covers),
+                    title = stringResource(R.string.chapter_scanlator_filter_option),
+                    group = stringResource(R.string.general),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.add_edit_categories),
+                    group = stringResource(R.string.categories),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.default_category),
+                    group = stringResource(R.string.categories),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.global_updates),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.library_update_device_restriction),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.smart_library_update_restrictions),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.faster_library_update),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.library_update_order),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.categories),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.auto_refresh_covers),
                     stringResource(R.string.auto_refresh_covers_summary),
+                    group = stringResource(R.string.global_updates),
                 ),
             )
         }

@@ -108,8 +108,8 @@ internal class MergeSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.komga)),
-                SearchTerm(stringResource(R.string.suwayomi)),
+                SearchTerm(title = stringResource(R.string.komga)),
+                SearchTerm(title = stringResource(R.string.suwayomi)),
             )
         }
     }

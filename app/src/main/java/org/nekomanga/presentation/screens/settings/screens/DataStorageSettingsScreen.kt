@@ -222,17 +222,53 @@ internal class DataStorageSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.storage_location)),
+                SearchTerm(title = stringResource(R.string.storage_location)),
                 SearchTerm(
-                    stringResource(R.string.create_backup),
-                    stringResource(R.string.can_be_used_to_restore),
+                    title = stringResource(R.string.create_backup),
+                    subtitle = stringResource(R.string.can_be_used_to_restore),
+                    group = stringResource(R.string.backup_and_restore),
                 ),
                 SearchTerm(
-                    stringResource(R.string.restore_backup),
-                    stringResource(R.string.restore_from_backup_file),
+                    title = stringResource(R.string.restore_backup),
+                    subtitle = stringResource(R.string.restore_from_backup_file),
+                    group = stringResource(R.string.backup_and_restore),
                 ),
-                SearchTerm(stringResource(R.string.automatic_backups)),
-                SearchTerm(stringResource(R.string.total_cache_usage)),
+                SearchTerm(
+                    title = stringResource(R.string.automatic_backups),
+                    group = stringResource(R.string.backup_and_restore),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.parent_cache_folder),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.chapter_disk_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.cover_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.custom_cover_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.online_cover_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.image_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.network_cache),
+                    group = stringResource(R.string.cache),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.temp_file_cache),
+                    group = stringResource(R.string.cache),
+                ),
             )
         }
     }

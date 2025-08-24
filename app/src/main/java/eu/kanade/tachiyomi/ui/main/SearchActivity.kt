@@ -18,8 +18,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.setting.AbstractSettingsController
-import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
+import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.manga.MangaMappings
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.math.BigInteger
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.presentation.screens.Screens
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -56,7 +56,6 @@ class SearchActivity : MainActivity() {
             }
         }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
-        (router.backstack.lastOrNull()?.controller as? AbstractSettingsController)?.setTitle()
     }
 
     // Override finishAfterTransition since the animation gets weird when launching this from other
@@ -251,8 +250,10 @@ class SearchActivity : MainActivity() {
                 )
             }
             SHORTCUT_READER_SETTINGS -> {
+                val settingsController = SettingsController()
+                settingsController.presenter.deepLink = Screens.Settings.Reader
                 router.replaceTopController(
-                    RouterTransaction.with(SettingsReaderController())
+                    RouterTransaction.with(SettingsController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler())
                 )

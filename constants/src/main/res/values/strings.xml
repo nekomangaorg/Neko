@@ -790,6 +790,7 @@
     <string name="reader">Reader</string>
     <string name="appearance">Appearance</string>
     <string name="advanced">Advanced</string>
+    <string name="debug">Debug</string>
     <string name="about">About</string>
     <string name="help">Help</string>
     <string name="search_settings">Search settings</string>
@@ -874,7 +875,7 @@
     <string name="no_new_chapters_open_details">When there\'s no new chapters, the series\' details will open instead</string>
 
     <!-- Data and Storage -->
-    <string name="data_storage">Data and Storage</string>
+    <string name="data_storage">Data and storage</string>
     <string name="storage_location">Storage location</string>
     <string name="storage_location_info">Used for automatic backups, saved images and chapter downloads.</string>
     <string name="backup">Backup</string>

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -22,6 +23,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import eu.kanade.tachiyomi.ui.setting.AdvancedSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
+import eu.kanade.tachiyomi.ui.setting.DebugSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.DownloadSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.LibrarySettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
@@ -37,6 +39,7 @@ import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCa
 import org.nekomanga.presentation.screens.settings.screens.AdvancedSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.AppearanceSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DataStorageSettingsScreen
+import org.nekomanga.presentation.screens.settings.screens.DebugSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.DownloadSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.GeneralSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.LibrarySettingsScreen
@@ -48,11 +51,11 @@ import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
 import org.nekomanga.presentation.screens.settings.screens.TrackingSettingsScreen
 
 @Composable
-fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) {
+fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, deepLink: NavKey?) {
     val context = LocalContext.current
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
-    val backStack = rememberNavBackStack(Screens.Settings.Main)
+    val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main)
 
     NavDisplay(
         backStack = backStack,
@@ -90,6 +93,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                                 onTrackingClick = { backStack.add(Screens.Settings.Tracking) },
                                 onSecurityClick = { backStack.add(Screens.Settings.Security) },
                                 onAdvancedClick = { backStack.add(Screens.Settings.Advanced) },
+                                onDebugClick = { backStack.add(Screens.Settings.Debug) },
                             )
                         },
                     )
@@ -238,6 +242,22 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit) 
                             clearDatabase = vm::clearDatabase,
                             cleanupDownloads = vm::cleanupDownloads,
                             reindexDownloads = vm::reindexDownloads,
+                            onNavigationIconClick = { reset(backStack) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Debug> {
+                    val vm: DebugSettingsViewModel = viewModel()
+
+                    DebugSettingsScreen(
+                            toastEvent = vm.toastEvent,
+                            unfollowAllLibraryManga = vm::unfollowAllLibraryManga,
+                            removeAllMangaWithStatusOnMangaDex =
+                                vm::removeAllMangaWithStatusOnMangaDex,
+                            clearAllManga = vm::clearAllManga,
+                            clearAllTrackers = vm::clearAllTrackers,
+                            clearAllCategories = vm::clearAllCategories,
                             onNavigationIconClick = { reset(backStack) },
                         )
                         .Content()

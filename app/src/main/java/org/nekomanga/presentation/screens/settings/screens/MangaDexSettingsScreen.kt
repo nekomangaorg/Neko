@@ -114,7 +114,7 @@ internal class MangaDexSettingsScreen(
                         title = stringResource(R.string.content_rating_title),
                         subtitleProvider = { selected, all ->
                             stringResource(R.string.content_rating_summary) +
-                                selected.joinToString(",")
+                                selected.joinToString()
                         },
                         entries =
                             persistentMapOf(
@@ -280,7 +280,6 @@ internal class MangaDexSettingsScreen(
                         title = stringResource(R.string.push_favorites_to_mangadex),
                         subtitle = stringResource(R.string.push_favorites_to_mangadex_summary),
                         onClick = {
-                            // pushFollowsFromLibraryToMangaDex = true
                             StatusSyncJob.startNow(context, StatusSyncJob.entireLibraryToDex)
                         },
                     ),
@@ -294,43 +293,66 @@ internal class MangaDexSettingsScreen(
         @Composable
         override fun getSearchTerms(): ImmutableList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(stringResource(R.string.sign_out)),
-                SearchTerm(stringResource(R.string.sign_in)),
-                SearchTerm(stringResource(R.string.show_content_rating_filter_in_search)),
                 SearchTerm(
-                    stringResource(R.string.content_rating_title),
-                    stringResource(R.string.content_rating_summary),
+                    title = stringResource(R.string.show_content_rating_filter_in_search),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.include_unavailable),
-                    stringResource(R.string.include_unavailable_summary),
-                ),
-                SearchTerm(stringResource(R.string.show_languages)),
-                SearchTerm(
-                    stringResource(R.string.currently_blocked_groups),
-                    stringResource(R.string.currently_blocked_groups_description),
+                    title = stringResource(R.string.content_rating_title),
+                    subtitle = stringResource(R.string.content_rating_summary),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.reading_sync),
-                    stringResource(R.string.reading_sync_summary),
+                    title = stringResource(R.string.delete_saved_filters),
+                    subtitle = stringResource(R.string.delete_saved_filters_description),
+                    group = stringResource(R.string.general),
                 ),
                 SearchTerm(
-                    stringResource(R.string.data_saver),
-                    stringResource(R.string.data_saver_summary),
+                    title = stringResource(R.string.include_unavailable),
+                    subtitle = stringResource(R.string.include_unavailable_summary),
+                    group = stringResource(R.string.chapter_group),
                 ),
                 SearchTerm(
-                    stringResource(R.string.use_port_443_title),
-                    stringResource(R.string.use_port_443_summary),
-                ),
-                SearchTerm(stringResource(R.string.cover_quality)),
-                SearchTerm(stringResource(R.string.auto_add_to_mangadex_library)),
-                SearchTerm(
-                    stringResource(R.string.pull_follows_to_library),
-                    stringResource(R.string.pull_follows_to_library_summary),
+                    title = stringResource(R.string.show_languages),
+                    group = stringResource(R.string.chapter_group),
                 ),
                 SearchTerm(
-                    stringResource(R.string.push_favorites_to_mangadex),
-                    stringResource(R.string.push_favorites_to_mangadex_summary),
+                    title = stringResource(R.string.currently_blocked_groups),
+                    subtitle = stringResource(R.string.currently_blocked_groups_description),
+                    group = stringResource(R.string.chapter_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.reading_sync),
+                    subtitle = stringResource(R.string.reading_sync_summary),
+                    group = stringResource(R.string.chapter_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.data_saver),
+                    subtitle = stringResource(R.string.data_saver_summary),
+                    group = stringResource(R.string.image_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.use_port_443_title),
+                    subtitle = stringResource(R.string.use_port_443_summary),
+                    group = stringResource(R.string.image_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.cover_quality),
+                    group = stringResource(R.string.image_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.auto_add_to_mangadex_library),
+                    group = stringResource(R.string.library),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.pull_follows_to_library),
+                    subtitle = stringResource(R.string.pull_follows_to_library_summary),
+                    group = stringResource(R.string.library),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.push_favorites_to_mangadex),
+                    subtitle = stringResource(R.string.push_favorites_to_mangadex_summary),
+                    group = stringResource(R.string.library),
                 ),
             )
         }

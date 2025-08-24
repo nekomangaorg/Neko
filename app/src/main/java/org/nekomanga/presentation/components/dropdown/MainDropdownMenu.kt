@@ -41,7 +41,6 @@ fun MainDropdownMenu(
     incognitoModeEnabled: Boolean,
     incognitoModeClick: () -> Unit,
     settingsClick: () -> Unit,
-    settings2Click: () -> Unit,
     statsClick: () -> Unit,
     aboutClick: () -> Unit,
     helpClick: () -> Unit,
@@ -87,12 +86,6 @@ fun MainDropdownMenu(
                     title = UiText.StringResource(R.string.settings),
                     icon = UiIcon.Icon(Icons.Outlined.Settings),
                     onClick = settingsClick,
-                    onDismiss = onDismiss,
-                )
-                Row(
-                    title = UiText.StringResource(R.string.amoled_black),
-                    icon = UiIcon.Icon(Icons.Outlined.Settings),
-                    onClick = settings2Click,
                     onDismiss = onDismiss,
                 )
                 Row(
