@@ -54,7 +54,7 @@ iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconicsV
 iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconicsVersion" }
 
 
-jsoup = "org.jsoup:jsoup:1.21.1"
+jsoup = "org.jsoup:jsoup:1.21.2"
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
@@ -120,7 +120,7 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.14.5"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.9.1"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.1"
 viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]

@@ -91,7 +91,7 @@ class FeedRepository(
                                     .mapNotNull { it.chapters.firstOrNull() }
                                     .maxOfOrNull { it.chapter.dateUpload }
                             val chapter =
-                                ChapterSort(manga).getNextUnreadChapter(chapters)
+                                ChapterSort(manga).getNextUnreadChapter(chapters)?.toSimpleChapter()
                                     ?: return@mapNotNull null
 
                             FeedManga(
@@ -99,8 +99,7 @@ class FeedRepository(
                                 mangaTitle = manga.title,
                                 date = recentUploadDate ?: 0L,
                                 artwork = manga.toDisplayManga().currentArtwork,
-                                chapters =
-                                    persistentListOf(chapter.toSimpleChapter()!!.toChapterItem()),
+                                chapters = persistentListOf(getChapterItem(manga, chapter)),
                             )
                         }
                 }
