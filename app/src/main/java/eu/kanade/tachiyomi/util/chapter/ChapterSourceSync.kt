@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -15,6 +14,7 @@ import java.util.TreeSet
 import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.nameWithoutExtension
@@ -40,7 +40,7 @@ fun syncChaptersWithSource(
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
-    val preferences: PreferencesHelper = Injekt.get()
+    val mangaDexPreferences: MangaDexPreferences = Injekt.get()
 
     // Chapters from db.
     var dbChapters = db.getChapters(manga).executeAsBlocking()
@@ -224,7 +224,7 @@ fun syncChaptersWithSource(
             }
         }
     }
-    if (preferences.readingSync().get()) {
+    if (mangaDexPreferences.readingSync().get()) {
         runBlocking { Injekt.get<StatusHandler>().markMergedChaptersStatus(toSync, true) }
     }
 

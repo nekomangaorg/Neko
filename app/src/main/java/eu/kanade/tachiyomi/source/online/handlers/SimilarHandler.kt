@@ -8,7 +8,6 @@ import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MUMangaDto
@@ -28,6 +27,7 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -36,7 +36,8 @@ class SimilarHandler {
     private val networkServices: NetworkServices by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     private val mappings: MangaMappings by injectLazy()
-    private val preferencesHelper: PreferencesHelper by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
+
     private val json: Json by injectLazy()
 
     suspend fun fetchRelated(dexId: String, forceRefresh: Boolean): List<SourceManga> {
@@ -59,7 +60,7 @@ class SimilarHandler {
 
             val mangaList = similarGetMangadexMangaList(mangaIdMap.keys.toList(), false)
 
-            val thumbQuality = preferencesHelper.thumbnailQuality().get()
+            val thumbQuality = mangaDexPreferences.coverQuality().get()
             val relatedMangaList =
                 mangaList.data.map { it.toRelatedMangaDto(thumbQuality, mangaIdMap[it.id] ?: "") }
 
@@ -157,7 +158,7 @@ class SimilarHandler {
 
         // Get our page of mangaList
         // TODO: We should also remove any that have a bad language here
-        val activeLangs = MdUtil.getLangsToShow(preferencesHelper)
+        val activeLangs = MdUtil.getLangsToShow(mangaDexPreferences)
         val idPairs =
             similarDto.matches
                 .mapNotNull {
@@ -181,7 +182,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+        val thumbQuality = mangaDexPreferences.coverQuality().get()
         val mangaList =
             mangaListDto.data.map { it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "") }
 
@@ -254,7 +255,7 @@ class SimilarHandler {
 
         val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
-        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+        val thumbQuality = mangaDexPreferences.coverQuality().get()
         val mangaList =
             mangaListDto.data.map { it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "") }
 
@@ -322,7 +323,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+        val thumbQuality = mangaDexPreferences.coverQuality().get()
         val mangaList =
             mangaListDto.data.map { it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "") }
 
@@ -399,7 +400,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+        val thumbQuality = mangaDexPreferences.coverQuality().get()
         val mangaList =
             mangaListDto.data.map { it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "") }
 

@@ -8,7 +8,6 @@ import com.github.michaelbull.result.filterErrors
 import com.github.michaelbull.result.filterValues
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -22,6 +21,7 @@ import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.toDisplayResult
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -30,7 +30,7 @@ class BrowseRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     private val loginHelper: MangaDexLoginHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val preferenceHelper: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
 
     fun isLoggedIn() = loginHelper.isLoggedIn()
@@ -88,7 +88,7 @@ class BrowseRepository(
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
         val blockedScanlatorUUIDs =
-            preferenceHelper.blockedScanlators().get().map {
+            mangaDexPreferences.blockedGroups().get().map {
                 var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
                 if (scanlatorImpl == null) {
                     mangaDex.getScanlator(scanlator = it).map { scanlator ->

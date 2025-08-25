@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -117,15 +118,12 @@ class DownloadCache(
             mangaDir ?: return 0
 
             val listFiles =
-                mangaDir
-                    .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
-                    .orEmpty()
+                mangaDir.listFiles { _, filename -> !filename.endsWith(TMP_DIR_SUFFIX) }.orEmpty()
 
             return listFiles.size
         } else {
             mangaFiles[manga.id] ?: return 0
-            val files =
-                mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            val files = mangaFiles[manga.id]!!.first.filter { !it.endsWith(TMP_DIR_SUFFIX) }
             val ids = mangaFiles[manga.id]!!.second
             var count = files.size
             files.forEach {
@@ -149,7 +147,7 @@ class DownloadCache(
 
         mangaDir ?: return emptyList()
         return mangaDir
-            .listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            .listFiles { _, filename -> !filename.endsWith(TMP_DIR_SUFFIX) }
             .orEmpty()
             .toList()
     }

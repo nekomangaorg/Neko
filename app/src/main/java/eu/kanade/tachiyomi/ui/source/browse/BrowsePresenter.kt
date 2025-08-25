@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.toggle
@@ -46,6 +45,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -56,6 +56,7 @@ class BrowsePresenter(
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<BrowseController>() {
@@ -71,14 +72,14 @@ class BrowsePresenter(
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(incomingQuery),
                 defaultContentRatings =
-                    preferences.contentRatingSelections().get().toImmutableSet(),
+                    mangaDexPreferences.visibleContentRatings().get().toImmutableSet(),
                 screenType = BrowseScreenType.Homepage,
             )
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
-        val enabledContentRatings = preferences.contentRatingSelections().get()
+        val enabledContentRatings = mangaDexPreferences.visibleContentRatings().get()
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
@@ -87,7 +88,7 @@ class BrowsePresenter(
         return DexFilters(
             query = Filter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
-            contentRatingVisible = preferences.showContentRatingFilter().get(),
+            contentRatingVisible = mangaDexPreferences.showContentRatingFilter().get(),
         )
     }
 
@@ -179,7 +180,7 @@ class BrowsePresenter(
                 it.copy(
                     categories = categories,
                     promptForCategories =
-                        CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                        CategoryUtil.shouldShowCategoryPrompt(libraryPreferences, categories),
                 )
             }
         }
@@ -589,7 +590,7 @@ class BrowsePresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory().get()
+                val defaultCategory = libraryPreferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _browseScreenState.value.categories

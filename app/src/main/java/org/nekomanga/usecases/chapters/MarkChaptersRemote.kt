@@ -1,15 +1,15 @@
 package org.nekomanga.usecases.chapters
 
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.domain.site.MangaDexPreferences
 
 /** Given a list of chapters this attempts to mark them read/unread on the MangaDex website */
 class MarkChaptersRemote(
     private val statusHandler: StatusHandler,
-    private val preferences: PreferencesHelper,
+    private val mangaDexPreferences: MangaDexPreferences,
 ) {
     suspend operator fun invoke(
         markAction: ChapterMarkActions,
@@ -23,7 +23,7 @@ class MarkChaptersRemote(
                 is ChapterMarkActions.Unread -> false
                 else -> null
             }
-        if (syncRead != null && !skipSync && preferences.readingSync().get()) {
+        if (syncRead != null && !skipSync && mangaDexPreferences.readingSync().get()) {
 
             val (mergedChapters, nonMergedChapters) =
                 chapterItems.map { it.chapter }.partition { it.isMergedChapter() }

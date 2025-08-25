@@ -16,6 +16,7 @@ data class CategoryItem(
     val isAlone: Boolean = true,
     val isHidden: Boolean = false,
     val isDynamic: Boolean = false,
+    val isSystemCategory: Boolean = (id == 0 && name == "Default"),
     val sourceId: Long? = null,
 )
 

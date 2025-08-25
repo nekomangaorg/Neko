@@ -35,7 +35,7 @@ class MergedLoginDialog(
 
     override fun setCredentialsOnView(view: View) =
         with(view) {
-            binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
+            binding.dialogTitle.text = context.getString(R.string.sign_in_to_, source.name)
             binding.username.setText(preferences.sourceUsername(source).get())
             binding.password.setText(preferences.sourcePassword(source).get())
             binding.url.setText(preferences.sourceUrl(source).get())
@@ -66,7 +66,7 @@ class MergedLoginDialog(
                     if (result) {
                         dialog?.dismiss()
                         preferences.setSourceCredentials(source, username, password, url)
-                        context.toast(R.string.successfully_logged_in)
+                        context.toast(R.string.successfully_signed_in)
                         (targetController as? Listener)?.siteLoginDialogClosed(
                             source,
                             binding.url.text.toString(),
@@ -89,7 +89,7 @@ class MergedLoginDialog(
             dialog?.setCanceledOnTouchOutside(true)
             binding.progress.visibility = View.GONE
             binding.login.visibility = View.VISIBLE
-            scope.launch { context.toast(R.string.could_not_log_in) }
+            scope.launch { context.toast(R.string.could_not_sign_in) }
         }
     }
 

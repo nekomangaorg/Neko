@@ -10,7 +10,6 @@ import com.skydoves.sandwich.mapSuccess
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -45,11 +44,12 @@ import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
 open class MangaDex : HttpSource() {
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
     private val followsHandler: FollowsHandler by injectLazy()
 
@@ -77,14 +77,14 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             val response =
                 networkServices.service.randomManga(
-                    preferences.contentRatingSelections().get().toList()
+                    mangaDexPreferences.visibleContentRatings().get().toList()
                 )
 
             val result =
                 response.getOrResultError("trying to get random Manga").andThen {
                     Ok(
                         it.data.toSourceManga(
-                            preferences.thumbnailQuality().get(),
+                            mangaDexPreferences.coverQuality().get(),
                             useNoCoverUrl = false,
                         )
                     )
@@ -318,7 +318,7 @@ open class MangaDex : HttpSource() {
             manga.uuid(),
             manga.last_chapter_number,
             manga.last_volume_number,
-            preferences.includeUnavailable().get(),
+            mangaDexPreferences.includeUnavailableChapters().get(),
         )
     }
 

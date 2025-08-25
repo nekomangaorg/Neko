@@ -39,14 +39,13 @@ class CoverCache(val context: Context) {
     }
 
     /** Cache directory used for cache management. */
-    private val cacheDir = getCacheDir(COVERS_DIR)
+    val cacheDir = getCacheDir(COVERS_DIR)
 
     /** Cache directory used for custom cover cache management. */
-    private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
+    val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
 
     /** Cache directory used for covers not in library management. */
-    private val onlineCoverDirectory =
-        File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
+    val onlineCoverDirectory = File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
 
     private val maxOnlineCacheSize = 50L * 1024L * 1024L // 50 MB
 
@@ -111,6 +110,23 @@ class CoverCache(val context: Context) {
         CoilDiskCache.get(context).clear()
 
         lastClean = System.currentTimeMillis()
+    }
+
+    /** Clear out custom covers */
+    suspend fun deleteAllCustomCachedCovers() {
+        val directory = customCoverCacheDir
+        var deletedSize = 0L
+        val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        while (files.hasNext()) {
+            val file = files.next()
+            deletedSize += file.length()
+            file.delete()
+        }
+        withContext(Dispatchers.Main) {
+            context.toast(
+                context.getString(R.string.deleted_, Formatter.formatFileSize(context, deletedSize))
+            )
+        }
     }
 
     /** Clear out online covers until its under a certain size */

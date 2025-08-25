@@ -91,9 +91,11 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.track.TrackServiceItem
@@ -109,6 +111,8 @@ import uy.kohesive.injekt.api.get
 class MangaDetailPresenter(
     private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -181,7 +185,7 @@ class MangaDetailPresenter(
 
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
-                    hasDefaultCategory = preferences.defaultCategory().get() != -1,
+                    hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                     extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
                     forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
@@ -447,7 +451,9 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline())
+            if (
+                !mangaDexPreferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline()
+            )
                 return@launchIO
 
             runCatching {
@@ -729,7 +735,7 @@ class MangaDetailPresenter(
     }
 
     private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
-        val quality = preferences.thumbnailQuality().get()
+        val quality = mangaDexPreferences.coverQuality().get()
 
         return db.getArtwork(mangaId)
             .executeAsBlocking()
@@ -760,7 +766,7 @@ class MangaDetailPresenter(
     private fun updateChapterFlows() {
         presenterScope.launchIO {
             // possibly move this into a chapter repository
-            val blockedScanlators = preferences.blockedScanlators().get()
+            val blockedScanlators = mangaDexPreferences.blockedGroups().get()
             val allChapters =
                 db.getChapters(mangaId)
                     .executeOnIO()
@@ -939,7 +945,7 @@ class MangaDetailPresenter(
                             }
                             db.insertTrack(track).executeOnIO()
                         }
-                        val autoAddStatus = preferences.autoAddToMangadexLibrary().get()
+                        val autoAddStatus = mangaDexPreferences.autoAddToMangaDexLibrary().get()
                         val shouldAddAsPlanToRead =
                             currentManga().favorite &&
                                 autoAddStatus in 1..3 &&
@@ -1562,7 +1568,7 @@ class MangaDetailPresenter(
             updateMangaFlow()
             // add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && generalState.value.hasDefaultCategory) {
-                val defaultCategoryId = preferences.defaultCategory().get()
+                val defaultCategoryId = libraryPreferences.defaultCategory().get()
                 generalState.value.allCategories
                     .firstOrNull { defaultCategoryId == it.id }
                     ?.let { updateMangaCategories(listOf(it)) }
@@ -1925,9 +1931,9 @@ class MangaDetailPresenter(
             if (scanlatorImpl == null) {
                 launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
             }
-            val blockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+            val blockedScanlators = mangaDexPreferences.blockedGroups().get().toMutableSet()
             blockedScanlators.add(scanlator)
-            preferences.blockedScanlators().set(blockedScanlators)
+            mangaDexPreferences.blockedGroups().set(blockedScanlators)
             updateChapterFlows()
             _snackbarState.emit(
                 SnackbarState(
@@ -1938,9 +1944,9 @@ class MangaDetailPresenter(
                         presenterScope.launch {
                             db.deleteScanlator(scanlator).executeOnIO()
                             val allBlockedScanlators =
-                                preferences.blockedScanlators().get().toMutableSet()
+                                mangaDexPreferences.blockedGroups().get().toMutableSet()
                             allBlockedScanlators.remove(scanlator)
-                            preferences.blockedScanlators().set(allBlockedScanlators)
+                            mangaDexPreferences.blockedGroups().set(allBlockedScanlators)
                             updateChapterFlows()
                         }
                     },

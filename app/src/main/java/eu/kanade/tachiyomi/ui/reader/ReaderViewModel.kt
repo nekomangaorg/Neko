@@ -75,6 +75,7 @@ import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -90,6 +91,7 @@ class ReaderViewModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     private val readerPreferences: ReaderPreferences = Injekt.get(),
     private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
@@ -462,7 +464,7 @@ class ReaderViewModel(
         val shouldTrack =
             !securityPreferences.incognitoMode().get() ||
                 hasTrackers ||
-                preferences.readingSync().get()
+                mangaDexPreferences.readingSync().get()
         if (
             shouldTrack &&
                 // For double pages, check if the second to last page is doubled up
@@ -825,7 +827,7 @@ class ReaderViewModel(
             try {
                 var directory = storageManager.getPagesDirectory()
 
-                if (preferences.folderPerManga().get() && directory != null) {
+                if (readerPreferences.folderPerManga().get() && directory != null) {
                     directory =
                         directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
                 }
@@ -860,7 +862,7 @@ class ReaderViewModel(
             try {
                 var directory = storageManager.getPagesDirectory()!!
 
-                if (preferences.folderPerManga().get()) {
+                if (readerPreferences.folderPerManga().get()) {
                     directory =
                         directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
                 }
@@ -955,7 +957,7 @@ class ReaderViewModel(
 
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         manga ?: return
-        if (!preferences.readingSync().get()) {
+        if (!mangaDexPreferences.readingSync().get()) {
             return
         }
 

@@ -31,16 +31,16 @@ class MergedLogoutDialog(
         return activity!!
             .materialAlertDialog()
             .apply {
-                setTitle(R.string.log_out)
+                setTitle(R.string.sign_out)
                 setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(R.string.log_out) { _, _ ->
+                setPositiveButton(R.string.sign_out) { _, _ ->
                     launchNow {
                         runCatching {
                                 // val loggedOut = source.logout()
 
                                 // if (loggedOut.loggedOut) {
                                 launch { preferences.setSourceCredentials(source, "", "", "") }
-                                activity?.toast(R.string.successfully_logged_out)
+                                activity?.toast(R.string.successfully_signed_out)
                                 (targetController as? Listener)?.siteLogoutDialogClosed(source)
                                 /* } else {
                                     activity?.toast(loggedOut.error)
@@ -48,7 +48,7 @@ class MergedLogoutDialog(
                             }
                             .onFailure { e ->
                                 TimberKt.e(e) { "error logging out" }
-                                activity?.toast(R.string.could_not_log_in)
+                                activity?.toast(R.string.could_not_sign_in)
                             }
                     }
                 }

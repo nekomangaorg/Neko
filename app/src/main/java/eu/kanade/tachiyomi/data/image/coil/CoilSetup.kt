@@ -52,7 +52,7 @@ fun coilImageLoader(context: Context) =
 /** Direct copy of Coil's internal SingletonDiskCache so that [MangaCoverFetcher] can access it. */
 internal object CoilDiskCache {
 
-    private const val FOLDER_NAME = "image_cache"
+    const val FOLDER_NAME = "image_cache"
     private var instance: DiskCache? = null
 
     @Synchronized

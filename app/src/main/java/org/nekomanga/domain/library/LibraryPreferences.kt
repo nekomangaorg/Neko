@@ -6,6 +6,8 @@ import tachiyomi.core.preference.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
+    fun defaultCategory() = this.preferenceStore.getInt("default_category", -1)
+
     fun enableLocalChapters() = this.preferenceStore.getBoolean("enable_local_chapters", true)
 
     fun searchSuggestions() = this.preferenceStore.getString("library_search_suggestion")
@@ -93,8 +95,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 
-    fun includeUnavailable() = this.preferenceStore.getBoolean("include_unavailable")
-
     fun updateCovers() = this.preferenceStore.getBoolean("refresh_covers_too", true)
 
     fun outlineOnCovers() = this.preferenceStore.getBoolean("outline_on_covers", true)
@@ -134,7 +134,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
-    fun whatToUpdateOnRefresh() = this.preferenceStore.getInt("update_on_refresh", -1)
+    fun chapterScanlatorFilterOption() =
+        this.preferenceStore.getInt("chapter_scanlator_filter_option", 1)
 
     companion object {
 

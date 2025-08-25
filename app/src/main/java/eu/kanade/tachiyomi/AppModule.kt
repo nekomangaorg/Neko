@@ -46,10 +46,10 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.domain.backup.BackupPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
@@ -190,8 +190,6 @@ class PreferenceModule(val application: Application) : InjektModule {
             )
         }
 
-        addSingletonFactory { BackupPreferences(get()) }
-
         addSingletonFactory { SecurityPreferences(get()) }
 
         addSingletonFactory { LibraryPreferences(get()) }
@@ -201,6 +199,8 @@ class PreferenceModule(val application: Application) : InjektModule {
         addSingletonFactory { NetworkPreferences(get(), BuildConfig.DEBUG) }
 
         addSingletonFactory { MangaDetailsPreferences(get()) }
+
+        addSingletonFactory { MangaDexPreferences(get()) }
 
         addSingletonFactory { PreferencesHelper(context = application, preferenceStore = get()) }
     }

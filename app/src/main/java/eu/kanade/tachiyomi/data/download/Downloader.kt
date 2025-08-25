@@ -51,6 +51,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import okhttp3.Response
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -339,7 +341,10 @@ class Downloader(
                     }
 
             // Delete all temporary (unfinished) files
-            tmpDir.listFiles()?.filter { it.name!!.endsWith(".tmp") }?.forEach { it.delete() }
+            tmpDir
+                .listFiles()
+                ?.filter { it.name!!.endsWith(TMP_FILE_SUFFIX) }
+                ?.forEach { it.delete() }
 
             download.status = Download.State.DOWNLOADING
 
@@ -399,7 +404,7 @@ class Downloader(
 
         val digitCount = (download.pages?.size ?: 0).toString().length.coerceAtLeast(3)
         val filename = "%0${digitCount}d".format(Locale.ENGLISH, page.number)
-        val tmpFile = tmpDir.findFile("$filename.tmp")
+        val tmpFile = tmpDir.findFile("$filename$TMP_FILE_SUFFIX")
 
         // Delete temp file if it exists
         tmpFile?.delete()
@@ -457,7 +462,7 @@ class Downloader(
         page.progress = 0
         return flow {
                 val response = source.getImage(page)
-                val file = tmpDir.createFile("$filename.tmp")!!
+                val file = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
                 try {
                     response.body.source().saveTo(file.openOutputStream())
                     val extension = getImageExtension(response, file)
@@ -489,7 +494,7 @@ class Downloader(
      * @param filename the filename of the image.
      */
     private fun copyImageFromCache(cacheFile: File, tmpDir: UniFile, filename: String): UniFile {
-        val tmpFile = tmpDir.createFile("$filename.tmp")!!
+        val tmpFile = tmpDir.createFile("$filename$TMP_FILE_SUFFIX")!!
         cacheFile.inputStream().use { input ->
             tmpFile.openOutputStream().use { output -> input.copyTo(output) }
         }
@@ -561,7 +566,7 @@ class Downloader(
                 val fileName = it.name.orEmpty()
                 when {
                     fileName in listOf(NOMEDIA_FILE) -> false
-                    fileName.endsWith(".tmp") -> false
+                    fileName.endsWith(TMP_FILE_SUFFIX) -> false
                     // Only count the first split page and not the others
                     fileName.contains("__") && !fileName.endsWith("__001.jpg") -> false
                     else -> true
@@ -683,7 +688,6 @@ class Downloader(
     }
 
     companion object {
-        const val TMP_DIR_SUFFIX = "_tmp"
         const val MIN_DISK_SPACE = 200L * 1024 * 1024
     }
 }

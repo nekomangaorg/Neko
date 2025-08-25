@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 import org.nekomanga.R
+import org.nekomanga.domain.site.MangaDexPreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -244,6 +245,7 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val db: DatabaseHelper = Injekt.get()
         val preferences: PreferencesHelper = Injekt.get()
+        val mangaDexPreference: MangaDexPreferences = Injekt.get()
 
         val manga = db.getManga(mangaId).executeAsBlocking() ?: return
 
@@ -259,7 +261,7 @@ class NotificationReceiver : BroadcastReceiver() {
             downloadManager.deleteChapters(chaptersToDelete, manga)
         }
 
-        if (preferences.readingSync().get()) {
+        if (mangaDexPreference.readingSync().get()) {
             val (mergedChapters, nonMergedChapters) = dbChapters.partition { it.isMergedChapter() }
             if (nonMergedChapters.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()

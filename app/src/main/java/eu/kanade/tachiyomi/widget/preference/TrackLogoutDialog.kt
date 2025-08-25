@@ -21,12 +21,12 @@ class TrackLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
         val serviceName = activity!!.getString(service.nameRes())
         return activity!!
             .materialAlertDialog()
-            .setTitle(activity!!.getString(R.string.log_out_from_, serviceName))
+            .setTitle(activity!!.getString(R.string.sign_out_from_, serviceName))
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.log_out) { _, _ ->
+            .setPositiveButton(R.string.sign_out) { _, _ ->
                 service.logout()
                 (targetController as? Listener)?.trackLogoutDialogClosed(service)
-                activity!!.toast(R.string.successfully_logged_out)
+                activity!!.toast(R.string.successfully_signed_out)
             }
             .create()
     }

@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.lang.isUUID
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -177,7 +178,7 @@ class DownloadProvider(
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
-                if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
+                if (fileName.endsWith(TMP_DIR_SUFFIX)) {
                     return@filter true
                 }
                 if (fileName.startsWith("${Constants.LOCAL_SOURCE}_")) {
@@ -222,7 +223,7 @@ class DownloadProvider(
     fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
         return chapters.mapNotNull {
-            mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}")
+            mangaDir.findFile("${getChapterDirName(it)}${TMP_DIR_SUFFIX}")
         }
     }
 

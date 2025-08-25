@@ -61,6 +61,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -70,6 +71,7 @@ import uy.kohesive.injekt.injectLazy
 class LibraryPresenter(
     val db: DatabaseHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
@@ -1322,7 +1324,8 @@ class LibraryPresenter(
                         chapterFilter.filterChaptersByScanlatorsAndLanguage(
                             db.getChapters(manga).executeAsBlocking().filter { !it.read },
                             manga,
-                            preferences,
+                            mangaDexPreferences,
+                            libraryPreferences,
                         )
                     downloadManager.downloadChapters(manga, chapters)
                 }
@@ -1362,7 +1365,7 @@ class LibraryPresenter(
     }
 
     fun confirmMarkReadStatus(mangaList: HashMap<Manga, List<Chapter>>, markRead: Boolean) {
-        if (preferences.readingSync().get()) {
+        if (mangaDexPreferences.readingSync().get()) {
             mangaList.forEach { entry ->
                 val (mergedChapters, nonMergedChapters) =
                     entry.value.partition { it.isMergedChapter() }

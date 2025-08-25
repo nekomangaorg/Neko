@@ -11,6 +11,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import okhttp3.OkHttpClient
 import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.injectLazy
@@ -110,6 +113,13 @@ abstract class TrackService(val id: Int) {
 
     open fun isLogged(): Boolean =
         getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
+
+    fun isLoggedInFlow(): Flow<Boolean> {
+        return combine(getUsername().changes(), getPassword().changes()) { username, password ->
+                username.isNotEmpty() && password.isNotEmpty()
+            }
+            .distinctUntilChanged()
+    }
 
     fun getUsername() = preferences.trackUsername(this)
 

@@ -28,7 +28,7 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
     override fun setCredentialsOnView(view: View) =
         with(view) {
             val serviceName = context.getString(service.nameRes())
-            binding.dialogTitle.text = context.getString(R.string.log_in_to_, serviceName)
+            binding.dialogTitle.text = context.getString(R.string.sign_in_to_, serviceName)
             binding.username.setText(service.getUsername().get())
             binding.password.setText(service.getPassword().get())
         }
@@ -54,7 +54,7 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
                     if (result) {
                         dialog?.dismiss()
 
-                        context.toast(R.string.successfully_logged_in)
+                        context.toast(R.string.successfully_signed_in)
                     } else {
                         errorResult()
                     }

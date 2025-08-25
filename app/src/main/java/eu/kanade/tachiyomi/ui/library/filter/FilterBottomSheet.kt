@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.databinding.FilterBottomSheetBinding
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -50,6 +51,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     /** Preferences helper. */
     private val libraryPreferences: LibraryPreferences by injectLazy()
 
+    private val mangaDexPreferences: MangaDexPreferences by injectLazy()
+
     private lateinit var binding: FilterBottomSheetBinding
 
     private val trackManager: TrackManager by injectLazy()
@@ -58,7 +61,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         get() = trackManager.hasLoggedServices()
 
     private val includeUnavailable
-        get() = libraryPreferences.includeUnavailable().get()
+        get() = mangaDexPreferences.includeUnavailableChapters().get()
 
     private lateinit var downloaded: FilterTagGroup
 

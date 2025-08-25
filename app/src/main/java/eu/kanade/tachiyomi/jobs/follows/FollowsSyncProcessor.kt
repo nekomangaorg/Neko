@@ -18,13 +18,17 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class FollowsSyncProcessor {
 
     val preferences: PreferencesHelper by injectLazy()
+    val mangaDexPreferences: MangaDexPreferences by injectLazy()
+    val libraryPreference: LibraryPreferences by injectLazy()
     val db: DatabaseHelper by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
@@ -43,7 +47,7 @@ class FollowsSyncProcessor {
             val countOfAdded = AtomicInteger(0)
 
             val syncFollowStatusInts =
-                preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
+                mangaDexPreferences.mangaDexPullToLibraryIndices().get().map { it.toInt() }
 
             sourceManager.mangaDex
                 .fetchAllFollows()
@@ -63,7 +67,7 @@ class FollowsSyncProcessor {
                     TimberKt.d { "total number from mangadex is ${listManga.size}" }
 
                     val categories = db.getCategories().executeAsBlocking()
-                    val defaultCategoryId = preferences.defaultCategory().get()
+                    val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
                     val mangaIdsToUpdate =

@@ -74,7 +74,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:scaleType="fitCenter"
-        android:text="@string/log_in"
+        android:text="@string/sign_in"
         android:textSize="16sp" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator

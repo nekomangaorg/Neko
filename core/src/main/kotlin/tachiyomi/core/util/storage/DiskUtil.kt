@@ -3,16 +3,51 @@ package tachiyomi.core.util.storage
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import android.os.StatFs
 import android.text.format.Formatter
+import androidx.core.content.ContextCompat
 import com.hippo.unifile.UniFile
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import tachiyomi.core.util.lang.Hash
 
 object DiskUtil {
 
+    /** Returns the root folders of all the available external storages. */
+    fun getExternalStorages(context: Context): List<File> {
+        return ContextCompat.getExternalFilesDirs(context, null).filterNotNull().mapNotNull {
+            val file = File(it.absolutePath.substringBefore("/Android/"))
+            val state = Environment.getExternalStorageState(file)
+            if (
+                state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY
+            ) {
+                file
+            } else {
+                null
+            }
+        }
+    }
+
     fun hashKeyForDisk(key: String): String {
         return Hash.md5(key)
+    }
+
+    fun getCacheDirSize(context: Context): Long {
+        return File(context.cacheDir, "")
+            .listFiles()!!
+            .mapNotNull {
+                if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
+                    getDirectorySize(it)
+                } else {
+                    null
+                }
+            }
+            .sum()
     }
 
     fun getDirectorySize(f: File): Long {
@@ -123,6 +158,45 @@ object DiskUtil {
     /** Returns real size of directory in human readable format. */
     fun readableDiskSize(context: Context, bytes: Long): String {
         return Formatter.formatFileSize(context, bytes)
+    }
+
+    fun cleanupDiskSpace(directory: File, context: Context, isTmpFileLookup: Boolean = false) {
+        if (isTmpFileLookup) {
+            File(context.cacheDir, "").listFiles()!!.asSequence().forEach {
+                if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
+                    it.delete()
+                }
+            }
+        } else {
+            directory.listFiles()!!.asSequence().forEach { it.delete() }
+        }
+    }
+
+    fun observeDiskSpace(
+        directory: File,
+        context: Context,
+        isTmpFileLookup: Boolean = false,
+    ): Flow<String> = flow {
+        while (true) {
+            if (isTmpFileLookup) {
+                val tmpFiles =
+                    File(context.cacheDir, "")
+                        .listFiles()!!
+                        .mapNotNull {
+                            if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
+                                getDirectorySize(it)
+                            } else {
+                                null
+                            }
+                        }
+                        .sum()
+                emit(readableDiskSize(context, tmpFiles))
+            } else {
+
+                emit(readableDiskSize(context, directory))
+            }
+            delay(3.seconds)
+        }
     }
 
     const val NOMEDIA_FILE = ".nomedia"

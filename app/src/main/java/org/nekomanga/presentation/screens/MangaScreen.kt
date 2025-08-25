@@ -209,10 +209,10 @@ fun MangaScreen(
     ) {
         NekoScaffold(
             type = NekoScaffoldType.Search,
-            themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
-            onSearch = onSearch,
+            themeColorState = themeColorState,
             searchPlaceHolder = stringResource(id = R.string.search_chapters),
+            onSearch = onSearch,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
                 OverflowOptions(
@@ -220,151 +220,152 @@ fun MangaScreen(
                     chaptersProvider = { generalState.value.activeChapters },
                 )
             },
-        ) { incomingPaddingValues ->
-            PullRefresh(
-                refreshing = isRefreshing.value,
-                onRefresh = onRefresh,
-                indicatorOffset = incomingPaddingValues.calculateTopPadding(),
-                backgroundColor = themeColorState.buttonColor,
-                contentColor = MaterialTheme.colorScheme.surface,
-            ) {
-                val mangaDetailContentPadding =
-                    PaddingValues(
-                        bottom =
-                            WindowInsets.navigationBars
-                                .only(WindowInsetsSides.Bottom)
-                                .asPaddingValues()
-                                .calculateBottomPadding()
-                    )
-
-                val chapterContentPadding =
-                    PaddingValues(
-                        bottom =
-                            WindowInsets.navigationBars
-                                .only(WindowInsetsSides.Bottom)
-                                .asPaddingValues()
-                                .calculateBottomPadding(),
-                        top = incomingPaddingValues.calculateTopPadding(),
-                    )
-
-                CompositionLocalProvider(
-                    LocalRippleConfiguration provides themeColorState.rippleConfiguration,
-                    LocalTextSelectionColors provides themeColorState.textSelectionColors,
+            content = { incomingPaddingValues ->
+                PullRefresh(
+                    refreshing = isRefreshing.value,
+                    onRefresh = onRefresh,
+                    indicatorOffset = incomingPaddingValues.calculateTopPadding(),
+                    backgroundColor = themeColorState.buttonColor,
+                    contentColor = MaterialTheme.colorScheme.surface,
                 ) {
-                    if (
-                        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-                            !generalState.value.forcePortrait
-                    ) {
-                        SideBySideLayout(
-                            mangaDetailContentPadding = mangaDetailContentPadding,
-                            chapterContentPadding = chapterContentPadding,
-                            details = {
-                                Details(
-                                    themeColorState = themeColorState,
-                                    mangaState = mangaState,
-                                    generalState = generalState,
-                                    isSearching = isSearching,
-                                    trackMergeState = trackMergeState,
-                                    windowSizeClass = windowSizeClass,
-                                    chapterActions = chapterActions,
-                                    categoryActions = categoryActions,
-                                    descriptionActions = descriptionActions,
-                                    informationActions = informationActions,
-                                    generatePalette = generatePalette,
-                                    openSheet = { sheet -> openSheet(sheet) },
-                                    similarClick = similarClick,
-                                    shareClick = shareClick,
-                                    toggleFavorite = toggleFavorite,
-                                )
-                            },
-                            chapterHeader = {
-                                ChapterHeader(
-                                    themeColorState = themeColorState,
-                                    isSearching = isSearching,
-                                    generalState = generalState,
-                                    openSheet = { sheet -> openSheet(sheet) },
-                                )
-                            },
-                            chaptersProvider = {
-                                when (isSearching.value) {
-                                    true -> generalState.value.searchChapters
-                                    false -> generalState.value.activeChapters
-                                }
-                            },
-                            chapterRow = { index, chapterItem ->
-                                ChapterRow(
-                                    themeColorState = themeColorState,
-                                    generalState = generalState,
-                                    chapterActions = chapterActions,
-                                    scope = scope,
-                                    chapterItem = chapterItem,
-                                    index = index,
-                                )
-                            },
+                    val mangaDetailContentPadding =
+                        PaddingValues(
+                            bottom =
+                                WindowInsets.navigationBars
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues()
+                                    .calculateBottomPadding()
                         )
-                    } else {
-                        VerticalLayout(
-                            contentPadding = mangaDetailContentPadding,
-                            details = {
-                                Details(
-                                    themeColorState = themeColorState,
-                                    mangaState = mangaState,
-                                    generalState = generalState,
-                                    isSearching = isSearching,
-                                    trackMergeState = trackMergeState,
-                                    windowSizeClass = windowSizeClass,
-                                    chapterActions = chapterActions,
-                                    categoryActions = categoryActions,
-                                    descriptionActions = descriptionActions,
-                                    informationActions = informationActions,
-                                    generatePalette = generatePalette,
-                                    openSheet = { sheet -> openSheet(sheet) },
-                                    similarClick = similarClick,
-                                    shareClick = shareClick,
-                                    toggleFavorite = toggleFavorite,
-                                )
-                            },
-                            chapterHeader = {
-                                ChapterHeader(
-                                    themeColorState = themeColorState,
-                                    isSearching = isSearching,
-                                    generalState = generalState,
-                                    openSheet = { sheet -> openSheet(sheet) },
-                                )
-                            },
-                            chaptersProvider = {
-                                when (isSearching.value) {
-                                    true -> generalState.value.searchChapters
-                                    false -> generalState.value.activeChapters
-                                }
-                            },
-                            chapterRow = { index, chapterItem ->
-                                ChapterRow(
-                                    themeColorState = themeColorState,
-                                    generalState = generalState,
-                                    chapterActions = chapterActions,
-                                    scope = scope,
-                                    chapterItem = chapterItem,
-                                    index = index,
-                                )
-                            },
-                        )
-                    }
 
-                    if (generalState.value.removedChapters.isNotEmpty()) {
-                        RemovedChaptersDialog(
-                            themeColorState = themeColorState,
-                            chapters = generalState.value.removedChapters,
-                            onConfirm = {
-                                chapterActions.delete(generalState.value.removedChapters)
-                                chapterActions.clearRemoved
-                            },
-                            onDismiss = chapterActions.clearRemoved,
+                    val chapterContentPadding =
+                        PaddingValues(
+                            bottom =
+                                WindowInsets.navigationBars
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues()
+                                    .calculateBottomPadding(),
+                            top = incomingPaddingValues.calculateTopPadding(),
                         )
+
+                    CompositionLocalProvider(
+                        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+                        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+                    ) {
+                        if (
+                            windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
+                                !generalState.value.forcePortrait
+                        ) {
+                            SideBySideLayout(
+                                mangaDetailContentPadding = mangaDetailContentPadding,
+                                chapterContentPadding = chapterContentPadding,
+                                details = {
+                                    Details(
+                                        themeColorState = themeColorState,
+                                        mangaState = mangaState,
+                                        generalState = generalState,
+                                        isSearching = isSearching,
+                                        trackMergeState = trackMergeState,
+                                        windowSizeClass = windowSizeClass,
+                                        chapterActions = chapterActions,
+                                        categoryActions = categoryActions,
+                                        descriptionActions = descriptionActions,
+                                        informationActions = informationActions,
+                                        generatePalette = generatePalette,
+                                        openSheet = { sheet -> openSheet(sheet) },
+                                        similarClick = similarClick,
+                                        shareClick = shareClick,
+                                        toggleFavorite = toggleFavorite,
+                                    )
+                                },
+                                chapterHeader = {
+                                    ChapterHeader(
+                                        themeColorState = themeColorState,
+                                        isSearching = isSearching,
+                                        generalState = generalState,
+                                        openSheet = { sheet -> openSheet(sheet) },
+                                    )
+                                },
+                                chaptersProvider = {
+                                    when (isSearching.value) {
+                                        true -> generalState.value.searchChapters
+                                        false -> generalState.value.activeChapters
+                                    }
+                                },
+                                chapterRow = { index, chapterItem ->
+                                    ChapterRow(
+                                        themeColorState = themeColorState,
+                                        generalState = generalState,
+                                        chapterActions = chapterActions,
+                                        scope = scope,
+                                        chapterItem = chapterItem,
+                                        index = index,
+                                    )
+                                },
+                            )
+                        } else {
+                            VerticalLayout(
+                                contentPadding = mangaDetailContentPadding,
+                                details = {
+                                    Details(
+                                        themeColorState = themeColorState,
+                                        mangaState = mangaState,
+                                        generalState = generalState,
+                                        isSearching = isSearching,
+                                        trackMergeState = trackMergeState,
+                                        windowSizeClass = windowSizeClass,
+                                        chapterActions = chapterActions,
+                                        categoryActions = categoryActions,
+                                        descriptionActions = descriptionActions,
+                                        informationActions = informationActions,
+                                        generatePalette = generatePalette,
+                                        openSheet = { sheet -> openSheet(sheet) },
+                                        similarClick = similarClick,
+                                        shareClick = shareClick,
+                                        toggleFavorite = toggleFavorite,
+                                    )
+                                },
+                                chapterHeader = {
+                                    ChapterHeader(
+                                        themeColorState = themeColorState,
+                                        isSearching = isSearching,
+                                        generalState = generalState,
+                                        openSheet = { sheet -> openSheet(sheet) },
+                                    )
+                                },
+                                chaptersProvider = {
+                                    when (isSearching.value) {
+                                        true -> generalState.value.searchChapters
+                                        false -> generalState.value.activeChapters
+                                    }
+                                },
+                                chapterRow = { index, chapterItem ->
+                                    ChapterRow(
+                                        themeColorState = themeColorState,
+                                        generalState = generalState,
+                                        chapterActions = chapterActions,
+                                        scope = scope,
+                                        chapterItem = chapterItem,
+                                        index = index,
+                                    )
+                                },
+                            )
+                        }
+
+                        if (generalState.value.removedChapters.isNotEmpty()) {
+                            RemovedChaptersDialog(
+                                themeColorState = themeColorState,
+                                chapters = generalState.value.removedChapters,
+                                onConfirm = {
+                                    chapterActions.delete(generalState.value.removedChapters)
+                                    chapterActions.clearRemoved
+                                },
+                                onDismiss = chapterActions.clearRemoved,
+                            )
+                        }
                     }
                 }
-            }
-        }
+            },
+        )
     }
 }
 

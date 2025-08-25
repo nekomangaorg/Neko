@@ -75,6 +75,8 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun webtoonEnableZoomOut() = this.preferenceStore.getBoolean("webtoon_enable_zoom_out")
 
+    fun folderPerManga() = this.preferenceStore.getBoolean("create_folder_per_manga", false)
+
     fun readWithLongTap() = this.preferenceStore.getBoolean("reader_long_tap", true)
 
     fun readWithVolumeKeys() = this.preferenceStore.getBoolean("reader_volume_keys")
@@ -105,7 +107,7 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun invertDoublePages() = this.preferenceStore.getBoolean("invert_double_pages")
 
     fun webtoonPageLayout() =
-        this.preferenceStore.getInt("webtoon_page_layout", PageLayout.SINGLE_PAGE.value)
+        this.preferenceStore.getInt("webtoon_page_layout", PageLayout.SINGLE_PAGE.webtoonValue)
 
     fun webtoonReaderHideThreshold() =
         this.preferenceStore.getEnum(

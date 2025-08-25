@@ -22,21 +22,21 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
         return activity!!
             .materialAlertDialog()
             .apply {
-                setTitle(R.string.log_out)
+                setTitle(R.string.sign_out)
                 setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(R.string.log_out) { _, _ ->
+                setPositiveButton(R.string.sign_out) { _, _ ->
                     launchNow {
                         runCatching {
                                 when (loginHelper.logout()) {
-                                    true -> activity?.toast(R.string.successfully_logged_out)
-                                    false -> activity?.toast(R.string.successfully_logged_out)
+                                    true -> activity?.toast(R.string.successfully_signed_out)
+                                    false -> activity?.toast(R.string.successfully_signed_out)
                                 }
-                                activity?.toast(R.string.successfully_logged_out)
+                                activity?.toast(R.string.successfully_signed_out)
                                 (targetController as? Listener)?.siteLogoutDialogClosed()
                             }
                             .onFailure { e ->
                                 TimberKt.e(e) { "Error logging out" }
-                                activity?.toast(R.string.could_not_log_in)
+                                activity?.toast(R.string.could_not_sign_in)
                             }
                     }
                 }

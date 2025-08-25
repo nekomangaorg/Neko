@@ -48,7 +48,7 @@
         android:layout_gravity="center_vertical"
         android:padding="4dp"
         app:tint="#FF4CAF50"
-        android:contentDescription="@string/successfully_logged_in"
+        android:contentDescription="@string/successfully_signed_in"
         android:src="@drawable/ic_done_24dp" />
 
 </LinearLayout>

@@ -317,31 +317,14 @@ class DownloadManager(val context: Context) {
         }
     }
 
-    /*
-        private suspend fun getChaptersToDelete(chapters: List<Chapter>, manga: Manga): List<Chapter> {
-            // Retrieve the categories that are set to exclude from being deleted on read
-            val categoriesToExclude = pr.removeExcludeCategories().get().map(String::toLong)
-
-            val categoriesForManga = getCategories.await(manga.id)
-                .map { it.id }
-                .ifEmpty { listOf(0) }
-            val filteredCategoryManga = if (categoriesForManga.intersect(categoriesToExclude).isNotEmpty()) {
-                chapters.filterNot { it.read }
-            } else {
-                chapters
-            }
-
-            return if (!downloadPreferences.removeBookmarkedChapters().get()) {
-                filteredCategoryManga.filterNot { it.bookmark }
-            } else {
-                filteredCategoryManga
-            }
-        }
-    */
-
     /** return the list of all manga folders */
     fun getMangaFolders(): List<UniFile> {
         return provider.findSourceDir()?.listFiles()?.toList() ?: emptyList()
+    }
+
+    /** return the list of all manga folders */
+    fun getMangaDirName(manga: Manga): String {
+        return provider.getMangaDirName(manga)
     }
 
     /**

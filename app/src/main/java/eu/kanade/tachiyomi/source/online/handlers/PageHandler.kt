@@ -20,6 +20,7 @@ import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -27,6 +28,9 @@ class PageHandler {
 
     val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
+
+    val mangaDexPreferences: MangaDexPreferences by injectLazy()
+
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
     val comikeyHandler: ComikeyHandler by injectLazy()
     val azukiHandler: AzukiHandler by injectLazy()
@@ -86,7 +90,7 @@ class PageHandler {
                     networkServices.atHomeService
                         .getAtHomeServer(
                             chapter.mangadex_chapter_id,
-                            preferences.usePort443Only().get(),
+                            mangaDexPreferences.usePort443ForImageServer().get(),
                         )
                         .getOrResultError("trying to get at home response")
                         .getOrThrow { Exception(it.message()) }
@@ -94,7 +98,7 @@ class PageHandler {
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,
                     atHomeDto,
-                    preferences.dataSaver().get(),
+                    mangaDexPreferences.dataSaver().get(),
                 )
             } catch (e: Exception) {
                 TimberKt.e(e) { "error processing page list" }

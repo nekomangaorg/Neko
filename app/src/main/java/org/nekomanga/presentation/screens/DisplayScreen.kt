@@ -97,12 +97,12 @@ fun DisplayScreen(
         },
     ) {
         NekoScaffold(
+            type = NekoScaffoldType.Title,
+            onNavigationIconClicked = onBackPress,
             title =
                 if (displayScreenState.value.titleRes != null)
                     stringResource(id = displayScreenState.value.titleRes!!)
                 else displayScreenState.value.title,
-            type = NekoScaffoldType.Title,
-            onNavigationIconClicked = onBackPress,
             actions = {
                 AppBarActions(
                     actions =
@@ -118,89 +118,90 @@ fun DisplayScreen(
                         )
                 )
             },
-        ) { incomingContentPadding ->
-            val contentPadding =
-                PaddingValues(
-                    bottom =
-                        WindowInsets.navigationBars
-                            .only(WindowInsetsSides.Bottom)
-                            .asPaddingValues()
-                            .calculateBottomPadding(),
-                    top = incomingContentPadding.calculateTopPadding(),
-                )
+            content = { incomingContentPadding ->
+                val contentPadding =
+                    PaddingValues(
+                        bottom =
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues()
+                                .calculateBottomPadding(),
+                        top = incomingContentPadding.calculateTopPadding(),
+                    )
 
-            val haptic = LocalHapticFeedback.current
-            fun mangaLongClick(displayManga: DisplayManga) {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
-                    scope.launch {
-                        longClickedMangaId = displayManga.mangaId
-                        sheetState.show()
+                val haptic = LocalHapticFeedback.current
+                fun mangaLongClick(displayManga: DisplayManga) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
+                        scope.launch {
+                            longClickedMangaId = displayManga.mangaId
+                            sheetState.show()
+                        }
+                    } else {
+                        toggleFavorite(displayManga.mangaId, emptyList())
                     }
-                } else {
-                    toggleFavorite(displayManga.mangaId, emptyList())
                 }
-            }
 
-            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Loading(
-                        Modifier.zIndex(1f)
-                            .padding(Size.small)
-                            .padding(top = contentPadding.calculateTopPadding())
-                            .align(Alignment.TopCenter)
-                    )
-                }
-            } else if (displayScreenState.value.error != null) {
-                EmptyScreen(
-                    icon = Icons.Default.ErrorOutline,
-                    iconSize = 176.dp,
-                    message = displayScreenState.value.error,
-                    actions =
-                        if (displayScreenState.value.page == 1)
-                            persistentListOf(Action(R.string.retry, retryClick))
-                        else persistentListOf(),
-                    contentPadding = incomingContentPadding,
-                )
-            } else {
-                if (displayScreenState.value.isList) {
-                    MangaList(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                } else {
-                    MangaGrid(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns =
-                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
-                        isComfortable = displayScreenState.value.isComfortableGrid,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                }
-                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
-                    Box(Modifier.fillMaxSize()) {
-                        LinearProgressIndicator(
-                            modifier =
-                                Modifier.padding(
-                                        bottom =
-                                            contentPadding.calculateBottomPadding() + Size.small
-                                    )
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth()
+                if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Loading(
+                            Modifier.zIndex(1f)
+                                .padding(Size.small)
+                                .padding(top = contentPadding.calculateTopPadding())
+                                .align(Alignment.TopCenter)
                         )
                     }
+                } else if (displayScreenState.value.error != null) {
+                    EmptyScreen(
+                        icon = Icons.Default.ErrorOutline,
+                        iconSize = 176.dp,
+                        message = displayScreenState.value.error,
+                        actions =
+                            if (displayScreenState.value.page == 1)
+                                persistentListOf(Action(R.string.retry, retryClick))
+                            else persistentListOf(),
+                        contentPadding = incomingContentPadding,
+                    )
+                } else {
+                    if (displayScreenState.value.isList) {
+                        MangaList(
+                            mangaList = displayScreenState.value.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    } else {
+                        MangaGrid(
+                            mangaList = displayScreenState.value.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            columns =
+                                numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
+                            isComfortable = displayScreenState.value.isComfortableGrid,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    }
+                    if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
+                        Box(Modifier.fillMaxSize()) {
+                            LinearProgressIndicator(
+                                modifier =
+                                    Modifier.padding(
+                                            bottom =
+                                                contentPadding.calculateBottomPadding() + Size.small
+                                        )
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                            )
+                        }
+                    }
                 }
-            }
-        }
+            },
+        )
     }
 }

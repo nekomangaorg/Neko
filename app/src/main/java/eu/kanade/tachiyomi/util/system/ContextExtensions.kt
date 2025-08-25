@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -23,6 +24,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -44,6 +46,7 @@ import kotlin.math.max
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -67,6 +70,31 @@ fun Context.toast(@StringRes resource: Int, duration: Int = Toast.LENGTH_SHORT) 
  */
 fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, text.orEmpty(), duration).show()
+}
+
+/**
+ * Display a toast in this context.
+ *
+ * @param text the text to display.
+ * @param duration the duration of the toast. Defaults to short.
+ */
+fun Context.toast(text: UiText?, duration: Int = Toast.LENGTH_SHORT) {
+    val message =
+        when (text) {
+            null -> ""
+            is UiText.PluralsResource ->
+                this.resources.getQuantityString(text.resourceId, text.count, text.args)
+            is UiText.String -> text.str
+            is UiText.StringResource -> {
+                if (text.args.isEmpty()) {
+                    this.resources.getString(text.resourceId)
+                } else {
+                    this.resources.getString(text.resourceId, text.args)
+                }
+            }
+        }
+
+    Toast.makeText(this, message, duration).show()
 }
 
 /**
@@ -322,6 +350,17 @@ fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
 fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+}
+
+fun Context.getActivity(): AppCompatActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is AppCompatActivity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return null
 }
 
 suspend fun CoroutineWorker.tryToSetForeground() {

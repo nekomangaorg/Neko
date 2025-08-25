@@ -30,9 +30,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -47,7 +45,6 @@ import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.TabbedInterface
-import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -641,46 +638,7 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
 }
 
 val Controller.mainRecyclerView: RecyclerView?
-    get() = (this as? SettingsController)?.listView ?: (this as? BaseController<*>)?.mainRecycler
-
-fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: Boolean = false) {
-    if (activityBinding?.bigToolbar?.isVisible == false) return
-    val recycler = mainRecyclerView ?: return
-    val activityBinding = activityBinding ?: return
-    val appBarOffset = activityBinding.appBar.toolbarDistanceToTop
-    if (
-        allTheWayUp &&
-            recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
-                fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight
-    ) {
-        (recycler.layoutManager as? LinearLayoutManager)?.scrollToPosition(0)
-        (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPosition(0)
-        recycler.post {
-            activityBinding.appBar.updateAppBarAfterY(recycler)
-            activityBinding.appBar.useSearchToolbarForMenu(false)
-        }
-        return
-    }
-    if (
-        scrollUpAnyway ||
-            recycler.computeVerticalScrollOffset() - recycler.paddingTop <= 0 - appBarOffset
-    ) {
-        (recycler.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(
-            0,
-            activityBinding.appBar.yNeededForSmallToolbar,
-        )
-        (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPositionWithOffset(
-            0,
-            activityBinding.appBar.yNeededForSmallToolbar,
-        )
-        recycler.post {
-            activityBinding.appBar.updateAppBarAfterY(recycler)
-            activityBinding.appBar.useSearchToolbarForMenu(
-                recycler.computeVerticalScrollOffset() != 0
-            )
-        }
-    }
-}
+    get() = (this as? BaseController<*>)?.mainRecycler
 
 fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
     val context = view?.context ?: return
@@ -775,9 +733,6 @@ val Controller.fullAppBarHeight: Int?
 
 val Controller.isControllerVisible: Boolean
     get() = router.backstack.lastOrNull()?.controller == this
-
-val Controller.previousController: Controller?
-    get() = router.backstack.getOrNull(router.backstackSize - 2)?.controller
 
 @MainThread
 fun Router.canStillGoBack(): Boolean {

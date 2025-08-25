@@ -95,7 +95,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
-                                R.string.sync_follows_to_library_toast,
+                                R.string.pull_follows_to_library_toast,
                                 total,
                             ),
                             Toast.LENGTH_LONG,

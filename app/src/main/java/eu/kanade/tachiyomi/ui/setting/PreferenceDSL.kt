@@ -42,12 +42,6 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
     return initThenAdd(Preference(context), block)
 }
 
-inline fun PreferenceGroup.themePreference(
-    block: (@DSL ThemePreference).() -> Unit
-): ThemePreference {
-    return initThenAdd(ThemePreference(context), block)
-}
-
 inline fun PreferenceGroup.switchPreference(
     block: (@DSL SwitchPreferenceCompat).() -> Unit
 ): SwitchPreferenceCompat {
@@ -231,18 +225,20 @@ fun SwitchPreferenceCompat.requireAuthentication(
                     callback =
                         object : AuthenticatorUtil.AuthenticationCallback() {
                             override fun onAuthenticationSucceeded(
-                                result: BiometricPrompt.AuthenticationResult
+                                activity: FragmentActivity?,
+                                result: BiometricPrompt.AuthenticationResult,
                             ) {
-                                super.onAuthenticationSucceeded(result)
+                                super.onAuthenticationSucceeded(activity, result)
                                 isChecked = newValue
                             }
 
                             override fun onAuthenticationError(
+                                activity: FragmentActivity?,
                                 errorCode: Int,
                                 errString: CharSequence,
                             ) {
-                                super.onAuthenticationError(errorCode, errString)
-                                activity.toast(errString.toString())
+                                super.onAuthenticationError(activity, errorCode, errString)
+                                activity?.toast(errString.toString())
                             }
                         },
                 )
