@@ -114,7 +114,9 @@ class SearchActivity : MainActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
+
         reEnableBackPressedCallBack()
+
         setFloatingToolbar(canShowFloatingToolbar(to))
         nav.isVisible = false
         binding.bottomView?.isVisible = false
@@ -253,7 +255,7 @@ class SearchActivity : MainActivity() {
                 val settingsController = SettingsController()
                 settingsController.presenter.deepLink = Screens.Settings.Reader
                 router.replaceTopController(
-                    RouterTransaction.with(SettingsController())
+                    RouterTransaction.with(settingsController)
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler())
                 )

@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
@@ -56,6 +57,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
     val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main)
+    val wasDeepLink = remember(deepLink) { deepLink != null }
 
     NavDisplay(
         backStack = backStack,
@@ -100,7 +102,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 }
                 entry<Screens.Settings.Search> {
                     SettingsSearchScreen(
-                        onNavigationIconClicked = { reset(backStack) },
+                        onNavigationIconClicked = { reset(backStack, wasDeepLink, onBackPressed) },
                         navigate = { route ->
                             backStack.clear()
                             backStack.addAll(listOf(Screens.Settings.Main, route))
@@ -111,7 +113,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     val vm: SettingsViewModel = viewModel()
 
                     GeneralSettingsScreen(
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             preferencesHelper = vm.preferences,
                             showNotificationSetting = sdkMinimumO,
                             manageNotificationsClicked = {
@@ -123,7 +127,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 entry<Screens.Settings.Appearance> {
                     val vm: SettingsViewModel = viewModel()
                     AppearanceSettingsScreen(
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             preferences = vm.preferences,
                             mangaDetailsPreferences = vm.mangaDetailsPreferences,
                         )
@@ -132,7 +138,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 entry<Screens.Settings.Library> {
                     val vm: LibrarySettingsViewModel = viewModel()
                     LibrarySettingsScreen(
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             libraryPreferences = vm.libraryPreferences,
                             setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
                             categories = vm.allCategories.collectAsState().value,
@@ -156,7 +164,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     val vm: DataStorageSettingsViewModel = viewModel()
 
                     DataStorageSettingsScreen(
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             storagePreferences = vm.storagePreferences,
                             clearCache = vm::clearParentCache,
                             toastEvent = vm.toastEvent,
@@ -167,7 +177,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 entry<Screens.Settings.MangaDex> {
                     val vm: MangaDexSettingsViewModel = viewModel()
                     MangaDexSettingsScreen(
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             mangaDexPreferences = vm.mangaDexPreference,
                             mangaDexSettingsState = vm.state.collectAsState().value,
                             deleteSavedFilters = vm::deleteAllBrowseFilters,
@@ -180,7 +192,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     MergeSettingsScreen(
                             login = vm::login,
                             logout = vm::logout,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
                             loginEvent = vm.loginEvent,
                             komgaState = vm.komgaMergeScreenState.collectAsState().value,
                             suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
@@ -191,7 +205,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     val vm: ReaderSettingsViewModel = viewModel()
                     ReaderSettingsScreen(
                             readerPreferences = vm.readerPreferences,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -203,7 +217,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             preferences = vm.preferences,
                             readerPreferences = vm.readerPreferences,
                             allCategories = vm.allCategories.collectAsState().value,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -218,7 +232,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             loginEvent = vm.loginEvent,
                             login = vm::login,
                             logout = vm::logout,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -227,7 +241,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
                     SecuritySettingsScreen(
                             securityPreferences = vm.securityPreferences,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -242,7 +256,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             clearDatabase = vm::clearDatabase,
                             cleanupDownloads = vm::cleanupDownloads,
                             reindexDownloads = vm::reindexDownloads,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -258,7 +272,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             clearAllManga = vm::clearAllManga,
                             clearAllTrackers = vm::clearAllTrackers,
                             clearAllCategories = vm::clearAllCategories,
-                            onNavigationIconClick = { reset(backStack) },
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
                 }
@@ -266,9 +280,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     )
 }
 
-private fun reset(backstack: NavBackStack) {
-    backstack.clear()
-    backstack.add(Screens.Settings.Main)
+private fun reset(backstack: NavBackStack, wasDeepLink: Boolean, onBackPressed: () -> Unit) {
+    if (wasDeepLink) {
+        onBackPressed()
+    } else {
+        backstack.clear()
+        backstack.add(Screens.Settings.Main)
+    }
 }
 
 @SuppressLint("InlinedApi")
