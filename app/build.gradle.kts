@@ -78,9 +78,6 @@ android {
 }
 
 composeCompiler {
-    // Enable experimental compiler opts
-    // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
-    featureFlags.addAll(ComposeFeatureFlag.OptimizeNonSkippingGroups)
     val enableMetrics =
         project.providers.gradleProperty("enableComposeCompilerMetrics").orNull.toBoolean()
     val enableReports =
