@@ -476,8 +476,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         false -> emptyList()
                     }
 
-               val blockedGroups = mangaDexPreferences.blockedGroups().get()
-               val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
+                val blockedGroups = mangaDexPreferences.blockedGroups().get()
+                val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
                 val fetchedChapters =
                     (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })

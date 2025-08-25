@@ -58,7 +58,7 @@ class DisplayRepository(
                 }
                 .map { it.uuid }
         val blockedUploaderUUIDs =
-            preferenceHelper
+            mangaDexPreferences
                 .blockedUploaders()
                 .get()
                 .mapNotNull {
@@ -107,7 +107,7 @@ class DisplayRepository(
                 }
                 .map { it.uuid }
         val blockedUploaderUUIDs =
-            preferenceHelper
+            mangaDexPreferences
                 .blockedUploaders()
                 .get()
                 .mapNotNull {

@@ -99,7 +99,7 @@ class BrowseRepository(
                 }
             }
         val blockedUploaderUUIDs =
-            preferenceHelper.blockedUploaders().get().map {
+            mangaDexPreferences.blockedUploaders().get().map {
                 var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
                 if (uploaderImpl == null) {
                     mangaDex.getUploader(uploader = it).map { uploader ->

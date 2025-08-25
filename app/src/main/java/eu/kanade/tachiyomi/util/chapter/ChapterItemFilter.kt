@@ -133,7 +133,7 @@ class ChapterItemFilter(
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
         val blocked = blockedScanlators + blockedUploaders
 
-        val chapterScanlatorMatchAll = preferences.chapterScanlatorFilterOption().get() == 0
+        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
         val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
         SourceManager.mergeSourceNames

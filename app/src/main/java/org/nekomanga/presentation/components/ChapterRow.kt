@@ -244,7 +244,7 @@ private fun ChapterInfo(
 
         scanlators
             .map { if (it == "No Group") null to uploader else it to null }
-            .filterNot { it == null to null }
+            .filterNot { it == null to null || it == null to "" }
             .map { (scanlator, uploader) ->
                 SimpleDropDownItem.Action(
                     text = UiText.String(scanlator ?: uploader!!),
@@ -529,7 +529,7 @@ private fun getDropDownItems(
                 showScanlator,
                 listOf(
                     SimpleDropDownItem.Parent(
-                        text = UiText.StringResource(R.string.block_group),
+                        text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
                     )
                 ),

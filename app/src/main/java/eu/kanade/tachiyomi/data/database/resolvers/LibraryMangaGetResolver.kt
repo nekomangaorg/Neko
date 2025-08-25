@@ -56,12 +56,12 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
+        val blocked = blockedScanlators + blockedUploaders
 
         val chapterList =
-            list.filter {
+            list.filterNot {
                 val (scanlator, uploader) = it.split(" [;] ")
-                !ChapterUtil.filterByGroup(scanlators, false, blockedScanlators) &&
-                    (!scanlator.contains("No Group") || uploader !in blockedUploaders)
+                ChapterUtil.filterByGroup(scanlator, uploader, false, blocked.toMutableSet())
             }
 
         return when (manga.filtered_scanlators == null) {
@@ -84,11 +84,13 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                             )
                         }
                     }
-                    .filterNot { scanlators ->
+                    .filterNot { pairs ->
+                        val (scanlator, uploader) = pairs.split(" [;] ")
                         ChapterUtil.filterByGroup(
-                            scanlators,
+                            scanlator,
+                            uploader,
                             chapterScanlatorMatchAll,
-                            filteredScanlators,
+                            filteredScanlators.toMutableSet(),
                         )
                     }
                     .size
