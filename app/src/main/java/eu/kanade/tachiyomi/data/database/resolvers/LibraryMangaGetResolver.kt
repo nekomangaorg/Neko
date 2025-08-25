@@ -7,13 +7,12 @@ import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGetResolver {

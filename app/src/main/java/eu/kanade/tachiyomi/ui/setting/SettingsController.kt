@@ -14,7 +14,12 @@ class SettingsController : BaseComposeController<SettingsPresenter>() {
         SettingsScreen(
             windowSizeClass = windowSizeClass,
             deepLink = presenter.deepLink,
-            onBackPressed = { router.handleBack() },
+            onBackPressed = {
+                when (router.backstackSize > 1) {
+                    true -> router.handleBack()
+                    false -> activity?.onBackPressed()
+                }
+            },
         )
     }
 }
