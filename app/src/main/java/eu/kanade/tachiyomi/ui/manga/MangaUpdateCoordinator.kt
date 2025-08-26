@@ -32,6 +32,7 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
@@ -266,7 +267,7 @@ class MangaUpdateCoordinator {
                     val scanlators = it.chapter.scanlatorList()
                     !it.isDownloaded &&
                         scanlators.none { scanlator -> scanlator in blockedScanlators } &&
-                        ("No Group" !in scanlators || it.chapter.uploader !in blockedUploaders)
+                        (Constants.NO_GROUP !in scanlators || it.chapter.uploader !in blockedUploaders)
                 }
                 .map { it.chapter.toDbChapter() },
         )

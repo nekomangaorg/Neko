@@ -243,7 +243,7 @@ private fun ChapterInfo(
         }
 
         scanlators
-            .map { if (it == "No Group") null to uploader else it to null }
+            .map { if (it == Constants.NO_GROUP) null to uploader else it to null }
             .filterNot { it == null to null || it == null to "" }
             .map { (scanlator, uploader) ->
                 SimpleDropDownItem.Action(

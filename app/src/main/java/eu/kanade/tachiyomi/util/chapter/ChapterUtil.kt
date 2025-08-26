@@ -141,13 +141,13 @@ class ChapterUtil {
 
             if (uploaderStr.isNotEmpty()) {
                 // Check uploaders if there is no group
-                if ("No Group" in scanlators) {
+                if (Constants.NO_GROUP in scanlators) {
                     scanlators.add(uploaderStr)
                     filtered += filteredUploaders
                 }
                 // Match all should ignore No Group if uploader is filtered
-                if (all && uploaderStr.isNotEmpty() && "No Group" !in filteredGroups) {
-                    scanlators.remove("No Group")
+                if (all && uploaderStr.isNotEmpty() && Constants.NO_GROUP !in filteredGroups) {
+                    scanlators.remove(Constants.NO_GROUP)
                 }
             }
 

@@ -776,7 +776,7 @@ class MangaDetailPresenter(
                     .filter {
                         val scanlators = it.scanlatorList()
                         scanlators.none { scanlator -> blockedScanlators.contains(scanlator) } &&
-                            ("No Group" !in scanlators || it.uploader !in blockedUploaders)
+                            (Constants.NO_GROUP !in scanlators || it.uploader !in blockedUploaders)
                     }
                     .map { chapter ->
                         val downloadState =

@@ -86,6 +86,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
@@ -488,7 +489,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         .filter {
                             val scanlators = ChapterUtil.getScanlators(it.scanlator)
                             scanlators.none { scanlator -> scanlator in blockedGroups } &&
-                                ("No Group" !in scanlators || it.uploader !in blockedUploaders)
+                                (Constants.NO_GROUP !in scanlators || it.uploader !in blockedUploaders)
                         }
 
                 // delete cover cache image if the thumbnail from network is not empty

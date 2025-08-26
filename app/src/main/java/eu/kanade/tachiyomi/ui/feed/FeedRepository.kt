@@ -22,6 +22,7 @@ import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -63,7 +64,7 @@ class FeedRepository(
                 }
                 .filterNot {
                     it.chapter.uploader in blockedUploaders &&
-                        "No Group" !in it.chapter.scanlatorList()
+                        Constants.NO_GROUP !in it.chapter.scanlatorList()
                 }
                 .toPersistentList()
 
@@ -153,7 +154,7 @@ class FeedRepository(
                                 scanlators.fastAny { scanlator ->
                                     scanlator in blockedScanlators
                                 } ||
-                                    ("No Group" in scanlators &&
+                                    (Constants.NO_GROUP in scanlators &&
                                         chapter.chapter.uploader in blockedUploaders)
                             ) {
                                 return@mapNotNull null
@@ -251,7 +252,7 @@ class FeedRepository(
                                 }
                                 .filterNot {
                                     it.uploader in blockedUploaders &&
-                                        "No Group" in it.scanlatorList()
+                                        Constants.NO_GROUP in it.scanlatorList()
                                 }
 
                         if (chapters.any { it.read || it.last_page_read != 0 }) {
@@ -455,7 +456,7 @@ class FeedRepository(
                                 scanlators.fastAny { scanlator ->
                                     scanlator in blockedScanlators
                                 } ||
-                                    ("No Group" in scanlators &&
+                                    (Constants.NO_GROUP in scanlators &&
                                         chapterItem.chapter.uploader in blockedUploaders)
                             ) {
                                 return@mapNotNull null
