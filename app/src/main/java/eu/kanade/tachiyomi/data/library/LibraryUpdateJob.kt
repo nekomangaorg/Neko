@@ -559,8 +559,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                                 // only download scanlators not filtered out
                                 chaptersToDl =
-                                    chaptersToDl.filter {
-                                        it.scanlator !in toIgnore && it.uploader !in toIgnore
+                                    chaptersToDl.filterNot {
+                                        val scanlatorMatchAll =
+                                            libraryPreferences
+                                                .chapterScanlatorFilterOption()
+                                                .get() == 0
+                                        ChapterUtil.filterByScanlator(
+                                            it.scanlator ?: "",
+                                            it.uploader ?: "",
+                                            scanlatorMatchAll,
+                                            toIgnore,
+                                        )
                                     }
                             }
 
