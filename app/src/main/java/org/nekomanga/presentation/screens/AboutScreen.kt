@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,19 +33,25 @@ import compose.icons.SimpleIcons
 import compose.icons.simpleicons.Discord
 import compose.icons.simpleicons.Github
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
+import eu.kanade.tachiyomi.data.updater.REPO_URL
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.util.system.isOnline
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.DISCORD_URL
+import org.nekomanga.constants.Constants.PRIVACY_POLICY_URL
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.PreferenceRow
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.snackbar.snackbarHost
+import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -99,74 +106,84 @@ fun AboutScreen(
                 )
             }
 
-            LazyColumn(contentPadding = contentPadding) {
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = Size.medium),
+                verticalArrangement = Arrangement.spacedBy(Size.extraTiny),
+            ) {
                 item { LogoHeader() }
                 item { Spacer(modifier = Modifier.size(Size.large)) }
                 item {
-                    PreferenceRow(
-                        title = stringResource(R.string.version),
-                        subtitle =
-                            when {
-                                BuildConfig.DEBUG -> {
-                                    "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
-                                }
+                    ExpressiveListCard(listCardType = ListCardType.Top) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.version),
+                            subtitle =
+                                when {
+                                    BuildConfig.DEBUG -> {
+                                        "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
+                                    }
 
-                                else -> {
-                                    "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
+                                    else -> {
+                                        "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
+                                    }
+                                },
+                            onPreferenceClick = { onVersionClicked(context) },
+                        )
+                    }
+                }
+
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.check_for_updates),
+                            onPreferenceClick = {
+                                if (!context.isOnline()) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.no_network_connection),
+                                            withDismissAction = true,
+                                        )
+                                    }
+                                } else {
+                                    checkForUpdate(context)
                                 }
                             },
-                        onClick = { onVersionClicked(context) },
-                    )
+                        )
+                    }
+                }
+                item {
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.whats_new),
+                            onPreferenceClick = {
+                                val url =
+                                    if (BuildConfig.DEBUG) {
+                                        LATEST_COMMIT_URL
+                                    } else {
+                                        RELEASE_URL
+                                    }
+                                uriHandler.openUri(url)
+                            },
+                        )
+                    }
                 }
 
                 item {
-                    PreferenceRow(
-                        title = stringResource(R.string.check_for_updates),
-                        onClick = {
-                            if (!context.isOnline()) {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        context.getString(R.string.no_network_connection),
-                                        withDismissAction = true,
-                                    )
-                                }
-                            } else {
-                                checkForUpdate(context)
-                            }
-                        },
-                    )
-                }
-                item {
-                    PreferenceRow(
-                        title = stringResource(R.string.whats_new),
-                        onClick = {
-                            val url =
-                                if (BuildConfig.DEBUG) {
-                                    "https://github.com/nekomangaorg/Neko/commits/master"
-                                } else {
-                                    RELEASE_URL
-                                }
-                            uriHandler.openUri(url)
-                        },
-                    )
+                    ExpressiveListCard(listCardType = ListCardType.Center) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.open_source_licenses),
+                            onPreferenceClick = onClickLicenses,
+                        )
+                    }
                 }
 
                 item {
-                    PreferenceRow(
-                        title = stringResource(R.string.open_source_licenses),
-                        onClick = onClickLicenses,
-                    )
+                    ExpressiveListCard(listCardType = ListCardType.Bottom) {
+                        TextPreferenceWidget(
+                            title = stringResource(R.string.privacy_policy),
+                            onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
+                        )
+                    }
                 }
-
-                item {
-                    PreferenceRow(
-                        title = stringResource(R.string.privacy_policy),
-                        onClick = {
-                            uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy")
-                        },
-                    )
-                }
-                item { Spacer(modifier = Modifier.size(16.dp)) }
 
                 item {
                     FlowRow(
@@ -178,13 +195,13 @@ fun AboutScreen(
                             label = "Discord",
                             modifier = modifier,
                             icon = SimpleIcons.Discord,
-                            url = "https://discord.gg/4vmK42QuKG",
+                            url = DISCORD_URL,
                         )
                         LinkIcon(
                             modifier = modifier,
                             label = "GitHub",
                             icon = SimpleIcons.Github,
-                            url = "https://nekomanga.org/",
+                            url = REPO_URL,
                         )
                     }
                 }
@@ -196,11 +213,11 @@ fun AboutScreen(
 @Composable
 private fun LogoHeader() {
     Column {
-        Surface(modifier = Modifier.fillMaxWidth().padding(top = 30.dp)) {
+        Surface(modifier = Modifier.fillMaxWidth().padding(top = Size.huge)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_neko_yokai),
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier.size(Size.extraExtraHuge * 2),
                 contentDescription = null,
             )
         }

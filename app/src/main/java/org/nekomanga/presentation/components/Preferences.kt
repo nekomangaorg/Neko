@@ -1,32 +1,19 @@
 package org.nekomanga.presentation.components
 
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import org.nekomanga.presentation.theme.Size
-import org.nekomanga.presentation.theme.Size.medium
 
 @Composable
 fun Divider(modifier: Modifier = Modifier) {
-    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), modifier = modifier)
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -35,53 +22,4 @@ fun VerticalDivider(modifier: Modifier = Modifier) {
         modifier = Modifier.fillMaxHeight().width(1.dp).then(modifier),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
-}
-
-@Composable
-fun PreferenceRow(
-    title: String,
-    painter: Painter? = null,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
-    subtitle: String? = null,
-    action: @Composable (() -> Unit)? = null,
-) {
-    val height = if (subtitle != null) 72.dp else 56.dp
-
-    val titleTextStyle =
-        MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
-    val subtitleTextStyle =
-        MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-        )
-
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .heightIn(min = height)
-                .combinedClickable(onLongClick = onLongClick, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (painter != null) {
-            Icon(
-                painter = painter,
-                modifier = Modifier.padding(horizontal = medium).size(24.dp),
-                tint = MaterialTheme.colorScheme.primary,
-                contentDescription = null,
-            )
-        }
-        Column(Modifier.padding(horizontal = medium).weight(1f)) {
-            Text(text = title, style = titleTextStyle)
-            if (subtitle != null) {
-                Text(
-                    modifier = Modifier.padding(top = Size.tiny),
-                    text = subtitle,
-                    style = subtitleTextStyle,
-                )
-            }
-        }
-        if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp)) { action() }
-        }
-    }
 }

@@ -5,6 +5,10 @@ object Constants {
 
     const val DONT_KILL_MY_APP_URL = "https://dontkillmyapp.com/"
 
+    const val PRIVACY_POLICY_URL = "https://github.com/nekomangaorg/privacy_policy"
+
+    const val DISCORD_URL = "https://discord.gg/4vmK42QuKG"
+
     const val NO_GROUP = "No Group"
 
     const val LOCAL_SOURCE = "Local"
