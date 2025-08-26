@@ -28,6 +28,7 @@ object MangaConstants {
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val allUploaders: ImmutableSet<String> = persistentSetOf(),
         val allSources: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
         val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),

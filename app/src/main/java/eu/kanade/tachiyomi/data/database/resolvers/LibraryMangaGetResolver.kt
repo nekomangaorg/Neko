@@ -56,19 +56,24 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
         val blockedScanlators = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
-        val blocked = blockedScanlators + blockedUploaders
 
         val chapterList =
             list.filterNot {
                 val (scanlator, uploader) = it.split(" [;] ")
-                ChapterUtil.filterByGroup(scanlator, uploader, false, blocked.toMutableSet())
+                ChapterUtil.filterByScanlator(
+                    scanlator,
+                    uploader,
+                    false,
+                    blockedScanlators,
+                    blockedUploaders,
+                )
             }
 
         return when (manga.filtered_scanlators == null) {
             true -> chapterList.size
             false -> {
-                val filteredScanlators =
-                    ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+                // Filtered sources, groups and uploaders
+                val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
                 val chapterScanlatorMatchAll =
                     libraryPreferences.chapterScanlatorFilterOption().get() == 0
                 val sources = SourceManager.mergeSourceNames + MdConstants.name
@@ -80,17 +85,18 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                                 scanlators,
                                 MergeType.containsMergeSourceName(scanlators),
                                 scanlators == Constants.LOCAL_SOURCE,
-                                filteredScanlators,
+                                filtered,
                             )
                         }
                     }
                     .filterNot { pairs ->
                         val (scanlator, uploader) = pairs.split(" [;] ")
-                        ChapterUtil.filterByGroup(
+                        ChapterUtil.filterByScanlator(
                             scanlator,
                             uploader,
                             chapterScanlatorMatchAll,
-                            filteredScanlators.toMutableSet(),
+                            filtered,
+                            emptySet(),
                         )
                     }
                     .size

@@ -75,16 +75,16 @@ class ChapterUtil {
          */
         fun filteredBySource(
             sourceName: String,
-            scanlatorStr: String,
+            groupStr: String,
             isMerged: Boolean,
             isLocal: Boolean,
-            filteredGroups: Set<String>,
+            filteredSources: Set<String>,
         ): Boolean {
-            if (filteredGroups.isEmpty()) {
+            if (filteredSources.isEmpty()) {
                 return false
             }
 
-            val shouldCheck = sourceName in filteredGroups
+            val shouldCheck = sourceName in filteredSources
             if (!shouldCheck) {
                 return false
             }
@@ -105,7 +105,7 @@ class ChapterUtil {
                 return false
             }
 
-            return getScanlators(scanlatorStr).any { group -> group == sourceName }
+            return getScanlators(groupStr).any { group -> group == sourceName }
         }
 
         /**
@@ -126,24 +126,27 @@ class ChapterUtil {
          * the any filter is used. if the all filter is used then all the groups for the chapter
          * need to be in the group set.
          */
-        fun filterByGroup(
-            scanlatorStr: String,
+        fun filterByScanlator(
+            groupStr: String,
             uploaderStr: String,
             all: Boolean,
-            filtered: MutableSet<String>,
+            filteredGroups: Set<String>,
+            filteredUploaders: Set<String>,
         ): Boolean {
             val scanlators =
-                getScanlators(scanlatorStr)
+                getScanlators(groupStr)
                     .filterNot { it in SourceManager.mergeSourceNames }
                     .toMutableList()
+            val filtered = filteredGroups.toMutableSet()
 
             if (uploaderStr.isNotEmpty()) {
                 // Check uploaders if there is no group
                 if ("No Group" in scanlators) {
                     scanlators.add(uploaderStr)
+                    filtered += filteredUploaders
                 }
                 // Match all should ignore No Group if uploader is filtered
-                if (all && "No Group" !in filtered) {
+                if (all && uploaderStr.isNotEmpty() && "No Group" !in filteredGroups) {
                     scanlators.remove("No Group")
                 }
             }

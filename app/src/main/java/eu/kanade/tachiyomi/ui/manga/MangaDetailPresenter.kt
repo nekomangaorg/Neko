@@ -82,6 +82,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -815,6 +816,15 @@ class MangaDetailPresenter(
                 allChapters
                     .flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }
                     .toMutableSet()
+            val allChapterUploaders =
+                allChapters
+                    .mapNotNull {
+                        if (it.chapter.uploader.isEmpty()) return@mapNotNull null
+                        if (it.chapter.scanlator != Constants.NO_GROUP) return@mapNotNull null
+                        it.chapter.uploader
+                    }
+                    .toSet()
+
             if (
                 allChapterScanlators.size == 1 &&
                     !currentManga().filtered_scanlators.isNullOrEmpty()
@@ -840,6 +850,7 @@ class MangaDetailPresenter(
                             .toImmutableList(),
                     allChapters = allChapters.toImmutableList(),
                     allScanlators = allChapterScanlators.toImmutableSet(),
+                    allUploaders = allChapterUploaders.toImmutableSet(),
                     allSources = allSources.toImmutableSet(),
                     allLanguages = allLanguages.toImmutableSet(),
                 )
@@ -1199,7 +1210,7 @@ class MangaDetailPresenter(
         val filteredScanlators =
             ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions =
-            generalState.value.allScanlators
+            (generalState.value.allScanlators + generalState.value.allUploaders)
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
                 .map { scanlator ->
                     MangaConstants.ScanlatorOption(

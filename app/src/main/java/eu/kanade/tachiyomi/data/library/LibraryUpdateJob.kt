@@ -552,13 +552,16 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
 
                             if (manga.filtered_scanlators != null) {
-                                val scanlatorsToIgnore =
+                                //  Ignored sources, groups and uploaders
+                                val toIgnore =
                                     ChapterUtil.getScanlators(manga.filtered_scanlators)
                                         .toMutableSet()
 
                                 // only download scanlators not filtered out
                                 chaptersToDl =
-                                    chaptersToDl.filter { it.scanlator !in scanlatorsToIgnore }
+                                    chaptersToDl.filter {
+                                        it.scanlator !in toIgnore && it.uploader !in toIgnore
+                                    }
                             }
 
                             downloadChapters(manga, chaptersToDl)

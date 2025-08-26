@@ -159,11 +159,13 @@ class ChapterFilter(
 
         val blockedScanlators = mangaDexPreferences.blockedGroups().get().toSet()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
-        val blocked = blockedScanlators + blockedUploaders
-        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
-        val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+
+        // Filtered sources, groups and uploaders
+        val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
+
         val sources = SourceManager.mergeSourceNames + MdConstants.name
+        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
 
         return chapters
             .asSequence()
@@ -174,7 +176,7 @@ class ChapterFilter(
                         chapter.scanlator ?: "",
                         chapter.isMergedChapter(),
                         chapter.isLocalSource(),
-                        filteredGroups,
+                        filtered,
                     )
                 }
             }
@@ -183,19 +185,21 @@ class ChapterFilter(
             }
             // blocked groups are always Any
             .filterNot { chapter ->
-                ChapterUtil.filterByGroup(
+                ChapterUtil.filterByScanlator(
                     chapter.scanlator ?: "",
                     chapter.uploader ?: "",
                     false,
-                    blocked.toMutableSet(),
+                    blockedScanlators,
+                    blockedUploaders,
                 )
             }
             .filterNot { chapter ->
-                ChapterUtil.filterByGroup(
+                ChapterUtil.filterByScanlator(
                     chapter.scanlator ?: "",
                     chapter.uploader ?: "",
                     chapterScanlatorMatchAll,
-                    filteredGroups.toMutableSet(),
+                    filtered,
+                    emptySet(),
                 )
             }
             .toList()
