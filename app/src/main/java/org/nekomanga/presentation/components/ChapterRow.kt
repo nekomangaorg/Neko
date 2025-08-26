@@ -55,6 +55,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
@@ -100,7 +101,7 @@ fun ChapterRow(
     onWebView: () -> Unit,
     onComment: () -> Unit,
     onRead: () -> Unit,
-    blockScanlator: (String?, String?) -> Unit,
+    blockScanlator: (MangaConstants.BlockType, String) -> Unit,
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
@@ -228,7 +229,7 @@ private fun ChapterInfo(
     isMerged: Boolean = false,
     isLocal: Boolean = false,
     isUnavailable: Boolean,
-    blockScanlator: (String?, String?) -> Unit,
+    blockScanlator: (MangaConstants.BlockType, String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
 
@@ -245,10 +246,17 @@ private fun ChapterInfo(
         scanlators
             .map { if (it == Constants.NO_GROUP) null to uploader else it to null }
             .filterNot { it == null to null || it == null to "" }
-            .map { (scanlator, uploader) ->
+            .map { (group, uploader) ->
                 SimpleDropDownItem.Action(
-                    text = UiText.String(scanlator ?: uploader!!),
-                    onClick = { blockScanlator(scanlator, uploader) },
+                    text = UiText.String(group ?: uploader!!),
+                    onClick = {
+                        if (group != null) {
+                            blockScanlator(MangaConstants.BlockType.Group, group)
+                        }
+                        if (uploader != null) {
+                            blockScanlator(MangaConstants.BlockType.Uploader, uploader)
+                        }
+                    },
                 )
             }
             .toImmutableList()
