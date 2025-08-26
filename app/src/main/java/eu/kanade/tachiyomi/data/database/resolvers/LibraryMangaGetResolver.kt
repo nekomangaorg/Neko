@@ -74,7 +74,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
             false -> {
                 // Filtered sources, groups and uploaders
                 val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
-                val chapterScanlatorMatchAll =
+                val scanlatorMatchAll =
                     libraryPreferences.chapterScanlatorFilterOption().get() == 0
                 val sources = SourceManager.mergeSourceNames + MdConstants.name
                 chapterList
@@ -94,9 +94,8 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                         ChapterUtil.filterByScanlator(
                             scanlator,
                             uploader,
-                            chapterScanlatorMatchAll,
+                            scanlatorMatchAll,
                             filtered,
-                            emptySet(),
                         )
                     }
                     .size

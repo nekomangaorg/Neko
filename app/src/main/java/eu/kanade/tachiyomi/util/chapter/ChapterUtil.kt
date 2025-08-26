@@ -131,7 +131,7 @@ class ChapterUtil {
             uploaderStr: String,
             all: Boolean,
             filteredGroups: Set<String>,
-            filteredUploaders: Set<String>,
+            filteredUploaders: Set<String> = emptySet(),
         ): Boolean {
             val scanlators =
                 getScanlators(groupStr)

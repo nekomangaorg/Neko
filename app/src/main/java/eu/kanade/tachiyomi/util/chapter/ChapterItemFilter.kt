@@ -137,7 +137,7 @@ class ChapterItemFilter(
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
         val sources = SourceManager.mergeSourceNames + MdConstants.name
-        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
+        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
 
         return chapters
             .asSequence()
@@ -169,9 +169,8 @@ class ChapterItemFilter(
                 ChapterUtil.filterByScanlator(
                     chapterItem.chapter.scanlator,
                     chapterItem.chapter.uploader,
-                    chapterScanlatorMatchAll,
-                    filtered.toMutableSet(),
-                    emptySet(),
+                    scanlatorMatchAll,
+                    filtered,
                 )
             }
             .toList()
