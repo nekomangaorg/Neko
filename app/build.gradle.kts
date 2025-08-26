@@ -10,8 +10,8 @@ plugins {
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
-    // apply(mapOf("plugin" to "com.google.gms.google-services"))
-    // apply(mapOf("plugin" to "com.google.firebase.crashlytics"))
+    apply(mapOf("plugin" to "com.google.gms.google-services"))
+    apply(mapOf("plugin" to "com.google.firebase.crashlytics"))
 }
 
 val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
