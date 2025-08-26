@@ -121,4 +121,4 @@ class SimilarRepository {
     }
 }
 
-data class SimilarMangaGroup(@StringRes val type: Int, val manga: List<DisplayManga>)
+data class SimilarMangaGroup(@param:StringRes val type: Int, val manga: List<DisplayManga>)

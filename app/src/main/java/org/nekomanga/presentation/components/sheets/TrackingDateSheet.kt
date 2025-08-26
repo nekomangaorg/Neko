@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lanars.compose.datetextfield.DateTextField
 import com.lanars.compose.datetextfield.Format
-import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
@@ -46,6 +45,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
+import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size

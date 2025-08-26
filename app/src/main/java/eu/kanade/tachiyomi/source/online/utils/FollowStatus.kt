@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import java.util.Locale
 import org.nekomanga.constants.R
 
-enum class FollowStatus(val int: Int, @StringRes val stringRes: Int) {
+enum class FollowStatus(val int: Int, @param:StringRes val stringRes: Int) {
     UNFOLLOWED(0, R.string.follows_unfollowed),
     READING(1, R.string.follows_reading),
     COMPLETED(2, R.string.follows_completed),

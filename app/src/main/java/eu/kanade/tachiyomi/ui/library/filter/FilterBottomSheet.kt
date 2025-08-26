@@ -583,7 +583,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             private set
     }
 
-    enum class Filters(val value: Char, @StringRes val stringRes: Int) {
+    enum class Filters(val value: Char, @param:StringRes val stringRes: Int) {
         UnreadProgress('u', R.string.read_progress),
         Unread('r', R.string.unread),
         Downloaded('d', R.string.downloaded),

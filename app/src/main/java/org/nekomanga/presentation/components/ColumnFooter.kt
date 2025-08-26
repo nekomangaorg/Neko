@@ -23,7 +23,6 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
-import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColorState

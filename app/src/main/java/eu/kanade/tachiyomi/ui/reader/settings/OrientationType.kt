@@ -8,8 +8,8 @@ import org.nekomanga.R
 enum class OrientationType(
     val prefValue: Int,
     val flag: Int,
-    @StringRes val stringRes: Int,
-    @DrawableRes val iconRes: Int,
+    @param:StringRes val stringRes: Int,
+    @param:DrawableRes val iconRes: Int,
     val flagValue: Int = prefValue shl OrientationType.SHIFT,
 ) {
     DEFAULT(

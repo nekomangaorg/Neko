@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.Divider
 import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
@@ -35,6 +34,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.CheckboxRow
+import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState

@@ -12,8 +12,8 @@ import androidx.annotation.Dimension
  * A class that draws the outlines of a text when given a stroke color and stroke width.
  */
 class OutlineSpan(
-    @ColorInt private val strokeColor: Int,
-    @Dimension private val strokeWidth: Float,
+    @param:ColorInt private val strokeColor: Int,
+    @param:Dimension private val strokeWidth: Float,
 ) : ReplacementSpan() {
 
     override fun getSize(

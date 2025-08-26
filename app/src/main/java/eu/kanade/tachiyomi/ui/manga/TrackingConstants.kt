@@ -41,7 +41,7 @@ object TrackingConstants {
 
         class Success(val trackSearchResult: ImmutableList<TrackSearchItem>) : TrackSearchResult()
 
-        class Error(val errorMessage: String, @StringRes val trackerNameRes: Int) :
+        class Error(val errorMessage: String, @param:StringRes val trackerNameRes: Int) :
             TrackSearchResult()
     }
 

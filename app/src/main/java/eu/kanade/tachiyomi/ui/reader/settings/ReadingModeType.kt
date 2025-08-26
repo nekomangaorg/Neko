@@ -7,8 +7,8 @@ import org.nekomanga.R
 
 enum class ReadingModeType(
     val prefValue: Int,
-    @StringRes val stringRes: Int,
-    @DrawableRes val iconRes: Int,
+    @param:StringRes val stringRes: Int,
+    @param:DrawableRes val iconRes: Int,
     val flagValue: Int = prefValue shl ReadingModeType.SHIFT,
 ) {
     DEFAULT(0, R.string.default_value, R.drawable.ic_reader_default_24dp),

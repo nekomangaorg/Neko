@@ -10,10 +10,13 @@ sealed class UiText {
 
     data class String(val str: kotlin.String) : UiText()
 
-    class PluralsResource(@PluralsRes val resourceId: Int, val count: Int, vararg val args: Any) :
-        UiText()
+    class PluralsResource(
+        @param:PluralsRes val resourceId: Int,
+        val count: Int,
+        vararg val args: Any,
+    ) : UiText()
 
-    class StringResource(@StringRes val resourceId: Int, vararg val args: Any) : UiText()
+    class StringResource(@param:StringRes val resourceId: Int, vararg val args: Any) : UiText()
 
     @Composable
     fun asString(): kotlin.String {

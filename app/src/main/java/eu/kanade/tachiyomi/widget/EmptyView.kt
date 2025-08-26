@@ -109,5 +109,5 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         this.isVisible = true
     }
 
-    data class Action(@StringRes val resId: Int, val listener: OnClickListener)
+    data class Action(@param:StringRes val resId: Int, val listener: OnClickListener)
 }

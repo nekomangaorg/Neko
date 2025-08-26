@@ -50,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.graphics.ColorUtils
-import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -75,6 +74,7 @@ import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.nekoRippleConfiguration

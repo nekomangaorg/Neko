@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.theme.Size
 
 /** Column scoped header with a cancel button */

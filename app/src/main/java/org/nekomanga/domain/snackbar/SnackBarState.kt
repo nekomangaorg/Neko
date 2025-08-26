@@ -6,12 +6,12 @@ import androidx.compose.material3.SnackbarDuration
 
 data class SnackbarState(
     val message: String? = null,
-    @StringRes val messageRes: Int? = null,
-    @StringRes val fieldRes: Int? = null,
-    @StringRes val prefixRes: Int? = null,
+    @param:StringRes val messageRes: Int? = null,
+    @param:StringRes val fieldRes: Int? = null,
+    @param:StringRes val prefixRes: Int? = null,
     val actionLabel: String? = null,
     val snackbarDuration: SnackbarDuration = SnackbarDuration.Short,
-    @StringRes val actionLabelRes: Int? = null,
+    @param:StringRes val actionLabelRes: Int? = null,
     val action: (() -> Unit)? = null,
     val dismissAction: (() -> Unit)? = null,
 ) {

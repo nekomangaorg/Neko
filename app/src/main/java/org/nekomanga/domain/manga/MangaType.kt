@@ -3,7 +3,7 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import org.nekomanga.R
 
-enum class MangaType(@StringRes val typeRes: Int) {
+enum class MangaType(@param:StringRes val typeRes: Int) {
     Manhua(R.string.manhua),
     Manhwa(R.string.manhwa),
     Manga(R.string.manga),

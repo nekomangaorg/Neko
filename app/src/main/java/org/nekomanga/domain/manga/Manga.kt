@@ -10,7 +10,7 @@ data class SourceManga(
     val url: String,
     val title: String,
     val displayText: String = "",
-    @StringRes val displayTextRes: Int? = null,
+    @param:StringRes val displayTextRes: Int? = null,
 )
 
 data class DisplayManga(
@@ -21,7 +21,7 @@ data class DisplayManga(
     val title: String,
     val displayText: String = "",
     val isVisible: Boolean = true,
-    @StringRes val displayTextRes: Int? = null,
+    @param:StringRes val displayTextRes: Int? = null,
 )
 
 data class MergeArtwork(val url: String, val mergeType: MergeType)

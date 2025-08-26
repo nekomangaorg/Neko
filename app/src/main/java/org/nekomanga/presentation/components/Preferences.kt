@@ -1,4 +1,4 @@
-package eu.kanade.presentation.components
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,15 +26,12 @@ import org.nekomanga.presentation.theme.Size.medium
 
 @Composable
 fun Divider(modifier: Modifier = Modifier) {
-    androidx.compose.material3.Divider(
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-        modifier = modifier,
-    )
+    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f), modifier = modifier)
 }
 
 @Composable
 fun VerticalDivider(modifier: Modifier = Modifier) {
-    androidx.compose.material3.Divider(
+    HorizontalDivider(
         modifier = Modifier.fillMaxHeight().width(1.dp).then(modifier),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
@@ -86,23 +85,3 @@ fun PreferenceRow(
         }
     }
 }
-
-/*@Composable
-fun SwitchPreference(
-    preference: PreferenceMutableState<Boolean>,
-    title: String,
-    subtitle: String? = null,
-    painter: Painter? = null,
-) {
-    PreferenceRow(
-        title = title,
-        subtitle = subtitle,
-        painter = painter,
-        action = {
-            Switch(checked = preference.value, onCheckedChange = null)
-            // TODO: remove this once switch checked state is fixed: https://issuetracker.google.com/issues/228336571
-            Text(preference.value.toString())
-        },
-        onClick = { preference.value = !preference.value },
-    )
-}*/

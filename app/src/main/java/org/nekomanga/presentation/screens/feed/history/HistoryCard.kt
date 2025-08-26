@@ -37,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
@@ -46,6 +45,7 @@ import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem

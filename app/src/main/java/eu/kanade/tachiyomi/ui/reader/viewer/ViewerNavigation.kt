@@ -7,7 +7,7 @@ import org.nekomanga.R
 
 abstract class ViewerNavigation {
 
-    sealed class NavigationRegion(@StringRes val nameRes: Int, val colorRes: Int) {
+    sealed class NavigationRegion(@param:StringRes val nameRes: Int, val colorRes: Int) {
         object MENU : NavigationRegion(R.string.menu, R.color.navigation_menu)
 
         object PREV : NavigationRegion(R.string.previous, R.color.navigation_prev)

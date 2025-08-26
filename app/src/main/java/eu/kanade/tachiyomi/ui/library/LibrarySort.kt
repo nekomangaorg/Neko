@@ -7,11 +7,11 @@ import org.nekomanga.R
 
 enum class LibrarySort(
     val mainValue: Int,
-    @StringRes private val stringRes: Int,
-    @DrawableRes private val iconRes: Int,
+    @param:StringRes private val stringRes: Int,
+    @param:DrawableRes private val iconRes: Int,
     private val catValue: Int = mainValue,
-    @StringRes private val dynamicStringRes: Int = stringRes,
-    @DrawableRes private val dynamicIconRes: Int = iconRes,
+    @param:StringRes private val dynamicStringRes: Int = stringRes,
+    @param:DrawableRes private val dynamicIconRes: Int = iconRes,
 ) {
 
     Title(0, R.string.title, R.drawable.ic_sort_by_alpha_24dp),

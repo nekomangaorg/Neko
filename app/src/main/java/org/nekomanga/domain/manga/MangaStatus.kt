@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 
-enum class MangaStatus(val status: Int, @StringRes val statusRes: Int, val key: String = "") {
+enum class MangaStatus(val status: Int, @param:StringRes val statusRes: Int, val key: String = "") {
     Unknown(0, R.string.unknown),
     Ongoing(1, R.string.ongoing, MdConstants.Status.ongoing),
     Completed(2, R.string.completed, MdConstants.Status.completed),

@@ -86,7 +86,7 @@ object MangaConstants {
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
     data class NextUnreadChapter(
-        @StringRes val id: Int? = null,
+        @param:StringRes val id: Int? = null,
         val text: String = "",
         val simpleChapter: SimpleChapter? = null,
     )

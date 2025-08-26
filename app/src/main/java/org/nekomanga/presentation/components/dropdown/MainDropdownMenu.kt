@@ -26,9 +26,9 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.presentation.components.Divider
 import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.R
+import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText

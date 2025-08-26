@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
-
 plugins {
     id(androidx.plugins.application.get().pluginId)
     id(kotlinx.plugins.android.get().pluginId)

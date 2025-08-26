@@ -42,11 +42,3 @@ abstract class GitCommitCount : ValueSource<String, ValueSourceParameters.None> 
     }
 }
 
-fun Project.runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
