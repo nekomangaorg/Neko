@@ -157,7 +157,7 @@ class ChapterFilter(
         libraryPreferences: LibraryPreferences,
     ): List<T> {
 
-        val blockedScanlators = mangaDexPreferences.blockedGroups().get().toSet()
+        val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
 
         // Filtered sources, groups and uploaders
@@ -189,7 +189,7 @@ class ChapterFilter(
                     chapter.scanlator ?: "",
                     chapter.uploader ?: "",
                     false,
-                    blockedScanlators,
+                    blockedGroups,
                     blockedUploaders,
                 )
             }

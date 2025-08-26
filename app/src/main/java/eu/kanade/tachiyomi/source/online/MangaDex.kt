@@ -166,7 +166,7 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchHomePageInfo(
-        blockedScanlatorUUIDs: List<String>,
+        blockedGroupUUIDs: List<String>,
         blockedUploaderUUIDs: List<String>,
     ): Result<List<ListResults>, ResultError> {
         return withIOContext {
@@ -232,7 +232,7 @@ open class MangaDex : HttpSource() {
                     if (!loginHelper.isLoggedIn()) return@async null
                     feedUpdatesHandler
                         .getPage(
-                            blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            blockedGroupUUIDs = blockedGroupUUIDs,
                             blockedUploaderUUIDs = blockedUploaderUUIDs,
                             limit = MdConstants.Limits.latestSmaller,
                         )
@@ -250,7 +250,7 @@ open class MangaDex : HttpSource() {
                 val latestChapter = async {
                     latestChapterHandler
                         .getPage(
-                            blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            blockedGroupUUIDs = blockedGroupUUIDs,
                             blockedUploaderUUIDs = blockedUploaderUUIDs,
                             limit = MdConstants.Limits.latestSmaller,
                         )
@@ -302,18 +302,18 @@ open class MangaDex : HttpSource() {
 
     suspend fun latestChapters(
         page: Int,
-        blockedScanlatorUUIDs: List<String>,
+        blockedGroupUUIDs: List<String>,
         blockedUploaderUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
-        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
+        return latestChapterHandler.getPage(page, blockedGroupUUIDs, blockedUploaderUUIDs)
     }
 
     suspend fun feedUpdates(
         page: Int,
-        blockedScanlatorUUIDs: List<String>,
+        blockedGroupUUIDs: List<String>,
         blockedUploaderUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
-        return feedUpdatesHandler.getPage(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
+        return feedUpdatesHandler.getPage(page, blockedGroupUUIDs, blockedUploaderUUIDs)
     }
 
     suspend fun getMangaDetails(

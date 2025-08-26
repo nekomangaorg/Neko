@@ -90,7 +90,7 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
-        @Query("excludedGroups[]") blockedScanlators: List<String>,
+        @Query("excludedGroups[]") blockedGroups: List<String>,
         @Query("excludedUploaders[]") blockedUploaders: List<String>,
     ): ApiResponse<ChapterListDto>
 

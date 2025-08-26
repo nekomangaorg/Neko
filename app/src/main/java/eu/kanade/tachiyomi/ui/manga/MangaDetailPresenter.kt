@@ -767,7 +767,7 @@ class MangaDetailPresenter(
     private fun updateChapterFlows() {
         presenterScope.launchIO {
             // possibly move this into a chapter repository
-            val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+            val blockedGroups = mangaDexPreferences.blockedGroups().get()
             val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
             val allChapters =
                 db.getChapters(mangaId)
@@ -775,7 +775,7 @@ class MangaDetailPresenter(
                     .mapNotNull { it.toSimpleChapter() }
                     .filter {
                         val scanlators = it.scanlatorList()
-                        scanlators.none { scanlator -> blockedScanlators.contains(scanlator) } &&
+                        scanlators.none { scanlator -> blockedGroups.contains(scanlator) } &&
                             (Constants.NO_GROUP !in scanlators || it.uploader !in blockedUploaders)
                     }
                     .map { chapter ->
@@ -1944,9 +1944,9 @@ class MangaDetailPresenter(
                 if (scanlatorImpl == null) {
                     launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
                 }
-                val blockedScanlators = mangaDexPreferences.blockedGroups().get().toMutableSet()
-                blockedScanlators.add(scanlator)
-                mangaDexPreferences.blockedGroups().set(blockedScanlators)
+                val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
+                blockedGroups.add(scanlator)
+                mangaDexPreferences.blockedGroups().set(blockedGroups)
             } else {
                 val uploaderImpl = db.getUploaderByName(uploader!!).executeAsBlocking()
                 if (uploaderImpl == null) {
@@ -1966,10 +1966,10 @@ class MangaDetailPresenter(
                         presenterScope.launch {
                             if (scanlator != null) {
                                 db.deleteScanlator(scanlator).executeOnIO()
-                                val allBlockedScanlators =
+                                val allBlockedGroups =
                                     mangaDexPreferences.blockedGroups().get().toMutableSet()
-                                allBlockedScanlators.remove(scanlator)
-                                mangaDexPreferences.blockedGroups().set(allBlockedScanlators)
+                                allBlockedGroups.remove(scanlator)
+                                mangaDexPreferences.blockedGroups().set(allBlockedGroups)
                             } else {
                                 db.deleteUploader(uploader!!).executeOnIO()
                                 val allBlockedUploaders =

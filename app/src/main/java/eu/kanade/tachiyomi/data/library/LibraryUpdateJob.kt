@@ -489,7 +489,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         .filter {
                             val scanlators = ChapterUtil.getScanlators(it.scanlator)
                             scanlators.none { scanlator -> scanlator in blockedGroups } &&
-                                (Constants.NO_GROUP !in scanlators || it.uploader !in blockedUploaders)
+                                (Constants.NO_GROUP !in scanlators ||
+                                    it.uploader !in blockedUploaders)
                         }
 
                 // delete cover cache image if the thumbnail from network is not empty

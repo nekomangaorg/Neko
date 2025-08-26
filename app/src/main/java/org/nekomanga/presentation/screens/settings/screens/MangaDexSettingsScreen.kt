@@ -155,21 +155,21 @@ internal class MangaDexSettingsScreen(
         var showBlockedUploaderDialog by rememberSaveable { mutableStateOf(false) }
 
         if (showBlockedGroupDialog) {
-                TriStateListDialog(
-                    title = stringResource(R.string.unblock_group),
-                    negativeOnly = true,
-                    items = blockedGroups.sorted().toList(),
-                    initialChecked = emptyList(),
-                    initialInversed = emptyList(),
-                    itemLabel = { it },
-                    onDismissRequest = { showBlockedGroupDialog = false },
-                    onValueChanged = { _, newExcluded ->
-                        mangaDexPreferences
-                            .blockedGroups()
-                            .set(blockedGroups.minus(newExcluded.toSet()))
-                        showBlockedGroupDialog = false
-                    },
-                )
+            TriStateListDialog(
+                title = stringResource(R.string.unblock_group),
+                negativeOnly = true,
+                items = blockedGroups.sorted().toList(),
+                initialChecked = emptyList(),
+                initialInversed = emptyList(),
+                itemLabel = { it },
+                onDismissRequest = { showBlockedGroupDialog = false },
+                onValueChanged = { _, newExcluded ->
+                    mangaDexPreferences
+                        .blockedGroups()
+                        .set(blockedGroups.minus(newExcluded.toSet()))
+                    showBlockedGroupDialog = false
+                },
+            )
         }
         if (showBlockedUploaderDialog) {
             TriStateListDialog(

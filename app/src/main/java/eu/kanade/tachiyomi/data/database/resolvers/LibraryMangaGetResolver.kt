@@ -54,7 +54,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         if (isEmpty()) return 0
         val list = split(" [.] ")
 
-        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         val chapterList =
@@ -64,7 +64,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     scanlator,
                     uploader,
                     false,
-                    blockedScanlators,
+                    blockedGroups,
                     blockedUploaders,
                 )
             }

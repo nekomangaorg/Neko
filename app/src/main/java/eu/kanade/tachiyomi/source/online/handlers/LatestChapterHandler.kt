@@ -31,7 +31,7 @@ class LatestChapterHandler {
 
     suspend fun getPage(
         page: Int = 1,
-        blockedScanlatorUUIDs: List<String>,
+        blockedGroupUUIDs: List<String>,
         blockedUploaderUUIDs: List<String>,
         limit: Int = MdConstants.Limits.latest,
     ): Result<MangaListPage, ResultError> {
@@ -49,7 +49,7 @@ class LatestChapterHandler {
                     offset,
                     langs,
                     contentRatings,
-                    blockedScanlatorUUIDs,
+                    blockedGroupUUIDs,
                     blockedUploaderUUIDs,
                 )
                 .getOrResultError("getting latest chapters")

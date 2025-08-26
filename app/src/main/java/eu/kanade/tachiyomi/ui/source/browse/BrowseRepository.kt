@@ -85,7 +85,7 @@ class BrowseRepository(
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
-        val blockedScanlatorUUIDs =
+        val blockedGroupUUIDs =
             mangaDexPreferences.blockedGroups().get().map {
                 var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
                 if (scanlatorImpl == null) {
@@ -112,7 +112,7 @@ class BrowseRepository(
                 }
             }
 
-        val scanlatorUUIDs = blockedScanlatorUUIDs.filterValues().map { it.uuid }
+        val scanlatorUUIDs = blockedGroupUUIDs.filterValues().map { it.uuid }
         val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
         return mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
             Ok(

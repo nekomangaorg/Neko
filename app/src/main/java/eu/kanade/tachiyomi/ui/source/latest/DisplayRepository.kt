@@ -42,7 +42,7 @@ class DisplayRepository(
     private suspend fun getFeedUpdatesPage(
         page: Int
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        val blockedScanlatorUUIDs =
+        val blockedGroupUUIDs =
             mangaDexPreferences
                 .blockedGroups()
                 .get()
@@ -73,7 +73,7 @@ class DisplayRepository(
                 }
                 .map { it.uuid }
         return mangaDex
-            .feedUpdates(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
+            .feedUpdates(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
                     val displayMangaList =
@@ -89,7 +89,7 @@ class DisplayRepository(
     private suspend fun getLatestChapterPage(
         page: Int
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        val blockedScanlatorUUIDs =
+        val blockedGroupUUIDs =
             mangaDexPreferences
                 .blockedGroups()
                 .get()
@@ -122,7 +122,7 @@ class DisplayRepository(
                 }
                 .map { it.uuid }
         return mangaDex
-            .latestChapters(page, blockedScanlatorUUIDs, blockedUploaderUUIDs)
+            .latestChapters(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
                     val displayMangaList =
