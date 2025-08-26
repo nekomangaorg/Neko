@@ -71,6 +71,7 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.feed.FeedController
+import eu.kanade.tachiyomi.ui.library.LibraryComposeController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
@@ -313,6 +314,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 when (router.backstack.firstOrNull()?.controller) {
                     is FeedController -> R.id.nav_feed
                     is BrowseController -> R.id.nav_browse
+                    is LibraryComposeController -> R.id.nav_feed
                     else -> R.id.nav_library
                 }
         }
@@ -336,7 +338,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 setRoot(
                     when (id) {
                         R.id.nav_library -> LibraryController()
-                        R.id.nav_feed -> FeedController()
+                        R.id.nav_feed -> LibraryComposeController() // FeedController()
                         else -> BrowseController()
                     },
                     id,
@@ -1170,6 +1172,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     .filterNotNull()
                     .filterNot { it is BrowseController }
                     .filterNot { it is FeedController }
+                    .filterNot { it is LibraryComposeController }
                     .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->
