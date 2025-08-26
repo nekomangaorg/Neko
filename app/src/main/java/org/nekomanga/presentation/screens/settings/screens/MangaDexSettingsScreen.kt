@@ -151,10 +151,10 @@ internal class MangaDexSettingsScreen(
         blockedUploaders: ImmutableSet<String>,
     ): Preference.PreferenceGroup {
 
-        var showBlockedDialog by rememberSaveable { mutableStateOf(false) }
-        var groupDialog by rememberSaveable { mutableStateOf(true) }
-        if (showBlockedDialog) {
-            if (groupDialog) {
+        var showBlockedGroupDialog by rememberSaveable { mutableStateOf(false) }
+        var showBlockedUploaderDialog by rememberSaveable { mutableStateOf(false) }
+
+        if (showBlockedGroupDialog) {
                 TriStateListDialog(
                     title = stringResource(R.string.unblock_group),
                     negativeOnly = true,
@@ -162,32 +162,33 @@ internal class MangaDexSettingsScreen(
                     initialChecked = emptyList(),
                     initialInversed = emptyList(),
                     itemLabel = { it },
-                    onDismissRequest = { showBlockedDialog = false },
+                    onDismissRequest = { showBlockedGroupDialog = false },
                     onValueChanged = { _, newExcluded ->
                         mangaDexPreferences
                             .blockedGroups()
                             .set(blockedGroups.minus(newExcluded.toSet()))
-                        showBlockedDialog = false
+                        showBlockedGroupDialog = false
                     },
                 )
-            } else {
-                TriStateListDialog(
-                    title = stringResource(R.string.unblock_uploader),
-                    negativeOnly = true,
-                    items = blockedUploaders.sorted().toList(),
-                    initialChecked = emptyList(),
-                    initialInversed = emptyList(),
-                    itemLabel = { it },
-                    onDismissRequest = { showBlockedDialog = false },
-                    onValueChanged = { _, newExcluded ->
-                        mangaDexPreferences
-                            .blockedUploaders()
-                            .set(blockedUploaders.minus(newExcluded.toSet()))
-                        showBlockedDialog = false
-                    },
-                )
-            }
         }
+        if (showBlockedUploaderDialog) {
+            TriStateListDialog(
+                title = stringResource(R.string.unblock_uploader),
+                negativeOnly = true,
+                items = blockedUploaders.sorted().toList(),
+                initialChecked = emptyList(),
+                initialInversed = emptyList(),
+                itemLabel = { it },
+                onDismissRequest = { showBlockedUploaderDialog = false },
+                onValueChanged = { _, newExcluded ->
+                    mangaDexPreferences
+                        .blockedUploaders()
+                        .set(blockedUploaders.minus(newExcluded.toSet()))
+                    showBlockedUploaderDialog = false
+                },
+            )
+        }
+
         return Preference.PreferenceGroup(
             title = stringResource(R.string.chapter_group),
             preferenceItems =
@@ -218,8 +219,7 @@ internal class MangaDexSettingsScreen(
                                 if (blockedGroups.isEmpty()) {
                                     context.toast(R.string.no_blocked_groups)
                                 } else {
-                                    showBlockedDialog = true
-                                    groupDialog = true
+                                    showBlockedGroupDialog = true
                                 }
                             },
                         ),
@@ -230,8 +230,7 @@ internal class MangaDexSettingsScreen(
                                 if (blockedUploaders.isEmpty()) {
                                     context.toast(R.string.no_blocked_uploaders)
                                 } else {
-                                    showBlockedDialog = true
-                                    groupDialog = false
+                                    showBlockedUploaderDialog = true
                                 }
                             },
                         ),
