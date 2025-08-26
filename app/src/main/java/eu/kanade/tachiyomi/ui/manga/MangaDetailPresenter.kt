@@ -1937,50 +1937,57 @@ class MangaDetailPresenter(
         }
     }
 
-    fun blockScanlator(scanlator: String?, uploader: String?) {
+    fun blockScanlator(blockType: MangaConstants.BlockType, blocked: String) {
         presenterScope.launchIO {
-            if (scanlator != null) {
-                val scanlatorImpl = db.getScanlatorByName(scanlator).executeAsBlocking()
-                if (scanlatorImpl == null) {
-                    launchIO { mangaUpdateCoordinator.updateScanlator(scanlator) }
+            when (blockType) {
+                MangaConstants.BlockType.Group -> {
+                    val groupImpl = db.getGroupByName(blocked).executeAsBlocking()
+                    if (groupImpl == null) {
+                        launchIO { mangaUpdateCoordinator.updateGroup(blocked) }
+                    }
+                    val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
+                    blockedGroups.add(blocked)
+                    mangaDexPreferences.blockedGroups().set(blockedGroups)
                 }
-                val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
-                blockedGroups.add(scanlator)
-                mangaDexPreferences.blockedGroups().set(blockedGroups)
-            } else {
-                val uploaderImpl = db.getUploaderByName(uploader!!).executeAsBlocking()
-                if (uploaderImpl == null) {
-                    launchIO { mangaUpdateCoordinator.updateUploader(uploader) }
+                MangaConstants.BlockType.Uploader -> {
+                    val uploaderImpl = db.getUploaderByName(blocked).executeAsBlocking()
+                    if (uploaderImpl == null) {
+                        launchIO { mangaUpdateCoordinator.updateUploader(blocked) }
+                    }
+                    val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                    blockedUploaders.add(blocked)
+                    mangaDexPreferences.blockedUploaders().set(blockedUploaders)
                 }
-                val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toMutableSet()
-                blockedUploaders.add(uploader)
-                mangaDexPreferences.blockedUploaders().set(blockedUploaders)
             }
             updateChapterFlows()
             _snackbarState.emit(
                 SnackbarState(
                     messageRes = R.string.globally_blocked_group_,
-                    message = scanlator ?: uploader!!,
+                    message = blocked,
                     actionLabelRes = R.string.undo,
                     action = {
                         presenterScope.launch {
-                            if (scanlator != null) {
-                                db.deleteScanlator(scanlator).executeOnIO()
-                                val allBlockedGroups =
-                                    mangaDexPreferences.blockedGroups().get().toMutableSet()
-                                allBlockedGroups.remove(scanlator)
-                                mangaDexPreferences.blockedGroups().set(allBlockedGroups)
-                            } else {
-                                db.deleteUploader(uploader!!).executeOnIO()
-                                val allBlockedUploaders =
-                                    mangaDexPreferences.blockedUploaders().get().toMutableSet()
-                                allBlockedUploaders.remove(uploader)
-                                mangaDexPreferences.blockedUploaders().set(allBlockedUploaders)
+                            when (blockType) {
+                                MangaConstants.BlockType.Group -> {
+                                    db.deleteGroup(blocked).executeOnIO()
+                                    val allBlockedGroups =
+                                        mangaDexPreferences.blockedGroups().get().toMutableSet()
+                                    allBlockedGroups.remove(blocked)
+                                    mangaDexPreferences.blockedGroups().set(allBlockedGroups)
+                                }
+
+                                MangaConstants.BlockType.Uploader -> {
+                                    db.deleteUploader(blocked).executeOnIO()
+                                    val allBlockedUploaders =
+                                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                                    allBlockedUploaders.remove(blocked)
+                                    mangaDexPreferences.blockedUploaders().set(allBlockedUploaders)
+                                }
                             }
                             updateChapterFlows()
                         }
                     },
-                )
+                ),
             )
         }
     }
