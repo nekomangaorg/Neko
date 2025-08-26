@@ -1941,8 +1941,8 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             when (blockType) {
                 MangaConstants.BlockType.Group -> {
-                    val groupImpl = db.getGroupByName(blocked).executeAsBlocking()
-                    if (groupImpl == null) {
+                    val scanlatorGroupImpl = db.getScanlatorGroupByName(blocked).executeAsBlocking()
+                    if (scanlatorGroupImpl == null) {
                         launchIO { mangaUpdateCoordinator.updateGroup(blocked) }
                     }
                     val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
@@ -1954,7 +1954,8 @@ class MangaDetailPresenter(
                     if (uploaderImpl == null) {
                         launchIO { mangaUpdateCoordinator.updateUploader(blocked) }
                     }
-                    val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                    val blockedUploaders =
+                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
                     blockedUploaders.add(blocked)
                     mangaDexPreferences.blockedUploaders().set(blockedUploaders)
                 }
@@ -1969,7 +1970,7 @@ class MangaDetailPresenter(
                         presenterScope.launch {
                             when (blockType) {
                                 MangaConstants.BlockType.Group -> {
-                                    db.deleteGroup(blocked).executeOnIO()
+                                    db.deleteScanlatorGroup(blocked).executeOnIO()
                                     val allBlockedGroups =
                                         mangaDexPreferences.blockedGroups().get().toMutableSet()
                                     allBlockedGroups.remove(blocked)
@@ -1987,7 +1988,7 @@ class MangaDetailPresenter(
                             updateChapterFlows()
                         }
                     },
-                ),
+                )
             )
         }
     }

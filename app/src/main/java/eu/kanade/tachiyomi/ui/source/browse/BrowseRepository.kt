@@ -87,15 +87,15 @@ class BrowseRepository(
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
         val blockedGroupUUIDs =
             mangaDexPreferences.blockedGroups().get().map {
-                var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
-                if (scanlatorImpl == null) {
-                    mangaDex.getScanlator(scanlator = it).map { scanlator ->
-                        scanlatorImpl = scanlator.toScanlatorImpl()
-                        db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
-                        scanlatorImpl!!
+                var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
+                if (scanlatorGroupImpl == null) {
+                    mangaDex.getScanlatorGroup(group = it).map { group ->
+                        scanlatorGroupImpl = group.toScanlatorGroupImpl()
+                        db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
+                        scanlatorGroupImpl!!
                     }
                 } else {
-                    Ok(scanlatorImpl!!)
+                    Ok(scanlatorGroupImpl!!)
                 }
             }
         val blockedUploaderUUIDs =

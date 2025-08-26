@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.database.tables.MergeMangaTable
-import eu.kanade.tachiyomi.data.database.tables.ScanlatorTable
+import eu.kanade.tachiyomi.data.database.tables.ScanlatorGroupTable
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable
 import eu.kanade.tachiyomi.data.database.tables.TrackTable
 import eu.kanade.tachiyomi.data.database.tables.UploaderTable
@@ -22,7 +22,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_NAME = "tachiyomi.db"
 
         /** Version of the database. */
-        const val DATABASE_VERSION = 42
+        const val DATABASE_VERSION = 43
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -48,7 +48,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             execSQL(HistoryTable.createTableQuery)
             execSQL(SimilarTable.createTableQuery)
             execSQL(ArtworkTable.createTableQuery)
-            execSQL(ScanlatorTable.createTableQuery)
+            execSQL(ScanlatorGroupTable.createTableQuery)
             execSQL(UploaderTable.createTableQuery)
             execSQL(BrowseFilterTable.createTableQuery)
             execSQL(MergeMangaTable.createTableQuery)
@@ -156,7 +156,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
 
         if (oldVersion < 33) {
-            db.execSQL(ScanlatorTable.createTableQuery)
+            db.execSQL(ScanlatorGroupTable.createTableQuery)
         }
         if (oldVersion < 34) {
             db.execSQL(BrowseFilterTable.createTableQuery)
@@ -188,6 +188,10 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 42) {
             db.execSQL(UploaderTable.createTableQuery)
+        }
+
+        if (oldVersion < 43 && oldVersion >= 33) {
+            db.execSQL(ScanlatorGroupTable.renameTable)
         }
     }
 }

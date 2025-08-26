@@ -25,7 +25,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
-import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
+import eu.kanade.tachiyomi.data.database.models.ScanlatorGroupImpl
 import eu.kanade.tachiyomi.data.database.models.SearchMetadata
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.UploaderImpl
@@ -37,7 +37,7 @@ import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
 import eu.kanade.tachiyomi.data.database.queries.MergeMangaQueries
-import eu.kanade.tachiyomi.data.database.queries.ScanlatorQueries
+import eu.kanade.tachiyomi.data.database.queries.ScanlatorGroupQueries
 import eu.kanade.tachiyomi.data.database.queries.SearchMetadataQueries
 import eu.kanade.tachiyomi.data.database.queries.SimilarQueries
 import eu.kanade.tachiyomi.data.database.queries.TrackQueries
@@ -56,7 +56,7 @@ open class DatabaseHelper(context: Context) :
     MangaCategoryQueries,
     HistoryQueries,
     SearchMetadataQueries,
-    ScanlatorQueries,
+    ScanlatorGroupQueries,
     UploaderQueries,
     SimilarQueries {
 
@@ -78,7 +78,7 @@ open class DatabaseHelper(context: Context) :
             .addTypeMapping(History::class.java, HistoryTypeMapping())
             .addTypeMapping(MangaSimilar::class.java, SimilarTypeMapping())
             .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
-            .addTypeMapping(ScanlatorImpl::class.java, ScanlatorTypeMapping())
+            .addTypeMapping(ScanlatorGroupImpl::class.java, ScanlatorTypeMapping())
             .addTypeMapping(UploaderImpl::class.java, UploaderTypeMapping())
             .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
             .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())

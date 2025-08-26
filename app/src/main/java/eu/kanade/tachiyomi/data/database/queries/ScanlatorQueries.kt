@@ -3,31 +3,31 @@ package eu.kanade.tachiyomi.data.database.queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.Query
 import eu.kanade.tachiyomi.data.database.DbProvider
-import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
-import eu.kanade.tachiyomi.data.database.tables.ScanlatorTable
+import eu.kanade.tachiyomi.data.database.models.ScanlatorGroupImpl
+import eu.kanade.tachiyomi.data.database.tables.ScanlatorGroupTable
 
-interface ScanlatorQueries : DbProvider {
+interface ScanlatorGroupQueries : DbProvider {
 
-    fun insertScanlators(scanlators: List<ScanlatorImpl>) = db.put().objects(scanlators).prepare()
+    fun insertScanlatorGroups(groups: List<ScanlatorGroupImpl>) = db.put().objects(groups).prepare()
 
-    fun getScanlatorByName(name: String) =
+    fun getScanlatorGroupByName(name: String) =
         db.get()
-            .`object`(ScanlatorImpl::class.java)
+            .`object`(ScanlatorGroupImpl::class.java)
             .withQuery(
                 Query.builder()
-                    .table(ScanlatorTable.TABLE)
-                    .where("${ScanlatorTable.COL_NAME} = ?")
+                    .table(ScanlatorGroupTable.TABLE)
+                    .where("${ScanlatorGroupTable.COL_NAME} = ?")
                     .whereArgs(name)
                     .build()
             )
             .prepare()
 
-    fun deleteScanlator(name: String) =
+    fun deleteScanlatorGroup(name: String) =
         db.delete()
             .byQuery(
                 DeleteQuery.builder()
-                    .table(ScanlatorTable.TABLE)
-                    .where("${ScanlatorTable.COL_NAME} = ?")
+                    .table(ScanlatorGroupTable.TABLE)
+                    .where("${ScanlatorGroupTable.COL_NAME} = ?")
                     .whereArgs(name)
                     .build()
             )

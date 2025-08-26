@@ -7,7 +7,7 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.mapSuccess
-import eu.kanade.tachiyomi.data.database.models.Scanlator
+import eu.kanade.tachiyomi.data.database.models.ScanlatorGroup
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.Uploader
@@ -101,10 +101,10 @@ open class MangaDex : HttpSource() {
         }
     }
 
-    suspend fun getScanlator(scanlator: String): Result<Scanlator, ResultError> {
+    suspend fun getScanlatorGroup(group: String): Result<ScanlatorGroup, ResultError> {
         return withIOContext {
             networkServices.service
-                .scanlatorGroup(scanlator)
+                .scanlatorGroup(group)
                 .getOrResultError("Trying to get scanlator")
                 .andThen { groupListDto ->
                     val groupDto = groupListDto.data.firstOrNull()
@@ -112,7 +112,7 @@ open class MangaDex : HttpSource() {
                         true -> Err("No Scanlator Group found".toResultError())
                         false -> {
                             Ok(
-                                Scanlator(
+                                ScanlatorGroup(
                                     name = groupDto.attributes.name,
                                     uuid = groupDto.id,
                                     description = groupDto.attributes.description,

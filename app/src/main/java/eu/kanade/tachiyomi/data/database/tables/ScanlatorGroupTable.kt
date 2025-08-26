@@ -1,8 +1,9 @@
 package eu.kanade.tachiyomi.data.database.tables
 
-object ScanlatorTable {
+object ScanlatorGroupTable {
 
-    const val TABLE = "scanlator"
+    const val TABLE = "scanlator_group"
+    const val OLD_NAME = "scanlator"
 
     const val COL_ID = "_id"
 
@@ -22,4 +23,7 @@ object ScanlatorTable {
             UNIQUE ($COL_UUID) ON CONFLICT REPLACE
             )
             """
+
+    val renameTable: String
+        get() = "ALTER TABLE $OLD_NAME RENAME TO $TABLE"
 }

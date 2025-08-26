@@ -274,12 +274,12 @@ class MangaUpdateCoordinator {
         )
     }
 
-    suspend fun updateScanlator(scanlator: String) {
-        sourceManager.mangaDex.getScanlator(scanlator).onSuccess {
+    suspend fun updateGroup(group: String) {
+        sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
             // Sanity check for merged
-            val scanlatorImpl = it.toScanlatorImpl()
-            if (scanlator == scanlatorImpl.name) {
-                db.insertScanlators(listOf(scanlatorImpl)).executeAsBlocking()
+            val scanlatorGroupImpl = it.toScanlatorGroupImpl()
+            if (group == scanlatorGroupImpl.name) {
+                db.insertScanlatorGroups(listOf(scanlatorGroupImpl)).executeAsBlocking()
             }
         }
     }

@@ -47,14 +47,14 @@ class DisplayRepository(
                 .blockedGroups()
                 .get()
                 .mapNotNull {
-                    var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
-                    if (scanlatorImpl == null) {
-                        mangaDex.getScanlator(scanlator = it).map { scanlator ->
-                            scanlatorImpl = scanlator.toScanlatorImpl()
+                    var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
+                    if (scanlatorGroupImpl == null) {
+                        mangaDex.getScanlatorGroup(group = it).map { scanlator ->
+                            scanlatorGroupImpl = scanlator.toScanlatorGroupImpl()
                         }
-                        db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                        db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
                     }
-                    scanlatorImpl
+                    scanlatorGroupImpl
                 }
                 .map { it.uuid }
         val blockedUploaderUUIDs =
@@ -94,16 +94,16 @@ class DisplayRepository(
                 .blockedGroups()
                 .get()
                 .mapNotNull {
-                    var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
-                    if (scanlatorImpl == null) {
+                    var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
+                    if (scanlatorGroupImpl == null) {
                         mangaDex
-                            .getScanlator(scanlator = it)
-                            .map { scanlator -> scanlatorImpl = scanlator.toScanlatorImpl() }
+                            .getScanlatorGroup(group = it)
+                            .map { group -> scanlatorGroupImpl = group.toScanlatorGroupImpl() }
                             .onSuccess {
-                                db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                                db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
                             }
                     }
-                    scanlatorImpl
+                    scanlatorGroupImpl
                 }
                 .map { it.uuid }
         val blockedUploaderUUIDs =
