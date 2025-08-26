@@ -52,14 +52,14 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
     private fun String.filterChaptersByScanlators(manga: LibraryManga): Int {
         if (isEmpty()) return 0
-        val list = split(" [.] ")
+        val list = split(Constants.RAW_CHAPTER_SEPARATOR)
 
         val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         val chapterList =
             list.filterNot {
-                val (scanlator, uploader) = it.split(" [;] ")
+                val (scanlator, uploader) = it.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
                 ChapterUtil.filterByScanlator(
                     scanlator,
                     uploader,
@@ -89,7 +89,8 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                         }
                     }
                     .filterNot { pairs ->
-                        val (scanlator, uploader) = pairs.split(" [;] ")
+                        val (scanlator, uploader) =
+                            pairs.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
                         ChapterUtil.filterByScanlator(
                             scanlator,
                             uploader,
