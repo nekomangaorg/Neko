@@ -13,6 +13,14 @@ data class SourceManga(
     @param:StringRes val displayTextRes: Int? = null,
 )
 
+data class LibraryManga(
+    val mangaId: Long,
+    val currentArtwork: Artwork,
+    val title: String,
+    val unreadCount: Int = 0,
+    val downloadCount: Int = 0,
+)
+
 data class DisplayManga(
     val mangaId: Long,
     val inLibrary: Boolean,

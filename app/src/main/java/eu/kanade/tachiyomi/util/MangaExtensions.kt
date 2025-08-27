@@ -17,6 +17,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.LibraryManga
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
@@ -107,6 +108,20 @@ fun Manga.toDisplayManga(
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
         displayTextRes = displayTextRes,
+        currentArtwork =
+            Artwork(
+                url = this.user_cover ?: "",
+                inLibrary = this.favorite,
+                mangaId = this.id!!,
+                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
+            ),
+    )
+}
+
+fun Manga.toLibraryManga(): LibraryManga {
+    return LibraryManga(
+        mangaId = this.id!!,
+        title = (this as? MangaImpl)?.title ?: this.title,
         currentArtwork =
             Artwork(
                 url = this.user_cover ?: "",

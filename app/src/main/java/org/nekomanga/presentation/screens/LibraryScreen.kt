@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -141,8 +144,14 @@ fun LibraryScreen(
                                 Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                     .fillMaxSize()
                         ) {
-
-                            // TODO library view
+                            LazyColumn(contentPadding = recyclerContentPadding) {
+                                libraryScreenState.value.items.forEach { item ->
+                                    item(item.categoryItem.id) {
+                                        Text(text = item.categoryItem.name)
+                                    }
+                                    items(item.libraryItems) { Text(text = it.title) }
+                                }
+                            }
                         }
                     },
                 )
