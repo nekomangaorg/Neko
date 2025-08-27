@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.SeasonalDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
-import eu.kanade.tachiyomi.source.online.models.dto.UploaderDto
+import eu.kanade.tachiyomi.source.online.models.dto.UserResultDto
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import retrofit2.http.Body
@@ -90,7 +90,8 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
-        @Query("excludedGroups[]") blockedScanlators: List<String>,
+        @Query("excludedGroups[]") blockedGroups: List<String>,
+        @Query("excludedUploaders[]") blockedUploaders: List<String>,
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
@@ -116,7 +117,7 @@ interface MangaDexService {
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
     @GET("${MdConstants.Api.user}/{id}")
-    suspend fun uploader(@Path("id") id: String): ApiResponse<UploaderDto>
+    suspend fun uploader(@Path("id") id: String): ApiResponse<UserResultDto>
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>

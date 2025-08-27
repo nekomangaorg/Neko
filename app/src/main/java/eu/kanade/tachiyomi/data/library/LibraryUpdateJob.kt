@@ -86,6 +86,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
@@ -477,6 +478,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     }
 
                 val blockedGroups = mangaDexPreferences.blockedGroups().get()
+                val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
                 val fetchedChapters =
                     (listOf(holder.sChapters) + mergedList.map { it.map { pair -> pair.first } })
@@ -485,9 +487,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 .thenBy { getChapterNum(it) }
                         )
                         .filter {
-                            ChapterUtil.getScanlators(it.scanlator).none { scanlator ->
-                                scanlator in blockedGroups
-                            }
+                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
+                            scanlators.none { scanlator -> scanlator in blockedGroups } &&
+                                (Constants.NO_GROUP !in scanlators ||
+                                    it.uploader !in blockedUploaders)
                         }
 
                 // delete cover cache image if the thumbnail from network is not empty
@@ -551,13 +554,25 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
 
                             if (manga.filtered_scanlators != null) {
-                                val scanlatorsToIgnore =
+                                //  Ignored sources, groups and uploaders
+                                val toIgnore =
                                     ChapterUtil.getScanlators(manga.filtered_scanlators)
                                         .toMutableSet()
 
                                 // only download scanlators not filtered out
                                 chaptersToDl =
-                                    chaptersToDl.filter { it.scanlator !in scanlatorsToIgnore }
+                                    chaptersToDl.filterNot {
+                                        val scanlatorMatchAll =
+                                            libraryPreferences
+                                                .chapterScanlatorFilterOption()
+                                                .get() == 0
+                                        ChapterUtil.filterByScanlator(
+                                            it.scanlator ?: "",
+                                            it.uploader ?: "",
+                                            scanlatorMatchAll,
+                                            toIgnore,
+                                        )
+                                    }
                             }
 
                             downloadChapters(manga, chaptersToDl)

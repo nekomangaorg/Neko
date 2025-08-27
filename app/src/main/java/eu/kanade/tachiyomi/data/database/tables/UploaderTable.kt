@@ -1,24 +1,21 @@
 package eu.kanade.tachiyomi.data.database.tables
 
-object ScanlatorTable {
+object UploaderTable {
 
-    const val TABLE = "scanlator"
+    const val TABLE = "uploader"
 
     const val COL_ID = "_id"
 
-    const val COL_NAME = "name"
+    const val COL_USERNAME = "username"
 
     const val COL_UUID = "uuid"
-
-    const val COL_DESCRIPTION = "description"
 
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
-            $COL_NAME TEXT NOT NULL,
+            $COL_USERNAME TEXT NOT NULL,
             $COL_UUID TEXT NOT NULL,
-            $COL_DESCRIPTION TEXT,
             UNIQUE ($COL_UUID) ON CONFLICT REPLACE
             )
             """

@@ -158,10 +158,14 @@ class ChapterFilter(
     ): List<T> {
 
         val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
-        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
-        val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
+
+        // Filtered sources, groups and uploaders
+        val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
+
         val sources = SourceManager.mergeSourceNames + MdConstants.name
+        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
 
         return chapters
             .asSequence()
@@ -172,7 +176,7 @@ class ChapterFilter(
                         chapter.scanlator ?: "",
                         chapter.isMergedChapter(),
                         chapter.isLocalSource(),
-                        filteredGroups,
+                        filtered,
                     )
                 }
             }
@@ -181,13 +185,20 @@ class ChapterFilter(
             }
             // blocked groups are always Any
             .filterNot { chapter ->
-                ChapterUtil.filterByGroup(chapter.scanlator ?: "", false, blockedGroups)
+                ChapterUtil.filterByScanlator(
+                    chapter.scanlator ?: "",
+                    chapter.uploader ?: "",
+                    false,
+                    blockedGroups,
+                    blockedUploaders,
+                )
             }
             .filterNot { chapter ->
-                ChapterUtil.filterByGroup(
+                ChapterUtil.filterByScanlator(
                     chapter.scanlator ?: "",
-                    chapterScanlatorMatchAll,
-                    filteredGroups,
+                    chapter.uploader ?: "",
+                    scanlatorMatchAll,
+                    filtered,
                 )
             }
             .toList()

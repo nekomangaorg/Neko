@@ -32,6 +32,7 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
@@ -256,24 +257,37 @@ class MangaUpdateCoordinator {
      * @param chapters the list of chapters to download.
      */
     fun downloadChapters(manga: Manga, chapters: List<ChapterItem>) {
-        val blockedScanlators = mangaDexPreferences.blockedGroups().get()
+        val blockedGroups = mangaDexPreferences.blockedGroups().get()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
         downloadManager.downloadChapters(
             manga,
             chapters
                 .filter {
+                    val scanlators = it.chapter.scanlatorList()
                     !it.isDownloaded &&
-                        it.chapter.scanlatorList().none { scanlator ->
-                            scanlator in blockedScanlators
-                        }
+                        scanlators.none { scanlator -> scanlator in blockedGroups } &&
+                        (Constants.NO_GROUP !in scanlators ||
+                            it.chapter.uploader !in blockedUploaders)
                 }
                 .map { it.chapter.toDbChapter() },
         )
     }
 
-    suspend fun updateScanlator(scanlator: String) {
-        sourceManager.mangaDex.getScanlator(scanlator).onSuccess {
-            db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
+    suspend fun updateGroup(group: String) {
+        sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
+            // Sanity check for merged
+            val scanlatorGroupImpl = it.toScanlatorGroupImpl()
+            if (group == scanlatorGroupImpl.name) {
+                db.insertScanlatorGroups(listOf(scanlatorGroupImpl)).executeAsBlocking()
+            }
+        }
+    }
+
+    suspend fun updateUploader(uploader: String) {
+        sourceManager.mangaDex.getUploader(uploader).onSuccess {
+            // Uploader only comes from the MD source
+            db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
         }
     }
 }
