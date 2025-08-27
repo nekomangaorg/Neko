@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.library
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.toLibraryMangaItem
+import kotlin.collections.map
 import kotlin.collections.toSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -164,8 +166,10 @@ class LibraryComposePresenter(
     }
 
     fun categoryListFlow(): Flow<List<CategoryItem>> {
-        return db.getCategories().asFlow().map { dbCategory ->
-            dbCategory.map { it.toCategoryItem() }
+        return db.getCategories().asFlow().map { dbCategories ->
+            (listOf(Category.createDefault()) + dbCategories)
+                .sortedBy { it.order }
+                .map { it.toCategoryItem() }
         }
     }
 

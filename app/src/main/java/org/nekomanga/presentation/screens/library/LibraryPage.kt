@@ -62,8 +62,9 @@ private fun LibraryCategoryHeader(categoryItem: CategoryItem, categoryItemClick:
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .padding(horizontal = Size.medium)
-                .clickable(onClick = categoryItemClick),
+                .padding(Size.small)
+                .clickable(onClick = categoryItemClick)
+                .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
