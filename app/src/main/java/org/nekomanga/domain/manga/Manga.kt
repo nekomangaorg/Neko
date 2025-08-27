@@ -13,13 +13,24 @@ data class SourceManga(
     @param:StringRes val displayTextRes: Int? = null,
 )
 
-data class LibraryManga(
-    val mangaId: Long,
-    val currentArtwork: Artwork,
-    val title: String,
+data class LibraryMangaItem(
+    val displayManga: DisplayManga,
     val unreadCount: Int = 0,
+    val readCount: Int = 0,
+    val category: Int = 0,
+    val bookmarkCount: Int = 0,
+    val unavailableCount: Int = 0,
     val downloadCount: Int = 0,
-)
+) {
+    val totalChapterCount
+        get() = readCount + unreadCount
+
+    val availableCount
+        get() = totalChapterCount - unavailableCount
+
+    val hasStarted
+        get() = readCount > 0
+}
 
 data class DisplayManga(
     val mangaId: Long,

@@ -2,27 +2,36 @@ package eu.kanade.tachiyomi.ui.library
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.toLibraryManga
+import eu.kanade.tachiyomi.util.toLibraryMangaItem
+import kotlin.collections.toSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.manga.LibraryMangaItem
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class LibraryComposePresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
     private val _libraryScreenState =
         MutableStateFlow(
@@ -34,38 +43,149 @@ class LibraryComposePresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
+    fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
+        flow: Flow<T1>,
+        flow2: Flow<T2>,
+        flow3: Flow<T3>,
+        flow4: Flow<T4>,
+        flow5: Flow<T5>,
+        flow6: Flow<T6>,
+        flow7: Flow<T7>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R,
+    ): Flow<R> =
+        combine(
+            combine(flow, flow2, flow3, ::Triple),
+            combine(flow4, flow5, ::Pair),
+            combine(flow6, flow7, ::Pair),
+        ) { t1, t2, t3 ->
+            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t3.first, t3.second)
+        }
+
     override fun onCreate() {
         super.onCreate()
+
         presenterScope.launchIO {
-            val db = Injekt.get<DatabaseHelper>()
-            val libraryMangaList =
-                db.getFavoriteMangaList().executeOnIO().map { dbManga -> dbManga.toLibraryManga() }
-            val allCategoryItem =
-                CategoryItem(
-                    id = -1,
-                    name = "All",
-                    order = -1,
-                    mangaSort =
-                        (LibrarySort.valueOf(libraryPreferences.sortingMode().get())
-                                ?: LibrarySort.Title)
-                            .categoryValue,
-                    isDynamic = true,
-                )
-            val allLibraryCategoryItem =
-                LibraryCategoryItem(
-                    categoryItem = allCategoryItem,
-                    libraryMangaList.toPersistentList(),
-                )
-            _libraryScreenState.update { it.copy(items = persistentListOf(allLibraryCategoryItem)) }
-            /**
-             * Group by categories, or dynamic categories libraryPreferences.sortingMode().get(),
-             * libraryPreferences.sortAscending().get(),
-             */
-            // update
+            combine(
+                    libraryMangaListFlow(),
+                    categoryListFlow(),
+                    libraryPreferences.collapsedCategories().changes(),
+                    // unreadBadgesFlow, //downloadBadgesFlow, unread/download // maybe just their
+                    // own flows watching the libraryScreenState
+                    libraryPreferences.sortingMode().changes(),
+                    libraryPreferences.layout().changes(),
+                    libraryPreferences.gridSize().changes(),
+                    libraryPreferences.groupBy().changes(),
+                ) {
+                    libraryMangaList,
+                    categoryList,
+                    collapsedCategories,
+                    sortingMode,
+                    layout,
+                    gridSize,
+                    groupBy ->
+                    val collapsedCategorySet =
+                        collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
 
-            // lookup unread count then update
-            // lookup download count then update if enabled
+                    val libraryViewType =
+                        when (layout) {
+                            2 -> LibraryViewType.ComfortableGrid(rawColumnCount = gridSize)
+                            1 -> LibraryViewType.CompactGrid(rawColumnCount = gridSize)
+                            else -> LibraryViewType.List
+                        }
 
+                    //  Group by categories, or dynamic categories
+                    // libraryPreferences.sortingMode().get(),
+                    // libraryPreferences.sortAscending().get(),
+                    //
+                    // update
+
+                    // lookup unread count then update
+                    // lookup download count then update if enabled
+
+                    /*     val allCategoryItem =
+                    CategoryItem(
+                        id = -1,
+                        name = "All",
+                        order = -1,
+                        mangaSort =
+                            (LibrarySort.valueOf(libraryPreferences.sortingMode().get())
+                                    ?: LibrarySort.Title)
+                                .categoryValue,
+                        isDynamic = true,
+                    )*/
+
+                    /* val allLibraryCategoryItem =
+                        LibraryCategoryItem(
+                            categoryItem = allCategoryItem,
+                            libraryMangaList.toPersistentList(),
+                        )
+                    persistentListOf(allLibraryCategoryItem)*/
+
+                    val items =
+                        if (libraryMangaList.toPersistentList().isNotEmpty()) {
+                            val mangaMap = libraryMangaList.groupBy { it.category }.toMap()
+
+                            categoryList
+                                .map { categoryItem ->
+                                    val updatedCategoryItem =
+                                        categoryItem.copy(
+                                            isHidden = categoryItem.id in collapsedCategorySet
+                                        )
+                                    LibraryCategoryItem(
+                                        categoryItem = updatedCategoryItem,
+                                        libraryItems =
+                                            mangaMap[categoryItem.id]?.toPersistentList()
+                                                ?: persistentListOf(),
+                                    )
+                                }
+                                .toPersistentList()
+                        } else {
+                            persistentListOf()
+                        }
+
+                    LibraryViewItem(libraryViewType = libraryViewType, libraryCategoryItems = items)
+                }
+                .distinctUntilChanged()
+                .collectLatest { libraryViewItem ->
+                    _libraryScreenState.update {
+                        it.copy(
+                            libraryViewType = libraryViewItem.libraryViewType,
+                            items = libraryViewItem.libraryCategoryItems,
+                        )
+                    }
+                }
+        }
+    }
+
+    fun libraryMangaListFlow(): Flow<List<LibraryMangaItem>> {
+        return db.getLibraryMangaList().asFlow().map { dbManga ->
+            dbManga.map { it.toLibraryMangaItem() }
+        }
+    }
+
+    fun categoryListFlow(): Flow<List<CategoryItem>> {
+        return db.getCategories().asFlow().map { dbCategory ->
+            dbCategory.map { it.toCategoryItem() }
+        }
+    }
+
+    fun categoryItemClick(category: CategoryItem) {
+        presenterScope.launchIO {
+            val collapsedCategory =
+                libraryPreferences
+                    .collapsedCategories()
+                    .get()
+                    .mapNotNull { it.toIntOrNull() }
+                    .toMutableSet()
+
+            if (category.id in collapsedCategory) {
+                collapsedCategory.remove(category.id)
+            } else {
+                collapsedCategory.add(category.id)
+            }
+            libraryPreferences
+                .collapsedCategories()
+                .set(collapsedCategory.map { it.toString() }.toSet())
         }
     }
 

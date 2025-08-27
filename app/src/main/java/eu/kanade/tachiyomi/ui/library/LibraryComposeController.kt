@@ -32,6 +32,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                 LibraryScreenActions(
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },
+                    categoryItemClick = presenter::categoryItemClick,
                 ),
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,

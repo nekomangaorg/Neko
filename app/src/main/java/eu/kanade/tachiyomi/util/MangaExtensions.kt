@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -17,7 +18,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.domain.manga.LibraryManga
+import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
@@ -118,17 +119,17 @@ fun Manga.toDisplayManga(
     )
 }
 
-fun Manga.toLibraryManga(): LibraryManga {
-    return LibraryManga(
-        mangaId = this.id!!,
-        title = (this as? MangaImpl)?.title ?: this.title,
-        currentArtwork =
-            Artwork(
-                url = this.user_cover ?: "",
-                inLibrary = this.favorite,
-                mangaId = this.id!!,
-                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
-            ),
+fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
+
+    val displayManga = this.toDisplayManga(displayText = this.author ?: "")
+
+    return LibraryMangaItem(
+        displayManga = displayManga.copy(inLibrary = false),
+        unreadCount = this.unread,
+        readCount = this.read,
+        category = this.category,
+        bookmarkCount = this.bookmarkCount,
+        unavailableCount = this.unavailableCount,
     )
 }
 

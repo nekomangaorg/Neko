@@ -106,7 +106,7 @@ fun MangaListWithHeader(
 }
 
 @Composable
-private fun MangaRow(
+fun MangaRow(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,

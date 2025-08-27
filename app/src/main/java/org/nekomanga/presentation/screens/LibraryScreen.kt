@@ -16,12 +16,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -31,12 +28,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoColors
@@ -45,6 +47,7 @@ import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.library.LibraryPage
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -144,13 +147,26 @@ fun LibraryScreen(
                                 Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                     .fillMaxSize()
                         ) {
-                            LazyColumn(contentPadding = recyclerContentPadding) {
-                                libraryScreenState.value.items.forEach { item ->
-                                    item(item.categoryItem.id) {
-                                        Text(text = item.categoryItem.name)
-                                    }
-                                    items(item.libraryItems) { Text(text = it.title) }
+                            if (libraryScreenState.value.items.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    EmptyScreen(
+                                        iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
+                                        iconSize = 176.dp,
+                                        message =
+                                            stringResource(
+                                                id = R.string.library_is_empty_add_from_browse
+                                            ),
+                                    )
                                 }
+                            } else {
+                                LibraryPage(
+                                    contentPadding = recyclerContentPadding,
+                                    libraryScreenState = libraryScreenState.value,
+                                    libraryScreenActions = libraryScreenActions,
+                                )
                             }
                         }
                     },
