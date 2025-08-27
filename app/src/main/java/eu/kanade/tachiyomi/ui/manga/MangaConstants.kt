@@ -28,6 +28,7 @@ object MangaConstants {
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val allUploaders: ImmutableSet<String> = persistentSetOf(),
         val allSources: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
         val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
@@ -224,9 +225,14 @@ object MangaConstants {
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
         val open: (ChapterItem) -> Unit,
-        val blockScanlator: (String) -> Unit,
+        val blockScanlator: (BlockType, String) -> Unit,
         val openNext: () -> Unit,
         val openComment: (String) -> Unit,
         val openInBrowser: (ChapterItem) -> Unit,
     )
+
+    enum class BlockType {
+        Group,
+        Uploader,
+    }
 }

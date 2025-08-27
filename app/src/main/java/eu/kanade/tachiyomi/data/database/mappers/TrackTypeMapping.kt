@@ -37,7 +37,7 @@ class TrackPutResolver : DefaultPutResolver<Track>() {
         UpdateQuery.builder().table(TABLE).where("$COL_ID = ?").whereArgs(obj.id).build()
 
     override fun mapToContentValues(obj: Track) =
-        ContentValues(10).apply {
+        ContentValues(13).apply {
             put(COL_ID, obj.id)
             put(COL_MANGA_ID, obj.manga_id)
             put(COL_SYNC_ID, obj.sync_id)

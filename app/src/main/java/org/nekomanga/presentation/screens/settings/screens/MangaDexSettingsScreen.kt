@@ -47,7 +47,12 @@ internal class MangaDexSettingsScreen(
 
         return persistentListOf(
                 generalGroup(context, deleteSavedFilters, mangaDexPreferences),
-                chapterGroup(context, mangaDexPreferences, mangaDexSettingsState.blockedGroups),
+                chapterGroup(
+                    context,
+                    mangaDexPreferences,
+                    mangaDexSettingsState.blockedGroups,
+                    mangaDexSettingsState.blockedUploaders,
+                ),
                 imageGroup(mangaDexPreferences),
                 libraryGroup(context, mangaDexPreferences),
             )
@@ -143,10 +148,13 @@ internal class MangaDexSettingsScreen(
         context: Context,
         mangaDexPreferences: MangaDexPreferences,
         blockedGroups: ImmutableSet<String>,
+        blockedUploaders: ImmutableSet<String>,
     ): Preference.PreferenceGroup {
 
-        var showBlockedDialog by rememberSaveable { mutableStateOf(false) }
-        if (showBlockedDialog) {
+        var showBlockedGroupDialog by rememberSaveable { mutableStateOf(false) }
+        var showBlockedUploaderDialog by rememberSaveable { mutableStateOf(false) }
+
+        if (showBlockedGroupDialog) {
             TriStateListDialog(
                 title = stringResource(R.string.unblock_group),
                 negativeOnly = true,
@@ -154,15 +162,33 @@ internal class MangaDexSettingsScreen(
                 initialChecked = emptyList(),
                 initialInversed = emptyList(),
                 itemLabel = { it },
-                onDismissRequest = { showBlockedDialog = false },
+                onDismissRequest = { showBlockedGroupDialog = false },
                 onValueChanged = { _, newExcluded ->
                     mangaDexPreferences
                         .blockedGroups()
                         .set(blockedGroups.minus(newExcluded.toSet()))
-                    showBlockedDialog = false
+                    showBlockedGroupDialog = false
                 },
             )
         }
+        if (showBlockedUploaderDialog) {
+            TriStateListDialog(
+                title = stringResource(R.string.unblock_uploader),
+                negativeOnly = true,
+                items = blockedUploaders.sorted().toList(),
+                initialChecked = emptyList(),
+                initialInversed = emptyList(),
+                itemLabel = { it },
+                onDismissRequest = { showBlockedUploaderDialog = false },
+                onValueChanged = { _, newExcluded ->
+                    mangaDexPreferences
+                        .blockedUploaders()
+                        .set(blockedUploaders.minus(newExcluded.toSet()))
+                    showBlockedUploaderDialog = false
+                },
+            )
+        }
+
         return Preference.PreferenceGroup(
             title = stringResource(R.string.chapter_group),
             preferenceItems =
@@ -188,13 +214,23 @@ internal class MangaDexSettingsScreen(
                         ),
                         Preference.PreferenceItem.TextPreference(
                             title = stringResource(R.string.currently_blocked_groups),
-                            subtitle =
-                                stringResource(R.string.currently_blocked_groups_description),
+                            subtitle = stringResource(R.string.currently_blocked_description),
                             onClick = {
                                 if (blockedGroups.isEmpty()) {
                                     context.toast(R.string.no_blocked_groups)
                                 } else {
-                                    showBlockedDialog = true
+                                    showBlockedGroupDialog = true
+                                }
+                            },
+                        ),
+                        Preference.PreferenceItem.TextPreference(
+                            title = stringResource(R.string.currently_blocked_uploaders),
+                            subtitle = stringResource(R.string.currently_blocked_description),
+                            onClick = {
+                                if (blockedUploaders.isEmpty()) {
+                                    context.toast(R.string.no_blocked_uploaders)
+                                } else {
+                                    showBlockedUploaderDialog = true
                                 }
                             },
                         ),
@@ -318,7 +354,12 @@ internal class MangaDexSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.currently_blocked_groups),
-                    subtitle = stringResource(R.string.currently_blocked_groups_description),
+                    subtitle = stringResource(R.string.currently_blocked_description),
+                    group = stringResource(R.string.chapter_group),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.currently_blocked_uploaders),
+                    subtitle = stringResource(R.string.currently_blocked_description),
                     group = stringResource(R.string.chapter_group),
                 ),
                 SearchTerm(

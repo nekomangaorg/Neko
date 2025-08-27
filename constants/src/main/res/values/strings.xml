@@ -1244,11 +1244,14 @@
     <string name="mark_all_as_unread">Mark all as unread</string>
     <string name="mark_range_as">Mark range as</string>
     <string name="mark_previous_as">Mark Previous as</string>
-    <string name="block_group">Block group</string>
+    <string name="block_scanlator">Block scanlator</string>
     <string name="currently_blocked_groups">Currently blocked groups</string>
-    <string name="currently_blocked_groups_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
+    <string name="currently_blocked_uploaders">Currently blocked uploaders</string>
+    <string name="currently_blocked_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
     <string name="unblock_group">Unblock groups</string>
     <string name="no_blocked_groups">No blocked groups</string>
+    <string name="unblock_uploader">Unblock uploader</string>
+    <string name="no_blocked_uploaders">No blocked uploaders</string>
     <string name="delete_saved_filters">Delete saved filters</string>
     <string name="saved_filters_deleted">Saved filters deleted</string>
     <string name="delete_saved_filters_description">Use this if you get a parse exception clicking the search button in browse, or want to delete all your saved search filters.</string>
@@ -1387,7 +1390,7 @@
     <string name="continue_reading_">Continue reading %1$s</string>
     <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
     <string name="filter_source">Filter Source</string>
-    <string name="filter_groups">Filter Scanlator Groups</string>
+    <string name="filter_scanlators">Filter Scanlators</string>
     <string name="filter_languages">Filter Languages</string>
 
     <string name="scanlator_groups">Scanlator groups</string>

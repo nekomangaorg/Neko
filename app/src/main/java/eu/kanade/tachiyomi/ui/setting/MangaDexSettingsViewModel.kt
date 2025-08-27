@@ -58,6 +58,15 @@ class MangaDexSettingsViewModel : ViewModel() {
                     _state.update { it.copy(blockedGroups = blockedGroups.toImmutableSet()) }
                 }
                 .stateIn(viewModelScope)
+
+            mangaDexPreference
+                .blockedUploaders()
+                .changes()
+                .distinctUntilChanged()
+                .onEach { blockedUploaders ->
+                    _state.update { it.copy(blockedUploaders = blockedUploaders.toImmutableSet()) }
+                }
+                .stateIn(viewModelScope)
         }
     }
 
@@ -73,5 +82,6 @@ class MangaDexSettingsViewModel : ViewModel() {
         val isLoggedIn: Boolean = false,
         val loginUrl: String = "",
         val blockedGroups: ImmutableSet<String> = persistentSetOf(),
+        val blockedUploaders: ImmutableSet<String> = persistentSetOf(),
     )
 }

@@ -330,7 +330,9 @@ private fun Scanlator(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text =
                     stringResource(
-                        id = if (isSourceFilter) R.string.filter_source else R.string.filter_groups
+                        id =
+                            if (isSourceFilter) R.string.filter_source
+                            else R.string.filter_scanlators
                     ),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface,

@@ -130,29 +130,25 @@ class ChapterItemFilter(
     ): List<T> {
 
         val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
-        val chapterScanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
-        val filteredGroups = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+        val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
+
+        // Filtered sources, groups and uploaders
+        val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
-        SourceManager.mergeSourceNames
+
+        val sources = SourceManager.mergeSourceNames + MdConstants.name
+        val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
+
         return chapters
             .asSequence()
             .filterNot { chapterItem ->
-                ChapterUtil.filteredBySource(
-                    MdConstants.name,
-                    chapterItem.chapter.scanlator,
-                    chapterItem.chapter.isMergedChapter(),
-                    chapterItem.chapter.isLocalSource(),
-                    filteredGroups,
-                )
-            }
-            .filterNot { chapterItem ->
-                SourceManager.mergeSourceNames.any { sourceName ->
+                sources.any { sourceName ->
                     ChapterUtil.filteredBySource(
                         sourceName,
                         chapterItem.chapter.scanlator,
                         chapterItem.chapter.isMergedChapter(),
                         chapterItem.chapter.isLocalSource(),
-                        filteredGroups,
+                        filtered,
                     )
                 }
             }
@@ -161,13 +157,20 @@ class ChapterItemFilter(
             }
             // blocked groups are always Any
             .filterNot { chapterItem ->
-                ChapterUtil.filterByGroup(chapterItem.chapter.scanlator, false, blockedGroups)
+                ChapterUtil.filterByScanlator(
+                    chapterItem.chapter.scanlator,
+                    chapterItem.chapter.uploader,
+                    false,
+                    blockedGroups,
+                    blockedUploaders,
+                )
             }
             .filterNot { chapterItem ->
-                ChapterUtil.filterByGroup(
+                ChapterUtil.filterByScanlator(
                     chapterItem.chapter.scanlator,
-                    chapterScanlatorMatchAll,
-                    filteredGroups,
+                    chapterItem.chapter.uploader,
+                    scanlatorMatchAll,
+                    filtered,
                 )
             }
             .toList()

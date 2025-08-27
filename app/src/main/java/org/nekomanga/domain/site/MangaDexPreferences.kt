@@ -34,6 +34,8 @@ class MangaDexPreferences(private val preferenceStore: PreferenceStore) {
 
     fun blockedGroups() = this.preferenceStore.getStringSet("blocked_scanlators", emptySet())
 
+    fun blockedUploaders() = this.preferenceStore.getStringSet("blocked_uploaders", emptySet())
+
     fun readingSync() = this.preferenceStore.getBoolean("reading_sync_bool", false)
 
     fun mangaDexUserName() = this.preferenceStore.getString("mangadex_username", "")
