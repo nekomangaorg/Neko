@@ -606,6 +606,11 @@
     <string name="automatic_orientation">Automatic (based on orientation)</string>
     <string name="actions">Actions</string>
     <string name="show_on_long_press">Show on long press</string>
+    <string name="eink">E-Ink</string>
+    <string name="eink_16bit">16-bit color</string>
+    <string name="eink_16bit_description">Filter for color e-ink displays</string>
+    <string name="eink_dither">Floyd-Steinberg dithering</string>
+    <string name="eink_dither_description">Reduces color banding</string>
     <string name="save_pages_separately">Save pages in separate folders</string>
     <string name="create_folders_by_manga_title">Creates folders according to manga title</string>
     <string name="pref_hide_threshold">Sensitivity for hiding menu on scroll</string>
