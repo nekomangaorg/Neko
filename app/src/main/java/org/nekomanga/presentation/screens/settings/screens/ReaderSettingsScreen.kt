@@ -538,12 +538,18 @@ internal class ReaderSettingsScreen(
                     group = stringResource(R.string.display),
                 ),
                 SearchTerm(
+                    title = stringResource(R.string.grayscale),
+                    group = stringResource(R.string.eink)
+                ),
+                SearchTerm(
                     title = stringResource(R.string.eink_16bit),
                     subtitle = stringResource(R.string.eink_16bit_description),
+                    group = stringResource(R.string.eink)
                 ),
                 SearchTerm(
                     title = stringResource(R.string.eink_dither),
                     subtitle = stringResource(R.string.eink_dither_description),
+                    group = stringResource(R.string.eink)
                 ),
                 SearchTerm(
                     title = stringResource(R.string.skip_read_chapters),
