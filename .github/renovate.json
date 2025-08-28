@@ -2,4 +2,5 @@
   "extends": [
     "config:base"
   ]
+  "prTitle": "chore: update {{depName}} to {{newVersion}}",
 }
