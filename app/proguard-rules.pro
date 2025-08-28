@@ -42,6 +42,9 @@
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 
+# Coil3
+-keep class * extends coil3.util.DecoderServiceLoaderTarget { *; }
+-keep class * extends coil3.util.FetcherServiceLoaderTarget { *; }
 
 # RxJava 1.1.0
 -dontwarn sun.misc.**
