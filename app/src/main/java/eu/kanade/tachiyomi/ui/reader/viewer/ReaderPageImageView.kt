@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
+import ColorEInk16Bit
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.Animatable
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -24,6 +24,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.crossfade
+import coil3.size.Size
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
@@ -34,6 +35,11 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import java.io.InputStream
 import java.nio.ByteBuffer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import org.nekomanga.domain.reader.ReaderPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * A wrapper view for showing page image.
@@ -52,6 +58,7 @@ constructor(
     @AttrRes defStyleAttrs: Int = 0,
     @StyleRes defStyleRes: Int = 0,
     private val isWebtoon: Boolean = false,
+    private val readerPreferences: ReaderPreferences = Injekt.get(),
 ) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes) {
 
     protected var pageView: View? = null
@@ -83,17 +90,6 @@ constructor(
     @CallSuper
     open fun onViewClicked() {
         onViewClicked?.invoke()
-    }
-
-    fun setImage(drawable: Drawable, config: Config) {
-        this.config = config
-        if (drawable is Animatable) {
-            prepareAnimatedImageView()
-            setAnimatedImage(drawable, config)
-        } else {
-            prepareNonAnimatedImageView()
-            setNonAnimatedImage(drawable, config)
-        }
     }
 
     fun setImage(inputStream: InputStream, isAnimated: Boolean, config: Config) {
@@ -182,7 +178,7 @@ constructor(
         }
     }
 
-    private fun setNonAnimatedImage(image: Any, config: Config) =
+    private fun setNonAnimatedImage(image: InputStream, config: Config) =
         (pageView as? SubsamplingScaleImageView)?.apply {
             setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
             setMinimumScaleType(config.minimumScaleType)
@@ -226,17 +222,16 @@ constructor(
                 }
             )
 
-            when (image) {
-                is Drawable -> {
-                    val bitmap = (image as BitmapDrawable).bitmap
-                    setImage(ImageSource.bitmap(bitmap))
-                }
-                is InputStream -> setImage(ImageSource.inputStream(image))
-                else ->
-                    throw IllegalArgumentException(
-                        "Not implemented for class ${image::class.simpleName}"
-                    )
-            }
+            if (readerPreferences.colorEInk16bit().get()) {
+                val original = BitmapFactory.decodeStream(image)
+                val processed =
+                    runBlocking(Dispatchers.IO) {
+                        ColorEInk16Bit(readerPreferences.colorEInkDither().get())
+                            .transform(original, Size(original.width, original.height))
+                    }
+                setImage(ImageSource.bitmap(processed))
+            } else setImage(ImageSource.inputStream(image))
+
             isVisible = true
         }
 
@@ -281,24 +276,15 @@ constructor(
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
-    private fun setAnimatedImage(image: Any, config: Config) =
+    private fun setAnimatedImage(image: InputStream, config: Config) =
         (pageView as? AppCompatImageView)?.apply {
             if (this is PhotoView) {
                 setZoomTransitionDuration(config.zoomDuration.getSystemScaledDuration())
             }
 
-            val data =
-                when (image) {
-                    is Drawable -> image
-                    is InputStream -> ByteBuffer.wrap(image.readBytes())
-                    else ->
-                        throw IllegalArgumentException(
-                            "Not implemented for class ${image::class.simpleName}"
-                        )
-                }
             val request =
                 ImageRequest.Builder(context)
-                    .data(data)
+                    .data(ByteBuffer.wrap(image.readBytes()))
                     .memoryCachePolicy(CachePolicy.DISABLED)
                     .diskCachePolicy(CachePolicy.DISABLED)
                     .target(

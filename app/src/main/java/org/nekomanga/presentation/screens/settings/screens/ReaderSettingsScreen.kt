@@ -4,11 +4,9 @@ import android.os.Build
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
@@ -42,6 +40,7 @@ internal class ReaderSettingsScreen(
         return persistentListOf(
             generalGroup(),
             displayGroup(),
+            einkGroup(),
             readingGroup(),
             pagedGroup(),
             webtoonGroup(),
@@ -158,6 +157,31 @@ internal class ReaderSettingsScreen(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = readerPreferences.showPageNumber(),
                         title = stringResource(R.string.show_page_number),
+                    ),
+                ),
+        )
+    }
+
+    @Composable
+    private fun einkGroup(): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.eink),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = readerPreferences.grayscale(),
+                        title = stringResource(R.string.grayscale),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = readerPreferences.colorEInk16bit(),
+                        title = stringResource(R.string.eink_16bit),
+                        subtitle = stringResource(R.string.eink_16bit_description),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = readerPreferences.colorEInkDither(),
+                        title = stringResource(R.string.eink_dither),
+                        subtitle = stringResource(R.string.eink_dither_description),
+                        enabled = readerPreferences.colorEInk16bit().collectAsState().value,
                     ),
                 ),
         )
@@ -512,6 +536,20 @@ internal class ReaderSettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.show_page_number),
                     group = stringResource(R.string.display),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.grayscale),
+                    group = stringResource(R.string.eink),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.eink_16bit),
+                    subtitle = stringResource(R.string.eink_16bit_description),
+                    group = stringResource(R.string.eink),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.eink_dither),
+                    subtitle = stringResource(R.string.eink_dither_description),
+                    group = stringResource(R.string.eink),
                 ),
                 SearchTerm(
                     title = stringResource(R.string.skip_read_chapters),

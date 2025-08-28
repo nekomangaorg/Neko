@@ -69,6 +69,10 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun grayscale() = this.preferenceStore.getBoolean("pref_grayscale")
 
+    fun colorEInk16bit() = this.preferenceStore.getBoolean("pref_eink_16bit", false)
+
+    fun colorEInkDither() = this.preferenceStore.getBoolean("pref_eink_dither", true)
+
     fun invertedColors() = this.preferenceStore.getBoolean("pref_inverted_colors")
 
     fun webtoonSidePadding() = this.preferenceStore.getInt("webtoon_side_padding")
