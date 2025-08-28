@@ -4,7 +4,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.material.ripple
 import androidx.compose.material3.Icon
@@ -15,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
-import androidx.compose.material3.tokens.IconButtonTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -108,7 +106,7 @@ fun CombinedClickableIconButton(
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = modifier.minimumInteractiveComponentSize().size(IconButtonTokens.StateLayerSize),
+        modifier = modifier.minimumInteractiveComponentSize(),
         contentAlignment = Alignment.Center,
     ) {
         val contentColor =
@@ -137,7 +135,7 @@ fun Modifier.iconButtonCombinedClickable(
     if (isEnabled) {
         combinedClickable(
             interactionSource = remember { MutableInteractionSource() },
-            indication = ripple(bounded = false, radius = IconButtonTokens.StateLayerSize / 2),
+            indication = ripple(bounded = false),
             onClickLabel = toolTipLabel,
             role = Role.Button,
             onClick = onClick,

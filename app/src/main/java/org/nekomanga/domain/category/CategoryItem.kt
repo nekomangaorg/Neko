@@ -2,6 +2,7 @@ package org.nekomanga.domain.category
 
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -12,7 +13,8 @@ data class CategoryItem(
     val order: Int = 0,
     val flags: Int = 0,
     val mangaOrder: ImmutableList<Long> = persistentListOf(),
-    val mangaSort: Char? = null,
+    val sortOrder: LibrarySort,
+    val isAscending: Boolean = true,
     val isAlone: Boolean = true,
     val isHidden: Boolean = false,
     val isDynamic: Boolean = false,
@@ -27,7 +29,7 @@ fun CategoryItem.toDbCategory(): CategoryImpl {
         order = this@toDbCategory.order
         flags = this@toDbCategory.flags
         mangaOrder = this@toDbCategory.mangaOrder.toList()
-        mangaSort = this@toDbCategory.mangaSort
+        mangaSort = this@toDbCategory.sortOrder.categoryValue
         isAlone = this@toDbCategory.isAlone
         isHidden = this@toDbCategory.isHidden
         isDynamic = this@toDbCategory.isDynamic
@@ -42,7 +44,8 @@ fun Category.toCategoryItem(): CategoryItem {
         order = this.order,
         flags = this.flags,
         mangaOrder = this.mangaOrder.toImmutableList(),
-        mangaSort = this.mangaSort,
+        isAscending = this.isAscending(),
+        sortOrder = LibrarySort.valueOf(this.mangaSort) ?: LibrarySort.Title,
         isAlone = this.isAlone,
         isHidden = this.isHidden,
         isDynamic = this.isDynamic,

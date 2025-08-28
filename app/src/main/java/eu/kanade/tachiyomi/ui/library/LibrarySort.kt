@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import org.nekomanga.R
 
@@ -40,6 +41,20 @@ enum class LibrarySort(
     @StringRes fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
 
     @DrawableRes fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
+
+    fun composeIcon(): Icons {
+        when (this) {
+            LibrarySort.Title -> TODO()
+            LibrarySort.LastRead -> TODO()
+            LibrarySort.LatestChapter -> TODO()
+            LibrarySort.Unread -> TODO()
+            LibrarySort.TotalChapters -> TODO()
+            LibrarySort.DateAdded -> TODO()
+            LibrarySort.DateFetched -> TODO()
+            LibrarySort.DragAndDrop -> TODO()
+            LibrarySort.Rating -> TODO()
+        }
+    }
 
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
         return MaterialMenuSheet.MenuSheetItem(mainValue, iconRes(isDynamic), stringRes(isDynamic))
