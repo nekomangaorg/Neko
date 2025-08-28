@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -75,7 +78,7 @@ fun AboutScreen(
         onNavigationIconClicked = onBackPressed,
         title = stringResource(id = R.string.about),
         snackBarHost = snackbarHost(snackbarHostState),
-        content = { contentPadding ->
+        content = { incomingContentPadding ->
             LaunchedEffect(snackbarHostState.currentSnackbarData) {
                 snackbar.collect { state ->
                     scope.launch {
@@ -106,8 +109,18 @@ fun AboutScreen(
                 )
             }
 
+            val recyclerContentPadding =
+                PaddingValues(
+                    top = incomingContentPadding.calculateTopPadding(),
+                    bottom =
+                        Size.navBarSize +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    start = Size.medium,
+                    end = Size.medium,
+                )
+
             LazyColumn(
-                contentPadding = PaddingValues(horizontal = Size.medium),
+                contentPadding = recyclerContentPadding,
                 verticalArrangement = Arrangement.spacedBy(Size.extraTiny),
             ) {
                 item { LogoHeader() }
