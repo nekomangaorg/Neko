@@ -1,6 +1,7 @@
 {
   "prTitle": "chore: update {{depName}} to {{newVersion}}",
   "extends": [
-    "config:base"
+    "config:base",
+    ":semanticCommitType(chore)"
   ]
 }
