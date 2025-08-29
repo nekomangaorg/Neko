@@ -37,6 +37,7 @@ data class BrowseScreenState(
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,
     val filters: DexFilters,
+    val backtrackMangaId: Long? = null,
     val defaultContentRatings: ImmutableSet<String>,
     val handledIncomingQuery: Boolean = false,
     val firstLoad: Boolean = true,
