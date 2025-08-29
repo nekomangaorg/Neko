@@ -131,7 +131,11 @@ class LibraryComposePresenter(
                             val mangaMap = libraryMangaList.groupBy { it.category }.toMap()
 
                             categoryList
-                                .map { categoryItem ->
+                                .mapNotNull { categoryItem ->
+                                    if (categoryItem.isSystemCategory) {
+                                        return@mapNotNull null
+                                    }
+
                                     val updatedCategoryItem =
                                         categoryItem.copy(
                                             isHidden = categoryItem.id in collapsedCategorySet

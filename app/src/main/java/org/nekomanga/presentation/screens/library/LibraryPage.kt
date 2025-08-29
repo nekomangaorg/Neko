@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.library
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,11 +16,15 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,6 +34,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.MangaRow
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -47,13 +53,13 @@ fun LibraryPage(
             item(item.categoryItem.id) {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
+                    enabled = !item.libraryItems.isEmpty(),
                     categoryItemClick = {
                         libraryScreenActions.categoryItemClick(item.categoryItem)
                     },
                 )
             }
             if (!item.categoryItem.isHidden) {
-
                 items(
                     item.libraryItems,
                     key = { libraryItem -> libraryItem.displayManga.title + item.categoryItem.name },
@@ -70,12 +76,28 @@ fun LibraryPage(
 }
 
 @Composable
-private fun LibraryCategoryHeader(categoryItem: CategoryItem, categoryItemClick: () -> Unit) {
+private fun LibraryCategoryHeader(
+    categoryItem: CategoryItem,
+    categoryItemClick: () -> Unit,
+    enabled: Boolean,
+) {
+
+    // Animate the background color to provide a smooth transition for the disabled state
+    val textColor by
+        animateColorAsState(
+            targetValue =
+                if (enabled) MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.disabledAlphaLowContrast
+                    )
+        )
+
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .clickable(onClick = categoryItemClick)
-                .padding(vertical = Size.tiny),
+                .clickable(enabled = enabled, onClick = categoryItemClick)
+                .padding(vertical = Size.extraTiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -83,10 +105,16 @@ private fun LibraryCategoryHeader(categoryItem: CategoryItem, categoryItemClick:
                 if (categoryItem.isHidden) Icons.Default.ArrowDropDown
                 else Icons.Default.ArrowDropUp,
             contentDescription = null,
+            tint = textColor,
         )
-        Text(text = categoryItem.name, maxLines = 1, style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = categoryItem.name,
+            maxLines = 1,
+            color = textColor,
+            style = MaterialTheme.typography.titleLarge,
+        )
         Gap(Size.small, modifier = Modifier.weight(1f))
-        TextButton(onClick = { /* Do Nothing */ }) {
+        TextButton(enabled = enabled, onClick = { /* Do Nothing */ }) {
             Text(
                 text = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
                 maxLines = 1,
@@ -101,12 +129,16 @@ private fun LibraryCategoryHeader(categoryItem: CategoryItem, categoryItemClick:
                 modifier = Modifier.size(Size.mediumLarge),
             )
         }
-        /*TextButton(onClick = {}) {
+        IconButton(
+            enabled = enabled,
+            colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
+            onClick = {},
+        ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
                 modifier = Modifier.size(Size.mediumLarge),
             )
-        }*/
+        }
     }
 }
