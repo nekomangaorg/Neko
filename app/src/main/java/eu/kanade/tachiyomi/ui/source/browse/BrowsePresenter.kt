@@ -148,12 +148,13 @@ class BrowsePresenter(
 
     override fun onCreate() {
         super.onCreate()
+        isOnline()
 
         if (_browseScreenState.value.firstLoad) {
             if (browseScreenState.value.filters.query.text.isNotBlank()) {
-                getSearchPage()
+                getSearchPage(true)
             } else {
-                getHomepage()
+                getHomepage(true)
             }
         }
 
@@ -225,7 +226,7 @@ class BrowsePresenter(
         presenterScope.launch { paginator.loadNextItems() }
     }
 
-    private fun getHomepage() {
+    private fun getHomepage(initialLoad: Boolean = false) {
         presenterScope.launchIO {
             if (!isOnline()) return@launchIO
             browseRepository
@@ -233,6 +234,7 @@ class BrowsePresenter(
                 .onFailure { resultError ->
                     _browseScreenState.update { state ->
                         state.copy(
+                            backtrackMangaId = if (initialLoad) state.backtrackMangaId else null,
                             error = UiText.String(resultError.message()),
                             initialLoading = false,
                             hideFooterButton = false,
@@ -242,6 +244,7 @@ class BrowsePresenter(
                 .onSuccess {
                     _browseScreenState.update { state ->
                         state.copy(
+                            backtrackMangaId = if (initialLoad) state.backtrackMangaId else null,
                             homePageManga = it.updateVisibility(preferences),
                             initialLoading = false,
                             hideFooterButton = false,
@@ -259,7 +262,9 @@ class BrowsePresenter(
                     _browseScreenState.value.displayMangaHolder.resultType !=
                         BrowseScreenType.Follows
             ) {
-                _browseScreenState.update { state -> state.copy(initialLoading = true) }
+                _browseScreenState.update { state ->
+                    state.copy(initialLoading = true, backtrackMangaId = null)
+                }
                 browseRepository
                     .getFollows()
                     .onFailure {
@@ -297,12 +302,18 @@ class BrowsePresenter(
         }
     }
 
-    fun getSearchPage() {
+    fun getSearchPage(keepBacktrack: Boolean = false) {
+
         presenterScope.launchIO {
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(
+                    initialLoading = true,
+                    error = null,
+                    page = 1,
+                    backtrackMangaId = if (keepBacktrack) state.backtrackMangaId else null,
+                )
             }
 
             val currentQuery = browseScreenState.value.filters.query.text
@@ -327,11 +338,12 @@ class BrowsePresenter(
 
                     when (val queryMode = browseScreenState.value.filters.queryMode) {
                         QueryType.Author,
-                        QueryType.Group -> {
+                        QueryType.Group,
+                            -> {
                             when (queryMode) {
-                                    QueryType.Author -> browseRepository.getAuthors(currentQuery)
-                                    else -> browseRepository.getGroups(currentQuery)
-                                }
+                                QueryType.Author -> browseRepository.getAuthors(currentQuery)
+                                else -> browseRepository.getGroups(currentQuery)
+                            }
                                 .onFailure {
                                     _browseScreenState.update { state ->
                                         state.copy(
@@ -343,6 +355,12 @@ class BrowsePresenter(
                                 .onSuccess { dr ->
                                     _browseScreenState.update {
                                         it.copy(
+                                            title = when (queryMode) {
+                                                QueryType.Author ->
+                                                    UiText.StringResource(R.string.author)
+                                                else ->
+                                                    UiText.StringResource(R.string.scanlator_group)
+                                            },
                                             otherResults = dr.toImmutableList(),
                                             screenType = BrowseScreenType.Other,
                                             initialLoading = false,
@@ -541,7 +559,7 @@ class BrowsePresenter(
                         filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid))
                     )
                 }
-                getSearchPage()
+                getSearchPage(true)
             } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
                 _browseScreenState.update {
                     it.copy(
@@ -717,7 +735,7 @@ class BrowsePresenter(
         }
     }
 
-    fun searchTag(tag: String) {
+    fun searchTag(tag: String, backtrackMangaId: Long? = null) {
         presenterScope.launch {
             val blankFilter = createInitialDexFilter("")
 
@@ -742,25 +760,28 @@ class BrowsePresenter(
                             }
                     )
                 }
-            _browseScreenState.update { it.copy(filters = filters) }
-            getSearchPage()
+            _browseScreenState.update {
+                it.copy(filters = filters, backtrackMangaId = backtrackMangaId)
+            }
+            getSearchPage(backtrackMangaId != null)
         }
     }
 
-    fun searchCreator(creator: String) {
+    fun searchCreator(creator: String, backtrackMangaId: Long? = null) {
         presenterScope.launch {
             val blankFilter = createInitialDexFilter("")
             _browseScreenState.update {
                 it.copy(
+                    backtrackMangaId = backtrackMangaId,
                     filters =
                         blankFilter.copy(
                             queryMode = QueryType.Author,
                             query = Filter.Query(creator, QueryType.Author),
-                        )
+                        ),
                 )
             }
 
-            getSearchPage()
+            getSearchPage(backtrackMangaId != null)
         }
     }
 
@@ -919,7 +940,8 @@ class BrowsePresenter(
         presenterScope.launch {
             when (browseScreenType) {
                 BrowseScreenType.Follows -> getFollows(forceUpdate)
-                BrowseScreenType.Filter -> getSearchPage()
+                BrowseScreenType.Filter ->
+                    getSearchPage(browseScreenState.value.backtrackMangaId != null)
                 else -> Unit
             }
             _browseScreenState.update { it.copy(screenType = browseScreenType, error = null) }

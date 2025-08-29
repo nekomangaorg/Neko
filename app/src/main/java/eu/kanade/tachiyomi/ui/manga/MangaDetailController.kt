@@ -198,9 +198,18 @@ class MangaDetailController(private val mangaId: Long) :
                     },
                 ),
             onBackPressed = {
-                when (router.backstackSize > 1) {
-                    true -> router.handleBack()
-                    false -> activity?.onBackPressed()
+                val controller = router.backstack[0].controller
+                if (
+                    controller is BrowseController &&
+                        controller.presenter.browseScreenState.value.backtrackMangaId == mangaId
+                ) {
+                    router.popToRoot()
+                    (activity as? MainActivity)?.goToTab(R.id.nav_library)
+                } else {
+                    when (router.backstackSize > 1) {
+                        true -> router.handleBack()
+                        false -> activity?.onBackPressed()
+                    }
                 }
             },
         )
@@ -299,12 +308,12 @@ class MangaDetailController(private val mangaId: Long) :
 
     /** Search by author on browse screen */
     private fun creatorClicked(text: String) {
-        getBrowseController()?.searchByCreator(text)
+        getBrowseController()?.searchByCreator(text, mangaId)
     }
 
     /** Search by tag on browse screen */
     private fun genreSearch(text: String) {
-        getBrowseController()?.searchByTag(text)
+        getBrowseController()?.searchByTag(text, mangaId)
     }
 
     private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
