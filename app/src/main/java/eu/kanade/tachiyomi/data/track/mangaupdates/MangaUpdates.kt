@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.R
+import org.nekomanga.logging.TimberKt
 
 class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
@@ -132,11 +133,16 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun login(username: String, password: String): Boolean {
-        val authenticated =
-            api.authenticate(username, password) ?: throw Throwable("Unable to login")
-        saveCredentials(username, authenticated.sessionToken)
-        interceptor.newAuth(authenticated.sessionToken)
-        return true
+        return try {
+            val authenticated =
+                api.authenticate(username, password) ?: throw Throwable("Unable to login")
+            saveCredentials(username, authenticated.sessionToken)
+            interceptor.newAuth(authenticated.sessionToken)
+            return true
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error logging into MangaUpdates" }
+            false
+        }
     }
 
     fun restoreSession(): String? {

@@ -210,7 +210,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     suspend fun getLibManga(track: Track): Track {
         return rest.getLibManga(track.media_id).let {
             val data = it["data"]!!.jsonArray
-            if (data.size > 0) {
+            if (data.isNotEmpty()) {
                 val manga = it["included"]!!.jsonArray[0].jsonObject
                 KitsuLibManga(data[0].jsonObject, manga).toTrack()
             } else {
