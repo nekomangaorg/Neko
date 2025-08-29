@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
@@ -123,9 +124,12 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val displayManga = this.toDisplayManga(displayText = this.author ?: "")
 
+    val mangaRating = this.rating?.toDoubleOrNull() ?: (-1).toDouble()
+
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
-        dateAdded = this.date_added,
+        rating = ((mangaRating * 100).roundToInt() / 100.0),
+        addedToLibraryDate = this.date_added,
         latestChapterDate = this.last_update,
         unreadCount = this.unread,
         readCount = this.read,

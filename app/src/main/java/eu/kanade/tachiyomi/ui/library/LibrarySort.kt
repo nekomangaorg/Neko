@@ -61,9 +61,9 @@ enum class LibrarySort(
     }
 
     companion object {
-        fun valueOf(value: Int) = values().find { it.mainValue == value }
+        fun valueOf(value: Int) = entries.find { it.mainValue == value }
 
         fun valueOf(char: Char?) =
-            values().find { it.categoryValue == char || it.categoryValueDescending == char }
+            entries.find { it.categoryValue == char || it.categoryValueDescending == char }
     }
 }

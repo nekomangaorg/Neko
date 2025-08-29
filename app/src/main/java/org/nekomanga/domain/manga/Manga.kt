@@ -15,7 +15,7 @@ data class SourceManga(
 
 data class LibraryMangaItem(
     val displayManga: DisplayManga,
-    val addedToLibraryDate: Long =0L,
+    val addedToLibraryDate: Long = 0L,
     val latestChapterDate: Long = 0L,
     val unreadCount: Int = 0,
     val readCount: Int = 0,
@@ -23,6 +23,7 @@ data class LibraryMangaItem(
     val bookmarkCount: Int = 0,
     val unavailableCount: Int = 0,
     val downloadCount: Int = 0,
+    val rating: Double = (-1).toDouble(),
 ) {
     val totalChapterCount
         get() = readCount + unreadCount

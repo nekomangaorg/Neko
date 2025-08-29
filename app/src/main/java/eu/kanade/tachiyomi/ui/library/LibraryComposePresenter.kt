@@ -27,6 +27,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -88,6 +89,8 @@ class LibraryComposePresenter(
                     val collapsedCategorySet =
                         collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
 
+                    val removeArticles = libraryPreferences.removeArticles().get()
+
                     val libraryViewType =
                         when (layout) {
                             2 -> LibraryViewType.ComfortableGrid(rawColumnCount = gridSize)
@@ -133,11 +136,38 @@ class LibraryComposePresenter(
                                         categoryItem.copy(
                                             isHidden = categoryItem.id in collapsedCategorySet
                                         )
+
+                                    val unsortedMangaList =
+                                        mangaMap[categoryItem.id]?.toPersistentList()
+                                            ?: persistentListOf()
+
+                                    val sortedMangaList =
+                                        unsortedMangaList.sortedWith(
+                                            LibraryMangaItemComparator(
+                                                librarySort = categoryItem.sortOrder,
+                                                removeArticles = removeArticles,
+                                                lastReadMapFn = {
+                                                    TimberKt.d { "Last read fn called" }
+                                                    var counter = 0
+                                                    db.getLastReadManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
+                                                lastFetchMapFn = {
+                                                    var counter = 0
+                                                    db.getLastFetchedManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
+                                            )
+                                        )
+
                                     LibraryCategoryItem(
                                         categoryItem = updatedCategoryItem,
                                         libraryItems =
-                                            mangaMap[categoryItem.id]?.toPersistentList()
-                                                ?: persistentListOf(),
+                                            if (updatedCategoryItem.isAscending)
+                                                sortedMangaList.toPersistentList()
+                                            else sortedMangaList.reversed().toPersistentList(),
                                     )
                                 }
                                 .toPersistentList()
