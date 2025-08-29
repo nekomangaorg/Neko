@@ -15,6 +15,8 @@ data class SourceManga(
 
 data class LibraryMangaItem(
     val displayManga: DisplayManga,
+    val addedToLibraryDate: Long =0L,
+    val latestChapterDate: Long = 0L,
     val unreadCount: Int = 0,
     val readCount: Int = 0,
     val category: Int = 0,

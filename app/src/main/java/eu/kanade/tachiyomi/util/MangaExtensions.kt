@@ -125,6 +125,8 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
+        dateAdded = this.date_added,
+        latestChapterDate = this.last_update,
         unreadCount = this.unread,
         readCount = this.read,
         category = this.category,
