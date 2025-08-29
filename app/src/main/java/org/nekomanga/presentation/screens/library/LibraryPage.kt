@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -109,11 +110,10 @@ private fun LibraryCategoryHeader(
         )
         Text(
             text = categoryItem.name,
-            maxLines = 1,
             color = textColor,
             style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(1f),
         )
-        Gap(Size.small, modifier = Modifier.weight(1f))
         TextButton(enabled = enabled, onClick = { /* Do Nothing */ }) {
             Text(
                 text = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
