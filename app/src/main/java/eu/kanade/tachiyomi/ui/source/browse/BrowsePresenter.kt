@@ -65,7 +65,6 @@ class BrowsePresenter(
         MutableStateFlow(
             BrowseScreenState(
                 isList = preferences.browseAsList().get(),
-                hideFooterButton = true,
                 showLibraryEntries = preferences.browseShowLibrary().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
@@ -148,6 +147,7 @@ class BrowsePresenter(
 
     override fun onCreate() {
         super.onCreate()
+        isOnline()
 
         if (_browseScreenState.value.firstLoad) {
             if (browseScreenState.value.filters.query.text.isNotBlank()) {
@@ -235,7 +235,6 @@ class BrowsePresenter(
                         state.copy(
                             error = UiText.String(resultError.message()),
                             initialLoading = false,
-                            hideFooterButton = false,
                         )
                     }
                 }
@@ -244,7 +243,6 @@ class BrowsePresenter(
                         state.copy(
                             homePageManga = it.updateVisibility(preferences),
                             initialLoading = false,
-                            hideFooterButton = false,
                         )
                     }
                 }
@@ -972,12 +970,14 @@ class BrowsePresenter(
     /** Check if can access internet */
     private fun isOnline(): Boolean {
         return if (view?.activity?.isOnline() == true) {
+            _browseScreenState.update { it.copy(hideFooterButton = false) }
             true
         } else {
             presenterScope.launch {
                 _browseScreenState.update {
                     it.copy(
                         initialLoading = false,
+                        hideFooterButton = true,
                         error = UiText.StringResource(R.string.no_network_connection),
                     )
                 }
