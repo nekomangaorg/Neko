@@ -77,8 +77,8 @@ class LibrarySettingsViewModel : ViewModel() {
             } else {
                 val category = _allCategories.value.firstOrNull { it.id == id }
                 if (category != null) {
-                    category.copy(name = newCategoryName)
-                    db.insertCategory(category.toDbCategory()).executeAsBlocking()
+                    val updatedCategory = category.copy(name = newCategoryName)
+                    db.insertCategory(updatedCategory.toDbCategory()).executeAsBlocking()
                 }
             }
         }
