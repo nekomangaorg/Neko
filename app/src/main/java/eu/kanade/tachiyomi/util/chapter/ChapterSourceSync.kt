@@ -67,7 +67,6 @@ fun syncChaptersWithSource(
     var finalRawSourceChapters = rawSourceChapters
 
     // Check for local chapter to add
-
     if (localChapterLookupEnabled) {
 
         TimberKt.d { "local chapter enabled, checking for orphans" }
@@ -83,7 +82,7 @@ fun syncChaptersWithSource(
                             downloadManager.isChapterDownloaded(dbChapter, manga)) ||
                             (dbChapter.isLocalSource() &&
                                 downloadManager.isChapterDownloaded(dbChapter, manga, true))
-                    ) {
+                    ) { // Don't re-add the chapter if it's already in the db
                         val validName =
                             downloadManager.downloadedChapterName(dbChapter).firstOrNull {
                                 it in allDownloadsMap
@@ -106,6 +105,10 @@ fun syncChaptersWithSource(
                     allDownloads.mapNotNull { file ->
                         val chapterName = file.nameWithoutExtension!!.substringAfter("_")
                         if (chapterName.substringAfterLast(" - ") in chapterUUIDs) {
+                            if (file.name!!.startsWith(Constants.LOCAL_SOURCE)) {
+                                val correctFileName = file.name!!.substringAfter("_")
+                                file.renameTo(correctFileName)
+                            }
                             return@mapNotNull null
                         }
                         val dateUploaded = file.lastModified()
