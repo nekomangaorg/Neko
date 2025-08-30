@@ -191,20 +191,19 @@ fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableLis
  */
 fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayManga> {
     return this.map { displayManga ->
-        when (prefs.browseShowLibrary().get()) {
-            true -> {
-                displayManga.copy(isVisible = true)
-            }
-            false -> {
-                displayManga.copy(isVisible = !displayManga.inLibrary)
-            }
+        when (prefs.browseDisplayMode().get() % 3) {
+            2 -> displayManga.copy(isVisible = displayManga.inLibrary)
+            1 -> displayManga.copy(isVisible = !displayManga.inLibrary)
+            else -> displayManga.copy(isVisible = true)
         }
     }
 }
 
 /** Filters out library manga if enabled */
 fun List<DisplayManga>.filterVisibility(prefs: PreferencesHelper): List<DisplayManga> {
-    return this.filter { displayManga ->
-        prefs.browseShowLibrary().get() || !displayManga.inLibrary
+    return when (prefs.browseDisplayMode().get() % 3) {
+        2 -> this.filter { it.inLibrary }
+        1 -> this.filter { !it.inLibrary }
+        else -> this
     }
 }

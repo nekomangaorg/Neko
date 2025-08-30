@@ -3,6 +3,7 @@ package org.nekomanga.presentation.components
 import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.Visibility
@@ -43,18 +44,24 @@ fun listGridAppBarAction(
     }
 }
 
-fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
-    return when (showEntries) {
-        true ->
+fun showLibraryEntriesAction(showEntries: Int, onClick: () -> Unit): AppBar.Action {
+    return when (showEntries % 3) {
+        2 ->
+            AppBar.Action(
+                title = UiText.StringResource(R.string.show_all_manga),
+                icon = Icons.Filled.Visibility,
+                onClick = onClick,
+            )
+        1 ->
+            AppBar.Action(
+                title = UiText.StringResource(R.string.show_library_manga),
+                icon = Icons.Filled.Favorite,
+                onClick = onClick,
+            )
+        else ->
             AppBar.Action(
                 title = UiText.StringResource(R.string.hide_library_manga),
                 icon = Icons.Filled.VisibilityOff,
-                onClick = onClick,
-            )
-        false ->
-            AppBar.Action(
-                title = UiText.StringResource(R.string.show_library_manga),
-                icon = Icons.Filled.Visibility,
                 onClick = onClick,
             )
     }

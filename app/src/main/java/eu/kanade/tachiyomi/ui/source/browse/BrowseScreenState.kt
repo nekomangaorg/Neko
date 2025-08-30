@@ -31,7 +31,7 @@ data class BrowseScreenState(
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
     val isList: Boolean,
-    val showLibraryEntries: Boolean,
+    val showLibraryEntries: Int,
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,

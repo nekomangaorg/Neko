@@ -66,7 +66,7 @@ class BrowsePresenter(
             BrowseScreenState(
                 isList = preferences.browseAsList().get(),
                 hideFooterButton = true,
-                showLibraryEntries = preferences.browseShowLibrary().get(),
+                showLibraryEntries = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
@@ -197,8 +197,8 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.browseShowLibrary().changes().collectLatest { bool ->
-                _browseScreenState.update { it.copy(showLibraryEntries = bool) }
+            preferences.browseDisplayMode().changes().collectLatest { show ->
+                _browseScreenState.update { it.copy(showLibraryEntries = show) }
                 presenterScope.launch {
                     _browseScreenState.update {
                         it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
@@ -927,7 +927,7 @@ class BrowsePresenter(
     }
 
     fun switchLibraryVisibility() {
-        preferences.browseShowLibrary().set(!browseScreenState.value.showLibraryEntries)
+        preferences.browseDisplayMode().set((browseScreenState.value.showLibraryEntries + 1) % 3)
     }
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
