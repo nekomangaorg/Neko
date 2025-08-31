@@ -207,7 +207,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                         val data = it["data"]!!.jsonObject
                         val viewer = data["Viewer"]!!.jsonObject
                         Pair(
-                            viewer["name"]!!.jsonPrimitive.content,
+                            viewer["id"]!!.jsonPrimitive.int.toString(),
                             viewer["mediaListOptions"]!!
                                 .jsonObject["scoreFormat"]!!
                                 .jsonPrimitive
@@ -443,7 +443,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             """
             |query User {
                 |Viewer {
-                    |name
+                    |id
                     |mediaListOptions {
                         |scoreFormat
                     |}
