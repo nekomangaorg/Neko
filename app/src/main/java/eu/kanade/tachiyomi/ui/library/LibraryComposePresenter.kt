@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.asFlow
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.toLibraryMangaItem
 import kotlin.collections.map
@@ -25,9 +26,9 @@ import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -151,7 +152,6 @@ class LibraryComposePresenter(
                                                 librarySort = categoryItem.sortOrder,
                                                 removeArticles = removeArticles,
                                                 lastReadMapFn = {
-                                                    TimberKt.d { "Last read fn called" }
                                                     var counter = 0
                                                     db.getLastReadManga()
                                                         .executeAsBlocking()
@@ -224,6 +224,57 @@ class LibraryComposePresenter(
             libraryPreferences
                 .collapsedCategories()
                 .set(collapsedCategory.map { it.toString() }.toSet())
+        }
+    }
+
+    fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
+        presenterScope.launchIO {
+            val updatedDbCategory =
+                when (category.sortOrder == librarySort) {
+                    true -> category.toDbCategory(true)
+                    false ->
+                        category.copy(isAscending = false, sortOrder = librarySort).toDbCategory()
+                }
+
+            db.insertCategory(updatedDbCategory).executeOnIO()
+
+            val updatedCategory = updatedDbCategory.toCategoryItem()
+
+            val mutableItems = _libraryScreenState.value.items.toMutableList()
+            val index =
+                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
+            if (index >= 0) {
+                val libraryCategoryItem = mutableItems[index]
+                val newSortedList =
+                    if (category.sortOrder == librarySort) {
+                        libraryCategoryItem.libraryItems.reversed().toPersistentList()
+                    } else {
+                        libraryCategoryItem.libraryItems
+                            .sortedWith(
+                                LibraryMangaItemComparator(
+                                    librarySort = updatedCategory.sortOrder,
+                                    removeArticles = libraryPreferences.removeArticles().get(),
+                                    lastReadMapFn = {
+                                        var counter = 0
+                                        db.getLastReadManga().executeAsBlocking().associate {
+                                            it.id!! to counter++
+                                        }
+                                    },
+                                    lastFetchMapFn = {
+                                        var counter = 0
+                                        db.getLastFetchedManga().executeAsBlocking().associate {
+                                            it.id!! to counter++
+                                        }
+                                    },
+                                )
+                            )
+                            .toPersistentList()
+                    }
+                val updatedLibraryCategoryItem = LibraryCategoryItem(updatedCategory, newSortedList)
+                mutableItems[index] = updatedLibraryCategoryItem
+
+                _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
+            }
         }
     }
 

@@ -3,6 +3,18 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.SortByAlpha
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.SwapVert
+import androidx.compose.ui.graphics.vector.ImageVector
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import org.nekomanga.R
 
@@ -38,21 +50,23 @@ enum class LibrarySort(
     val categoryValueDescending: Char
         get() = if (this == DragAndDrop) 'D' else 'b' + catValue * 2
 
-    @StringRes fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
+    @StringRes
+    fun stringRes(isDynamic: Boolean = false) = if (isDynamic) dynamicStringRes else stringRes
 
-    @DrawableRes fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
+    @DrawableRes
+    fun iconRes(isDynamic: Boolean = false) = if (isDynamic) dynamicIconRes else iconRes
 
-    fun composeIcon(): Icons {
-        when (this) {
-            LibrarySort.Title -> TODO()
-            LibrarySort.LastRead -> TODO()
-            LibrarySort.LatestChapter -> TODO()
-            LibrarySort.Unread -> TODO()
-            LibrarySort.TotalChapters -> TODO()
-            LibrarySort.DateAdded -> TODO()
-            LibrarySort.DateFetched -> TODO()
-            LibrarySort.DragAndDrop -> TODO()
-            LibrarySort.Rating -> TODO()
+    fun composeIcon(): ImageVector {
+        return when (this) {
+            Title -> Icons.Default.SortByAlpha
+            LastRead -> Icons.Outlined.AccessTime
+            LatestChapter -> Icons.Outlined.NewReleases
+            Unread -> Icons.Filled.RemoveRedEye
+            TotalChapters -> Icons.Filled.FormatListNumbered
+            DateAdded -> Icons.Outlined.Favorite
+            DateFetched -> Icons.Outlined.CalendarMonth
+            DragAndDrop -> Icons.Outlined.SwapVert
+            Rating -> Icons.Default.BarChart
         }
     }
 

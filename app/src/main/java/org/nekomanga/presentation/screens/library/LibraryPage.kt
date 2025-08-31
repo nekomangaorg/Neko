@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -30,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
+import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
@@ -42,7 +41,8 @@ import org.nekomanga.presentation.theme.Size
 fun LibraryPage(
     contentPadding: PaddingValues,
     libraryScreenState: LibraryScreenState,
-    libraryScreenActions: LibraryScreenActions,
+    libraryCategoryActions: LibraryCategoryActions,
+    categorySortClick: (CategoryItem) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
@@ -56,7 +56,11 @@ fun LibraryPage(
                     categoryItem = item.categoryItem,
                     enabled = !item.libraryItems.isEmpty(),
                     categoryItemClick = {
-                        libraryScreenActions.categoryItemClick(item.categoryItem)
+                        libraryCategoryActions.categoryItemClick(item.categoryItem)
+                    },
+                    categorySortClick = { categorySortClick(item.categoryItem) },
+                    categoryRefreshClick = {
+                        libraryCategoryActions.categoryRefreshClick(item.categoryItem)
                     },
                 )
             }
@@ -80,6 +84,8 @@ fun LibraryPage(
 private fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
     categoryItemClick: () -> Unit,
+    categorySortClick: () -> Unit,
+    categoryRefreshClick: () -> Unit,
     enabled: Boolean,
 ) {
 
@@ -114,7 +120,7 @@ private fun LibraryCategoryHeader(
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f),
         )
-        TextButton(enabled = enabled, onClick = { /* Do Nothing */ }) {
+        TextButton(enabled = enabled, onClick = categorySortClick) {
             Text(
                 text = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
                 maxLines = 1,
@@ -132,7 +138,7 @@ private fun LibraryCategoryHeader(
         IconButton(
             enabled = enabled,
             colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
-            onClick = {},
+            onClick = categoryRefreshClick,
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,

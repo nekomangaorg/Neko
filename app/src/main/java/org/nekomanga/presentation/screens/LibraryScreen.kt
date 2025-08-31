@@ -22,6 +22,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import kotlinx.coroutines.launch
@@ -47,6 +49,8 @@ import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.library.LibraryBottomSheet
+import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
 import org.nekomanga.presentation.screens.library.LibraryPage
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
@@ -55,6 +59,7 @@ import org.nekomanga.presentation.theme.Size
 fun LibraryScreen(
     libraryScreenState: State<LibraryScreenState>,
     libraryScreenActions: LibraryScreenActions,
+    libraryCategoryActions: LibraryCategoryActions,
     windowSizeClass: WindowSizeClass,
     legacySideNav: Boolean,
     incognitoClick: () -> Unit,
@@ -73,6 +78,8 @@ fun LibraryScreen(
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
+    var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
+
     val searchHint = "Search \"Dummy\""
 
     /** Close the bottom sheet on back if its open */
@@ -81,6 +88,21 @@ fun LibraryScreen(
     // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
     val actualSideNav = legacySideNav
     val navBarPadding = rememberNavBarPadding(actualSideNav)
+
+    // set the current sheet to null when bottom sheet is closed
+    LaunchedEffect(key1 = sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            currentBottomSheet = null
+        }
+    }
+
+    val openSheet: (LibraryBottomSheetScreen) -> Unit = {
+        scope.launch {
+            currentBottomSheet = it
+            sheetState.show()
+        }
+    }
+
     Box(
         modifier =
             Modifier.fillMaxSize().conditional(mainDropdownShowing) {
@@ -92,7 +114,15 @@ fun LibraryScreen(
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
             sheetContent = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                    // TODO BottomSheet
+                    currentBottomSheet?.let { currentSheet ->
+                        LibraryBottomSheet(
+                            currentScreen = currentSheet,
+                            contentPadding = navBarPadding,
+                            librarySortClicked =
+                                libraryCategoryActions.categoryItemLibrarySortClick,
+                            closeSheet = { scope.launch { sheetState.hide() } },
+                        )
+                    }
                 }
             },
         ) {
@@ -162,10 +192,20 @@ fun LibraryScreen(
                                     )
                                 }
                             } else {
+
                                 LibraryPage(
                                     contentPadding = recyclerContentPadding,
                                     libraryScreenState = libraryScreenState.value,
-                                    libraryScreenActions = libraryScreenActions,
+                                    libraryCategoryActions = libraryCategoryActions,
+                                    categorySortClick = { categoryItem ->
+                                        scope.launch {
+                                            openSheet(
+                                                LibraryBottomSheetScreen.SortSheet(
+                                                    categoryItem = categoryItem
+                                                )
+                                            )
+                                        }
+                                    },
                                 )
                             }
                         }

@@ -22,9 +22,6 @@ interface Category : Serializable {
 
     var isAlone: Boolean
 
-    val nameLower: String
-        get() = name.lowercase()
-
     var isHidden: Boolean
 
     var isDynamic: Boolean

@@ -19,9 +19,15 @@ data class LibraryScreenState(
 
 data class LibraryScreenActions(
     /* val mangaClick: (Long) -> Unit,*/
-    val categoryItemClick: (CategoryItem) -> Unit,
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
+)
+
+data class LibraryCategoryActions(
+    /* val mangaClick: (Long) -> Unit,*/
+    val categoryItemClick: (CategoryItem) -> Unit,
+    val categoryRefreshClick: (CategoryItem) -> Unit,
+    val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
 )
 
 data class LibraryViewItem(

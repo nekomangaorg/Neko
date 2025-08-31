@@ -1174,6 +1174,11 @@ class LibraryPresenter(
     /** Update a category's sorting */
     fun sortCategory(catId: Int, order: Char) {
         val category = categories.find { catId == it.id } ?: return
+
+        TimberKt.d {
+            "ESCO name:${category.name} sort: ${category.mangaSort} sortingMode: ${category.sortingMode()} ascending: ${category.isAscending()} "
+        }
+
         category.mangaSort = order
         if (catId == -1 || category.isDynamic) {
             val sort = category.sortingMode() ?: LibrarySort.Title

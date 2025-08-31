@@ -22,14 +22,25 @@ data class CategoryItem(
     val sourceId: Long? = null,
 )
 
-fun CategoryItem.toDbCategory(): CategoryImpl {
+fun CategoryItem.toDbCategory(flipAscendingSortOrder: Boolean = false): CategoryImpl {
+
+    val categorySortOrderValue =
+        when {
+            flipAscendingSortOrder && this.isAscending ->
+                this@toDbCategory.sortOrder.categoryValueDescending
+            flipAscendingSortOrder -> this@toDbCategory.sortOrder.categoryValue
+            this.isAscending -> this@toDbCategory.sortOrder.categoryValue
+            !this.isAscending -> this@toDbCategory.sortOrder.categoryValueDescending
+            else -> this@toDbCategory.sortOrder.categoryValue
+        }
+
     return CategoryImpl().apply {
         id = this@toDbCategory.id
         name = this@toDbCategory.name
         order = this@toDbCategory.order
         flags = this@toDbCategory.flags
         mangaOrder = this@toDbCategory.mangaOrder.toList()
-        mangaSort = this@toDbCategory.sortOrder.categoryValue
+        mangaSort = categorySortOrderValue
         isAlone = this@toDbCategory.isAlone
         isHidden = this@toDbCategory.isHidden
         isDynamic = this@toDbCategory.isDynamic
