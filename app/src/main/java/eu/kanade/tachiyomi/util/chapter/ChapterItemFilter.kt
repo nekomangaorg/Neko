@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -35,9 +36,9 @@ class ChapterItemFilter(
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_BOOKMARKED
         val notBookmarkEnabled =
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-        val unavailableEnabled =
-            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
         val availableEnabled =
+            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
+        val unavailableEnabled =
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them

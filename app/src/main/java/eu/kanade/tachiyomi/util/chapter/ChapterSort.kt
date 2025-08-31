@@ -21,15 +21,17 @@ class ChapterSort(
         filterForReader: Boolean = false,
         currentChapter: T? = null,
     ): List<T> {
-        val chapters =
-            when {
-                filterForReader ->
-                    chapterFilter.filterChaptersForReader(rawChapters, manga, currentChapter)
-                andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
-                else -> rawChapters
-            }
-
-        return chapters.sortedWith(sortComparator())
+        return when {
+            filterForReader ->
+                chapterFilter.filterChaptersForReader(
+                    rawChapters.sortedWith(sortComparator()),
+                    manga,
+                    currentChapter,
+                )
+            andFiltered ->
+                chapterFilter.filterChapters(rawChapters, manga).sortedWith(sortComparator())
+            else -> rawChapters.sortedWith(sortComparator())
+        }
     }
 
     fun <T : Chapter> getNextUnreadChapter(rawChapters: List<T>, andFiltered: Boolean = true): T? {
