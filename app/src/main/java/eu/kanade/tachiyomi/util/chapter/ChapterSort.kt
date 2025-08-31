@@ -24,8 +24,9 @@ class ChapterSort(
         return when {
             filterForReader ->
                 chapterFilter.filterChaptersForReader(
-                    rawChapters.sortedWith(sortComparator()),
+                    rawChapters,
                     manga,
+                    sortComparator(),
                     currentChapter,
                 )
             andFiltered ->

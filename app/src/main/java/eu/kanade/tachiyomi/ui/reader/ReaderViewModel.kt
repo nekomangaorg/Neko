@@ -146,8 +146,9 @@ class ReaderViewModel(
         val chapterSort = ChapterSort(manga, chapterFilter, preferences)
         val chaptersForReader =
             chapterFilter.filterChaptersForReader(
-                dbChapters.sortedWith(chapterSort.sortComparator(true)),
+                dbChapters,
                 manga,
+                chapterSort.sortComparator(true),
                 selectedChapter,
             )
         chaptersForReader.map(::ReaderChapter)

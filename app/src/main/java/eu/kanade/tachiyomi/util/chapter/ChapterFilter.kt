@@ -13,7 +13,6 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -83,6 +82,7 @@ class ChapterFilter(
     fun <T : Chapter> filterChaptersForReader(
         chapters: List<T>,
         manga: Manga,
+        comparator: Comparator<T>,
         selectedChapter: T? = null,
     ): List<T> {
         var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
@@ -102,7 +102,7 @@ class ChapterFilter(
                 !readerPreferences.skipFiltered().get() &&
                 !readerPreferences.skipDuplicates().get()
         ) {
-            return filteredChapters
+            return filteredChapters.sortedWith(comparator)
         }
 
         if (readerPreferences.skipRead().get()) {
@@ -112,10 +112,11 @@ class ChapterFilter(
             filteredChapters = filterChapters(filteredChapters, manga)
         }
 
+        filteredChapters = filteredChapters.sortedWith(comparator)
+
         if (readerPreferences.skipDuplicates().get()) {
             filteredChapters =
                 filteredChapters.partitionByChapterNumber().map { chapters ->
-                    TimberKt.d { "${chapters.map { "${it.chapter_txt} ${getVolumeNum(it)}" }}" }
                     chapters.find { it.id == selectedChapter?.id }
                         ?: chapters.find {
                             it.scanlator == selectedChapter?.scanlator &&
