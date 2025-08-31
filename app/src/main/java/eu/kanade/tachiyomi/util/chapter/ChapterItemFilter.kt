@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -72,54 +71,12 @@ class ChapterItemFilter(
                     (notBookmarkEnabled && chapter.bookmark) ||
                     (downloadEnabled && !isDownloaded) ||
                     (notDownloadEnabled && isDownloaded) ||
-                    (unavailableEnabled && !isAvailable) ||
-                    (availableEnabled && isAvailable))
+                    (unavailableEnabled && isAvailable) ||
+                    (availableEnabled && !isAvailable))
             }
         } else {
             filteredChapters
         }
-    }
-
-    /** filter chapters for the reader */
-    fun <T : ChapterItem> filterChaptersForReader(
-        chapters: List<T>,
-        manga: Manga,
-        selectedChapter: T? = null,
-    ): List<T> {
-        var filteredChapters =
-            filterChaptersByScanlatorsAndLanguage(
-                chapters,
-                manga,
-                mangaDexPreferences,
-                libraryPreferences,
-            )
-        filteredChapters =
-            filteredChapters.filter {
-                it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList
-            }
-
-        // if neither preference is enabled don't even filter
-        if (!readerPreferences.skipRead().get() && !readerPreferences.skipFiltered().get()) {
-            return filteredChapters
-        }
-
-        if (readerPreferences.skipRead().get()) {
-            filteredChapters = filteredChapters.filter { !it.chapter.read }
-        }
-        if (readerPreferences.skipFiltered().get()) {
-            filteredChapters = filterChapters(filteredChapters, manga)
-        }
-        // add the selected chapter to the list in case it was filtered out
-        if (selectedChapter != null) {
-            val find = filteredChapters.find { it.chapter.id == selectedChapter.chapter.id }
-            if (find == null) {
-                val mutableList = filteredChapters.toMutableList()
-                mutableList.add(selectedChapter)
-                filteredChapters = mutableList.toList()
-            }
-        }
-
-        return filteredChapters
     }
 
     /** filters chapters for scanlators */

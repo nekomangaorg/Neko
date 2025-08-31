@@ -14,22 +14,8 @@ class ChapterItemSort(
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
 ) {
 
-    fun <T : ChapterItem> getChaptersSorted(
-        manga: Manga,
-        rawChapters: List<T>,
-        andFiltered: Boolean = true,
-        filterForReader: Boolean = false,
-        currentChapter: T? = null,
-    ): List<T> {
-        val chapters =
-            when {
-                filterForReader ->
-                    chapterFilter.filterChaptersForReader(rawChapters, manga, currentChapter)
-                andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
-                else -> rawChapters
-            }
-
-        return chapters.sortedWith(sortComparator(manga))
+    fun <T : ChapterItem> getChaptersSorted(manga: Manga, rawChapters: List<T>): List<T> {
+        return chapterFilter.filterChapters(rawChapters, manga).sortedWith(sortComparator(manga))
     }
 
     fun <T : ChapterItem> getNextUnreadChapter(

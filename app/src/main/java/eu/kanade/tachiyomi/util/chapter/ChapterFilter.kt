@@ -37,9 +37,9 @@ class ChapterFilter(
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_BOOKMARKED
         val notBookmarkEnabled =
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-        val unavailableEnabled =
-            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
         val availableEnabled =
+            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
+        val unavailableEnabled =
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
@@ -70,8 +70,8 @@ class ChapterFilter(
                     (notBookmarkEnabled && it.bookmark) ||
                     (downloadEnabled && !isDownloaded) ||
                     (notDownloadEnabled && isDownloaded) ||
-                    (unavailableEnabled && !isAvailable) ||
-                    (availableEnabled && isAvailable))
+                    (unavailableEnabled && isAvailable) ||
+                    (availableEnabled && !isAvailable))
             }
         } else {
             filteredChapters
