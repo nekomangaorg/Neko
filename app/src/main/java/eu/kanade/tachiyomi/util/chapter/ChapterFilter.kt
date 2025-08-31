@@ -13,6 +13,7 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -114,6 +115,7 @@ class ChapterFilter(
         if (readerPreferences.skipDuplicates().get()) {
             filteredChapters =
                 filteredChapters.partitionByChapterNumber().map { chapters ->
+                    TimberKt.d { "${chapters.map { "${it.chapter_txt} ${getVolumeNum(it)}" }}" }
                     chapters.find { it.id == selectedChapter?.id }
                         ?: chapters.find {
                             it.scanlator == selectedChapter?.scanlator &&
@@ -151,7 +153,14 @@ class ChapterFilter(
         var currentList = mutableListOf<T>()
         this.forEachIndexed { i, ch ->
             currentList.add(ch)
-            if (i + 1 >= this.size || getChapterNum(ch) != getChapterNum(this[i + 1])) {
+            if (
+                i + 1 >= this.size ||
+                    getChapterNum(ch) == null ||
+                    getChapterNum(ch) != getChapterNum(this[i + 1]) ||
+                    (getVolumeNum(ch) != getVolumeNum(this[i + 1]) &&
+                        getVolumeNum(ch) != null &&
+                        getVolumeNum(this[i + 1]) != null)
+            ) {
                 result.add(currentList.toList())
                 currentList = mutableListOf()
             }
