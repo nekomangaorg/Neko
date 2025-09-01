@@ -23,6 +23,7 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.interceptor.rateLimit
 import tachiyomi.core.network.await
@@ -206,8 +207,10 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     .let {
                         val data = it["data"]!!.jsonObject
                         val viewer = data["Viewer"]!!.jsonObject
+                        val id = viewer["id"]!!.jsonPrimitive.int.toString()
+                        val user = viewer["name"]!!.jsonPrimitive.content
                         Pair(
-                            viewer["id"]!!.jsonPrimitive.int.toString(),
+                            user + Constants.SEPARATOR + id,
                             viewer["mediaListOptions"]!!
                                 .jsonObject["scoreFormat"]!!
                                 .jsonPrimitive
@@ -444,6 +447,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             |query User {
                 |Viewer {
                     |id
+                    |name
                     |mediaListOptions {
                         |scoreFormat
                     |}
