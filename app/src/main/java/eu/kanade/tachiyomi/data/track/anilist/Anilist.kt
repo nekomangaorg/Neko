@@ -199,7 +199,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             interceptor.setAuth(oauth)
             val (username, scoreType) = api.getCurrentUser()
             scorePreference.set(scoreType)
-            saveCredentials(username.toString(), oauth.access_token)
+            saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
             TimberKt.e(e) { "Error logging into Anilist" }
@@ -243,13 +243,12 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     suspend fun getUserId(): Int {
-        return try {
-            getUsername().get().substringAfter(Constants.SEPARATOR).toInt()
-        } catch (e: NumberFormatException) {
-            val username = api.getCurrentUser()
-            super.preferences.trackUsername(this).set(username.first)
-            username.first.substringAfter(Constants.SEPARATOR).toInt()
+        var username = getUsername().get()
+        if (!username.contains(Constants.SEPARATOR)) {
+            username = api.getCurrentUser().first
+            super.preferences.trackUsername(this).set(username)
         }
+        return username.substringAfter(Constants.SEPARATOR).toInt()
     }
 
     companion object {
