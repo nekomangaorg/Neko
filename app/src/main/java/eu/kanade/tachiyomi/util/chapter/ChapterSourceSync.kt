@@ -131,10 +131,9 @@ fun syncChaptersWithSource(
                                 url = "${Constants.LOCAL_SOURCE}/$file"
                                 name = chapterName
                                 chapter_txt = chapterName
-                                this.vol =
-                                    if (chapterName.startsWith("Vol.")) {
-                                        chapterName.substringAfter("Vol.").substringBefore(" ")
-                                    } else ""
+                                vol =
+                                    if (chapterName[0].isDigit()) ""
+                                    else chapterName.removePrefix("Vol.").takeWhile { it.isDigit() }
                                 scanlator = Constants.LOCAL_SOURCE
                                 date_upload = dateUploaded
                                 isUnavailable = true
