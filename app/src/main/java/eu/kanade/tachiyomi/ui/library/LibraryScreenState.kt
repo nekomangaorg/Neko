@@ -37,6 +37,7 @@ data class LibraryViewItem(
 
 data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
+    val isRefreshing: Boolean = false,
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
 

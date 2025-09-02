@@ -7,8 +7,8 @@ import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.data.database.models.Category
 import org.nekomanga.R
 
-class CategoryItem(val category: Category, val itemCount: Int? = null) :
-    AbstractItem<FastAdapter.ViewHolder<CategoryItem>>() {
+class CategoryItemLegacy(val category: Category, val itemCount: Int? = null) :
+    AbstractItem<FastAdapter.ViewHolder<CategoryItemLegacy>>() {
 
     /** defines the type defining this item. must be unique. preferably an id */
     override val type: Int = R.id.category_text
@@ -18,14 +18,14 @@ class CategoryItem(val category: Category, val itemCount: Int? = null) :
 
     override var identifier = category.id?.toLong() ?: -1L
 
-    override fun getViewHolder(v: View): FastAdapter.ViewHolder<CategoryItem> {
+    override fun getViewHolder(v: View): FastAdapter.ViewHolder<CategoryItemLegacy> {
         return ViewHolder(v)
     }
 
-    class ViewHolder(view: View) : FastAdapter.ViewHolder<CategoryItem>(view) {
+    class ViewHolder(view: View) : FastAdapter.ViewHolder<CategoryItemLegacy>(view) {
         val categoryTitle: TextView = view.findViewById(R.id.category_text)
 
-        override fun bindView(item: CategoryItem, payloads: List<Any>) {
+        override fun bindView(item: CategoryItemLegacy, payloads: List<Any>) {
             val catText =
                 item.category.name +
                     if (item.itemCount != null) {
@@ -36,7 +36,7 @@ class CategoryItem(val category: Category, val itemCount: Int? = null) :
             categoryTitle.text = catText
         }
 
-        override fun unbindView(item: CategoryItem) {
+        override fun unbindView(item: CategoryItemLegacy) {
             categoryTitle.text = null
         }
     }

@@ -10,6 +10,9 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.toLibraryManga
+import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.presentation.screens.LibraryScreen
 
 class LibraryComposeController : BaseComposeController<LibraryComposePresenter>() {
@@ -36,7 +39,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
             libraryCategoryActions =
                 LibraryCategoryActions(
                     categoryItemClick = presenter::categoryItemClick,
-                    categoryRefreshClick = {},
+                    categoryRefreshClick = { category -> updateCategory(category, context) },
                     categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
                 ),
             windowSizeClass = windowSizeClass,
@@ -49,6 +52,26 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                 (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
             },
         )
+    }
+
+    private fun updateCategory(category: CategoryItem, context: Context) {
+        if (!LibraryUpdateJob.categoryInQueue(category.id)) {
+            LibraryUpdateJob.startNow(
+                context = context,
+                category.toDbCategory(),
+                mangaToUse =
+                    if (category.isDynamic) {
+                        val libraryItems =
+                            presenter.libraryScreenState.value.items
+                                .firstOrNull { it.categoryItem.id == category.id }
+                                ?.libraryItems
+                                ?.map { it.toLibraryManga() }
+                        libraryItems
+                    } else {
+                        null
+                    },
+            )
+        }
     }
 
     private fun updateLibrary(start: Boolean, context: Context) {

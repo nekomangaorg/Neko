@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGO
 import org.nekomanga.R
 
 /** Category item for a recycler view. */
-class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder>() {
+class CategoryItemLegacy(val category: Category) : AbstractFlexibleItem<CategoryHolder>() {
 
     /** Whether this item is currently selected. */
     var isEditing = false
@@ -58,7 +58,7 @@ class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other is CategoryItem) {
+        if (other is CategoryItemLegacy) {
             return category.id == other.category.id
         }
         return false

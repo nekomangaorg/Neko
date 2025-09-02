@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.library
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -55,6 +57,7 @@ fun LibraryPage(
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
                     enabled = !item.libraryItems.isEmpty(),
+                    isRefreshing = item.isRefreshing,
                     categoryItemClick = {
                         libraryCategoryActions.categoryItemClick(item.categoryItem)
                     },
@@ -83,6 +86,7 @@ fun LibraryPage(
 @Composable
 private fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
+    isRefreshing: Boolean,
     categoryItemClick: () -> Unit,
     categorySortClick: () -> Unit,
     categoryRefreshClick: () -> Unit,
@@ -134,17 +138,40 @@ private fun LibraryCategoryHeader(
                 contentDescription = null,
                 modifier = Modifier.size(Size.mediumLarge),
             )
-        }
-        IconButton(
-            enabled = enabled,
-            colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
-            onClick = categoryRefreshClick,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = null,
-                modifier = Modifier.size(Size.mediumLarge),
-            )
+
+            AnimatedContent(targetState = isRefreshing) { targetState ->
+                when (targetState) {
+                    true -> {
+                        IconButton(
+                            enabled = false,
+                            colors =
+                                IconButtonDefaults.iconButtonColors(
+                                    disabledContentColor = textColor
+                                ),
+                            onClick = {},
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(Size.medium),
+                                strokeWidth = Size.extraTiny,
+                            )
+                        }
+                    }
+
+                    false -> {
+                        IconButton(
+                            enabled = enabled,
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
+                            onClick = categoryRefreshClick,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                modifier = Modifier.size(Size.mediumLarge),
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.toggle
@@ -65,9 +67,14 @@ class LibraryComposePresenter(
             transform(t1.first, t1.second, t1.third, t2.first, t2.second, t3.first, t3.second)
         }
 
+    override fun onResume() {
+        super.onResume()
+        observeLibraryUpdates()
+    }
+
     override fun onCreate() {
         super.onCreate()
-
+        observeLibraryUpdates()
         presenterScope.launchIO {
             combine(
                     libraryMangaListFlow(),
@@ -227,6 +234,19 @@ class LibraryComposePresenter(
         }
     }
 
+    fun categoryItemRefresh(category: CategoryItem) {
+        presenterScope.launchIO {
+            val isInQueue = LibraryUpdateJob.categoryInQueue(category.id)
+            val mutableItems = _libraryScreenState.value.items.toMutableList()
+            val index =
+                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
+            if (index > 0) {
+                mutableItems[index] = mutableItems[index].copy(isRefreshing = true)
+                _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
+            }
+        }
+    }
+
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
         presenterScope.launchIO {
             val updatedDbCategory =
@@ -270,7 +290,12 @@ class LibraryComposePresenter(
                             )
                             .toPersistentList()
                     }
-                val updatedLibraryCategoryItem = LibraryCategoryItem(updatedCategory, newSortedList)
+                val updatedLibraryCategoryItem =
+                    LibraryCategoryItem(
+                        updatedCategory,
+                        mutableItems[index].isRefreshing,
+                        newSortedList,
+                    )
                 mutableItems[index] = updatedLibraryCategoryItem
 
                 _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
@@ -279,6 +304,34 @@ class LibraryComposePresenter(
     }
 
     private var searchJob: Job? = null
+
+    fun observeLibraryUpdates() {
+        pausablePresenterScope.launchIO {
+            flow {
+                    while (true) {
+                        _libraryScreenState.value.items.forEachIndexed { index, libraryCategoryItem
+                            ->
+                            val isInQueue =
+                                LibraryUpdateJob.categoryInQueue(
+                                    libraryCategoryItem.categoryItem.id
+                                )
+                            if (
+                                (libraryCategoryItem.isRefreshing && !isInQueue) ||
+                                    (!libraryCategoryItem.isRefreshing && isInQueue)
+                            ) {
+                                emit(index)
+                            }
+                        }
+                    }
+                }
+                .collect { index ->
+                    val mutableItems = _libraryScreenState.value.items.toMutableList()
+                    mutableItems[index] =
+                        mutableItems[index].copy(isRefreshing = !mutableItems[index].isRefreshing)
+                    _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
+                }
+        }
+    }
 
     fun toggleIncognitoMode() {
         presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }

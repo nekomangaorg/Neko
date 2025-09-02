@@ -204,14 +204,14 @@ class LibraryPresenter(
             setUnreadBadge(hiddenItems)
             allLibraryItems = library
             hiddenLibraryItems = hiddenItems
+            launchIO { setDownloadCount(allLibraryItems) }
+            launchIO { setDownloadCount(hiddenLibraryItems) }
             var mangaMap = library
             mangaMap = applyFilters(mangaMap)
             mangaMap = applySort(mangaMap)
             val freshStart = libraryItems.isEmpty()
             sectionLibrary(mangaMap, freshStart)
 
-            setDownloadCount(allLibraryItems)
-            setDownloadCount(hiddenLibraryItems)
             mangaMap = applyFilters(allLibraryItems)
             mangaMap = applySort(mangaMap)
             sectionLibrary(mangaMap)

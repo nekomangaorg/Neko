@@ -31,13 +31,13 @@ class CategoryPresenter(
     /** Called when the presenter is created. */
     fun getCategories() {
         if (categories.isNotEmpty()) {
-            controller.setCategories(categories.map(::CategoryItem))
+            controller.setCategories(categories.map(::CategoryItemLegacy))
         }
         scope.launch(Dispatchers.IO) {
             categories.clear()
             categories.add(newCategory())
             categories.addAll(db.getCategories().executeAsBlocking())
-            val catItems = categories.map(::CategoryItem)
+            val catItems = categories.map(::CategoryItemLegacy)
             withContext(Dispatchers.Main) { controller.setCategories(catItems) }
         }
     }
@@ -86,7 +86,7 @@ class CategoryPresenter(
         val safeCategory = category ?: return
         db.deleteCategory(safeCategory).executeAsBlocking()
         categories.remove(safeCategory)
-        controller.setCategories(categories.map(::CategoryItem))
+        controller.setCategories(categories.map(::CategoryItemLegacy))
     }
 
     /**
@@ -104,7 +104,9 @@ class CategoryPresenter(
             this@CategoryPresenter.categories = categories.sortedBy { it.order }.toMutableList()
 
             withContext(Dispatchers.Main) {
-                controller.setCategories(this@CategoryPresenter.categories.map(::CategoryItem))
+                controller.setCategories(
+                    this@CategoryPresenter.categories.map(::CategoryItemLegacy)
+                )
             }
         }
     }
@@ -128,7 +130,7 @@ class CategoryPresenter(
         category.name = name
         db.insertCategory(category).executeAsBlocking()
         categories.find { it.id == category.id }?.name = name
-        controller.setCategories(categories.map(::CategoryItem))
+        controller.setCategories(categories.map(::CategoryItemLegacy))
         return true
     }
 

@@ -120,6 +120,21 @@ fun Manga.toDisplayManga(
     )
 }
 
+fun LibraryMangaItem.toLibraryManga(): LibraryManga {
+    return LibraryManga().apply {
+        this.unread = this@toLibraryManga.unreadCount
+        this.read = this@toLibraryManga.readCount
+        this.category = this@toLibraryManga.category
+        this.bookmarkCount = this@toLibraryManga.bookmarkCount
+        this.unavailableCount = this@toLibraryManga.unavailableCount
+        this.id = this@toLibraryManga.displayManga.mangaId
+        this.url = this@toLibraryManga.displayManga.url
+        this.title = this@toLibraryManga.displayManga.title
+        this.favorite = true
+        this.initialized = true
+    }
+}
+
 fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val displayManga = this.toDisplayManga(displayText = this.author ?: "")

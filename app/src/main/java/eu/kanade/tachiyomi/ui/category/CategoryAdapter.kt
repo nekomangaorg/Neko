@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  * @param controller The containing controller.
  */
 class CategoryAdapter(controller: CategoryController) :
-    FlexibleAdapter<CategoryItem>(null, controller, true) {
+    FlexibleAdapter<CategoryItemLegacy>(null, controller, true) {
 
     /** Listener called when an item of the list is released. */
     val categoryItemListener: CategoryItemListener = controller

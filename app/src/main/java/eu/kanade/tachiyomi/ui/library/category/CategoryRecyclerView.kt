@@ -17,10 +17,10 @@ class CategoryRecyclerView
 constructor(context: Context, attrs: AttributeSet? = null) : RecyclerView(context, attrs) {
 
     val manager = LinearLayoutManager(context)
-    private val fastAdapter: FastAdapter<CategoryItem>
+    private val fastAdapter: FastAdapter<CategoryItemLegacy>
     var onCategoryClicked: (Int) -> Unit = { _ -> }
     var onShowAllClicked: (Boolean) -> Unit = {}
-    private val itemAdapter = ItemAdapter<CategoryItem>()
+    private val itemAdapter = ItemAdapter<CategoryItemLegacy>()
     var selectedCategory: Int = 0
 
     init {
@@ -32,16 +32,16 @@ constructor(context: Context, attrs: AttributeSet? = null) : RecyclerView(contex
     }
 
     fun setCategories(items: List<Category>, itemsMap: Map<Int, Int>) {
-        itemAdapter.set(items.map { CategoryItem(it, itemsMap[it.id]) })
+        itemAdapter.set(items.map { CategoryItemLegacy(it, itemsMap[it.id]) })
         fastAdapter.onBindViewHolderListener =
-            (object : OnBindViewHolderListenerImpl<CategoryItem>() {
+            (object : OnBindViewHolderListenerImpl<CategoryItemLegacy>() {
                 override fun onBindViewHolder(
                     viewHolder: ViewHolder,
                     position: Int,
                     payloads: List<Any>,
                 ) {
                     super.onBindViewHolder(viewHolder, position, payloads)
-                    (viewHolder as? CategoryItem.ViewHolder)?.categoryTitle?.isSelected =
+                    (viewHolder as? CategoryItemLegacy.ViewHolder)?.categoryTitle?.isSelected =
                         selectedCategory == position
                 }
             })
@@ -63,7 +63,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : RecyclerView(contex
     fun setCategories(selected: Int) {
         selectedCategory = selected
         for (i in 0..manager.itemCount) {
-            (findViewHolderForAdapterPosition(i) as? CategoryItem.ViewHolder)
+            (findViewHolderForAdapterPosition(i) as? CategoryItemLegacy.ViewHolder)
                 ?.categoryTitle
                 ?.isSelected = selectedCategory == i
         }
