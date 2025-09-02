@@ -65,7 +65,7 @@ class BrowsePresenter(
         MutableStateFlow(
             BrowseScreenState(
                 isList = preferences.browseAsList().get(),
-                showLibraryEntries = preferences.browseShowLibrary().get(),
+                showLibraryEntries = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
