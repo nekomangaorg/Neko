@@ -158,6 +158,7 @@ class LibraryComposePresenter(
                                             LibraryMangaItemComparator(
                                                 librarySort = categoryItem.sortOrder,
                                                 removeArticles = removeArticles,
+                                                mangaOrder = categoryItem.mangaOrder,
                                                 lastReadMapFn = {
                                                     var counter = 0
                                                     db.getLastReadManga()
@@ -234,26 +235,13 @@ class LibraryComposePresenter(
         }
     }
 
-    fun categoryItemRefresh(category: CategoryItem) {
-        presenterScope.launchIO {
-            val isInQueue = LibraryUpdateJob.categoryInQueue(category.id)
-            val mutableItems = _libraryScreenState.value.items.toMutableList()
-            val index =
-                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
-            if (index > 0) {
-                mutableItems[index] = mutableItems[index].copy(isRefreshing = true)
-                _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
-            }
-        }
-    }
-
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
         presenterScope.launchIO {
             val updatedDbCategory =
                 when (category.sortOrder == librarySort) {
                     true -> category.toDbCategory(true)
                     false ->
-                        category.copy(isAscending = false, sortOrder = librarySort).toDbCategory()
+                        category.copy(isAscending = true, sortOrder = librarySort).toDbCategory()
                 }
 
             db.insertCategory(updatedDbCategory).executeOnIO()
@@ -274,6 +262,7 @@ class LibraryComposePresenter(
                                 LibraryMangaItemComparator(
                                     librarySort = updatedCategory.sortOrder,
                                     removeArticles = libraryPreferences.removeArticles().get(),
+                                    mangaOrder = updatedCategory.mangaOrder,
                                     lastReadMapFn = {
                                         var counter = 0
                                         db.getLastReadManga().executeAsBlocking().associate {
@@ -300,6 +289,29 @@ class LibraryComposePresenter(
 
                 _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
             }
+        }
+    }
+
+    fun dragAndDropManga(
+        fromIndex: Int,
+        toIndex: Int,
+        category: CategoryItem,
+        libraryMangaItem: LibraryMangaItem,
+    ) {
+        presenterScope.launchIO {
+            val libraryCategoryItemIndex =
+                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
+            val libraryCategoryItem = _libraryScreenState.value.items[libraryCategoryItemIndex]
+            val mutableLibraryItems = libraryCategoryItem.libraryItems.toMutableList()
+            mutableLibraryItems[toIndex] = mutableLibraryItems[fromIndex]
+            val dbCategory = category.toDbCategory()
+            dbCategory.mangaOrder = mutableLibraryItems.map { item -> item.displayManga.mangaId }
+            db.insertCategory(dbCategory).executeOnIO()
+            val updatedLibraryCategoryItem =
+                libraryCategoryItem.copy(libraryItems = mutableLibraryItems.toPersistentList())
+            val mutableItems = _libraryScreenState.value.items.toMutableList()
+            mutableItems[libraryCategoryItemIndex] = updatedLibraryCategoryItem
+            _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
         }
     }
 

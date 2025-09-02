@@ -6,16 +6,28 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 fun LibraryMangaItemComparator(
     librarySort: LibrarySort,
     removeArticles: Boolean = false,
+    mangaOrder: List<Long>,
     lastReadMapFn: () -> Map<Long, Int>,
     lastFetchMapFn: () -> Map<Long, Int>,
 ): Comparator<LibraryMangaItem> {
     return when (librarySort) {
-        LibrarySort.Title,
-        LibrarySort.DragAndDrop -> {
+        LibrarySort.Title -> {
             compareBy {
                 when (removeArticles) {
                     true -> it.displayManga.title.removeArticles()
                     false -> it.displayManga.title
+                }
+            }
+        }
+        LibrarySort.DragAndDrop -> {
+            Comparator { item1, item2 ->
+                val index1 = mangaOrder.indexOf(item1.displayManga.mangaId)
+                val index2 = mangaOrder.indexOf(item2.displayManga.mangaId)
+                when {
+                    index1 == index2 -> 0
+                    index1 == -1 -> -1
+                    index2 == -1 -> 1
+                    else -> index1.compareTo(index2)
                 }
             }
         }

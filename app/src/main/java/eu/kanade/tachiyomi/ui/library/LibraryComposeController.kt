@@ -41,6 +41,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     categoryItemClick = presenter::categoryItemClick,
                     categoryRefreshClick = { category -> updateCategory(category, context) },
                     categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
+                    dragAndDropManga = presenter::dragAndDropManga,
                 ),
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,

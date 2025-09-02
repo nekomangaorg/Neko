@@ -28,6 +28,7 @@ data class LibraryCategoryActions(
     val categoryItemClick: (CategoryItem) -> Unit,
     val categoryRefreshClick: (CategoryItem) -> Unit,
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
+    val dragAndDropManga: (Int, Int, CategoryItem, LibraryMangaItem) -> Unit,
 )
 
 data class LibraryViewItem(

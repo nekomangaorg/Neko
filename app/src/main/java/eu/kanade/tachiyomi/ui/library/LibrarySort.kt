@@ -75,6 +75,13 @@ enum class LibrarySort(
     }
 
     companion object {
+        fun filteredEntries() = entries.filterNot { it == DragAndDrop }
+
+        fun filteredValueOf(char: Char?) =
+            filteredEntries().find {
+                it.categoryValue == char || it.categoryValueDescending == char
+            }
+
         fun valueOf(value: Int) = entries.find { it.mainValue == value }
 
         fun valueOf(char: Char?) =

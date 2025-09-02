@@ -56,7 +56,7 @@ fun Category.toCategoryItem(): CategoryItem {
         flags = this.flags,
         mangaOrder = this.mangaOrder.toImmutableList(),
         isAscending = this.isAscending(),
-        sortOrder = LibrarySort.valueOf(this.mangaSort) ?: LibrarySort.Title,
+        sortOrder = LibrarySort.filteredValueOf(this.mangaSort) ?: LibrarySort.Title,
         isAlone = this.isAlone,
         isHidden = this.isHidden,
         isDynamic = this.isDynamic,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +39,7 @@ fun LibrarySortSheet(
     isCurrentLibrarySortAscending: Boolean,
     librarySortClicked: (LibrarySort) -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
-    bottomContentPadding: Dp = 16.dp,
+    bottomContentPadding: Dp = Size.medium,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
@@ -63,7 +64,7 @@ fun LibrarySortSheet(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
             ) {
-                items(LibrarySort.entries) { librarySort ->
+                items(LibrarySort.filteredEntries()) { librarySort ->
                     val textColor =
                         if (currentLibrarySort == librarySort) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurface
@@ -88,13 +89,15 @@ fun LibrarySortSheet(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         if (librarySort == currentLibrarySort) {
-                            Icon(
-                                imageVector =
-                                    if (isCurrentLibrarySortAscending) Icons.Default.ArrowDownward
-                                    else Icons.Default.ArrowUpward,
-                                contentDescription = null,
-                                tint = textColor,
-                            )
+                            val icon =
+                                when {
+                                    currentLibrarySort == LibrarySort.DragAndDrop ->
+                                        Icons.Default.Check
+                                    isCurrentLibrarySortAscending -> Icons.Default.ArrowDownward
+                                    else -> Icons.Default.ArrowUpward
+                                }
+
+                            Icon(imageVector = icon, contentDescription = null, tint = textColor)
                         }
                     }
                 }
