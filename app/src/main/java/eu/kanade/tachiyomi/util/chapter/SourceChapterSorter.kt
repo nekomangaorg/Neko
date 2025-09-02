@@ -76,7 +76,9 @@ fun getChapterNum(chapter: SChapter): Float? {
 }
 
 private fun String.subStringFloatOrNull(delimiter: String): Float? {
-    return this.substringAfter(delimiter).toFloatOrNull()
+    return this.substringAfter(delimiter)
+        .takeWhile { it.isWhitespace() || it.isDigit() || it == '.' }
+        .toFloatOrNull()
 }
 
 // fun getChapterNumInt(chapter: SChapter): Int? {
