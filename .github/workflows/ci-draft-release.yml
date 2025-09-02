@@ -116,7 +116,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.19.2
+        uses: ncipollo/release-action@v1.20.0
         with:
           allowUpdates: true
           body: |
