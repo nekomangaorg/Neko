@@ -137,7 +137,7 @@ fun LibraryMangaItem.toLibraryManga(): LibraryManga {
 
 fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
-    val displayManga = this.toDisplayManga(displayText = this.author ?: "")
+    val displayManga = this.toDisplayManga()
 
     val mangaRating = this.rating?.toDoubleOrNull() ?: (-1).toDouble()
 

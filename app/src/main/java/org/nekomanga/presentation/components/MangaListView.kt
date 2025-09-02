@@ -109,32 +109,44 @@ fun MangaListWithHeader(
 fun MangaRow(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
+    showUnreadBadge: Boolean = false,
+    showDownloadBadge: Boolean = false,
+    unreadCount: Int = 0,
+    downloadCount: Int = 0,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.padding(Size.tiny)) {
+    Row(modifier = modifier.padding(Size.tiny), verticalAlignment = Alignment.CenterVertically) {
         MangaListCover(displayManga, shouldOutlineCover)
 
-        Column(
-            modifier = Modifier.padding(Size.tiny).align(alignment = Alignment.CenterVertically)
-        ) {
+        Column(modifier = Modifier.weight(1f).padding(Size.tiny)) {
             val titleLineCount =
                 when (displayManga.displayText.isBlank()) {
                     true -> 2
                     false -> 1
                 }
-
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
             MangaListSubtitle(
                 text = displayManga.displayText,
                 textRes = displayManga.displayTextRes,
             )
         }
+        if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
+            DownloadUnreadBadge(
+                offset = 0.dp,
+                outline = shouldOutlineCover,
+                showUnread = showUnreadBadge,
+                showDownloads = showDownloadBadge,
+                unreadCount = unreadCount,
+                downloadCount = downloadCount,
+            )
+        }
     }
 }
 
 @Composable
-private fun MangaListTitle(title: String, maxLines: Int) {
+private fun MangaListTitle(title: String, maxLines: Int, modifier: Modifier = Modifier) {
     Text(
+        modifier = modifier,
         text = title,
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurface,

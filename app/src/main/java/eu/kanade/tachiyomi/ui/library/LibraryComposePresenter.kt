@@ -140,7 +140,13 @@ class LibraryComposePresenter(
 
                             categoryList
                                 .mapNotNull { categoryItem ->
-                                    if (categoryItem.isSystemCategory) {
+                                    val unsortedMangaList =
+                                        mangaMap[categoryItem.id]?.toPersistentList()
+                                            ?: persistentListOf()
+
+                                    if (
+                                        categoryItem.isSystemCategory && unsortedMangaList.isEmpty()
+                                    ) {
                                         return@mapNotNull null
                                     }
 
@@ -148,10 +154,6 @@ class LibraryComposePresenter(
                                         categoryItem.copy(
                                             isHidden = categoryItem.id in collapsedCategorySet
                                         )
-
-                                    val unsortedMangaList =
-                                        mangaMap[categoryItem.id]?.toPersistentList()
-                                            ?: persistentListOf()
 
                                     val sortedMangaList =
                                         unsortedMangaList.sortedWith(

@@ -90,6 +90,10 @@ fun LibraryPage(
                             MangaRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 displayManga = libraryItem.displayManga,
+                                showUnreadBadge = true,
+                                unreadCount = libraryItem.unreadCount,
+                                showDownloadBadge = true,
+                                downloadCount = libraryItem.downloadCount,
                                 shouldOutlineCover = libraryScreenState.outlineCovers,
                             )
                         }
