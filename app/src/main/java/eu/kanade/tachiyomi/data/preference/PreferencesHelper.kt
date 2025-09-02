@@ -85,6 +85,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun browseShowLibrary() = this.preferenceStore.getBoolean(Keys.catalogueShowLibrary, true)
 
+    fun browseDisplayMode() =
+        this.preferenceStore.getInt(
+            Keys.catalogueDisplayMode,
+            if (browseShowLibrary().get()) 0 else 2,
+        )
+
     fun sourceUsername(source: Source) =
         this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
 
