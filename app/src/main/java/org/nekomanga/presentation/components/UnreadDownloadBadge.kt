@@ -2,27 +2,34 @@ package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.components.Outline as NekoOutline
 import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.Size as NekoSize
 
 @Composable
 internal fun DownloadUnreadBadge(
@@ -74,25 +81,29 @@ private fun SoloBadge(
     Box(
         modifier =
             Modifier.offset(x = offset, y = offset)
-                .background(backgroundColor, badgeShape)
+                .background(backgroundColor, singleBadgeShape)
                 .conditional(outline) {
                     this.border(
-                        width = Outline.thickness,
-                        color = Outline.color,
-                        shape = badgeShape,
+                        width = NekoOutline.thickness,
+                        color = NekoOutline.color,
+                        shape = singleBadgeShape,
                     )
                 }
     ) {
         Text(
-            modifier = Modifier.padding(vertical = Size.tiny, horizontal = Size.tiny),
+            modifier = Modifier.padding(vertical = NekoSize.tiny, horizontal = NekoSize.small),
             text = count,
             style = MaterialTheme.typography.labelMedium.copy(color = countColor),
         )
     }
 }
 
-private val badgeShape =
+private val singleBadgeShape =
     RoundedCornerShape(topStartPercent = 50, 25, bottomStartPercent = 25, bottomEndPercent = 50)
+
+private val downloadBadgeShape = SlashedRoundedShape(CornerSize(50), CornerSize(25), false)
+
+private val unreadBadgeShape = SlashedRoundedShape(CornerSize(25), CornerSize(50), true)
 
 @Composable
 private fun DoubleBadge(
@@ -105,41 +116,172 @@ private fun DoubleBadge(
     count2: String,
     count2Color: Color,
 ) {
-    val gradientBrush =
-        Brush.linearGradient(
-            colorStops = listOf(0.5f to backgroundColor1, 0.5f to backgroundColor2).toTypedArray()
+    OverlappingLayout(
+        overlap = 10.dp // The amount of overlap
+    ) {
+        DoubleBadgeOneSide(
+            shape = downloadBadgeShape,
+            color = count1Color,
+            backgroundColor = backgroundColor1,
+            count = count1,
+            outline = outline,
         )
 
+        DoubleBadgeOneSide(
+            shape = unreadBadgeShape,
+            color = count2Color,
+            backgroundColor = backgroundColor2,
+            count = count2,
+            outline = outline,
+        )
+    }
+}
+
+@Composable
+private fun DoubleBadgeOneSide(
+    modifier: Modifier = Modifier,
+    shape: Shape,
+    color: Color,
+    backgroundColor: Color,
+    count: String,
+    outline: Boolean,
+) {
     Box(
         modifier =
-            Modifier.offset(x = offset, y = offset)
-                .clip(badgeShape)
-                .background(brush = gradientBrush)
-                .conditional(outline) {
-                    this.border(
-                        width = Outline.thickness,
-                        color = Outline.color,
-                        shape = badgeShape,
-                    )
-                }
+            modifier.clip(shape).background(color = backgroundColor).conditional(outline) {
+                this.border(width = NekoOutline.thickness, color = NekoOutline.color, shape = shape)
+            }
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = Size.extraTiny, horizontal = Size.tiny),
-        ) {
-            Text(
-                text = count1.toString(),
-                style = MaterialTheme.typography.labelMedium.copy(color = count1Color),
-            )
-            Gap(Size.small)
+        Text(
+            modifier = Modifier.padding(vertical = NekoSize.tiny, horizontal = NekoSize.small),
+            text = count,
+            style = MaterialTheme.typography.labelMedium.copy(color = color),
+        )
+    }
+}
 
-            Text(
-                text = count2,
-                style = MaterialTheme.typography.labelMedium.copy(color = count2Color),
-            )
+@Composable
+fun OverlappingLayout(modifier: Modifier = Modifier, overlap: Dp, content: @Composable () -> Unit) {
+    Layout(content = content, modifier = modifier) { measurables, constraints ->
+        // This layout is designed for exactly two children
+        require(measurables.size == 2) { "This layout requires exactly two children." }
+
+        // Measure the first child
+        val firstPlaceable = measurables[0].measure(constraints)
+
+        // Measure the second child
+        val secondPlaceable = measurables[1].measure(constraints)
+
+        // Calculate the total width of the layout
+        val totalWidth = (firstPlaceable.width + secondPlaceable.width) - overlap.roundToPx()
+
+        // Calculate the total height of the layout
+        val totalHeight = maxOf(firstPlaceable.height, secondPlaceable.height)
+
+        // Place the layout on the screen
+        layout(totalWidth, totalHeight) {
+            // Place the first child at the start (x=0)
+            firstPlaceable.placeRelative(x = 0, y = 0)
+
+            // Place the second child with the specified overlap
+            // We move it to the right by the first child's width minus the overlap
+            secondPlaceable.placeRelative(x = firstPlaceable.width - overlap.roundToPx(), y = 0)
         }
     }
+}
+
+private class SlashedRoundedShape(
+    private val topStart: CornerSize,
+    private val bottomStart: CornerSize,
+    private val isReversed: Boolean = false,
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+        return Outline.Generic(
+            path =
+                Path().apply {
+                    if (!isReversed) {
+                        // Original shape: rounded on left, slashed on right
+                        val topStartRadius = topStart.toPx(size, density)
+                        arcTo(
+                            rect =
+                                Rect(
+                                    left = 0f,
+                                    top = 0f,
+                                    right = topStartRadius * 2,
+                                    bottom = topStartRadius * 2,
+                                ),
+                            startAngleDegrees = 180f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false,
+                        )
+                        lineTo(size.width, 0f)
+                        lineTo(size.width - 20f, size.height)
+                        val bottomStartRadius = bottomStart.toPx(size, density)
+                        arcTo(
+                            rect =
+                                Rect(
+                                    left = 0f,
+                                    top = size.height - bottomStartRadius * 2,
+                                    right = bottomStartRadius * 2,
+                                    bottom = size.height,
+                                ),
+                            startAngleDegrees = 90f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false,
+                        )
+                        close()
+                    } else {
+                        // Reversed shape: slashed on left, rounded on right
+                        moveTo(20f, 0f)
+                        lineTo(size.width, 0f)
+                        val topEndRadius = topStart.toPx(size, density)
+                        arcTo(
+                            rect =
+                                Rect(
+                                    left = size.width - topEndRadius * 2,
+                                    top = 0f,
+                                    right = size.width,
+                                    bottom = topEndRadius * 2,
+                                ),
+                            startAngleDegrees = 270f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false,
+                        )
+                        val bottomEndRadius = bottomStart.toPx(size, density)
+                        arcTo(
+                            rect =
+                                Rect(
+                                    left = size.width - bottomEndRadius * 2,
+                                    top = size.height - bottomEndRadius * 2,
+                                    right = size.width,
+                                    bottom = size.height,
+                                ),
+                            startAngleDegrees = 0f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = false,
+                        )
+                        lineTo(0f, size.height)
+                        close()
+                    }
+                }
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 32)
+@Composable
+private fun DownloadUnreadBadgePreview11() {
+    Surface { Box(modifier = Modifier.background(Color.Red, downloadBadgeShape).size(100.dp)) }
+}
+
+@Preview(showBackground = true, apiLevel = 32)
+@Composable
+private fun DownloadUnreadBadgePreview10() {
+    Surface { Box(modifier = Modifier.background(Color.Red, unreadBadgeShape).size(100.dp)) }
 }
 
 @Preview(showBackground = true, apiLevel = 32)

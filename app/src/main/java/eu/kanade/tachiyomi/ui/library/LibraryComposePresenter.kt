@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.asFlow
@@ -38,6 +39,7 @@ class LibraryComposePresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
+    val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
     private val _libraryScreenState =
         MutableStateFlow(
@@ -199,6 +201,7 @@ class LibraryComposePresenter(
                             items = libraryViewItem.libraryCategoryItems,
                         )
                     }
+                    updateDownloadBadges()
                 }
         }
     }
@@ -344,6 +347,27 @@ class LibraryComposePresenter(
                         mutableItems[index].copy(isRefreshing = !mutableItems[index].isRefreshing)
                     _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
                 }
+        }
+    }
+
+    fun updateDownloadBadges() {
+        presenterScope.launchIO {
+            _libraryScreenState.value.items.forEachIndexed { index, libraryItem ->
+                presenterScope.launchIO {
+                    val items =
+                        libraryItem.libraryItems
+                            .map {
+                                val dbManga = db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                it.copy(downloadCount = downloadManager.getDownloadCount(dbManga))
+                            }
+                            .toPersistentList()
+                    val mutableItemList = _libraryScreenState.value.items.toMutableList()
+                    mutableItemList[index] = libraryItem.copy(libraryItems = items)
+                    _libraryScreenState.update {
+                        it.copy(items = mutableItemList.toPersistentList())
+                    }
+                }
+            }
         }
     }
 

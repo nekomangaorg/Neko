@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
@@ -46,6 +47,8 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.MangaRow
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -85,17 +88,33 @@ fun LibraryPage(
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
-                    Column {
-                        item.libraryItems.forEach { libraryItem ->
-                            MangaRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                displayManga = libraryItem.displayManga,
-                                showUnreadBadge = true,
-                                unreadCount = libraryItem.unreadCount,
-                                showDownloadBadge = true,
-                                downloadCount = libraryItem.downloadCount,
-                                shouldOutlineCover = libraryScreenState.outlineCovers,
-                            )
+                    Column(
+                        modifier =
+                            Modifier.padding(
+                                start = Size.small,
+                                end = Size.small,
+                                bottom = Size.small,
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(Size.tiny),
+                    ) {
+                        item.libraryItems.forEachIndexed { index, libraryItem ->
+                            val listCardType =
+                                when {
+                                    index == 0 && item.libraryItems.size > 1 -> ListCardType.Top
+                                    index == item.libraryItems.size - 1 -> ListCardType.Bottom
+                                    else -> ListCardType.Center
+                                }
+                            ExpressiveListCard(listCardType = listCardType) {
+                                MangaRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    displayManga = libraryItem.displayManga,
+                                    showUnreadBadge = true,
+                                    unreadCount = libraryItem.unreadCount,
+                                    showDownloadBadge = true,
+                                    downloadCount = libraryItem.downloadCount,
+                                    shouldOutlineCover = libraryScreenState.outlineCovers,
+                                )
+                            }
                         }
                     }
                 }
@@ -143,6 +162,8 @@ private fun LibraryCategoryHeader(
             text = categoryItem.name,
             color = textColor,
             style = MaterialTheme.typography.titleLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 3,
             modifier = Modifier.weight(1f),
         )
         TextButton(enabled = enabled, onClick = categorySortClick) {
@@ -184,6 +205,7 @@ private fun LibraryCategoryHeader(
 
                 false -> {
                     IconButton(
+                        modifier = Modifier.size(Size.mediumLarge),
                         enabled = enabled,
                         colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
                         onClick = categoryRefreshClick,

@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.util.Objects
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.domain.manga.DisplayManga
@@ -131,6 +132,7 @@ fun MangaRow(
             )
         }
         if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
+            Gap(Size.tiny)
             DownloadUnreadBadge(
                 offset = 0.dp,
                 outline = shouldOutlineCover,
