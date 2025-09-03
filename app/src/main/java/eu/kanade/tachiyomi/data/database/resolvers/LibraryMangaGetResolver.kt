@@ -79,6 +79,13 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 chapterList
                     .filterNot { scanlators ->
                         sources.any { source ->
+                            var (scanlators, _) =
+                                scanlators.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
+                            scanlators =
+                                scanlators.replace(
+                                    Constants.RAW_CHAPTER_SEPARATOR,
+                                    Constants.SCANLATOR_SEPARATOR,
+                                )
                             ChapterUtil.filteredBySource(
                                 source,
                                 scanlators,
