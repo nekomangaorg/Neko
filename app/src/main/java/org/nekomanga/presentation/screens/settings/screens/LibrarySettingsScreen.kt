@@ -74,20 +74,6 @@ internal class LibrarySettingsScreen(
                         title = stringResource(R.string.sort_by_ignoring_articles),
                         subtitle = stringResource(R.string.when_sorting_ignore_articles),
                     ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = libraryPreferences.showSearchSuggestions(),
-                        title = stringResource(R.string.search_suggestions),
-                        subtitle = stringResource(R.string.search_tips_show_periodically),
-                        onValueChanged = {
-                            if (it) {
-                                setLibrarySearchSuggestion()
-                            } else {
-                                DelayedLibrarySuggestionsJob.setupTask(context, false)
-                                libraryPreferences.searchSuggestions().set("")
-                            }
-                            true
-                        },
-                    ),
                     Preference.PreferenceItem.InfoPreference(
                         stringResource(R.string.display_options_can_be)
                     ),
@@ -302,11 +288,6 @@ internal class LibrarySettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.sort_by_ignoring_articles),
                     subtitle = stringResource(R.string.when_sorting_ignore_articles),
-                    group = stringResource(R.string.general),
-                ),
-                SearchTerm(
-                    title = stringResource(R.string.search_suggestions),
-                    subtitle = stringResource(R.string.search_tips_show_periodically),
                     group = stringResource(R.string.general),
                 ),
                 SearchTerm(

@@ -80,8 +80,6 @@ fun LibraryScreen(
 
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
-    val searchHint = "Search \"Dummy\""
-
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
@@ -137,7 +135,7 @@ fun LibraryScreen(
                 NekoScaffold(
                     type = NekoScaffoldType.SearchOutline,
                     title = "",
-                    searchPlaceHolder = searchHint,
+                    searchPlaceHolder = stringResource(R.string.search_library),
                     incognitoMode = libraryScreenState.value.incognitoMode,
                     isRoot = true,
                     onSearch = libraryScreenActions.search,
