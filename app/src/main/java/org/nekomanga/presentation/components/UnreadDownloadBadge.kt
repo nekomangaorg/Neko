@@ -117,13 +117,16 @@ private fun DoubleBadge(
     count2Color: Color,
 ) {
     OverlappingLayout(
-        overlap = 10.dp // The amount of overlap
+        modifier = Modifier.offset(offset, offset),
+        overlap = 10.dp, // The amount of overlap
     ) {
         DoubleBadgeOneSide(
             shape = downloadBadgeShape,
             color = count1Color,
             backgroundColor = backgroundColor1,
             count = count1,
+            startPadding = NekoSize.small,
+            endPadding = NekoSize.small + NekoSize.extraTiny,
             outline = outline,
         )
 
@@ -132,6 +135,8 @@ private fun DoubleBadge(
             color = count2Color,
             backgroundColor = backgroundColor2,
             count = count2,
+            startPadding = NekoSize.small + NekoSize.extraTiny,
+            endPadding = NekoSize.small,
             outline = outline,
         )
     }
@@ -142,6 +147,8 @@ private fun DoubleBadgeOneSide(
     modifier: Modifier = Modifier,
     shape: Shape,
     color: Color,
+    startPadding: Dp,
+    endPadding: Dp,
     backgroundColor: Color,
     count: String,
     outline: Boolean,
@@ -153,7 +160,13 @@ private fun DoubleBadgeOneSide(
             }
     ) {
         Text(
-            modifier = Modifier.padding(vertical = NekoSize.tiny, horizontal = NekoSize.small),
+            modifier =
+                Modifier.padding(
+                    top = NekoSize.tiny,
+                    bottom = NekoSize.tiny,
+                    start = startPadding,
+                    end = endPadding,
+                ),
             text = count,
             style = MaterialTheme.typography.labelMedium.copy(color = color),
         )
@@ -274,20 +287,14 @@ private class SlashedRoundedShape(
 
 @Preview(showBackground = true, apiLevel = 32)
 @Composable
-private fun DownloadUnreadBadgePreview11() {
-    Surface { Box(modifier = Modifier.background(Color.Red, downloadBadgeShape).size(100.dp)) }
+private fun DownloadUnreadBadgePreview() {
+    Surface { DownloadUnreadBadge(true, true, 100, true, 100, 0.dp) }
 }
 
 @Preview(showBackground = true, apiLevel = 32)
 @Composable
 private fun DownloadUnreadBadgePreview10() {
-    Surface { Box(modifier = Modifier.background(Color.Red, unreadBadgeShape).size(100.dp)) }
-}
-
-@Preview(showBackground = true, apiLevel = 32)
-@Composable
-private fun DownloadUnreadBadgePreview() {
-    Surface { DownloadUnreadBadge(true, true, 100, true, 100, 0.dp) }
+    Surface { DownloadUnreadBadge(true, true, 10, true, 1, 0.dp) }
 }
 
 @Preview(showBackground = true, apiLevel = 32)

@@ -194,6 +194,7 @@ fun LibraryScreen(
                                 LibraryPage(
                                     contentPadding = recyclerContentPadding,
                                     libraryScreenState = libraryScreenState.value,
+                                    libraryScreenActions = libraryScreenActions,
                                     libraryCategoryActions = libraryCategoryActions,
                                     categorySortClick = { categoryItem ->
                                         scope.launch {

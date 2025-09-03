@@ -9,8 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.toLibraryManga
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.presentation.screens.LibraryScreen
@@ -33,6 +36,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
             libraryScreenState = presenter.libraryScreenState.collectAsState(),
             libraryScreenActions =
                 LibraryScreenActions(
+                    mangaClick = ::openManga,
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },
                 ),
@@ -53,6 +57,12 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                 (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
             },
         )
+    }
+
+    private fun openManga(mangaId: Long) {
+        viewScope.launchUI {
+            router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+        }
     }
 
     private fun updateCategory(category: CategoryItem, context: Context) {

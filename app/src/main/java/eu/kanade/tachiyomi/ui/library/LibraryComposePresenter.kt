@@ -41,17 +41,11 @@ class LibraryComposePresenter(
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
-    private val _libraryScreenState =
-        MutableStateFlow(
-            LibraryScreenState(
-                outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                incognitoMode = securityPreferences.incognitoMode().get(),
-            )
-        )
+    private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
+    /* fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
@@ -63,11 +57,15 @@ class LibraryComposePresenter(
     ): Flow<R> =
         combine(
             combine(flow, flow2, flow3, ::Triple),
-            combine(flow4, flow5, ::Pair),
-            combine(flow6, flow7, ::Pair),
-        ) { t1, t2, t3 ->
-            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t3.first, t3.second)
-        }
+            combine(flow4, flow5, flow6::Triple),
+            //combine(flow6, flow7, ::Pair),
+        ) { t1, t2, */
+    /*t3*/
+    /* ->
+    transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third */
+    /*t3.first, t3.second*/
+    /*)
+    }*/
 
     override fun onResume() {
         super.onResume()
@@ -77,34 +75,36 @@ class LibraryComposePresenter(
     override fun onCreate() {
         super.onCreate()
         observeLibraryUpdates()
+        preferenceUpdates()
+
         presenterScope.launchIO {
             combine(
                     libraryMangaListFlow(),
                     categoryListFlow(),
                     libraryPreferences.collapsedCategories().changes(),
-                    // unreadBadgesFlow, //downloadBadgesFlow, unread/download // maybe just their
-                    // own flows watching the libraryScreenState
                     libraryPreferences.sortingMode().changes(),
-                    libraryPreferences.layout().changes(),
-                    libraryPreferences.gridSize().changes(),
                     libraryPreferences.groupBy().changes(),
-                ) {
-                    libraryMangaList,
-                    categoryList,
-                    collapsedCategories,
-                    sortingMode,
-                    layout,
-                    gridSize,
-                    groupBy ->
+                ) { libraryMangaList, categoryList, collapsedCategories, sortingMode, groupBy ->
                     val collapsedCategorySet =
                         collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
+                    val layout = libraryPreferences.layout().get()
+                    val gridSize = libraryPreferences.gridSize().get()
+
                     val libraryViewType =
                         when (layout) {
-                            2 -> LibraryViewType.ComfortableGrid(rawColumnCount = gridSize)
-                            1 -> LibraryViewType.CompactGrid(rawColumnCount = gridSize)
+                            2 ->
+                                LibraryViewType.Grid(
+                                    rawColumnCount = gridSize,
+                                    LibraryViewType.GridType.Comfortable,
+                                )
+                            1 ->
+                                LibraryViewType.Grid(
+                                    rawColumnCount = gridSize,
+                                    LibraryViewType.GridType.Compact,
+                                )
                             else -> LibraryViewType.List
                         }
 
@@ -217,6 +217,60 @@ class LibraryComposePresenter(
             (listOf(Category.createDefault()) + dbCategories)
                 .sortedBy { it.order }
                 .map { it.toCategoryItem() }
+        }
+    }
+
+    fun preferenceUpdates() {
+
+        presenterScope.launchIO {
+            securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(incognitoMode = enabled) }
+            }
+        }
+
+        presenterScope.launchIO {
+            libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(outlineCovers = enabled) }
+            }
+        }
+
+        presenterScope.launchIO {
+            libraryPreferences.showDownloadBadge().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(showDownloadBadges = enabled) }
+            }
+        }
+
+        presenterScope.launchIO {
+            libraryPreferences.unreadBadgeType().changes().distinctUntilChanged().collectLatest {
+                type ->
+                _libraryScreenState.update { it.copy(showUnreadBadges = type == 2) }
+            }
+        }
+
+        presenterScope.launchIO {
+            combine(
+                    libraryPreferences.gridSize().changes(),
+                    libraryPreferences.layout().changes(),
+                ) { gridSize, layout ->
+                    gridSize to layout
+                }
+                .distinctUntilChanged()
+                .collectLatest { pair ->
+                    val viewType =
+                        when (pair.second) {
+                            0 -> LibraryViewType.List
+                            1 -> LibraryViewType.Grid(pair.first, LibraryViewType.GridType.Compact)
+                            else ->
+                                LibraryViewType.Grid(
+                                    pair.first,
+                                    LibraryViewType.GridType.Comfortable,
+                                )
+                        }
+                    _libraryScreenState.update { it.copy(libraryViewType = viewType) }
+                }
         }
     }
 

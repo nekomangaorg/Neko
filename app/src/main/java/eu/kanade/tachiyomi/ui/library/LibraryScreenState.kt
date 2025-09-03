@@ -11,13 +11,15 @@ data class LibraryScreenState(
     val libraryViewType: LibraryViewType = LibraryViewType.List,
     val isRefreshing: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
-    val outlineCovers: Boolean,
+    val outlineCovers: Boolean = false,
+    val showUnreadBadges: Boolean = false,
+    val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
 )
 
 data class LibraryScreenActions(
-    /* val mangaClick: (Long) -> Unit,*/
+    val mangaClick: (Long) -> Unit,
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
 )
@@ -41,10 +43,14 @@ data class LibraryCategoryItem(
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
 
-sealed class LibraryViewType {
-    data class ComfortableGrid(val rawColumnCount: Float) : LibraryViewType()
+sealed class LibraryViewType() {
 
-    data class CompactGrid(val rawColumnCount: Float) : LibraryViewType()
+    data class Grid(val rawColumnCount: Float, val gridType: GridType) : LibraryViewType()
 
     object List : LibraryViewType()
+
+    enum class GridType {
+        Comfortable,
+        Compact,
+    }
 }

@@ -1,23 +1,19 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -37,28 +33,42 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
+import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySort
+import eu.kanade.tachiyomi.ui.library.LibraryViewType
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.components.MangaGridItem
 import org.nekomanga.presentation.components.MangaRow
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
+import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun LibraryPage(
     contentPadding: PaddingValues,
     libraryScreenState: LibraryScreenState,
+    libraryScreenActions: LibraryScreenActions,
     libraryCategoryActions: LibraryCategoryActions,
     categorySortClick: (CategoryItem) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
+
+    val columns =
+        numberOfColumns(
+            rawValue =
+                (libraryScreenState.libraryViewType as? LibraryViewType.Grid)?.rawColumnCount ?: 0f
+        )
+    val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.small
 
     LazyColumn(
         modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
@@ -82,44 +92,91 @@ fun LibraryPage(
                     },
                 )
             }
-            item(key = "animated-content-${item.categoryItem.id}") {
-                AnimatedVisibility(
-                    visible = !item.categoryItem.isHidden,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
-                    Column(
-                        modifier =
-                            Modifier.padding(
-                                start = Size.small,
-                                end = Size.small,
-                                bottom = Size.small,
-                            ),
-                        verticalArrangement = Arrangement.spacedBy(Size.tiny),
-                    ) {
-                        item.libraryItems.forEachIndexed { index, libraryItem ->
-                            val listCardType =
-                                when {
-                                    index == 0 && item.libraryItems.size > 1 -> ListCardType.Top
-                                    index == item.libraryItems.size - 1 -> ListCardType.Bottom
-                                    else -> ListCardType.Center
+
+            if (item.libraryItems.isNotEmpty()) {
+                when (libraryScreenState.libraryViewType) {
+                    is LibraryViewType.Grid -> {
+                        items(item.libraryItems.chunked(columns)) { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.tiny),
+                                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                            ) {
+                                rowItems.forEach { libraryItem ->
+                                    MangaGridItem(
+                                        modifier = Modifier.width(width),
+                                        displayManga = libraryItem.displayManga,
+                                        shouldOutlineCover = libraryScreenState.outlineCovers,
+                                        isComfortable =
+                                            libraryScreenState.libraryViewType.gridType ==
+                                                LibraryViewType.GridType.Comfortable,
+                                        onClick = {
+                                            libraryScreenActions.mangaClick(
+                                                libraryItem.displayManga.mangaId
+                                            )
+                                        },
+                                        onLongClick = {},
+                                    )
                                 }
-                            ExpressiveListCard(listCardType = listCardType) {
-                                MangaRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    displayManga = libraryItem.displayManga,
-                                    showUnreadBadge = true,
-                                    unreadCount = libraryItem.unreadCount,
-                                    showDownloadBadge = true,
-                                    downloadCount = libraryItem.downloadCount,
-                                    shouldOutlineCover = libraryScreenState.outlineCovers,
-                                )
                             }
+                        }
+                    }
+
+                    LibraryViewType.List -> {
+                        itemsIndexed(
+                            item.libraryItems,
+                            key = { index, libraryItem ->
+                                libraryItem.displayManga.title + item.categoryItem.name
+                            },
+                        ) { index, libraryItem ->
+                            ListItem(
+                                index = index,
+                                totalSize = item.libraryItems.size,
+                                libraryScreenState = libraryScreenState,
+                                libraryItem = libraryItem,
+                                libraryScreenActions = libraryScreenActions,
+                            )
+                            Gap(Size.tiny)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ListItem(
+    index: Int,
+    totalSize: Int,
+    libraryScreenState: LibraryScreenState,
+    libraryItem: LibraryMangaItem,
+    libraryScreenActions: LibraryScreenActions,
+) {
+    val listCardType =
+        when {
+            index == 0 && totalSize > 1 -> ListCardType.Top
+            index == totalSize - 1 -> ListCardType.Bottom
+            else -> ListCardType.Center
+        }
+    ExpressiveListCard(
+        modifier = Modifier.padding(horizontal = Size.small),
+        listCardType = listCardType,
+    ) {
+        MangaRow(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable(
+                        onClick = {
+                            libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
+                        }
+                    ),
+            displayManga = libraryItem.displayManga,
+            showUnreadBadge = libraryScreenState.showUnreadBadges,
+            unreadCount = libraryItem.unreadCount,
+            showDownloadBadge = libraryScreenState.showDownloadBadges,
+            downloadCount = libraryItem.downloadCount,
+            shouldOutlineCover = libraryScreenState.outlineCovers,
+        )
     }
 }
 
