@@ -143,10 +143,15 @@ class ReaderViewModel(
             dbChapters.find { it.id == chapterId }
                 ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader =
-            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
         val chapterSort = ChapterSort(manga, chapterFilter, preferences)
-        chaptersForReader.sortedWith(chapterSort.sortComparator(true)).map(::ReaderChapter)
+        val chaptersForReader =
+            chapterFilter.filterChaptersForReader(
+                dbChapters,
+                manga,
+                chapterSort.sortComparator(true),
+                selectedChapter,
+            )
+        chaptersForReader.map(::ReaderChapter)
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
