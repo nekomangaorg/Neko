@@ -40,11 +40,15 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },
                 ),
+            librarySheetActions =
+                LibrarySheetActions(
+                    groupByClick = presenter::groupByClick,
+                    categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
+                ),
             libraryCategoryActions =
                 LibraryCategoryActions(
                     categoryItemClick = presenter::categoryItemClick,
                     categoryRefreshClick = { category -> updateCategory(category, context) },
-                    categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
                     dragAndDropManga = presenter::dragAndDropManga,
                 ),
             windowSizeClass = windowSizeClass,

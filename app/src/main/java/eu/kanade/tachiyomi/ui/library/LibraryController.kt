@@ -540,7 +540,7 @@ class LibraryController(
                 MaterialMenuSheet.MenuSheetItem(
                     id,
                     LibraryGroup.groupTypeDrawableRes(id),
-                    LibraryGroup.groupTypeStringRes(id, presenter.allCategories.size > 1),
+                    LibraryGroup.groupTypeStringRes(id),
                 )
             }
         MaterialMenuSheet(

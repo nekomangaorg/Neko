@@ -50,6 +50,12 @@ interface TrackQueries : DbProvider {
             )
             .prepare()
 
+    fun getAllTracks() =
+        db.get()
+            .listOfObjects(Track::class.java)
+            .withQuery(Query.builder().table(TrackTable.TABLE).build())
+            .prepare()
+
     fun getMDList(manga: Manga) =
         db.get()
             .`object`(Track::class.java)

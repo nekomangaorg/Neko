@@ -212,7 +212,7 @@
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
     <string name="series">Series</string>
-    <string name="group_library_by">Group library by…</string>
+    <string name="group_library_by">Group by</string>
     <string name="content_rating">Content rating</string>
     <string name="tracking_status">Tracking status</string>
     <string name="ungrouped">Ungrouped</string>

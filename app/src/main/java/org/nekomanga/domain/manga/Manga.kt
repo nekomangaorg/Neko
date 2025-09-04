@@ -23,6 +23,11 @@ data class LibraryMangaItem(
     val bookmarkCount: Int = 0,
     val unavailableCount: Int = 0,
     val downloadCount: Int = 0,
+    val genre: List<String> = emptyList(),
+    val author: List<String> = emptyList(),
+    val contentRating: List<String> = emptyList(),
+    val language: List<String> = emptyList(),
+    val status: List<String> = emptyList(),
     val rating: Double = (-1).toDouble(),
 ) {
     val totalChapterCount

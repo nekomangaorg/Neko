@@ -76,9 +76,8 @@ fun LibraryPage(
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        item { Gap(Size.small) }
         libraryScreenState.items.forEach { item ->
-            item(item.categoryItem.id) {
+            item(item.categoryItem.name) {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
                     enabled = !item.libraryItems.isEmpty(),
@@ -96,7 +95,7 @@ fun LibraryPage(
             if (!item.categoryItem.isHidden) {
                 when (libraryScreenState.libraryViewType) {
                     is LibraryViewType.Grid -> {
-                        items(item.libraryItems.chunked(columns)) { rowItems ->
+                        items(items = item.libraryItems.chunked(columns)) { rowItems ->
                             RowGrid(
                                 rowItems = rowItems,
                                 libraryScreenState = libraryScreenState,
@@ -235,7 +234,7 @@ private fun LibraryCategoryHeader(
         Text(
             text = categoryItem.name,
             color = textColor,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             overflow = TextOverflow.Ellipsis,
             maxLines = 3,
             modifier = Modifier.weight(1f),

@@ -3,10 +3,8 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.outlined.AccessTime
@@ -80,11 +78,13 @@ enum class LibrarySort(
         fun filteredValueOf(char: Char?) =
             filteredEntries().find {
                 it.categoryValue == char || it.categoryValueDescending == char
-            }
+            } ?: Title
 
-        fun valueOf(value: Int) = entries.find { it.mainValue == value }
+        fun filteredValueOf(value: Int) = filteredEntries().find { it.mainValue == value } ?: Title
+
+        fun valueOf(value: Int) = entries.find { it.mainValue == value } ?: Title
 
         fun valueOf(char: Char?) =
-            entries.find { it.categoryValue == char || it.categoryValueDescending == char }
+            entries.find { it.categoryValue == char || it.categoryValueDescending == char } ?: Title
     }
 }

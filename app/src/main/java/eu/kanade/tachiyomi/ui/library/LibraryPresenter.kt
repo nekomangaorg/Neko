@@ -825,6 +825,7 @@ class LibraryPresenter(
                         return tagItems[swappedName]!!
                     }
                 }
+
                 val headerItem = LibraryHeaderItem({ getCategory(it) }, tagItems.count())
                 tagItems[name] = headerItem
                 headerItem

@@ -6,20 +6,26 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +45,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -59,6 +66,7 @@ import org.nekomanga.presentation.theme.Size
 fun LibraryScreen(
     libraryScreenState: State<LibraryScreenState>,
     libraryScreenActions: LibraryScreenActions,
+    librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
     windowSizeClass: WindowSizeClass,
     legacySideNav: Boolean,
@@ -75,6 +83,8 @@ fun LibraryScreen(
             skipHalfExpanded = true,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
+
+    val filterScrollState = rememberScrollState()
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
@@ -114,10 +124,10 @@ fun LibraryScreen(
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     currentBottomSheet?.let { currentSheet ->
                         LibraryBottomSheet(
+                            libraryScreenState = libraryScreenState.value,
+                            librarySheetActions = librarySheetActions,
                             currentScreen = currentSheet,
                             contentPadding = navBarPadding,
-                            librarySortClicked =
-                                libraryCategoryActions.categoryItemLibrarySortClick,
                             closeSheet = { scope.launch { sheetState.hide() } },
                         )
                     }
@@ -133,8 +143,7 @@ fun LibraryScreen(
                         Size.extraLarge,
             ) {
                 NekoScaffold(
-                    type = NekoScaffoldType.SearchOutline,
-                    title = "",
+                    type = NekoScaffoldType.SearchOutlineWithActions,
                     searchPlaceHolder = stringResource(R.string.search_library),
                     incognitoMode = libraryScreenState.value.incognitoMode,
                     isRoot = true,
@@ -154,6 +163,24 @@ fun LibraryScreen(
                                     )
                                 )
                         )
+                    },
+                    underHeaderActions = {
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(horizontal = Size.medium)
+                                    .horizontalScroll(filterScrollState)
+                        ) {
+                            FilledTonalButton(
+                                onClick = {
+                                    scope.launch {
+                                        openSheet(LibraryBottomSheetScreen.GroupBySheet)
+                                    }
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.group_library_by))
+                            }
+                        }
                     },
                     content = { incomingContentPadding ->
                         val recyclerContentPadding =

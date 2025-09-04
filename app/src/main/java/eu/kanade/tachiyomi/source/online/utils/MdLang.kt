@@ -66,6 +66,6 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int)
     VIETNAMESE("vi", "Vietnamese", R.drawable.ic_flag_vn);
 
     companion object {
-        fun fromIsoCode(isoCode: String): MdLang? = values().firstOrNull { it.lang == isoCode }
+        fun fromIsoCode(isoCode: String): MdLang? = entries.firstOrNull { it.lang == isoCode }
     }
 }

@@ -15,6 +15,8 @@ data class LibraryScreenState(
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
+    val groupByOptions: ImmutableList<Int> = persistentListOf(),
+    val currentGroupBy: Int = 0,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
 )
 
@@ -24,11 +26,14 @@ data class LibraryScreenActions(
     val updateLibrary: (Boolean) -> Unit,
 )
 
+data class LibrarySheetActions(
+    val groupByClick: (Int) -> Unit,
+    val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
+)
+
 data class LibraryCategoryActions(
-    /* val mangaClick: (Long) -> Unit,*/
     val categoryItemClick: (CategoryItem) -> Unit,
     val categoryRefreshClick: (CategoryItem) -> Unit,
-    val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
     val dragAndDropManga: (Int, Int, CategoryItem, LibraryMangaItem) -> Unit,
 )
 

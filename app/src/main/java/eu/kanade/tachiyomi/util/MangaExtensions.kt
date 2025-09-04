@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
@@ -141,6 +142,50 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val mangaRating = this.rating?.toDoubleOrNull() ?: (-1).toDouble()
 
+    val unknownList = listOf("Unknown")
+
+    val genreList =
+        this.genre
+            ?.split(",")
+            ?.filter { !it.contains("content rating:", true) }
+            ?.mapNotNull {
+                val tag = it.trim().capitalizeWords()
+                tag.ifBlank { null }
+            } ?: unknownList
+
+    val authorList =
+        when (this.author.isNullOrBlank() && this.artist.isNullOrBlank()) {
+            true -> unknownList
+            false -> {
+                listOfNotNull(
+                        author.takeUnless { it.isNullOrBlank() },
+                        artist.takeUnless { it.isNullOrBlank() },
+                    )
+                    .map {
+                        it.split(",", "/", " x ", " - ", ignoreCase = true).mapNotNull { name ->
+                            val author = name.trim()
+                            author.ifBlank { null }
+                        }
+                    }
+                    .flatten()
+                    .distinct()
+            }
+        }
+    val contentRating = getContentRating() ?: "Unknown"
+
+    val language = MdLang.fromIsoCode(lang_flag ?: "###")?.prettyPrint ?: "Unknown"
+
+    val status =
+        when (status) {
+            SManga.LICENSED -> "Licensed"
+            SManga.ONGOING -> "Ongoing"
+            SManga.COMPLETED -> "Completed"
+            SManga.PUBLICATION_COMPLETE -> "Publication Completed"
+            SManga.CANCELLED -> "Cancelled"
+            SManga.HIATUS -> "Hiatus"
+            else -> "Unknown"
+        }
+
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
         rating = ((mangaRating * 100).roundToInt() / 100.0),
@@ -149,6 +194,11 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
         unreadCount = this.unread,
         readCount = this.read,
         category = this.category,
+        genre = genreList,
+        author = authorList,
+        contentRating = listOf(contentRating),
+        language = listOf(language),
+        status = listOf(status),
         bookmarkCount = this.bookmarkCount,
         unavailableCount = this.unavailableCount,
     )
