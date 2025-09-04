@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
@@ -36,9 +37,9 @@ class ChapterFilter(
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_BOOKMARKED
         val notBookmarkEnabled =
             manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-        val unavailableEnabled =
-            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
         val availableEnabled =
+            manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_AVAILABLE
+        val unavailableEnabled =
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
@@ -69,8 +70,8 @@ class ChapterFilter(
                     (notBookmarkEnabled && it.bookmark) ||
                     (downloadEnabled && !isDownloaded) ||
                     (notDownloadEnabled && isDownloaded) ||
-                    (unavailableEnabled && !isAvailable) ||
-                    (availableEnabled && isAvailable))
+                    (unavailableEnabled && isAvailable) ||
+                    (availableEnabled && !isAvailable))
             }
         } else {
             filteredChapters
@@ -81,6 +82,7 @@ class ChapterFilter(
     fun <T : Chapter> filterChaptersForReader(
         chapters: List<T>,
         manga: Manga,
+        comparator: Comparator<T>,
         selectedChapter: T? = null,
     ): List<T> {
         var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
@@ -100,7 +102,7 @@ class ChapterFilter(
                 !readerPreferences.skipFiltered().get() &&
                 !readerPreferences.skipDuplicates().get()
         ) {
-            return filteredChapters
+            return filteredChapters.sortedWith(comparator)
         }
 
         if (readerPreferences.skipRead().get()) {
@@ -110,25 +112,27 @@ class ChapterFilter(
             filteredChapters = filterChapters(filteredChapters, manga)
         }
 
+        filteredChapters = filteredChapters.sortedWith(comparator)
+
         if (readerPreferences.skipDuplicates().get()) {
             filteredChapters =
-                filteredChapters
-                    .groupBy { it.chapter_number }
-                    .map { (_, chapters) ->
-                        chapters.find { it.id == selectedChapter?.id }
-                            ?: chapters.find { it.scanlator == selectedChapter?.scanlator }
-                            ?: chapters.find {
-                                val mainScans = ChapterUtil.getScanlators(it.scanlator)
-                                val currScans =
-                                    ChapterUtil.getScanlators(selectedChapter?.scanlator)
-                                if (currScans.isEmpty() || mainScans.isEmpty()) {
-                                    return@find false
-                                }
-
-                                mainScans.any { scanlator -> currScans.contains(scanlator) }
-                            }
-                            ?: chapters.first()
-                    }
+                filteredChapters.partitionByChapterNumber().map { chapters ->
+                    chapters.find { it.id == selectedChapter?.id }
+                        ?: chapters.find {
+                            it.scanlator == selectedChapter?.scanlator &&
+                                it.uploader == selectedChapter?.uploader
+                        }
+                        ?: chapters.maxBy {
+                            val mainScans = ChapterUtil.getScanlators(it.scanlator).toMutableSet()
+                            if (Constants.NO_GROUP in mainScans)
+                                it.uploader?.let { up -> mainScans.add(up) }
+                            val currScans =
+                                ChapterUtil.getScanlators(selectedChapter?.scanlator).toMutableSet()
+                            if (Constants.NO_GROUP in currScans)
+                                selectedChapter!!.uploader?.let { up -> currScans.add(up) }
+                            mainScans.intersect(currScans).size
+                        }
+                }
         }
 
         // add the selected chapter to the list in case it was filtered out
@@ -136,13 +140,33 @@ class ChapterFilter(
             val find = filteredChapters.find { it.id == selectedChapter.id }
             if (find == null) {
                 val mutableList = filteredChapters.toMutableList()
-
                 mutableList.add(selectedChapter)
                 filteredChapters = mutableList.toList()
             }
         }
 
         return filteredChapters
+    }
+
+    // Adapted from https://stackoverflow.com/a/65465410
+    fun <T : Chapter> List<T>.partitionByChapterNumber(): List<List<T>> {
+        val result = mutableListOf<List<T>>()
+        var currentList = mutableListOf<T>()
+        this.forEachIndexed { i, ch ->
+            currentList.add(ch)
+            if (
+                i + 1 >= this.size ||
+                    getChapterNum(ch) == null ||
+                    getChapterNum(ch) != getChapterNum(this[i + 1]) ||
+                    (getVolumeNum(ch) != getVolumeNum(this[i + 1]) &&
+                        getVolumeNum(ch) != null &&
+                        getVolumeNum(this[i + 1]) != null)
+            ) {
+                result.add(currentList.toList())
+                currentList = mutableListOf()
+            }
+        }
+        return result
     }
 
     /**

@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -152,7 +152,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         // If user was using API v1 fetch library_id
         if (track.library_id == null || track.library_id!! == 0L) {
             val libManga =
-                api.findLibManga(track, getUsername().get().toInt())
+                api.findLibManga(track, getUserId())
                     ?: throw Exception("$track not found on user library")
             track.library_id = libManga.library_id
         }
@@ -161,7 +161,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun bind(track: Track): Track {
-        val remoteTrack = api.findLibManga(track, getUsername().get().toInt())
+        val remoteTrack = api.findLibManga(track, getUserId())
 
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
@@ -184,7 +184,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         api.search(query, manga, wasPreviouslyTracked)
 
     override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.getLibManga(track, getUsername().get().toInt())
+        val remoteTrack = api.getLibManga(track, getUserId())
         track.copyPersonalFrom(remoteTrack)
         track.title = remoteTrack.title
         track.total_chapters = remoteTrack.total_chapters
@@ -199,7 +199,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             interceptor.setAuth(oauth)
             val (username, scoreType) = api.getCurrentUser()
             scorePreference.set(scoreType)
-            saveCredentials(username.toString(), oauth.access_token)
+            saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
             TimberKt.e(e) { "Error logging into Anilist" }
@@ -240,6 +240,15 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             TimberKt.e(e) { "Error decoding oauth string" }
             null
         }
+    }
+
+    suspend fun getUserId(): Int {
+        var username = getUsername().get()
+        if (!username.contains(Constants.SEPARATOR)) {
+            username = api.getCurrentUser().first
+            super.preferences.trackUsername(this).set(username)
+        }
+        return username.substringAfter(Constants.SEPARATOR).toInt()
     }
 
     companion object {

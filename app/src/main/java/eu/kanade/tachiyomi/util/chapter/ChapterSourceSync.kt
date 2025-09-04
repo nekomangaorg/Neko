@@ -67,7 +67,6 @@ fun syncChaptersWithSource(
     var finalRawSourceChapters = rawSourceChapters
 
     // Check for local chapter to add
-
     if (localChapterLookupEnabled) {
 
         TimberKt.d { "local chapter enabled, checking for orphans" }
@@ -83,7 +82,7 @@ fun syncChaptersWithSource(
                             downloadManager.isChapterDownloaded(dbChapter, manga)) ||
                             (dbChapter.isLocalSource() &&
                                 downloadManager.isChapterDownloaded(dbChapter, manga, true))
-                    ) {
+                    ) { // Don't re-add the chapter if it's already in the db
                         val validName =
                             downloadManager.downloadedChapterName(dbChapter).firstOrNull {
                                 it in allDownloadsMap
@@ -103,30 +102,47 @@ fun syncChaptersWithSource(
         finalRawSourceChapters =
             if (allDownloads.isNotEmpty()) {
                 val localSourceChapters =
-                    allDownloads.mapNotNull { file ->
-                        val chapterName = file.nameWithoutExtension!!.substringAfter("_")
-                        if (chapterName.substringAfterLast(" - ") in chapterUUIDs) {
-                            return@mapNotNull null
-                        }
-                        val dateUploaded = file.lastModified()
-                        val fileNameSuffix = file.name?.substringAfter("_")
-                        val expectedFileName =
-                            DiskUtil.buildValidFilename(
-                                "${Constants.LOCAL_SOURCE}_${fileNameSuffix}"
-                            )
-                        if (file.name != expectedFileName) {
-                            file.renameTo(expectedFileName)
-                        }
+                    allDownloads
+                        .mapNotNull { file ->
+                            val chapterName =
+                                file.nameWithoutExtension!!.substringAfter(
+                                    "${Constants.LOCAL_SOURCE}_"
+                                )
+                            if (chapterName.substringAfterLast(" - ") in chapterUUIDs) {
+                                if (file.name!!.startsWith(Constants.LOCAL_SOURCE)) {
+                                    val correctFileName =
+                                        file.name!!.substringAfter("${Constants.LOCAL_SOURCE}_")
+                                    file.renameTo(correctFileName)
+                                }
+                                return@mapNotNull null
+                            }
+                            val dateUploaded = file.lastModified()
+                            val fileNameSuffix =
+                                file.name?.substringAfter("${Constants.LOCAL_SOURCE}_")
+                            val expectedFileName =
+                                DiskUtil.buildValidFilename(
+                                    "${Constants.LOCAL_SOURCE}_${fileNameSuffix}"
+                                )
+                            if (file.name != expectedFileName) {
+                                file.renameTo(expectedFileName)
+                            }
 
-                        SChapter.create().apply {
-                            url = "${Constants.LOCAL_SOURCE}/$file"
-                            name = chapterName
-                            chapter_txt = chapterName
-                            scanlator = Constants.LOCAL_SOURCE
-                            date_upload = dateUploaded
-                            isUnavailable = true
+                            SChapter.create().apply {
+                                url = "${Constants.LOCAL_SOURCE}/$file"
+                                name = chapterName
+                                chapter_txt = chapterName
+                                vol =
+                                    if (chapterName[0].isDigit()) ""
+                                    else chapterName.removePrefix("Vol.").takeWhile { it.isDigit() }
+                                scanlator = Constants.LOCAL_SOURCE
+                                date_upload = dateUploaded
+                                isUnavailable = true
+                            }
                         }
-                    }
+                        .sortedWith(
+                            compareByDescending<SChapter> { getChapterNum(it) == null }
+                                .thenByDescending { getChapterNum(it) }
+                        )
                 downloadManager.refreshCache()
                 listOf(rawSourceChapters, localSourceChapters)
                     .mergeSorted(
@@ -139,6 +155,10 @@ fun syncChaptersWithSource(
                         .filter {
                             it.isLocalSource() && downloadManager.isChapterDownloaded(it, manga)
                         }
+                        .sortedWith(
+                            compareByDescending<Chapter> { getChapterNum(it) == null }
+                                .thenByDescending { getChapterNum(it) }
+                        )
                         .map { dbChapter -> SChapter.create().apply { copyFrom(dbChapter) } }
                 listOf(rawSourceChapters, localSourceChapters)
                     .mergeSorted(

@@ -253,7 +253,8 @@
     <string name="display_as_grid">Display as grid</string>
     <string name="display_as_list">Display as list</string>
     <string name="hide_library_manga">Hide library entries</string>
-    <string name="show_library_manga">Show library entries</string>
+    <string name="show_all_manga">Show all entries</string>
+    <string name="show_library_manga">Show only library entries</string>
     <string name="hide_category_hopper">Hide category hopper</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>
@@ -1522,7 +1523,7 @@
     <string name="verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
 
     <string name="reindex_downloads">Reindex downloads</string>
-    <string name="reindex_downloads_summary">Force app toe recheck for downloaded chapters.</string>
+    <string name="reindex_downloads_summary">Force app to recheck for downloaded chapters.</string>
     <string name="reindex_downloads_invalidate">Reindexing downloads</string>
     <string name="reindex_downloads_complete">Reindexing complete</string>
 

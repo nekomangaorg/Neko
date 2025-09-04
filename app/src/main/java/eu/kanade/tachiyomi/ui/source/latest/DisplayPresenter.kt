@@ -48,7 +48,7 @@ class DisplayPresenter(
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
-                showLibraryEntries = preferences.browseShowLibrary().get(),
+                showLibraryEntries = preferences.browseDisplayMode().get(),
             )
         )
     val displayScreenState: StateFlow<DisplayScreenState> = _displayScreenState.asStateFlow()
@@ -113,7 +113,7 @@ class DisplayPresenter(
             }
         }
         presenterScope.launch {
-            preferences.browseShowLibrary().changes().collectLatest { show ->
+            preferences.browseDisplayMode().changes().collectLatest { show ->
                 _displayScreenState.update {
                     it.copy(
                         showLibraryEntries = show,
@@ -186,7 +186,7 @@ class DisplayPresenter(
                 }
             }
 
-            if (!preferences.browseShowLibrary().get()) {
+            if (preferences.browseDisplayMode().get() != 0) {
                 _displayScreenState.update {
                     it.copy(
                         filteredDisplayManga =
@@ -219,7 +219,7 @@ class DisplayPresenter(
     }
 
     fun switchLibraryVisibility() {
-        preferences.browseShowLibrary().set(!displayScreenState.value.showLibraryEntries)
+        preferences.browseDisplayMode().set((displayScreenState.value.showLibraryEntries + 1) % 3)
     }
 
     fun updateMangaForChanges() {

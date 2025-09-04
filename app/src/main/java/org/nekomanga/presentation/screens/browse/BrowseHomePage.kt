@@ -101,33 +101,30 @@ fun BrowseHomePage(
                 horizontalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 item { Gap(Size.small) }
-
-                items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) {
-                    displayManga ->
-                    if (displayManga.isVisible) {
-                        Box {
-                            Box(
-                                modifier =
-                                    Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                                        .combinedClickable(
-                                            onClick = { onClick(displayManga.mangaId) },
-                                            onLongClick = { onLongClick(displayManga) },
-                                        )
-                            ) {
-                                Column(modifier = Modifier.width(coverSize)) {
-                                    MangaCover.Square.invoke(
-                                        artwork = displayManga.currentArtwork,
-                                        shouldOutlineCover = shouldOutlineCover,
-                                        modifier = Modifier.requiredHeight(coverSize),
+                val manga = homePageManga.displayManga.filter { it.isVisible }
+                items(manga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
+                    Box {
+                        Box(
+                            modifier =
+                                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                                    .combinedClickable(
+                                        onClick = { onClick(displayManga.mangaId) },
+                                        onLongClick = { onLongClick(displayManga) },
                                     )
-                                    MangaGridTitle(title = displayManga.title)
-                                    MangaGridSubtitle(subtitleText = displayManga.displayText)
-                                }
+                        ) {
+                            Column(modifier = Modifier.width(coverSize)) {
+                                MangaCover.Square.invoke(
+                                    artwork = displayManga.currentArtwork,
+                                    shouldOutlineCover = shouldOutlineCover,
+                                    modifier = Modifier.requiredHeight(coverSize),
+                                )
+                                MangaGridTitle(title = displayManga.title)
+                                MangaGridSubtitle(subtitleText = displayManga.displayText)
                             }
+                        }
 
-                            if (displayManga.inLibrary) {
-                                InLibraryBadge(shouldOutlineCover)
-                            }
+                        if (displayManga.inLibrary) {
+                            InLibraryBadge(shouldOutlineCover)
                         }
                     }
                 }
