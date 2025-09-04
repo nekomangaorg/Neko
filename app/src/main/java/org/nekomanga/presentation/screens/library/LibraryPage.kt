@@ -30,12 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -68,7 +68,7 @@ fun LibraryPage(
             rawValue =
                 (libraryScreenState.libraryViewType as? LibraryViewType.Grid)?.rawColumnCount ?: 0f
         )
-    val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.small
+    val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.smedium
 
     LazyColumn(
         modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
@@ -93,31 +93,19 @@ fun LibraryPage(
                 )
             }
 
-            if (item.libraryItems.isNotEmpty()) {
+            if (!item.categoryItem.isHidden) {
                 when (libraryScreenState.libraryViewType) {
                     is LibraryViewType.Grid -> {
                         items(item.libraryItems.chunked(columns)) { rowItems ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.tiny),
-                                horizontalArrangement = Arrangement.spacedBy(Size.small),
-                            ) {
-                                rowItems.forEach { libraryItem ->
-                                    MangaGridItem(
-                                        modifier = Modifier.width(width),
-                                        displayManga = libraryItem.displayManga,
-                                        shouldOutlineCover = libraryScreenState.outlineCovers,
-                                        isComfortable =
-                                            libraryScreenState.libraryViewType.gridType ==
-                                                LibraryViewType.GridType.Comfortable,
-                                        onClick = {
-                                            libraryScreenActions.mangaClick(
-                                                libraryItem.displayManga.mangaId
-                                            )
-                                        },
-                                        onLongClick = {},
-                                    )
-                                }
-                            }
+                            RowGrid(
+                                rowItems = rowItems,
+                                libraryScreenState = libraryScreenState,
+                                width = width,
+                                isComfortableGrid =
+                                    libraryScreenState.libraryViewType.gridType ==
+                                        LibraryViewType.GridType.Comfortable,
+                                libraryScreenActions = libraryScreenActions,
+                            )
                         }
                     }
 
@@ -140,6 +128,35 @@ fun LibraryPage(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RowGrid(
+    rowItems: List<LibraryMangaItem>,
+    libraryScreenState: LibraryScreenState,
+    width: Dp,
+    isComfortableGrid: Boolean,
+    libraryScreenActions: LibraryScreenActions,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
+    ) {
+        rowItems.forEach { libraryItem ->
+            MangaGridItem(
+                modifier = Modifier.width(width),
+                displayManga = libraryItem.displayManga,
+                showUnreadBadge = libraryScreenState.showUnreadBadges,
+                unreadCount = libraryItem.unreadCount,
+                showDownloadBadge = libraryScreenState.showDownloadBadges,
+                downloadCount = libraryItem.downloadCount,
+                shouldOutlineCover = libraryScreenState.outlineCovers,
+                isComfortable = isComfortableGrid,
+                onClick = { libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId) },
+                onLongClick = {},
+            )
         }
     }
 }

@@ -118,6 +118,10 @@ fun MangaGrid(
 fun MangaGridItem(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
+    showUnreadBadge: Boolean = false,
+    showDownloadBadge: Boolean = false,
+    unreadCount: Int = 0,
+    downloadCount: Int = 0,
     isComfortable: Boolean = true,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -145,6 +149,15 @@ fun MangaGridItem(
 
         if (displayManga.inLibrary) {
             InLibraryBadge(shouldOutlineCover)
+        }
+        if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
+            DownloadUnreadBadge(
+                outline = shouldOutlineCover,
+                showUnread = showUnreadBadge,
+                unreadCount = unreadCount,
+                showDownloads = showDownloadBadge,
+                downloadCount = downloadCount,
+            )
         }
     }
 }
