@@ -62,3 +62,4 @@ sealed class LibraryViewType() {
         Compact,
     }
 }
+

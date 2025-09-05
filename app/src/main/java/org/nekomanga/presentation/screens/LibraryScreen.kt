@@ -6,34 +6,21 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,7 +41,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
-import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -63,12 +49,11 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
-import org.nekomanga.presentation.components.icons.CollapseAllIcon
-import org.nekomanga.presentation.components.icons.ExpandAllIcon
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
+import org.nekomanga.presentation.screens.library.LibraryButtonBar
 import org.nekomanga.presentation.screens.library.LibraryPage
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
@@ -94,8 +79,6 @@ fun LibraryScreen(
             skipHalfExpanded = true,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
-
-    val filterScrollState = rememberScrollState()
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
@@ -176,82 +159,13 @@ fun LibraryScreen(
                         )
                     },
                     underHeaderActions = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(filterScrollState),
-                            horizontalArrangement = Arrangement.spacedBy(Size.small),
-                        ) {
-                            Gap(Size.medium)
-
-                            FilledTonalIconButton(
-                                onClick = { libraryScreenActions.collapseExpandAllCategories() }
-                            ) {
-                                Icon(
-                                    imageVector =
-                                        if (libraryScreenState.value.allCollapsed) ExpandAllIcon
-                                        else CollapseAllIcon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-                            FilledTonalButton(
-                                onClick = {
-                                    scope.launch {
-                                        openSheet(LibraryBottomSheetScreen.GroupBySheet)
-                                    }
-                                }
-                            ) {
-                                Text(text = stringResource(R.string.group_library_by))
-                            }
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = true,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                                ) {
-                                    Text("Unread")
-                                }
-                                SegmentedButton(
-                                    selected = false,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                                ) {
-                                    Text("Read")
-                                }
-                            }
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = true,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                                ) {
-                                    Text("Not started")
-                                }
-                                SegmentedButton(
-                                    selected = false,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                                ) {
-                                    Text("In Progress")
-                                }
-                            }
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = true,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                                ) {
-                                    Text("Downloaded")
-                                }
-                                SegmentedButton(
-                                    selected = false,
-                                    onClick = {},
-                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                                ) {
-                                    Text("Not downloaded")
-                                }
-                            }
-                            Gap(Size.medium)
-                        }
+                        LibraryButtonBar(
+                            libraryScreenActions = libraryScreenActions,
+                            libraryScreenState = libraryScreenState,
+                            groupByClick = {
+                                scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
+                            },
+                        )
                     },
                     content = { incomingContentPadding ->
                         val recyclerContentPadding =

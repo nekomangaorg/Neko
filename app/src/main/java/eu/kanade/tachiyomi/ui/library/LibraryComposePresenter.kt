@@ -222,7 +222,7 @@ class LibraryComposePresenter(
                                     allCollapsed = false
                                 }
                                 val sortedMangaList =
-                                    libraryCategoryItem.libraryItems.sortedWith(
+                                    libraryCategoryItem.libraryItems.distinctBy { it.displayManga.mangaId }.sortedWith(
                                         LibraryMangaItemComparator(
                                             librarySort =
                                                 libraryCategoryItem.categoryItem.sortOrder,
@@ -584,6 +584,37 @@ class LibraryComposePresenter(
     }
 
     private var searchJob: Job? = null
+
+/*    private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
+        return combine(
+            libraryPreferences.downloadBadge().changes(),
+            libraryPreferences.unreadBadge().changes(),
+            libraryPreferences.localBadge().changes(),
+            libraryPreferences.languageBadge().changes(),
+            libraryPreferences.autoUpdateMangaRestrictions().changes(),
+            libraryPreferences.filterDownloaded().changes(),
+            libraryPreferences.filterUnread().changes(),
+            libraryPreferences.filterStarted().changes(),
+            libraryPreferences.filterBookmarked().changes(),
+            libraryPreferences.filterCompleted().changes(),
+            libraryPreferences.filterIntervalCustom().changes(),
+        ) {
+            ItemPreferences(
+                downloadBadge = it[0] as Boolean,
+                unreadBadge = it[1] as Boolean,
+                localBadge = it[2] as Boolean,
+                languageBadge = it[3] as Boolean,
+                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[4] as Set<*>),
+                globalFilterDownloaded = it[5] as Boolean,
+                filterDownloaded = it[6] as TriState,
+                filterUnread = it[7] as TriState,
+                filterStarted = it[8] as TriState,
+                filterBookmarked = it[9] as TriState,
+                filterCompleted = it[10] as TriState,
+                filterIntervalCustom = it[11] as TriState,
+            )
+        }
+    }*/
 
     fun observeLibraryUpdates() {
         pausablePresenterScope.launchIO {
