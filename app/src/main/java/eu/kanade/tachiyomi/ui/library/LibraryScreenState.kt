@@ -37,6 +37,9 @@ data class LibrarySheetActions(
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
     val libraryDisplayModeClick: (LibraryDisplayMode) -> Unit,
     val rawColumnCountChanged: (Float) -> Unit,
+    val outlineCoversToggled: () -> Unit,
+    val unreadBadgesToggled: () -> Unit,
+    val downloadBadgesToggled: () -> Unit,
 )
 
 data class LibraryCategoryActions(

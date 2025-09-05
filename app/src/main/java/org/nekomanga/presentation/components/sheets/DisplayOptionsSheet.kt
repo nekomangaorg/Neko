@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +51,12 @@ fun DisplayOptionsSheet(
     libraryDisplayModeClick: (LibraryDisplayMode) -> Unit,
     rawColumnCount: Float,
     rawColumnCountChanged: (Float) -> Unit,
+    outlineCoversEnabled: Boolean,
+    outlineCoversToggled: () -> Unit,
+    unreadBadgesEnabled: Boolean,
+    unreadBadgesToggled: () -> Unit,
+    downloadBadgesEnabled: Boolean,
+    downloadBadgesToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -63,23 +72,23 @@ fun DisplayOptionsSheet(
         ) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(Size.medium)
+            Gap(Size.small)
             Text(
                 modifier = paddingModifier.fillMaxWidth(),
                 text = stringResource(R.string.display_options),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
             )
-            Gap(Size.medium)
+            Gap(Size.large)
             LazyColumn(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .requiredHeightIn(Size.none, maxLazyHeight.dp)
-                        .padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
                 verticalArrangement = Arrangement.spacedBy(Size.medium),
             ) {
                 item {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
                         LibraryDisplayMode.entries().forEachIndexed { index, libraryDisplayMode ->
                             ToggleButton(
                                 modifier =
@@ -119,8 +128,10 @@ fun DisplayOptionsSheet(
                                 useHeight = true,
                             )
                         Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
                             text =
-                                "Grid size: Portrait: ${if(isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if(isPortrait) numberOfColumnsAlt else numberOfColumns}"
+                                "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
                         )
                         Gap(Size.tiny)
                         Row(modifier = Modifier.fillMaxWidth()) {
@@ -134,13 +145,73 @@ fun DisplayOptionsSheet(
                                 steps = 8,
                                 valueRange = 0f..7f,
                             )
+                            Gap(Size.tiny)
                             TextButton(
-                                onClick = { rawColumnCountChanged(3f) },
+                                onClick = {
+                                    sliderPosition = 3f
+                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                },
                                 shapes = ButtonDefaults.shapes(),
                             ) {
                                 Text(stringResource(R.string.reset))
                             }
                         }
+                    }
+                }
+                item {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth().clickable(onClick = outlineCoversToggled),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Gap(Size.small)
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = stringResource(id = R.string.show_outline_around_covers),
+                        )
+                        Switch(
+                            checked = outlineCoversEnabled,
+                            onCheckedChange = { outlineCoversToggled() },
+                        )
+                        Gap(Size.small)
+                    }
+                }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable(onClick = unreadBadgesToggled),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Gap(Size.small)
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = stringResource(id = R.string.unread_badge),
+                        )
+                        Switch(
+                            checked = unreadBadgesEnabled,
+                            onCheckedChange = { unreadBadgesToggled() },
+                        )
+                        Gap(Size.small)
+                    }
+                }
+                item {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth().clickable(onClick = downloadBadgesToggled),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Gap(Size.small)
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = stringResource(id = R.string.download_badge),
+                        )
+                        Switch(
+                            checked = downloadBadgesEnabled,
+                            onCheckedChange = { downloadBadgesToggled() },
+                        )
+                        Gap(Size.small)
                     }
                 }
             }

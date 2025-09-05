@@ -78,6 +78,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun unreadBadgeType() = this.preferenceStore.getInt("unread_badge_type", 2)
 
+    fun showUnreadBadge() = this.preferenceStore.getBoolean("display_unread_badge", true)
+
     fun showCategoriesHeaderCount() = this.preferenceStore.getBoolean("display_number_of_items")
 
     fun showAllCategories() = this.preferenceStore.getBoolean("show_all_categories", true)

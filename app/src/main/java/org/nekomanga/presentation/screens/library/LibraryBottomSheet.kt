@@ -56,6 +56,12 @@ fun LibraryBottomSheet(
                 libraryDisplayModeClick = { librarySheetActions.libraryDisplayModeClick(it) },
                 rawColumnCount = libraryScreenState.rawColumnCount,
                 rawColumnCountChanged = { librarySheetActions.rawColumnCountChanged(it) },
+                outlineCoversEnabled = libraryScreenState.outlineCovers,
+                outlineCoversToggled = { librarySheetActions.outlineCoversToggled() },
+                unreadBadgesEnabled = libraryScreenState.showUnreadBadges,
+                unreadBadgesToggled = { librarySheetActions.unreadBadgesToggled() },
+                downloadBadgesEnabled = libraryScreenState.showDownloadBadges,
+                downloadBadgesToggled = { librarySheetActions.downloadBadgesToggled() },
                 bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
     }

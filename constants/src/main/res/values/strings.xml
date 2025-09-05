@@ -236,6 +236,7 @@
     <string name="cover_only_grid">Cover-only grid</string>
     <string name="compact_grid">Compact Grid</string>
     <string name="download_badge">Download badges</string>
+    <string name="unread_badge">Unread badges</string>
     <string name="hide_start_reading_button">Hide start reading button</string>
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>

@@ -257,7 +257,6 @@ class LibraryComposePresenter(
                             isFirstLoad = false,
                         )
                     }
-                    updateDownloadBadges()
                 }
         }
     }
@@ -300,9 +299,9 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
-            libraryPreferences.unreadBadgeType().changes().distinctUntilChanged().collectLatest {
-                type ->
-                _libraryScreenState.update { it.copy(showUnreadBadges = type == 2) }
+            libraryPreferences.showUnreadBadge().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(showUnreadBadges = enabled) }
             }
         }
 
@@ -371,6 +370,18 @@ class LibraryComposePresenter(
 
     fun rawColumnCountChanged(updatedColumnCount: Float) {
         presenterScope.launchIO { libraryPreferences.gridSize().set(updatedColumnCount) }
+    }
+
+    fun outlineCoversToggled() {
+        presenterScope.launchIO { libraryPreferences.outlineOnCovers().toggle() }
+    }
+
+    fun downloadBadgesToggled() {
+        presenterScope.launchIO { libraryPreferences.showDownloadBadge().toggle() }
+    }
+
+    fun unreadBadgesToggled() {
+        presenterScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
@@ -609,6 +620,7 @@ class LibraryComposePresenter(
     }*/
 
     fun observeLibraryUpdates() {
+
         pausablePresenterScope.launchIO {
             flow {
                     while (true) {

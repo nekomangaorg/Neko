@@ -47,6 +47,9 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
                     libraryDisplayModeClick = presenter::libraryDisplayModeClick,
                     rawColumnCountChanged = presenter::rawColumnCountChanged,
+                    outlineCoversToggled = presenter::outlineCoversToggled,
+                    downloadBadgesToggled = presenter::downloadBadgesToggled,
+                    unreadBadgesToggled = presenter::unreadBadgesToggled,
                 ),
             libraryCategoryActions =
                 LibraryCategoryActions(
