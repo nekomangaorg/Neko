@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -32,11 +30,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cheonjaeung.compose.grid.SimpleGridCells
+import com.cheonjaeung.compose.grid.VerticalGrid
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
@@ -68,10 +66,11 @@ fun LibraryPage(
             rawValue =
                 (libraryScreenState.libraryViewType as? LibraryViewType.Grid)?.rawColumnCount ?: 0f
         )
-    val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.smedium
+
+    // val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.smedium
 
     LazyColumn(
-        modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(0.dp),
@@ -99,7 +98,7 @@ fun LibraryPage(
                             RowGrid(
                                 rowItems = rowItems,
                                 libraryScreenState = libraryScreenState,
-                                width = width,
+                                columns = columns,
                                 isComfortableGrid =
                                     libraryScreenState.libraryViewType.gridType ==
                                         LibraryViewType.GridType.Comfortable,
@@ -135,17 +134,17 @@ fun LibraryPage(
 private fun RowGrid(
     rowItems: List<LibraryMangaItem>,
     libraryScreenState: LibraryScreenState,
-    width: Dp,
+    columns: Int,
     isComfortableGrid: Boolean,
     libraryScreenActions: LibraryScreenActions,
 ) {
-    Row(
+    VerticalGrid(
+        columns = SimpleGridCells.Fixed(columns),
         modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
         horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         rowItems.forEach { libraryItem ->
             MangaGridItem(
-                modifier = Modifier.width(width),
                 displayManga = libraryItem.displayManga,
                 showUnreadBadge = libraryScreenState.showUnreadBadges,
                 unreadCount = libraryItem.unreadCount,

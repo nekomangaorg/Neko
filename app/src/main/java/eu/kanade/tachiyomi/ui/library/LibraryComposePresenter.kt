@@ -222,27 +222,29 @@ class LibraryComposePresenter(
                                     allCollapsed = false
                                 }
                                 val sortedMangaList =
-                                    libraryCategoryItem.libraryItems.distinctBy { it.displayManga.mangaId }.sortedWith(
-                                        LibraryMangaItemComparator(
-                                            librarySort =
-                                                libraryCategoryItem.categoryItem.sortOrder,
-                                            removeArticles = removeArticles,
-                                            mangaOrder =
-                                                libraryCategoryItem.categoryItem.mangaOrder,
-                                            lastReadMapFn = {
-                                                var counter = 0
-                                                db.getLastReadManga()
-                                                    .executeAsBlocking()
-                                                    .associate { it.id!! to counter++ }
-                                            },
-                                            lastFetchMapFn = {
-                                                var counter = 0
-                                                db.getLastFetchedManga()
-                                                    .executeAsBlocking()
-                                                    .associate { it.id!! to counter++ }
-                                            },
+                                    libraryCategoryItem.libraryItems
+                                        .distinctBy { it.displayManga.mangaId }
+                                        .sortedWith(
+                                            LibraryMangaItemComparator(
+                                                librarySort =
+                                                    libraryCategoryItem.categoryItem.sortOrder,
+                                                removeArticles = removeArticles,
+                                                mangaOrder =
+                                                    libraryCategoryItem.categoryItem.mangaOrder,
+                                                lastReadMapFn = {
+                                                    var counter = 0
+                                                    db.getLastReadManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
+                                                lastFetchMapFn = {
+                                                    var counter = 0
+                                                    db.getLastFetchedManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
+                                            )
                                         )
-                                    )
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -585,7 +587,7 @@ class LibraryComposePresenter(
 
     private var searchJob: Job? = null
 
-/*    private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
+    /*    private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
         return combine(
             libraryPreferences.downloadBadge().changes(),
             libraryPreferences.unreadBadge().changes(),
