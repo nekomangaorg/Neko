@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,9 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -46,6 +50,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -166,11 +171,10 @@ fun LibraryScreen(
                     },
                     underHeaderActions = {
                         Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(horizontal = Size.medium)
-                                    .horizontalScroll(filterScrollState)
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(filterScrollState),
+                            horizontalArrangement = Arrangement.spacedBy(Size.small),
                         ) {
+                            Gap(Size.medium)
                             FilledTonalButton(
                                 onClick = {
                                     scope.launch {
@@ -180,6 +184,55 @@ fun LibraryScreen(
                             ) {
                                 Text(text = stringResource(R.string.group_library_by))
                             }
+                            SingleChoiceSegmentedButtonRow {
+                                SegmentedButton(
+                                    selected = true,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                ) {
+                                    Text("Unread")
+                                }
+                                SegmentedButton(
+                                    selected = false,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                ) {
+                                    Text("Read")
+                                }
+                            }
+                            SingleChoiceSegmentedButtonRow {
+                                SegmentedButton(
+                                    selected = true,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                ) {
+                                    Text("Not started")
+                                }
+                                SegmentedButton(
+                                    selected = false,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                ) {
+                                    Text("In Progress")
+                                }
+                            }
+                            SingleChoiceSegmentedButtonRow {
+                                SegmentedButton(
+                                    selected = true,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                ) {
+                                    Text("Downloaded")
+                                }
+                                SegmentedButton(
+                                    selected = false,
+                                    onClick = {},
+                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                ) {
+                                    Text("Not downloaded")
+                                }
+                            }
+                            Gap(Size.medium)
                         }
                     },
                     content = { incomingContentPadding ->

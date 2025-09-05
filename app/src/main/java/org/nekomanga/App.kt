@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.image.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.library.LibraryComposePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
@@ -170,6 +171,7 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
     override fun onLowMemory() {
         super.onLowMemory()
         LibraryPresenter.onLowMemory()
+        LibraryComposePresenter.onLowMemory()
     }
 
     override fun newImageLoader(context: Context) = coilImageLoader(context)

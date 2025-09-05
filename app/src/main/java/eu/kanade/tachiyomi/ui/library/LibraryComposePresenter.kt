@@ -79,8 +79,22 @@ class LibraryComposePresenter(
         observeLibraryUpdates()
     }
 
+    /** Save the current list to speed up loading later */
+    override fun onDestroy() {
+        super.onDestroy()
+        lastLibraryCategoryItems = _libraryScreenState.value.items
+    }
+
     override fun onCreate() {
         super.onCreate()
+        presenterScope.launchIO {
+            lastLibraryCategoryItems?.let { items ->
+                _libraryScreenState.update {
+                    it.copy(isFirstLoad = false, items = items.toPersistentList())
+                }
+            }
+            lastLibraryCategoryItems = null
+        }
         observeLibraryUpdates()
         preferenceUpdates()
 
@@ -228,6 +242,7 @@ class LibraryComposePresenter(
                         it.copy(
                             libraryViewType = libraryViewItem.libraryViewType,
                             items = libraryViewItem.libraryCategoryItems,
+                            isFirstLoad = false,
                         )
                     }
                     updateDownloadBadges()
@@ -613,6 +628,11 @@ class LibraryComposePresenter(
     }
 
     companion object {
+        private var lastLibraryCategoryItems: List<LibraryCategoryItem>? = null
         private const val dynamicCategorySplitter = "??\t??\t?"
+
+        fun onLowMemory() {
+            lastLibraryCategoryItems = null
+        }
     }
 }

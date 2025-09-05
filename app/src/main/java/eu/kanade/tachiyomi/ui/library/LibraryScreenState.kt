@@ -9,6 +9,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 
 data class LibraryScreenState(
     val libraryViewType: LibraryViewType = LibraryViewType.List,
+    val isFirstLoad: Boolean = true,
     val isRefreshing: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean = false,

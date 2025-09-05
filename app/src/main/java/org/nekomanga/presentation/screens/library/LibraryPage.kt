@@ -206,7 +206,6 @@ private fun LibraryCategoryHeader(
     enabled: Boolean,
 ) {
 
-    // Animate the background color to provide a smooth transition for the disabled state
     val textColor by
         animateColorAsState(
             targetValue =
@@ -221,7 +220,7 @@ private fun LibraryCategoryHeader(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable(enabled = enabled, onClick = categoryItemClick)
-                .padding(vertical = Size.extraTiny),
+                .padding(vertical = Size.extraTiny, horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
