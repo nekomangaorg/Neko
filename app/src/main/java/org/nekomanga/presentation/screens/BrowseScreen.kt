@@ -161,10 +161,13 @@ fun BrowseScreen(
         ) {
             NekoScaffold(
                 type = NekoScaffoldType.Title,
-                onNavigationIconClicked = onBackPress,
+                onNavigationIconClicked = {
+                    val contextMangaId = browseScreenState.value.backtrackMangaId
+                    if (contextMangaId != null) openManga(contextMangaId) else onBackPress()
+                },
                 title = browseScreenState.value.title.asString(),
                 incognitoMode = browseScreenState.value.incognitoMode,
-                isRoot = true,
+                isRoot = browseScreenState.value.backtrackMangaId == null,
                 actions = {
                     AppBarActions(
                         actions =
