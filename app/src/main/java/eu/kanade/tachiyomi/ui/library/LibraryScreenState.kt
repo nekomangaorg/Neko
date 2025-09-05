@@ -10,6 +10,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 data class LibraryScreenState(
     val libraryViewType: LibraryViewType = LibraryViewType.List,
     val isFirstLoad: Boolean = true,
+    val allCollapsed: Boolean = false,
     val isRefreshing: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean = false,
@@ -25,6 +26,7 @@ data class LibraryScreenActions(
     val mangaClick: (Long) -> Unit,
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
+    val collapseExpandAllCategories: () -> Unit,
 )
 
 data class LibrarySheetActions(

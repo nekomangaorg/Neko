@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -89,8 +90,13 @@ class LibraryComposePresenter(
         super.onCreate()
         presenterScope.launchIO {
             lastLibraryCategoryItems?.let { items ->
+                val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
                 _libraryScreenState.update {
-                    it.copy(isFirstLoad = false, items = items.toPersistentList())
+                    it.copy(
+                        isFirstLoad = false,
+                        items = items.toPersistentList(),
+                        allCollapsed = !notAllCollapsed,
+                    )
                 }
             }
             lastLibraryCategoryItems = null
@@ -157,19 +163,6 @@ class LibraryComposePresenter(
                             else -> LibraryViewType.List
                         }
 
-                    val mapOfLoggedInTrackStatus =
-                        db.getAllTracks()
-                            .executeOnIO()
-                            .mapNotNull { track ->
-                                val trackService =
-                                    loggedServices.firstOrNull { it.id == track.sync_id }
-                                if (trackService == null) {
-                                    return@mapNotNull null
-                                }
-                                track.manga_id to trackService.getGlobalStatus(track.status)
-                            }
-                            .groupBy({ it.first }, { it.second })
-
                     val unsortedLibraryCategoryItems =
                         when (groupBy) {
                             UNGROUPED -> {
@@ -178,8 +171,29 @@ class LibraryComposePresenter(
                             BY_AUTHOR,
                             BY_CONTENT,
                             BY_LANGUAGE,
-                            BY_TRACK_STATUS,
-                            BY_STATUS -> {
+                            BY_STATUS,
+                            BY_TAG,
+                            BY_TRACK_STATUS -> {
+                                val mapOfLoggedInTrackStatus =
+                                    if (groupBy == BY_TRACK_STATUS) {
+                                        db.getAllTracks()
+                                            .executeOnIO()
+                                            .mapNotNull { track ->
+                                                val trackService =
+                                                    loggedServices.firstOrNull {
+                                                        it.id == track.sync_id
+                                                    }
+                                                if (trackService == null) {
+                                                    return@mapNotNull null
+                                                }
+                                                track.manga_id to
+                                                    trackService.getGlobalStatus(track.status)
+                                            }
+                                            .groupBy({ it.first }, { it.second })
+                                    } else {
+                                        emptyMap()
+                                    }
+
                                 groupByDynamic(
                                     libraryMangaList = libraryMangaList,
                                     collapsedDynamicCategorySet = collapsedDynamicCategories,
@@ -190,7 +204,6 @@ class LibraryComposePresenter(
                                 )
                             }
                             else -> {
-
                                 /*BY_DEFAULT*/
                                 groupByCategory(
                                     libraryMangaList,
@@ -200,9 +213,14 @@ class LibraryComposePresenter(
                             }
                         }
 
+                    var allCollapsed = true
+
                     val items =
                         unsortedLibraryCategoryItems
                             .map { libraryCategoryItem ->
+                                if (!libraryCategoryItem.categoryItem.isHidden) {
+                                    allCollapsed = false
+                                }
                                 val sortedMangaList =
                                     libraryCategoryItem.libraryItems.sortedWith(
                                         LibraryMangaItemComparator(
@@ -233,6 +251,8 @@ class LibraryComposePresenter(
                                 )
                             }
                             .toPersistentList()
+
+                    _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
 
                     LibraryViewItem(libraryViewType = libraryViewType, libraryCategoryItems = items)
                 }
@@ -609,6 +629,42 @@ class LibraryComposePresenter(
                     _libraryScreenState.update {
                         it.copy(items = mutableItemList.toPersistentList())
                     }
+                }
+            }
+        }
+    }
+
+    fun collapseExpandAllCategories() {
+        presenterScope.launchIO {
+            val updatedAllCollapsed = !_libraryScreenState.value.allCollapsed
+            val categoryItems = _libraryScreenState.value.items.map { it.categoryItem }
+            if (categoryItems.isEmpty()) {
+                return@launchIO
+            }
+
+            when (categoryItems[0].isDynamic) {
+                true -> {
+
+                    val collapsedDynamicCategorySet =
+                        if (!updatedAllCollapsed) {
+                            emptySet()
+                        } else {
+                            val libraryGroupBy = libraryPreferences.groupBy().get()
+                            categoryItems
+                                .map { dynamicCategoryName(libraryGroupBy, it.name) }
+                                .toSet()
+                        }
+
+                    libraryPreferences.collapsedDynamicCategories().set(collapsedDynamicCategorySet)
+                }
+                false -> {
+                    val collapsedCategorySet =
+                        if (!updatedAllCollapsed) {
+                            emptySet()
+                        } else {
+                            categoryItems.map { it.id.toString() }.toSet()
+                        }
+                    libraryPreferences.collapsedCategories().set(collapsedCategorySet)
                 }
             }
         }

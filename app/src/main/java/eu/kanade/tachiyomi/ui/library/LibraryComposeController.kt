@@ -39,6 +39,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     mangaClick = ::openManga,
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },
+                    collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                 ),
             librarySheetActions =
                 LibrarySheetActions(

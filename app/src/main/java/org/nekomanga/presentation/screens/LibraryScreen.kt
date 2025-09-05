@@ -22,10 +22,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -59,6 +63,8 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.icons.CollapseAllIcon
+import org.nekomanga.presentation.components.icons.ExpandAllIcon
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
@@ -175,6 +181,18 @@ fun LibraryScreen(
                             horizontalArrangement = Arrangement.spacedBy(Size.small),
                         ) {
                             Gap(Size.medium)
+
+                            FilledTonalIconButton(
+                                onClick = { libraryScreenActions.collapseExpandAllCategories() }
+                            ) {
+                                Icon(
+                                    imageVector =
+                                        if (libraryScreenState.value.allCollapsed) ExpandAllIcon
+                                        else CollapseAllIcon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                             FilledTonalButton(
                                 onClick = {
                                     scope.launch {
@@ -256,21 +274,25 @@ fun LibraryScreen(
                                     .fillMaxSize()
                         ) {
                             if (libraryScreenState.value.items.isEmpty()) {
+
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center,
                                 ) {
-                                    EmptyScreen(
-                                        iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
-                                        iconSize = 176.dp,
-                                        message =
-                                            stringResource(
-                                                id = R.string.library_is_empty_add_from_browse
-                                            ),
-                                    )
+                                    if (libraryScreenState.value.isFirstLoad) {
+                                        CircularProgressIndicator()
+                                    } else {
+                                        EmptyScreen(
+                                            iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
+                                            iconSize = 176.dp,
+                                            message =
+                                                stringResource(
+                                                    id = R.string.library_is_empty_add_from_browse
+                                                ),
+                                        )
+                                    }
                                 }
                             } else {
-
                                 LibraryPage(
                                     contentPadding = recyclerContentPadding,
                                     libraryScreenState = libraryScreenState.value,
