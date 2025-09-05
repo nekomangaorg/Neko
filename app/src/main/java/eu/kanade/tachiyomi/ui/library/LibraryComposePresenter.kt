@@ -4,6 +4,7 @@ import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -40,6 +42,8 @@ import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.logging.TimberKt
+import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -57,7 +61,7 @@ class LibraryComposePresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
@@ -65,14 +69,24 @@ class LibraryComposePresenter(
         flow5: Flow<T5>,
         flow6: Flow<T6>,
         flow7: Flow<T7>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R,
+        flow8: Flow<T8>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
     ): Flow<R> =
         combine(
             combine(flow, flow2, flow3, ::Triple),
-            combine(flow4, flow5, ::Pair),
-            combine(flow6, flow7, ::Pair),
+            combine(flow4, flow5, flow6, ::Triple),
+            combine(flow7, flow8, ::Pair),
         ) { t1, t2, t3 ->
-            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t3.first, t3.second)
+            transform(
+                t1.first,
+                t1.second,
+                t1.third,
+                t2.first,
+                t2.second,
+                t2.third,
+                t3.first,
+                t3.second,
+            )
         }
 
     override fun onResume() {
@@ -126,6 +140,7 @@ class LibraryComposePresenter(
                     libraryPreferences.sortingMode().changes(),
                     libraryPreferences.sortAscending().changes(),
                     libraryPreferences.groupBy().changes(),
+                    libraryPreferences.showDownloadBadge().changes(),
                 ) {
                     libraryMangaList,
                     categoryList,
@@ -133,7 +148,8 @@ class LibraryComposePresenter(
                     collapsedDynamicCategories,
                     sortingMode,
                     sortAscending,
-                    groupBy ->
+                    groupBy,
+                    showDownloadBadges ->
                     val collapsedCategorySet =
                         collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
 
@@ -202,11 +218,11 @@ class LibraryComposePresenter(
 
                     val items =
                         unsortedLibraryCategoryItems
-                            .map { libraryCategoryItem ->
+                            .mapAsync { libraryCategoryItem ->
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
-                                val sortedMangaList =
+                                val tempSortedList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
                                         .sortedWith(
@@ -230,6 +246,19 @@ class LibraryComposePresenter(
                                                 },
                                             )
                                         )
+                                val sortedMangaList =
+                                    if (showDownloadBadges) {
+                                        tempSortedList.mapAsync {
+                                            val dbManga =
+                                                db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                            it.copy(
+                                                downloadCount =
+                                                    downloadManager.getDownloadCount(dbManga)
+                                            )
+                                        }
+                                    } else {
+                                        tempSortedList
+                                    }
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -622,6 +651,17 @@ class LibraryComposePresenter(
     fun observeLibraryUpdates() {
 
         pausablePresenterScope.launchIO {
+            downloadManager
+                .statusFlow()
+                .catch { error -> TimberKt.e(error) }
+                .collect { download ->
+                    if (download.status == Download.State.DOWNLOADED) {
+                        updateDownloadBadges(download.mangaItem.id)
+                    }
+                }
+        }
+
+        pausablePresenterScope.launchIO {
             flow {
                     while (true) {
                         _libraryScreenState.value.items.forEachIndexed { index, libraryCategoryItem
@@ -648,15 +688,32 @@ class LibraryComposePresenter(
         }
     }
 
-    fun updateDownloadBadges() {
+    fun updateDownloadBadges(mangaId: Long) {
         presenterScope.launchIO {
             _libraryScreenState.value.items.forEachIndexed { index, libraryItem ->
                 presenterScope.launchIO {
+                    val done = false
+                    var updatedDownloadCount = -1
                     val items =
                         libraryItem.libraryItems
                             .map {
-                                val dbManga = db.getManga(it.displayManga.mangaId).executeOnIO()!!
-                                it.copy(downloadCount = downloadManager.getDownloadCount(dbManga))
+                                if (it.displayManga.mangaId == mangaId && !done) {
+                                    if (done) {
+                                        it.copy(downloadCount = updatedDownloadCount)
+                                    } else {
+                                        val dbManga =
+                                            db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                        updatedDownloadCount =
+                                            downloadManager.getDownloadCount(dbManga)
+                                        done
+                                        it.copy(
+                                            downloadCount =
+                                                downloadManager.getDownloadCount(dbManga)
+                                        )
+                                    }
+                                } else {
+                                    it
+                                }
                             }
                             .toPersistentList()
                     val mutableItemList = _libraryScreenState.value.items.toMutableList()
