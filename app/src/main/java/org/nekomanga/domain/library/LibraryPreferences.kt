@@ -3,6 +3,7 @@ package org.nekomanga.domain.library
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import tachiyomi.core.preference.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
@@ -122,7 +123,13 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun filterDownloaded() = this.preferenceStore.getInt("pref_filter_downloaded_key")
 
-    fun filterUnread() = this.preferenceStore.getInt("pref_filter_unread_key")
+    fun filterUnread() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_unread_key",
+            FilterUnread.Inactive,
+            { it.toInt() },
+            { FilterUnread.fromInt(it) },
+        )
 
     fun filterCompleted() = this.preferenceStore.getInt("pref_filter_completed_key")
 

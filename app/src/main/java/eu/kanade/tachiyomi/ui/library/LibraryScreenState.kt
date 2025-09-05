@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
+import androidx.compose.runtime.Immutable
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
@@ -11,6 +13,7 @@ import org.nekomanga.presentation.components.UiText
 
 data class LibraryScreenState(
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
+    val libraryFilters: LibraryFilters = LibraryFilters(),
     val rawColumnCount: Float = 3f,
     val isFirstLoad: Boolean = true,
     val allCollapsed: Boolean = false,
@@ -30,6 +33,7 @@ data class LibraryScreenActions(
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
     val collapseExpandAllCategories: () -> Unit,
+    val filterUnreadToggled: (FilterUnread) -> Unit,
 )
 
 data class LibrarySheetActions(
@@ -59,6 +63,8 @@ data class LibraryCategoryItem(
     val isRefreshing: Boolean = false,
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
+
+@Immutable data class LibraryFilters(val filterUnread: FilterUnread = FilterUnread.Inactive)
 
 sealed interface LibraryDisplayMode {
 

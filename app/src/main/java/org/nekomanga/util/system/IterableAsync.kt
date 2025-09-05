@@ -10,3 +10,10 @@ suspend fun <T, R> Iterable<T>.mapAsync(transform: suspend (T) -> R): List<R> = 
 
     deferredResults.awaitAll()
 }
+
+suspend fun <T, R : Any> Iterable<T>.mapAsyncNotNull(transform: suspend (T) -> R?): List<R> =
+    coroutineScope {
+        // Launch a coroutine for each item and collect the Deferred results
+        val deferredResults = this@mapAsyncNotNull.map { item -> async { transform(item) } }
+        deferredResults.awaitAll().filterNotNull()
+    }

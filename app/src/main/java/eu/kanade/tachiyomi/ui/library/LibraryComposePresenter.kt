@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -44,6 +45,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.util.system.mapAsync
+import org.nekomanga.util.system.mapAsyncNotNull
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -61,7 +63,7 @@ class LibraryComposePresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
@@ -70,12 +72,13 @@ class LibraryComposePresenter(
         flow6: Flow<T6>,
         flow7: Flow<T7>,
         flow8: Flow<T8>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
+        flow9: Flow<T9>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R,
     ): Flow<R> =
         combine(
             combine(flow, flow2, flow3, ::Triple),
             combine(flow4, flow5, flow6, ::Triple),
-            combine(flow7, flow8, ::Pair),
+            combine(flow7, flow8, flow9, ::Triple),
         ) { t1, t2, t3 ->
             transform(
                 t1.first,
@@ -86,6 +89,7 @@ class LibraryComposePresenter(
                 t2.third,
                 t3.first,
                 t3.second,
+                t3.third,
             )
         }
 
@@ -135,6 +139,7 @@ class LibraryComposePresenter(
             combine(
                     libraryMangaListFlow(),
                     categoryListFlow(),
+                    filterPreferencesFlow(),
                     libraryPreferences.collapsedCategories().changes(),
                     libraryPreferences.collapsedDynamicCategories().changes(),
                     libraryPreferences.sortingMode().changes(),
@@ -144,6 +149,7 @@ class LibraryComposePresenter(
                 ) {
                     libraryMangaList,
                     categoryList,
+                    libraryFilters,
                     collapsedCategories,
                     collapsedDynamicCategories,
                     sortingMode,
@@ -248,17 +254,19 @@ class LibraryComposePresenter(
                                         )
                                 val sortedMangaList =
                                     if (showDownloadBadges) {
-                                        tempSortedList.mapAsync {
-                                            val dbManga =
-                                                db.getManga(it.displayManga.mangaId).executeOnIO()!!
-                                            it.copy(
-                                                downloadCount =
-                                                    downloadManager.getDownloadCount(dbManga)
-                                            )
+                                            tempSortedList.mapAsync {
+                                                val dbManga =
+                                                    db.getManga(it.displayManga.mangaId)
+                                                        .executeOnIO()!!
+                                                it.copy(
+                                                    downloadCount =
+                                                        downloadManager.getDownloadCount(dbManga)
+                                                )
+                                            }
+                                        } else {
+                                            tempSortedList
                                         }
-                                    } else {
-                                        tempSortedList
-                                    }
+                                        .applyFilters(libraryFilters)
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -350,6 +358,47 @@ class LibraryComposePresenter(
         }
     }
 
+    private fun filterPreferencesFlow(): Flow<LibraryFilters> {
+        return combine(
+            libraryPreferences.filterDownloaded().changes(),
+            libraryPreferences.filterUnread().changes(),
+            libraryPreferences.filterCompleted().changes(),
+            libraryPreferences.filterBookmarked().changes(),
+            libraryPreferences.filterUnavailable().changes(),
+            libraryPreferences.filterCompleted().changes(),
+            libraryPreferences.filterTracked().changes(),
+            libraryPreferences.filterMerged().changes(),
+            libraryPreferences.filterMissingChapters().changes(),
+            libraryPreferences.filterMangaType().changes(),
+        ) {
+            LibraryFilters(
+                // filterDownloaded = it[0] as TriState,
+                filterUnread = it[1] as FilterUnread
+            )
+        }
+    }
+
+    private suspend fun List<LibraryMangaItem>.applyFilters(
+        libraryFilters: LibraryFilters
+    ): List<LibraryMangaItem> {
+        // check if no filter if so then just return
+
+        return this.mapAsyncNotNull { libraryMangaItem ->
+            if (
+                libraryFilters.filterUnread is FilterUnread.Enabled &&
+                    libraryMangaItem.unreadCount == 0
+            )
+                return@mapAsyncNotNull null
+            if (
+                libraryFilters.filterUnread is FilterUnread.Disabled &&
+                    libraryMangaItem.unreadCount > 0
+            )
+                return@mapAsyncNotNull null
+
+            libraryMangaItem
+        }
+    }
+
     fun categoryItemClick(category: CategoryItem) {
         presenterScope.launchIO {
             when (category.isDynamic) {
@@ -411,6 +460,10 @@ class LibraryComposePresenter(
 
     fun unreadBadgesToggled() {
         presenterScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
+    }
+
+    fun filterUnreadToggled(filterUnread: FilterUnread) {
+        presenterScope.launchIO { libraryPreferences.filterUnread().set(filterUnread) }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
@@ -617,38 +670,13 @@ class LibraryComposePresenter(
 
     private var searchJob: Job? = null
 
-    /*    private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
-        return combine(
-            libraryPreferences.downloadBadge().changes(),
-            libraryPreferences.unreadBadge().changes(),
-            libraryPreferences.localBadge().changes(),
-            libraryPreferences.languageBadge().changes(),
-            libraryPreferences.autoUpdateMangaRestrictions().changes(),
-            libraryPreferences.filterDownloaded().changes(),
-            libraryPreferences.filterUnread().changes(),
-            libraryPreferences.filterStarted().changes(),
-            libraryPreferences.filterBookmarked().changes(),
-            libraryPreferences.filterCompleted().changes(),
-            libraryPreferences.filterIntervalCustom().changes(),
-        ) {
-            ItemPreferences(
-                downloadBadge = it[0] as Boolean,
-                unreadBadge = it[1] as Boolean,
-                localBadge = it[2] as Boolean,
-                languageBadge = it[3] as Boolean,
-                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[4] as Set<*>),
-                globalFilterDownloaded = it[5] as Boolean,
-                filterDownloaded = it[6] as TriState,
-                filterUnread = it[7] as TriState,
-                filterStarted = it[8] as TriState,
-                filterBookmarked = it[9] as TriState,
-                filterCompleted = it[10] as TriState,
-                filterIntervalCustom = it[11] as TriState,
-            )
-        }
-    }*/
-
     fun observeLibraryUpdates() {
+
+        pausablePresenterScope.launchIO {
+            filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
+                _libraryScreenState.update { it.copy(libraryFilters = libraryFilters) }
+            }
+        }
 
         pausablePresenterScope.launchIO {
             downloadManager

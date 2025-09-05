@@ -277,7 +277,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun hasActiveFiltersFromPref(): Boolean {
         return libraryPreferences.filterDownloaded().get() > 0 ||
-            libraryPreferences.filterUnread().get() > 0 ||
+            libraryPreferences.filterUnread().get().toInt() > 0 ||
             libraryPreferences.filterCompleted().get() > 0 ||
             libraryPreferences.filterTracked().get() > 0 ||
             libraryPreferences.filterMangaType().get() > 0 ||
@@ -407,7 +407,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             downloaded.setState(libraryPreferences.filterDownloaded())
             completed.setState(libraryPreferences.filterCompleted())
             bookmarked.setState(libraryPreferences.filterBookmarked())
-            val unreadP = libraryPreferences.filterUnread().get()
+            val unreadP = libraryPreferences.filterUnread().get().toInt()
             if (unreadP <= 2) {
                 unread.state = unreadP - 1
             } else {
@@ -478,15 +478,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         .filterUnread()
                         .set(
                             when (index) {
-                                in 0..1 -> index + 3
-                                else -> 0
+                                in 0..1 -> FilterUnread.fromInt(index + 3)
+                                else -> FilterUnread.fromInt(0)
                             }
                         )
                     null
-                }
-                unread -> {
-                    unreadProgress.reset()
-                    libraryPreferences.filterUnread()
                 }
                 downloaded -> libraryPreferences.filterDownloaded()
                 completed -> libraryPreferences.filterCompleted()
@@ -534,7 +530,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun clearFilters() {
         libraryPreferences.filterDownloaded().set(0)
-        libraryPreferences.filterUnread().set(0)
+        libraryPreferences.filterUnread().set(FilterUnread.Inactive)
         libraryPreferences.filterCompleted().set(0)
         libraryPreferences.filterBookmarked().set(0)
         libraryPreferences.filterTracked().set(0)

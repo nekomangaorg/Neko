@@ -124,7 +124,7 @@ class LibraryPresenter(
     var hasActiveFilters: Boolean = run {
         val filterDownloaded = libraryPreferences.filterDownloaded().get()
 
-        val filterUnread = libraryPreferences.filterUnread().get()
+        val filterUnread = libraryPreferences.filterUnread().get().toInt()
 
         val filterCompleted = libraryPreferences.filterCompleted().get()
 
@@ -294,7 +294,7 @@ class LibraryPresenter(
     private fun applyFilters(items: List<LibraryItem>): List<LibraryItem> {
         val filterDownloaded = libraryPreferences.filterDownloaded().get()
 
-        val filterUnread = libraryPreferences.filterUnread().get()
+        val filterUnread = libraryPreferences.filterUnread().get().toInt()
 
         val filterCompleted = libraryPreferences.filterCompleted().get()
 
