@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
@@ -82,14 +81,11 @@ private fun EmptyScreen(
 ) {
     val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
     ) {
         val top = maxHeight / 2
-        Column(
-            modifier = Modifier.fillMaxSize().paddingFromBaseline(top = top),
-            Arrangement.Top,
-            Alignment.CenterHorizontally,
-        ) {
+        Column(modifier = Modifier.fillMaxWidth(), Arrangement.Top, Alignment.CenterHorizontally) {
             icon()
 
             message?.let {
