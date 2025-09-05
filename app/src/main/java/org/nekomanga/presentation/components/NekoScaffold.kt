@@ -327,13 +327,6 @@ fun SearchOutlineTopAppBar(
                             searchText = it
                             onSearchText(it)
                         },
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Green,
-                                unfocusedContainerColor = Color.Blue,
-                                disabledContainerColor = Color.Gray,
-                                errorContainerColor = Color.Red,
-                            ),
                         onSearch = { onSearchText(it) },
                         placeholder = {
                             Text(
@@ -455,13 +448,6 @@ fun SearchOutlineWithActionsTopAppBar(
                             searchText = it
                             onSearchText(it)
                         },
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Green,
-                                unfocusedContainerColor = Color.Blue,
-                                disabledContainerColor = Color.Gray,
-                                errorContainerColor = Color.Red,
-                            ),
                         onSearch = { onSearchText(it) },
                         placeholder = {
                             Text(
@@ -573,13 +559,6 @@ fun SearchOutlineDummyTopAppBar(
                         expanded = false,
                         onExpandedChange = {},
                         onQueryChange = {},
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Green,
-                                unfocusedContainerColor = Color.Blue,
-                                disabledContainerColor = Color.Gray,
-                                errorContainerColor = Color.Red,
-                            ),
                         onSearch = {},
                         placeholder = {
                             Text(

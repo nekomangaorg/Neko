@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +51,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
@@ -146,6 +149,17 @@ fun LibraryScreen(
                         AppBarActions(
                             actions =
                                 listOf(
+                                    AppBar.Action(
+                                        title = UiText.StringResource(R.string.settings),
+                                        icon = Icons.Outlined.Tune,
+                                        onClick = {
+                                            scope.launch {
+                                                openSheet(
+                                                    LibraryBottomSheetScreen.DisplayOptionsSheet
+                                                )
+                                            }
+                                        },
+                                    ),
                                     AppBar.MainDropdown(
                                         incognitoMode = libraryScreenState.value.incognitoMode,
                                         incognitoModeClick = incognitoClick,
@@ -154,7 +168,7 @@ fun LibraryScreen(
                                         aboutClick = aboutClick,
                                         helpClick = helpClick,
                                         menuShowing = { visible -> mainDropdownShowing = visible },
-                                    )
+                                    ),
                                 )
                         )
                     },
@@ -194,7 +208,7 @@ fun LibraryScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     if (libraryScreenState.value.isFirstLoad) {
-                                        CircularProgressIndicator()
+                                        CircularWavyProgressIndicator()
                                     } else {
                                         EmptyScreen(
                                             iconicImage = CommunityMaterial.Icon2.cmd_heart_off,

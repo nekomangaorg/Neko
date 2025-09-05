@@ -46,7 +46,7 @@ class DisplayPresenter(
                         ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
                         ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 showLibraryEntries = preferences.browseDisplayMode().get(),
             )

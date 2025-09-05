@@ -148,21 +148,6 @@ class LibraryComposePresenter(
                     val layout = libraryPreferences.layout().get()
                     val gridSize = libraryPreferences.gridSize().get()
 
-                    val libraryViewType =
-                        when (layout) {
-                            2 ->
-                                LibraryViewType.Grid(
-                                    rawColumnCount = gridSize,
-                                    LibraryViewType.GridType.Comfortable,
-                                )
-                            1 ->
-                                LibraryViewType.Grid(
-                                    rawColumnCount = gridSize,
-                                    LibraryViewType.GridType.Compact,
-                                )
-                            else -> LibraryViewType.List
-                        }
-
                     val unsortedLibraryCategoryItems =
                         when (groupBy) {
                             UNGROUPED -> {
@@ -256,13 +241,18 @@ class LibraryComposePresenter(
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
 
-                    LibraryViewItem(libraryViewType = libraryViewType, libraryCategoryItems = items)
+                    LibraryViewItem(
+                        libraryDisplayMode = layout,
+                        libraryCategoryItems = items,
+                        rawColumnCount = gridSize,
+                    )
                 }
                 .distinctUntilChanged()
                 .collectLatest { libraryViewItem ->
                     _libraryScreenState.update {
                         it.copy(
-                            libraryViewType = libraryViewItem.libraryViewType,
+                            libraryDisplayMode = libraryViewItem.libraryDisplayMode,
+                            rawColumnCount = libraryViewItem.rawColumnCount,
                             items = libraryViewItem.libraryCategoryItems,
                             isFirstLoad = false,
                         )
@@ -325,17 +315,9 @@ class LibraryComposePresenter(
                 }
                 .distinctUntilChanged()
                 .collectLatest { pair ->
-                    val viewType =
-                        when (pair.second) {
-                            0 -> LibraryViewType.List
-                            1 -> LibraryViewType.Grid(pair.first, LibraryViewType.GridType.Compact)
-                            else ->
-                                LibraryViewType.Grid(
-                                    pair.first,
-                                    LibraryViewType.GridType.Comfortable,
-                                )
-                        }
-                    _libraryScreenState.update { it.copy(libraryViewType = viewType) }
+                    _libraryScreenState.update {
+                        it.copy(libraryDisplayMode = pair.second, rawColumnCount = pair.first)
+                    }
                 }
         }
     }
@@ -381,6 +363,14 @@ class LibraryComposePresenter(
 
     fun groupByClick(groupBy: Int) {
         presenterScope.launchIO { libraryPreferences.groupBy().set(groupBy) }
+    }
+
+    fun libraryDisplayModeClick(libraryDisplayMode: LibraryDisplayMode) {
+        presenterScope.launchIO { libraryPreferences.layout().set(libraryDisplayMode) }
+    }
+
+    fun rawColumnCountChanged(updatedColumnCount: Float) {
+        presenterScope.launchIO { libraryPreferences.gridSize().set(updatedColumnCount) }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {

@@ -156,13 +156,13 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class Object<T>(
+    class ObjectAsString<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
         defaultValue: T,
-        val serializer: (T) -> String,
-        val deserializer: (String) -> T,
+        private val serializer: (T) -> String,
+        private val deserializer: (String) -> T,
     ) : AndroidPreference<T>(preferences, keyFlow, key, defaultValue) {
         override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T {
             return try {
@@ -174,6 +174,28 @@ sealed class AndroidPreference<T>(
 
         override fun write(key: String, value: T): Editor.() -> Unit = {
             putString(key, serializer(value))
+        }
+    }
+
+    class ObjectAsInt<T>(
+        preferences: SharedPreferences,
+        keyFlow: Flow<String?>,
+        key: String,
+        defaultValue: T,
+        private val serializer: (T) -> Int,
+        private val deserializer: (Int) -> T,
+    ) : AndroidPreference<T>(preferences, keyFlow, key, defaultValue) {
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T {
+            return try {
+                if (preferences.contains(key)) preferences.getInt(key, 0).let(deserializer)
+                else defaultValue
+            } catch (e: Exception) {
+                defaultValue
+            }
+        }
+
+        override fun write(key: String, value: T): Editor.() -> Unit = {
+            putInt(key, serializer(value))
         }
     }
 }

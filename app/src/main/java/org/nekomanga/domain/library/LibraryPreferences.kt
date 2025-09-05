@@ -1,5 +1,6 @@
 package org.nekomanga.domain.library
 
+import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import tachiyomi.core.preference.PreferenceStore
@@ -50,6 +51,14 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun updatePrioritization() = this.preferenceStore.getInt("library_update_prioritization")
 
     fun layout() =
+        this.preferenceStore.getObjectFromInt(
+            key = "pref_display_library_layout",
+            defaultValue = LibraryDisplayMode.ComfortableGrid,
+            serializer = { it.toInt() },
+            deserializer = { i -> LibraryDisplayMode.fromInt(i) },
+        )
+
+    fun layoutLegacy() =
         this.preferenceStore.getInt(
             "pref_display_library_layout",
             LibraryItem.LAYOUT_COMFORTABLE_GRID,

@@ -67,7 +67,7 @@ class BrowsePresenter(
                 isList = preferences.browseAsList().get(),
                 showLibraryEntries = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(incomingQuery),
                 defaultContentRatings =

@@ -39,7 +39,7 @@ class LibraryItem(
         get() = libraryPreferences.uniformGrid().get()
 
     private val libraryLayout: Int
-        get() = libraryPreferences.layout().get()
+        get() = libraryPreferences.layoutLegacy().get()
 
     val hideReadingButton: Boolean
         get() = libraryPreferences.hideStartReadingButton().get()

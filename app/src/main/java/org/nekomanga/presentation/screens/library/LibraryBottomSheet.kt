@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.presentation.components.sheets.DisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.GroupBySheet
 import org.nekomanga.presentation.components.sheets.LibrarySortSheet
 
@@ -12,6 +13,8 @@ sealed class LibraryBottomSheetScreen {
     data class SortSheet(val categoryItem: CategoryItem) : LibraryBottomSheetScreen()
 
     object GroupBySheet : LibraryBottomSheetScreen()
+
+    object DisplayOptionsSheet : LibraryBottomSheetScreen()
 }
 
 @Composable
@@ -45,6 +48,14 @@ fun LibraryBottomSheet(
                     librarySheetActions.groupByClick(it)
                     closeSheet()
                 },
+                bottomContentPadding = contentPadding.calculateBottomPadding(),
+            )
+        is LibraryBottomSheetScreen.DisplayOptionsSheet ->
+            DisplayOptionsSheet(
+                currentLibraryDisplayMode = libraryScreenState.libraryDisplayMode,
+                libraryDisplayModeClick = { librarySheetActions.libraryDisplayModeClick(it) },
+                rawColumnCount = libraryScreenState.rawColumnCount,
+                rawColumnCountChanged = { librarySheetActions.rawColumnCountChanged(it) },
                 bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
     }

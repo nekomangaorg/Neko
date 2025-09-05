@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
+import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import eu.kanade.tachiyomi.ui.library.LibraryViewType
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -61,13 +61,7 @@ fun LibraryPage(
 ) {
     val lazyListState = rememberLazyListState()
 
-    val columns =
-        numberOfColumns(
-            rawValue =
-                (libraryScreenState.libraryViewType as? LibraryViewType.Grid)?.rawColumnCount ?: 0f
-        )
-
-    // val width = (LocalConfiguration.current.screenWidthDp / columns).dp - Size.smedium
+    val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -92,22 +86,23 @@ fun LibraryPage(
             }
 
             if (!item.categoryItem.isHidden) {
-                when (libraryScreenState.libraryViewType) {
-                    is LibraryViewType.Grid -> {
+                when (libraryScreenState.libraryDisplayMode) {
+                    is LibraryDisplayMode.ComfortableGrid,
+                    is LibraryDisplayMode.CompactGrid -> {
                         items(items = item.libraryItems.chunked(columns)) { rowItems ->
                             RowGrid(
                                 rowItems = rowItems,
                                 libraryScreenState = libraryScreenState,
                                 columns = columns,
                                 isComfortableGrid =
-                                    libraryScreenState.libraryViewType.gridType ==
-                                        LibraryViewType.GridType.Comfortable,
+                                    libraryScreenState.libraryDisplayMode
+                                        is LibraryDisplayMode.ComfortableGrid,
                                 libraryScreenActions = libraryScreenActions,
                             )
                         }
                     }
 
-                    LibraryViewType.List -> {
+                    LibraryDisplayMode.List -> {
                         itemsIndexed(
                             item.libraryItems,
                             key = { index, libraryItem ->

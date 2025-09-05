@@ -45,6 +45,8 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                 LibrarySheetActions(
                     groupByClick = presenter::groupByClick,
                     categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
+                    libraryDisplayModeClick = presenter::libraryDisplayModeClick,
+                    rawColumnCountChanged = presenter::rawColumnCountChanged,
                 ),
             libraryCategoryActions =
                 LibraryCategoryActions(

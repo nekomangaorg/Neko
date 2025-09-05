@@ -161,7 +161,7 @@ class LibraryController(
     /** Action mode for selections. */
     private var actionMode: ActionMode? = null
 
-    private var libraryLayout: Int = libraryPreferences.layout().get()
+    private var libraryLayout: Int = libraryPreferences.layoutLegacy().get()
 
     var singleCategory: Boolean = false
         private set
@@ -1031,7 +1031,7 @@ class LibraryController(
 
     private fun setPreferenceFlows() {
         listOf(
-                libraryPreferences.layout(),
+                libraryPreferences.layoutLegacy(),
                 libraryPreferences.uniformGrid(),
                 libraryPreferences.gridSize(),
                 libraryPreferences.staggeredGrid(),
@@ -1416,7 +1416,7 @@ class LibraryController(
     }
 
     private fun reattachAdapter() {
-        libraryLayout = libraryPreferences.layout().get()
+        libraryLayout = libraryPreferences.layoutLegacy().get()
         setRecyclerLayout()
         val position = binding.libraryGridRecycler.recycler.findFirstVisibleItemPosition()
         binding.libraryGridRecycler.recycler.adapter = adapter

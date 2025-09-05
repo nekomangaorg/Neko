@@ -33,7 +33,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun inflateBinding() = LibraryDisplayLayoutBinding.bind(this)
 
     override fun initGeneralPreferences() {
-        binding.displayGroup.bindToPreference(libraryPreferences.layout())
+        binding.displayGroup.bindToPreference(libraryPreferences.layoutLegacy())
         binding.uniformGrid.bindToPreference(libraryPreferences.uniformGrid()) {
             binding.staggeredGrid.isEnabled = !it
         }

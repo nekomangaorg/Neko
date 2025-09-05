@@ -4,11 +4,14 @@ import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.components.UiText
 
 data class LibraryScreenState(
-    val libraryViewType: LibraryViewType = LibraryViewType.List,
+    val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
+    val rawColumnCount: Float = 3f,
     val isFirstLoad: Boolean = true,
     val allCollapsed: Boolean = false,
     val isRefreshing: Boolean = false,
@@ -32,6 +35,8 @@ data class LibraryScreenActions(
 data class LibrarySheetActions(
     val groupByClick: (Int) -> Unit,
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
+    val libraryDisplayModeClick: (LibraryDisplayMode) -> Unit,
+    val rawColumnCountChanged: (Float) -> Unit,
 )
 
 data class LibraryCategoryActions(
@@ -41,7 +46,8 @@ data class LibraryCategoryActions(
 )
 
 data class LibraryViewItem(
-    val libraryViewType: LibraryViewType,
+    val libraryDisplayMode: LibraryDisplayMode,
+    val rawColumnCount: Float = 3f,
     val libraryCategoryItems: PersistentList<LibraryCategoryItem>,
 )
 
@@ -51,14 +57,40 @@ data class LibraryCategoryItem(
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
 
-sealed class LibraryViewType() {
+sealed interface LibraryDisplayMode {
 
-    data class Grid(val rawColumnCount: Float, val gridType: GridType) : LibraryViewType()
+    data object ComfortableGrid : LibraryDisplayMode
 
-    object List : LibraryViewType()
+    data object CompactGrid : LibraryDisplayMode
 
-    enum class GridType {
-        Comfortable,
-        Compact,
+    data object List : LibraryDisplayMode
+
+    fun toInt(): Int {
+        return when (this) {
+            is List -> 0
+            is CompactGrid -> 1
+            else -> 2
+        }
+    }
+
+    fun toUiText(): UiText {
+        return when (this) {
+            is List -> UiText.StringResource(R.string.list)
+            is CompactGrid -> UiText.StringResource(R.string.compact_grid)
+            else -> UiText.StringResource(R.string.comfortable_grid)
+        }
+    }
+
+    companion object {
+
+        fun entries() = listOf(List, CompactGrid, ComfortableGrid)
+
+        fun fromInt(value: Int): LibraryDisplayMode {
+            return when (value) {
+                0 -> List
+                1 -> CompactGrid
+                else -> ComfortableGrid
+            }
+        }
     }
 }

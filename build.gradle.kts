@@ -32,6 +32,7 @@ subprojects {
                         "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                         "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
                         "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
+                        "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
                         "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
                         "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
                         "-opt-in=kotlin.time.ExperimentalTime",

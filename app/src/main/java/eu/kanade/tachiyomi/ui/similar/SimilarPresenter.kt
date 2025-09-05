@@ -40,7 +40,7 @@ class SimilarPresenter(
             SimilarScreenState(
                 isList = preferences.browseAsList().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
             )
         )

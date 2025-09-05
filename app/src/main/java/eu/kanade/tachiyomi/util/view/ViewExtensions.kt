@@ -340,15 +340,6 @@ fun Int.numberOfRowsForValue(rawValue: Float): Int {
     return max(1, (dpWidth / trueSize).roundToInt())
 }
 
-fun Int.numberOfColumnsForCompose(rawValue: Float): Int {
-    val size = 1.5f.pow(rawValue)
-    val trueSize =
-        AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) /
-            100f
-    val dpWidth = (this.pxToDp / 100f).roundToInt()
-    return max(1, (dpWidth / trueSize).roundToInt())
-}
-
 var View.compatToolTipText: CharSequence?
     get() =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
