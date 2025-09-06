@@ -13,6 +13,7 @@ import org.nekomanga.presentation.components.UiText
 
 data class LibraryScreenState(
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
+    val hasActiveFilters: Boolean = false,
     val libraryFilters: LibraryFilters = LibraryFilters(),
     val rawColumnCount: Float = 3f,
     val isFirstLoad: Boolean = true,
@@ -33,6 +34,7 @@ data class LibraryScreenActions(
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
     val collapseExpandAllCategories: () -> Unit,
+    val clearActiveFilters: () -> Unit,
     val filterUnreadToggled: (FilterUnread) -> Unit,
 )
 

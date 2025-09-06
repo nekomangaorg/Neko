@@ -1,17 +1,23 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 sealed class FilterUnread() {
-    object Enabled : FilterUnread()
+    object Unread : FilterUnread()
 
-    object Disabled : FilterUnread()
+    object Read : FilterUnread()
+
+    object NotStarted : FilterUnread()
+
+    object InProgress : FilterUnread()
 
     object Inactive : FilterUnread()
 
     fun toInt(): Int {
         return when (this) {
             Inactive -> 0
-            Enabled -> 1
-            Disabled -> 2
+            Unread -> 1
+            Read -> 2
+            NotStarted -> 3
+            InProgress -> 4
         }
     }
 
@@ -19,8 +25,10 @@ sealed class FilterUnread() {
 
         fun fromInt(fromInt: Int): FilterUnread {
             return when (fromInt) {
-                2 -> Disabled
-                1 -> Enabled
+                4 -> InProgress
+                3 -> NotStarted
+                2 -> Read
+                1 -> Unread
                 else -> Inactive
             }
         }

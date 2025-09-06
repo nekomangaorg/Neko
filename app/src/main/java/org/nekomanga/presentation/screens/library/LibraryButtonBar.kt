@@ -1,18 +1,18 @@
 package org.nekomanga.presentation.screens.library
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ButtonShapes
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
@@ -46,9 +46,12 @@ fun LibraryButtonBar(
         Row(
             horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
         ) {
-            FilledTonalIconButton(
+            FilledTonalButton(
                 shapes =
-                    IconButtonShapes(shape = CircleShape, pressedShape = RoundedCornerShape(25)),
+                    ButtonShapes(
+                        shape = ButtonGroupDefaults.connectedLeadingButtonShape,
+                        pressedShape = ButtonGroupDefaults.connectedLeadingButtonPressShape,
+                    ),
                 onClick = { libraryScreenActions.collapseExpandAllCategories() },
             ) {
                 Icon(
@@ -58,46 +61,97 @@ fun LibraryButtonBar(
                     contentDescription = null,
                 )
             }
-            FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = groupByClick) {
+            FilledTonalButton(
+                shapes =
+                    ButtonShapes(
+                        shape = ButtonGroupDefaults.connectedTrailingButtonShape,
+                        pressedShape = ButtonGroupDefaults.connectedTrailingButtonPressShape,
+                    ),
+                onClick = groupByClick,
+            ) {
                 Text(text = stringResource(R.string.group_library_by))
             }
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
-        ) {
-            ToggleButton(
-                checked =
-                    libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Enabled,
-                onCheckedChange = { enabling ->
-                    val action =
-                        when (enabling) {
-                            false -> FilterUnread.Inactive
-                            true -> FilterUnread.Enabled
-                        }
-                    libraryScreenActions.filterUnreadToggled(action)
-                },
-                shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
-            ) {
-                Text(stringResource(R.string.unread))
-            }
-            ToggleButton(
-                checked =
-                    libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Disabled,
-                onCheckedChange = { enabling ->
-                    val action =
-                        when (enabling) {
-                            false -> FilterUnread.Inactive
-                            true -> FilterUnread.Disabled
-                        }
-                    libraryScreenActions.filterUnreadToggled(action)
-                },
-                shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
-            ) {
-                Text(stringResource(R.string.read))
+        AnimatedVisibility(libraryScreenState.value.hasActiveFilters) {
+            FilledIconButton(onClick = libraryScreenActions.clearActiveFilters) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = null)
             }
         }
+
+        val unreadToggleList =
+            listOf(
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterUnread
+                            is FilterUnread.NotStarted,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterUnreadToggled(
+                            if (enabling) FilterUnread.NotStarted else FilterUnread.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.not_started),
+                ),
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterUnread
+                            is FilterUnread.InProgress,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterUnreadToggled(
+                            if (enabling) FilterUnread.InProgress else FilterUnread.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.in_progress),
+                ),
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Unread,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterUnreadToggled(
+                            if (enabling) FilterUnread.Unread else FilterUnread.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.read),
+                ),
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Read,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterUnreadToggled(
+                            if (enabling) FilterUnread.Read else FilterUnread.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.unread),
+                ),
+            )
+
+        ConnectedToggleButtons(unreadToggleList)
 
         Gap(Size.small)
     }
 }
+
+@Composable
+private fun ConnectedToggleButtons(buttons: List<ToggleButtonFields>) {
+    Row(horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        buttons.forEachIndexed { index, fields ->
+            ToggleButton(
+                checked = fields.buttonChecked,
+                onCheckedChange = fields.buttonOnCheckedChange,
+                shapes =
+                    when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        buttons.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
+            ) {
+                Text(fields.buttonText)
+            }
+        }
+    }
+}
+
+private data class ToggleButtonFields(
+    val buttonChecked: Boolean,
+    val buttonOnCheckedChange: (Boolean) -> Unit,
+    val buttonText: String,
+)

@@ -55,6 +55,9 @@ class LibraryComposePresenter(
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
+
+    private var searchJob: Job? = null
+
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
 
     private val loggedServices by lazy {
@@ -385,15 +388,28 @@ class LibraryComposePresenter(
 
         return this.mapAsyncNotNull { libraryMangaItem ->
             if (
-                libraryFilters.filterUnread is FilterUnread.Enabled &&
+                libraryFilters.filterUnread is FilterUnread.Unread &&
                     libraryMangaItem.unreadCount == 0
-            )
+            ) {
                 return@mapAsyncNotNull null
+            }
             if (
-                libraryFilters.filterUnread is FilterUnread.Disabled &&
-                    libraryMangaItem.unreadCount > 0
-            )
+                libraryFilters.filterUnread is FilterUnread.Read && libraryMangaItem.unreadCount > 0
+            ) {
                 return@mapAsyncNotNull null
+            }
+            if (
+                libraryFilters.filterUnread is FilterUnread.NotStarted &&
+                    !(libraryMangaItem.unreadCount > 0 && !libraryMangaItem.hasStarted)
+            ) {
+                return@mapAsyncNotNull null
+            }
+            if (
+                libraryFilters.filterUnread is FilterUnread.InProgress &&
+                    !(libraryMangaItem.unreadCount > 0 && libraryMangaItem.hasStarted)
+            ) {
+                return@mapAsyncNotNull null
+            }
 
             libraryMangaItem
         }
@@ -460,6 +476,13 @@ class LibraryComposePresenter(
 
     fun unreadBadgesToggled() {
         presenterScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
+    }
+
+    fun clearActiveFilters() {
+        presenterScope.launchIO {
+            libraryPreferences.filterUnread().set(FilterUnread.Inactive)
+            // TODO rest
+        }
     }
 
     fun filterUnreadToggled(filterUnread: FilterUnread) {
@@ -668,13 +691,15 @@ class LibraryComposePresenter(
         }
     }
 
-    private var searchJob: Job? = null
-
     fun observeLibraryUpdates() {
 
         pausablePresenterScope.launchIO {
             filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
-                _libraryScreenState.update { it.copy(libraryFilters = libraryFilters) }
+                val hasActiveFilters = libraryFilters.filterUnread !is FilterUnread.Inactive
+
+                _libraryScreenState.update {
+                    it.copy(libraryFilters = libraryFilters, hasActiveFilters = hasActiveFilters)
+                }
             }
         }
 
