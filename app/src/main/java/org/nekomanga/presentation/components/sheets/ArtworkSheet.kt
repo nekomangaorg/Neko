@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -198,7 +199,7 @@ private fun ArtworkButton(text: String, color: Color, modifier: Modifier, onClic
 private fun Thumbnail(artwork: Artwork, thumbnailSize: Dp, thumbnailClicked: () -> Unit) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
-        placeholder = ColorPainter(Color(Pastel.getColorLight())),
+        placeholder = ColorPainter(colorResource(Pastel.getColorLight())),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier =
