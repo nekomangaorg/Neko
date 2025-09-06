@@ -9,11 +9,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
@@ -48,7 +48,7 @@ enum class MangaCover(val ratio: Float) {
 
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
-            placeholder = ColorPainter(Color(color)),
+            placeholder = ColorPainter(colorResource(color)),
             contentDescription = contentDescription,
             alpha = alpha,
             contentScale = ContentScale.Crop,
