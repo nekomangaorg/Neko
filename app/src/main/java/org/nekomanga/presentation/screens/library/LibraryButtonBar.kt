@@ -33,6 +33,7 @@ fun LibraryButtonBar(
     modifier: Modifier = Modifier,
     libraryScreenActions: LibraryScreenActions,
     libraryScreenState: State<LibraryScreenState>,
+    showCollapseAll: Boolean,
     groupByClick: () -> Unit,
 ) {
     val filterScrollState = rememberScrollState()
@@ -46,21 +47,24 @@ fun LibraryButtonBar(
         Row(
             horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
         ) {
-            FilledTonalButton(
-                shapes =
-                    ButtonShapes(
-                        shape = ButtonGroupDefaults.connectedLeadingButtonShape,
-                        pressedShape = ButtonGroupDefaults.connectedLeadingButtonPressShape,
-                    ),
-                onClick = { libraryScreenActions.collapseExpandAllCategories() },
-            ) {
-                Icon(
-                    imageVector =
-                        if (libraryScreenState.value.allCollapsed) ExpandAllIcon
-                        else CollapseAllIcon,
-                    contentDescription = null,
-                )
+            AnimatedVisibility(showCollapseAll) {
+                FilledTonalButton(
+                    shapes =
+                        ButtonShapes(
+                            shape = ButtonGroupDefaults.connectedLeadingButtonShape,
+                            pressedShape = ButtonGroupDefaults.connectedLeadingButtonPressShape,
+                        ),
+                    onClick = { libraryScreenActions.collapseExpandAllCategories() },
+                ) {
+                    Icon(
+                        imageVector =
+                            if (libraryScreenState.value.allCollapsed) ExpandAllIcon
+                            else CollapseAllIcon,
+                        contentDescription = null,
+                    )
+                }
             }
+
             FilledTonalButton(
                 shapes =
                     ButtonShapes(

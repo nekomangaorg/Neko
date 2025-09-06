@@ -643,6 +643,7 @@ class LibraryComposePresenter(
         collapsedCategorySet: Set<Int>,
     ): List<LibraryCategoryItem> {
         return if (libraryMangaList.toPersistentList().isNotEmpty()) {
+
             val mangaMap = libraryMangaList.groupBy { it.category }.toMap()
 
             categoryList

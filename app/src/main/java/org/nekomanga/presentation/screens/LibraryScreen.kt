@@ -176,6 +176,7 @@ fun LibraryScreen(
                         LibraryButtonBar(
                             libraryScreenActions = libraryScreenActions,
                             libraryScreenState = libraryScreenState,
+                            showCollapseAll = libraryScreenState.value.items.size > 1,
                             groupByClick = {
                                 scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
                             },

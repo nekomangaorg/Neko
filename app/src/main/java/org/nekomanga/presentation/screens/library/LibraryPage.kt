@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -82,6 +83,7 @@ fun LibraryPage(
                     categoryItem = item.categoryItem,
                     enabled = !item.libraryItems.isEmpty(),
                     isRefreshing = item.isRefreshing,
+                    isCollapsible = libraryScreenState.items.size > 1,
                     categoryItemClick = {
                         libraryCategoryActions.categoryItemClick(item.categoryItem)
                     },
@@ -90,6 +92,7 @@ fun LibraryPage(
                         libraryCategoryActions.categoryRefreshClick(item.categoryItem)
                     },
                 )
+                Gap(Size.tiny)
             }
 
             if (!item.categoryItem.isHidden) {
@@ -98,6 +101,7 @@ fun LibraryPage(
                     is LibraryDisplayMode.CompactGrid -> {
                         items(items = item.libraryItems.chunked(columns)) { rowItems ->
                             RowGrid(
+                                modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
                                 libraryScreenState = libraryScreenState,
                                 columns = columns,
@@ -134,6 +138,7 @@ fun LibraryPage(
 
 @Composable
 private fun RowGrid(
+    modifier: Modifier = Modifier,
     rowItems: List<LibraryMangaItem>,
     libraryScreenState: LibraryScreenState,
     columns: Int,
@@ -142,7 +147,7 @@ private fun RowGrid(
 ) {
     VerticalGrid(
         columns = SimpleGridCells.Fixed(columns),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
+        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
         horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         rowItems.forEach { libraryItem ->
@@ -163,6 +168,7 @@ private fun RowGrid(
 
 @Composable
 private fun ListItem(
+    modifer: Modifier = Modifier,
     index: Int,
     totalSize: Int,
     libraryScreenState: LibraryScreenState,
@@ -176,7 +182,7 @@ private fun ListItem(
             else -> ListCardType.Center
         }
     ExpressiveListCard(
-        modifier = Modifier.padding(horizontal = Size.small),
+        modifier = modifer.padding(horizontal = Size.small),
         listCardType = listCardType,
     ) {
         MangaRow(
@@ -201,6 +207,7 @@ private fun ListItem(
 private fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
     isRefreshing: Boolean,
+    isCollapsible: Boolean,
     categoryItemClick: () -> Unit,
     categorySortClick: () -> Unit,
     categoryRefreshClick: () -> Unit,
@@ -220,19 +227,28 @@ private fun LibraryCategoryHeader(
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .clickable(enabled = enabled, onClick = categoryItemClick)
+                .clickable(enabled = isCollapsible, onClick = categoryItemClick)
                 .padding(vertical = Size.extraTiny, horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector =
-                if (categoryItem.isHidden) Icons.Default.ArrowDropDown
-                else Icons.Default.ArrowDropUp,
-            contentDescription = null,
-            tint = textColor,
-        )
+        AnimatedVisibility(isCollapsible) {
+            Icon(
+                imageVector =
+                    if (categoryItem.isHidden) Icons.Default.ArrowDropDown
+                    else Icons.Default.ArrowDropUp,
+                contentDescription = null,
+                tint = textColor,
+            )
+        }
+
+        val text =
+            when {
+                isCollapsible || categoryItem.name.equals("all", true) -> categoryItem.name
+                else -> ""
+            }
+
         Text(
-            text = categoryItem.name,
+            text = text,
             color = textColor,
             style = MaterialTheme.typography.titleLarge,
             overflow = TextOverflow.Ellipsis,
