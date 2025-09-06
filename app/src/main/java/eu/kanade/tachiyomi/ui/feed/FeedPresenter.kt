@@ -60,12 +60,17 @@ class FeedPresenter(
 
     private val _historyScreenPagingState =
         MutableStateFlow(
-            HistoryScreenPagingState(historyGrouping = preferences.historyChapterGrouping().get())
+            lastHistoryScreenState
+                ?: HistoryScreenPagingState(
+                    historyGrouping = preferences.historyChapterGrouping().get()
+                )
         )
 
-    private val _updatesScreenPagingState = MutableStateFlow(UpdatesScreenPagingState())
+    private val _updatesScreenPagingState =
+        MutableStateFlow(lastUpdateScreenState ?: UpdatesScreenPagingState())
 
-    private val _summaryScreenPagingState = MutableStateFlow(SummaryScreenPagingState())
+    private val _summaryScreenPagingState =
+        MutableStateFlow(lastSummaryScreenPagingState ?: SummaryScreenPagingState())
 
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
 
@@ -139,8 +144,18 @@ class FeedPresenter(
             },
         )
 
+    override fun onDestroy() {
+        super.onDestroy()
+        lastUpdateScreenState = _updatesScreenPagingState.value
+        lastHistoryScreenState = _historyScreenPagingState.value
+        lastSummaryScreenPagingState = _summaryScreenPagingState.value
+    }
+
     override fun onCreate() {
         super.onCreate()
+        lastUpdateScreenState = null
+        lastHistoryScreenState = null
+        lastSummaryScreenPagingState = null
         loadSummaryPage()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         presenterScope.launchIO {
@@ -1063,6 +1078,17 @@ class FeedPresenter(
     }
 
     companion object {
+
+        private var lastUpdateScreenState: UpdatesScreenPagingState? = null
+        private var lastHistoryScreenState: HistoryScreenPagingState? = null
+        private var lastSummaryScreenPagingState: SummaryScreenPagingState? = null
+
+        fun onLowMemory() {
+            lastUpdateScreenState = null
+            lastHistoryScreenState = null
+            lastSummaryScreenPagingState = null
+        }
+
         const val HISTORY_ENDLESS_LIMIT = 15
         const val UPDATES_ENDLESS_LIMIT = 200
     }
