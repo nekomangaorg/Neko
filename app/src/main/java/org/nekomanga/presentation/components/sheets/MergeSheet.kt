@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -242,7 +243,7 @@ private fun SuccessResults(
                             .data(MergeArtwork(url = item.coverUrl, mergeType = mergeType))
                             .crossfade(true)
                             .build(),
-                    placeholder = ColorPainter(Color(Pastel.getColorLight())),
+                    placeholder = ColorPainter(colorResource(Pastel.getColorLight())),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxWidth(),
