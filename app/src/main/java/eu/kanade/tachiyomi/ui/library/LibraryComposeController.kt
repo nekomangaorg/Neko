@@ -41,8 +41,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     updateLibrary = { start -> updateLibrary(start, context) },
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                     clearActiveFilters = presenter::clearActiveFilters,
-                    filterUnreadToggled = presenter::filterUnreadToggled,
-                    filterDownloadToggled = presenter::filterDownloadToggled,
+                    filterToggled = presenter::filterToggled,
                 ),
             librarySheetActions =
                 LibrarySheetActions(

@@ -2,6 +2,7 @@ package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 
 data class SimpleManga(val title: String, val id: Long)
 
@@ -22,19 +23,20 @@ data class LibraryMangaItem(
     val category: Int = 0,
     val bookmarkCount: Int = 0,
     val unavailableCount: Int = 0,
+    val trackCount: Int = 0,
     val downloadCount: Int = 0,
+    val isMerged: Boolean = false,
+    val hasMissingChapters: Boolean = false,
     val genre: List<String> = emptyList(),
     val author: List<String> = emptyList(),
     val contentRating: List<String> = emptyList(),
     val language: List<String> = emptyList(),
     val status: List<String> = emptyList(),
+    val seriesType: FilterMangaType = FilterMangaType.Manga,
     val rating: Double = (-1).toDouble(),
 ) {
     val totalChapterCount
         get() = readCount + unreadCount
-
-    val availableCount
-        get() = totalChapterCount - unavailableCount
 
     val hasStarted
         get() = readCount > 0

@@ -278,13 +278,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun hasActiveFiltersFromPref(): Boolean {
         return libraryPreferences.filterDownloaded().get().toInt() > 0 ||
             libraryPreferences.filterUnread().get().toInt() > 0 ||
-            libraryPreferences.filterCompleted().get() > 0 ||
-            libraryPreferences.filterTracked().get() > 0 ||
-            libraryPreferences.filterMangaType().get() > 0 ||
-            libraryPreferences.filterMerged().get() > 0 ||
-            libraryPreferences.filterMissingChapters().get() > 0 ||
-            libraryPreferences.filterBookmarked().get() > 0 ||
-            libraryPreferences.filterUnavailable().get() > 0 ||
+            libraryPreferences.filterCompleted().get().toInt() > 0 ||
+            libraryPreferences.filterTracked().get().toInt() > 0 ||
+            libraryPreferences.filterMangaType().get().toInt() > 0 ||
+            libraryPreferences.filterMerged().get().toInt() > 0 ||
+            libraryPreferences.filterMissingChapters().get().toInt() > 0 ||
+            libraryPreferences.filterBookmarked().get().toInt() > 0 ||
+            libraryPreferences.filterUnavailable().get().toInt() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -360,7 +360,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             withUIContext {
                 mangaType?.setState(
-                    when (libraryPreferences.filterMangaType().get()) {
+                    when (libraryPreferences.filterMangaType().get().toInt()) {
                         Manga.TYPE_MANGA -> context.getString(R.string.manga)
                         Manga.TYPE_MANHUA -> context.getString(R.string.manhua)
                         Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
@@ -368,8 +368,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         else -> ""
                     }
                 )
-                missingChapters.setState(libraryPreferences.filterMissingChapters())
-                merged.setState(libraryPreferences.filterMerged())
+                /*  missingChapters.setState(libraryPreferences.filterMissingChapters())
+                merged.setState(libraryPreferences.filterMerged())*/
 
                 reorderFilters()
                 reSortViews()
@@ -405,16 +405,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private suspend fun setFilterStates() {
         withContext(Dispatchers.Main) {
             // downloaded.setState(libraryPreferences.filterDownloaded())
-            completed.setState(libraryPreferences.filterCompleted())
-            bookmarked.setState(libraryPreferences.filterBookmarked())
+            /*   completed.setState(libraryPreferences.filterCompleted())
+            bookmarked.setState(libraryPreferences.filterBookmarked())*/
             val unreadP = libraryPreferences.filterUnread().get().toInt()
             if (unreadP <= 2) {
                 unread.state = unreadP - 1
             } else {
                 unreadProgress.state = unreadP - 3
             }
-            tracked?.setState(libraryPreferences.filterTracked())
-            unavailable?.setState(libraryPreferences.filterUnavailable())
+            /* tracked?.setState(libraryPreferences.filterTracked())
+            unavailable?.setState(libraryPreferences.filterUnavailable())*/
             reorderFilters()
             reSortViews()
         }
@@ -466,7 +466,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference: Boolean) {
-        if (updatePreference) {
+        /*if (updatePreference) {
             when (view) {
                 trackers -> {
                     FILTER_TRACKER = view.nameOf(index) ?: ""
@@ -500,13 +500,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             context.getString(R.string.comic) -> Manga.TYPE_COMIC
                             else -> 0
                         }
-                    libraryPreferences.filterMangaType().set(newIndex)
+                   // libraryPreferences.filterMangaType().set(newIndex)
                     null
                 }
                 else -> null
             }?.set(index + 1)
             onGroupClicked(ACTION_FILTER)
-        }
+        }*/
         val hasFilters = hasActiveFilters()
         if (hasFilters && clearButton.parent == null) {
             binding.filterLayout.addView(clearButton, 0)
@@ -529,15 +529,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun clearFilters() {
-        // libraryPreferences.filterDownloaded().set(0)
-        libraryPreferences.filterUnread().set(FilterUnread.Inactive)
-        libraryPreferences.filterCompleted().set(0)
-        libraryPreferences.filterBookmarked().set(0)
-        libraryPreferences.filterTracked().set(0)
-        libraryPreferences.filterMerged().set(0)
-        libraryPreferences.filterMissingChapters().set(0)
-        libraryPreferences.filterUnavailable().set(0)
-        libraryPreferences.filterMangaType().set(0)
+        libraryPreferences.filterDownloaded().delete()
+        libraryPreferences.filterUnread().delete()
+        libraryPreferences.filterCompleted().delete()
+        libraryPreferences.filterBookmarked().delete()
+        libraryPreferences.filterTracked().delete()
+        libraryPreferences.filterMerged().delete()
+        libraryPreferences.filterMissingChapters().delete()
+        libraryPreferences.filterUnavailable().delete()
+        libraryPreferences.filterMangaType().delete()
         FILTER_TRACKER = ""
 
         val transition = androidx.transition.AutoTransition()

@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
@@ -140,7 +141,17 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val displayManga = this.toDisplayManga()
 
+    this.availableCount
+
     val mangaRating = this.rating?.toDoubleOrNull() ?: (-1).toDouble()
+
+    val seriesType =
+        when (lang_flag) {
+            "ko" -> FilterMangaType.Manhwa
+            "zh",
+            "zh-hk" -> FilterMangaType.Manhua
+            else -> FilterMangaType.Manga
+        }
 
     val unknownList = listOf("Unknown")
 
@@ -197,10 +208,14 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
         genre = genreList,
         author = authorList,
         contentRating = listOf(contentRating),
+        isMerged = this.isMerged,
+        hasMissingChapters = this.missing_chapters != null,
         language = listOf(language),
         status = listOf(status),
+        seriesType = seriesType,
         bookmarkCount = this.bookmarkCount,
         unavailableCount = this.unavailableCount,
+        trackCount = this.trackCount,
     )
 }
 

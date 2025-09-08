@@ -1,28 +1,34 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
-sealed class FilterUnread() {
-    object Unread : FilterUnread()
+import org.nekomanga.R
+import org.nekomanga.domain.manga.LibraryMangaItem
 
-    object Read : FilterUnread()
+sealed interface FilterUnread : LibraryFilterType {
+    object Inactive : FilterUnread, BaseFilter(0)
 
-    object NotStarted : FilterUnread()
+    object Unread : FilterUnread, BaseFilter(1, R.string.unread)
 
-    object InProgress : FilterUnread()
+    object Read : FilterUnread, BaseFilter(2, R.string.read)
 
-    object Inactive : FilterUnread()
+    object NotStarted : FilterUnread, BaseFilter(3, R.string.not_started)
 
-    fun toInt(): Int {
+    object InProgress : FilterUnread, BaseFilter(4, R.string.in_progress)
+
+    override fun matches(item: LibraryMangaItem): Boolean {
         return when (this) {
-            Inactive -> 0
-            Unread -> 1
-            Read -> 2
-            NotStarted -> 3
-            InProgress -> 4
+            Unread -> item.unreadCount > 0
+            Read -> item.unreadCount == 0
+            InProgress -> item.unreadCount > 0 && item.hasStarted
+            NotStarted -> item.unreadCount > 0 && !item.hasStarted
+            Inactive -> true
         }
     }
 
-    companion object {
+    override fun toggle(enabling: Boolean): LibraryFilterType {
+        return if (enabling) this else FilterUnread.Inactive
+    }
 
+    companion object {
         fun fromInt(fromInt: Int): FilterUnread {
             return when (fromInt) {
                 4 -> InProgress

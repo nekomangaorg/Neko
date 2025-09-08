@@ -137,12 +137,12 @@ class LibraryPresenter(
         val filterMerged = libraryPreferences.filterMerged().get()
 
         !(filterDownloaded.toInt() == 0 &&
-            filterUnread == 0 &&
-            filterCompleted == 0 &&
-            filterTracked == 0 &&
-            filterMangaType == 0 &&
-            filterMissingChapters == 0 &&
-            filterMerged == 0)
+            filterUnread.toInt() == 0 &&
+            filterCompleted.toInt() == 0 &&
+            filterTracked.toInt() == 0 &&
+            filterMangaType.toInt() == 0 &&
+            filterMissingChapters.toInt() == 0 &&
+            filterMerged.toInt() == 0)
     }
 
     /** Save the current list to speed up loading later */
@@ -317,11 +317,11 @@ class LibraryPresenter(
 
         val filtersOff =
             filterDownloaded.toInt() == 0 &&
-                filterUnread == 0 &&
-                filterCompleted == 0 &&
-                filterTracked == 0 &&
-                filterMangaType == 0 &&
-                filterUnavailable == 0
+                filterUnread.toInt() == 0 &&
+                filterCompleted.toInt() == 0 &&
+                filterTracked.toInt() == 0 &&
+                filterMangaType.toInt() == 0 &&
+                filterUnavailable.toInt() == 0
         hasActiveFilters = !filtersOff
         val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
         val filteredItems =
@@ -340,15 +340,15 @@ class LibraryPresenter(
                                 matchesFilters(
                                     it,
                                     filterDownloaded.toInt(),
-                                    filterUnread,
-                                    filterCompleted,
-                                    filterTracked,
-                                    filterMangaType,
-                                    filterBookmarked,
-                                    filterUnavailable,
+                                    filterUnread.toInt(),
+                                    filterCompleted.toInt(),
+                                    filterTracked.toInt(),
+                                    filterMangaType.toInt(),
+                                    filterBookmarked.toInt(),
+                                    filterUnavailable.toInt(),
                                     filterTrackers,
-                                    filterMerged,
-                                    filterMissingChapters,
+                                    filterMerged.toInt(),
+                                    filterMissingChapters.toInt(),
                                 )
                             }
                         }
@@ -364,15 +364,15 @@ class LibraryPresenter(
                         matchesFilters(
                             item,
                             filterDownloaded.toInt(),
-                            filterUnread,
-                            filterCompleted,
-                            filterTracked,
-                            filterMangaType,
-                            filterBookmarked,
-                            filterUnavailable,
+                            filterUnread.toInt(),
+                            filterCompleted.toInt(),
+                            filterTracked.toInt(),
+                            filterMangaType.toInt(),
+                            filterBookmarked.toInt(),
+                            filterUnavailable.toInt(),
                             filterTrackers,
-                            filterMerged,
-                            filterMissingChapters,
+                            filterMerged.toInt(),
+                            filterMissingChapters.toInt(),
                         )
                     if (matches) {
                         missingCategorySet.remove(item.manga.category)

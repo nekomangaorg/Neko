@@ -1,8 +1,16 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.runtime.Immutable
+import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
+import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
+import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
+import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
@@ -36,8 +44,7 @@ data class LibraryScreenActions(
     val updateLibrary: (Boolean) -> Unit,
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,
-    val filterUnreadToggled: (FilterUnread) -> Unit,
-    val filterDownloadToggled: (FilterDownloaded) -> Unit,
+    val filterToggled: (LibraryFilterType) -> Unit,
 )
 
 data class LibrarySheetActions(
@@ -70,9 +77,28 @@ data class LibraryCategoryItem(
 
 @Immutable
 data class LibraryFilters(
-    val filterUnread: FilterUnread = FilterUnread.Inactive,
+    val filterBookmarked: FilterBookmarked = FilterBookmarked.Inactive,
+    val filterCompleted: FilterCompleted = FilterCompleted.Inactive,
     val filterDownloaded: FilterDownloaded = FilterDownloaded.Inactive,
-)
+    val filterMangaType: FilterMangaType = FilterMangaType.Inactive,
+    val filterMerged: FilterMerged = FilterMerged.Inactive,
+    val filterMissingChapters: FilterMissingChapters = FilterMissingChapters.Inactive,
+    val filterTracked: FilterTracked = FilterTracked.Inactive,
+    val filterUnavailable: FilterUnavailable = FilterUnavailable.Inactive,
+    val filterUnread: FilterUnread = FilterUnread.Inactive,
+) {
+    fun hasActiveFilter(): Boolean {
+        return filterBookmarked !is FilterBookmarked.Inactive ||
+            filterCompleted !is FilterCompleted.Inactive ||
+            filterDownloaded !is FilterDownloaded.Inactive ||
+            filterMangaType !is FilterMangaType.Inactive ||
+            filterMerged !is FilterMerged.Inactive ||
+            filterMissingChapters !is FilterMissingChapters.Inactive ||
+            filterTracked !is FilterTracked.Inactive ||
+            filterUnavailable !is FilterUnavailable.Inactive ||
+            filterUnread !is FilterUnread.Inactive
+    }
+}
 
 sealed interface LibraryDisplayMode {
 

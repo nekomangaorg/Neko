@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable as MangaCategory
 import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
+import eu.kanade.tachiyomi.data.database.tables.TrackTable as Track
 import org.nekomanga.constants.Constants
 
 /** Query to get the manga from the library, with their categories and unread count. */
@@ -16,6 +17,7 @@ val libraryQuery =
             COALESCE(C.unread, '') AS ${Manga.COL_UNREAD},
             COALESCE(R.hasread, '') AS ${Manga.COL_HAS_READ},
             COALESCE(B.bookmarkCount, 0) AS ${Manga.COL_BOOKMARK_COUNT},
+            COALESCE(T.trackCount, 0) AS ${Manga.COL_TRACK_COUNT},
             COALESCE(U.unavailableCount,0) as ${Manga.COL_UNAVAILABLE_COUNT}
         FROM ${Manga.TABLE}
         LEFT JOIN (
@@ -51,6 +53,12 @@ val libraryQuery =
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS B
         ON ${Manga.COL_ID} = B.${Chapter.COL_MANGA_ID}
+        LEFT JOIN (
+            SELECT ${Track.COL_MANGA_ID}, COUNT(*) AS trackCount
+            FROM ${Track.TABLE}
+            GROUP BY ${Track.COL_MANGA_ID}
+        ) AS T
+        ON ${Manga.COL_ID} = T.${Track.COL_MANGA_ID}
         LEFT JOIN (
             SELECT ${Chapter.COL_MANGA_ID}, COUNT(*) AS unavailableCount
             FROM ${Chapter.TABLE}

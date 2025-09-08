@@ -69,6 +69,7 @@
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
     <string name="unavailable">Unavailable</string>
+    <string name="no_unavailable">No Unavailable</string>
     <string name="available">Available</string>
     <string name="removed_bookmark">Removed bookmark</string>
     <string name="chapters_removed">Chapters removed.</string>

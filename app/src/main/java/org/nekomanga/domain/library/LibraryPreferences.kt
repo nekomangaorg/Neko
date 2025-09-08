@@ -2,8 +2,15 @@ package org.nekomanga.domain.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryItem
+import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
+import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
+import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import tachiyomi.core.preference.PreferenceStore
 
@@ -124,33 +131,75 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun filterDownloaded() =
         this.preferenceStore.getObjectFromInt(
-            "pref_filter_downloaded_key",
-            FilterDownloaded.Inactive,
-            { it.toInt() },
-            { FilterDownloaded.fromInt(it) },
+            key = "pref_filter_downloaded_key",
+            defaultValue = FilterDownloaded.Inactive,
+            serializer = FilterDownloaded::toInt,
+            deserializer = FilterDownloaded::fromInt,
         )
 
     fun filterUnread() =
         this.preferenceStore.getObjectFromInt(
-            "pref_filter_unread_key",
-            FilterUnread.Inactive,
-            { it.toInt() },
-            { FilterUnread.fromInt(it) },
+            key = "pref_filter_unread_key",
+            defaultValue = FilterUnread.Inactive,
+            serializer = FilterUnread::toInt,
+            deserializer = FilterUnread::fromInt,
         )
 
-    fun filterCompleted() = this.preferenceStore.getInt("pref_filter_completed_key")
+    fun filterCompleted() =
+        this.preferenceStore.getObjectFromInt(
+            key = "pref_filter_completed_key",
+            defaultValue = FilterCompleted.Inactive,
+            serializer = FilterCompleted::toInt,
+            deserializer = FilterCompleted::fromInt,
+        )
 
-    fun filterBookmarked() = this.preferenceStore.getInt("pref_filter_bookmarked_key")
+    fun filterBookmarked() =
+        this.preferenceStore.getObjectFromInt(
+            key = "pref_filter_bookmarked_key",
+            defaultValue = FilterBookmarked.Inactive,
+            serializer = FilterBookmarked::toInt,
+            deserializer = FilterBookmarked::fromInt,
+        )
 
-    fun filterUnavailable() = this.preferenceStore.getInt("pref_filter_unavailable_key")
+    fun filterUnavailable() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_unavailable_key",
+            defaultValue = FilterUnavailable.Inactive,
+            serializer = FilterUnavailable::toInt,
+            deserializer = FilterUnavailable::fromInt,
+        )
 
-    fun filterTracked() = this.preferenceStore.getInt("pref_filter_tracked_key")
+    fun filterTracked() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_tracked_key",
+            defaultValue = FilterTracked.Inactive,
+            serializer = FilterTracked::toInt,
+            deserializer = FilterTracked::fromInt,
+        )
 
-    fun filterMangaType() = this.preferenceStore.getInt("pref_filter_manga_type_key")
+    fun filterMangaType() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_manga_type_key",
+            defaultValue = FilterMangaType.Inactive,
+            serializer = FilterMangaType::toInt,
+            deserializer = FilterMangaType::fromInt,
+        )
 
-    fun filterMerged() = this.preferenceStore.getInt("pref_filter_merged_key")
+    fun filterMerged() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_merged_key",
+            defaultValue = FilterMerged.Inactive,
+            serializer = FilterMerged::toInt,
+            deserializer = FilterMerged::fromInt,
+        )
 
-    fun filterMissingChapters() = this.preferenceStore.getInt("pref_filter_missing_chapters_key")
+    fun filterMissingChapters() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_missing_chapters_key",
+            defaultValue = FilterMissingChapters.Inactive,
+            serializer = FilterMissingChapters::toInt,
+            deserializer = FilterMissingChapters::fromInt,
+        )
 
     fun showEmptyCategoriesWhileFiltering() =
         this.preferenceStore.getBoolean("show_empty_categories_filtering")

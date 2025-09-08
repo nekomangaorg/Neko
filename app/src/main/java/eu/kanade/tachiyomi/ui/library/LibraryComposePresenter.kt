@@ -16,8 +16,16 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
+import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
+import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
+import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
+import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -374,20 +382,26 @@ class LibraryComposePresenter(
 
     private fun filterPreferencesFlow(): Flow<LibraryFilters> {
         return combine(
-            libraryPreferences.filterDownloaded().changes(),
-            libraryPreferences.filterUnread().changes(),
-            libraryPreferences.filterCompleted().changes(),
             libraryPreferences.filterBookmarked().changes(),
-            libraryPreferences.filterUnavailable().changes(),
             libraryPreferences.filterCompleted().changes(),
-            libraryPreferences.filterTracked().changes(),
+            libraryPreferences.filterDownloaded().changes(),
+            libraryPreferences.filterMangaType().changes(),
             libraryPreferences.filterMerged().changes(),
             libraryPreferences.filterMissingChapters().changes(),
-            libraryPreferences.filterMangaType().changes(),
+            libraryPreferences.filterTracked().changes(),
+            libraryPreferences.filterUnavailable().changes(),
+            libraryPreferences.filterUnread().changes(),
         ) {
             LibraryFilters(
-                filterDownloaded = it[0] as FilterDownloaded,
-                filterUnread = it[1] as FilterUnread,
+                filterBookmarked = it[0] as FilterBookmarked,
+                filterCompleted = it[1] as FilterCompleted,
+                filterDownloaded = it[2] as FilterDownloaded,
+                filterMangaType = it[3] as FilterMangaType,
+                filterMerged = it[4] as FilterMerged,
+                filterMissingChapters = it[5] as FilterMissingChapters,
+                filterTracked = it[6] as FilterTracked,
+                filterUnavailable = it[7] as FilterUnavailable,
+                filterUnread = it[8] as FilterUnread,
             )
         }
     }
@@ -396,25 +410,26 @@ class LibraryComposePresenter(
         libraryFilters: LibraryFilters
     ): List<LibraryMangaItem> {
         return this.filterAsync { libraryMangaItem ->
-            val unreadCondition =
-                when (libraryFilters.filterUnread) {
-                    is FilterUnread.Unread -> libraryMangaItem.unreadCount > 0
-                    is FilterUnread.Read -> libraryMangaItem.unreadCount == 0
-                    is FilterUnread.NotStarted ->
-                        libraryMangaItem.unreadCount > 0 && !libraryMangaItem.hasStarted
-                    is FilterUnread.InProgress ->
-                        libraryMangaItem.unreadCount > 0 && libraryMangaItem.hasStarted
-                    is FilterUnread.Inactive -> true
-                }
+            val bookmarkedCondition = libraryFilters.filterBookmarked.matches(libraryMangaItem)
+            val completedCondition = libraryFilters.filterCompleted.matches(libraryMangaItem)
+            val downloadedCondition = libraryFilters.filterDownloaded.matches(libraryMangaItem)
+            val mangaTypeCondition = libraryFilters.filterMangaType.matches(libraryMangaItem)
+            val mergedCondition = libraryFilters.filterMerged.matches(libraryMangaItem)
+            val missingChaptersCondition =
+                libraryFilters.filterMissingChapters.matches(libraryMangaItem)
+            val trackedCondition = libraryFilters.filterTracked.matches(libraryMangaItem)
+            val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
+            val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
 
-            val downloadedCondition =
-                when (libraryFilters.filterDownloaded) {
-                    is FilterDownloaded.Downloaded -> libraryMangaItem.downloadCount > 0
-                    is FilterDownloaded.NotDownloaded -> libraryMangaItem.downloadCount == 0
-                    is FilterDownloaded.Inactive -> true
-                }
-
-            unreadCondition && downloadedCondition
+            completedCondition &&
+                downloadedCondition &&
+                unreadCondition &&
+                trackedCondition &&
+                missingChaptersCondition &&
+                bookmarkedCondition &&
+                mergedCondition &&
+                unavailableCondition &&
+                mangaTypeCondition
         }
     }
 
@@ -485,15 +500,30 @@ class LibraryComposePresenter(
         presenterScope.launchIO {
             libraryPreferences.filterUnread().delete()
             libraryPreferences.filterDownloaded().delete()
+            libraryPreferences.filterCompleted().delete()
+            libraryPreferences.filterMangaType().delete()
+            libraryPreferences.filterBookmarked().delete()
+            libraryPreferences.filterMissingChapters().delete()
+            libraryPreferences.filterMerged().delete()
+            libraryPreferences.filterTracked().delete()
+            libraryPreferences.filterUnavailable().delete()
         }
     }
 
-    fun filterUnreadToggled(filterUnread: FilterUnread) {
-        presenterScope.launchIO { libraryPreferences.filterUnread().set(filterUnread) }
-    }
-
-    fun filterDownloadToggled(filterDownloaded: FilterDownloaded) {
-        presenterScope.launchIO { libraryPreferences.filterDownloaded().set(filterDownloaded) }
+    fun filterToggled(filter: LibraryFilterType) {
+        presenterScope.launchIO {
+            when (filter) {
+                is FilterBookmarked -> libraryPreferences.filterBookmarked().set(filter)
+                is FilterCompleted -> libraryPreferences.filterCompleted().set(filter)
+                is FilterDownloaded -> libraryPreferences.filterDownloaded().set(filter)
+                is FilterMangaType -> libraryPreferences.filterMangaType().set(filter)
+                is FilterMerged -> libraryPreferences.filterMerged().set(filter)
+                is FilterMissingChapters -> libraryPreferences.filterMissingChapters().set(filter)
+                is FilterTracked -> libraryPreferences.filterTracked().set(filter)
+                is FilterUnavailable -> libraryPreferences.filterUnavailable().set(filter)
+                is FilterUnread -> libraryPreferences.filterUnread().set(filter)
+            }
+        }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
@@ -703,10 +733,11 @@ class LibraryComposePresenter(
 
         pausablePresenterScope.launchIO {
             filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
-                val hasActiveFilters = libraryFilters.filterUnread !is FilterUnread.Inactive
-
                 _libraryScreenState.update {
-                    it.copy(libraryFilters = libraryFilters, hasActiveFilters = hasActiveFilters)
+                    it.copy(
+                        libraryFilters = libraryFilters,
+                        hasActiveFilters = libraryFilters.hasActiveFilter(),
+                    )
                 }
             }
         }

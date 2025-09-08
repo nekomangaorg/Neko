@@ -21,8 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
+import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
+import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
+import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.icons.CollapseAllIcon
@@ -85,91 +93,84 @@ fun LibraryButtonBar(
 
         val unreadToggleList =
             listOf(
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterUnread
-                            is FilterUnread.NotStarted,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterUnreadToggled(
-                            if (enabling) FilterUnread.NotStarted else FilterUnread.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.not_started),
-                ),
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterUnread
-                            is FilterUnread.InProgress,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterUnreadToggled(
-                            if (enabling) FilterUnread.InProgress else FilterUnread.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.in_progress),
-                ),
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Unread,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterUnreadToggled(
-                            if (enabling) FilterUnread.Unread else FilterUnread.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.unread),
-                ),
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterUnread is FilterUnread.Read,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterUnreadToggled(
-                            if (enabling) FilterUnread.Read else FilterUnread.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.read),
-                ),
+                FilterUnread.NotStarted,
+                FilterUnread.InProgress,
+                FilterUnread.Unread,
+                FilterUnread.Read,
             )
 
-        val downloadToggleList =
-            listOf(
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterDownloaded
-                            is FilterDownloaded.Downloaded,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterDownloadToggled(
-                            if (enabling) FilterDownloaded.Downloaded else FilterDownloaded.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.downloaded),
-                ),
-                ToggleButtonFields(
-                    buttonChecked =
-                        libraryScreenState.value.libraryFilters.filterDownloaded
-                            is FilterDownloaded.NotDownloaded,
-                    buttonOnCheckedChange = { enabling ->
-                        libraryScreenActions.filterDownloadToggled(
-                            if (enabling) FilterDownloaded.NotDownloaded
-                            else FilterDownloaded.Inactive
-                        )
-                    },
-                    buttonText = stringResource(R.string.not_downloaded),
-                ),
-            )
-
-        ConnectedToggleButtons(unreadToggleList)
-        ConnectedToggleButtons(downloadToggleList)
+        val downloadToggleList = listOf(FilterDownloaded.Downloaded, FilterDownloaded.NotDownloaded)
+        val completedToggleList = listOf(FilterCompleted.Completed, FilterCompleted.Ongoing)
+        val mangaTypeToggleList =
+            listOf(FilterMangaType.Manga, FilterMangaType.Manhwa, FilterMangaType.Manhua)
+        val bookmarkToggleList = listOf(FilterBookmarked.Bookmarked, FilterBookmarked.NotBookmarked)
+        val missingToggleList =
+            listOf(FilterMissingChapters.MissingChapter, FilterMissingChapters.NoMissingChapters)
+        val unavailableToggleList =
+            listOf(FilterUnavailable.Unavailable, FilterUnavailable.NoUnavailable)
+        val mergedToggleList = listOf(FilterMerged.Merged, FilterMerged.NotMerged)
+        val trackedToggleList = listOf(FilterTracked.Tracked, FilterTracked.NotTracked)
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterUnread,
+            unreadToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterDownloaded,
+            downloadToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterCompleted,
+            completedToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterMangaType,
+            mangaTypeToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterBookmarked,
+            bookmarkToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterMissingChapters,
+            missingToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterUnavailable,
+            unavailableToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterMerged,
+            mergedToggleList,
+            libraryScreenActions.filterToggled,
+        )
+        ConnectedToggleButtons(
+            libraryScreenState.value.libraryFilters.filterTracked,
+            trackedToggleList,
+            libraryScreenActions.filterToggled,
+        )
 
         Gap(Size.small)
     }
 }
 
 @Composable
-private fun ConnectedToggleButtons(buttons: List<ToggleButtonFields>) {
+private fun ConnectedToggleButtons(
+    current: LibraryFilterType,
+    buttons: List<LibraryFilterType>,
+    toggleFilter: (LibraryFilterType) -> Unit,
+) {
     Row(horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        buttons.forEachIndexed { index, fields ->
+        buttons.forEachIndexed { index, buttonFilterType ->
             ToggleButton(
-                checked = fields.buttonChecked,
-                onCheckedChange = fields.buttonOnCheckedChange,
+                checked = buttonFilterType == current,
+                onCheckedChange = { toggleFilter(buttonFilterType.toggle(it)) },
                 shapes =
                     when (index) {
                         0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
@@ -177,7 +178,7 @@ private fun ConnectedToggleButtons(buttons: List<ToggleButtonFields>) {
                         else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                     },
             ) {
-                Text(fields.buttonText)
+                Text(buttonFilterType.UiText().asString())
             }
         }
     }
