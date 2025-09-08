@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
@@ -114,7 +115,7 @@ fun LibraryButtonBar(
                             if (enabling) FilterUnread.Unread else FilterUnread.Inactive
                         )
                     },
-                    buttonText = stringResource(R.string.read),
+                    buttonText = stringResource(R.string.unread),
                 ),
                 ToggleButtonFields(
                     buttonChecked =
@@ -124,11 +125,39 @@ fun LibraryButtonBar(
                             if (enabling) FilterUnread.Read else FilterUnread.Inactive
                         )
                     },
-                    buttonText = stringResource(R.string.unread),
+                    buttonText = stringResource(R.string.read),
+                ),
+            )
+
+        val downloadToggleList =
+            listOf(
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterDownloaded
+                            is FilterDownloaded.Downloaded,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterDownloadToggled(
+                            if (enabling) FilterDownloaded.Downloaded else FilterDownloaded.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.downloaded),
+                ),
+                ToggleButtonFields(
+                    buttonChecked =
+                        libraryScreenState.value.libraryFilters.filterDownloaded
+                            is FilterDownloaded.NotDownloaded,
+                    buttonOnCheckedChange = { enabling ->
+                        libraryScreenActions.filterDownloadToggled(
+                            if (enabling) FilterDownloaded.NotDownloaded
+                            else FilterDownloaded.Inactive
+                        )
+                    },
+                    buttonText = stringResource(R.string.not_downloaded),
                 ),
             )
 
         ConnectedToggleButtons(unreadToggleList)
+        ConnectedToggleButtons(downloadToggleList)
 
         Gap(Size.small)
     }

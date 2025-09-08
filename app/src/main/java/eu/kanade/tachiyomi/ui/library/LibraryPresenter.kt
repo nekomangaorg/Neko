@@ -136,7 +136,7 @@ class LibraryPresenter(
 
         val filterMerged = libraryPreferences.filterMerged().get()
 
-        !(filterDownloaded == 0 &&
+        !(filterDownloaded.toInt() == 0 &&
             filterUnread == 0 &&
             filterCompleted == 0 &&
             filterTracked == 0 &&
@@ -316,7 +316,7 @@ class LibraryPresenter(
         val filterMissingChapters = libraryPreferences.filterMissingChapters().get()
 
         val filtersOff =
-            filterDownloaded == 0 &&
+            filterDownloaded.toInt() == 0 &&
                 filterUnread == 0 &&
                 filterCompleted == 0 &&
                 filterTracked == 0 &&
@@ -339,7 +339,7 @@ class LibraryPresenter(
                             return@f subItems.any {
                                 matchesFilters(
                                     it,
-                                    filterDownloaded,
+                                    filterDownloaded.toInt(),
                                     filterUnread,
                                     filterCompleted,
                                     filterTracked,
@@ -363,7 +363,7 @@ class LibraryPresenter(
                     val matches =
                         matchesFilters(
                             item,
-                            filterDownloaded,
+                            filterDownloaded.toInt(),
                             filterUnread,
                             filterCompleted,
                             filterTracked,

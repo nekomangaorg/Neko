@@ -3,6 +3,7 @@ package org.nekomanga.domain.library
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import tachiyomi.core.preference.PreferenceStore
 
@@ -121,7 +122,13 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showDownloadBadge() = this.preferenceStore.getBoolean("display_download_badge")
 
-    fun filterDownloaded() = this.preferenceStore.getInt("pref_filter_downloaded_key")
+    fun filterDownloaded() =
+        this.preferenceStore.getObjectFromInt(
+            "pref_filter_downloaded_key",
+            FilterDownloaded.Inactive,
+            { it.toInt() },
+            { FilterDownloaded.fromInt(it) },
+        )
 
     fun filterUnread() =
         this.preferenceStore.getObjectFromInt(

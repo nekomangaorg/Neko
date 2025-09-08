@@ -276,7 +276,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun hasActiveFilters() = filterItems.any { it.isActivated }
 
     private fun hasActiveFiltersFromPref(): Boolean {
-        return libraryPreferences.filterDownloaded().get() > 0 ||
+        return libraryPreferences.filterDownloaded().get().toInt() > 0 ||
             libraryPreferences.filterUnread().get().toInt() > 0 ||
             libraryPreferences.filterCompleted().get() > 0 ||
             libraryPreferences.filterTracked().get() > 0 ||
@@ -404,7 +404,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private suspend fun setFilterStates() {
         withContext(Dispatchers.Main) {
-            downloaded.setState(libraryPreferences.filterDownloaded())
+            // downloaded.setState(libraryPreferences.filterDownloaded())
             completed.setState(libraryPreferences.filterCompleted())
             bookmarked.setState(libraryPreferences.filterBookmarked())
             val unreadP = libraryPreferences.filterUnread().get().toInt()
@@ -484,7 +484,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         )
                     null
                 }
-                downloaded -> libraryPreferences.filterDownloaded()
+                // downloaded -> libraryPreferences.filterDownloaded()
                 completed -> libraryPreferences.filterCompleted()
                 bookmarked -> libraryPreferences.filterBookmarked()
                 tracked -> libraryPreferences.filterTracked()
@@ -529,7 +529,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun clearFilters() {
-        libraryPreferences.filterDownloaded().set(0)
+        // libraryPreferences.filterDownloaded().set(0)
         libraryPreferences.filterUnread().set(FilterUnread.Inactive)
         libraryPreferences.filterCompleted().set(0)
         libraryPreferences.filterBookmarked().set(0)

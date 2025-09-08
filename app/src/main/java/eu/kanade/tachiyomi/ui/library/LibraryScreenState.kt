@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.runtime.Immutable
+import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
@@ -36,6 +37,7 @@ data class LibraryScreenActions(
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,
     val filterUnreadToggled: (FilterUnread) -> Unit,
+    val filterDownloadToggled: (FilterDownloaded) -> Unit,
 )
 
 data class LibrarySheetActions(
@@ -66,7 +68,11 @@ data class LibraryCategoryItem(
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
 
-@Immutable data class LibraryFilters(val filterUnread: FilterUnread = FilterUnread.Inactive)
+@Immutable
+data class LibraryFilters(
+    val filterUnread: FilterUnread = FilterUnread.Inactive,
+    val filterDownloaded: FilterDownloaded = FilterDownloaded.Inactive,
+)
 
 sealed interface LibraryDisplayMode {
 

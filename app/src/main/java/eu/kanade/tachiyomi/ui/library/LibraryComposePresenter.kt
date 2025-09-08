@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
+import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -44,8 +45,8 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.util.system.filterAsync
 import org.nekomanga.util.system.mapAsync
-import org.nekomanga.util.system.mapAsyncNotNull
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -255,19 +256,29 @@ class LibraryComposePresenter(
                                                 },
                                             )
                                         )
+                                /* val sortedMangaList =
+                                if (showDownloadBadges) {
+                                        tempSortedList.mapAsync {
+                                            val dbManga =
+                                                db.getManga(it.displayManga.mangaId)
+                                                    .executeOnIO()!!
+                                            it.copy(
+                                                downloadCount =
+                                                    downloadManager.getDownloadCount(dbManga)
+                                            )
+                                        }
+                                    } else {
+                                        tempSortedList
+                                    }*/
                                 val sortedMangaList =
-                                    if (showDownloadBadges) {
-                                            tempSortedList.mapAsync {
-                                                val dbManga =
-                                                    db.getManga(it.displayManga.mangaId)
-                                                        .executeOnIO()!!
-                                                it.copy(
-                                                    downloadCount =
-                                                        downloadManager.getDownloadCount(dbManga)
-                                                )
-                                            }
-                                        } else {
-                                            tempSortedList
+                                    tempSortedList
+                                        .mapAsync {
+                                            val dbManga =
+                                                db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                            it.copy(
+                                                downloadCount =
+                                                    downloadManager.getDownloadCount(dbManga)
+                                            )
                                         }
                                         .applyFilters(libraryFilters)
                                 libraryCategoryItem.copy(
@@ -375,8 +386,8 @@ class LibraryComposePresenter(
             libraryPreferences.filterMangaType().changes(),
         ) {
             LibraryFilters(
-                // filterDownloaded = it[0] as TriState,
-                filterUnread = it[1] as FilterUnread
+                filterDownloaded = it[0] as FilterDownloaded,
+                filterUnread = it[1] as FilterUnread,
             )
         }
     }
@@ -384,34 +395,26 @@ class LibraryComposePresenter(
     private suspend fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters
     ): List<LibraryMangaItem> {
-        // check if no filter if so then just return
+        return this.filterAsync { libraryMangaItem ->
+            val unreadCondition =
+                when (libraryFilters.filterUnread) {
+                    is FilterUnread.Unread -> libraryMangaItem.unreadCount > 0
+                    is FilterUnread.Read -> libraryMangaItem.unreadCount == 0
+                    is FilterUnread.NotStarted ->
+                        libraryMangaItem.unreadCount > 0 && !libraryMangaItem.hasStarted
+                    is FilterUnread.InProgress ->
+                        libraryMangaItem.unreadCount > 0 && libraryMangaItem.hasStarted
+                    is FilterUnread.Inactive -> true
+                }
 
-        return this.mapAsyncNotNull { libraryMangaItem ->
-            if (
-                libraryFilters.filterUnread is FilterUnread.Unread &&
-                    libraryMangaItem.unreadCount == 0
-            ) {
-                return@mapAsyncNotNull null
-            }
-            if (
-                libraryFilters.filterUnread is FilterUnread.Read && libraryMangaItem.unreadCount > 0
-            ) {
-                return@mapAsyncNotNull null
-            }
-            if (
-                libraryFilters.filterUnread is FilterUnread.NotStarted &&
-                    !(libraryMangaItem.unreadCount > 0 && !libraryMangaItem.hasStarted)
-            ) {
-                return@mapAsyncNotNull null
-            }
-            if (
-                libraryFilters.filterUnread is FilterUnread.InProgress &&
-                    !(libraryMangaItem.unreadCount > 0 && libraryMangaItem.hasStarted)
-            ) {
-                return@mapAsyncNotNull null
-            }
+            val downloadedCondition =
+                when (libraryFilters.filterDownloaded) {
+                    is FilterDownloaded.Downloaded -> libraryMangaItem.downloadCount > 0
+                    is FilterDownloaded.NotDownloaded -> libraryMangaItem.downloadCount == 0
+                    is FilterDownloaded.Inactive -> true
+                }
 
-            libraryMangaItem
+            unreadCondition && downloadedCondition
         }
     }
 
@@ -480,13 +483,17 @@ class LibraryComposePresenter(
 
     fun clearActiveFilters() {
         presenterScope.launchIO {
-            libraryPreferences.filterUnread().set(FilterUnread.Inactive)
-            // TODO rest
+            libraryPreferences.filterUnread().delete()
+            libraryPreferences.filterDownloaded().delete()
         }
     }
 
     fun filterUnreadToggled(filterUnread: FilterUnread) {
         presenterScope.launchIO { libraryPreferences.filterUnread().set(filterUnread) }
+    }
+
+    fun filterDownloadToggled(filterDownloaded: FilterDownloaded) {
+        presenterScope.launchIO { libraryPreferences.filterDownloaded().set(filterDownloaded) }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
