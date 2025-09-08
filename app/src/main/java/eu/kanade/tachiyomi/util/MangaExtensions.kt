@@ -215,7 +215,6 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
         seriesType = seriesType,
         bookmarkCount = this.bookmarkCount,
         unavailableCount = this.unavailableCount,
-        trackCount = this.trackCount,
     )
 }
 

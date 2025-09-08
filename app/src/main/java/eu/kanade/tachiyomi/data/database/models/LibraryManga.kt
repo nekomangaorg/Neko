@@ -11,8 +11,6 @@ class LibraryManga : MangaImpl() {
 
     var unavailableCount: Int = 0
 
-    var trackCount: Int = 0
-
     var isMerged: Boolean = false
 
     val availableCount

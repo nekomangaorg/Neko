@@ -140,21 +140,25 @@ fun LibraryButtonBar(
             missingToggleList,
             libraryScreenActions.filterToggled,
         )
-        ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterUnavailable,
-            unavailableToggleList,
-            libraryScreenActions.filterToggled,
-        )
+        if (libraryScreenState.value.showUnavailableFilter) {
+            ConnectedToggleButtons(
+                libraryScreenState.value.libraryFilters.filterUnavailable,
+                unavailableToggleList,
+                libraryScreenActions.filterToggled,
+            )
+        }
         ConnectedToggleButtons(
             libraryScreenState.value.libraryFilters.filterMerged,
             mergedToggleList,
             libraryScreenActions.filterToggled,
         )
-        ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterTracked,
-            trackedToggleList,
-            libraryScreenActions.filterToggled,
-        )
+        if (libraryScreenState.value.trackMap.isNotEmpty()) {
+            ConnectedToggleButtons(
+                libraryScreenState.value.libraryFilters.filterTracked,
+                trackedToggleList,
+                libraryScreenActions.filterToggled,
+            )
+        }
 
         Gap(Size.small)
     }

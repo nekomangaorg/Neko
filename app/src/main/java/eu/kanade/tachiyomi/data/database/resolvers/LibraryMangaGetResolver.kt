@@ -32,8 +32,6 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
         mapBaseFromCursor(manga, cursor)
 
-        manga.trackCount = cursor.getInt(cursor.getColumnIndex(MangaTable.COL_TRACK_COUNT))
-
         manga.unread =
             cursor
                 .getString(cursor.getColumnIndex(MangaTable.COL_UNREAD))

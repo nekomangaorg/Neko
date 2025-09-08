@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.util.toLibraryMangaItem
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
@@ -52,6 +54,7 @@ import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.util.system.filterAsync
 import org.nekomanga.util.system.mapAsync
@@ -61,6 +64,7 @@ import uy.kohesive.injekt.api.get
 class LibraryComposePresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
+    val mangadexPreferences: MangaDexPreferences = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
@@ -75,7 +79,7 @@ class LibraryComposePresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
@@ -85,13 +89,15 @@ class LibraryComposePresenter(
         flow7: Flow<T7>,
         flow8: Flow<T8>,
         flow9: Flow<T9>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R,
+        flow10: Flow<T10>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R,
     ): Flow<R> =
         combine(
             combine(flow, flow2, flow3, ::Triple),
             combine(flow4, flow5, flow6, ::Triple),
-            combine(flow7, flow8, flow9, ::Triple),
-        ) { t1, t2, t3 ->
+            combine(flow7, flow8, ::Pair),
+            combine(flow9, flow10, ::Pair),
+        ) { t1, t2, t3, t4 ->
             transform(
                 t1.first,
                 t1.second,
@@ -101,7 +107,8 @@ class LibraryComposePresenter(
                 t2.third,
                 t3.first,
                 t3.second,
-                t3.third,
+                t4.first,
+                t4.second,
             )
         }
 
@@ -152,6 +159,7 @@ class LibraryComposePresenter(
                     libraryMangaListFlow(),
                     categoryListFlow(),
                     filterPreferencesFlow(),
+                    trackMapFlow(),
                     libraryPreferences.collapsedCategories().changes(),
                     libraryPreferences.collapsedDynamicCategories().changes(),
                     libraryPreferences.sortingMode().changes(),
@@ -162,6 +170,7 @@ class LibraryComposePresenter(
                     libraryMangaList,
                     categoryList,
                     libraryFilters,
+                    trackMap,
                     collapsedCategories,
                     collapsedDynamicCategories,
                     sortingMode,
@@ -171,7 +180,9 @@ class LibraryComposePresenter(
                     val collapsedCategorySet =
                         collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
 
-                    _libraryScreenState.update { it.copy(currentGroupBy = groupBy) }
+                    _libraryScreenState.update {
+                        it.copy(currentGroupBy = groupBy, trackMap = trackMap.toPersistentMap())
+                    }
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
@@ -193,33 +204,13 @@ class LibraryComposePresenter(
                             BY_STATUS,
                             BY_TAG,
                             BY_TRACK_STATUS -> {
-                                val mapOfLoggedInTrackStatus =
-                                    if (groupBy == BY_TRACK_STATUS) {
-                                        db.getAllTracks()
-                                            .executeOnIO()
-                                            .mapNotNull { track ->
-                                                val trackService =
-                                                    loggedServices.firstOrNull {
-                                                        it.id == track.sync_id
-                                                    }
-                                                if (trackService == null) {
-                                                    return@mapNotNull null
-                                                }
-                                                track.manga_id to
-                                                    trackService.getGlobalStatus(track.status)
-                                            }
-                                            .groupBy({ it.first }, { it.second })
-                                    } else {
-                                        emptyMap()
-                                    }
-
                                 groupByDynamic(
                                     libraryMangaList = libraryMangaList,
                                     collapsedDynamicCategorySet = collapsedDynamicCategories,
                                     groupType = groupBy,
                                     sortOrder = librarySort,
                                     sortAscending = sortAscending,
-                                    loggedInTrackStatus = mapOfLoggedInTrackStatus,
+                                    loggedInTrackStatus = trackMap,
                                 )
                             }
                             else -> {
@@ -285,10 +276,12 @@ class LibraryComposePresenter(
                                                 db.getManga(it.displayManga.mangaId).executeOnIO()!!
                                             it.copy(
                                                 downloadCount =
-                                                    downloadManager.getDownloadCount(dbManga)
+                                                    downloadManager.getDownloadCount(dbManga),
+                                                trackCount =
+                                                    trackMap[it.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
-                                        .applyFilters(libraryFilters)
+                                        .applyFilters(libraryFilters, trackMap)
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -334,7 +327,34 @@ class LibraryComposePresenter(
         }
     }
 
+    fun trackMapFlow(): Flow<Map<Long, List<String>>> {
+        return db.getAllTracks()
+            .asFlow()
+            .mapNotNull { tracks ->
+                tracks
+                    .mapNotNull { track ->
+                        val trackService = loggedServices.firstOrNull { it.id == track.sync_id }
+                        if (trackService == null) {
+                            return@mapNotNull null
+                        }
+                        track.manga_id to trackService.getGlobalStatus(track.status)
+                    }
+                    .groupBy({ it.first }, { it.second })
+            }
+            .distinctUntilChanged()
+    }
+
     fun preferenceUpdates() {
+
+        presenterScope.launchIO {
+            mangadexPreferences
+                .includeUnavailableChapters()
+                .changes()
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    _libraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
+                }
+        }
 
         presenterScope.launchIO {
             securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
@@ -407,7 +427,8 @@ class LibraryComposePresenter(
     }
 
     private suspend fun List<LibraryMangaItem>.applyFilters(
-        libraryFilters: LibraryFilters
+        libraryFilters: LibraryFilters,
+        trackMap: Map<Long, List<String>>,
     ): List<LibraryMangaItem> {
         return this.filterAsync { libraryMangaItem ->
             val bookmarkedCondition = libraryFilters.filterBookmarked.matches(libraryMangaItem)
@@ -416,7 +437,12 @@ class LibraryComposePresenter(
             val mangaTypeCondition = libraryFilters.filterMangaType.matches(libraryMangaItem)
             val mergedCondition = libraryFilters.filterMerged.matches(libraryMangaItem)
             val missingChaptersCondition =
-                libraryFilters.filterMissingChapters.matches(libraryMangaItem)
+                when (libraryFilters.filterTracked) {
+                    FilterTracked.Inactive -> true
+                    FilterTracked.NotTracked ->
+                        trackMap[libraryMangaItem.displayManga.mangaId] == null
+                    FilterTracked.Tracked -> trackMap[libraryMangaItem.displayManga.mangaId] != null
+                }
             val trackedCondition = libraryFilters.filterTracked.matches(libraryMangaItem)
             val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
             val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)

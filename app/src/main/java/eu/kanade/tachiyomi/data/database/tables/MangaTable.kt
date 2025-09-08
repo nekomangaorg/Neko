@@ -42,8 +42,6 @@ object MangaTable {
 
     const val COL_BOOKMARK_COUNT = "bookmark_count"
 
-    const val COL_TRACK_COUNT = "track_count"
-
     const val COL_UNAVAILABLE_COUNT = "unavailable_count"
 
     const val COL_CATEGORY = "category"
@@ -222,7 +220,4 @@ object MangaTable {
 
     val addLanguageFilterFlag: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE_FILTER_FLAG TEXT DEFAULT NULL"
-
-    val addTrackCount: String
-        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_TRACK_COUNT INTEGER DEFAULT 0"
 }

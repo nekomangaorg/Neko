@@ -14,7 +14,9 @@ import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -34,6 +36,8 @@ data class LibraryScreenState(
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
     val groupByOptions: ImmutableList<Int> = persistentListOf(),
+    val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
+    val showUnavailableFilter: Boolean = false,
     val currentGroupBy: Int = 0,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
 )
