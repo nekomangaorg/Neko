@@ -12,6 +12,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -201,9 +202,10 @@ class MangaDetailPresenter(
                 updateArtworkFlow()
                 onRefresh()
             } else {
-                if (!db.getChapters(mangaId).executeOnIO().any { it.smart_order != 0 }) onRefresh()
+                val dbChapters = db.getChapters(mangaId).executeOnIO()
+                if (dbChapters.size > 1 && dbChapters.all { it.smart_order == 0 }) onRefresh()
                 else {
-                    updateAllFlows()
+                    updateAllFlows(dbChapters)
                     refreshTracking()
                     syncChaptersReadStatus()
                 }
@@ -213,7 +215,7 @@ class MangaDetailPresenter(
     }
 
     /** Update all flows */
-    private fun updateAllFlows() {
+    private fun updateAllFlows(dbChapters: List<Chapter>? = null) {
         presenterScope.launchIO {
             // immediately update the categories in case loading manga takes a second
             updateCategoryFlows()
@@ -229,7 +231,7 @@ class MangaDetailPresenter(
                             alternativeArtwork = altArtwork,
                         )
                     }
-                    updateChapterFlows()
+                    updateChapterFlows(dbChapters)
                     updateFilterFlow()
                 }
                 .onFailure { TimberKt.e(it) { "Error trying to update manga in all flows" } }
@@ -764,14 +766,13 @@ class MangaDetailPresenter(
     }
 
     /** Updates the visible chapters for a manga */
-    private fun updateChapterFlows() {
+    private fun updateChapterFlows(dbChapters: List<Chapter>? = null) {
         presenterScope.launchIO {
             // possibly move this into a chapter repository
             val blockedGroups = mangaDexPreferences.blockedGroups().get()
             val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
             val allChapters =
-                db.getChapters(mangaId)
-                    .executeOnIO()
+                (dbChapters ?: db.getChapters(mangaId).executeOnIO())
                     .mapNotNull { it.toSimpleChapter() }
                     .filter {
                         val scanlators = it.scanlatorList()

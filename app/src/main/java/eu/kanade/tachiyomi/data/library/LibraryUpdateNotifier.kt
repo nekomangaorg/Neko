@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -14,6 +13,7 @@ import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.transformations
+import coil3.toBitmap
 import coil3.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -165,7 +165,7 @@ class LibraryUpdateNotifier(private val context: Context) {
     /**
      * Shows the notification containing the result of the update done by the service.
      *
-     * @param updates a list of manga with new updates.
+     * @param newUpdates a list of manga with new updates.
      */
     fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
         // create a copy of the list since it will be cleared by the time it is used
@@ -192,7 +192,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                             .build()
 
                                     context.imageLoader.execute(request).image?.let { drawable ->
-                                        setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
+                                        setLargeIcon(drawable.toBitmap())
                                     }
                                 } catch (e: Exception) {}
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
