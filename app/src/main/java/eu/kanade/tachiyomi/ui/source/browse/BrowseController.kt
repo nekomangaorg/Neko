@@ -65,12 +65,12 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         )
     }
 
-    fun searchByTag(tag: String) {
-        presenter.searchTag(tag)
+    fun searchByTag(tag: String, backtrackMangaId: Long? = null) {
+        presenter.searchTag(tag, backtrackMangaId)
     }
 
-    fun searchByCreator(creator: String) {
-        presenter.searchCreator(creator)
+    fun searchByCreator(creator: String, backtrackMangaId: Long? = null) {
+        presenter.searchCreator(creator, backtrackMangaId)
     }
 
     private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
