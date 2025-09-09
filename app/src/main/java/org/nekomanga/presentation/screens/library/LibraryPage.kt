@@ -168,7 +168,7 @@ private fun RowGrid(
 
 @Composable
 private fun ListItem(
-    modifer: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     index: Int,
     totalSize: Int,
     libraryScreenState: LibraryScreenState,
@@ -177,12 +177,12 @@ private fun ListItem(
 ) {
     val listCardType =
         when {
-            index == 0 && totalSize > 1 -> ListCardType.Top
+            index == 0 && totalSize >= 1 -> ListCardType.Top
             index == totalSize - 1 -> ListCardType.Bottom
             else -> ListCardType.Center
         }
     ExpressiveListCard(
-        modifier = modifer.padding(horizontal = Size.small),
+        modifier = modifier.padding(horizontal = Size.small),
         listCardType = listCardType,
     ) {
         MangaRow(
