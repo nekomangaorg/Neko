@@ -25,8 +25,8 @@ sealed interface FilterCompleted : LibraryFilterType {
     companion object {
         fun fromInt(fromInt: Int): FilterCompleted {
             return when (fromInt) {
-                2 -> Completed
-                1 -> Ongoing
+                2 -> Ongoing
+                1 -> Completed
                 else -> Inactive
             }
         }
