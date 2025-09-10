@@ -23,7 +23,7 @@ lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.9.3"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
-material = { module = "androidx.compose.material:material", version = "1.9.0" }
+material = { module = "androidx.compose.material:material", version = "1.9.1" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core",  version = "1.7.8" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 
