@@ -85,7 +85,9 @@ class ChapterFilter(
         comparator: Comparator<T>,
         selectedChapter: T? = null,
     ): List<T> {
-        var filteredChapters = chapters.filterNot { it.isUnavailable && !it.isLocalSource() }
+        var filteredChapters = chapters.filter {
+            !it.isUnavailable || it.isLocalSource() || downloadManager.isChapterDownloaded(it, manga)
+        }
         filteredChapters =
             filterChaptersByScanlatorsAndLanguage(
                 filteredChapters,
