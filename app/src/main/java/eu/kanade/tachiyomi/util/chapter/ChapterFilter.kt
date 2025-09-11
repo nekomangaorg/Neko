@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.util.isAvailable
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -63,7 +64,7 @@ class ChapterFilter(
         ) {
             filteredChapters.filter {
                 val isDownloaded = downloadManager.isChapterDownloaded(it, manga)
-                val isAvailable = !it.isUnavailable || isDownloaded || it.isLocalSource()
+                val isAvailable = it.isAvailable(isDownloaded)
                 return@filter !(readEnabled && !it.read ||
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && !it.bookmark) ||
@@ -85,9 +86,7 @@ class ChapterFilter(
         comparator: Comparator<T>,
         selectedChapter: T? = null,
     ): List<T> {
-        var filteredChapters = chapters.filter {
-            !it.isUnavailable || it.isLocalSource() || downloadManager.isChapterDownloaded(it, manga)
-        }
+        var filteredChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
         filteredChapters =
             filterChaptersByScanlatorsAndLanguage(
                 filteredChapters,
