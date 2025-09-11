@@ -23,6 +23,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText
 
 data class LibraryScreenState(
+    val searchQuery: String? = null,
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
     val hasActiveFilters: Boolean = false,
     val libraryFilters: LibraryFilters = LibraryFilters(),
@@ -77,6 +78,16 @@ data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
     val isRefreshing: Boolean = false,
     val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
+)
+
+@Immutable
+data class LibraryViewPreferences(
+    val collapsedCategories: Set<String>,
+    val collapsedDynamicCategories: Set<String>,
+    val sortingMode: LibrarySort,
+    val sortAscending: Boolean,
+    val groupBy: Int,
+    val showDownloadBadges: Boolean,
 )
 
 @Immutable

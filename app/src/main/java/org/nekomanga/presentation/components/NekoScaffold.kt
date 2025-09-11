@@ -84,6 +84,7 @@ fun NekoScaffold(
     title: String = "",
     subtitle: String = "",
     searchPlaceHolder: String = "",
+    searchPlaceHolderAlt: String = "",
     incognitoMode: Boolean = false,
     isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior =
@@ -186,6 +187,7 @@ fun NekoScaffold(
                         SearchOutlineWithActionsTopAppBar(
                             onSearchText = onSearch,
                             searchPlaceHolder = searchPlaceHolder,
+                            searchPlaceHolderAlt = searchPlaceHolderAlt,
                             color = color,
                             navigationEnabled = searchNavigationEnabled,
                             navigationIconLabel = navigationIconLabel,
@@ -402,6 +404,7 @@ fun SearchOutlineTopAppBar(
 fun SearchOutlineWithActionsTopAppBar(
     onSearchText: (String?) -> Unit,
     searchPlaceHolder: String,
+    searchPlaceHolderAlt: String,
     color: Color,
     navigationEnabled: Boolean,
     navigationIconLabel: String,
@@ -451,7 +454,10 @@ fun SearchOutlineWithActionsTopAppBar(
                         onSearch = { onSearchText(it) },
                         placeholder = {
                             Text(
-                                text = searchPlaceHolder,
+                                text =
+                                    if (searchEnabled && searchPlaceHolderAlt.isNotEmpty())
+                                        searchPlaceHolderAlt
+                                    else searchPlaceHolder,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },

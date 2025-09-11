@@ -1,6 +1,9 @@
 package org.nekomanga.constants
 
 object Constants {
+
+    const val SEARCH_DEBOUNCE_MILLIS = 250L
+
     const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64)"
 
     const val DONT_KILL_MY_APP_URL = "https://dontkillmyapp.com/"
@@ -16,6 +19,7 @@ object Constants {
     const val SEPARATOR = " · "
     const val SCANLATOR_SEPARATOR = " & "
 
+    const val ALT_TITLES_SEPARATOR = "|~|"
     const val RAW_CHAPTER_SEPARATOR = " [.] "
     const val RAW_SCANLATOR_TYPE_SEPARATOR = " [;] "
 

@@ -142,6 +142,7 @@ fun LibraryScreen(
                 NekoScaffold(
                     type = NekoScaffoldType.SearchOutlineWithActions,
                     searchPlaceHolder = stringResource(R.string.search_library),
+                    searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
                     incognitoMode = libraryScreenState.value.incognitoMode,
                     isRoot = true,
                     onSearch = libraryScreenActions.search,

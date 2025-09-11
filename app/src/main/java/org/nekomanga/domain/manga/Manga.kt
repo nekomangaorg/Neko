@@ -27,6 +27,7 @@ data class LibraryMangaItem(
     val trackCount: Int = 0,
     val isMerged: Boolean = false,
     val hasMissingChapters: Boolean = false,
+    val altTitles: List<String> = emptyList(),
     val genre: List<String> = emptyList(),
     val author: List<String> = emptyList(),
     val contentRating: List<String> = emptyList(),

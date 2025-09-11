@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.source.model.MangaInfo
 
@@ -201,8 +202,10 @@ interface Manga : SManga {
     }
 
     fun getAltTitles(): List<String> {
-        return alt_titles?.split("|~|")?.filter { it.isNotBlank() }?.filter { it != originalTitle }
-            ?: emptyList()
+        return alt_titles
+            ?.split(ALT_TITLES_SEPARATOR)
+            ?.filter { it.isNotBlank() }
+            ?.filter { it != originalTitle } ?: emptyList()
     }
 
     fun getExternalLinks(): List<ExternalLink> {

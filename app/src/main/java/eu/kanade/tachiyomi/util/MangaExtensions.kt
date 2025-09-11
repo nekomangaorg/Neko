@@ -155,6 +155,8 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val unknownList = listOf("Unknown")
 
+    val altTitles = this.getAltTitles()
+
     val genreList =
         this.genre
             ?.split(",")
@@ -205,6 +207,7 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
         unreadCount = this.unread,
         readCount = this.read,
         category = this.category,
+        altTitles = this.getAltTitles(),
         genre = genreList,
         author = authorList,
         contentRating = listOf(contentRating),

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -34,7 +35,6 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,11 +42,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
+import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
@@ -69,8 +71,6 @@ class LibraryComposePresenter(
     val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
 
-    private var searchJob: Job? = null
-
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
 
     private val loggedServices by lazy {
@@ -79,37 +79,19 @@ class LibraryComposePresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
         flow4: Flow<T4>,
         flow5: Flow<T5>,
         flow6: Flow<T6>,
-        flow7: Flow<T7>,
-        flow8: Flow<T8>,
-        flow9: Flow<T9>,
-        flow10: Flow<T10>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R,
+        transform: suspend (T1, T2, T3, T4, T5, T6) -> R,
     ): Flow<R> =
-        combine(
-            combine(flow, flow2, flow3, ::Triple),
-            combine(flow4, flow5, flow6, ::Triple),
-            combine(flow7, flow8, ::Pair),
-            combine(flow9, flow10, ::Pair),
-        ) { t1, t2, t3, t4 ->
-            transform(
-                t1.first,
-                t1.second,
-                t1.third,
-                t2.first,
-                t2.second,
-                t2.third,
-                t3.first,
-                t3.second,
-                t4.first,
-                t4.second,
-            )
+        combine(combine(flow, flow2, flow3, ::Triple), combine(flow4, flow5, flow6, ::Triple)) {
+            t1,
+            t2 ->
+            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
         }
 
     override fun onResume() {
@@ -156,47 +138,49 @@ class LibraryComposePresenter(
 
         presenterScope.launchIO {
             combine(
+                    libraryScreenState
+                        .map { it.searchQuery }
+                        .distinctUntilChanged()
+                        .debounce(SEARCH_DEBOUNCE_MILLIS),
                     libraryMangaListFlow(),
                     categoryListFlow(),
                     filterPreferencesFlow(),
                     trackMapFlow(),
-                    libraryPreferences.collapsedCategories().changes(),
-                    libraryPreferences.collapsedDynamicCategories().changes(),
-                    libraryPreferences.sortingMode().changes(),
-                    libraryPreferences.sortAscending().changes(),
-                    libraryPreferences.groupBy().changes(),
-                    libraryPreferences.showDownloadBadge().changes(),
+                    libraryViewFlow(),
                 ) {
+                    searchQuery,
                     libraryMangaList,
                     categoryList,
                     libraryFilters,
                     trackMap,
-                    collapsedCategories,
-                    collapsedDynamicCategories,
-                    sortingMode,
-                    sortAscending,
-                    groupBy,
-                    showDownloadBadges ->
+                    libraryViewPreferences ->
                     val collapsedCategorySet =
-                        collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
+                        libraryViewPreferences.collapsedCategories
+                            .mapNotNull { it.toIntOrNull() }
+                            .toSet()
 
                     _libraryScreenState.update {
-                        it.copy(currentGroupBy = groupBy, trackMap = trackMap.toPersistentMap())
+                        it.copy(
+                            currentGroupBy = libraryViewPreferences.groupBy,
+                            trackMap = trackMap.toPersistentMap(),
+                        )
                     }
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
                     libraryPreferences.sortAscending().get()
 
-                    val librarySort = LibrarySort.valueOf(sortingMode)
-
                     val layout = libraryPreferences.layout().get()
                     val gridSize = libraryPreferences.gridSize().get()
 
                     val unsortedLibraryCategoryItems =
-                        when (groupBy) {
+                        when (libraryViewPreferences.groupBy) {
                             UNGROUPED -> {
-                                groupByUngrouped(libraryMangaList, librarySort, sortAscending)
+                                groupByUngrouped(
+                                    libraryMangaList,
+                                    libraryViewPreferences.sortingMode,
+                                    libraryViewPreferences.sortAscending,
+                                )
                             }
                             BY_AUTHOR,
                             BY_CONTENT,
@@ -206,10 +190,11 @@ class LibraryComposePresenter(
                             BY_TRACK_STATUS -> {
                                 groupByDynamic(
                                     libraryMangaList = libraryMangaList,
-                                    collapsedDynamicCategorySet = collapsedDynamicCategories,
-                                    groupType = groupBy,
-                                    sortOrder = librarySort,
-                                    sortAscending = sortAscending,
+                                    collapsedDynamicCategorySet =
+                                        libraryViewPreferences.collapsedDynamicCategories,
+                                    groupType = libraryViewPreferences.groupBy,
+                                    sortOrder = libraryViewPreferences.sortingMode,
+                                    sortAscending = libraryViewPreferences.sortAscending,
                                     loggedInTrackStatus = trackMap,
                                 )
                             }
@@ -281,7 +266,7 @@ class LibraryComposePresenter(
                                                     trackMap[it.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
-                                        .applyFilters(libraryFilters, trackMap)
+                                        .applyFilters(libraryFilters, trackMap, searchQuery)
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -314,17 +299,21 @@ class LibraryComposePresenter(
     }
 
     fun libraryMangaListFlow(): Flow<List<LibraryMangaItem>> {
-        return db.getLibraryMangaList().asFlow().map { dbManga ->
-            dbManga.map { it.toLibraryMangaItem() }
-        }
+        return db.getLibraryMangaList()
+            .asFlow()
+            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
+            .distinctUntilChanged()
     }
 
     fun categoryListFlow(): Flow<List<CategoryItem>> {
-        return db.getCategories().asFlow().map { dbCategories ->
-            (listOf(Category.createDefault()) + dbCategories)
-                .sortedBy { it.order }
-                .map { it.toCategoryItem() }
-        }
+        return db.getCategories()
+            .asFlow()
+            .map { dbCategories ->
+                (listOf(Category.createDefault()) + dbCategories)
+                    .sortedBy { it.order }
+                    .map { it.toCategoryItem() }
+            }
+            .distinctUntilChanged()
     }
 
     fun trackMapFlow(): Flow<Map<Long, List<String>>> {
@@ -400,6 +389,30 @@ class LibraryComposePresenter(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun libraryViewFlow(): Flow<LibraryViewPreferences> {
+        return combine(
+                libraryPreferences.collapsedCategories().changes(),
+                libraryPreferences.collapsedDynamicCategories().changes(),
+                libraryPreferences.sortingMode().changes(),
+                libraryPreferences.sortAscending().changes(),
+                libraryPreferences.groupBy().changes(),
+                libraryPreferences.showDownloadBadge().changes(),
+            ) {
+                val librarySort = LibrarySort.valueOf(it[2] as Int)
+
+                LibraryViewPreferences(
+                    collapsedCategories = it[0] as Set<String>,
+                    collapsedDynamicCategories = it[1] as Set<String>,
+                    sortingMode = librarySort,
+                    sortAscending = it[3] as Boolean,
+                    groupBy = it[4] as Int,
+                    showDownloadBadges = it[5] as Boolean,
+                )
+            }
+            .distinctUntilChanged()
+    }
+
     private fun filterPreferencesFlow(): Flow<LibraryFilters> {
         return combine(
             libraryPreferences.filterBookmarked().changes(),
@@ -429,8 +442,10 @@ class LibraryComposePresenter(
     private suspend fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
+        searchQuery: String?,
     ): List<LibraryMangaItem> {
         return this.filterAsync { libraryMangaItem ->
+            val displayManga = libraryMangaItem.displayManga
             val bookmarkedCondition = libraryFilters.filterBookmarked.matches(libraryMangaItem)
             val completedCondition = libraryFilters.filterCompleted.matches(libraryMangaItem)
             val downloadedCondition = libraryFilters.filterDownloaded.matches(libraryMangaItem)
@@ -439,13 +454,45 @@ class LibraryComposePresenter(
             val missingChaptersCondition =
                 when (libraryFilters.filterTracked) {
                     FilterTracked.Inactive -> true
-                    FilterTracked.NotTracked ->
-                        trackMap[libraryMangaItem.displayManga.mangaId] == null
-                    FilterTracked.Tracked -> trackMap[libraryMangaItem.displayManga.mangaId] != null
+                    FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
+                    FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
                 }
             val trackedCondition = libraryFilters.filterTracked.matches(libraryMangaItem)
             val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
             val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
+
+            val searchCondition =
+                if (searchQuery == null) {
+                    true
+                } else {
+                    displayManga.title.contains(searchQuery, true) ||
+                        libraryMangaItem.altTitles.fastAny { altTitle ->
+                            altTitle.contains(searchQuery, true)
+                        } ||
+                        libraryMangaItem.author.fastAny { author ->
+                            author.contains(searchQuery, true)
+                        } ||
+                        if (searchQuery.contains(",")) {
+                            libraryMangaItem.genre.fastAll { genre -> genre.contains(searchQuery) }
+                            searchQuery.split(",").all { splitQuery ->
+                                libraryMangaItem.genre.fastAny { genre ->
+                                    if (splitQuery.startsWith("-")) {
+                                        !genre.contains(splitQuery.substringAfter("-"), true)
+                                    } else {
+                                        genre.contains(splitQuery, true)
+                                    }
+                                }
+                            }
+                        } else {
+                            libraryMangaItem.genre.fastAny { genre ->
+                                if (searchQuery.startsWith("-")) {
+                                    !genre.contains(searchQuery.substringAfter("-"), true)
+                                } else {
+                                    genre.contains(searchQuery, true)
+                                }
+                            }
+                        }
+                }
 
             completedCondition &&
                 downloadedCondition &&
@@ -455,7 +502,8 @@ class LibraryComposePresenter(
                 bookmarkedCondition &&
                 mergedCondition &&
                 unavailableCondition &&
-                mangaTypeCondition
+                mangaTypeCondition &&
+                searchCondition
         }
     }
 
@@ -889,8 +937,7 @@ class LibraryComposePresenter(
     }
 
     fun search(searchQuery: String?) {
-        searchJob?.cancel()
-        searchJob = presenterScope.launchIO {}
+        _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
     }
 
     companion object {
