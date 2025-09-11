@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -214,6 +215,7 @@ class MangaDetailController(private val mangaId: Long) :
             context.toast("${chapter.scanlator} not supported, try WebView")
         } else if (
             chapter.isUnavailable &&
+            !chapter.isLocalSource() &&
                 !presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga.value!!)
         ) {
             context.toast("Chapter is not available")

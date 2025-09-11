@@ -87,8 +87,10 @@ class FeedRepository(
                         .mapNotNull { entry ->
                             val manga = db.getManga(entry.key).executeOnIO()!!
                             val chapters =
-                                db.getChapters(manga).executeOnIO().filterNot {
-                                    it.isUnavailable && !it.isLocalSource()
+                                db.getChapters(manga).executeOnIO().filter {
+                                    !it.isUnavailable ||
+                                        it.isLocalSource() ||
+                                        downloadManager.isChapterDownloaded(it, manga)
                                 }
                             val recentUploadDate =
                                 entry.value
@@ -190,8 +192,10 @@ class FeedRepository(
                                         ?.name ?: ""
                                 val manga = db.getManga(entry.key).executeOnIO()!!
                                 val chapters =
-                                    db.getChapters(manga).executeOnIO().filterNot {
-                                        it.isUnavailable && !it.isLocalSource()
+                                    db.getChapters(manga).executeOnIO().filter {
+                                        !it.isUnavailable ||
+                                            it.isLocalSource() ||
+                                            downloadManager.isChapterDownloaded(it, manga)
                                     }
                                 val chapter =
                                     ChapterSort(manga).getNextUnreadChapter(chapters)
@@ -257,7 +261,11 @@ class FeedRepository(
 
                         val simpleChapter =
                             chapters
-                                .filterNot { it.isUnavailable && !it.isLocalSource() }
+                                .filter {
+                                    !it.isUnavailable ||
+                                        it.isLocalSource() ||
+                                        downloadManager.isChapterDownloaded(it, manga)
+                                }
                                 .maxByOrNull { it.source_order }
                                 ?.toSimpleChapter() ?: return@mapNotNull null
 
