@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -1892,9 +1893,7 @@ class MangaDetailPresenter(
             val chapters = generalState.value.allChapters
             val final =
                 chapters
-                    .filter {
-                        !it.chapter.isUnavailable || it.chapter.isLocalSource() || it.isDownloaded
-                    }
+                    .filter { it.isAvailable() }
                     .filter {
                         getChapterNum(it.chapter.toSChapter())?.toInt() == manga.last_chapter_number
                     }

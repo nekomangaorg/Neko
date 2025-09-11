@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.util
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import kotlin.math.floor
@@ -17,9 +20,7 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     if (this.isNotEmpty()) {
         val chapterNumberArray =
             this.asSequence()
-                .filter {
-                    !it.chapter.isUnavailable || it.isDownloaded || it.chapter.isLocalSource()
-                }
+                .filter { it.isAvailable() }
                 .distinctBy {
                     if (it.chapter.chapterText.isNotEmpty()) {
                         it.chapter.volume + it.chapter.chapterText
@@ -102,4 +103,18 @@ fun Chapter.filteredBySource(sourceName: String, filteredSources: Set<String>): 
     }
 
     return ChapterUtil.getScanlators(this.scanlator).any { group -> group == sourceName }
+}
+
+fun ChapterItem.isAvailable(): Boolean {
+    return !this.chapter.isUnavailable || this.chapter.isLocalSource() || this.isDownloaded
+}
+
+fun Chapter.isAvailable(downloadManager: DownloadManager, manga: Manga): Boolean {
+    return !this.isUnavailable ||
+        this.isLocalSource() ||
+        downloadManager.isChapterDownloaded(this, manga)
+}
+
+fun Chapter.isAvailable(isDownloaded: Boolean): Boolean {
+    return isDownloaded || !this.isUnavailable || this.isLocalSource()
 }
