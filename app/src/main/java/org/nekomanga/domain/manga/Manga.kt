@@ -1,6 +1,8 @@
 package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 
@@ -41,6 +43,40 @@ data class LibraryMangaItem(
 
     val hasStarted
         get() = readCount > 0
+
+    fun matches(searchQuery: String?): Boolean {
+        return if (searchQuery == null) {
+            true
+        } else {
+            displayManga.title.contains(searchQuery, true) ||
+                this.altTitles.fastAny { altTitle ->
+                    altTitle.contains(searchQuery, true)
+                } ||
+                this.author.fastAny { author ->
+                    author.contains(searchQuery, true)
+                } ||
+                if (searchQuery.contains(",")) {
+                    this.genre.fastAll { genre -> genre.contains(searchQuery) }
+                    searchQuery.split(",").all { splitQuery ->
+                        this.genre.fastAny { genre ->
+                            if (splitQuery.startsWith("-")) {
+                                !genre.contains(splitQuery.substringAfter("-"), true)
+                            } else {
+                                genre.contains(splitQuery, true)
+                            }
+                        }
+                    }
+                } else {
+                    this.genre.fastAny { genre ->
+                        if (searchQuery.startsWith("-")) {
+                            !genre.contains(searchQuery.substringAfter("-"), true)
+                        } else {
+                            genre.contains(searchQuery, true)
+                        }
+                    }
+                }
+        }
+    }
 }
 
 data class DisplayManga(

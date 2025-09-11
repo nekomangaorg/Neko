@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -461,38 +460,7 @@ class LibraryComposePresenter(
             val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
             val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
 
-            val searchCondition =
-                if (searchQuery == null) {
-                    true
-                } else {
-                    displayManga.title.contains(searchQuery, true) ||
-                        libraryMangaItem.altTitles.fastAny { altTitle ->
-                            altTitle.contains(searchQuery, true)
-                        } ||
-                        libraryMangaItem.author.fastAny { author ->
-                            author.contains(searchQuery, true)
-                        } ||
-                        if (searchQuery.contains(",")) {
-                            libraryMangaItem.genre.fastAll { genre -> genre.contains(searchQuery) }
-                            searchQuery.split(",").all { splitQuery ->
-                                libraryMangaItem.genre.fastAny { genre ->
-                                    if (splitQuery.startsWith("-")) {
-                                        !genre.contains(splitQuery.substringAfter("-"), true)
-                                    } else {
-                                        genre.contains(splitQuery, true)
-                                    }
-                                }
-                            }
-                        } else {
-                            libraryMangaItem.genre.fastAny { genre ->
-                                if (searchQuery.startsWith("-")) {
-                                    !genre.contains(searchQuery.substringAfter("-"), true)
-                                } else {
-                                    genre.contains(searchQuery, true)
-                                }
-                            }
-                        }
-                }
+            val searchCondition = libraryMangaItem.matches(searchQuery)
 
             completedCondition &&
                 downloadedCondition &&
