@@ -254,6 +254,7 @@ fun LibraryScreen(
                                     libraryScreenState = libraryScreenState.value,
                                     libraryScreenActions = libraryScreenActions,
                                     libraryCategoryActions = libraryCategoryActions,
+                                    selectionMode = selectionMode,
                                     categorySortClick = { categoryItem ->
                                         scope.launch {
                                             openSheet(

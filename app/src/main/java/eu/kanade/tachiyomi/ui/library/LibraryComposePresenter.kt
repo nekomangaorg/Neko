@@ -916,6 +916,22 @@ class LibraryComposePresenter(
         _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
     }
 
+    fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
+        presenterScope.launchIO {
+            var currentSelected = _libraryScreenState.value.selectedItems.toList()
+            currentSelected =
+                if (libraryMangaItems.all { it in currentSelected }) {
+                    currentSelected - libraryMangaItems
+                } else {
+                    currentSelected + libraryMangaItems
+                }
+
+            _libraryScreenState.update {
+                it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+            }
+        }
+    }
+
     fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
         presenterScope.launchIO {
             val currentSelected = _libraryScreenState.value.selectedItems.toMutableList()

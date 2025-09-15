@@ -16,10 +16,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ButtonShapes
@@ -33,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +67,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LibraryPage(
     contentPadding: PaddingValues,
+    selectionMode: Boolean,
     libraryScreenState: LibraryScreenState,
     libraryScreenActions: LibraryScreenActions,
     libraryCategoryActions: LibraryCategoryActions,
@@ -72,6 +76,16 @@ fun LibraryPage(
     val lazyListState = rememberLazyListState()
 
     val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
+
+    val collapsible by
+        remember(libraryScreenState.items.size) {
+            mutableStateOf(libraryScreenState.items.size > 1)
+        }
+
+    val selectedIds by
+        remember(libraryScreenState.selectedItems) {
+            mutableStateOf(libraryScreenState.selectedItems.map { it.displayManga.mangaId })
+        }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -85,9 +99,18 @@ fun LibraryPage(
                     categoryItem = item.categoryItem,
                     enabled = !item.libraryItems.isEmpty(),
                     isRefreshing = item.isRefreshing,
-                    isCollapsible = libraryScreenState.items.size > 1,
+                    selectionMode = selectionMode,
+                    allSelected =
+                        item.libraryItems
+                            .map { it.displayManga.mangaId }
+                            .all { id -> id in selectedIds },
+                    isCollapsible = collapsible,
                     categoryItemClick = {
-                        libraryCategoryActions.categoryItemClick(item.categoryItem)
+                        if (selectionMode) {
+                            libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems)
+                        } else {
+                            libraryCategoryActions.categoryItemClick(item.categoryItem)
+                        }
                     },
                     categorySortClick = { categorySortClick(item.categoryItem) },
                     categoryRefreshClick = {
@@ -97,7 +120,7 @@ fun LibraryPage(
                 Gap(Size.tiny)
             }
 
-            if (!item.categoryItem.isHidden) {
+            if (!item.categoryItem.isHidden || !collapsible) {
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
@@ -223,6 +246,8 @@ private fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
     isRefreshing: Boolean,
     isCollapsible: Boolean,
+    selectionMode: Boolean,
+    allSelected: Boolean,
     categoryItemClick: () -> Unit,
     categorySortClick: () -> Unit,
     categoryRefreshClick: () -> Unit,
@@ -242,15 +267,25 @@ private fun LibraryCategoryHeader(
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .clickable(enabled = isCollapsible, onClick = categoryItemClick)
+                .clickable(enabled = isCollapsible || selectionMode, onClick = categoryItemClick)
                 .padding(vertical = Size.extraTiny, horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AnimatedVisibility(isCollapsible) {
+        AnimatedVisibility(isCollapsible && !selectionMode) {
             Icon(
                 imageVector =
                     if (categoryItem.isHidden) Icons.Default.ArrowDropDown
                     else Icons.Default.ArrowDropUp,
+                contentDescription = null,
+                tint = textColor,
+            )
+        }
+        AnimatedVisibility(selectionMode) {
+            Gap(Size.tiny)
+            Icon(
+                imageVector =
+                    if (allSelected) Icons.Default.CheckCircleOutline
+                    else Icons.Default.AddCircleOutline,
                 contentDescription = null,
                 tint = textColor,
             )
