@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.asFlow
-import kotlin.getValue
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -18,7 +17,6 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.reader.ReaderPreferences
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class DownloadSettingsViewModel : ViewModel() {
@@ -37,7 +35,7 @@ class DownloadSettingsViewModel : ViewModel() {
         viewModelScope.launch {
             db.getCategories().asFlow().distinctUntilChanged().collectLatest { categories ->
                 _allCategories.value =
-                    (listOf(Category.createDefault()) + categories)
+                    (listOf(Category.createSystemCategory()) + categories)
                         .sortedBy { it.order }
                         .map { it.toCategoryItem() }
                         .toPersistentList()

@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -50,6 +51,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.MangaGridItem
 import org.nekomanga.presentation.components.MangaRow
@@ -159,8 +161,15 @@ private fun RowGrid(
                 downloadCount = libraryItem.downloadCount,
                 shouldOutlineCover = libraryScreenState.outlineCovers,
                 isComfortable = isComfortableGrid,
-                onClick = { libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId) },
-                onLongClick = {},
+                isSelected = libraryScreenState.selectedItems.contains(libraryItem),
+                onClick = {
+                    if (libraryScreenState.selectedItems.isNotEmpty()) {
+                        libraryScreenActions.mangaLongClick(libraryItem)
+                    } else {
+                        libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
+                    }
+                },
+                onLongClick = { libraryScreenActions.mangaLongClick(libraryItem) },
             )
         }
     }
@@ -188,12 +197,18 @@ private fun ListItem(
         MangaRow(
             modifier =
                 Modifier.fillMaxWidth()
-                    .clickable(
+                    .combinedClickable(
                         onClick = {
-                            libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
-                        }
+                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                                libraryScreenActions.mangaLongClick(libraryItem)
+                            } else {
+                                libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
+                            }
+                        },
+                        onLongClick = { libraryScreenActions.mangaLongClick(libraryItem) },
                     ),
             displayManga = libraryItem.displayManga,
+            isSelected = libraryScreenState.selectedItems.contains(libraryItem),
             showUnreadBadge = libraryScreenState.showUnreadBadges,
             unreadCount = libraryItem.unreadCount,
             showDownloadBadge = libraryScreenState.showDownloadBadges,
@@ -243,8 +258,9 @@ private fun LibraryCategoryHeader(
 
         val text =
             when {
-                isCollapsible || categoryItem.name.equals("all", true) -> categoryItem.name
-                else -> ""
+                !isCollapsible &&
+                    (categoryItem.isSystemCategory || categoryItem.name == ALL_CATEGORY) -> ""
+                else -> categoryItem.name
             }
 
         Text(

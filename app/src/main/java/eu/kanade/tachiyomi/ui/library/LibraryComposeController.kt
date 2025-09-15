@@ -37,6 +37,8 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
             libraryScreenActions =
                 LibraryScreenActions(
                     mangaClick = ::openManga,
+                    mangaLongClick = presenter::libraryItemLongClick,
+                    clearSelectedManga = presenter::clearSelectedManga,
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,

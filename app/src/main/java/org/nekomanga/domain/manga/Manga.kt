@@ -49,12 +49,8 @@ data class LibraryMangaItem(
             true
         } else {
             displayManga.title.contains(searchQuery, true) ||
-                this.altTitles.fastAny { altTitle ->
-                    altTitle.contains(searchQuery, true)
-                } ||
-                this.author.fastAny { author ->
-                    author.contains(searchQuery, true)
-                } ||
+                this.altTitles.fastAny { altTitle -> altTitle.contains(searchQuery, true) } ||
+                this.author.fastAny { author -> author.contains(searchQuery, true) } ||
                 if (searchQuery.contains(",")) {
                     this.genre.fastAll { genre -> genre.contains(searchQuery) }
                     searchQuery.split(",").all { splitQuery ->

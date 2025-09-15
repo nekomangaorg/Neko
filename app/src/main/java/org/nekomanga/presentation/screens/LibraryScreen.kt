@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -85,6 +86,11 @@ fun LibraryScreen(
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
+    var selectionMode by
+        remember(libraryScreenState.value.selectedItems) {
+            mutableStateOf(libraryScreenState.value.selectedItems.isNotEmpty())
+        }
+
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
     /** Close the bottom sheet on back if its open */
@@ -140,48 +146,68 @@ fun LibraryScreen(
                         Size.extraLarge,
             ) {
                 NekoScaffold(
-                    type = NekoScaffoldType.SearchOutlineWithActions,
+                    type =
+                        if (selectionMode) NekoScaffoldType.TitleAndSubtitle
+                        else NekoScaffoldType.SearchOutlineWithActions,
+                    title =
+                        if (selectionMode)
+                            "Selected: ${libraryScreenState.value.selectedItems.size}"
+                        else "",
                     searchPlaceHolder = stringResource(R.string.search_library),
                     searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
                     incognitoMode = libraryScreenState.value.incognitoMode,
                     isRoot = true,
+                    onNavigationIconClicked = {
+                        if (selectionMode) {
+                            libraryScreenActions.clearSelectedManga()
+                        }
+                    },
                     onSearch = libraryScreenActions.search,
+                    altAppBarColor = selectionMode,
                     actions = {
-                        AppBarActions(
-                            actions =
-                                listOf(
-                                    AppBar.Action(
-                                        title = UiText.StringResource(R.string.settings),
-                                        icon = Icons.Outlined.Tune,
-                                        onClick = {
-                                            scope.launch {
-                                                openSheet(
-                                                    LibraryBottomSheetScreen.DisplayOptionsSheet
-                                                )
-                                            }
-                                        },
-                                    ),
-                                    AppBar.MainDropdown(
-                                        incognitoMode = libraryScreenState.value.incognitoMode,
-                                        incognitoModeClick = incognitoClick,
-                                        settingsClick = settingsClick,
-                                        statsClick = statsClick,
-                                        aboutClick = aboutClick,
-                                        helpClick = helpClick,
-                                        menuShowing = { visible -> mainDropdownShowing = visible },
-                                    ),
-                                )
-                        )
+                        if (selectionMode) {} else {
+                            AppBarActions(
+                                actions =
+                                    listOf(
+                                        AppBar.Action(
+                                            title = UiText.StringResource(R.string.settings),
+                                            icon = Icons.Outlined.Tune,
+                                            onClick = {
+                                                scope.launch {
+                                                    openSheet(
+                                                        LibraryBottomSheetScreen.DisplayOptionsSheet
+                                                    )
+                                                }
+                                            },
+                                        ),
+                                        AppBar.MainDropdown(
+                                            incognitoMode = libraryScreenState.value.incognitoMode,
+                                            incognitoModeClick = incognitoClick,
+                                            settingsClick = settingsClick,
+                                            statsClick = statsClick,
+                                            aboutClick = aboutClick,
+                                            helpClick = helpClick,
+                                            menuShowing = { visible ->
+                                                mainDropdownShowing = visible
+                                            },
+                                        ),
+                                    )
+                            )
+                        }
                     },
                     underHeaderActions = {
-                        LibraryButtonBar(
-                            libraryScreenActions = libraryScreenActions,
-                            libraryScreenState = libraryScreenState,
-                            showCollapseAll = libraryScreenState.value.items.size > 1,
-                            groupByClick = {
-                                scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
-                            },
-                        )
+                        AnimatedVisibility(!selectionMode) {
+                            LibraryButtonBar(
+                                libraryScreenActions = libraryScreenActions,
+                                libraryScreenState = libraryScreenState,
+                                showCollapseAll = libraryScreenState.value.items.size > 1,
+                                groupByClick = {
+                                    scope.launch {
+                                        openSheet(LibraryBottomSheetScreen.GroupBySheet)
+                                    }
+                                },
+                            )
+                        }
                     },
                     content = { incomingContentPadding ->
                         val recyclerContentPadding =

@@ -18,9 +18,15 @@ data class CategoryItem(
     val isAlone: Boolean = true,
     val isHidden: Boolean = false,
     val isDynamic: Boolean = false,
-    val isSystemCategory: Boolean = (id == 0 && name == "Default"),
+    val isSystemCategory: Boolean = (id == 0 && name == SYSTEM_CATEGORY),
     val sourceId: Long? = null,
-)
+) {
+
+    companion object {
+        const val SYSTEM_CATEGORY = "Default"
+        const val ALL_CATEGORY = "All"
+    }
+}
 
 fun CategoryItem.toDbCategory(flipAscendingSortOrder: Boolean = false): CategoryImpl {
 

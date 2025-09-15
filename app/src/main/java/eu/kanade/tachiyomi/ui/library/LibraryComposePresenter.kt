@@ -51,6 +51,7 @@ import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
@@ -305,12 +306,19 @@ class LibraryComposePresenter(
     }
 
     fun categoryListFlow(): Flow<List<CategoryItem>> {
-        return db.getCategories()
-            .asFlow()
-            .map { dbCategories ->
-                (listOf(Category.createDefault()) + dbCategories)
+        return combine(
+                libraryPreferences.sortingMode().changes(),
+                libraryPreferences.sortAscending().changes(),
+                db.getCategories().asFlow(),
+            ) {
+                val librarySort = LibrarySort.valueOf(it[0] as Int)
+                val defaultCategory = Category.createSystemCategory().toCategoryItem()
+                val updatedDefaultCategory =
+                    defaultCategory.copy(sortOrder = librarySort, isAscending = it[1] as Boolean)
+                val dbCategories = it[2] as List<Category>
+                (listOf(updatedDefaultCategory) +
+                        dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
                     .sortedBy { it.order }
-                    .map { it.toCategoryItem() }
             }
             .distinctUntilChanged()
     }
@@ -570,7 +578,7 @@ class LibraryComposePresenter(
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
         presenterScope.launchIO {
-            if (category.isDynamic) {
+            if (category.isDynamic || category.isSystemCategory) {
                 when (category.sortOrder == librarySort) {
                     true -> libraryPreferences.sortAscending().set(!category.isAscending)
                     false -> libraryPreferences.sortingMode().set(librarySort.mainValue)
@@ -701,7 +709,7 @@ class LibraryComposePresenter(
         val allCategoryItem =
             CategoryItem(
                 id = -1,
-                name = "All",
+                name = ALL_CATEGORY,
                 order = -1,
                 sortOrder = sortOrder,
                 isAscending = isAscending,
@@ -906,6 +914,23 @@ class LibraryComposePresenter(
 
     fun search(searchQuery: String?) {
         _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
+    }
+
+    fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
+        presenterScope.launchIO {
+            val currentSelected = _libraryScreenState.value.selectedItems.toMutableList()
+            val removed = currentSelected.remove(libraryMangaItem)
+            if (!removed) {
+                currentSelected.add(libraryMangaItem)
+            }
+            _libraryScreenState.update {
+                it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+            }
+        }
+    }
+
+    fun clearSelectedManga() {
+        _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
     }
 
     companion object {

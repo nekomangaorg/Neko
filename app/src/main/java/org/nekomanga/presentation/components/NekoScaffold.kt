@@ -42,7 +42,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +86,7 @@ fun NekoScaffold(
     searchPlaceHolderAlt: String = "",
     incognitoMode: Boolean = false,
     isRoot: Boolean = false,
+    altAppBarColor: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior =
         TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState()),
     focusRequester: FocusRequester = remember { FocusRequester() },
@@ -102,9 +102,12 @@ fun NekoScaffold(
     content: @Composable (PaddingValues) -> Unit = {},
 ) {
     val systemUiController = rememberSystemUiController()
-    val useDarkIcons = MaterialTheme.colorScheme.surface.luminance() > .5
-    val color = getTopAppBarColor(title)
-    SideEffect { systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons) }
+    val color = getTopAppBarColor(title, altAppBarColor)
+    val useDarkIcons = color.luminance() > .5
+    LaunchedEffect(key1 = color, useDarkIcons) {
+        systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
+    }
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
@@ -764,10 +767,11 @@ private fun TitleOnlyTopAppBar(
 }
 
 @Composable
-fun getTopAppBarColor(title: String): Color {
-    return when (title.isEmpty()) {
-        true -> Color.Transparent
-        false -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
+fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Color {
+    return when {
+        title.isEmpty() && !altAppBarColor -> Color.Transparent
+        title.isNotEmpty() && !altAppBarColor -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
+        else -> MaterialTheme.colorScheme.secondary.copy(alpha = .7f)
     }
 }
 

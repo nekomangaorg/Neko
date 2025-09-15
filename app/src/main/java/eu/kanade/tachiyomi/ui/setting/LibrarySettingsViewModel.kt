@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.getValue
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -44,7 +43,7 @@ class LibrarySettingsViewModel : ViewModel() {
         viewModelScope.launch {
             db.getCategories().asFlow().distinctUntilChanged().collectLatest { categories ->
                 _allCategories.value =
-                    (listOf(Category.createDefault()) + categories)
+                    (listOf(Category.createSystemCategory()) + categories)
                         .sortedBy { it.order }
                         .map { it.toCategoryItem() }
                         .toPersistentList()

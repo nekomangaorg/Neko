@@ -41,10 +41,13 @@ data class LibraryScreenState(
     val showUnavailableFilter: Boolean = false,
     val currentGroupBy: Int = 0,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
+    val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
 )
 
 data class LibraryScreenActions(
     val mangaClick: (Long) -> Unit,
+    val mangaLongClick: (LibraryMangaItem) -> Unit,
+    val clearSelectedManga: () -> Unit,
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,
     val collapseExpandAllCategories: () -> Unit,

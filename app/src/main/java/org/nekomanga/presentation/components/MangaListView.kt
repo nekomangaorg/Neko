@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -110,13 +112,29 @@ fun MangaListWithHeader(
 fun MangaRow(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
+    isSelected: Boolean = false,
     showUnreadBadge: Boolean = false,
     showDownloadBadge: Boolean = false,
     unreadCount: Int = 0,
     downloadCount: Int = 0,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.padding(Size.tiny), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier =
+            modifier
+                .background(
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = NekoColors.mediumAlphaHighContrast
+                            )
+                        } else {
+                            Color.Transparent
+                        }
+                )
+                .padding(Size.tiny),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         MangaListCover(displayManga, shouldOutlineCover)
 
         Column(modifier = Modifier.weight(1f).padding(Size.tiny)) {

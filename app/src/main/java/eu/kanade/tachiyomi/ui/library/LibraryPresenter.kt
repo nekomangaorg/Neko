@@ -191,8 +191,9 @@ class LibraryPresenter(
         if (categories.isEmpty()) {
             val dbCategories = db.getCategories().executeAsBlocking()
             if (
-                (dbCategories + Category.createDefault(context)).distinctBy { it.order }.size !=
-                    dbCategories.size + 1
+                (dbCategories + Category.createSystemCategory(context))
+                    .distinctBy { it.order }
+                    .size != dbCategories.size + 1
             ) {
                 reorderCategories(dbCategories)
             }
@@ -1012,7 +1013,7 @@ class LibraryPresenter(
 
     /** Create a default category with the sort set */
     private fun createDefaultCategory(): Category {
-        val default = Category.createDefault(view?.applicationContext ?: context)
+        val default = Category.createSystemCategory(view?.applicationContext ?: context)
         default.order = -1
         val defOrder = libraryPreferences.defaultMangaOrder().get()
         if (defOrder.firstOrNull()?.isLetter() == true) {

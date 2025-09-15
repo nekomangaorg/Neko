@@ -123,6 +123,7 @@ fun MangaGridItem(
     unreadCount: Int = 0,
     downloadCount: Int = 0,
     isComfortable: Boolean = true,
+    isSelected: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -131,6 +132,16 @@ fun MangaGridItem(
         Box(
             modifier =
                 Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                    .background(
+                        color =
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(
+                                    alpha = NekoColors.mediumAlphaHighContrast
+                                )
+                            } else {
+                                Color.Transparent
+                            }
+                    )
                     .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                     .padding(Size.extraTiny)
         ) {
