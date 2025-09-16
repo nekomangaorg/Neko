@@ -15,12 +15,7 @@ enum class ReadingModeType(
     LEFT_TO_RIGHT(1, R.string.left_to_right_viewer, R.drawable.ic_reader_ltr_24dp),
     RIGHT_TO_LEFT(2, R.string.right_to_left_viewer, R.drawable.ic_reader_rtl_24dp),
     VERTICAL(3, R.string.vertical_viewer, R.drawable.ic_reader_vertical_24dp),
-    WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp),
-    CONTINUOUS_VERTICAL(
-        5,
-        R.string.continuous_vertical,
-        R.drawable.ic_reader_continuous_vertical_24dp,
-    );
+    WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp);
 
     companion object {
         fun fromPreference(preference: Int): ReadingModeType =
@@ -41,7 +36,7 @@ enum class ReadingModeType(
 
         fun isWebtoonType(preference: Int): Boolean {
             val mode = fromPreference(preference)
-            return mode == WEBTOON || mode == CONTINUOUS_VERTICAL
+            return mode == WEBTOON
         }
 
         fun fromSpinner(position: Int?) =

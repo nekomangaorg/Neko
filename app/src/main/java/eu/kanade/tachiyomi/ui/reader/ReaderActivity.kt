@@ -1095,8 +1095,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
                 ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
                 ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this)
-                ReadingModeType.CONTINUOUS_VERTICAL.flagValue ->
-                    WebtoonViewer(this, hasMargins = true)
                 else -> R2LPagerViewer(this)
             }
 
