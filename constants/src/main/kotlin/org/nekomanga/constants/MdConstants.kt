@@ -18,7 +18,7 @@ object MdConstants {
     const val chapterSuffix = "/chapter/"
 
     val UnsupportedOfficialGroupList =
-        arrayOf("Alpha Manga", "J-Novel Club", "INKR Comics", "Kodansha USA")
+        arrayOf("Alpha Manga", "INKR Comics", "J-Novel Club", "Kodansha USA", "Tapas")
 
     object Api {
         const val baseUrl = "https://api.mangadex.org"
