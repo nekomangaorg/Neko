@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.isAvailable
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -62,9 +63,9 @@ class ChapterItemFilter(
                 availableEnabled
         ) {
             filteredChapters.filter { chapterItem ->
-                val chapter = chapterItem.chapter
-                val isDownloaded = downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)
-                val isAvailable = !chapter.isUnavailable || isDownloaded || chapter.isLocalSource()
+                val chapter = chapterItem.chapter.toDbChapter()
+                val isDownloaded = downloadManager.isChapterDownloaded(chapter, manga)
+                val isAvailable = chapter.isAvailable(isDownloaded)
                 return@filter !(readEnabled && !chapter.read ||
                     (unreadEnabled && chapter.read) ||
                     (bookmarkEnabled && !chapter.bookmark) ||

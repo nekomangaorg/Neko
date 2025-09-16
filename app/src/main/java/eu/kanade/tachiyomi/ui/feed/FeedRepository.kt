@@ -10,9 +10,9 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.text.SimpleDateFormat
@@ -87,8 +87,8 @@ class FeedRepository(
                         .mapNotNull { entry ->
                             val manga = db.getManga(entry.key).executeOnIO()!!
                             val chapters =
-                                db.getChapters(manga).executeOnIO().filterNot {
-                                    it.isUnavailable && !it.isLocalSource()
+                                db.getChapters(manga).executeOnIO().filter {
+                                    it.isAvailable(downloadManager, manga)
                                 }
                             val recentUploadDate =
                                 entry.value
@@ -190,8 +190,8 @@ class FeedRepository(
                                         ?.name ?: ""
                                 val manga = db.getManga(entry.key).executeOnIO()!!
                                 val chapters =
-                                    db.getChapters(manga).executeOnIO().filterNot {
-                                        it.isUnavailable && !it.isLocalSource()
+                                    db.getChapters(manga).executeOnIO().filter {
+                                        it.isAvailable(downloadManager, manga)
                                     }
                                 val chapter =
                                     ChapterSort(manga).getNextUnreadChapter(chapters)
@@ -257,7 +257,7 @@ class FeedRepository(
 
                         val simpleChapter =
                             chapters
-                                .filterNot { it.isUnavailable && !it.isLocalSource() }
+                                .filter { it.isAvailable(downloadManager, manga) }
                                 .maxByOrNull { it.source_order }
                                 ?.toSimpleChapter() ?: return@mapNotNull null
 

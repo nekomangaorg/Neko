@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -52,6 +51,7 @@ import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
@@ -695,11 +695,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         ) {
             val final =
                 chapters
-                    .filter {
-                        !it.isUnavailable ||
-                            it.isLocalSource() ||
-                            downloadManager.isChapterDownloaded(it, manga)
-                    }
+                    .filter { it.isAvailable(downloadManager, manga) }
                     .filter { getChapterNum(it)?.toInt() == manga.last_chapter_number }
                     .filter {
                         getVolumeNum(it) == manga.last_volume_number ||

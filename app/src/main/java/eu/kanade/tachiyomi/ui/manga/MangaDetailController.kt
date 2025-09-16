@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -212,10 +213,7 @@ class MangaDetailController(private val mangaId: Long) :
                 MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
             context.toast("${chapter.scanlator} not supported, try WebView")
-        } else if (
-            chapter.isUnavailable &&
-                !presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga.value!!)
-        ) {
+        } else if (!chapter.isAvailable(presenter.downloadManager, presenter.manga.value!!)) {
             context.toast("Chapter is not available")
         } else {
             startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))

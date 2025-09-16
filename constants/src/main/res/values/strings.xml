@@ -543,7 +543,6 @@
     <string name="left_to_right_viewer">Left to right</string>
     <string name="right_to_left_viewer">Right to left</string>
     <string name="vertical_viewer">Vertical</string>
-    <string name="continuous_vertical">Continuous vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
     <string name="double_page_gap">Double page gap</string>

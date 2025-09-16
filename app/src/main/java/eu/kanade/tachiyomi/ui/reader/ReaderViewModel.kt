@@ -657,9 +657,8 @@ class ReaderViewModel(
         }
         val viewer = if (manga.readingModeType == 0) default else manga.readingModeType
 
-        return when {
-            !manga.isLongStrip() && viewer == ReadingModeType.WEBTOON.flagValue ->
-                ReadingModeType.CONTINUOUS_VERTICAL.flagValue
+        return when (manga.isLongStrip()) {
+            true -> ReadingModeType.WEBTOON.flagValue
             else -> viewer
         }
     }

@@ -61,11 +61,9 @@ internal class ReaderSettingsScreen(
                         entries =
                             ReadingModeType.entries
                                 .drop(1)
-                                .dropLast(1)
-                                .mapIndexed { index, type ->
-                                    index to stringResource(type.stringRes)
+                                .associate { type ->
+                                    type.prefValue to stringResource(type.stringRes)
                                 }
-                                .toMap()
                                 .toPersistentMap(),
                     ),
                     Preference.PreferenceItem.ListPreference(
