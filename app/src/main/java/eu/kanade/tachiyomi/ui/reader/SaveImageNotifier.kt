@@ -2,12 +2,12 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -41,7 +41,7 @@ class SaveImageNotifier(private val context: Context) {
                 .size(720, 1280)
                 .target(
                     onSuccess = {
-                        val bitmap = (it as BitmapDrawable).bitmap
+                        val bitmap = it.toBitmap()
                         if (bitmap != null) {
                             showCompleteNotification(file, bitmap)
                         } else {
