@@ -48,6 +48,7 @@ data class LibraryScreenActions(
     val mangaClick: (Long) -> Unit,
     val mangaLongClick: (LibraryMangaItem) -> Unit,
     val selectAllLibraryMangaItems: (List<LibraryMangaItem>) -> Unit,
+    val deleteSelectedLibraryMangaItems: () -> Unit,
     val clearSelectedManga: () -> Unit,
     val search: (String?) -> Unit,
     val updateLibrary: (Boolean) -> Unit,

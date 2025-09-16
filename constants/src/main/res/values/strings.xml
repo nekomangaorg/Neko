@@ -182,7 +182,7 @@
     <string name="updating_library">Updating library</string>
     <string name="selected_">Selected: %1$d</string>
     <string name="local">Local</string>
-    <string name="remove_from_library_question">Remove from library?</string>
+    <string name="remove_from_library_question">Remove from library? All files will be deleted.</string>
     <string name="manga_from_library">Manga from library</string>
     <string name="delete_downloads">Delete downloads</string>
     <string name="deleted_downloads">Deleted downloads</string>

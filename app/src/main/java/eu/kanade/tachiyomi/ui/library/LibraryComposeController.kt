@@ -39,6 +39,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     mangaClick = ::openManga,
                     mangaLongClick = presenter::libraryItemLongClick,
                     selectAllLibraryMangaItems = presenter::selectAllLibraryMangaItems,
+                    deleteSelectedLibraryMangaItems = presenter::deleteSelectedLibraryMangaItems,
                     clearSelectedManga = presenter::clearSelectedManga,
                     search = presenter::search,
                     updateLibrary = { start -> updateLibrary(start, context) },

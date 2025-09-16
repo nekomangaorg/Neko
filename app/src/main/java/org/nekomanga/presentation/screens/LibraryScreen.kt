@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -53,6 +54,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
@@ -90,6 +92,8 @@ fun LibraryScreen(
         remember(libraryScreenState.value.selectedItems) {
             mutableStateOf(libraryScreenState.value.selectedItems.isNotEmpty())
         }
+
+    var deleteMangaConfirmation by remember { mutableStateOf(false) }
 
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
@@ -165,7 +169,30 @@ fun LibraryScreen(
                     onSearch = libraryScreenActions.search,
                     altAppBarColor = selectionMode,
                     actions = {
-                        if (selectionMode) {} else {
+                        if (selectionMode) {
+                            AppBarActions(
+                                actions =
+                                    listOf(
+                                        AppBar.Action(
+                                            title =
+                                                UiText.StringResource(R.string.remove_from_library),
+                                            icon = Icons.Outlined.DeleteOutline,
+                                            onClick = { deleteMangaConfirmation = true },
+                                        )
+                                        /* AppBar.MainDropdown(
+                                            incognitoMode = libraryScreenState.value.incognitoMode,
+                                            incognitoModeClick = incognitoClick,
+                                            settingsClick = settingsClick,
+                                            statsClick = statsClick,
+                                            aboutClick = aboutClick,
+                                            helpClick = helpClick,
+                                            menuShowing = { visible ->
+                                                mainDropdownShowing = visible
+                                            },
+                                        ),*/
+                                    )
+                            )
+                        } else {
                             AppBarActions(
                                 actions =
                                     listOf(
@@ -229,6 +256,20 @@ fun LibraryScreen(
                                 Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                     .fillMaxSize()
                         ) {
+                            if (deleteMangaConfirmation) {
+                                ConfirmationDialog(
+                                    title = stringResource(R.string.remove),
+                                    body = stringResource(R.string.remove_from_library_question),
+                                    confirmButton = stringResource(R.string.remove),
+                                    onDismiss = {
+                                        deleteMangaConfirmation = !deleteMangaConfirmation
+                                    },
+                                    onConfirm = {
+                                        libraryScreenActions.deleteSelectedLibraryMangaItems()
+                                    },
+                                )
+                            }
+
                             if (libraryScreenState.value.items.isEmpty()) {
 
                                 Box(

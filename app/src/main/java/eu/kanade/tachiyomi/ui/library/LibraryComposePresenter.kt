@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.toLibraryMangaItem
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -67,6 +69,7 @@ class LibraryComposePresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangadexPreferences: MangaDexPreferences = Injekt.get(),
+    val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
@@ -929,6 +932,20 @@ class LibraryComposePresenter(
             _libraryScreenState.update {
                 it.copy(selectedItems = currentSelected.distinct().toPersistentList())
             }
+        }
+    }
+
+    fun deleteSelectedLibraryMangaItems() {
+        presenterScope.launchNonCancellable {
+            var currentSelected = _libraryScreenState.value.selectedItems.toList()
+            currentSelected.forEach { libraryMangaItem ->
+                val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
+                dbManga.favorite = false
+                db.insertManga(dbManga).executeOnIO()
+                coverCache.deleteFromCache(dbManga)
+                downloadManager.deleteManga(dbManga)
+            }
+            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
         }
     }
 
