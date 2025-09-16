@@ -74,21 +74,6 @@ object ImageUtil {
         }
     }
 
-    fun resizeBitMapDrawable(drawable: Drawable, resources: Resources?, size: Int): Drawable? {
-        val b = (drawable as? BitmapDrawable)?.bitmap
-        val bitmapResized: Bitmap? =
-            if (b != null) {
-                Bitmap.createScaledBitmap(b, size, size, false)
-            } else {
-                null
-            }
-        return if (bitmapResized != null) {
-            BitmapDrawable(resources, bitmapResized)
-        } else {
-            null
-        }
-    }
-
     fun getExtensionFromMimeType(mime: String?): String {
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime)
             ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime]
