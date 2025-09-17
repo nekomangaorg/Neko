@@ -168,23 +168,6 @@ class FeedPresenter(
 
     override fun onCreate() {
         super.onCreate()
-        presenterScope.launchIO {
-            _updatesScreenPagingState.update {
-                it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: persistentListOf())
-            }
-            _historyScreenPagingState.update {
-                it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: persistentListOf())
-            }
-            _summaryScreenPagingState.update {
-                it.copy(
-                    updatesFeedMangaList = lastSummaryUpdatesFeedMangaList ?: persistentListOf(),
-                    continueReadingList = lastContinueReadingList ?: persistentListOf(),
-                    newlyAddedFeedMangaList =
-                        lastSummaryNewlyAddedFeedMangaList ?: persistentListOf(),
-                )
-            }
-            onLowMemory()
-        }
 
         loadSummaryPage()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
@@ -1101,6 +1084,23 @@ class FeedPresenter(
 
     override fun onResume() {
         super.onResume()
+        presenterScope.launchIO {
+            _updatesScreenPagingState.update {
+                it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: persistentListOf())
+            }
+            _historyScreenPagingState.update {
+                it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: persistentListOf())
+            }
+            _summaryScreenPagingState.update {
+                it.copy(
+                    updatesFeedMangaList = lastSummaryUpdatesFeedMangaList ?: persistentListOf(),
+                    continueReadingList = lastContinueReadingList ?: persistentListOf(),
+                    newlyAddedFeedMangaList =
+                        lastSummaryNewlyAddedFeedMangaList ?: persistentListOf(),
+                )
+            }
+            onLowMemory()
+        }
         observeDownloads()
         loadSummaryPage()
     }
