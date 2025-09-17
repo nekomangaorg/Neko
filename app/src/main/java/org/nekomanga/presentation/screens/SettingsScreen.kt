@@ -280,7 +280,11 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     )
 }
 
-private fun reset(backstack: NavBackStack, wasDeepLink: Boolean, onBackPressed: () -> Unit) {
+private fun reset(
+    backstack: NavBackStack<NavKey>,
+    wasDeepLink: Boolean,
+    onBackPressed: () -> Unit,
+) {
     if (wasDeepLink) {
         onBackPressed()
     } else {

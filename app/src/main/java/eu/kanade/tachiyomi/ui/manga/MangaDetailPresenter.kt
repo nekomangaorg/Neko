@@ -184,7 +184,7 @@ class MangaDetailPresenter(
                         it == MergeType.Suwayomi && !sourceManager.suwayomi.isConfigured()
                     }
                     .filterNot { it == MergeType.MangaLife }
-                    .filterNot { it  == MergeType.Comick}
+                    .filterNot { it == MergeType.Comick }
                     .toPersistentList()
 
             _generalState.value =
