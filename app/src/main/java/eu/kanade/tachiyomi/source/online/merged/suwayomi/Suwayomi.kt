@@ -204,32 +204,38 @@ class Suwayomi : MergedServerSource() {
                                     .chapters
                             }
                             .sortedByDescending { it.sourceOrder }
+                    var previous: Pair<Float?, Boolean> = null to false
                     val chapterPairs =
-                        chapters.map { chapter ->
-                            val sanitized = sanitizeName(chapter.name, chapter.chapterNumber)
-                            SChapter.create().apply {
-                                chapter_number = chapter.chapterNumber
-                                if (sanitized is Name.Sanitized) {
-                                    name = sanitized.name
-                                    vol = sanitized.vol
-                                    chapter_txt = sanitized.chapter_txt
-                                    chapter_title = sanitized.chapter_title
-                                } else {
-                                    name = chapter.name
-                                    chapter_txt = "Ch.${chapter.chapterNumber}"
-                                }
+                        chapters
+                            .sortedBy { it.sourceOrder }
+                            .map { chapter ->
+                                val sanitized =
+                                    sanitizeName(chapter.name, chapter.chapterNumber, previous)
+                                SChapter.create().apply {
+                                    if (sanitized is Name.Sanitized) {
+                                        name = sanitized.name
+                                        vol = sanitized.vol
+                                        chapter_number = sanitized.chapter_number
+                                        previous = chapter_number to sanitized.premiere
+                                        chapter_txt = sanitized.chapter_txt
+                                        chapter_title = sanitized.chapter_title
+                                    } else {
+                                        name = chapter.name
+                                        chapter_number = chapter.chapterNumber
+                                        chapter_txt = "Ch.${chapter.chapterNumber}"
+                                    }
 
-                                this.vol = vol
-                                url =
-                                    "/manga/${mangaId}/chapter/${chapter.sourceOrder} ${chapter.id}"
-                                val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
-                                scanlator =
-                                    (listOf(this@Suwayomi.name, sourceName) + scanlators)
-                                        .joinToString(Constants.SCANLATOR_SEPARATOR)
-                                language = lang
-                                date_upload = chapter.uploadDate
-                            } to chapter.isRead
-                        }
+                                    this.vol = vol
+                                    url =
+                                        "/manga/${mangaId}/chapter/${chapter.sourceOrder} ${chapter.id}"
+                                    val scanlators = chapter.scanlator?.split(", ") ?: emptyList()
+                                    scanlator =
+                                        (listOf(this@Suwayomi.name, sourceName) + scanlators)
+                                            .joinToString(Constants.SCANLATOR_SEPARATOR)
+                                    language = lang
+                                    date_upload = chapter.uploadDate
+                                } to chapter.isRead
+                            }
                     return@runCatching chapterPairs
                 }
                 .mapError {
@@ -239,11 +245,36 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    fun sanitizeName(rawName: String, chapter: Float): Name {
+    fun sanitizeName(rawName: String, chapter: Float, previous: Pair<Float?, Boolean>): Name {
         if (chapter < 0) {
-            // Source info is not sane, sanitizing won't work
-            return Name.NotSane
+            if (rawName.contains("prologue", true)) {
+                return Name.Sanitized("Ch.0 - $rawName", "", 0f, "Ch.0", rawName)
+            }
+            // Source info is not sane enough, sanitizing won't work
+            if (!rawName.contains("end", true)) return Name.NotSane
         }
+
+        // This is for bato.to normalization
+        if (
+            previous.first != null &&
+                previous.first!! > chapter &&
+                (rawName.contains("end", true) || rawName.contains("season", true))
+        ) {
+            var chapterNumber = previous.first!!.toLong()
+            if (!previous.second) chapterNumber += 1
+            val chtxt = "Ch.$chapterNumber"
+            val name = listOf(chtxt, "-", rawName).joinToString(" ")
+
+            return Name.Sanitized(
+                name,
+                "",
+                chapterNumber.toFloat(),
+                chtxt,
+                rawName,
+                !(rawName.contains("finale", true) || rawName.contains("end", true)),
+            )
+        }
+
         var vol = ""
         val ch =
             if (chapter == chapter.toLong().toFloat()) {
@@ -262,6 +293,7 @@ class Suwayomi : MergedServerSource() {
                 "Chapter",
                 "Chap",
                 "Ch.",
+                "Ch-",
                 "Ch",
                 "chapter",
                 "chap",
@@ -318,7 +350,7 @@ class Suwayomi : MergedServerSource() {
             chapterName.add(title)
         }
 
-        return Name.Sanitized(chapterName.joinToString(" "), vol, chtxt, title)
+        return Name.Sanitized(chapterName.joinToString(" "), vol, chapter, chtxt, title)
     }
 
     fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
@@ -433,8 +465,10 @@ sealed class Name {
     data class Sanitized(
         val name: String,
         val vol: String,
+        val chapter_number: Float,
         val chapter_txt: String,
         val chapter_title: String,
+        val premiere: Boolean = false,
     ) : Name()
 
     data object NotSane : Name()
