@@ -236,6 +236,7 @@ class Suwayomi : MergedServerSource() {
                                     date_upload = chapter.uploadDate
                                 } to chapter.isRead
                             }
+                            .reversed()
                     return@runCatching chapterPairs
                 }
                 .mapError {
@@ -255,23 +256,24 @@ class Suwayomi : MergedServerSource() {
         }
 
         // This is for bato.to normalization
+        val edgeCases = mutableListOf("season", "end", "epilogue", "side story", "finale")
         if (
             previous.first != null &&
                 previous.first!! > chapter &&
-                (rawName.contains("end", true) || rawName.contains("season", true))
+                edgeCases.any { rawName.contains(it, true) }
         ) {
             var chapterNumber = previous.first!!.toLong()
             if (!previous.second) chapterNumber += 1
             val chtxt = "Ch.$chapterNumber"
             val name = listOf(chtxt, "-", rawName).joinToString(" ")
-
+            edgeCases.remove("season")
             return Name.Sanitized(
                 name,
                 "",
                 chapterNumber.toFloat(),
                 chtxt,
                 rawName,
-                !(rawName.contains("finale", true) || rawName.contains("end", true)),
+                !edgeCases.any { rawName.contains(it, true) },
             )
         }
 
@@ -311,6 +313,7 @@ class Suwayomi : MergedServerSource() {
         volumePrefixes.any { prefix ->
             if (title.startsWith(prefix)) {
                 if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
+                if (prefix == "Ep" && title.startsWith("Epilogue")) return@any false
                 val delimiter =
                     when (prefix.startsWith('(')) {
                         true -> ")"
