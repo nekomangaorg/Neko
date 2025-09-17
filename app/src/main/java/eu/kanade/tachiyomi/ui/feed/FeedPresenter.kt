@@ -60,17 +60,12 @@ class FeedPresenter(
 
     private val _historyScreenPagingState =
         MutableStateFlow(
-            lastHistoryScreenState
-                ?: HistoryScreenPagingState(
-                    historyGrouping = preferences.historyChapterGrouping().get()
-                )
+            HistoryScreenPagingState(historyGrouping = preferences.historyChapterGrouping().get())
         )
 
-    private val _updatesScreenPagingState =
-        MutableStateFlow(lastUpdateScreenState ?: UpdatesScreenPagingState())
+    private val _updatesScreenPagingState = MutableStateFlow(UpdatesScreenPagingState())
 
-    private val _summaryScreenPagingState =
-        MutableStateFlow(lastSummaryScreenPagingState ?: SummaryScreenPagingState())
+    private val _summaryScreenPagingState = MutableStateFlow(SummaryScreenPagingState())
 
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
 
@@ -108,8 +103,14 @@ class FeedPresenter(
                         offset = newKey,
                         pageLoading = false,
                         hasMoreResults = hasNextPage,
+                        // empty the list before adding the first page in case it was loaded from
+                        // cache
                         updatesFeedMangaList =
-                            (state.updatesFeedMangaList + items).toImmutableList(),
+                            if (newKey == 1) {
+                                items.toImmutableList()
+                            } else {
+                                (state.updatesFeedMangaList + items).toImmutableList()
+                            },
                     )
                 }
             },
@@ -132,13 +133,25 @@ class FeedPresenter(
                 _historyScreenPagingState.update { state -> state.copy(pageLoading = false) }
             },
             onSuccess = { hasNextPage, items, newKey ->
+                // empty the list before adding teh first
+                if (newKey == 1) {
+                    _historyScreenPagingState.update { state ->
+                        state.copy(historyFeedMangaList = persistentListOf())
+                    }
+                }
                 _historyScreenPagingState.update { state ->
                     state.copy(
                         offset = newKey,
                         pageLoading = false,
                         hasMoreResults = hasNextPage,
+                        // empty the list before adding the first page in case it was loaded from
+                        // cache
                         historyFeedMangaList =
-                            (state.historyFeedMangaList + items).toImmutableList(),
+                            if (newKey == 1) {
+                                items.toImmutableList()
+                            } else {
+                                (state.historyFeedMangaList + items).toImmutableList()
+                            },
                     )
                 }
             },
@@ -146,16 +159,33 @@ class FeedPresenter(
 
     override fun onDestroy() {
         super.onDestroy()
-        lastUpdateScreenState = _updatesScreenPagingState.value
-        lastHistoryScreenState = _historyScreenPagingState.value
-        lastSummaryScreenPagingState = _summaryScreenPagingState.value
+        lastUpdatesFeedMangaList = _updatesScreenPagingState.value.updatesFeedMangaList
+        lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
+        lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
+        lastContinueReadingList = _summaryScreenPagingState.value.continueReadingList
+        lastSummaryNewlyAddedFeedMangaList = _summaryScreenPagingState.value.newlyAddedFeedMangaList
     }
 
     override fun onCreate() {
         super.onCreate()
-        lastUpdateScreenState = null
-        lastHistoryScreenState = null
-        lastSummaryScreenPagingState = null
+        presenterScope.launchIO {
+            _updatesScreenPagingState.update {
+                it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: persistentListOf())
+            }
+            _historyScreenPagingState.update {
+                it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: persistentListOf())
+            }
+            _summaryScreenPagingState.update {
+                it.copy(
+                    updatesFeedMangaList = lastSummaryUpdatesFeedMangaList ?: persistentListOf(),
+                    continueReadingList = lastContinueReadingList ?: persistentListOf(),
+                    newlyAddedFeedMangaList =
+                        lastSummaryNewlyAddedFeedMangaList ?: persistentListOf(),
+                )
+            }
+            onLowMemory()
+        }
+
         loadSummaryPage()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         presenterScope.launchIO {
@@ -241,7 +271,6 @@ class FeedPresenter(
                             state.copy(
                                 offset = 0,
                                 searchHistoryFeedMangaList = persistentListOf(),
-                                historyFeedMangaList = persistentListOf(),
                                 searchQuery = "",
                             )
                         }
@@ -252,7 +281,6 @@ class FeedPresenter(
                             state.copy(
                                 offset = 0,
                                 searchUpdatesFeedMangaList = persistentListOf(),
-                                updatesFeedMangaList = persistentListOf(),
                                 searchQuery = "",
                             )
                         }
@@ -1079,14 +1107,18 @@ class FeedPresenter(
 
     companion object {
 
-        private var lastUpdateScreenState: UpdatesScreenPagingState? = null
-        private var lastHistoryScreenState: HistoryScreenPagingState? = null
-        private var lastSummaryScreenPagingState: SummaryScreenPagingState? = null
+        private var lastUpdatesFeedMangaList: ImmutableList<FeedManga>? = null
+        private var lastHistoryFeedMangaList: ImmutableList<FeedManga>? = null
+        private var lastSummaryUpdatesFeedMangaList: ImmutableList<FeedManga>? = null
+        private var lastContinueReadingList: ImmutableList<FeedManga>? = null
+        private var lastSummaryNewlyAddedFeedMangaList: ImmutableList<FeedManga>? = null
 
         fun onLowMemory() {
-            lastUpdateScreenState = null
-            lastHistoryScreenState = null
-            lastSummaryScreenPagingState = null
+            lastUpdatesFeedMangaList = null
+            lastHistoryFeedMangaList = null
+            lastSummaryUpdatesFeedMangaList = null
+            lastContinueReadingList = null
+            lastSummaryNewlyAddedFeedMangaList = null
         }
 
         const val HISTORY_ENDLESS_LIMIT = 15
