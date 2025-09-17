@@ -1243,6 +1243,7 @@
     <string name="less">Less</string>
     <string name="loading">Loading…</string>
     <string name="lock">Lock</string>
+    <string name="mark_as">Mark as</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_read">Mark read</string>
     <string name="mark_as_unread">Mark as unread</string>

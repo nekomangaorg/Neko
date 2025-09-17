@@ -16,13 +16,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -284,8 +284,7 @@ private fun LibraryCategoryHeader(
             Gap(Size.tiny)
             Icon(
                 imageVector =
-                    if (allSelected) Icons.Default.CheckCircleOutline
-                    else Icons.Default.AddCircleOutline,
+                    if (allSelected) Icons.Default.CheckCircleOutline else Icons.Outlined.Circle,
                 contentDescription = null,
                 tint = textColor,
             )

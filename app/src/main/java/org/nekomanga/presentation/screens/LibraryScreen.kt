@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -57,6 +56,7 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.library.LibraryAppBarActions
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
 import org.nekomanga.presentation.screens.library.LibraryButtonBar
@@ -170,27 +170,8 @@ fun LibraryScreen(
                     altAppBarColor = selectionMode,
                     actions = {
                         if (selectionMode) {
-                            AppBarActions(
-                                actions =
-                                    listOf(
-                                        AppBar.Action(
-                                            title =
-                                                UiText.StringResource(R.string.remove_from_library),
-                                            icon = Icons.Outlined.DeleteOutline,
-                                            onClick = { deleteMangaConfirmation = true },
-                                        )
-                                        /* AppBar.MainDropdown(
-                                            incognitoMode = libraryScreenState.value.incognitoMode,
-                                            incognitoModeClick = incognitoClick,
-                                            settingsClick = settingsClick,
-                                            statsClick = statsClick,
-                                            aboutClick = aboutClick,
-                                            helpClick = helpClick,
-                                            menuShowing = { visible ->
-                                                mainDropdownShowing = visible
-                                            },
-                                        ),*/
-                                    )
+                            LibraryAppBarActions(
+                                removeFromLibraryClick = { deleteMangaConfirmation = true }
                             )
                         } else {
                             AppBarActions(

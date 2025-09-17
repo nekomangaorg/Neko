@@ -82,8 +82,8 @@ import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
+import org.nekomanga.presentation.screens.mangadetails.MangaDetailsAppBarActions
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
-import org.nekomanga.presentation.screens.mangadetails.OverflowOptions
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -215,7 +215,7 @@ fun MangaScreen(
             onSearch = onSearch,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
-                OverflowOptions(
+                MangaDetailsAppBarActions(
                     chapterActions = chapterActions,
                     chaptersProvider = { generalState.value.activeChapters },
                 )

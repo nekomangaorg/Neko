@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -102,12 +103,11 @@ fun NekoScaffold(
     content: @Composable (PaddingValues) -> Unit = {},
 ) {
     val systemUiController = rememberSystemUiController()
-    val color = getTopAppBarColor(title, altAppBarColor)
-    val useDarkIcons = color.luminance() > .5
-    LaunchedEffect(key1 = color, useDarkIcons) {
+    val (color, useDarkIcons) = getTopAppBarColor(title, altAppBarColor)
+    DisposableEffect(color, useDarkIcons) {
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
+        onDispose {}
     }
-
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
@@ -231,7 +231,7 @@ private fun TitleAndSubtitleTopAppBar(
             Column {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -245,7 +245,7 @@ private fun TitleAndSubtitleTopAppBar(
                 }
             }
         },
-        modifier = Modifier.statusBarsPadding(),
+        modifier = Modifier.statusBarsPadding().padding(top = Size.small),
         navigationIcon = {
             ToolTipButton(
                 toolTipLabel = navigationIconLabel,
@@ -767,11 +767,16 @@ private fun TitleOnlyTopAppBar(
 }
 
 @Composable
-fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Color {
+fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Pair<Color, Boolean> {
     return when {
-        title.isEmpty() && !altAppBarColor -> Color.Transparent
-        title.isNotEmpty() && !altAppBarColor -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
-        else -> MaterialTheme.colorScheme.secondary.copy(alpha = .7f)
+        title.isEmpty() && !altAppBarColor ->
+            Color.Transparent to (MaterialTheme.colorScheme.surface.luminance() > 0.5f)
+        title.isNotEmpty() && !altAppBarColor ->
+            MaterialTheme.colorScheme.surface.copy(alpha = .7f) to
+                (MaterialTheme.colorScheme.surface.copy(alpha = .7f).luminance() > 0.5f)
+        else ->
+            MaterialTheme.colorScheme.secondary.copy(alpha = .7f) to
+                (MaterialTheme.colorScheme.secondary.copy(alpha = .7f).luminance() > 0.5f)
     }
 }
 

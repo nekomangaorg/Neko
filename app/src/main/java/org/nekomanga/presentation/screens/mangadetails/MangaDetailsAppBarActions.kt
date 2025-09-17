@@ -11,7 +11,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
 
 @Composable
-fun OverflowOptions(
+fun MangaDetailsAppBarActions(
     chapterActions: MangaConstants.ChapterActions,
     chaptersProvider: () -> ImmutableList<ChapterItem>,
 ) {
