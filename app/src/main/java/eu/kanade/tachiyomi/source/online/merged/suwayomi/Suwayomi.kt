@@ -326,7 +326,9 @@ class Suwayomi : MergedServerSource() {
         }
         val chtxt = "Ch.$ch"
         chapterName.add(chtxt)
-        if (
+        if (title.startsWith(ch)) {
+            title = title.replaceFirst(ch, "").trimStart('.').trimStart()
+        } else if (
             !chapterPrefixes.any { prefix ->
                 if (title.startsWith(prefix)) {
                     title = title.replaceFirst(prefix, "").trimStart()
