@@ -13,12 +13,14 @@ import eu.kanade.tachiyomi.util.asJsoup
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
+import okhttp3.FormBody
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
@@ -70,17 +72,13 @@ class WeebCentral : ReducedHttpSource() {
                 .toHttpUrl()
                 .newBuilder()
                 .addPathSegment("search")
-                .addPathSegment("data")
-                .addQueryParameter("author", "")
-                .addQueryParameter("text", query)
-                .addQueryParameter("sort", "Best Match")
-                .addQueryParameter("order", "Ascending")
-                .addQueryParameter("official", "Any")
-                .addQueryParameter("display_mode", "Full Display")
+                .addPathSegment("simple")
                 .build()
                 .toString()
 
-        val response = client.newCall(GET(url, headers)).await()
+        val formBody = FormBody.Builder().add("text", query).build()
+
+        val response = client.newCall(POST(url, headers, body = formBody)).await()
 
         if (!response.isSuccessful) {
             response.close()
@@ -93,12 +91,12 @@ class WeebCentral : ReducedHttpSource() {
     private fun parseSearchManga(response: Response): List<SManga> {
         val document = response.asJsoup()
         response.closeQuietly()
-        return document.select("article").mapNotNull { element ->
-            if (element.select("a.link").first() == null) {
+        return document.select("div").mapNotNull { element ->
+            if (element.select("a").first() == null) {
                 null
             } else {
                 MangaImpl().apply {
-                    element.select("a.link").first()?.let { link ->
+                    element.select("a").first()?.let { link ->
                         title = link.text()
                         setUrlWithoutDomain(link.attr("abs:href"))
                     }
