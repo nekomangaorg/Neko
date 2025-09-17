@@ -256,7 +256,8 @@ class Suwayomi : MergedServerSource() {
         }
 
         // This is for bato.to normalization
-        val edgeCases = mutableListOf("season", "end", "epilogue", "side story", "finale")
+        val edgeCases =
+            mutableListOf("season", "end", "epilogue", "side story", "special episode", "finale")
         if (
             previous.first != null &&
                 previous.first!! > chapter &&
@@ -286,7 +287,7 @@ class Suwayomi : MergedServerSource() {
                 }
                 .toString()
 
-        var title = rawName
+        var title = rawName.replaceFirst(emojiRegex, "").trimStart()
         val chapterName = mutableListOf<String>()
         val volumePrefixes =
             arrayOf("Volume", "Vol.", "volume", "vol.", "Season", "S", "(S", "season", "s", "(s")
@@ -463,6 +464,7 @@ class Suwayomi : MergedServerSource() {
 
     companion object {
         val name = "Suwayomi"
+        val emojiRegex = Regex("^[\\p{So}\\p{Cn}\\p{Cs}\\x{1F000}-\\x{1FFFF}]+")
     }
 }
 
