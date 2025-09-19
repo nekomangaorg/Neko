@@ -1094,7 +1094,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             when (mangaViewer) {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
                 ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
-                ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this)
+                ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this, !manga.isLongStrip())
                 else -> R2LPagerViewer(this)
             }
 
