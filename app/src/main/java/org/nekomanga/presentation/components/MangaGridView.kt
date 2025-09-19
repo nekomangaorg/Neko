@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -173,7 +172,7 @@ fun MangaGridItem(
             }
             if (showStartReadingButton) {
                 StartReadingButton(
-                    modifier = Modifier.align(Alignment.TopEnd).padding(Size.tiny),
+                    modifier = Modifier.align(Alignment.TopEnd),
                     onStartReadingClick = onStartReadingClick,
                 )
             }
@@ -199,9 +198,28 @@ fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () ->
     Box(
         modifier =
             modifier
-                .clip(CircleShape)
+                .padding(Size.extraTiny)
+                .clip(
+                    shape =
+                        RoundedCornerShape(
+                            topStart = Size.tiny,
+                            bottomStart = Size.tiny,
+                            bottomEnd = Size.tiny,
+                            topEnd = Shapes.coverRadius,
+                        )
+                )
                 .clickable(onClick = onStartReadingClick)
-                .border(width = Outline.thickness, color = Outline.color, shape = CircleShape)
+                .border(
+                    width = Outline.thickness,
+                    color = Outline.color,
+                    shape =
+                        RoundedCornerShape(
+                            topStart = Size.tiny,
+                            bottomStart = Size.tiny,
+                            bottomEnd = Size.tiny,
+                            topEnd = Shapes.coverRadius,
+                        ),
+                )
                 .background(MaterialTheme.colorScheme.onPrimary)
                 .size(Size.extraLarge)
     ) {
