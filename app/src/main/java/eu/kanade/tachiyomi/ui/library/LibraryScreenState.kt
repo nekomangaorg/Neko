@@ -39,6 +39,7 @@ data class LibraryScreenState(
     val groupByOptions: ImmutableList<Int> = persistentListOf(),
     val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
     val showUnavailableFilter: Boolean = false,
+    val showStartReadingButton: Boolean = true,
     val currentGroupBy: Int = 0,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
     val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
@@ -47,6 +48,7 @@ data class LibraryScreenState(
 data class LibraryScreenActions(
     val mangaClick: (Long) -> Unit,
     val mangaLongClick: (LibraryMangaItem) -> Unit,
+    val mangaStartReadingClick: (Long) -> Unit,
     val selectAllLibraryMangaItems: (List<LibraryMangaItem>) -> Unit,
     val deleteSelectedLibraryMangaItems: () -> Unit,
     val clearSelectedManga: () -> Unit,
@@ -65,6 +67,7 @@ data class LibrarySheetActions(
     val outlineCoversToggled: () -> Unit,
     val unreadBadgesToggled: () -> Unit,
     val downloadBadgesToggled: () -> Unit,
+    val startReadingButtonToggled: () -> Unit,
 )
 
 data class LibraryCategoryActions(

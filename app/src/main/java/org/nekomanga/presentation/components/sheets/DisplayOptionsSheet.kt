@@ -57,6 +57,8 @@ fun DisplayOptionsSheet(
     unreadBadgesToggled: () -> Unit,
     downloadBadgesEnabled: Boolean,
     downloadBadgesToggled: () -> Unit,
+    showStartReadingButtonEnabled: Boolean,
+    startReadingButtonToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -178,43 +180,41 @@ fun DisplayOptionsSheet(
                     }
                 }
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable(onClick = unreadBadgesToggled),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Gap(Size.small)
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.unread_badge),
-                        )
-                        Switch(
-                            checked = unreadBadgesEnabled,
-                            onCheckedChange = { unreadBadgesToggled() },
-                        )
-                        Gap(Size.small)
-                    }
+                    ToggleRow(
+                        enabled = unreadBadgesEnabled,
+                        onClick = unreadBadgesToggled,
+                        text = stringResource(id = R.string.unread_badge),
+                    )
                 }
                 item {
-                    Row(
-                        modifier =
-                            Modifier.fillMaxWidth().clickable(onClick = downloadBadgesToggled),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Gap(Size.small)
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.download_badge),
-                        )
-                        Switch(
-                            checked = downloadBadgesEnabled,
-                            onCheckedChange = { downloadBadgesToggled() },
-                        )
-                        Gap(Size.small)
-                    }
+                    ToggleRow(
+                        enabled = downloadBadgesEnabled,
+                        onClick = downloadBadgesToggled,
+                        text = stringResource(R.string.download_badge),
+                    )
+                }
+                item {
+                    ToggleRow(
+                        enabled = showStartReadingButtonEnabled,
+                        onClick = startReadingButtonToggled,
+                        text = stringResource(R.string.show_start_reading_button),
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ToggleRow(enabled: Boolean, onClick: () -> Unit, text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Gap(Size.small)
+        Text(modifier = Modifier.weight(1f), text = text)
+        Switch(checked = enabled, onCheckedChange = { onClick() })
+        Gap(Size.small)
     }
 }

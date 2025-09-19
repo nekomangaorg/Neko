@@ -42,7 +42,7 @@ class LibraryItem(
         get() = libraryPreferences.layoutLegacy().get()
 
     val hideReadingButton: Boolean
-        get() = libraryPreferences.hideStartReadingButton().get()
+        get() = libraryPreferences.showStartReadingButton().get()
 
     override fun getLayoutRes(): Int {
         return if (libraryLayout == LAYOUT_LIST || manga.isBlank()) {

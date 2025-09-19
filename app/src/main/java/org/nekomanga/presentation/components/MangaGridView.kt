@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,12 +12,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -124,6 +131,8 @@ fun MangaGridItem(
     downloadCount: Int = 0,
     isComfortable: Boolean = true,
     isSelected: Boolean = false,
+    showStartReadingButton: Boolean = false,
+    onStartReadingClick: () -> Unit = {},
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -152,9 +161,21 @@ fun MangaGridItem(
                 }
 
             if (isComfortable) {
-                Column { ComfortableGridItem(displayManga, subtitleText, shouldOutlineCover) }
+                Column {
+                    ComfortableGridItem(
+                        manga = displayManga,
+                        subtitleText = subtitleText,
+                        shouldOutlineCover = shouldOutlineCover,
+                    )
+                }
             } else {
                 Box { CompactGridItem(displayManga, subtitleText, shouldOutlineCover) }
+            }
+            if (showStartReadingButton) {
+                StartReadingButton(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(Size.tiny),
+                    onStartReadingClick = onStartReadingClick,
+                )
             }
         }
 
@@ -174,11 +195,31 @@ fun MangaGridItem(
 }
 
 @Composable
+fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () -> Unit) {
+    Box(
+        modifier =
+            modifier
+                .clip(CircleShape)
+                .clickable(onClick = onStartReadingClick)
+                .border(width = Outline.thickness, color = Outline.color, shape = CircleShape)
+                .background(MaterialTheme.colorScheme.onPrimary)
+                .size(Size.extraLarge)
+    ) {
+        Icon(
+            modifier = Modifier.align(Alignment.Center).size(Size.large),
+            imageVector = Icons.AutoMirrored.Default.MenuBook,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
 fun ComfortableGridItem(
+    modifier: Modifier = Modifier,
     manga: DisplayManga,
     subtitleText: String,
     shouldOutlineCover: Boolean,
-    modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
         artwork = manga.currentArtwork,

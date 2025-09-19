@@ -185,6 +185,11 @@ private fun RowGrid(
                 shouldOutlineCover = libraryScreenState.outlineCovers,
                 isComfortable = isComfortableGrid,
                 isSelected = libraryScreenState.selectedItems.contains(libraryItem),
+                showStartReadingButton =
+                    libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+                onStartReadingClick = {
+                    libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
+                },
                 onClick = {
                     if (libraryScreenState.selectedItems.isNotEmpty()) {
                         libraryScreenActions.mangaLongClick(libraryItem)

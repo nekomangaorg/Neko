@@ -62,6 +62,8 @@ fun LibraryBottomSheet(
                 unreadBadgesToggled = { librarySheetActions.unreadBadgesToggled() },
                 downloadBadgesEnabled = libraryScreenState.showDownloadBadges,
                 downloadBadgesToggled = { librarySheetActions.downloadBadgesToggled() },
+                showStartReadingButtonEnabled = libraryScreenState.showStartReadingButton,
+                startReadingButtonToggled = { librarySheetActions.startReadingButtonToggled() },
                 bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
     }

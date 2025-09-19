@@ -1037,7 +1037,7 @@ class LibraryController(
                 libraryPreferences.staggeredGrid(),
             )
             .forEach { it.changes().drop(1).onEach { reattachAdapter() }.launchIn(viewScope) }
-        libraryPreferences.hideStartReadingButton().register()
+        libraryPreferences.showStartReadingButton().register()
         libraryPreferences.outlineOnCovers().register { adapter.showOutline = it }
         libraryPreferences.showCategoriesHeaderCount().register { adapter.showNumber = it }
     }

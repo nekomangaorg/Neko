@@ -15,7 +15,7 @@ class LibraryBadgesView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.unreadBadgeGroup.bindToPreference(libraryPreferences.unreadBadgeType()) {
             controller?.presenter?.requestUnreadBadgesUpdate()
         }
-        binding.hideReading.bindToPreference(libraryPreferences.hideStartReadingButton())
+        binding.hideReading.bindToPreference(libraryPreferences.showStartReadingButton())
         binding.downloadBadge.bindToPreference(libraryPreferences.showDownloadBadge()) {
             controller?.presenter?.requestDownloadBadgesUpdate()
         }

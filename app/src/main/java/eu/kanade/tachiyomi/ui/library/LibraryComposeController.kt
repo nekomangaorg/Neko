@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.toLibraryManga
@@ -46,6 +47,14 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                     clearActiveFilters = presenter::clearActiveFilters,
                     filterToggled = presenter::filterToggled,
+                    mangaStartReadingClick = { mangaId ->
+                        presenter.openNextUnread(
+                            mangaId,
+                            { manga, chapter ->
+                                startActivity(ReaderActivity.newIntent(context, manga, chapter))
+                            },
+                        )
+                    },
                 ),
             librarySheetActions =
                 LibrarySheetActions(
@@ -56,6 +65,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     outlineCoversToggled = presenter::outlineCoversToggled,
                     downloadBadgesToggled = presenter::downloadBadgesToggled,
                     unreadBadgesToggled = presenter::unreadBadgesToggled,
+                    startReadingButtonToggled = presenter::startReadingButtonToggled,
                 ),
             libraryCategoryActions =
                 LibraryCategoryActions(

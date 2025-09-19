@@ -4,9 +4,12 @@ import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
@@ -27,6 +30,8 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -69,9 +74,11 @@ class LibraryComposePresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangadexPreferences: MangaDexPreferences = Injekt.get(),
+    val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
+    val chapterFilter: ChapterFilter = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
@@ -313,12 +320,15 @@ class LibraryComposePresenter(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
                 db.getCategories().asFlow(),
-            ) {
-                val librarySort = LibrarySort.valueOf(it[0] as Int)
+            ) { combinedArray ->
+                val librarySort = LibrarySort.valueOf(combinedArray[0] as Int)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
-                    defaultCategory.copy(sortOrder = librarySort, isAscending = it[1] as Boolean)
-                val dbCategories = it[2] as List<Category>
+                    defaultCategory.copy(
+                        sortOrder = librarySort,
+                        isAscending = combinedArray[1] as Boolean,
+                    )
+                val dbCategories = combinedArray[2] as List<Category>
                 (listOf(updatedDefaultCategory) +
                         dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
                     .sortedBy { it.order }
@@ -344,6 +354,16 @@ class LibraryComposePresenter(
     }
 
     fun preferenceUpdates() {
+
+        presenterScope.launchIO {
+            libraryPreferences
+                .showStartReadingButton()
+                .changes()
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    _libraryScreenState.update { it.copy(showStartReadingButton = enabled) }
+                }
+        }
 
         presenterScope.launchIO {
             mangadexPreferences
@@ -547,6 +567,10 @@ class LibraryComposePresenter(
 
     fun unreadBadgesToggled() {
         presenterScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
+    }
+
+    fun startReadingButtonToggled() {
+        presenterScope.launchIO { libraryPreferences.showStartReadingButton().toggle() }
     }
 
     fun clearActiveFilters() {
@@ -959,6 +983,18 @@ class LibraryComposePresenter(
             _libraryScreenState.update {
                 it.copy(selectedItems = currentSelected.distinct().toPersistentList())
             }
+        }
+    }
+
+    fun openNextUnread(mangaId: Long, openChapter: (Manga, Chapter) -> Unit) {
+        presenterScope.launchIO {
+            val manga = db.getManga(mangaId).executeOnIO()
+            manga ?: return@launchIO
+            val chapters = db.getChapters(manga).executeAsBlocking()
+            val chapter =
+                ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters)
+            chapter ?: return@launchIO
+            openChapter(manga, chapter)
         }
     }
 

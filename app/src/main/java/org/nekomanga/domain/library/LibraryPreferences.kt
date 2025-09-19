@@ -125,7 +125,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun staggeredGrid() = this.preferenceStore.getBoolean("use_staggered_grid")
 
-    fun hideStartReadingButton() = this.preferenceStore.getBoolean("hide_reading_button")
+    fun showStartReadingButton() = this.preferenceStore.getBoolean("start_reading_button", true)
 
     fun showDownloadBadge() = this.preferenceStore.getBoolean("display_download_badge")
 
