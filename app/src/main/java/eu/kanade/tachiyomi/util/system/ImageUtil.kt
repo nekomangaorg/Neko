@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
@@ -11,7 +10,6 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -70,21 +68,6 @@ object ImageUtil {
             }
         } catch (e: Exception) {
             TimberKt.e(e) { "Error getting image type from stream" }
-            null
-        }
-    }
-
-    fun resizeBitMapDrawable(drawable: Drawable, resources: Resources?, size: Int): Drawable? {
-        val b = (drawable as? BitmapDrawable)?.bitmap
-        val bitmapResized: Bitmap? =
-            if (b != null) {
-                Bitmap.createScaledBitmap(b, size, size, false)
-            } else {
-                null
-            }
-        return if (bitmapResized != null) {
-            BitmapDrawable(resources, bitmapResized)
-        } else {
             null
         }
     }

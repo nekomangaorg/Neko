@@ -299,162 +299,155 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         fun addToLibraryQuery() =
             """
             |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
-                |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
-                |   id
-                |   status
-                |}
+            |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
+            |   id
+            |   status
             |}
-            |
-            """
+            |}
+            |"""
                 .trimMargin()
 
         fun deleteFromLibraryQuery() =
             """
-                |mutation DeleteManga(${'$'}listId: Int) {
-                |DeleteMediaListEntry (id: ${'$'}listId) {
-                    |deleted
-
-                |}
+            |mutation DeleteManga(${'$'}listId: Int) {
+            |DeleteMediaListEntry (id: ${'$'}listId) {
+            |deleted
+            |
             |}
-            """
+            |}"""
                 .trimMargin()
 
         fun updateInLibraryQuery() =
             """
             |mutation UpdateManga(${'$'}listId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}score: Int, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
-                |SaveMediaListEntry (id: ${'$'}listId, progress: ${'$'}progress, status: ${'$'}status, scoreRaw: ${'$'}score, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
-                    |id
-                    |status
-                    |progress
-                    |startedAt {
-                        |year
-                        |month
-                        |day
-                    |}
-                    |completedAt {
-                        |year
-                        |month
-                        |day
-                    |}
-                |}
+            |SaveMediaListEntry (id: ${'$'}listId, progress: ${'$'}progress, status: ${'$'}status, scoreRaw: ${'$'}score, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) {
+            |id
+            |status
+            |progress
+            |startedAt {
+            |year
+            |month
+            |day
             |}
-            |
-            """
+            |completedAt {
+            |year
+            |month
+            |day
+            |}
+            |}
+            |}
+            |"""
                 .trimMargin()
 
         fun searchQuery() =
             """
             |query Search(${'$'}query: String) {
-                |Page (perPage: 50) {
-                    |media(search: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
-                        |id
-                        |title {
-                            |userPreferred
-                        |}
-                        |coverImage {
-                            |large
-                        |}
-                        |format
-                        |status
-                        |chapters
-                        |description
-                        |startDate {
-                            |year
-                            |month
-                            |day
-                        |}
-                    |}
-                |}
+            |Page (perPage: 50) {
+            |media(search: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
+            |id
+            |title {
+            |userPreferred
             |}
-            |
-            """
+            |coverImage {
+            |large
+            |}
+            |format
+            |status
+            |chapters
+            |description
+            |startDate {
+            |year
+            |month
+            |day
+            |}
+            |}
+            |}
+            |}
+            |"""
                 .trimMargin()
 
         fun findQuery() =
             """
             |query Media(${'$'}query: Int) {
-                |Page (perPage: 50) {
-                    |media(id: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
-                        |id
-                        |title {
-                            |userPreferred
-                        |}
-                        |coverImage {
-                            |large
-                        |}
-                        |format
-                        |status
-                        |chapters
-                        |description
-                        |startDate {
-                            |year
-                            |month
-                            |day
-                        |}
-                    |}
-                |}
+            |Page (perPage: 50) {
+            |media(id: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
+            |id
+            |title {
+            |userPreferred
             |}
-            |
-            """
+            |coverImage {
+            |large
+            |}
+            |format
+            |status
+            |chapters
+            |description
+            |startDate {
+            |year
+            |month
+            |day
+            |}
+            |}
+            |}
+            |}
+            |"""
                 .trimMargin()
 
         fun findLibraryMangaQuery() =
             """
             |query (${'$'}id: Int!, ${'$'}manga_id: Int!) {
-                |Page {
-                    |mediaList(userId: ${'$'}id, type: MANGA, mediaId: ${'$'}manga_id) {
-                        |id
-                        |status
-                        |scoreRaw: score(format: POINT_100)
-                        |progress
-                        |startedAt {
-                            |year
-                            |month
-                            |day
-                        |}
-                        |completedAt {
-                            |year
-                            |month
-                            |day
-                        |}
-                        |media {
-                            |id
-                            |title {
-                                |userPreferred
-                            |}
-                            |coverImage {
-                                |large
-                            |}
-                            |format
-                            |status
-                            |chapters
-                            |description
-                            |startDate {
-                                |year
-                                |month
-                                |day
-                            |}
-                        |}
-                    |}
-                |}
+            |Page {
+            |mediaList(userId: ${'$'}id, type: MANGA, mediaId: ${'$'}manga_id) {
+            |id
+            |status
+            |scoreRaw: score(format: POINT_100)
+            |progress
+            |startedAt {
+            |year
+            |month
+            |day
             |}
-            |
-            """
+            |completedAt {
+            |year
+            |month
+            |day
+            |}
+            |media {
+            |id
+            |title {
+            |userPreferred
+            |}
+            |coverImage {
+            |large
+            |}
+            |format
+            |status
+            |chapters
+            |description
+            |startDate {
+            |year
+            |month
+            |day
+            |}
+            |}
+            |}
+            |}
+            |}
+            |"""
                 .trimMargin()
 
         fun currentUserQuery() =
             """
             |query User {
-                |Viewer {
-                    |id
-                    |name
-                    |mediaListOptions {
-                        |scoreFormat
-                    |}
-                |}
+            |Viewer {
+            |id
+            |name
+            |mediaListOptions {
+            |scoreFormat
             |}
-            |
-            """
+            |}
+            |}
+            |"""
                 .trimMargin()
     }
 }

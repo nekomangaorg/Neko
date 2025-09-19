@@ -184,6 +184,7 @@ class MangaDetailPresenter(
                         it == MergeType.Suwayomi && !sourceManager.suwayomi.isConfigured()
                     }
                     .filterNot { it == MergeType.MangaLife }
+                    .filterNot { it == MergeType.Comick }
                     .toPersistentList()
 
             _generalState.value =
@@ -647,14 +648,15 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             db.deleteMergeMangaForType(mangaId, mergeType).executeAsBlocking()
             updateMangaFlow()
-
-            val mergedChapters =
-                db.getChapters(currentManga()).executeOnIO().filter {
+            val (mergedChapters, nonMergedChapters) =
+                db.getChapters(currentManga()).executeOnIO().partition {
                     it.isMergedChapterOfType(mergeType)
                 }
-
-            downloadManager.deleteChapters(mergedChapters, currentManga())
+            if (!libraryPreferences.enableLocalChapters().get()) {
+                downloadManager.deleteChapters(mergedChapters, currentManga())
+            }
             db.deleteChapters(mergedChapters).executeOnIO()
+
             updateAllFlows()
         }
     }

@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.StringRes
@@ -12,6 +11,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -222,7 +222,7 @@ class MangaDetailController(private val mangaId: Long) :
 
     /** Generate palette from the drawable */
     private fun setPalette(drawable: Drawable) {
-        val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return
+        val bitmap = drawable.toBitmap()
         Palette.from(bitmap).generate {
             it ?: return@generate
             viewScope.launchUI {

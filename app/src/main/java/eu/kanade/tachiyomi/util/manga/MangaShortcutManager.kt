@@ -5,10 +5,10 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import coil3.imageLoader
 import coil3.request.ImageRequest
+import coil3.toBitmap
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -57,8 +57,7 @@ class MangaShortcutManager(
                 val shortcuts =
                     recents.map { item ->
                         val request = ImageRequest.Builder(context).data(item).build()
-                        val bitmap =
-                            (context.imageLoader.execute(request).image as? BitmapDrawable)?.bitmap
+                        val bitmap = context.imageLoader.execute(request).image?.toBitmap()
 
                         ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
                             .setShortLabel(
