@@ -58,7 +58,7 @@ class SimilarHandler {
                     }
                     .toMap()
 
-            val mangaList = similarGetMangadexMangaList(mangaIdMap.keys.toList(), false)
+            val mangaList = getMangadexMangaList(mangaIdMap.keys.toList(), false)
 
             val thumbQuality = mangaDexPreferences.coverQuality().get()
             val relatedMangaList =
@@ -73,6 +73,47 @@ class SimilarHandler {
 
         val dbDto = getDbDto(db.getSimilar(dexId).executeAsBlocking())
         return dbDto.relatedManga?.map { it.toSourceManga() } ?: emptyList()
+    }
+
+    suspend fun fetchRecommended(dexId: String, forceRefresh: Boolean): List<SourceManga> {
+        if (forceRefresh) {
+            val recommended = withIOContext {
+                networkServices.service
+                    .recommendedManga(dexId)
+                    .onFailure { TimberKt.e { "trying to get recommended manga, $this" } }
+                    .getOrNull()
+            }
+            recommended ?: return emptyList()
+
+            val mangaIdMap =
+                recommended.data
+                    .mapNotNull {
+                        if (it.relationships.isEmpty()) return@mapNotNull null
+                        it.relationships.last().id to it.attributes.score
+                    }
+                    .toMap()
+            val mangaList = getMangadexMangaList(mangaIdMap.keys.toList(), false)
+            val thumbQuality = mangaDexPreferences.coverQuality().get()
+            val recommendedMangaList =
+                mangaList.data
+                    .sortedByDescending { mangaIdMap[it.id] }
+                    .map {
+                        it.toRelatedMangaDto(
+                            thumbQuality,
+                            "%.2f".format(100 * (mangaIdMap[it.id] ?: 0f)) + "% match",
+                        )
+                    }
+
+            // Update the Manga Similar database
+            val mangaDb = db.getSimilar(dexId).executeAsBlocking()
+            val dbDto = getDbDto(mangaDb)
+            dbDto.recommendedManga = recommendedMangaList
+            insertMangaSimilar(dexId, dbDto, mangaDb)
+        }
+
+        val dbDto = getDbDto(db.getSimilar(dexId).executeAsBlocking())
+
+        return dbDto.recommendedManga?.map { it.toSourceManga() } ?: emptyList()
     }
 
     private fun insertMangaSimilar(
@@ -178,7 +219,7 @@ class SimilarHandler {
             return
         }
 
-        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
+        val mangaListDto = getMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
@@ -253,7 +294,7 @@ class SimilarHandler {
             return
         }
 
-        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
+        val mangaListDto = getMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
         val thumbQuality = mangaDexPreferences.coverQuality().get()
         val mangaList =
@@ -319,7 +360,7 @@ class SimilarHandler {
             return
         }
 
-        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
+        val mangaListDto = getMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
@@ -396,7 +437,7 @@ class SimilarHandler {
             return
         }
 
-        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
+        val mangaListDto = getMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
@@ -413,7 +454,7 @@ class SimilarHandler {
     }
 
     /** this will get the manga objects with cover_art for all the specified ids */
-    private suspend fun similarGetMangadexMangaList(
+    private suspend fun getMangadexMangaList(
         mangaIds: List<String>,
         strictMatch: Boolean = true,
     ): MangaListDto {
