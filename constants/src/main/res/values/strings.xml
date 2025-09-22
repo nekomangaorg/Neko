@@ -1446,6 +1446,7 @@
     <!-- Similar -->
     <string name="similar_type">Similar</string>
     <string name="related_type">Related</string>
+    <string name="recommended_type">Recommended</string>
     <string name="similar">Similar Manga</string>
     <string name="similar_credit_title">Similar Manga Credits</string>
     <string name="similar_credit_message">
