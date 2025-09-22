@@ -295,7 +295,7 @@
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="library_update_device_restriction">Library device update restrictions</string>
+    <string name="library_update_device_restriction">Library device auto update restrictions</string>
     <string name="library_update__device_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
     <string name="smart_library_update_restrictions">Smart library update restrictions</string>

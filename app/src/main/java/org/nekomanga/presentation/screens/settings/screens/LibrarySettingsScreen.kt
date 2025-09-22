@@ -235,7 +235,6 @@ internal class LibrarySettingsScreen(
                         },
                     ),
                     Preference.PreferenceItem.MultiSelectListPreference(
-                        enabled = showLibraryUpdateRestrictions,
                         pref = libraryPreferences.autoUpdateMangaRestrictions(),
                         title = stringResource(R.string.smart_library_update_restrictions),
                         entries =
