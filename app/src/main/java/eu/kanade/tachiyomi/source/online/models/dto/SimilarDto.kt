@@ -15,10 +15,22 @@ data class RelationDto(
 @Serializable data class RelationAttributesDto(val relation: String)
 
 @Serializable
+data class RecommendationListDto(val response: String, val data: List<RecommendationDto>)
+
+@Serializable
+data class RecommendationDto(
+    val attributes: RecommendationAttributesDto,
+    val relationships: List<RelationMangaDto>,
+)
+
+@Serializable data class RecommendationAttributesDto(val score: Float)
+
+@Serializable
 data class SimilarMangaDatabaseDto(
     var similarApi: SimilarMangaDto? = null,
     var similarManga: List<RelatedMangaDto>? = null,
     var relatedManga: List<RelatedMangaDto>? = null,
+    var recommendedManga: List<RelatedMangaDto>? = null,
     var aniListApi: AnilistMangaRecommendationsDto? = null,
     var aniListManga: List<RelatedMangaDto>? = null,
     var myAnimelistApi: MalMangaRecommendationsDto? = null,

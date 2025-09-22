@@ -410,38 +410,34 @@ class FeedPresenter(
 
     fun deleteHistory(feedManga: FeedManga, simpleChapter: SimpleChapter) {
         presenterScope.launchIO {
+            feedRepository.deleteHistoryForChapter(simpleChapter.url)
+            val index =
+                _historyScreenPagingState.value.historyFeedMangaList.indexOfFirst {
+                    it.mangaId == feedManga.mangaId
+                }
+            val mutableFeedManga =
+                _historyScreenPagingState.value.historyFeedMangaList.toMutableList()
+
             if (feedManga.chapters.size == 1) {
-                deleteAllHistory(feedManga)
+                mutableFeedManga.removeAt(index)
+            } else if (_historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series) {
+                val newFeedManga = feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
+                mutableFeedManga[index] = newFeedManga
             } else {
-
-                feedRepository.deleteHistoryForChapter(simpleChapter.url)
-                val index =
-                    _historyScreenPagingState.value.historyFeedMangaList.indexOfFirst {
-                        it.mangaId == feedManga.mangaId
-                    }
-                val mutableFeedManga =
-                    _historyScreenPagingState.value.historyFeedMangaList.toMutableList()
-
-                if (_historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series) {
-                    val newFeedManga =
-                        feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
-                    mutableFeedManga[index] = newFeedManga
-                } else {
-                    val newFeedManga = _historyScreenPagingState.value.historyFeedMangaList[index]
-                    mutableFeedManga[index] =
-                        newFeedManga.copy(
-                            chapters =
-                                newFeedManga.chapters
-                                    .filter { it.chapter.url != simpleChapter.url }
-                                    .toImmutableList()
-                        )
-                }
-                _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = mutableFeedManga.toImmutableList())
-                }
+                val newFeedManga = _historyScreenPagingState.value.historyFeedMangaList[index]
+                mutableFeedManga[index] =
+                    newFeedManga.copy(
+                        chapters =
+                            newFeedManga.chapters
+                                .filter { it.chapter.url != simpleChapter.url }
+                                .toImmutableList()
+                    )
             }
-            loadSummaryPage()
+            _historyScreenPagingState.update {
+                it.copy(historyFeedMangaList = mutableFeedManga.toImmutableList())
+            }
         }
+        loadSummaryPage()
     }
 
     fun loadSummaryPage() {

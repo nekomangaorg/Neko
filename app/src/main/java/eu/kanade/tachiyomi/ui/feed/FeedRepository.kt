@@ -62,7 +62,7 @@ class FeedRepository(
                 }
                 .filterNot {
                     it.chapter.uploader in blockedUploaders &&
-                        Constants.NO_GROUP !in it.chapter.scanlatorList()
+                        Constants.NO_GROUP in it.chapter.scanlatorList()
                 }
                 .toPersistentList()
 
