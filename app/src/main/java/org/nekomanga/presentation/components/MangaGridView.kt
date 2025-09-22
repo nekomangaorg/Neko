@@ -122,6 +122,7 @@ fun MangaGrid(
 
 @Composable
 fun MangaGridItem(
+    modifier: Modifier = Modifier,
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     showUnreadBadge: Boolean = false,
@@ -134,7 +135,6 @@ fun MangaGridItem(
     onStartReadingClick: () -> Unit = {},
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
         Box(

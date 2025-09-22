@@ -103,7 +103,7 @@ fun NekoScaffold(
     content: @Composable (PaddingValues) -> Unit = {},
 ) {
     val systemUiController = rememberSystemUiController()
-    val (color, useDarkIcons) = getTopAppBarColor(title, altAppBarColor)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(title, altAppBarColor)
     DisposableEffect(color, useDarkIcons) {
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
         onDispose {}
@@ -140,6 +140,7 @@ fun NekoScaffold(
                     NekoScaffoldType.TitleAndSubtitle ->
                         TitleAndSubtitleTopAppBar(
                             color = color,
+                            onColor = onColor,
                             title = title,
                             subtitle = subtitle,
                             navigationIconLabel = navigationIconLabel,
@@ -218,6 +219,7 @@ fun NekoScaffold(
 @Composable
 private fun TitleAndSubtitleTopAppBar(
     color: Color,
+    onColor: Color,
     title: String,
     subtitle: String,
     navigationIconLabel: String,
@@ -232,6 +234,7 @@ private fun TitleAndSubtitleTopAppBar(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
+                    color = onColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -239,6 +242,7 @@ private fun TitleAndSubtitleTopAppBar(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
+                        color = onColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -767,16 +771,26 @@ private fun TitleOnlyTopAppBar(
 }
 
 @Composable
-fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Pair<Color, Boolean> {
+fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Triple<Color, Color, Boolean> {
     return when {
         title.isEmpty() && !altAppBarColor ->
-            Color.Transparent to (MaterialTheme.colorScheme.surface.luminance() > 0.5f)
+            Triple(
+                Color.Transparent,
+                Color.Black,
+                (MaterialTheme.colorScheme.surface.luminance() > 0.5f),
+            )
         title.isNotEmpty() && !altAppBarColor ->
-            MaterialTheme.colorScheme.surface.copy(alpha = .7f) to
-                (MaterialTheme.colorScheme.surface.copy(alpha = .7f).luminance() > 0.5f)
+            Triple(
+                MaterialTheme.colorScheme.surface.copy(alpha = .7f),
+                MaterialTheme.colorScheme.onSurface,
+                (MaterialTheme.colorScheme.surface.copy(alpha = .7f).luminance() > 0.5f),
+            )
         else ->
-            MaterialTheme.colorScheme.secondary.copy(alpha = .7f) to
-                (MaterialTheme.colorScheme.secondary.copy(alpha = .7f).luminance() > 0.5f)
+            Triple(
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .7f),
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                (MaterialTheme.colorScheme.secondary.copy(alpha = .7f).luminance() > 0.5f),
+            )
     }
 }
 
