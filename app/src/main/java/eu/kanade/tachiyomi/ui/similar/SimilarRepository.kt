@@ -50,6 +50,20 @@ class SimilarRepository {
                     .getOrNull()
             }
 
+            val recommended = async {
+                kotlin
+                    .runCatching {
+                        logTimeTaken(" Recommended Rec:") {
+                            createGroup(
+                                R.string.recommended_type,
+                                similarHandler.fetchRecommended(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get recommended" } }
+                    .getOrNull()
+            }
+
             val similar = async {
                 runCatching {
                         logTimeTaken("Similar Recs:") {
@@ -104,6 +118,7 @@ class SimilarRepository {
 
             listOfNotNull(
                 related.await(),
+                recommended.await(),
                 similar.await(),
                 mu.await(),
                 anilist.await(),

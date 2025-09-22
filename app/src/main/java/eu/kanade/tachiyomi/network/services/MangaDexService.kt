@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.RecommendationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.SeasonalDto
@@ -71,6 +72,9 @@ interface MangaDexService {
 
     @GET("${MdConstants.Api.manga}/{id}/relation")
     suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
+
+    @GET("${MdConstants.Api.manga}/{id}/recommendation")
+    suspend fun recommendedManga(@Path("id") id: String): ApiResponse<RecommendationListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(
