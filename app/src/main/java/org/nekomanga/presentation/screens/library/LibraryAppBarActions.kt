@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.library
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -12,6 +13,7 @@ import org.nekomanga.presentation.components.UiText
 @Composable
 fun LibraryAppBarActions(editCategoryClick: () -> Unit, removeFromLibraryClick: () -> Unit) {
     AppBarActions(
+        tint = MaterialTheme.colorScheme.onSecondaryContainer,
         actions =
             listOf(
                 AppBar.Action(
@@ -89,6 +91,6 @@ fun LibraryAppBarActions(editCategoryClick: () -> Unit, removeFromLibraryClick: 
                     title = UiText.StringResource(R.string.add_to_follows),
                     onClick = {},
                 ),
-            )
+            ),
     )
 }

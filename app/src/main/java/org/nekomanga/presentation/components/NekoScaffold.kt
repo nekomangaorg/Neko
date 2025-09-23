@@ -255,6 +255,7 @@ private fun TitleAndSubtitleTopAppBar(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
                 buttonClicked = onNavigationIconClicked,
+                enabledTint = onColor,
             )
         },
         actions = actions,
