@@ -90,10 +90,10 @@ fun EditCategorySheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
+                val stringRes = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
                 Text(
                     modifier = paddingModifier,
-                    text = stringResource(id = prefix, stringResource(id = R.string.manga)),
+                    text = stringResource(stringRes),
                     style = MaterialTheme.typography.titleLarge,
                 )
                 TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {

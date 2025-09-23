@@ -25,8 +25,8 @@
     <string name="creator">Creator</string>
     <string name="artist">Artist</string>
     <string name="description">Description</string>
-    <string name="move_x_to">Move %1$s to…</string>
-    <string name="add_x_to">Add %1$s to…</string>
+    <string name="move_x_to">Move to..</string>
+    <string name="add_x_to">Add to..</string>
 
     <!-- Status -->
     <string name="ongoing">Ongoing</string>

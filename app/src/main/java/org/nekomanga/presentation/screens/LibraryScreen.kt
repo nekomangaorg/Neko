@@ -126,7 +126,8 @@ fun LibraryScreen(
     ) {
         ModalBottomSheetLayout(
             sheetState = sheetState,
-            sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+            sheetShape =
+                RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
             sheetContent = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     currentBottomSheet?.let { currentSheet ->
@@ -171,7 +172,12 @@ fun LibraryScreen(
                     actions = {
                         if (selectionMode) {
                             LibraryAppBarActions(
-                                removeFromLibraryClick = { deleteMangaConfirmation = true }
+                                editCategoryClick = {
+                                    scope.launch {
+                                        openSheet(LibraryBottomSheetScreen.CategorySheet)
+                                    }
+                                },
+                                removeFromLibraryClick = { deleteMangaConfirmation = true },
                             )
                         } else {
                             AppBarActions(

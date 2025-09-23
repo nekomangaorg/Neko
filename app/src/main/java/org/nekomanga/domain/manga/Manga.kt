@@ -5,6 +5,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import org.nekomanga.domain.category.CategoryItem
 
 data class SimpleManga(val title: String, val id: Long)
 
@@ -29,6 +30,7 @@ data class LibraryMangaItem(
     val trackCount: Int = 0,
     val isMerged: Boolean = false,
     val hasMissingChapters: Boolean = false,
+    val allCategories: List<CategoryItem> = emptyList(),
     val altTitles: List<String> = emptyList(),
     val genre: List<String> = emptyList(),
     val author: List<String> = emptyList(),

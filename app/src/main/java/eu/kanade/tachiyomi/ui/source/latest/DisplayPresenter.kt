@@ -201,6 +201,8 @@ class DisplayPresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order =
+                (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             _displayScreenState.update {
                 it.copy(

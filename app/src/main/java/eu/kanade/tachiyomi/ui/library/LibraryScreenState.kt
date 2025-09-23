@@ -19,6 +19,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText
 
@@ -43,6 +44,7 @@ data class LibraryScreenState(
     val currentGroupBy: Int = 0,
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
     val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
+    val userCategories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
 data class LibraryScreenActions(
@@ -68,6 +70,8 @@ data class LibrarySheetActions(
     val unreadBadgesToggled: () -> Unit,
     val downloadBadgesToggled: () -> Unit,
     val startReadingButtonToggled: () -> Unit,
+    val addNewCategory: (String) -> Unit,
+    val editCategories: (List<DisplayManga>, List<CategoryItem>) -> Unit,
 )
 
 data class LibraryCategoryActions(

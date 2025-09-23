@@ -101,9 +101,10 @@ fun LibraryPage(
                     isRefreshing = item.isRefreshing,
                     selectionMode = selectionMode,
                     allSelected =
-                        item.libraryItems
-                            .map { it.displayManga.mangaId }
-                            .all { id -> id in selectedIds },
+                        item.libraryItems.isNotEmpty() &&
+                            item.libraryItems
+                                .map { it.displayManga.mangaId }
+                                .all { id -> id in selectedIds },
                     isCollapsible = collapsible,
                     categoryItemClick = {
                         if (selectionMode) {
@@ -128,6 +129,7 @@ fun LibraryPage(
                             RowGrid(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
+                                selectedIds = selectedIds,
                                 libraryScreenState = libraryScreenState,
                                 columns = columns,
                                 isComfortableGrid =
@@ -148,6 +150,7 @@ fun LibraryPage(
                             ListItem(
                                 index = index,
                                 totalSize = item.libraryItems.size,
+                                selectedIds = selectedIds,
                                 libraryScreenState = libraryScreenState,
                                 libraryItem = libraryItem,
                                 libraryScreenActions = libraryScreenActions,
@@ -165,6 +168,7 @@ fun LibraryPage(
 private fun RowGrid(
     modifier: Modifier = Modifier,
     rowItems: List<LibraryMangaItem>,
+    selectedIds: List<Long>,
     libraryScreenState: LibraryScreenState,
     columns: Int,
     isComfortableGrid: Boolean,
@@ -184,7 +188,7 @@ private fun RowGrid(
                 downloadCount = libraryItem.downloadCount,
                 shouldOutlineCover = libraryScreenState.outlineCovers,
                 isComfortable = isComfortableGrid,
-                isSelected = libraryScreenState.selectedItems.contains(libraryItem),
+                isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
                 showStartReadingButton =
                     libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
                 onStartReadingClick = {
@@ -208,6 +212,7 @@ private fun ListItem(
     modifier: Modifier = Modifier,
     index: Int,
     totalSize: Int,
+    selectedIds: List<Long>,
     libraryScreenState: LibraryScreenState,
     libraryItem: LibraryMangaItem,
     libraryScreenActions: LibraryScreenActions,
@@ -236,7 +241,7 @@ private fun ListItem(
                         onLongClick = { libraryScreenActions.mangaLongClick(libraryItem) },
                     ),
             displayManga = libraryItem.displayManga,
-            isSelected = libraryScreenState.selectedItems.contains(libraryItem),
+            isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
             showUnreadBadge = libraryScreenState.showUnreadBadges,
             unreadCount = libraryItem.unreadCount,
             showDownloadBadge = libraryScreenState.showDownloadBadges,

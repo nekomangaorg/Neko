@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.DisplayOptionsSheet
+import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.GroupBySheet
 import org.nekomanga.presentation.components.sheets.LibrarySortSheet
 
@@ -15,6 +17,8 @@ sealed class LibraryBottomSheetScreen {
     object GroupBySheet : LibraryBottomSheetScreen()
 
     object DisplayOptionsSheet : LibraryBottomSheetScreen()
+
+    object CategorySheet : LibraryBottomSheetScreen()
 }
 
 @Composable
@@ -66,5 +70,28 @@ fun LibraryBottomSheet(
                 startReadingButtonToggled = { librarySheetActions.startReadingButtonToggled() },
                 bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
+        is LibraryBottomSheetScreen.CategorySheet -> {
+
+            val selectedDisplayItems = libraryScreenState.selectedItems.map { it.displayManga }
+
+            val mangaCategories =
+                libraryScreenState.selectedItems
+                    .map { it.allCategories }
+                    .flatten()
+                    .distinct()
+                    .toPersistentList()
+
+            EditCategorySheet(
+                addingToLibrary = false,
+                bottomContentPadding = contentPadding.calculateBottomPadding(),
+                categories = libraryScreenState.userCategories,
+                mangaCategories = mangaCategories,
+                cancelClick = { closeSheet() },
+                addNewCategory = librarySheetActions.addNewCategory,
+                confirmClicked = { newCategoryItems ->
+                    librarySheetActions.editCategories(selectedDisplayItems, newCategoryItems)
+                },
+            )
+        }
     }
 }

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -42,6 +43,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,6 +64,7 @@ import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -86,6 +89,8 @@ class LibraryComposePresenter(
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
     }
+
+    val manualTrigger = MutableSharedFlow<Unit>()
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
@@ -173,6 +178,10 @@ class LibraryComposePresenter(
                         it.copy(
                             currentGroupBy = libraryViewPreferences.groupBy,
                             trackMap = trackMap.toPersistentMap(),
+                            userCategories =
+                                categoryList
+                                    .filterNot { category -> category.isSystemCategory }
+                                    .toPersistentList(),
                         )
                     }
 
@@ -250,20 +259,7 @@ class LibraryComposePresenter(
                                                 },
                                             )
                                         )
-                                /* val sortedMangaList =
-                                if (showDownloadBadges) {
-                                        tempSortedList.mapAsync {
-                                            val dbManga =
-                                                db.getManga(it.displayManga.mangaId)
-                                                    .executeOnIO()!!
-                                            it.copy(
-                                                downloadCount =
-                                                    downloadManager.getDownloadCount(dbManga)
-                                            )
-                                        }
-                                    } else {
-                                        tempSortedList
-                                    }*/
+                                /* val sortedMangaList =  if (showDownloadBadges) { tempSortedList.mapAsync { val dbManga = db.getManga(it.displayManga.mangaId)   .executeOnIO()!!            it.copy(              downloadCount =       downloadManager.getDownloadCount(dbManga)                         )                               }                          } else {                               tempSortedList                             }*/
                                 val sortedMangaList =
                                     tempSortedList
                                         .mapAsync {
@@ -599,6 +595,33 @@ class LibraryComposePresenter(
                 is FilterTracked -> libraryPreferences.filterTracked().set(filter)
                 is FilterUnavailable -> libraryPreferences.filterUnavailable().set(filter)
                 is FilterUnread -> libraryPreferences.filterUnread().set(filter)
+            }
+        }
+    }
+
+    /** Add New Category */
+    fun addNewCategory(newCategory: String) {
+        presenterScope.launchIO {
+            val category = Category.create(newCategory)
+            category.order =
+                (_libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
+            db.insertCategory(category).executeAsBlocking()
+        }
+    }
+
+    fun editCategories(mangaList: List<DisplayManga>, categories: List<CategoryItem>) {
+        presenterScope.launchIO {
+            val dbCategories = categories.map { it.toDbCategory() }
+
+            mangaList.map { manga ->
+                val dbManga = db.getManga(manga.mangaId).executeOnIO()!!
+                val mangaCategories = dbCategories.map { MangaCategory.create(dbManga, it) }
+                launchIO { db.setMangaCategories(mangaCategories, listOf(dbManga)) }
+            }
+            clearSelectedManga()
+            if (libraryPreferences.groupBy().get() == BY_DEFAULT) {
+                libraryPreferences.groupBy().set(UNGROUPED)
+                libraryPreferences.groupBy().set(BY_DEFAULT)
             }
         }
     }
@@ -978,7 +1001,12 @@ class LibraryComposePresenter(
             val currentSelected = _libraryScreenState.value.selectedItems.toMutableList()
             val removed = currentSelected.remove(libraryMangaItem)
             if (!removed) {
-                currentSelected.add(libraryMangaItem)
+                val categoryItems =
+                    db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
+                        .executeOnIO()
+                        .map { it.toCategoryItem() }
+                val copy = libraryMangaItem.copy(allCategories = categoryItems)
+                currentSelected.add(copy)
             }
             _libraryScreenState.update {
                 it.copy(selectedItems = currentSelected.distinct().toPersistentList())

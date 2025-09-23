@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.library
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.runtime.Composable
 import org.nekomanga.R
@@ -9,10 +10,15 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
 
 @Composable
-fun LibraryAppBarActions(removeFromLibraryClick: () -> Unit) {
+fun LibraryAppBarActions(editCategoryClick: () -> Unit, removeFromLibraryClick: () -> Unit) {
     AppBarActions(
         actions =
             listOf(
+                AppBar.Action(
+                    title = UiText.StringResource(R.string.edit_categories),
+                    icon = Icons.AutoMirrored.Outlined.Label,
+                    onClick = editCategoryClick,
+                ),
                 AppBar.Action(
                     title = UiText.StringResource(R.string.remove_from_library),
                     icon = Icons.Outlined.DeleteOutline,

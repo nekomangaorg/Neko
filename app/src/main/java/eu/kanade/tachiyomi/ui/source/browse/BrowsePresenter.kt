@@ -896,6 +896,7 @@ class BrowsePresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             _browseScreenState.update {
                 it.copy(
