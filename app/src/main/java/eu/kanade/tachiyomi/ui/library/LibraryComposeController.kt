@@ -47,6 +47,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                     clearActiveFilters = presenter::clearActiveFilters,
                     filterToggled = presenter::filterToggled,
+                    downloadChapters = presenter::downloadChapters,
                     mangaStartReadingClick = { mangaId ->
                         presenter.openNextUnread(
                             mangaId,

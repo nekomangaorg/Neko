@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.asFlow
@@ -884,7 +885,7 @@ class LibraryComposePresenter(
         presenterScope.launchIO {
             _libraryScreenState.value.items.forEachIndexed { index, libraryItem ->
                 presenterScope.launchIO {
-                    val done = false
+                    var done = false
                     var updatedDownloadCount = -1
                     val items =
                         libraryItem.libraryItems
@@ -897,7 +898,7 @@ class LibraryComposePresenter(
                                             db.getManga(it.displayManga.mangaId).executeOnIO()!!
                                         updatedDownloadCount =
                                             downloadManager.getDownloadCount(dbManga)
-                                        done
+                                        done = true
                                         it.copy(
                                             downloadCount =
                                                 downloadManager.getDownloadCount(dbManga)
@@ -1016,6 +1017,60 @@ class LibraryComposePresenter(
 
             _libraryScreenState.update {
                 it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+            }
+        }
+    }
+
+    fun downloadChapters(downloadAction: DownloadAction) {
+        presenterScope.launchIO {
+            val displayMangaList = _libraryScreenState.value.selectedItems.map { it.displayManga }
+            clearSelectedManga()
+            if (
+                downloadAction == DownloadAction.Cancel ||
+                    downloadAction == DownloadAction.Download ||
+                    downloadAction == DownloadAction.Remove ||
+                    downloadAction == DownloadAction.ImmediateDownload ||
+                    downloadAction == DownloadAction.Remove
+            ) {
+                return@launchIO
+            }
+
+            displayMangaList.mapAsync { displayManga ->
+                val dbManga = db.getManga(displayManga.mangaId).executeOnIO()!!
+                val dbChapters =
+                    chapterFilter
+                        .filterChaptersByScanlatorsAndLanguage(
+                            db.getChapters(dbManga).executeOnIO(),
+                            dbManga,
+                            mangadexPreferences,
+                            libraryPreferences,
+                        )
+                        .reversed()
+
+                when (downloadAction) {
+                    DownloadAction.DownloadAll -> {
+                        downloadManager.downloadChapters(dbManga, dbChapters)
+                    }
+                    is DownloadAction.DownloadNextUnread -> {
+                        val amount = downloadAction.numberToDownload
+                        val unreadDbChapters = dbChapters.filterNot { it.read }.take(amount)
+                        downloadManager.downloadChapters(dbManga, unreadDbChapters)
+                    }
+                    DownloadAction.DownloadUnread -> {
+                        val unreadDbChapters = dbChapters.filterNot { it.read }
+                        downloadManager.downloadChapters(dbManga, unreadDbChapters)
+                    }
+                    DownloadAction.RemoveAll -> {
+                        downloadManager.deleteChapters(dbManga, dbChapters)
+                        updateDownloadBadges(displayManga.mangaId)
+                    }
+                    DownloadAction.RemoveRead -> {
+                        val readDbChapters = dbChapters.filter { it.read }
+                        downloadManager.deleteChapters(dbManga, readDbChapters)
+                        updateDownloadBadges(displayManga.mangaId)
+                    }
+                    else -> Unit
+                }
             }
         }
     }

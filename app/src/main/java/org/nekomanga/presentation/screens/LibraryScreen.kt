@@ -172,6 +172,7 @@ fun LibraryScreen(
                     actions = {
                         if (selectionMode) {
                             LibraryAppBarActions(
+                                downloadChapters = libraryScreenActions.downloadChapters,
                                 editCategoryClick = {
                                     scope.launch {
                                         openSheet(LibraryBottomSheetScreen.CategorySheet)

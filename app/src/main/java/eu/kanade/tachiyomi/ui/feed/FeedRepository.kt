@@ -478,7 +478,7 @@ class FeedRepository(
 
     suspend fun deleteChapter(chapterItem: ChapterItem) {
         val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
-        downloadManager.deleteChapters(listOf(chapterItem.chapter.toDbChapter()), manga)
+        downloadManager.deleteChapters(manga, listOf(chapterItem.chapter.toDbChapter()))
     }
 
     suspend fun deleteAllHistoryForManga(mangaId: Long) {
@@ -552,9 +552,9 @@ class FeedRepository(
             is MangaConstants.DownloadAction.Download ->
                 downloadManager.downloadChapters(dbManga, listOf(dbChapter))
             is MangaConstants.DownloadAction.Remove ->
-                downloadManager.deleteChapters(listOf(dbChapter), dbManga)
+                downloadManager.deleteChapters(dbManga, listOf(dbChapter))
             is MangaConstants.DownloadAction.Cancel ->
-                downloadManager.deleteChapters(listOf(dbChapter), dbManga)
+                downloadManager.deleteChapters(dbManga, listOf(dbChapter))
             else -> Unit
         }
     }

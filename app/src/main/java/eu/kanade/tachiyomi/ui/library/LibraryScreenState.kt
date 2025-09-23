@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
@@ -58,6 +59,7 @@ data class LibraryScreenActions(
     val updateLibrary: (Boolean) -> Unit,
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,
+    val downloadChapters: (MangaConstants.DownloadAction) -> Unit,
     val filterToggled: (LibraryFilterType) -> Unit,
 )
 
