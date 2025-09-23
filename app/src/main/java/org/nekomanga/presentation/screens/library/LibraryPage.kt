@@ -274,6 +274,16 @@ private fun LibraryCategoryHeader(
                     )
         )
 
+    val iconColor by
+        animateColorAsState(
+            targetValue =
+                if (enabled) MaterialTheme.colorScheme.tertiary
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.disabledAlphaLowContrast
+                    )
+        )
+
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -291,14 +301,14 @@ private fun LibraryCategoryHeader(
             )
         }
         AnimatedVisibility(selectionMode) {
-            Gap(Size.tiny)
             Icon(
                 imageVector =
                     if (allSelected) Icons.Default.CheckCircleOutline else Icons.Outlined.Circle,
                 contentDescription = null,
-                tint = textColor,
+                tint = iconColor,
             )
         }
+        Gap(Size.small)
 
         val text =
             when {
