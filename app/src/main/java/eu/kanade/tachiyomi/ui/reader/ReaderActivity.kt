@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -348,6 +349,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     }
                     is ReaderViewModel.Event.ShareTrackingError -> {
                         showTrackingError(event.errors)
+                    }
+                    is ReaderViewModel.Event.CoverUpdated -> {
+                        setResult(RESULT_OK)
                     }
                 }
             }

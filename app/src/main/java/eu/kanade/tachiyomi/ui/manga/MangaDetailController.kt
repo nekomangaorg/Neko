@@ -216,7 +216,10 @@ class MangaDetailController(private val mangaId: Long) :
         } else if (!chapter.isAvailable(presenter.downloadManager, presenter.manga.value!!)) {
             context.toast("Chapter is not available")
         } else {
-            startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
+            startActivityForResult(
+                ReaderActivity.newIntent(context, presenter.manga.value!!, chapter),
+                REQUEST_CODE,
+            )
         }
     }
 
@@ -355,7 +358,15 @@ class MangaDetailController(private val mangaId: Long) :
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE && resultCode == android.app.Activity.RESULT_OK) {
+            presenter.onRefresh()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     companion object {
         const val MANGA_EXTRA = "manga"
+        private const val REQUEST_CODE = 101
     }
 }

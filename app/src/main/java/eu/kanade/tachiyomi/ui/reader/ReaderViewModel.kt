@@ -936,6 +936,7 @@ class ReaderViewModel(
                         coverCache.setCustomCoverToCache(manga, stream())
                         manga.user_cover = coverCache.getCustomCoverFile(manga).path
                         db.insertManga(manga).executeAsBlocking()
+                        eventChannel.send(Event.CoverUpdated)
                         SetAsCoverResult.Success
                     } else {
                         SetAsCoverResult.AddToLibraryFirst
@@ -1057,5 +1058,7 @@ class ReaderViewModel(
         ) : Event()
 
         data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()
+
+        object CoverUpdated : Event()
     }
 }
