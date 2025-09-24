@@ -20,135 +20,14 @@ import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 
+import org.nekomanga.presentation.screens.mangadetails.BlockType
+import org.nekomanga.presentation.screens.mangadetails.ChapterDisplayOptions
+import org.nekomanga.presentation.screens.mangadetails.LanguageOption
+import org.nekomanga.presentation.screens.mangadetails.ScanlatorOption
+import org.nekomanga.presentation.screens.mangadetails.SetGlobal
+import org.nekomanga.presentation.screens.mangadetails.SortOption
+
 object MangaConstants {
-
-    data class MangaScreenGeneralState(
-        val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val searchChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
-        val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val allScanlators: ImmutableSet<String> = persistentSetOf(),
-        val allUploaders: ImmutableSet<String> = persistentSetOf(),
-        val allSources: ImmutableSet<String> = persistentSetOf(),
-        val allLanguages: ImmutableSet<String> = persistentSetOf(),
-        val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
-        val chapterFilter: ChapterDisplay = ChapterDisplay(),
-        val chapterFilterText: String = "",
-        val chapterSortFilter: SortFilter = SortFilter(),
-        val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
-        val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
-        val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
-        val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
-        val hasDefaultCategory: Boolean = false,
-        val hideButtonText: Boolean = false,
-        val extraLargeBackdrop: Boolean = false,
-        val forcePortrait: Boolean = false,
-        val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
-        val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val themeBasedOffCovers: Boolean = false,
-        val wrapAltTitles: Boolean = false,
-        val trackServiceCount: Int = 0,
-        val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
-        val vibrantColor: Int? = null,
-    )
-
-    data class MangaScreenMangaState(
-        val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
-        val alternativeTitles: ImmutableList<String> = persistentListOf(),
-        val artist: String = "",
-        val author: String = "",
-        val currentArtwork: Artwork,
-        val currentDescription: String = "",
-        val currentTitle: String = "",
-        val externalLinks: ImmutableList<ExternalLink> = persistentListOf(),
-        val genres: ImmutableList<String> = persistentListOf(),
-        val initialized: Boolean = false,
-        val inLibrary: Boolean = false,
-        val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
-        val isPornographic: Boolean = false,
-        val langFlag: String? = null,
-        val missingChapters: String? = null,
-        val estimatedMissingChapters: String? = null,
-        val originalTitle: String = "",
-        val stats: Stats? = null,
-        val status: Int = 0,
-        val lastVolume: Int? = null,
-        val lastChapter: Int? = null,
-    )
-
-    data class MangaScreenTrackMergeState(
-        val loggedInTrackService: ImmutableList<TrackServiceItem> = persistentListOf(),
-        val tracks: ImmutableList<TrackItem> = persistentListOf(),
-        val trackSearchResult: TrackingConstants.TrackSearchResult =
-            TrackingConstants.TrackSearchResult.Loading,
-        val mergeSearchResult: MergeConstants.MergeSearchResult =
-            MergeConstants.MergeSearchResult.Loading,
-    )
-
-    /** Holds the next unread chapter and the text to display for the quick read button. */
-    data class NextUnreadChapter(
-        @param:StringRes val id: Int? = null,
-        val text: String = "",
-        val simpleChapter: SimpleChapter? = null,
-    )
-
-    data class SortFilter(
-        val sourceOrderSort: SortState = SortState.None,
-        val smartOrderSort: SortState = SortState.None,
-        val uploadDateSort: SortState = SortState.None,
-        val matchesGlobalDefaults: Boolean = true,
-    )
-
-    data class SortOption(val sortState: SortState, val sortType: SortType)
-
-    data class ScanlatorFilter(val scanlators: ImmutableList<ScanlatorOption>)
-
-    data class ScanlatorOption(val name: String, val disabled: Boolean = false)
-
-    data class LanguageFilter(val languages: ImmutableList<LanguageOption>)
-
-    data class LanguageOption(val name: String, val disabled: Boolean = false)
-
-    data class ChapterDisplay(
-        val showAll: Boolean = false,
-        val unread: ToggleableState = ToggleableState.Off,
-        val downloaded: ToggleableState = ToggleableState.Off,
-        val bookmarked: ToggleableState = ToggleableState.Off,
-        val hideChapterTitles: ToggleableState = ToggleableState.Off,
-        val available: ToggleableState = ToggleableState.Off,
-        val matchesGlobalDefaults: Boolean = true,
-    )
-
-    data class ChapterDisplayOptions(
-        val displayType: ChapterDisplayType,
-        val displayState: ToggleableState,
-    )
-
-    enum class ChapterDisplayType {
-        All,
-        Unread,
-        Downloaded,
-        Bookmarked,
-        Available,
-        HideTitles,
-    }
-
-    enum class SortType {
-        SourceOrder,
-        ChapterNumber,
-        UploadDate,
-    }
-
-    enum class SortState(val key: String) {
-        Ascending(MdConstants.Sort.ascending),
-        Descending(MdConstants.Sort.descending),
-        None(""),
-    }
-
-    enum class SetGlobal {
-        Sort,
-        Filter,
-    }
 
     class ChapterFilterActions(
         val changeSort: (sortOptions: SortOption?) -> Unit,
