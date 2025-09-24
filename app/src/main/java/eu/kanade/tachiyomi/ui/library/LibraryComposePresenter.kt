@@ -226,13 +226,15 @@ class LibraryComposePresenter(
                                     allCollapsed = false
                                 }
                                 val lastReadMap =
-                                    db.getLastReadManga().executeAsBlocking().associate {
-                                        it.id!! to it.last_read.toInt()
-                                    }
+                                    db.getLastReadManga()
+                                        .executeAsBlocking()
+                                        .withIndex()
+                                        .associate { (index, manga) -> manga.id!! to index }
                                 val lastFetchMap =
-                                    db.getLastFetchedManga().executeAsBlocking().associate {
-                                        it.id!! to it.last_read.toInt()
-                                    }
+                                    db.getLastFetchedManga()
+                                        .executeAsBlocking()
+                                        .withIndex()
+                                        .associate { (index, manga) -> manga.id!! to index }
 
                                 val tempSortedList =
                                     libraryCategoryItem.libraryItems
@@ -659,13 +661,15 @@ class LibraryComposePresenter(
                             libraryCategoryItem.libraryItems.reversed().toPersistentList()
                         } else {
                             val lastReadMap =
-                                db.getLastReadManga().executeAsBlocking().associate {
-                                    it.id!! to it.last_read.toInt()
+                                db.getLastReadManga().executeAsBlocking().withIndex().associate {
+                                    (index, manga) ->
+                                    manga.id!! to index
                                 }
                             val lastFetchMap =
-                                db.getLastFetchedManga().executeAsBlocking().associate {
-                                    it.id!! to it.last_read.toInt()
-                                }
+                                db.getLastFetchedManga()
+                                    .executeAsBlocking()
+                                    .withIndex()
+                                    .associate { (index, manga) -> manga.id!! to index }
                             libraryCategoryItem.libraryItems
                                 .sortedWith(
                                     LibraryMangaItemComparator(
