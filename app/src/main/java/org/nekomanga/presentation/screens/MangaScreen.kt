@@ -152,19 +152,28 @@ fun MangaScreen(
 
     val defaultThemeColorState = defaultThemeColorState()
 
-    var themeColorState by remember { mutableStateOf(defaultThemeColorState) }
-
-    if (generalState.value.themeBasedOffCovers && generalState.value.vibrantColor != null) {
-        val color = getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
-        themeColorState =
-            ThemeColorState(
-                buttonColor = color,
-                rippleConfiguration = nekoRippleConfiguration(color),
-                textSelectionColors = dynamicTextSelectionColor(color),
-                altContainerColor =
-                    Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)),
+    val themeColorState by
+        remember(generalState.value.themeBasedOffCovers, generalState.value.vibrantColor) {
+            mutableStateOf(
+                if (generalState.value.themeBasedOffCovers &&
+                    generalState.value.vibrantColor != null
+                ) {
+                    val color =
+                        getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
+                    ThemeColorState(
+                        buttonColor = color,
+                        rippleConfiguration = nekoRippleConfiguration(color),
+                        textSelectionColors = dynamicTextSelectionColor(color),
+                        altContainerColor =
+                            Color(
+                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)
+                            ),
+                    )
+                } else {
+                    defaultThemeColorState
+                },
             )
-    }
+        }
 
     // set the current sheet to null when bottom sheet is closed
     LaunchedEffect(key1 = sheetState.isVisible) {
@@ -251,6 +260,25 @@ fun MangaScreen(
                         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
                         LocalTextSelectionColors provides themeColorState.textSelectionColors,
                     ) {
+                        val detailsState =
+                            remember(
+                                themeColorState,
+                                mangaState,
+                                generalState,
+                                isSearching,
+                                trackMergeState,
+                                windowSizeClass,
+                            ) {
+                                DetailsState(
+                                    themeColorState = themeColorState,
+                                    mangaState = mangaState,
+                                    generalState = generalState,
+                                    isSearching = isSearching,
+                                    trackMergeState = trackMergeState,
+                                    windowSizeClass = windowSizeClass,
+                                )
+                            }
+
                         if (
                             windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
                                 !generalState.value.forcePortrait
@@ -260,12 +288,7 @@ fun MangaScreen(
                                 chapterContentPadding = chapterContentPadding,
                                 details = {
                                     Details(
-                                        themeColorState = themeColorState,
-                                        mangaState = mangaState,
-                                        generalState = generalState,
-                                        isSearching = isSearching,
-                                        trackMergeState = trackMergeState,
-                                        windowSizeClass = windowSizeClass,
+                                        detailsState = detailsState,
                                         chapterActions = chapterActions,
                                         categoryActions = categoryActions,
                                         descriptionActions = descriptionActions,
@@ -307,12 +330,7 @@ fun MangaScreen(
                                 contentPadding = mangaDetailContentPadding,
                                 details = {
                                     Details(
-                                        themeColorState = themeColorState,
-                                        mangaState = mangaState,
-                                        generalState = generalState,
-                                        isSearching = isSearching,
-                                        trackMergeState = trackMergeState,
-                                        windowSizeClass = windowSizeClass,
+                                        detailsState = detailsState,
                                         chapterActions = chapterActions,
                                         categoryActions = categoryActions,
                                         descriptionActions = descriptionActions,
@@ -378,9 +396,9 @@ private fun VerticalLayout(
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
-        item(key = 1) { details() }
+        item(key = "header") { details() }
 
-        item(key = 2) { chapterHeader() }
+        item(key = "chapter_header") { chapterHeader() }
 
         itemsIndexed(items = chaptersProvider(), key = { _, chapter -> chapter.chapter.id }) {
             index,
@@ -404,7 +422,7 @@ private fun SideBySideLayout(
             modifier = Modifier.fillMaxWidth(.5f).fillMaxHeight(),
             contentPadding = mangaDetailContentPadding,
         ) {
-            item { details() }
+            item(key = "header") { details() }
         }
 
         VerticalDivider(Modifier.align(Alignment.TopCenter))
@@ -414,7 +432,7 @@ private fun SideBySideLayout(
                 Modifier.align(Alignment.TopEnd).fillMaxWidth(.5f).fillMaxHeight().clipToBounds(),
             contentPadding = chapterContentPadding,
         ) {
-            item { chapterHeader() }
+            item(key = "chapter_header") { chapterHeader() }
             itemsIndexed(items = chaptersProvider(), key = { _, chapter -> chapter.chapter.id }) {
                 index,
                 chapter ->
@@ -536,14 +554,18 @@ fun ChapterHeader(
     )
 }
 
+private class DetailsState(
+    val themeColorState: ThemeColorState,
+    val mangaState: State<MangaConstants.MangaScreenMangaState>,
+    val generalState: State<MangaScreenGeneralState>,
+    val isSearching: State<Boolean>,
+    val trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
+    val windowSizeClass: WindowSizeClass,
+)
+
 @Composable
-fun Details(
-    themeColorState: ThemeColorState,
-    mangaState: State<MangaConstants.MangaScreenMangaState>,
-    generalState: State<MangaScreenGeneralState>,
-    isSearching: State<Boolean>,
-    trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
-    windowSizeClass: WindowSizeClass,
+private fun Details(
+    detailsState: DetailsState,
     chapterActions: ChapterActions,
     categoryActions: CategoryActions,
     descriptionActions: DescriptionActions,
@@ -554,18 +576,15 @@ fun Details(
     shareClick: () -> Unit,
     toggleFavorite: (Boolean) -> Unit,
 ) {
-    MangaDetailsHeader(
-        mangaState = mangaState,
-        generalState = generalState,
-        isSearching = isSearching.value,
-        windowSizeClass = windowSizeClass,
-        informationActions = informationActions,
-        themeColorState = themeColorState,
-        generatePalette = generatePalette,
-        isLoggedIntoTrackersProvider = { trackMergeState.value.loggedInTrackService.isNotEmpty() },
-        toggleFavorite = {
-            if (!mangaState.value.inLibrary && generalState.value.allCategories.isNotEmpty()) {
-                if (generalState.value.hasDefaultCategory) {
+    val isLoggedIntoTrackersProvider = remember(detailsState.trackMergeState) {
+        { detailsState.trackMergeState.value.loggedInTrackService.isNotEmpty() }
+    }
+
+    val toggleFavoriteProvider = remember(detailsState.mangaState, detailsState.generalState) {
+        {
+            if (!detailsState.mangaState.value.inLibrary &&
+                detailsState.generalState.value.allCategories.isNotEmpty()) {
+                if (detailsState.generalState.value.hasDefaultCategory) {
                     toggleFavorite(true)
                 } else {
                     openSheet(
@@ -573,29 +592,61 @@ fun Details(
                             addingToLibrary = true,
                             setCategories = categoryActions.set,
                             addToLibraryClick = { toggleFavorite(false) },
-                        )
+                        ),
                     )
                 }
             } else {
                 toggleFavorite(false)
             }
-        },
-        moveCategories = {
+        }
+    }
+
+    val moveCategoriesProvider = remember(categoryActions) {
+        {
             openSheet(
                 DetailsBottomSheetScreen.CategoriesSheet(
                     addingToLibrary = false,
                     setCategories = categoryActions.set,
-                )
+                ),
             )
-        },
-        trackingClick = { openSheet(DetailsBottomSheetScreen.TrackingSheet) },
+        }
+    }
+
+    val trackingClickProvider = remember {
+        { openSheet(DetailsBottomSheetScreen.TrackingSheet) }
+    }
+
+    val artworkClickProvider = remember {
+        { openSheet(DetailsBottomSheetScreen.ArtworkSheet) }
+    }
+
+    val mergeClickProvider = remember { { openSheet(DetailsBottomSheetScreen.MergeSheet) } }
+
+    val linksClickProvider = remember {
+        { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) }
+    }
+
+    val quickReadClickProvider = remember(chapterActions) { { chapterActions.openNext() } }
+
+    MangaDetailsHeader(
+        mangaState = detailsState.mangaState,
+        generalState = detailsState.generalState,
+        isSearching = detailsState.isSearching.value,
+        windowSizeClass = detailsState.windowSizeClass,
+        informationActions = informationActions,
+        themeColorState = detailsState.themeColorState,
+        generatePalette = generatePalette,
+        isLoggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
+        toggleFavorite = toggleFavoriteProvider,
+        moveCategories = moveCategoriesProvider,
+        trackingClick = trackingClickProvider,
         similarClick = similarClick,
-        artworkClick = { openSheet(DetailsBottomSheetScreen.ArtworkSheet) },
-        mergeClick = { openSheet(DetailsBottomSheetScreen.MergeSheet) },
-        linksClick = { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) },
+        artworkClick = artworkClickProvider,
+        mergeClick = mergeClickProvider,
+        linksClick = linksClickProvider,
         shareClick = shareClick,
         descriptionActions = descriptionActions,
-        quickReadClick = { chapterActions.openNext() },
+        quickReadClick = quickReadClickProvider,
     )
 }
 
