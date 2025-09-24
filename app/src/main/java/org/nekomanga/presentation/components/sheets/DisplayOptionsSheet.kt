@@ -59,6 +59,8 @@ fun DisplayOptionsSheet(
     downloadBadgesToggled: () -> Unit,
     showStartReadingButtonEnabled: Boolean,
     startReadingButtonToggled: () -> Unit,
+    horizontalCategoriesEnabled: Boolean,
+    horizontalCategoriesToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -198,6 +200,13 @@ fun DisplayOptionsSheet(
                         enabled = showStartReadingButtonEnabled,
                         onClick = startReadingButtonToggled,
                         text = stringResource(R.string.show_start_reading_button),
+                    )
+                }
+                item {
+                    ToggleRow(
+                        enabled = horizontalCategoriesEnabled,
+                        onClick = horizontalCategoriesToggled,
+                        text = stringResource(R.string.horizontal_categories),
                     )
                 }
             }
