@@ -54,7 +54,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.MangaGridItem
 import org.nekomanga.presentation.components.MangaRow
@@ -312,8 +311,7 @@ private fun LibraryCategoryHeader(
 
         val text =
             when {
-                !isCollapsible &&
-                    (categoryItem.isSystemCategory || categoryItem.name == ALL_CATEGORY) -> ""
+                !isCollapsible && categoryItem.isSystemCategory -> ""
                 else -> categoryItem.name
             }
 
