@@ -3,6 +3,7 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import org.nekomanga.domain.category.CategoryItem
@@ -77,8 +78,6 @@ data class LibraryMangaItem(
         }
     }
 }
-
-import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
 
 data class DisplayManga(
     val mangaId: Long,

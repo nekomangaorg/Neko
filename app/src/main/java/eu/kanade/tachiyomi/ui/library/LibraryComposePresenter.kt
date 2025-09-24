@@ -246,7 +246,7 @@ class LibraryComposePresenter(
                                                     libraryCategoryItem.categoryItem.mangaOrder,
                                                 lastReadMap = lastReadMap,
                                                 lastFetchMap = lastFetchMap,
-                                            ),
+                                            )
                                         )
                                 val downloadCounts =
                                     downloadManager.getDownloadCounts(
@@ -674,7 +674,7 @@ class LibraryComposePresenter(
                                         mangaOrder = updatedCategory.mangaOrder,
                                         lastReadMap = lastReadMap,
                                         lastFetchMap = lastFetchMap,
-                                    ),
+                                    )
                                 )
                                 .toPersistentList()
                         }
@@ -700,26 +700,26 @@ class LibraryComposePresenter(
         sortAscending: Boolean,
         loggedInTrackStatus: Map<Long, List<String>>,
     ): PersistentList<LibraryCategoryItem> {
-
-        return libraryMangaList
-            .flatMap { libraryMangaItem ->
-                val grouping =
-                    when (groupType) {
-                        BY_AUTHOR -> libraryMangaItem.author
-                        BY_CONTENT -> libraryMangaItem.contentRating
-                        BY_LANGUAGE -> libraryMangaItem.language
-                        BY_STATUS -> libraryMangaItem.status
-                        BY_TAG -> libraryMangaItem.genre
-                        BY_TRACK_STATUS -> {
-                            loggedInTrackStatus[libraryMangaItem.displayManga.mangaId]
-                                ?: listOf("Not tracked")
-                        }
-                        else -> libraryMangaItem.language
+        val groupingMap = mutableMapOf<String, MutableList<LibraryMangaItem>>()
+        libraryMangaList.forEach { libraryMangaItem ->
+            val grouping =
+                when (groupType) {
+                    BY_AUTHOR -> libraryMangaItem.author
+                    BY_CONTENT -> libraryMangaItem.contentRating
+                    BY_LANGUAGE -> libraryMangaItem.language
+                    BY_STATUS -> libraryMangaItem.status
+                    BY_TAG -> libraryMangaItem.genre
+                    BY_TRACK_STATUS -> {
+                        loggedInTrackStatus[libraryMangaItem.displayManga.mangaId]
+                            ?: listOf("Not tracked")
                     }
-
-                grouping.map { text -> text to libraryMangaItem }
+                    else -> libraryMangaItem.language
+                }
+            grouping.forEach { text ->
+                groupingMap.getOrPut(text) { mutableListOf() }.add(libraryMangaItem)
             }
-            .groupBy({ (text, _) -> text }, { (_, libraryMangaItem) -> libraryMangaItem })
+        }
+        return groupingMap
             .toList()
             .sortedBy { it.first }
             .mapIndexed { index, pair ->
@@ -888,9 +888,7 @@ class LibraryComposePresenter(
 
             val libraryCategoryItem = currentItems[categoryIndex]
             val mangaIndex =
-                libraryCategoryItem.libraryItems.indexOfFirst {
-                    it.displayManga.mangaId == mangaId
-                }
+                libraryCategoryItem.libraryItems.indexOfFirst { it.displayManga.mangaId == mangaId }
             if (mangaIndex == -1) return@launchIO
 
             val libraryMangaItem = libraryCategoryItem.libraryItems[mangaIndex]
