@@ -401,10 +401,13 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
-            preferences.libraryHorizontalCategories().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _libraryScreenState.update { it.copy(horizontalCategories = enabled) }
-            }
+            preferences
+                .libraryHorizontalCategories()
+                .changes()
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    _libraryScreenState.update { it.copy(horizontalCategories = enabled) }
+                }
         }
 
         presenterScope.launchIO {

@@ -91,7 +91,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             if (browseShowLibrary().get()) 0 else 2,
         )
 
-    fun libraryHorizontalCategories() = this.preferenceStore.getBoolean(Keys.libraryHorizontalCategories, false)
+    fun libraryHorizontalCategories() =
+        this.preferenceStore.getBoolean(Keys.libraryHorizontalCategories, false)
 
     fun sourceUsername(source: Source) =
         this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
