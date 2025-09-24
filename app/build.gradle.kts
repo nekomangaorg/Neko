@@ -168,6 +168,7 @@ dependencies {
     implementation(libs.cascade.compose)
 
     // Compose
+    implementation(platform(compose.compose.bom))
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
