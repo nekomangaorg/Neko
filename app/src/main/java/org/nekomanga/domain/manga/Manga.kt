@@ -78,6 +78,8 @@ data class LibraryMangaItem(
     }
 }
 
+import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
+
 data class DisplayManga(
     val mangaId: Long,
     val inLibrary: Boolean,
@@ -87,7 +89,14 @@ data class DisplayManga(
     val displayText: String = "",
     val isVisible: Boolean = true,
     @param:StringRes val displayTextRes: Int? = null,
-)
+) {
+    fun toDbManga(): DbManga =
+        DbManga.create(url, title).apply {
+            id = mangaId
+            favorite = inLibrary
+            thumbnail_url = currentArtwork.url
+        }
+}
 
 data class MergeArtwork(val url: String, val mergeType: MergeType)
 
