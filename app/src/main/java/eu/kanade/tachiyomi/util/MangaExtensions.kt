@@ -201,6 +201,7 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
+        userCover = this.user_cover,
         rating = ((mangaRating * 100).roundToInt() / 100.0),
         addedToLibraryDate = this.date_added,
         latestChapterDate = this.last_update,
