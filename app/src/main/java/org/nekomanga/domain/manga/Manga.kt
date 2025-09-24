@@ -31,6 +31,7 @@ data class Artwork(
     val mangaId: Long,
     val inLibrary: Boolean = false,
     val originalArtwork: String = "",
+    val userCover: String = "",
     val description: String = "",
     val volume: String = "",
     val active: Boolean = false,

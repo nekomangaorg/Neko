@@ -113,6 +113,7 @@ fun Manga.toDisplayManga(
                 inLibrary = this.favorite,
                 mangaId = this.id!!,
                 originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
+                userCover = this.user_cover ?: "",
             ),
     )
 }

@@ -34,6 +34,7 @@ import tachiyomi.core.network.await
 class AlternativeMangaCoverFetcher(
     private val url: String,
     private val inLibrary: Boolean,
+    private val userCover: String,
     private val mangaId: Long,
     private val sourceLazy: Lazy<MangaDex>,
     private val options: Options,
@@ -45,7 +46,13 @@ class AlternativeMangaCoverFetcher(
     private val diskCacheKey: String? by lazy {
         ArtworkKeyer()
             .key(
-                Artwork(url = url, inLibrary = inLibrary, originalArtwork = "", mangaId = mangaId),
+                Artwork(
+                    url = url,
+                    inLibrary = inLibrary,
+                    originalArtwork = "",
+                    mangaId = mangaId,
+                    userCover = userCover,
+                ),
                 options,
             )
     }
@@ -68,7 +75,9 @@ class AlternativeMangaCoverFetcher(
         val onlyCache = !networkRead && diskRead
         val shouldFetchRemotely = networkRead && !diskRead && !onlyCache
 
-        val coverFile = coverCache.getCoverFile(url, inLibrary)
+        val isUserCover = userCover == url
+
+        val coverFile = coverCache.getCoverFile(url, inLibrary && isUserCover)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
             if (!inLibrary) {
                 coverFile.setLastModified(Date().time)
