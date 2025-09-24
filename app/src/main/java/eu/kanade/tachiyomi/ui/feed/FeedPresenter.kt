@@ -159,6 +159,10 @@ class FeedPresenter(
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    override fun onPause() {
+        super.onPause()
         lastUpdatesFeedMangaList = _updatesScreenPagingState.value.updatesFeedMangaList
         lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
         lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
