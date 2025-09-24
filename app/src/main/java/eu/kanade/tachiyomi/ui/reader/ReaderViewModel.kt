@@ -934,6 +934,8 @@ class ReaderViewModel(
                 try {
                     if (manga.favorite) {
                         coverCache.setCustomCoverToCache(manga, stream())
+                        manga.user_cover = coverCache.getCustomCoverFile(manga).path
+                        db.insertManga(manga).executeAsBlocking()
                         SetAsCoverResult.Success
                     } else {
                         SetAsCoverResult.AddToLibraryFirst
