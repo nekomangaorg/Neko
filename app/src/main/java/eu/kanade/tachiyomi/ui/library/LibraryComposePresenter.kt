@@ -401,6 +401,13 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
+            preferences.libraryHorizontalCategories().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(horizontalCategories = enabled) }
+            }
+        }
+
+        presenterScope.launchIO {
             combine(
                     libraryPreferences.gridSize().changes(),
                     libraryPreferences.layout().changes(),
@@ -568,6 +575,10 @@ class LibraryComposePresenter(
 
     fun startReadingButtonToggled() {
         presenterScope.launchIO { libraryPreferences.showStartReadingButton().toggle() }
+    }
+
+    fun horizontalCategoriesToggled() {
+        presenterScope.launchIO { preferences.libraryHorizontalCategories().toggle() }
     }
 
     fun clearActiveFilters() {

@@ -46,6 +46,7 @@ data class LibraryScreenState(
     val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
     val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
     val userCategories: ImmutableList<CategoryItem> = persistentListOf(),
+    val horizontalCategories: Boolean = false,
 )
 
 data class LibraryScreenActions(
@@ -72,6 +73,7 @@ data class LibrarySheetActions(
     val unreadBadgesToggled: () -> Unit,
     val downloadBadgesToggled: () -> Unit,
     val startReadingButtonToggled: () -> Unit,
+    val horizontalCategoriesToggled: () -> Unit,
     val addNewCategory: (String) -> Unit,
     val editCategories: (List<DisplayManga>, List<CategoryItem>) -> Unit,
 )

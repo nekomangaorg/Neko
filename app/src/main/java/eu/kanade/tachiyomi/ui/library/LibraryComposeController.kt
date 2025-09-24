@@ -67,6 +67,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     downloadBadgesToggled = presenter::downloadBadgesToggled,
                     unreadBadgesToggled = presenter::unreadBadgesToggled,
                     startReadingButtonToggled = presenter::startReadingButtonToggled,
+                    horizontalCategoriesToggled = presenter::horizontalCategoriesToggled,
                     editCategories = presenter::editCategories,
                     addNewCategory = presenter::addNewCategory,
                 ),

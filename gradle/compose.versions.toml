@@ -51,7 +51,9 @@ markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil2",
 
 swipe = "me.saket.swipe:swipe:1.3.0"
 
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist_version" }
+accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist_version" }
 [bundles]
-accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller"]
+accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-pager", "accompanist-pager-indicators"]
 compose = ["activity", "collapsing-topbar", "grid-layout", "lifecycle-viewmodel-navigation3", "navigation3-runtime", "navigation3-ui", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "markdown-coil", "material-motion", "reorderable"]
 charting = ["charty"]

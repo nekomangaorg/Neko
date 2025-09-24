@@ -24,6 +24,8 @@ object PreferenceKeys {
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
     const val catalogueDisplayMode = "catalogue_display_mode"
 
+    const val libraryHorizontalCategories = "library_horizontal_categories"
+
     const val removeAfterReadSlots = "remove_after_read_slots"
 
     const val deleteRemovedChapters = "delete_removed_chapters"

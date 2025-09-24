@@ -73,9 +73,19 @@ fun LibraryPage(
     libraryCategoryActions: LibraryCategoryActions,
     categorySortClick: (CategoryItem) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
+    if (libraryScreenState.horizontalCategories) {
+        HorizontalCategoriesPage(
+            contentPadding = contentPadding,
+            selectionMode = selectionMode,
+            libraryScreenState = libraryScreenState,
+            libraryScreenActions = libraryScreenActions,
+            libraryCategoryActions = libraryCategoryActions,
+            categorySortClick = categorySortClick,
+        )
+    } else {
+        val lazyListState = rememberLazyListState()
 
-    val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
+        val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
 
     val collapsible by
         remember(libraryScreenState.items.size) {
@@ -161,6 +171,7 @@ fun LibraryPage(
                 }
             }
         }
+    }
     }
 }
 
