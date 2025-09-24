@@ -5,6 +5,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,13 +16,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -59,14 +62,19 @@ fun HorizontalCategoriesPage(
         }
 
     Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
-        PrimaryScrollableTabRow(
+        SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth(),
-            divider = { },
+            divider = {},
         ) {
             libraryScreenState.items.forEachIndexed { index, item ->
                 Tab(
-                    text = { Text(item.categoryItem.name) },
+                    text = {
+                        Text(
+                            item.categoryItem.name,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                 )
@@ -79,7 +87,26 @@ fun HorizontalCategoriesPage(
                 is LibraryDisplayMode.ComfortableGrid,
                 is LibraryDisplayMode.CompactGrid -> {
                     Column {
-                        Gap(Size.small)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            CategorySortButtons(
+                                enabled = true,
+                                categorySortClick = { categorySortClick(item.categoryItem) },
+                                sortString =
+                                    stringResource(
+                                        item.categoryItem.sortOrder.stringRes(
+                                            item.categoryItem.isDynamic
+                                        )
+                                    ),
+                                isAscending = item.categoryItem.isAscending,
+                                categoryIsRefreshing = item.isRefreshing,
+                                categoryRefreshClick = {
+                                    libraryCategoryActions.categoryRefreshClick(item.categoryItem)
+                                },
+                            )
+                        }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(columns),
                             modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
@@ -128,12 +155,54 @@ fun HorizontalCategoriesPage(
                 }
                 is LibraryDisplayMode.List -> {
                     Column {
-                        Gap(Size.small)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            CategorySortButtons(
+                                enabled = true,
+                                categorySortClick = { categorySortClick(item.categoryItem) },
+                                sortString =
+                                    stringResource(
+                                        item.categoryItem.sortOrder.stringRes(
+                                            item.categoryItem.isDynamic
+                                        )
+                                    ),
+                                isAscending = item.categoryItem.isAscending,
+                                categoryIsRefreshing = item.isRefreshing,
+                                categoryRefreshClick = {
+                                    libraryCategoryActions.categoryRefreshClick(item.categoryItem)
+                                },
+                            )
+                        }
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding =
                                 PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                         ) {
+                            item {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    CategorySortButtons(
+                                        enabled = true,
+                                        categorySortClick = {
+                                            categorySortClick(item.categoryItem)
+                                        },
+                                        sortString =
+                                            stringResource(
+                                                item.categoryItem.sortOrder.stringRes(
+                                                    item.categoryItem.isDynamic
+                                                )
+                                            ),
+                                        isAscending = item.categoryItem.isAscending,
+                                        categoryIsRefreshing = item.isRefreshing,
+                                        categoryRefreshClick = {
+                                            libraryCategoryActions.categoryRefreshClick(
+                                                item.categoryItem
+                                            )
+                                        },
+                                    )
+                                }
+                            }
                             itemsIndexed(
                                 items = item.libraryItems,
                                 key = { _, libraryItem -> libraryItem.displayManga.mangaId },

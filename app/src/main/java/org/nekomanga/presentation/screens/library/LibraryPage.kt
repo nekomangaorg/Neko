@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.library
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
@@ -10,38 +9,24 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Circle
-import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ButtonShapes
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,7 +36,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
-import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -334,81 +318,15 @@ private fun LibraryCategoryHeader(
             maxLines = 3,
             modifier = Modifier.weight(1f),
         )
-        TextButton(
+
+        CategorySortButtons(
             enabled = enabled,
-            shapes =
-                ButtonShapes(
-                    shape = ButtonGroupDefaults.connectedLeadingButtonShape,
-                    pressedShape = ButtonGroupDefaults.connectedLeadingButtonPressShape,
-                ),
-            onClick = categorySortClick,
-        ) {
-            Text(
-                text = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
-                maxLines = 1,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Gap(Size.extraTiny)
-            Icon(
-                imageVector =
-                    when {
-                        categoryItem.sortOrder == LibrarySort.DragAndDrop ->
-                            LibrarySort.DragAndDrop.composeIcon()
-
-                        categoryItem.isAscending -> Icons.Default.ArrowDownward
-                        else -> Icons.Default.ArrowUpward
-                    },
-                contentDescription = null,
-                modifier = Modifier.size(Size.large),
-            )
-        }
-        Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
-
-        AnimatedContent(targetState = isRefreshing) { targetState ->
-            when (targetState) {
-                true -> {
-                    val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
-                    val stroke =
-                        remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
-                    IconButton(
-                        enabled = false,
-                        shapes =
-                            IconButtonShapes(
-                                shape = ButtonGroupDefaults.connectedTrailingButtonShape,
-                                pressedShape = ButtonGroupDefaults.connectedTrailingButtonPressShape,
-                            ),
-                        colors =
-                            IconButtonDefaults.iconButtonColors(disabledContentColor = textColor),
-                        onClick = {},
-                    ) {
-                        CircularWavyProgressIndicator(
-                            modifier = Modifier.size(Size.large),
-                            trackStroke = stroke,
-                            stroke = stroke,
-                        )
-                    }
-                }
-
-                false -> {
-
-                    IconButton(
-                        enabled = enabled,
-                        shapes =
-                            IconButtonShapes(
-                                shape = ButtonGroupDefaults.connectedTrailingButtonShape,
-                                pressedShape = ButtonGroupDefaults.connectedTrailingButtonPressShape,
-                            ),
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
-                        onClick = categoryRefreshClick,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(Size.large),
-                        )
-                    }
-                }
-            }
-        }
+            categorySortClick = categorySortClick,
+            sortString = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
+            isAscending = categoryItem.isAscending,
+            textColor = textColor,
+            categoryIsRefreshing = isRefreshing,
+            categoryRefreshClick = categoryRefreshClick,
+        )
     }
 }
