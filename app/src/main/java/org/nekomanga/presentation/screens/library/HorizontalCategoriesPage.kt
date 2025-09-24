@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.screens.library
 
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -17,19 +19,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.MangaGridItem
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HorizontalCategoriesPage(
     contentPadding: PaddingValues,
@@ -39,7 +39,12 @@ fun HorizontalCategoriesPage(
     libraryCategoryActions: LibraryCategoryActions,
     categorySortClick: (CategoryItem) -> Unit,
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
+    ) {
+        libraryScreenState.items.size
+    }
     val scope = rememberCoroutineScope()
     val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
     val selectedIds = remember(libraryScreenState.selectedItems) {
@@ -47,35 +52,18 @@ fun HorizontalCategoriesPage(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        ScrollableTabRow(
-            selectedTabIndex = pagerState.currentPage,
-        ) {
-            libraryScreenState.items.forEachIndexed { index, item ->
-                Tab(
-                    text = { Text(item.categoryItem.name) },
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                )
-            }
-        }
-
         HorizontalPager(
-            count = libraryScreenState.items.size,
             state = pagerState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth().weight(1f),
         ) { page ->
             val item = libraryScreenState.items[page]
             LazyVerticalGrid(
                 columns = GridCells.Fixed(columns),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
                 horizontalArrangement = Arrangement.spacedBy(Size.small),
                 contentPadding = contentPadding,
             ) {
-                items(items = item.libraryItems) { libraryItem ->
+                items(items = item.libraryItems, key = { it.displayManga.mangaId }) { libraryItem ->
                     MangaGridItem(
                         displayManga = libraryItem.displayManga,
                         showUnreadBadge = libraryScreenState.showUnreadBadges,
@@ -99,6 +87,23 @@ fun HorizontalCategoriesPage(
                         onLongClick = { libraryScreenActions.mangaLongClick(libraryItem) },
                     )
                 }
+            }
+        }
+
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            libraryScreenState.items.forEachIndexed { index, item ->
+                Tab(
+                    text = { Text(item.categoryItem.name) },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                )
             }
         }
     }
