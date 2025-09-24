@@ -155,8 +155,9 @@ fun MangaScreen(
     val themeColorState by
         remember(generalState.value.themeBasedOffCovers, generalState.value.vibrantColor) {
             mutableStateOf(
-                if (generalState.value.themeBasedOffCovers &&
-                    generalState.value.vibrantColor != null
+                if (
+                    generalState.value.themeBasedOffCovers &&
+                        generalState.value.vibrantColor != null
                 ) {
                     val color =
                         getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
@@ -171,7 +172,7 @@ fun MangaScreen(
                     )
                 } else {
                     defaultThemeColorState
-                },
+                }
             )
         }
 
@@ -576,55 +577,54 @@ private fun Details(
     shareClick: () -> Unit,
     toggleFavorite: (Boolean) -> Unit,
 ) {
-    val isLoggedIntoTrackersProvider = remember(detailsState.trackMergeState) {
-        { detailsState.trackMergeState.value.loggedInTrackService.isNotEmpty() }
-    }
+    val isLoggedIntoTrackersProvider =
+        remember(detailsState.trackMergeState) {
+            { detailsState.trackMergeState.value.loggedInTrackService.isNotEmpty() }
+        }
 
-    val toggleFavoriteProvider = remember(detailsState.mangaState, detailsState.generalState) {
-        {
-            if (!detailsState.mangaState.value.inLibrary &&
-                detailsState.generalState.value.allCategories.isNotEmpty()) {
-                if (detailsState.generalState.value.hasDefaultCategory) {
-                    toggleFavorite(true)
+    val toggleFavoriteProvider =
+        remember(detailsState.mangaState, detailsState.generalState) {
+            {
+                if (
+                    !detailsState.mangaState.value.inLibrary &&
+                        detailsState.generalState.value.allCategories.isNotEmpty()
+                ) {
+                    if (detailsState.generalState.value.hasDefaultCategory) {
+                        toggleFavorite(true)
+                    } else {
+                        openSheet(
+                            DetailsBottomSheetScreen.CategoriesSheet(
+                                addingToLibrary = true,
+                                setCategories = categoryActions.set,
+                                addToLibraryClick = { toggleFavorite(false) },
+                            )
+                        )
+                    }
                 } else {
-                    openSheet(
-                        DetailsBottomSheetScreen.CategoriesSheet(
-                            addingToLibrary = true,
-                            setCategories = categoryActions.set,
-                            addToLibraryClick = { toggleFavorite(false) },
-                        ),
-                    )
+                    toggleFavorite(false)
                 }
-            } else {
-                toggleFavorite(false)
             }
         }
-    }
 
-    val moveCategoriesProvider = remember(categoryActions) {
-        {
-            openSheet(
-                DetailsBottomSheetScreen.CategoriesSheet(
-                    addingToLibrary = false,
-                    setCategories = categoryActions.set,
-                ),
-            )
+    val moveCategoriesProvider =
+        remember(categoryActions) {
+            {
+                openSheet(
+                    DetailsBottomSheetScreen.CategoriesSheet(
+                        addingToLibrary = false,
+                        setCategories = categoryActions.set,
+                    )
+                )
+            }
         }
-    }
 
-    val trackingClickProvider = remember {
-        { openSheet(DetailsBottomSheetScreen.TrackingSheet) }
-    }
+    val trackingClickProvider = remember { { openSheet(DetailsBottomSheetScreen.TrackingSheet) } }
 
-    val artworkClickProvider = remember {
-        { openSheet(DetailsBottomSheetScreen.ArtworkSheet) }
-    }
+    val artworkClickProvider = remember { { openSheet(DetailsBottomSheetScreen.ArtworkSheet) } }
 
     val mergeClickProvider = remember { { openSheet(DetailsBottomSheetScreen.MergeSheet) } }
 
-    val linksClickProvider = remember {
-        { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) }
-    }
+    val linksClickProvider = remember { { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) } }
 
     val quickReadClickProvider = remember(chapterActions) { { chapterActions.openNext() } }
 
