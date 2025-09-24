@@ -15,9 +15,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,10 +59,10 @@ fun HorizontalCategoriesPage(
         }
 
     Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
-        ScrollableTabRow(
+        PrimaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth(),
-            divider = { Divider(color = MaterialTheme.colorScheme.surface) },
+            divider = { },
         ) {
             libraryScreenState.items.forEachIndexed { index, item ->
                 Tab(
