@@ -75,13 +75,9 @@ class MangaDetailController(private val mangaId: Long) :
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val context = LocalContext.current
         MangaScreen(
-            generalState = presenter.generalState.collectAsStateWithLifecycle(),
-            mangaState = presenter.mangaState.collectAsStateWithLifecycle(),
-            trackMergeState = presenter.trackMergeState.collectAsStateWithLifecycle(),
+            mangaDetailScreenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
-            isRefreshing = presenter.isRefreshing.collectAsStateWithLifecycle(),
-            isSearching = presenter.isSearching.collectAsStateWithLifecycle(),
             onRefresh = presenter::onRefresh,
             onSearch = presenter::onSearch,
             categoryActions =
@@ -180,7 +176,7 @@ class MangaDetailController(private val mangaId: Long) :
                     delete = presenter::deleteChapters,
                     clearRemoved = presenter::clearRemovedChapters,
                     openNext = {
-                        presenter.generalState.value.nextUnreadChapter.simpleChapter?.let {
+                        presenter.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter?.let {
                             openChapter(context, it.toDbChapter())
                         }
                     },
@@ -268,7 +264,7 @@ class MangaDetailController(private val mangaId: Long) :
         viewScope.launch {
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
 
-            val cover = presenter.shareMangaCover(dir, presenter.mangaState.value.currentArtwork)
+            val cover = presenter.shareMangaCover(dir, presenter.mangaDetailScreenState.value.currentArtwork)
             val sharableCover = cover?.getUriWithAuthority(context)
 
             withUIContext {

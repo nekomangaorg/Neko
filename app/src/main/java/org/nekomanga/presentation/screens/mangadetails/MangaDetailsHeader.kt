@@ -56,8 +56,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaDetailsHeader(
-    generalState: State<MangaConstants.MangaScreenGeneralState>,
-    mangaState: State<MangaConstants.MangaScreenMangaState>,
+    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackersProvider: () -> Boolean,
     isSearching: Boolean,
@@ -82,17 +81,17 @@ fun MangaDetailsHeader(
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
         val isExpanded =
-            rememberSaveable(mangaState.value.inLibrary) {
+            rememberSaveable(mangaDetailScreenState.value.inLibrary) {
                 when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     true -> mutableStateOf(true)
-                    false -> mutableStateOf(!mangaState.value.inLibrary)
+                    false -> mutableStateOf(!mangaDetailScreenState.value.inLibrary)
                 }
             }
         val backdropHeight =
             when (isSearching) {
                 true -> (LocalConfiguration.current.screenHeightDp / 4).dp
                 false -> {
-                    when (generalState.value.extraLargeBackdrop) {
+                    when (mangaDetailScreenState.value.extraLargeBackdrop) {
                         true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
                         false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
                     }
@@ -103,8 +102,8 @@ fun MangaDetailsHeader(
             Box {
                 BackDrop(
                     themeColorState = themeColorState,
-                    artworkProvider = { mangaState.value.currentArtwork },
-                    showBackdropProvider = { generalState.value.themeBasedOffCovers },
+                    artworkProvider = { mangaDetailScreenState.value.currentArtwork },
+                    showBackdropProvider = { mangaDetailScreenState.value.themeBasedOffCovers },
                     modifier =
                         Modifier.animateContentSize()
                             .fillMaxWidth()
@@ -119,33 +118,35 @@ fun MangaDetailsHeader(
                             .background(
                                 Brush.verticalGradient(
                                     colors =
-                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
-                                )
-                            )
+                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
+                                ),
+                            ),
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
                         themeColorState = themeColorState,
-                        titleProvider = { mangaState.value.currentTitle },
-                        authorProvider = { mangaState.value.author },
-                        artistProvider = { mangaState.value.artist },
-                        statsProvider = { mangaState.value.stats },
-                        langFlagProvider = { mangaState.value.langFlag },
-                        statusProvider = { mangaState.value.status },
+                        titleProvider = { mangaDetailScreenState.value.currentTitle },
+                        authorProvider = { mangaDetailScreenState.value.author },
+                        artistProvider = { mangaDetailScreenState.value.artist },
+                        statsProvider = { mangaDetailScreenState.value.stats },
+                        langFlagProvider = { mangaDetailScreenState.value.langFlag },
+                        statusProvider = { mangaDetailScreenState.value.status },
                         lastChapterProvider = {
-                            mangaState.value.lastVolume to mangaState.value.lastChapter
+                            mangaDetailScreenState.value.lastVolume to
+                                mangaDetailScreenState.value.lastChapter
                         },
-                        isPornographicProvider = { mangaState.value.isPornographic },
-                        missingChaptersProvider = { mangaState.value.missingChapters },
+                        isPornographicProvider = { mangaDetailScreenState.value.isPornographic },
+                        missingChaptersProvider = { mangaDetailScreenState.value.missingChapters },
                         estimatedMissingChapterProvider = {
-                            mangaState.value.estimatedMissingChapters
+                            mangaDetailScreenState.value.estimatedMissingChapters
                         },
                         modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
                         isExpandedProvider = { isExpanded.value },
                         showMergedIconProvider = {
-                            mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes &&
-                                !generalState.value.hideButtonText
+                            mangaDetailScreenState.value.isMerged is
+                                MergeConstants.IsMergedManga.Yes &&
+                                !mangaDetailScreenState.value.hideButtonText
                         },
                         titleLongClick = informationActions.titleLongClick,
                         creatorCopyClick = informationActions.creatorCopy,
@@ -159,19 +160,22 @@ fun MangaDetailsHeader(
                         Column {
                             Gap(height = 16.dp)
                             ButtonBlock(
-                                hideButtonTextProvider = { generalState.value.hideButtonText },
-                                isInitializedProvider = { mangaState.value.initialized },
-                                isMergedProvider = {
-                                    mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes
+                                hideButtonTextProvider = {
+                                    mangaDetailScreenState.value.hideButtonText
                                 },
-                                inLibraryProvider = { mangaState.value.inLibrary },
+                                isInitializedProvider = { mangaDetailScreenState.value.initialized },
+                                isMergedProvider = {
+                                    mangaDetailScreenState.value.isMerged is
+                                        MergeConstants.IsMergedManga.Yes
+                                },
+                                inLibraryProvider = { mangaDetailScreenState.value.inLibrary },
                                 loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
                                 trackServiceCountProvider = {
-                                    generalState.value.trackServiceCount
+                                    mangaDetailScreenState.value.trackServiceCount
                                 },
                                 themeColorState = themeColorState,
                                 favoriteClick = {
-                                    if (!mangaState.value.inLibrary) {
+                                    if (!mangaDetailScreenState.value.inLibrary) {
                                         toggleFavorite()
                                     } else {
                                         favoriteExpanded = true
@@ -205,7 +209,7 @@ fun MangaDetailsHeader(
             Column {
                 if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     QuickReadButton(
-                        { generalState.value.nextUnreadChapter },
+                        { mangaDetailScreenState.value.nextUnreadChapter },
                         themeColorState,
                         quickReadClick,
                     )
@@ -213,14 +217,14 @@ fun MangaDetailsHeader(
                 Gap(Size.tiny)
                 DescriptionBlock(
                     windowSizeClass = windowSizeClass,
-                    titleProvider = { mangaState.value.currentTitle },
-                    description = mangaState.value.currentDescription,
-                    isInitializedProvider = { mangaState.value.initialized },
-                    altTitlesProvider = { mangaState.value.alternativeTitles },
-                    genresProvider = { mangaState.value.genres },
+                    titleProvider = { mangaDetailScreenState.value.currentTitle },
+                    description = mangaDetailScreenState.value.currentDescription,
+                    isInitializedProvider = { mangaDetailScreenState.value.initialized },
+                    altTitlesProvider = { mangaDetailScreenState.value.alternativeTitles },
+                    genresProvider = { mangaDetailScreenState.value.genres },
                     themeColorState = themeColorState,
                     isExpanded = isExpanded.value,
-                    wrapAltTitles = generalState.value.wrapAltTitles,
+                    wrapAltTitles = mangaDetailScreenState.value.wrapAltTitles,
                     expandCollapseClick = { isExpanded.value = !isExpanded.value },
                     genreSearch = descriptionActions.genreSearch,
                     genreSearchLibrary = descriptionActions.genreSearchLibrary,
@@ -229,7 +233,7 @@ fun MangaDetailsHeader(
                 )
                 if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                     QuickReadButton(
-                        { generalState.value.nextUnreadChapter },
+                        { mangaDetailScreenState.value.nextUnreadChapter },
                         themeColorState,
                         quickReadClick,
                     )
