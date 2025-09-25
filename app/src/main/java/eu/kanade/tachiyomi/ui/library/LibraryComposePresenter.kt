@@ -44,7 +44,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -90,8 +89,6 @@ class LibraryComposePresenter(
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
     }
-
-    val manualTrigger = MutableSharedFlow<Unit>()
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
@@ -276,9 +273,7 @@ class LibraryComposePresenter(
 
                                 libraryCategoryItem.copy(libraryItems = sortedMangaList)
                             }
-                            .filterNot {
-                                !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty()
-                            }
+                            .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
