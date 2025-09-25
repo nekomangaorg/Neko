@@ -38,8 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
@@ -269,13 +267,16 @@ fun LibraryScreen(
                                     if (libraryScreenState.value.isFirstLoad) {
                                         ContainedLoadingIndicator()
                                     } else {
+                                        val stringRes =
+                                            when (
+                                                libraryScreenState.value.searchQuery.isNullOrBlank()
+                                            ) {
+                                                true -> R.string.library_is_empty_add_from_browse
+                                                false -> R.string.no_results_found
+                                            }
+
                                         EmptyScreen(
-                                            iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
-                                            iconSize = 176.dp,
-                                            message =
-                                                stringResource(
-                                                    id = R.string.library_is_empty_add_from_browse
-                                                ),
+                                            message = UiText.StringResource(resourceId = stringRes)
                                         )
                                     }
                                 }

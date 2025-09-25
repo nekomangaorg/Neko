@@ -914,7 +914,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             return list.any { it.state == WorkInfo.State.RUNNING }
         }
 
-
         fun categoryInQueue(id: Int?) = instance?.get()?.categoryIds?.contains(id) ?: false
 
         fun startNow(

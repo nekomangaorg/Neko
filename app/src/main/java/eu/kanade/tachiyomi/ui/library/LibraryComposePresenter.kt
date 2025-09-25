@@ -279,9 +279,7 @@ class LibraryComposePresenter(
 
                                 libraryCategoryItem.copy(libraryItems = sortedMangaList)
                             }
-                            .filterNot {
-                                !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty()
-                            }
+                            .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
