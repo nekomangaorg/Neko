@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.library
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,11 +39,9 @@ import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HorizontalCategoriesPage(
     contentPadding: PaddingValues,
-    selectionMode: Boolean,
     libraryScreenState: LibraryScreenState,
     libraryScreenActions: LibraryScreenActions,
     libraryCategoryActions: LibraryCategoryActions,
