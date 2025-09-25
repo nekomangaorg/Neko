@@ -65,6 +65,7 @@ fun HorizontalCategoriesPage(
         SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth(),
+            edgePadding = Size.small,
             divider = {},
         ) {
             libraryScreenState.items.forEachIndexed { index, item ->
