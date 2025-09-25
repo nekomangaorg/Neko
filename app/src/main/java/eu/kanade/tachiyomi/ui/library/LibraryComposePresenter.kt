@@ -169,12 +169,11 @@ class LibraryComposePresenter(
                     categoryList,
                     libraryFilters,
                     trackMap,
-                    libraryViewPreferences
-                ->
-                val collapsedCategorySet =
-                    libraryViewPreferences.collapsedCategories
-                        .mapNotNull { it.toIntOrNull() }
-                        .toSet()
+                    libraryViewPreferences ->
+                    val collapsedCategorySet =
+                        libraryViewPreferences.collapsedCategories
+                            .mapNotNull { it.toIntOrNull() }
+                            .toSet()
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
@@ -220,51 +219,58 @@ class LibraryComposePresenter(
 
                     var allCollapsed = true
 
+                    val lastReadMap =
+                        db.getLastReadManga()
+                            .executeAsBlocking()
+                            .mapIndexed { index, manga -> manga.id!! to index }
+                            .toMap()
+                    val lastFetchMap =
+                        db.getLastFetchedManga()
+                            .executeAsBlocking()
+                            .mapIndexed { index, manga -> manga.id!! to index }
+                            .toMap()
+
+                    val allMangaItems =
+                        unsortedLibraryCategoryItems
+                            .flatMap { it.libraryItems }
+                            .distinctBy { it.displayManga.mangaId }
+
+                    val downloadCountMap =
+                        downloadManager.getDownloadCounts(
+                            allMangaItems.map { it.displayManga.toDbManga() }
+                        )
+
                     val items =
                         unsortedLibraryCategoryItems
-                            .mapAsync { libraryCategoryItem ->
+                            .map { libraryCategoryItem ->
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
-                                val lastReadMap =
-                                    db.getLastReadManga()
-                                        .executeAsBlocking()
-                                        .withIndex()
-                                        .associate { (index, manga) -> manga.id!! to index }
-                                val lastFetchMap =
-                                    db.getLastFetchedManga()
-                                        .executeAsBlocking()
-                                        .withIndex()
-                                        .associate { (index, manga) -> manga.id!! to index }
-                                val tempSortedList =
+
+                                val comparator =
+                                    LibraryMangaItemComparator(
+                                        librarySort = libraryCategoryItem.categoryItem.sortOrder,
+                                        removeArticles = removeArticles,
+                                        mangaOrder = libraryCategoryItem.categoryItem.mangaOrder,
+                                        lastReadMap = lastReadMap,
+                                        lastFetchMap = lastFetchMap,
+                                    )
+
+                                val sortedMangaList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
-                                        .sortedWith(
-                                            LibraryMangaItemComparator(
-                                                librarySort =
-                                                    libraryCategoryItem.categoryItem.sortOrder,
-                                                removeArticles = removeArticles,
-                                                mangaOrder =
-                                                    libraryCategoryItem.categoryItem.mangaOrder,
-                                                lastReadMap = lastReadMap,
-                                                lastFetchMap = lastFetchMap,
-                                            )
-                                        )
-                                val downloadCounts =
-                                    downloadManager.getDownloadCounts(
-                                        tempSortedList.map { it.displayManga.toDbManga() }
-                                    )
-                                val sortedMangaList =
-                                    tempSortedList
-                                        .map {
-                                            it.copy(
+                                        .sortedWith(comparator)
+                                        .map { item ->
+                                            item.copy(
                                                 downloadCount =
-                                                    downloadCounts[it.displayManga.mangaId] ?: 0,
+                                                    downloadCountMap[item.displayManga.mangaId]
+                                                        ?: 0,
                                                 trackCount =
-                                                    trackMap[it.displayManga.mangaId]?.size ?: 0,
+                                                    trackMap[item.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
                                         .applyFilters(libraryFilters, trackMap, searchQuery)
+
                                 libraryCategoryItem.copy(
                                     libraryItems =
                                         if (libraryCategoryItem.categoryItem.isAscending)
@@ -735,24 +741,19 @@ class LibraryComposePresenter(
                     else -> libraryMangaItem.language
                 }
 
-            // For each key (e.g., each genre), add the manga item to the corresponding list in the
-            // map.
             for (key in groupingKeys) {
                 groupedMap.getOrPut(key) { mutableListOf() }.add(libraryMangaItem)
             }
         }
 
-        // 2. Convert the efficiently-built map to the final sorted list structure.
-        // This part of the logic remains similar to your original code.
         return groupedMap.entries
-            .sortedBy { it.key } // Sort by the category name (e.g., "Action", "Comedy")
+            .sortedBy { it.key }
             .mapIndexed { index, entry ->
                 val categoryName = entry.key
                 val items = entry.value
-
                 val categoryItem =
                     CategoryItem(
-                        id = index, // The ID is now the index after sorting
+                        id = index,
                         sortOrder = sortOrder,
                         isAscending = sortAscending,
                         name = categoryName,
