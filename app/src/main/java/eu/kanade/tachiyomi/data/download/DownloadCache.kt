@@ -142,6 +142,13 @@ class DownloadCache(
         }
     }
 
+    fun getDownloadCounts(mangaIds: List<Long>): Map<Long, Int> {
+        checkRenew()
+        return mangaIds.associateWith { mangaId ->
+            mangaFiles[mangaId]?.first?.count { !it.endsWith(TMP_DIR_SUFFIX) } ?: 0
+        }
+    }
+
     fun getAllDownloadFiles(manga: Manga): List<UniFile> {
         val mangaDir = provider.findMangaDir(manga)
 

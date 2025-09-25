@@ -175,17 +175,6 @@ class LibraryComposePresenter(
                             .mapNotNull { it.toIntOrNull() }
                             .toSet()
 
-                    _libraryScreenState.update {
-                        it.copy(
-                            currentGroupBy = libraryViewPreferences.groupBy,
-                            trackMap = trackMap.toPersistentMap(),
-                            userCategories =
-                                categoryList
-                                    .filterNot { category -> category.isSystemCategory }
-                                    .toPersistentList(),
-                        )
-                    }
-
                     val removeArticles = libraryPreferences.removeArticles().get()
 
                     libraryPreferences.sortAscending().get()
@@ -260,15 +249,16 @@ class LibraryComposePresenter(
                                                 lastFetchMap = lastFetchMap,
                                             )
                                         )
-                                /* val sortedMangaList =  if (showDownloadBadges) { tempSortedList.mapAsync { val dbManga = db.getManga(it.displayManga.mangaId)   .executeOnIO()!!            it.copy(              downloadCount =       downloadManager.getDownloadCount(dbManga)                         )                               }                          } else {                               tempSortedList                             }*/
+                                val downloadCounts =
+                                    downloadManager.getDownloadCounts(
+                                        tempSortedList.map { it.displayManga.toDbManga() }
+                                    )
                                 val sortedMangaList =
                                     tempSortedList
-                                        .mapAsync {
-                                            val dbManga =
-                                                db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                        .map {
                                             it.copy(
                                                 downloadCount =
-                                                    downloadManager.getDownloadCount(dbManga),
+                                                    downloadCounts[it.displayManga.mangaId] ?: 0,
                                                 trackCount =
                                                     trackMap[it.displayManga.mangaId]?.size ?: 0,
                                             )
@@ -289,6 +279,12 @@ class LibraryComposePresenter(
                         libraryDisplayMode = layout,
                         libraryCategoryItems = items,
                         rawColumnCount = gridSize,
+                        currentGroupBy = libraryViewPreferences.groupBy,
+                        trackMap = trackMap.toPersistentMap(),
+                        userCategories =
+                            categoryList
+                                .filterNot { category -> category.isSystemCategory }
+                                .toPersistentList(),
                     )
                 }
                 .distinctUntilChanged()
@@ -299,6 +295,9 @@ class LibraryComposePresenter(
                             rawColumnCount = libraryViewItem.rawColumnCount,
                             items = libraryViewItem.libraryCategoryItems,
                             isFirstLoad = false,
+                            currentGroupBy = libraryViewItem.currentGroupBy,
+                            trackMap = libraryViewItem.trackMap,
+                            userCategories = libraryViewItem.userCategories,
                         )
                     }
                 }
