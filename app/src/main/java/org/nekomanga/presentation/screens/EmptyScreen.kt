@@ -2,119 +2,93 @@ package org.nekomanga.presentation.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFromBaseline
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mikepenz.iconics.compose.Image
-import com.mikepenz.iconics.typeface.IIcon
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.nekoRippleConfiguration
 
-@Composable
-fun NoResultsEmptyScreen(contentPaddingValues: PaddingValues) {
-    EmptyScreen(
-        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-        iconSize = 176.dp,
-        message = stringResource(id = R.string.no_results_found),
-        contentPadding = contentPaddingValues,
+private val ErrorFaces =
+    listOf(
+        "(･o･;)",
+        "Σ(ಠ_ಠ)",
+        "ಥ_ಥ",
+        "(˘･_･˘)",
+        "(；￣Д￣)",
+        "(･Д･。",
+        "(╬ಠ益ಠ)",
+        "(╥﹏╥)",
+        "(⋟﹏⋞)",
+        "Ò︵Ó",
+        " ˙ᯅ˙)",
+        "(¬_¬)",
+        "(ノಠ益ಠ)ノ彡┻━┻",
+        "(╯°□°）╯︵ ┻━┻",
+        "(｡>﹏<｡)",
+        "m(｡_｡)m",
+        "(•́﹏•̀｡)",
+        "ヾ(･`⌓´･)ﾉﾞ",
+        "(；一_一)",
+        "(-_-;)",
+        "´¬`",
+        "(ó﹏ò)",
+        "(´-﹏-`)",
+        "o(>﹏<)o",
+        "ヾ(;ﾟДﾟ)ﾉ",
+        "ヽ(｀⌒´メ)ノ",
+        "(˚Д˚)",
+        "(`皿´)",
     )
-}
 
 @Composable
 fun EmptyScreen(
-    icon: ImageVector? = null,
-    iconicImage: IIcon? = null,
-    iconSize: Dp = 24.dp,
-    message: String? = null,
+    message: String,
     actions: ImmutableList<Action> = persistentListOf(),
     contentPadding: PaddingValues = PaddingValues(),
 ) {
-    val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
-    EmptyScreen(message, actions, contentPadding) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(iconSize),
-                tint = iconColor,
-            )
-        } else if (iconicImage != null) {
-            Image(
-                asset = iconicImage,
-                modifier = Modifier.size(iconSize),
-                colorFilter = ColorFilter.tint(iconColor),
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyScreen(
-    message: String? = null,
-    actions: ImmutableList<Action> = persistentListOf(),
-    contentPadding: PaddingValues,
-    icon: @Composable () -> Unit,
-) {
-    val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())
+    val errorFace = remember { ErrorFaces.random() }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(contentPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val top = maxHeight / 2
-        Column(
-            modifier = Modifier.fillMaxSize().paddingFromBaseline(top = top),
-            Arrangement.Top,
-            Alignment.CenterHorizontally,
-        ) {
-            icon()
+        Text(
+            text = errorFace,
+            modifier = Modifier.padding(bottom = 16.dp),
+            fontSize = 32.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f),
+        )
 
-            message?.let {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f),
+        )
+
+        actions.forEach { action ->
+            TextButton(onClick = action.onClick) {
                 Text(
-                    text = message,
-                    color = iconColor,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    textAlign = TextAlign.Center,
+                    text = stringResource(id = action.resId),
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
-            }
-            CompositionLocalProvider(
-                LocalRippleConfiguration provides
-                    nekoRippleConfiguration(MaterialTheme.colorScheme.primary)
-            ) {
-                actions.forEach { action ->
-                    Spacer(modifier = Modifier.size(16.dp))
-                    TextButton(onClick = action.onClick) {
-                        Text(
-                            text = stringResource(id = action.resId),
-                            color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
             }
         }
     }
@@ -124,8 +98,6 @@ private fun EmptyScreen(
 @Composable
 private fun EmptyViewPreview() {
     EmptyScreen(
-        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-        iconSize = 72.dp,
         message = stringResource(id = R.string.no_results_found),
         actions = persistentListOf(Action(R.string.retry)),
     )
