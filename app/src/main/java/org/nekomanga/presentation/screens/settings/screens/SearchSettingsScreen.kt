@@ -30,6 +30,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
@@ -139,7 +140,7 @@ private fun SearchResult(
         when {
             it == null -> {}
             it.isEmpty() -> {
-                EmptyScreen(message = stringResource(R.string.no_results_found))
+                EmptyScreen(message = UiText.StringResource(resourceId = R.string.no_results_found))
             }
             else -> {
                 LazyColumn(
