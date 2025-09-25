@@ -3,9 +3,9 @@ package org.nekomanga.presentation.screens.browse
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import kotlinx.collections.immutable.toImmutableList
-import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
