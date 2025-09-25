@@ -175,17 +175,6 @@ class LibraryComposePresenter(
                             .mapNotNull { it.toIntOrNull() }
                             .toSet()
 
-                    _libraryScreenState.update {
-                        it.copy(
-                            currentGroupBy = libraryViewPreferences.groupBy,
-                            trackMap = trackMap.toPersistentMap(),
-                            userCategories =
-                                categoryList
-                                    .filterNot { category -> category.isSystemCategory }
-                                    .toPersistentList(),
-                        )
-                    }
-
                     val removeArticles = libraryPreferences.removeArticles().get()
 
                     libraryPreferences.sortAscending().get()
@@ -236,16 +225,6 @@ class LibraryComposePresenter(
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
-                                val lastReadMap =
-                                    db.getLastReadManga()
-                                        .executeAsBlocking()
-                                        .withIndex()
-                                        .associate { (index, manga) -> manga.id!! to index }
-                                val lastFetchMap =
-                                    db.getLastFetchedManga()
-                                        .executeAsBlocking()
-                                        .withIndex()
-                                        .associate { (index, manga) -> manga.id!! to index }
                                 val tempSortedList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
@@ -256,19 +235,30 @@ class LibraryComposePresenter(
                                                 removeArticles = removeArticles,
                                                 mangaOrder =
                                                     libraryCategoryItem.categoryItem.mangaOrder,
-                                                lastReadMap = lastReadMap,
-                                                lastFetchMap = lastFetchMap,
+                                                lastReadMapFn = {
+                                                    var counter = 0
+                                                    db.getLastReadManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
+                                                lastFetchMapFn = {
+                                                    var counter = 0
+                                                    db.getLastFetchedManga()
+                                                        .executeAsBlocking()
+                                                        .associate { it.id!! to counter++ }
+                                                },
                                             )
                                         )
-                                /* val sortedMangaList =  if (showDownloadBadges) { tempSortedList.mapAsync { val dbManga = db.getManga(it.displayManga.mangaId)   .executeOnIO()!!            it.copy(              downloadCount =       downloadManager.getDownloadCount(dbManga)                         )                               }                          } else {                               tempSortedList                             }*/
+                                val downloadCounts =
+                                    downloadManager.getDownloadCounts(
+                                        tempSortedList.map { it.displayManga.toDbManga() }
+                                    )
                                 val sortedMangaList =
                                     tempSortedList
-                                        .mapAsync {
-                                            val dbManga =
-                                                db.getManga(it.displayManga.mangaId).executeOnIO()!!
+                                        .map {
                                             it.copy(
                                                 downloadCount =
-                                                    downloadManager.getDownloadCount(dbManga),
+                                                    downloadCounts[it.displayManga.mangaId] ?: 0,
                                                 trackCount =
                                                     trackMap[it.displayManga.mangaId]?.size ?: 0,
                                             )
@@ -289,6 +279,12 @@ class LibraryComposePresenter(
                         libraryDisplayMode = layout,
                         libraryCategoryItems = items,
                         rawColumnCount = gridSize,
+                        currentGroupBy = libraryViewPreferences.groupBy,
+                        trackMap = trackMap.toPersistentMap(),
+                        userCategories =
+                            categoryList
+                                .filterNot { category -> category.isSystemCategory }
+                                .toPersistentList(),
                     )
                 }
                 .distinctUntilChanged()
@@ -299,6 +295,9 @@ class LibraryComposePresenter(
                             rawColumnCount = libraryViewItem.rawColumnCount,
                             items = libraryViewItem.libraryCategoryItems,
                             isFirstLoad = false,
+                            currentGroupBy = libraryViewItem.currentGroupBy,
+                            trackMap = libraryViewItem.trackMap,
+                            userCategories = libraryViewItem.userCategories,
                         )
                     }
                 }
@@ -660,24 +659,24 @@ class LibraryComposePresenter(
                         if (category.sortOrder == librarySort) {
                             libraryCategoryItem.libraryItems.reversed().toPersistentList()
                         } else {
-                            val lastReadMap =
-                                db.getLastReadManga().executeAsBlocking().withIndex().associate {
-                                    (index, manga) ->
-                                    manga.id!! to index
-                                }
-                            val lastFetchMap =
-                                db.getLastFetchedManga()
-                                    .executeAsBlocking()
-                                    .withIndex()
-                                    .associate { (index, manga) -> manga.id!! to index }
                             libraryCategoryItem.libraryItems
                                 .sortedWith(
                                     LibraryMangaItemComparator(
                                         librarySort = updatedCategory.sortOrder,
                                         removeArticles = libraryPreferences.removeArticles().get(),
                                         mangaOrder = updatedCategory.mangaOrder,
-                                        lastReadMap = lastReadMap,
-                                        lastFetchMap = lastFetchMap,
+                                        lastReadMapFn = {
+                                            var counter = 0
+                                            db.getLastReadManga().executeAsBlocking().associate {
+                                                it.id!! to counter++
+                                            }
+                                        },
+                                        lastFetchMapFn = {
+                                            var counter = 0
+                                            db.getLastFetchedManga().executeAsBlocking().associate {
+                                                it.id!! to counter++
+                                            }
+                                        },
                                     )
                                 )
                                 .toPersistentList()

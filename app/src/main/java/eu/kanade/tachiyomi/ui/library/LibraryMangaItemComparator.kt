@@ -6,9 +6,9 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 fun LibraryMangaItemComparator(
     librarySort: LibrarySort,
     removeArticles: Boolean = false,
-    mangaOrder: List<Long> = emptyList(),
-    lastReadMap: Map<Long, Int> = emptyMap(),
-    lastFetchMap: Map<Long, Int> = emptyMap(),
+    mangaOrder: List<Long>,
+    lastReadMapFn: () -> Map<Long, Int>,
+    lastFetchMapFn: () -> Map<Long, Int>,
 ): Comparator<LibraryMangaItem> {
     return when (librarySort) {
         LibrarySort.Title -> {
@@ -32,6 +32,7 @@ fun LibraryMangaItemComparator(
             }
         }
         LibrarySort.LastRead -> {
+            val lastReadMap = lastReadMapFn()
             Comparator { item1, item2 ->
                 val lastRead1 = lastReadMap[item1.displayManga.mangaId] ?: lastReadMap.size
                 val lastRead2 = lastReadMap[item2.displayManga.mangaId] ?: lastReadMap.size
@@ -43,6 +44,7 @@ fun LibraryMangaItemComparator(
         LibrarySort.TotalChapters -> compareByDescending { it.totalChapterCount }
         LibrarySort.DateAdded -> compareByDescending { it.addedToLibraryDate }
         LibrarySort.DateFetched -> {
+            val lastFetchMap = lastFetchMapFn()
             Comparator { item1, item2 ->
                 val lastFetched1 = lastFetchMap[item1.displayManga.mangaId] ?: lastFetchMap.size
                 val lastFetched2 = lastFetchMap[item2.displayManga.mangaId] ?: lastFetchMap.size
