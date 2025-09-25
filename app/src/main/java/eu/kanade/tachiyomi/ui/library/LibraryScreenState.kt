@@ -86,9 +86,6 @@ data class LibraryViewItem(
     val libraryDisplayMode: LibraryDisplayMode,
     val rawColumnCount: Float = 3f,
     val libraryCategoryItems: PersistentList<LibraryCategoryItem>,
-    val currentGroupBy: Int,
-    val trackMap: PersistentMap<Long, List<String>>,
-    val userCategories: ImmutableList<CategoryItem>,
 )
 
 data class LibraryCategoryItem(

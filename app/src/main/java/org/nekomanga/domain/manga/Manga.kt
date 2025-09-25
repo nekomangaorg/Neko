@@ -3,7 +3,6 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
-import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import org.nekomanga.domain.category.CategoryItem
@@ -88,14 +87,7 @@ data class DisplayManga(
     val displayText: String = "",
     val isVisible: Boolean = true,
     @param:StringRes val displayTextRes: Int? = null,
-) {
-    fun toDbManga(): DbManga =
-        DbManga.create(url, title).apply {
-            id = mangaId
-            favorite = inLibrary
-            thumbnail_url = currentArtwork.url
-        }
-}
+)
 
 data class MergeArtwork(val url: String, val mergeType: MergeType)
 
