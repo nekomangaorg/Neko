@@ -904,7 +904,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 WorkManager.getInstance(context)
                     .enqueueUniquePeriodicWork(
                         WORK_NAME_AUTO,
-                        ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                        ExistingPeriodicWorkPolicy.UPDATE,
                         request,
                     )
             } else {
