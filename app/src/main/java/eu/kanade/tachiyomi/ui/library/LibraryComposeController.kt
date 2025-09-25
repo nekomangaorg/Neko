@@ -74,6 +74,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
             libraryCategoryActions =
                 LibraryCategoryActions(
                     categoryItemClick = presenter::categoryItemClick,
+                    categoryAscendingClick = presenter::categoryAscendingClick,
                     categoryRefreshClick = { category -> updateCategory(category, context) },
                     dragAndDropManga = presenter::dragAndDropManga,
                 ),

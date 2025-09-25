@@ -107,6 +107,9 @@ fun LibraryPage(
                             }
                         },
                         categorySortClick = { categorySortClick(item.categoryItem) },
+                        categoryAscendingClick = {
+                            libraryCategoryActions.categoryAscendingClick(item.categoryItem)
+                        },
                         categoryRefreshClick = {
                             libraryCategoryActions.categoryRefreshClick(item.categoryItem)
                         },
@@ -254,6 +257,7 @@ private fun LibraryCategoryHeader(
     allSelected: Boolean,
     categoryItemClick: () -> Unit,
     categorySortClick: () -> Unit,
+    categoryAscendingClick: () -> Unit,
     categoryRefreshClick: () -> Unit,
     enabled: Boolean,
 ) {
@@ -326,6 +330,7 @@ private fun LibraryCategoryHeader(
             isAscending = categoryItem.isAscending,
             textColor = textColor,
             categoryIsRefreshing = isRefreshing,
+            ascendingClick = categoryAscendingClick,
             categoryRefreshClick = categoryRefreshClick,
         )
     }

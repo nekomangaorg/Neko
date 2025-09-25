@@ -248,8 +248,10 @@ class LibraryComposePresenter(
                                 }
 
                                 val comparator =
-                                    LibraryMangaItemComparator(
-                                        librarySort = libraryCategoryItem.categoryItem.sortOrder,
+                                    libraryMangaItemComparator(
+                                        categorySort = libraryCategoryItem.categoryItem.sortOrder,
+                                        categoryIsAscending =
+                                            libraryCategoryItem.categoryItem.isAscending,
                                         removeArticles = removeArticles,
                                         mangaOrder = libraryCategoryItem.categoryItem.mangaOrder,
                                         lastReadMap = lastReadMap,
@@ -270,13 +272,9 @@ class LibraryComposePresenter(
                                             )
                                         }
                                         .applyFilters(libraryFilters, trackMap, searchQuery)
+                                        .toPersistentList()
 
-                                libraryCategoryItem.copy(
-                                    libraryItems =
-                                        if (libraryCategoryItem.categoryItem.isAscending)
-                                            sortedMangaList.toPersistentList()
-                                        else sortedMangaList.reversed().toPersistentList()
-                                )
+                                libraryCategoryItem.copy(libraryItems = sortedMangaList)
                             }
                             .toPersistentList()
 
@@ -647,71 +645,25 @@ class LibraryComposePresenter(
         }
     }
 
+    fun categoryAscendingClick(category: CategoryItem) {
+        presenterScope.launchIO {
+            if (category.isDynamic || category.isSystemCategory) {
+                libraryPreferences.sortAscending().set(!category.isAscending)
+            } else {
+                val updatedDbCategory = category.toDbCategory(true)
+                db.insertCategory(updatedDbCategory).executeOnIO()
+            }
+        }
+    }
+
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
         presenterScope.launchIO {
             if (category.isDynamic || category.isSystemCategory) {
-                when (category.sortOrder == librarySort) {
-                    true -> libraryPreferences.sortAscending().set(!category.isAscending)
-                    false -> libraryPreferences.sortingMode().set(librarySort.mainValue)
-                }
+                libraryPreferences.sortingMode().set(librarySort.mainValue)
             } else {
-
                 val updatedDbCategory =
-                    when (category.sortOrder == librarySort) {
-                        true -> category.toDbCategory(true)
-                        false ->
-                            category
-                                .copy(isAscending = true, sortOrder = librarySort)
-                                .toDbCategory()
-                    }
-
+                    category.copy(isAscending = true, sortOrder = librarySort).toDbCategory()
                 db.insertCategory(updatedDbCategory).executeOnIO()
-
-                val updatedCategory = updatedDbCategory.toCategoryItem()
-
-                val mutableItems = _libraryScreenState.value.items.toMutableList()
-                val index =
-                    _libraryScreenState.value.items.indexOfFirst {
-                        it.categoryItem.id == category.id
-                    }
-                if (index >= 0) {
-                    val libraryCategoryItem = mutableItems[index]
-                    val newSortedList =
-                        if (category.sortOrder == librarySort) {
-                            libraryCategoryItem.libraryItems.reversed().toPersistentList()
-                        } else {
-                            val lastReadMap =
-                                db.getLastReadManga().executeAsBlocking().withIndex().associate {
-                                    (index, manga) ->
-                                    manga.id!! to index
-                                }
-                            val lastFetchMap =
-                                db.getLastFetchedManga()
-                                    .executeAsBlocking()
-                                    .withIndex()
-                                    .associate { (index, manga) -> manga.id!! to index }
-                            libraryCategoryItem.libraryItems
-                                .sortedWith(
-                                    LibraryMangaItemComparator(
-                                        librarySort = updatedCategory.sortOrder,
-                                        removeArticles = libraryPreferences.removeArticles().get(),
-                                        mangaOrder = updatedCategory.mangaOrder,
-                                        lastReadMap = lastReadMap,
-                                        lastFetchMap = lastFetchMap,
-                                    )
-                                )
-                                .toPersistentList()
-                        }
-                    val updatedLibraryCategoryItem =
-                        LibraryCategoryItem(
-                            updatedCategory,
-                            mutableItems[index].isRefreshing,
-                            newSortedList,
-                        )
-                    mutableItems[index] = updatedLibraryCategoryItem
-
-                    _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
-                }
             }
         }
     }

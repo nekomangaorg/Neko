@@ -80,6 +80,7 @@ data class LibrarySheetActions(
 
 data class LibraryCategoryActions(
     val categoryItemClick: (CategoryItem) -> Unit,
+    val categoryAscendingClick: (CategoryItem) -> Unit,
     val categoryRefreshClick: (CategoryItem) -> Unit,
     val dragAndDropManga: (Int, Int, CategoryItem, LibraryMangaItem) -> Unit,
 )

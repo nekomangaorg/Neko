@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,9 +30,9 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun RowScope.CategorySortButtons(
-    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     categorySortClick: () -> Unit,
+    ascendingClick: () -> Unit,
     sortString: String,
     isAscending: Boolean,
     textColor: Color = MaterialTheme.colorScheme.primary,
@@ -48,7 +49,18 @@ fun RowScope.CategorySortButtons(
         onClick = categorySortClick,
     ) {
         Text(text = sortString, maxLines = 1, style = MaterialTheme.typography.bodyLarge)
-        Gap(Size.extraTiny)
+    }
+    Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
+    IconButton(
+        enabled = enabled,
+        shapes =
+            IconButtonShapes(
+                shape = ShapeDefaults.Small,
+                pressedShape = ButtonGroupDefaults.connectedMiddleButtonPressShape,
+            ),
+        colors = IconButtonDefaults.iconButtonColors(contentColor = textColor),
+        onClick = ascendingClick,
+    ) {
         Icon(
             imageVector =
                 when {
@@ -56,11 +68,10 @@ fun RowScope.CategorySortButtons(
                     else -> Icons.Default.ArrowUpward
                 },
             contentDescription = null,
-            modifier = Modifier.size(Size.large),
+            modifier = Modifier.size(Size.mediumLarge),
         )
     }
     Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
-
     AnimatedContent(targetState = categoryIsRefreshing) { targetState ->
         when (targetState) {
             true -> {
@@ -78,7 +89,7 @@ fun RowScope.CategorySortButtons(
                     onClick = {},
                 ) {
                     CircularWavyProgressIndicator(
-                        modifier = Modifier.size(Size.large),
+                        modifier = Modifier.size(Size.mediumLarge),
                         trackStroke = stroke,
                         stroke = stroke,
                     )
@@ -100,7 +111,7 @@ fun RowScope.CategorySortButtons(
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = null,
-                        modifier = Modifier.size(Size.large),
+                        modifier = Modifier.size(Size.mediumLarge),
                     )
                 }
             }

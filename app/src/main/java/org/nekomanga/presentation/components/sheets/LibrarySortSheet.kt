@@ -5,20 +5,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -29,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -36,7 +32,6 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LibrarySortSheet(
     currentLibrarySort: LibrarySort,
-    isCurrentLibrarySortAscending: Boolean,
     librarySortClicked: (LibrarySort) -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
@@ -44,7 +39,7 @@ fun LibrarySortSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
 
         BaseSheet(
             themeColor = themeColorState,
@@ -66,39 +61,34 @@ fun LibrarySortSheet(
             ) {
                 items(LibrarySort.filteredEntries()) { librarySort ->
                     val textColor =
-                        if (currentLibrarySort == librarySort) MaterialTheme.colorScheme.primary
+                        if (currentLibrarySort == librarySort)
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.disabledAlphaHighContrast
+                            )
                         else MaterialTheme.colorScheme.onSurface
 
                     Row(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .clickable(onClick = { librarySortClicked(librarySort) })
-                                .padding(Size.small),
+                                .clickable(
+                                    enabled = librarySort != currentLibrarySort,
+                                    onClick = { librarySortClicked(librarySort) },
+                                )
+                                .padding(horizontal = Size.small, vertical = Size.smedium),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = librarySort.composeIcon(),
                             contentDescription = null,
                             tint = textColor,
+                            modifier = Modifier.size(Size.large),
                         )
-                        Gap(Size.small)
+                        Gap(Size.medium)
                         Text(
                             text = stringResource(librarySort.stringRes()),
-                            modifier = Modifier.weight(1f),
                             color = textColor,
                             style = MaterialTheme.typography.bodyLarge,
                         )
-                        if (librarySort == currentLibrarySort) {
-                            val icon =
-                                when {
-                                    currentLibrarySort == LibrarySort.DragAndDrop ->
-                                        Icons.Default.Check
-                                    isCurrentLibrarySortAscending -> Icons.Default.ArrowDownward
-                                    else -> Icons.Default.ArrowUpward
-                                }
-
-                            Icon(imageVector = icon, contentDescription = null, tint = textColor)
-                        }
                     }
                 }
             }

@@ -34,7 +34,6 @@ fun LibraryBottomSheet(
         is LibraryBottomSheetScreen.SortSheet ->
             LibrarySortSheet(
                 currentLibrarySort = currentScreen.categoryItem.sortOrder,
-                isCurrentLibrarySortAscending = currentScreen.categoryItem.isAscending,
                 librarySortClicked = { librarySort ->
                     librarySheetActions.categoryItemLibrarySortClick(
                         currentScreen.categoryItem,

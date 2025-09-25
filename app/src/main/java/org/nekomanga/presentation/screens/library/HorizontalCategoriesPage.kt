@@ -102,6 +102,9 @@ fun HorizontalCategoriesPage(
                                     ),
                                 isAscending = item.categoryItem.isAscending,
                                 categoryIsRefreshing = item.isRefreshing,
+                                ascendingClick = {
+                                    libraryCategoryActions.categoryAscendingClick(item.categoryItem)
+                                },
                                 categoryRefreshClick = {
                                     libraryCategoryActions.categoryRefreshClick(item.categoryItem)
                                 },
@@ -170,6 +173,9 @@ fun HorizontalCategoriesPage(
                                     ),
                                 isAscending = item.categoryItem.isAscending,
                                 categoryIsRefreshing = item.isRefreshing,
+                                ascendingClick = {
+                                    libraryCategoryActions.categoryAscendingClick(item.categoryItem)
+                                },
                                 categoryRefreshClick = {
                                     libraryCategoryActions.categoryRefreshClick(item.categoryItem)
                                 },
@@ -195,6 +201,11 @@ fun HorizontalCategoriesPage(
                                             ),
                                         isAscending = item.categoryItem.isAscending,
                                         categoryIsRefreshing = item.isRefreshing,
+                                        ascendingClick = {
+                                            libraryCategoryActions.categoryAscendingClick(
+                                                item.categoryItem
+                                            )
+                                        },
                                         categoryRefreshClick = {
                                             libraryCategoryActions.categoryRefreshClick(
                                                 item.categoryItem
