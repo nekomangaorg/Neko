@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.presentation.theme.Size
 
 private val ErrorFaces =
     listOf(
@@ -69,7 +69,7 @@ fun EmptyScreen(
     ) {
         Text(
             text = errorFace,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Size.medium),
             fontSize = 32.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f),
         )
@@ -77,7 +77,7 @@ fun EmptyScreen(
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f),
         )
