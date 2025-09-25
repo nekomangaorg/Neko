@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.browse
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -11,6 +10,7 @@ import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.EmptyScreen
 
@@ -27,7 +27,7 @@ fun BrowseFollowsPage(
 ) {
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         EmptyScreen(
-            message = stringResource(id = R.string.no_results_found),
+            message = UiText.StringResource(resourceId = R.string.no_results_found),
             contentPadding = contentPadding,
         )
     } else {

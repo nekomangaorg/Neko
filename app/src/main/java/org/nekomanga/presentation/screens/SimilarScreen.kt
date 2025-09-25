@@ -72,7 +72,7 @@ fun SimilarScreen(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
-            Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+            Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                 EditCategorySheet(
                     addingToLibrary = true,
                     categories = similarScreenState.value.categories,
@@ -148,7 +148,7 @@ private fun SimilarContent(
             Box(modifier = Modifier.fillMaxSize())
         } else {
             EmptyScreen(
-                message = UiText.StringResource(id = R.string.no_results_found),
+                message = UiText.StringResource(resourceId = R.string.no_results_found),
                 actions =
                     persistentListOf(
                         Action(text = UiText.StringResource(R.string.retry), onClick = refreshing)

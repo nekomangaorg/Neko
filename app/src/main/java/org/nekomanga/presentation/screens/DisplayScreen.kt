@@ -151,7 +151,7 @@ fun DisplayScreen(
                     }
                 } else if (displayScreenState.value.error != null) {
                     EmptyScreen(
-                        message = displayScreenState.value.error!!,
+                        message = UiText.String(displayScreenState.value.error!!),
                         actions =
                             if (displayScreenState.value.page == 1)
                                 persistentListOf(

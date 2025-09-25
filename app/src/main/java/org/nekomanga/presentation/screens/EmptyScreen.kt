@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
@@ -22,37 +23,55 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.theme.Size
 
-private val ErrorFaces =
-    listOf(
-        "(･o･;)",
-        "Σ(ಠ_ಠ)",
-        "ಥ_ಥ",
-        "(˘･_･˘)",
-        "(；￣Д￣)",
-        "(･Д･。",
-        "(╬ಠ益ಠ)",
-        "(╥﹏╥)",
-        "(⋟﹏⋞)",
-        "Ò︵Ó",
-        " ˙ᯅ˙)",
-        "(¬_¬)",
-        "(ノಠ益ಠ)ノ彡┻━┻",
-        "(╯°□°）╯︵ ┻━┻",
-        "(｡>﹏<｡)",
-        "m(｡_｡)m",
-        "(•́﹏•̀｡)",
-        "ヾ(･`⌓´･)ﾉﾞ",
-        "(；一_一)",
-        "(-_-;)",
-        "´¬`",
-        "(ó﹏ò)",
-        "(´-﹏-`)",
-        "o(>﹏<)o",
-        "ヾ(;ﾟДﾟ)ﾉ",
-        "ヽ(｀⌒´メ)ノ",
-        "(˚Д˚)",
-        "(`皿´)",
-    )
+private val ErrorFaces = listOf(
+    // Original list
+    "(･o･;)",
+    "Σ(ಠ_ಠ)",
+    "ಥ_ಥ",
+    "(˘･_･˘)",
+    "(；￣Д￣)",
+    "(･Д･。",
+    "(╬ಠ益ಠ)",
+    "(╥﹏╥)",
+    "(⋟﹏⋞)",
+    "Ò︵Ó",
+    " ˙ᯅ˙)",
+    "(¬_¬)",
+    "(ノಠ益ಠ)ノ彡┻━┻",
+    "(╯°□°）╯︵ ┻━┻",
+    "(｡>﹏<｡)",
+    "m(｡_｡)m",
+    "(•́﹏•̀｡)",
+    "ヾ(･`⌓´･)ﾉﾞ",
+    "(；一_一)",
+    "(-_-;)",
+    "´¬`",
+    "(ó﹏ò)",
+    "(´-﹏-`)",
+    "o(>﹏<)o",
+    "(；ﾟДﾟ)",
+    "ヾ(;ﾟДﾟ)ﾉ",
+    "ヽ(｀⌒´メ)ノ",
+    "(˚Д˚)",
+    "(`皿´)",
+    "Σ（ﾟдﾟlll)",
+    "(・・)？",
+    "(・・。)ゞ",
+    "(ﾟдﾟ；)",
+    "(´-ω-`)",
+    "(╬ ಠ 益 ಠ )",
+    "( ˘･з･)",
+    "(ノ｀Д´)ノ",
+    "(｀⌒´メ)",
+    "(ง •̀_•́)ง",
+    "(￣^￣)ゞ",
+    "(；´д｀)ゞ",
+    "(T_T)",
+    "(._.)",
+    "( ˘•ω•˘ )",
+    "(っ´-`c)",
+    "(´＿｀。)"
+)
 
 @Composable
 fun EmptyScreen(
@@ -68,29 +87,29 @@ fun EmptyScreen(
     ) {
         Text(
             text = errorFace,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = Size.medium),
+            style = MaterialTheme.typography.displayMedium,
             color =
                 MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
+        Gap(Size.large)
 
         Text(
             text = message.asString(),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             textAlign = TextAlign.Center,
             color =
                 MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
+        Gap(Size.large)
 
         actions.forEach { action ->
-            TextButton(onClick = action.onClick) {
+            ElevatedButton(onClick = action.onClick) {
                 Text(
                     text = action.text.asString(),
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
+            Gap(Size.small)
         }
     }
 }

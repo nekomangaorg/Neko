@@ -18,6 +18,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
 
@@ -91,7 +92,7 @@ fun StatsScreen(
                 LoadingScreen(incomingPaddingValues)
             } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
                 EmptyScreen(
-                    message = stringResource(id = R.string.unable_to_generate_stats),
+                    message = UiText.StringResource(resourceId = R.string.unable_to_generate_stats),
                     contentPadding = incomingPaddingValues,
                 )
             } else {
