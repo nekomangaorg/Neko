@@ -21,8 +21,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -39,7 +37,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
@@ -59,6 +56,7 @@ import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.showLibraryEntriesAction
@@ -259,10 +257,14 @@ fun BrowseScreen(
                             )
                         } else if (browseScreenState.value.error != null) {
                             EmptyScreen(
-                                icon = Icons.Default.ErrorOutline,
-                                iconSize = 176.dp,
-                                message = browseScreenState.value.error!!.asString(),
-                                actions = persistentListOf(Action(R.string.retry, retryClick)),
+                                message = browseScreenState.value.error!!,
+                                actions =
+                                    persistentListOf(
+                                        Action(
+                                            text = UiText.StringResource(R.string.retry),
+                                            onClick = retryClick,
+                                        )
+                                    ),
                                 contentPadding = recyclerContentPadding,
                             )
                         } else {

@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,13 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.theme.Size
 
 private val ErrorFaces =
@@ -57,7 +56,7 @@ private val ErrorFaces =
 
 @Composable
 fun EmptyScreen(
-    message: String,
+    message: UiText,
     actions: ImmutableList<Action> = persistentListOf(),
     contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -76,7 +75,7 @@ fun EmptyScreen(
         )
 
         Text(
-            text = message,
+            text = message.asString(),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             textAlign = TextAlign.Center,
@@ -87,7 +86,7 @@ fun EmptyScreen(
         actions.forEach { action ->
             TextButton(onClick = action.onClick) {
                 Text(
-                    text = stringResource(id = action.resId),
+                    text = action.text.asString(),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyLarge,
                 )
@@ -100,9 +99,9 @@ fun EmptyScreen(
 @Composable
 private fun EmptyViewPreview() {
     EmptyScreen(
-        message = stringResource(id = R.string.no_results_found),
-        actions = persistentListOf(Action(R.string.retry)),
+        message = UiText.StringResource(R.string.no_results_found),
+        actions = persistentListOf(Action(UiText.StringResource(R.string.retry))),
     )
 }
 
-data class Action(@StringRes val resId: Int, val onClick: () -> Unit = {})
+data class Action(val text: UiText, val onClick: () -> Unit = {})

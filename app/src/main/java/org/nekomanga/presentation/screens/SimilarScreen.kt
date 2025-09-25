@@ -27,8 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -41,6 +39,7 @@ import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -149,10 +148,11 @@ private fun SimilarContent(
             Box(modifier = Modifier.fillMaxSize())
         } else {
             EmptyScreen(
-                iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                iconSize = 176.dp,
-                message = stringResource(id = R.string.no_results_found),
-                actions = persistentListOf(Action(R.string.retry, refreshing)),
+                message = UiText.StringResource(id = R.string.no_results_found),
+                actions =
+                    persistentListOf(
+                        Action(text = UiText.StringResource(R.string.retry), onClick = refreshing)
+                    ),
             )
         }
     } else {
