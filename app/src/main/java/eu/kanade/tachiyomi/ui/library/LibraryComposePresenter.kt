@@ -236,6 +236,16 @@ class LibraryComposePresenter(
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
+                                val lastReadMap =
+                                    db.getLastReadManga()
+                                        .executeAsBlocking()
+                                        .withIndex()
+                                        .associate { (index, manga) -> manga.id!! to index }
+                                val lastFetchMap =
+                                    db.getLastFetchedManga()
+                                        .executeAsBlocking()
+                                        .withIndex()
+                                        .associate { (index, manga) -> manga.id!! to index }
                                 val tempSortedList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
@@ -246,18 +256,8 @@ class LibraryComposePresenter(
                                                 removeArticles = removeArticles,
                                                 mangaOrder =
                                                     libraryCategoryItem.categoryItem.mangaOrder,
-                                                lastReadMapFn = {
-                                                    var counter = 0
-                                                    db.getLastReadManga()
-                                                        .executeAsBlocking()
-                                                        .associate { it.id!! to counter++ }
-                                                },
-                                                lastFetchMapFn = {
-                                                    var counter = 0
-                                                    db.getLastFetchedManga()
-                                                        .executeAsBlocking()
-                                                        .associate { it.id!! to counter++ }
-                                                },
+                                                lastReadMap = lastReadMap,
+                                                lastFetchMap = lastFetchMap,
                                             )
                                         )
                                 /* val sortedMangaList =  if (showDownloadBadges) { tempSortedList.mapAsync { val dbManga = db.getManga(it.displayManga.mangaId)   .executeOnIO()!!            it.copy(              downloadCount =       downloadManager.getDownloadCount(dbManga)                         )                               }                          } else {                               tempSortedList                             }*/
@@ -674,24 +674,24 @@ class LibraryComposePresenter(
                         if (category.sortOrder == librarySort) {
                             libraryCategoryItem.libraryItems.reversed().toPersistentList()
                         } else {
+                            val lastReadMap =
+                                db.getLastReadManga().executeAsBlocking().withIndex().associate {
+                                    (index, manga) ->
+                                    manga.id!! to index
+                                }
+                            val lastFetchMap =
+                                db.getLastFetchedManga()
+                                    .executeAsBlocking()
+                                    .withIndex()
+                                    .associate { (index, manga) -> manga.id!! to index }
                             libraryCategoryItem.libraryItems
                                 .sortedWith(
                                     LibraryMangaItemComparator(
                                         librarySort = updatedCategory.sortOrder,
                                         removeArticles = libraryPreferences.removeArticles().get(),
                                         mangaOrder = updatedCategory.mangaOrder,
-                                        lastReadMapFn = {
-                                            var counter = 0
-                                            db.getLastReadManga().executeAsBlocking().associate {
-                                                it.id!! to counter++
-                                            }
-                                        },
-                                        lastFetchMapFn = {
-                                            var counter = 0
-                                            db.getLastFetchedManga().executeAsBlocking().associate {
-                                                it.id!! to counter++
-                                            }
-                                        },
+                                        lastReadMap = lastReadMap,
+                                        lastFetchMap = lastFetchMap,
                                     )
                                 )
                                 .toPersistentList()
