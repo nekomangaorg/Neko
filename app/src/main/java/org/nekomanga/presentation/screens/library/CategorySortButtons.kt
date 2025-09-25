@@ -75,7 +75,7 @@ fun RowScope.CategorySortButtons(
     AnimatedContent(targetState = categoryIsRefreshing) { targetState ->
         when (targetState) {
             true -> {
-                val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                val strokeWidth = with(LocalDensity.current) { Size.extraTiny.toPx() }
                 val stroke =
                     remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
                 IconButton(

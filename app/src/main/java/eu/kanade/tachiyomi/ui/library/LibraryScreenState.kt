@@ -57,7 +57,7 @@ data class LibraryScreenActions(
     val deleteSelectedLibraryMangaItems: () -> Unit,
     val clearSelectedManga: () -> Unit,
     val search: (String?) -> Unit,
-    val updateLibrary: (Boolean) -> Unit,
+    val updateLibrary: () -> Unit,
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,
     val downloadChapters: (MangaConstants.DownloadAction) -> Unit,

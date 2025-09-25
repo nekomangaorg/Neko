@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.asFlow
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -78,10 +77,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -858,7 +855,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     }
 
     companion object {
-        private const val TAG = "LibraryUpdate"
+        const val TAG = "LibraryUpdate"
         private const val WORK_NAME_AUTO = "LibraryUpdate-auto"
         private const val WORK_NAME_MANUAL = "LibraryUpdate-manual"
 
@@ -912,21 +909,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
 
-        fun cancelAllWorks(context: Context) {
-            WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
-        }
-
         fun isRunning(context: Context): Boolean {
             val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG).get()
             return list.any { it.state == WorkInfo.State.RUNNING }
         }
 
-        fun isRunningFlow(context: Context): Flow<Boolean> {
-            return WorkManager.getInstance(context)
-                .getWorkInfosForUniqueWorkLiveData(TAG)
-                .asFlow()
-                .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
-        }
 
         fun categoryInQueue(id: Int?) = instance?.get()?.categoryIds?.contains(id) ?: false
 

@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -83,6 +85,7 @@ class LibraryComposePresenter(
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val chapterFilter: ChapterFilter = Injekt.get(),
+    val workManager: WorkManager = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
@@ -802,6 +805,15 @@ class LibraryComposePresenter(
     }
 
     fun observeLibraryUpdates() {
+        pausablePresenterScope.launchIO {
+            workManager
+                .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
+                .distinctUntilChanged()
+                .collectLatest { running ->
+                    _libraryScreenState.update { it.copy(isRefreshing = false) }
+                }
+        }
 
         pausablePresenterScope.launchIO {
             filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->

@@ -43,7 +43,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     deleteSelectedLibraryMangaItems = presenter::deleteSelectedLibraryMangaItems,
                     clearSelectedManga = presenter::clearSelectedManga,
                     search = presenter::search,
-                    updateLibrary = { start -> updateLibrary(start, context) },
+                    updateLibrary = { updateLibrary(context) },
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                     clearActiveFilters = presenter::clearActiveFilters,
                     filterToggled = presenter::filterToggled,
@@ -116,12 +116,8 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
         }
     }
 
-    private fun updateLibrary(start: Boolean, context: Context) {
-        if (LibraryUpdateJob.isRunning(context) && !start) {
-            presenter.refreshing(false)
-            LibraryUpdateJob.stop(context)
-        } else if (!LibraryUpdateJob.isRunning(context) && start) {
-            presenter.refreshing(true)
+    private fun updateLibrary(context: Context) {
+        if (!LibraryUpdateJob.isRunning(context)) {
             LibraryUpdateJob.startNow(context)
         }
     }

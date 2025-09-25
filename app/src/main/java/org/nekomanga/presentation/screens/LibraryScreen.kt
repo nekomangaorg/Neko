@@ -23,7 +23,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -144,7 +144,7 @@ fun LibraryScreen(
         ) {
             PullRefresh(
                 refreshing = libraryScreenState.value.isRefreshing,
-                onRefresh = { libraryScreenActions.updateLibrary(true) },
+                onRefresh = libraryScreenActions.updateLibrary,
                 indicatorOffset =
                     WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
                         WindowInsets.displayCutout.asPaddingValues().calculateTopPadding() +
@@ -267,7 +267,7 @@ fun LibraryScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     if (libraryScreenState.value.isFirstLoad) {
-                                        CircularWavyProgressIndicator()
+                                        ContainedLoadingIndicator()
                                     } else {
                                         EmptyScreen(
                                             iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
