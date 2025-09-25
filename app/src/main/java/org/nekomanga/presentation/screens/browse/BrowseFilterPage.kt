@@ -11,11 +11,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
-import org.nekomanga.presentation.screens.NoResultsEmptyScreen
+import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -33,7 +35,10 @@ fun BrowseFilterPage(
     loadNextPage: () -> Unit,
 ) {
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
-        NoResultsEmptyScreen(contentPadding)
+        EmptyScreen(
+            message = UiText.StringResource(resourceId = R.string.no_results_found),
+            contentPadding = contentPadding,
+        )
     } else {
         if (isList) {
             MangaList(
