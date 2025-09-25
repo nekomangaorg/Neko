@@ -142,25 +142,12 @@ class MangaDetailPresenter(
         return _currentManga.value!!
     }
 
-    private val _generalState = MutableStateFlow(MangaConstants.MangaScreenGeneralState())
-    val generalState: StateFlow<MangaConstants.MangaScreenGeneralState> =
-        _generalState.asStateFlow()
-
-    private val _mangaState =
+    private val _mangaDetailScreenState =
         MutableStateFlow(
-            MangaConstants.MangaScreenMangaState(currentArtwork = Artwork(mangaId = mangaId))
+            MangaConstants.MangaDetailScreenState(currentArtwork = Artwork(mangaId = mangaId)),
         )
-    val mangaState: StateFlow<MangaConstants.MangaScreenMangaState> = _mangaState.asStateFlow()
-
-    private val _trackMergeState = MutableStateFlow(MangaConstants.MangaScreenTrackMergeState())
-    val trackMergeState: StateFlow<MangaConstants.MangaScreenTrackMergeState> =
-        _trackMergeState.asStateFlow()
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+    val mangaDetailScreenState: StateFlow<MangaConstants.MangaDetailScreenState> =
+        _mangaDetailScreenState.asStateFlow()
 
     private val _snackbarState = MutableSharedFlow<SnackbarState>()
     val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
@@ -187,8 +174,8 @@ class MangaDetailPresenter(
                     .filterNot { it == MergeType.Comick }
                     .toPersistentList()
 
-            _generalState.value =
-                MangaConstants.MangaScreenGeneralState(
+            _mangaDetailScreenState.update {
+                it.copy(
                     hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                     extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
@@ -198,6 +185,7 @@ class MangaDetailPresenter(
                     validMergeTypes = validMergeTypes,
                     vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
                 )
+            }
             if (!currentManga().initialized) {
                 updateCategoryFlows()
                 updateMangaFlow()
@@ -249,22 +237,22 @@ class MangaDetailPresenter(
                 return@launchIO
             }
 
-            _isRefreshing.value = true
+            _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
 
             mangaUpdateCoordinator.update(currentManga(), presenterScope, isMerging).collect {
                 result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(
-                            SnackbarState(message = result.text, messageRes = result.id)
+                            SnackbarState(message = result.text, messageRes = result.id),
                         )
-                        _isRefreshing.value = false
+                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
                         refreshTracking()
                         syncChaptersReadStatus()
-                        _isRefreshing.value = false
+                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
                     }
                     is MangaResult.UpdatedChapters -> Unit
                     is MangaResult.UpdatedManga -> {
@@ -275,7 +263,7 @@ class MangaDetailPresenter(
                     }
                     is MangaResult.ChaptersRemoved -> {
                         val removedChapters =
-                            generalState.value.allChapters.filter {
+                            mangaDetailScreenState.value.allChapters.filter {
                                 it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
                             }
 
@@ -284,7 +272,7 @@ class MangaDetailPresenter(
                                 2 -> deleteChapters(removedChapters)
                                 1 -> Unit
                                 else -> {
-                                    _generalState.update {
+                                    _mangaDetailScreenState.update {
                                         it.copy(removedChapters = removedChapters.toImmutableList())
                                     }
                                 }
@@ -301,12 +289,12 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val searchActive = search != null
 
-            _isSearching.value = searchActive
+            _mangaDetailScreenState.update { it.copy(isSearching = searchActive) }
 
             val filteredChapters =
                 when (searchActive) {
                     true -> {
-                        _generalState.value.activeChapters.filter {
+                        mangaDetailScreenState.value.activeChapters.filter {
                             it.chapter.chapterTitle.contains(search!!, true) ||
                                 it.chapter.scanlator.contains(search, true) ||
                                 it.chapter.name.contains(search, true)
@@ -315,7 +303,9 @@ class MangaDetailPresenter(
                     false -> emptyList()
                 }
 
-            _generalState.update { it.copy(searchChapters = filteredChapters.toPersistentList()) }
+            _mangaDetailScreenState.update {
+                it.copy(searchChapters = filteredChapters.toPersistentList())
+            }
         }
     }
 
@@ -386,13 +376,13 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
-            _generalState.update { state ->
+            _mangaDetailScreenState.update { state ->
                 state.copy(
                     trackingSuggestedDates =
                         TrackingSuggestedDates(
                             startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
                             finishedDate = chapters.maxOfOrNull { it.last_read } ?: 0L,
-                        )
+                        ),
                 )
             }
         }
@@ -418,13 +408,13 @@ class MangaDetailPresenter(
             // add a slight delay in case the tracking flow is slower
 
             var count = 0
-            while (count < 5 && trackMergeState.value.tracks.isEmpty()) {
+            while (count < 5 && mangaDetailScreenState.value.tracks.isEmpty()) {
                 delay(1000)
                 count++
             }
 
             val asyncList =
-                trackMergeState.value.tracks
+                mangaDetailScreenState.value.tracks
                     .filter { trackManager.getService(it.trackServiceId) != null }
                     .filter { trackManager.getService(it.trackServiceId)!!.isLogged() }
                     .map { trackItem ->
@@ -441,7 +431,7 @@ class MangaDetailPresenter(
                                                 message = it.message,
                                                 fieldRes = service.nameRes(),
                                                 messageRes = R.string.error_refreshing_,
-                                            )
+                                            ),
                                         )
                                     }
                                 }
@@ -464,7 +454,7 @@ class MangaDetailPresenter(
             runCatching {
                     statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
                         val chaptersToMarkRead =
-                            generalState.value.allChapters
+                            mangaDetailScreenState.value.allChapters
                                 .asSequence()
                                 .filter { !it.chapter.isMergedChapter() }
                                 .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
@@ -483,7 +473,7 @@ class MangaDetailPresenter(
                     presenterScope.launch {
                         delay(3000)
                         _snackbarState.emit(
-                            SnackbarState("Error trying to mark chapters read from MangaDex $it")
+                            SnackbarState("Error trying to mark chapters read from MangaDex $it"),
                         )
                     }
                 }
@@ -494,11 +484,12 @@ class MangaDetailPresenter(
     fun searchTracker(title: String, service: TrackServiceItem) {
         presenterScope.launchIO {
             val previouslyTracked =
-                trackMergeState.value.tracks.firstOrNull { service.id == it.trackServiceId } != null
+                mangaDetailScreenState.value.tracks.firstOrNull { service.id == it.trackServiceId } !=
+                    null
             trackingCoordinator
                 .searchTracker(title, service, currentManga(), previouslyTracked)
                 .collect { result ->
-                    _trackMergeState.update { it.copy(trackSearchResult = result) }
+                    _mangaDetailScreenState.update { it.copy(trackSearchResult = result) }
                 }
         }
     }
@@ -623,9 +614,9 @@ class MangaDetailPresenter(
     /** Set custom title or resets if given null */
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
-            val previousTitle = mangaState.value.currentTitle
+            val previousTitle = mangaDetailScreenState.value.currentTitle
             val newTitle = title ?: currentManga().originalTitle
-            _mangaState.update { it.copy(currentTitle = newTitle) }
+            _mangaDetailScreenState.update { it.copy(currentTitle = newTitle) }
 
             val manga = currentManga()
             manga.user_title = title
@@ -638,7 +629,7 @@ class MangaDetailPresenter(
                     message = newTitle,
                     actionLabelRes = R.string.undo,
                     action = { setAltTitle(previousTitle) },
-                )
+                ),
             )
         }
     }
@@ -648,7 +639,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             db.deleteMergeMangaForType(mangaId, mergeType).executeAsBlocking()
             updateMangaFlow()
-            val (mergedChapters, nonMergedChapters) =
+            val (mergedChapters, _) =
                 db.getChapters(currentManga()).executeOnIO().partition {
                     it.isMergedChapterOfType(mergeType)
                 }
@@ -663,42 +654,38 @@ class MangaDetailPresenter(
 
     fun searchMergedManga(query: String, mergeType: MergeType) {
         presenterScope.launchIO {
-            _trackMergeState.update { it.copy(mergeSearchResult = MergeSearchResult.Loading) }
+            _mangaDetailScreenState.update { it.copy(mergeSearchResult = MergeSearchResult.Loading) }
 
             runCatching {
-                    MergeType.getSource(mergeType, sourceManager)
-                    val mergedMangaResults =
-                        MergeType.getSource(mergeType, sourceManager).searchManga(query).map {
-                            SourceMergeManga(
-                                coverUrl = it.thumbnail_url ?: "",
-                                title = it.title,
-                                url = it.url,
-                                mergeType = mergeType,
-                            )
-                        }
+                MergeType.getSource(mergeType, sourceManager)
+                val mergedMangaResults =
+                    MergeType.getSource(mergeType, sourceManager).searchManga(query).map {
+                        SourceMergeManga(
+                            coverUrl = it.thumbnail_url ?: "",
+                            title = it.title,
+                            url = it.url,
+                            mergeType = mergeType,
+                        )
+                    }
 
-                    _trackMergeState.update {
-                        when (mergedMangaResults.isEmpty()) {
-                            true ->
-                                trackMergeState.value.copy(
-                                    mergeSearchResult = MergeSearchResult.NoResult
-                                )
-                            false ->
-                                trackMergeState.value.copy(
-                                    mergeSearchResult =
-                                        MergeSearchResult.Success(mergedMangaResults)
-                                )
-                        }
+                _mangaDetailScreenState.update {
+                    when (mergedMangaResults.isEmpty()) {
+                        true -> it.copy(mergeSearchResult = MergeSearchResult.NoResult)
+                        false ->
+                            it.copy(
+                                mergeSearchResult = MergeSearchResult.Success(mergedMangaResults),
+                            )
                     }
                 }
+            }
                 .getOrElse { error ->
                     TimberKt.e(error) { "Error searching merged manga" }
-                    _trackMergeState.update {
+                    _mangaDetailScreenState.update {
                         it.copy(
                             mergeSearchResult =
                                 MergeSearchResult.Error(
-                                    error.message ?: "Error looking up information"
-                                )
+                                    error.message ?: "Error looking up information",
+                                ),
                         )
                     }
                 }
@@ -722,7 +709,7 @@ class MangaDetailPresenter(
             val currentArtwork = createCurrentArtwork(dbManga)
 
             val altArtwork = createAltArtwork(currentManga(), currentArtwork)
-            _mangaState.update {
+            _mangaDetailScreenState.update {
                 it.copy(
                     alternativeArtwork = altArtwork.toImmutableList(),
                     currentArtwork = currentArtwork,
@@ -762,7 +749,7 @@ class MangaDetailPresenter(
 
     private fun updateVibrantColorFlow() {
         presenterScope.launch {
-            _generalState.update {
+            _mangaDetailScreenState.update {
                 it.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
             }
         }
@@ -812,7 +799,7 @@ class MangaDetailPresenter(
                                 },
                         )
                     }
-            _generalState.update { it.copy(allChapters = allChapters.toImmutableList()) }
+            _mangaDetailScreenState.update { it.copy(allChapters = allChapters.toImmutableList()) }
 
             val allSources = mutableSetOf(MdConstants.name)
 
@@ -831,7 +818,7 @@ class MangaDetailPresenter(
 
             if (
                 allChapterScanlators.size == 1 &&
-                    !currentManga().filtered_scanlators.isNullOrEmpty()
+                !currentManga().filtered_scanlators.isNullOrEmpty()
             ) {
                 updateMangaScanlator(emptySet())
             }
@@ -846,7 +833,7 @@ class MangaDetailPresenter(
             val allLanguages =
                 allChapters.flatMap { ChapterUtil.getLanguages(it.chapter.language) }.toSet()
 
-            _generalState.update {
+            _mangaDetailScreenState.update {
                 it.copy(
                     activeChapters =
                         chapterSort
@@ -906,7 +893,7 @@ class MangaDetailPresenter(
             val categories = db.getCategories().executeAsBlocking()
             val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
-            _generalState.update { state ->
+            _mangaDetailScreenState.update { state ->
                 state.copy(
                     allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
                     currentCategories =
@@ -919,7 +906,7 @@ class MangaDetailPresenter(
     /** Update flows for tracking */
     private fun updateTrackingFlows(checkForMissingTrackers: Boolean = false) {
         presenterScope.launchIO {
-            _trackMergeState.update { mergeState ->
+            _mangaDetailScreenState.update { mergeState ->
                 mergeState.copy(
                     loggedInTrackService =
                         trackManager.services
@@ -938,13 +925,13 @@ class MangaDetailPresenter(
                 val autoAddTracker = preferences.autoAddTracker().get()
 
                 // Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
-                trackMergeState.value.loggedInTrackService
+                mangaDetailScreenState.value.loggedInTrackService
                     .firstOrNull { it.isMdList }
                     ?.let { _ ->
                         val mdList = trackManager.mdList
 
                         var track =
-                            trackMergeState.value.tracks
+                            mangaDetailScreenState.value.tracks
                                 .firstOrNull { mdList.matchingTrack(it) }
                                 ?.toDbTrack()
 
@@ -992,7 +979,7 @@ class MangaDetailPresenter(
                             .map { it.toInt() }
                             .map { autoAddTrackerId ->
                                 async {
-                                    trackMergeState.value.loggedInTrackService
+                                    mangaDetailScreenState.value.loggedInTrackService
                                         .firstOrNull { it.id == autoAddTrackerId }
                                         ?.let { trackService ->
                                             val id =
@@ -1002,7 +989,7 @@ class MangaDetailPresenter(
                                                 )
                                             if (
                                                 id != null &&
-                                                    !trackMergeState.value.tracks.any {
+                                                    !mangaDetailScreenState.value.tracks.any {
                                                         trackService.id == it.trackServiceId
                                                     }
                                             ) {
@@ -1011,8 +998,8 @@ class MangaDetailPresenter(
                                                         _snackbarState.emit(
                                                             SnackbarState(
                                                                 message =
-                                                                    "No network connection, cannot autolink tracker"
-                                                            )
+                                                                    "No network connection, cannot autolink tracker",
+                                                            ),
                                                         )
                                                     }
                                                 } else {
@@ -1027,8 +1014,7 @@ class MangaDetailPresenter(
                                                         )
 
                                                     if (
-                                                        trackResult
-                                                            is
+                                                        trackResult is
                                                             TrackingConstants.TrackSearchResult.Success
                                                     ) {
                                                         val trackSearchItem =
@@ -1043,8 +1029,7 @@ class MangaDetailPresenter(
                                                             )
                                                         handleTrackingUpdate(trackingUpdate, false)
                                                     } else if (
-                                                        trackResult
-                                                            is
+                                                        trackResult is
                                                             TrackingConstants.TrackSearchResult.Error
                                                     ) {
                                                         launchUI {
@@ -1054,7 +1039,7 @@ class MangaDetailPresenter(
                                                                         trackResult.trackerNameRes,
                                                                     message =
                                                                         " error trying to autolink tracking.  ${trackResult.errorMessage}",
-                                                                )
+                                                                ),
                                                             )
                                                         }
                                                     }
@@ -1067,13 +1052,13 @@ class MangaDetailPresenter(
                     }
                 }
                 // update the tracks incase they were updated above
-                _trackMergeState.update { mergeState ->
+                _mangaDetailScreenState.update { mergeState ->
                     mergeState.copy(
                         tracks =
                             db.getTracks(mangaId)
                                 .executeAsBlocking()
                                 .map { it.toTrackItem() }
-                                .toImmutableList()
+                                .toImmutableList(),
                     )
                 }
             }
@@ -1081,9 +1066,9 @@ class MangaDetailPresenter(
             getSuggestedDate()
 
             val trackCount =
-                trackMergeState.value.loggedInTrackService.count { trackServiceItem ->
+                mangaDetailScreenState.value.loggedInTrackService.count { trackServiceItem ->
                     val trackService = trackManager.getService(trackServiceItem.id)!!
-                    trackMergeState.value.tracks.any { track ->
+                    mangaDetailScreenState.value.tracks.any { track ->
                         // return true if track matches and not MDList
                         // or track matches and MDlist is anything but Unfollowed
                         trackService.matchingTrack(track) &&
@@ -1093,7 +1078,7 @@ class MangaDetailPresenter(
                     }
                 }
 
-            _generalState.update { it.copy(trackServiceCount = trackCount) }
+            _mangaDetailScreenState.update { it.copy(trackServiceCount = trackCount) }
         }
     }
 
@@ -1198,7 +1183,7 @@ class MangaDetailPresenter(
         val filteredScanlators =
             ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions =
-            generalState.value.allSources
+            mangaDetailScreenState.value.allSources
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
                 .map { scanlator ->
                     MangaConstants.ScanlatorOption(
@@ -1214,7 +1199,7 @@ class MangaDetailPresenter(
         val filteredScanlators =
             ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions =
-            (generalState.value.allScanlators + generalState.value.allUploaders)
+            (mangaDetailScreenState.value.allScanlators + mangaDetailScreenState.value.allUploaders)
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
                 .map { scanlator ->
                     MangaConstants.ScanlatorOption(
@@ -1229,7 +1214,7 @@ class MangaDetailPresenter(
     private fun getLanguageFilter(): MangaConstants.LanguageFilter {
         val filteredLanguages = ChapterUtil.getLanguages(currentManga().filtered_language).toSet()
         val languageOptions =
-            generalState.value.allLanguages
+            mangaDetailScreenState.value.allLanguages
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
                 .map { language ->
                     MangaConstants.LanguageOption(

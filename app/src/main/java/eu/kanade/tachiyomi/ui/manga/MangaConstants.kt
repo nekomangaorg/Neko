@@ -22,7 +22,9 @@ import org.nekomanga.domain.track.TrackServiceItem
 
 object MangaConstants {
 
-    data class MangaScreenGeneralState(
+    data class MangaDetailScreenState(
+        val isRefreshing: Boolean = false,
+        val isSearching: Boolean = false,
         val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val searchChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
@@ -50,9 +52,6 @@ object MangaConstants {
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
         val vibrantColor: Int? = null,
-    )
-
-    data class MangaScreenMangaState(
         val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
         val alternativeTitles: ImmutableList<String> = persistentListOf(),
         val artist: String = "",
@@ -74,9 +73,6 @@ object MangaConstants {
         val status: Int = 0,
         val lastVolume: Int? = null,
         val lastChapter: Int? = null,
-    )
-
-    data class MangaScreenTrackMergeState(
         val loggedInTrackService: ImmutableList<TrackServiceItem> = persistentListOf(),
         val tracks: ImmutableList<TrackItem> = persistentListOf(),
         val trackSearchResult: TrackingConstants.TrackSearchResult =
