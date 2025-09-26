@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components
 
-import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Favorite
@@ -76,7 +75,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
             toolTipLabel = it.title.asString(),
             icon = it.icon,
             isEnabled = it.isEnabled,
-            buttonClicked = it.onClick,
+            onClick = it.onClick,
         )
     }
 
@@ -85,7 +84,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
         ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
-            buttonClicked = { showMenu = !showMenu },
+            onClick = { showMenu = !showMenu },
         )
 
         SimpleDropdownMenu(
@@ -103,7 +102,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
         ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
-            buttonClicked = { showMenu = !showMenu },
+            onClick = { showMenu = !showMenu },
         )
 
         mainDropDown.menuShowing(showMenu)
