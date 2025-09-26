@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -266,17 +267,38 @@ fun LibraryScreen(
                                 ) {
                                     if (libraryScreenState.value.isFirstLoad) {
                                         ContainedLoadingIndicator()
-                                    } else {
-                                        val stringRes =
-                                            when (
-                                                libraryScreenState.value.searchQuery.isNullOrBlank()
-                                            ) {
-                                                true -> R.string.library_is_empty_add_from_browse
-                                                false -> R.string.no_results_found
-                                            }
+                                    } else if (
+                                        !libraryScreenState.value.searchQuery.isNullOrBlank()
+                                    ) {
 
                                         EmptyScreen(
-                                            message = UiText.StringResource(resourceId = stringRes)
+                                            message =
+                                                UiText.StringResource(
+                                                    resourceId = R.string.no_results_found
+                                                ),
+                                            actions =
+                                                persistentListOf(
+                                                    Action(
+                                                        text =
+                                                            (UiText.StringResource(
+                                                                R.string.search_globally
+                                                            )),
+                                                        onClick = {
+                                                            libraryScreenActions.searchMangaDex(
+                                                                libraryScreenState.value
+                                                                    .searchQuery!!
+                                                            )
+                                                        },
+                                                    )
+                                                ),
+                                        )
+                                    } else {
+                                        EmptyScreen(
+                                            message =
+                                                UiText.StringResource(
+                                                    resourceId =
+                                                        R.string.library_is_empty_add_from_browse
+                                                )
                                         )
                                     }
                                 }

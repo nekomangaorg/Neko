@@ -11,10 +11,12 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.toLibraryManga
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.presentation.screens.LibraryScreen
@@ -43,6 +45,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     deleteSelectedLibraryMangaItems = presenter::deleteSelectedLibraryMangaItems,
                     clearSelectedManga = presenter::clearSelectedManga,
                     search = presenter::search,
+                    searchMangaDex = ::searchMangaDex,
                     updateLibrary = { updateLibrary(context) },
                     collapseExpandAllCategories = presenter::collapseExpandAllCategories,
                     clearActiveFilters = presenter::clearActiveFilters,
@@ -114,6 +117,12 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     },
             )
         }
+    }
+
+    private fun searchMangaDex(query: String) {
+        router.setRoot(
+            BrowseController(query).withFadeTransaction().tag(R.id.nav_browse.toString())
+        )
     }
 
     private fun updateLibrary(context: Context) {

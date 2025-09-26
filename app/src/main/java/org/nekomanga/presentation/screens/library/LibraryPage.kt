@@ -284,7 +284,10 @@ private fun LibraryCategoryHeader(
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .clickable(enabled = isCollapsible || selectionMode, onClick = categoryItemClick)
+                .clickable(
+                    enabled = enabled && (isCollapsible || selectionMode),
+                    onClick = categoryItemClick,
+                )
                 .padding(vertical = Size.extraTiny, horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {

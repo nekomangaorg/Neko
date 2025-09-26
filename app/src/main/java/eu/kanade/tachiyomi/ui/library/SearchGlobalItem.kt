@@ -74,7 +74,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         }
 
         fun bind(string: String) {
-            binding.button.text = view.context.getString(R.string.search_globally, string)
+            binding.button.text = view.context.getString(R.string.search_globally)
         }
 
         override fun onLongClick(view: View?): Boolean {

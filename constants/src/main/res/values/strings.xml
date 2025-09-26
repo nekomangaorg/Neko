@@ -207,7 +207,7 @@
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
     <string name="search_library">Search library</string>
-    <string name="search_globally">Search \"%1$s\" MangaDex</string>
+    <string name="search_globally">Search on MangaDex</string>
 
     <string name="copy">Copy</string>
     <string name="read_progress">Read progress</string>
