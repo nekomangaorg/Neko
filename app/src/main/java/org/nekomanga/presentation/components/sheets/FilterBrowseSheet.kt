@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components.sheets
 
-import ToolTipButton
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -75,6 +74,7 @@ import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.SearchFooter
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.components.sheetHandle

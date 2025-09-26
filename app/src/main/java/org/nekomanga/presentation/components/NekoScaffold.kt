@@ -2,7 +2,6 @@
 
 package org.nekomanga.presentation.components
 
-import ToolTipButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut

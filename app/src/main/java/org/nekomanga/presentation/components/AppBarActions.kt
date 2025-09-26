@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components
 
-import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Favorite
