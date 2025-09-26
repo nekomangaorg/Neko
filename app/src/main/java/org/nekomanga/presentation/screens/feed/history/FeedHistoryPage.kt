@@ -59,7 +59,7 @@ fun FeedHistoryPage(
                         text = dateString,
                         style =
                             MaterialTheme.typography.labelLarge.copy(
-                                color = MaterialTheme.colorScheme.tertiary
+                                color = MaterialTheme.colorScheme.secondary
                             ),
                         modifier =
                             Modifier.fillMaxWidth()

@@ -1,15 +1,19 @@
 package org.nekomanga.presentation.screens.feed.summary
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,14 +40,13 @@ fun FeedSummaryPage(
 ) {
     val scrollState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
-        item { SummaryHeader(stringResource(R.string.feed_continue_reading)) }
-        if (updatingContinueReading) {
-            item {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
-                )
-            }
+        item {
+            SummaryHeader(
+                text = stringResource(R.string.feed_continue_reading),
+                isRefreshing = updatingContinueReading,
+            )
         }
+
         if (!updatingContinueReading && continueReadingFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
@@ -69,14 +72,13 @@ fun FeedSummaryPage(
             }
         }
 
-        item { SummaryHeader(stringResource(R.string.recently_updated_manga)) }
-        if (updatingUpdates) {
-            item {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
-                )
-            }
+        item {
+            SummaryHeader(
+                text = stringResource(R.string.recently_updated_manga),
+                isRefreshing = updatingUpdates,
+            )
         }
+
         if (!updatingUpdates && updatesFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
@@ -101,14 +103,13 @@ fun FeedSummaryPage(
             }
         }
 
-        item { SummaryHeader(stringResource(R.string.newly_added)) }
-        if (updatingNewlyAdded) {
-            item {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
-                )
-            }
+        item {
+            SummaryHeader(
+                text = stringResource(R.string.newly_added),
+                isRefreshing = updatingNewlyAdded,
+            )
         }
+
         if (!updatingNewlyAdded && newlyAddedFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
@@ -135,20 +136,23 @@ fun FeedSummaryPage(
 }
 
 @Composable
-private fun SummaryHeader(text: String) {
-    Text(
-        text = text,
-        style =
-            MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.tertiary),
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(
-                    start = Size.small,
-                    end = Size.small,
-                    top = Size.small,
-                    bottom = Size.small,
+private fun SummaryHeader(text: String, isRefreshing: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style =
+                MaterialTheme.typography.titleMedium.copy(
+                    color = MaterialTheme.colorScheme.secondary
                 ),
-    )
+            modifier = Modifier.fillMaxWidth().weight(1f).padding(),
+        )
+        AnimatedVisibility(isRefreshing) {
+            CircularProgressIndicator(modifier = Modifier.size(Size.large))
+        }
+    }
 }
 
 @Composable

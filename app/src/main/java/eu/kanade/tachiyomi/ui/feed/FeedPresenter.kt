@@ -159,21 +159,34 @@ class FeedPresenter(
 
     override fun onDestroy() {
         super.onDestroy()
+        saveItems()
+    }
+
+    fun saveItems() {
+        lastUpdatesFeedMangaList =
+            lastUpdatesFeedMangaList ?: _updatesScreenPagingState.value.updatesFeedMangaList
+        lastHistoryFeedMangaList =
+            lastHistoryFeedMangaList ?: _historyScreenPagingState.value.historyFeedMangaList
+        lastSummaryUpdatesFeedMangaList =
+            lastSummaryUpdatesFeedMangaList ?: _summaryScreenPagingState.value.updatesFeedMangaList
+        lastContinueReadingList =
+            lastContinueReadingList ?: _summaryScreenPagingState.value.continueReadingList
+        lastSummaryNewlyAddedFeedMangaList =
+            lastSummaryNewlyAddedFeedMangaList
+                ?: _summaryScreenPagingState.value.newlyAddedFeedMangaList
     }
 
     override fun onPause() {
         super.onPause()
-        lastUpdatesFeedMangaList = _updatesScreenPagingState.value.updatesFeedMangaList
-        lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
-        lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
-        lastContinueReadingList = _summaryScreenPagingState.value.continueReadingList
-        lastSummaryNewlyAddedFeedMangaList = _summaryScreenPagingState.value.newlyAddedFeedMangaList
+        saveItems()
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        loadSummaryPage()
+        populateItems()
+        observeDownloads()
+
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         presenterScope.launchIO {
             val downloads =
@@ -192,7 +205,6 @@ class FeedPresenter(
 
             _feedScreenState.update { it.copy(downloads = downloads) }
         }
-        observeDownloads()
 
         if (_feedScreenState.value.firstLoad) {
             _feedScreenState.update { state -> state.copy(firstLoad = false) }
@@ -1093,8 +1105,7 @@ class FeedPresenter(
         presenterScope.launchIO { _feedScreenState.update { it.copy(isRefreshing = start) } }
     }
 
-    override fun onResume() {
-        super.onResume()
+    fun populateItems() {
         presenterScope.launchIO {
             _updatesScreenPagingState.update {
                 it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: it.updatesFeedMangaList)
@@ -1117,10 +1128,15 @@ class FeedPresenter(
             lastContinueReadingList = null
             lastSummaryNewlyAddedFeedMangaList = null
         }
-        observeDownloads()
         presenterScope.launchIO { loadSummaryPage() }
         presenterScope.launchIO { refreshUpdatesFeed() }
         presenterScope.launchIO { refreshHistoryFeed() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        populateItems()
+        observeDownloads()
     }
 
     companion object {
