@@ -711,49 +711,55 @@ class FeedPresenter(
 
     private fun refreshUpdatesFeed() {
         presenterScope.launchIO {
-            if (_updatesScreenPagingState.value.updatesFeedMangaList.isEmpty() && _feedScreenState.value.firstLoad) return@launchIO
+            if (
+                _updatesScreenPagingState.value.updatesFeedMangaList.isEmpty() &&
+                    _feedScreenState.value.firstLoad
+            )
+                return@launchIO
 
             val currentOffset = _updatesScreenPagingState.value.offset
             var mutableFeedManga = mutableListOf<FeedManga>()
             val limit = UPDATES_ENDLESS_LIMIT
             for (i in 0..currentOffset step limit) {
-                feedRepository.getUpdatesPage(
-                    offset = i,
-                    limit = limit,
-                    uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
-                ).onSuccess { results ->
-                    mutableFeedManga =
-                        (mutableFeedManga + results.second).toMutableList()
-                }
+                feedRepository
+                    .getUpdatesPage(
+                        offset = i,
+                        limit = limit,
+                        uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
+                    )
+                    .onSuccess { results ->
+                        mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
+                    }
             }
             _updatesScreenPagingState.update { state ->
-                state.copy(
-                    updatesFeedMangaList = mutableFeedManga.toImmutableList()
-                )
+                state.copy(updatesFeedMangaList = mutableFeedManga.toImmutableList())
             }
         }
     }
 
     private fun refreshHistoryFeed() {
         presenterScope.launchIO {
-            if (_historyScreenPagingState.value.historyFeedMangaList.isEmpty() && _feedScreenState.value.firstLoad) return@launchIO
+            if (
+                _historyScreenPagingState.value.historyFeedMangaList.isEmpty() &&
+                    _feedScreenState.value.firstLoad
+            )
+                return@launchIO
 
             val currentOffset = _historyScreenPagingState.value.offset
             var mutableFeedManga = mutableListOf<FeedManga>()
             val limit = HISTORY_ENDLESS_LIMIT
             for (i in 0..currentOffset step limit) {
-                feedRepository.getHistoryPage(
-                    offset = i,
-                    group = _historyScreenPagingState.value.historyGrouping,
-                ).onSuccess { results ->
-                    mutableFeedManga =
-                        (mutableFeedManga + results.second).toMutableList()
-                }
+                feedRepository
+                    .getHistoryPage(
+                        offset = i,
+                        group = _historyScreenPagingState.value.historyGrouping,
+                    )
+                    .onSuccess { results ->
+                        mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
+                    }
             }
             _historyScreenPagingState.update { state ->
-                state.copy(
-                    historyFeedMangaList = mutableFeedManga.toImmutableList()
-                )
+                state.copy(historyFeedMangaList = mutableFeedManga.toImmutableList())
             }
         }
     }
@@ -1091,43 +1097,30 @@ class FeedPresenter(
         super.onResume()
         presenterScope.launchIO {
             _updatesScreenPagingState.update {
-            it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: it.updatesFeedMangaList)
+                it.copy(updatesFeedMangaList = lastUpdatesFeedMangaList ?: it.updatesFeedMangaList)
             }
             _historyScreenPagingState.update {
-            it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: it.historyFeedMangaList)
+                it.copy(historyFeedMangaList = lastHistoryFeedMangaList ?: it.historyFeedMangaList)
             }
             _summaryScreenPagingState.update {
                 it.copy(
-                updatesFeedMangaList = lastSummaryUpdatesFeedMangaList ?: it.updatesFeedMangaList,
-                continueReadingList = lastContinueReadingList ?: it.continueReadingList,
+                    updatesFeedMangaList =
+                        lastSummaryUpdatesFeedMangaList ?: it.updatesFeedMangaList,
+                    continueReadingList = lastContinueReadingList ?: it.continueReadingList,
                     newlyAddedFeedMangaList =
-                lastSummaryNewlyAddedFeedMangaList ?: it.newlyAddedFeedMangaList,
+                        lastSummaryNewlyAddedFeedMangaList ?: it.newlyAddedFeedMangaList,
                 )
             }
-        lastUpdatesFeedMangaList = null
-        lastHistoryFeedMangaList = null
-        lastSummaryUpdatesFeedMangaList = null
-        lastContinueReadingList = null
-        lastSummaryNewlyAddedFeedMangaList = null
+            lastUpdatesFeedMangaList = null
+            lastHistoryFeedMangaList = null
+            lastSummaryUpdatesFeedMangaList = null
+            lastContinueReadingList = null
+            lastSummaryNewlyAddedFeedMangaList = null
         }
         observeDownloads()
-    when (_feedScreenState.value.feedScreenType) {
-        FeedScreenType.Summary -> {
-            loadSummaryPage()
-            presenterScope.launchIO { refreshUpdatesFeed() }
-            presenterScope.launchIO { refreshHistoryFeed() }
-        }
-        FeedScreenType.Updates -> {
-            refreshUpdatesFeed()
-            presenterScope.launchIO { loadSummaryPage() }
-            presenterScope.launchIO { refreshHistoryFeed() }
-        }
-        FeedScreenType.History -> {
-            refreshHistoryFeed()
-            presenterScope.launchIO { loadSummaryPage() }
-            presenterScope.launchIO { refreshUpdatesFeed() }
-        }
-    }
+        presenterScope.launchIO { loadSummaryPage() }
+        presenterScope.launchIO { refreshUpdatesFeed() }
+        presenterScope.launchIO { refreshHistoryFeed() }
     }
 
     companion object {
