@@ -80,7 +80,7 @@ fun StatsScreen(
                 ToolTipButton(
                     toolTipLabel = stringResource(id = actionText),
                     icon = actionIcon,
-                    buttonClicked = onSwitchClick,
+                    onClick = onSwitchClick,
                 )
             }
         },

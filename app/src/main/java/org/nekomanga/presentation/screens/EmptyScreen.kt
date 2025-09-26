@@ -25,7 +25,6 @@ import org.nekomanga.presentation.theme.Size
 
 private val ErrorFaces =
     listOf(
-        // Original list
         "(･o･;)",
         "Σ(ಠ_ಠ)",
         "ಥ_ಥ",

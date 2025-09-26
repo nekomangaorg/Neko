@@ -916,7 +916,7 @@
     <string name="backup_info">Automatic backups are enabled by default. A backup is created every 24 hours, up to 6 backups will saved. For best results  You should manually keep copies in other places as well.</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
-    <string name="restore_duration" formatted="false">%02d min, %02d sec</string>
+    <string name="restore_duration">%02d min, %02d sec</string>
     <string name="restore_miui_warning">Backup/Restore may not function properly if MIUI Optimization is disabled.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>

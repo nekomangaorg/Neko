@@ -697,7 +697,7 @@ fun SavedFilters(
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.delete_filter),
                                 icon = Icons.Outlined.Delete,
-                                buttonClicked = { deleteFilterClick(nameOfEnabledFilter) },
+                                onClick = { deleteFilterClick(nameOfEnabledFilter) },
                             )
                             val isDefault =
                                 savedFilters
@@ -717,9 +717,7 @@ fun SavedFilters(
                             ToolTipButton(
                                 toolTipLabel = stringResource(textRes),
                                 icon = icon,
-                                buttonClicked = {
-                                    filterDefaultClick(nameOfEnabledFilter, makeDefault)
-                                },
+                                onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
                             )
                         }
                     }

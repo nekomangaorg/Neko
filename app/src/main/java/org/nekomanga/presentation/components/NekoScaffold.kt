@@ -224,7 +224,7 @@ private fun TitleAndSubtitleTopAppBar(
             ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
-                buttonClicked = onNavigationIconClicked,
+                onClick = onNavigationIconClicked,
             )
         },
         actions = actions,
@@ -249,7 +249,7 @@ private fun NoTitleTopAppBar(
             ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
-                buttonClicked = onNavigationIconClicked,
+                onClick = onNavigationIconClicked,
             )
         },
         actions = actions,
@@ -326,7 +326,7 @@ fun SearchOutlineTopAppBar(
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
                                         icon = navigationIcon,
-                                        buttonClicked = onNavigationIconClicked,
+                                        onClick = onNavigationIconClicked,
                                     )
                                 }
                                 if (searchEnabled) {
@@ -334,7 +334,7 @@ fun SearchOutlineTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.cancel_search),
                                         icon = Icons.Filled.SearchOff,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
+                                        onClick = {
                                             onSearchText("")
                                             searchText = ""
                                             searchEnabled = false
@@ -347,7 +347,7 @@ fun SearchOutlineTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = { searchEnabled = true },
+                                        onClick = { searchEnabled = true },
                                     )
                                 }
                             }
@@ -363,7 +363,7 @@ fun SearchOutlineTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.clear),
                                         icon = Icons.Filled.Close,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
+                                        onClick = {
                                             onSearchText("")
                                             searchText = ""
                                         },
@@ -445,14 +445,14 @@ fun SearchOutlineDummyTopAppBar(
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
                                         icon = navigationIcon,
-                                        buttonClicked = onNavigationIconClicked,
+                                        onClick = onNavigationIconClicked,
                                     )
                                 } else {
                                     ToolTipButton(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = { onSearchEnabled() },
+                                        onClick = { onSearchEnabled() },
                                     )
                                 }
                             }
@@ -464,7 +464,7 @@ fun SearchOutlineDummyTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = { onSearchEnabled() },
+                                        onClick = { onSearchEnabled() },
                                     )
                                 } else {
                                     actions()
@@ -504,7 +504,7 @@ private fun NoTitleSearchTopAppBar(
             ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
-                buttonClicked = onNavigationIconClicked,
+                onClick = onNavigationIconClicked,
             )
         },
         actions = {
@@ -545,7 +545,7 @@ private fun NoTitleSearchTopAppBar(
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.clear),
                                 icon = Icons.Filled.Close,
-                                buttonClicked = {
+                                onClick = {
                                     onSearchText("")
                                     searchText = ""
                                 },
@@ -578,7 +578,7 @@ private fun NoTitleSearchTopAppBar(
             ToolTipButton(
                 toolTipLabel = searchPlaceHolder,
                 icon = icon,
-                buttonClicked = {
+                onClick = {
                     searchText = ""
                     alreadyRequestedFocus = false
                     onSearchText(null)
@@ -624,7 +624,7 @@ private fun TitleOnlyTopAppBar(
                 ToolTipButton(
                     toolTipLabel = navigationIconLabel,
                     icon = navigationIcon,
-                    buttonClicked = onNavigationIconClicked,
+                    onClick = onNavigationIconClicked,
                 )
             }
         },
