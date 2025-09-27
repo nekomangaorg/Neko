@@ -278,11 +278,6 @@
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
 
-        <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge" />
-
     </application>
 
 </manifest>
