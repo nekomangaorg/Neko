@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
-import java.util.Objects
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.R
@@ -52,15 +52,27 @@ fun BrowseHomePage(
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val coverSize =
-        (maxOf(
-                LocalConfiguration.current.screenHeightDp,
-                LocalConfiguration.current.screenWidthDp,
-            ) / 5)
-            .dp
+        remember(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp) {
+            (maxOf(
+                    LocalConfiguration.current.screenHeightDp,
+                    LocalConfiguration.current.screenWidthDp,
+                ) / 5)
+                .dp
+        }
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = contentPadding) {
-        items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) {
-            homePageManga ->
+        items(
+            items = browseHomePageManga,
+            key = { homePageManga ->
+                when (homePageManga.displayScreenType) {
+                    is DisplayScreenType.LatestChapters -> R.string.latest_chapters
+                    is DisplayScreenType.RecentlyAdded -> R.string.recently_added
+                    is DisplayScreenType.PopularNewTitles -> R.string.popular_new_titles
+                    is DisplayScreenType.FeedUpdates -> R.string.feed
+                    is DisplayScreenType.List -> homePageManga.displayScreenType.hashCode()
+                }
+            },
+        ) { homePageManga ->
             val headerText =
                 when (homePageManga.displayScreenType) {
                     is DisplayScreenType.LatestChapters ->
@@ -83,7 +95,7 @@ fun BrowseHomePage(
                         text = headerText,
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
                             ),
                     )
                     Gap(Size.tiny)
@@ -102,7 +114,10 @@ fun BrowseHomePage(
             ) {
                 item { Gap(Size.small) }
                 val manga = homePageManga.displayManga.filter { it.isVisible }
-                items(manga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
+                items(
+                    items = manga,
+                    key = { displayManga -> displayManga.mangaId },
+                ) { displayManga ->
                     Box {
                         Box(
                             modifier =
@@ -110,7 +125,7 @@ fun BrowseHomePage(
                                     .combinedClickable(
                                         onClick = { onClick(displayManga.mangaId) },
                                         onLongClick = { onLongClick(displayManga) },
-                                    )
+                                    ),
                         ) {
                             Column(modifier = Modifier.width(coverSize)) {
                                 MangaCover.Square.invoke(
@@ -142,7 +157,7 @@ fun BrowseHomePage(
                         text = stringResource(id = R.string.random_manga),
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
                             ),
                     )
                     Gap(Size.tiny)
