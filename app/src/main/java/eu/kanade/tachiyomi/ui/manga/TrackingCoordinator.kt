@@ -153,6 +153,9 @@ class TrackingCoordinator {
     ) =
         flow {
                 emit(TrackingConstants.TrackSearchResult.Loading)
+
+                val id = trackManager.getIdFromManga(service, manga) ?: ""
+
                 val results =
                     trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
                 emit(
@@ -160,7 +163,8 @@ class TrackingCoordinator {
                         true -> TrackingConstants.TrackSearchResult.NoResult
                         false ->
                             TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toImmutableList()
+                                results.map { it.toTrackSearchItem() }.toImmutableList(),
+                                hasMatchingId = id.isNotEmpty(),
                             )
                     }
                 )

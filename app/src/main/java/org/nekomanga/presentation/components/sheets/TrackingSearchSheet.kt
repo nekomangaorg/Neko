@@ -86,6 +86,7 @@ fun TrackingSearchSheet(
                         item { Gap(Size.tiny) }
                         if (
                             alreadySelectedTrack == null &&
+                                trackSearchResult.hasMatchingId &&
                                 trackSearchResult.trackSearchResult.size == 1
                         ) {
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())

@@ -39,7 +39,10 @@ object TrackingConstants {
 
         object NoResult : TrackSearchResult()
 
-        class Success(val trackSearchResult: ImmutableList<TrackSearchItem>) : TrackSearchResult()
+        class Success(
+            val trackSearchResult: ImmutableList<TrackSearchItem>,
+            val hasMatchingId: Boolean = false,
+        ) : TrackSearchResult()
 
         class Error(val errorMessage: String, @param:StringRes val trackerNameRes: Int) :
             TrackSearchResult()
