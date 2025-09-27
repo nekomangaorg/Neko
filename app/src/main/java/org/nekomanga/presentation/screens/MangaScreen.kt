@@ -57,7 +57,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInWebView
@@ -89,13 +88,9 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaScreen(
-    generalState: State<MangaScreenGeneralState>,
-    mangaState: State<MangaConstants.MangaScreenMangaState>,
-    trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
+    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     windowSizeClass: WindowSizeClass,
     snackbar: SharedFlow<SnackbarState>,
-    isRefreshing: State<Boolean>,
-    isSearching: State<Boolean>,
     onRefresh: () -> Unit,
     onSearch: (String?) -> Unit,
     generatePalette: (Drawable) -> Unit = {},
@@ -153,26 +148,32 @@ fun MangaScreen(
     val defaultThemeColorState = defaultThemeColorState()
 
     val themeColorState by
-        remember(generalState.value.themeBasedOffCovers, generalState.value.vibrantColor) {
+        remember(
+            mangaDetailScreenState.value.themeBasedOffCovers,
+            mangaDetailScreenState.value.vibrantColor,
+        ) {
             mutableStateOf(
                 if (
-                    generalState.value.themeBasedOffCovers &&
-                        generalState.value.vibrantColor != null
+                    mangaDetailScreenState.value.themeBasedOffCovers &&
+                    mangaDetailScreenState.value.vibrantColor != null
                 ) {
                     val color =
-                        getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
+                        getButtonThemeColor(
+                            Color(mangaDetailScreenState.value.vibrantColor!!),
+                            isDarkTheme,
+                        )
                     ThemeColorState(
                         buttonColor = color,
                         rippleConfiguration = nekoRippleConfiguration(color),
                         textSelectionColors = dynamicTextSelectionColor(color),
                         altContainerColor =
                             Color(
-                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)
+                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f),
                             ),
                     )
                 } else {
                     defaultThemeColorState
-                }
+                },
             )
         }
 
@@ -198,9 +199,7 @@ fun MangaScreen(
                     DetailsBottomSheet(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
-                        generalState = generalState,
-                        mangaState = mangaState,
-                        trackMergeState = trackMergeState,
+                        mangaDetailScreenState = mangaDetailScreenState,
                         addNewCategory = categoryActions.addNew,
                         dateFormat = dateFormat,
                         openSheet = ::openSheet,
@@ -227,12 +226,12 @@ fun MangaScreen(
             actions = {
                 OverflowOptions(
                     chapterActions = chapterActions,
-                    chaptersProvider = { generalState.value.activeChapters },
+                    chaptersProvider = { mangaDetailScreenState.value.activeChapters },
                 )
             },
             content = { incomingPaddingValues ->
                 PullRefresh(
-                    refreshing = isRefreshing.value,
+                    refreshing = mangaDetailScreenState.value.isRefreshing,
                     onRefresh = onRefresh,
                     indicatorOffset = incomingPaddingValues.calculateTopPadding(),
                     backgroundColor = themeColorState.buttonColor,
@@ -244,7 +243,7 @@ fun MangaScreen(
                                 WindowInsets.navigationBars
                                     .only(WindowInsetsSides.Bottom)
                                     .asPaddingValues()
-                                    .calculateBottomPadding()
+                                    .calculateBottomPadding(),
                         )
 
                     val chapterContentPadding =
@@ -264,25 +263,19 @@ fun MangaScreen(
                         val detailsState =
                             remember(
                                 themeColorState,
-                                mangaState,
-                                generalState,
-                                isSearching,
-                                trackMergeState,
+                                mangaDetailScreenState,
                                 windowSizeClass,
                             ) {
                                 DetailsState(
                                     themeColorState = themeColorState,
-                                    mangaState = mangaState,
-                                    generalState = generalState,
-                                    isSearching = isSearching,
-                                    trackMergeState = trackMergeState,
+                                    mangaDetailScreenState = mangaDetailScreenState,
                                     windowSizeClass = windowSizeClass,
                                 )
                             }
 
                         if (
                             windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-                                !generalState.value.forcePortrait
+                                !mangaDetailScreenState.value.forcePortrait
                         ) {
                             SideBySideLayout(
                                 mangaDetailContentPadding = mangaDetailContentPadding,
@@ -304,21 +297,20 @@ fun MangaScreen(
                                 chapterHeader = {
                                     ChapterHeader(
                                         themeColorState = themeColorState,
-                                        isSearching = isSearching,
-                                        generalState = generalState,
+                                        mangaDetailScreenState = mangaDetailScreenState,
                                         openSheet = { sheet -> openSheet(sheet) },
                                     )
                                 },
                                 chaptersProvider = {
-                                    when (isSearching.value) {
-                                        true -> generalState.value.searchChapters
-                                        false -> generalState.value.activeChapters
+                                    when (mangaDetailScreenState.value.isSearching) {
+                                        true -> mangaDetailScreenState.value.searchChapters
+                                        false -> mangaDetailScreenState.value.activeChapters
                                     }
                                 },
                                 chapterRow = { index, chapterItem ->
                                     ChapterRow(
                                         themeColorState = themeColorState,
-                                        generalState = generalState,
+                                        mangaDetailScreenState = mangaDetailScreenState,
                                         chapterActions = chapterActions,
                                         scope = scope,
                                         chapterItem = chapterItem,
@@ -346,21 +338,20 @@ fun MangaScreen(
                                 chapterHeader = {
                                     ChapterHeader(
                                         themeColorState = themeColorState,
-                                        isSearching = isSearching,
-                                        generalState = generalState,
+                                        mangaDetailScreenState = mangaDetailScreenState,
                                         openSheet = { sheet -> openSheet(sheet) },
                                     )
                                 },
                                 chaptersProvider = {
-                                    when (isSearching.value) {
-                                        true -> generalState.value.searchChapters
-                                        false -> generalState.value.activeChapters
+                                    when (mangaDetailScreenState.value.isSearching) {
+                                        true -> mangaDetailScreenState.value.searchChapters
+                                        false -> mangaDetailScreenState.value.activeChapters
                                     }
                                 },
                                 chapterRow = { index, chapterItem ->
                                     ChapterRow(
                                         themeColorState = themeColorState,
-                                        generalState = generalState,
+                                        mangaDetailScreenState = mangaDetailScreenState,
                                         chapterActions = chapterActions,
                                         scope = scope,
                                         chapterItem = chapterItem,
@@ -370,12 +361,14 @@ fun MangaScreen(
                             )
                         }
 
-                        if (generalState.value.removedChapters.isNotEmpty()) {
+                        if (mangaDetailScreenState.value.removedChapters.isNotEmpty()) {
                             RemovedChaptersDialog(
                                 themeColorState = themeColorState,
-                                chapters = generalState.value.removedChapters,
+                                chapters = mangaDetailScreenState.value.removedChapters,
                                 onConfirm = {
-                                    chapterActions.delete(generalState.value.removedChapters)
+                                    chapterActions.delete(
+                                        mangaDetailScreenState.value.removedChapters,
+                                    )
                                     chapterActions.clearRemoved
                                 },
                                 onDismiss = chapterActions.clearRemoved,
@@ -468,7 +461,7 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
 @Composable
 private fun ChapterRow(
     themeColorState: ThemeColorState,
-    generalState: State<MangaScreenGeneralState>,
+    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     chapterActions: ChapterActions,
     scope: CoroutineScope,
     chapterItem: ChapterItem,
@@ -492,7 +485,7 @@ private fun ChapterRow(
         downloadStateProvider = { chapterItem.downloadState },
         downloadProgressProvider = { chapterItem.downloadProgress },
         shouldHideChapterTitles =
-            generalState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
+            mangaDetailScreenState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
         onClick = { chapterActions.open(chapterItem) },
         onBookmark = {
             chapterActions.mark(
@@ -516,13 +509,22 @@ private fun ChapterRow(
             chapterActions.download(listOf(chapterItem), downloadAction)
         },
         markPrevious = { read ->
-            val chaptersToMark = generalState.value.activeChapters.subList(0, index)
-            val lastIndex = generalState.value.activeChapters.lastIndex
+            val chaptersToMark =
+                mangaDetailScreenState.value.activeChapters.subList(
+                    0,
+                    index,
+                )
+            val lastIndex = mangaDetailScreenState.value.activeChapters.lastIndex
             val altChapters =
                 if (index == lastIndex) {
                     emptyList()
                 } else {
-                    generalState.value.activeChapters.slice(IntRange(index + 1, lastIndex))
+                    mangaDetailScreenState.value.activeChapters.slice(
+                        IntRange(
+                            index + 1,
+                            lastIndex,
+                        ),
+                    )
                 }
             val action =
                 when (read) {
@@ -538,29 +540,25 @@ private fun ChapterRow(
 @Composable
 fun ChapterHeader(
     themeColorState: ThemeColorState,
-    isSearching: State<Boolean>,
-    generalState: State<MangaScreenGeneralState>,
+    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     openSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     ChapterHeader(
         themeColor = themeColorState,
         numberOfChaptersProvider = {
-            when (isSearching.value) {
-                true -> generalState.value.searchChapters.size
-                false -> generalState.value.activeChapters.size
+            when (mangaDetailScreenState.value.isSearching) {
+                true -> mangaDetailScreenState.value.searchChapters.size
+                false -> mangaDetailScreenState.value.activeChapters.size
             }
         },
-        filterTextProvider = { generalState.value.chapterFilterText },
+        filterTextProvider = { mangaDetailScreenState.value.chapterFilterText },
         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
     )
 }
 
 private class DetailsState(
     val themeColorState: ThemeColorState,
-    val mangaState: State<MangaConstants.MangaScreenMangaState>,
-    val generalState: State<MangaScreenGeneralState>,
-    val isSearching: State<Boolean>,
-    val trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
+    val mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     val windowSizeClass: WindowSizeClass,
 )
 
@@ -578,18 +576,18 @@ private fun Details(
     toggleFavorite: (Boolean) -> Unit,
 ) {
     val isLoggedIntoTrackersProvider =
-        remember(detailsState.trackMergeState) {
-            { detailsState.trackMergeState.value.loggedInTrackService.isNotEmpty() }
+        remember(detailsState.mangaDetailScreenState) {
+            { detailsState.mangaDetailScreenState.value.loggedInTrackService.isNotEmpty() }
         }
 
     val toggleFavoriteProvider =
-        remember(detailsState.mangaState, detailsState.generalState) {
+        remember(detailsState.mangaDetailScreenState) {
             {
                 if (
-                    !detailsState.mangaState.value.inLibrary &&
-                        detailsState.generalState.value.allCategories.isNotEmpty()
+                    !detailsState.mangaDetailScreenState.value.inLibrary &&
+                        detailsState.mangaDetailScreenState.value.allCategories.isNotEmpty()
                 ) {
-                    if (detailsState.generalState.value.hasDefaultCategory) {
+                    if (detailsState.mangaDetailScreenState.value.hasDefaultCategory) {
                         toggleFavorite(true)
                     } else {
                         openSheet(
@@ -597,7 +595,7 @@ private fun Details(
                                 addingToLibrary = true,
                                 setCategories = categoryActions.set,
                                 addToLibraryClick = { toggleFavorite(false) },
-                            )
+                            ),
                         )
                     }
                 } else {
@@ -613,7 +611,7 @@ private fun Details(
                     DetailsBottomSheetScreen.CategoriesSheet(
                         addingToLibrary = false,
                         setCategories = categoryActions.set,
-                    )
+                    ),
                 )
             }
         }
@@ -629,9 +627,8 @@ private fun Details(
     val quickReadClickProvider = remember(chapterActions) { { chapterActions.openNext() } }
 
     MangaDetailsHeader(
-        mangaState = detailsState.mangaState,
-        generalState = detailsState.generalState,
-        isSearching = detailsState.isSearching.value,
+        mangaDetailScreenState = detailsState.mangaDetailScreenState,
+        isSearching = detailsState.mangaDetailScreenState.value.isSearching,
         windowSizeClass = detailsState.windowSizeClass,
         informationActions = informationActions,
         themeColorState = detailsState.themeColorState,
@@ -674,7 +671,7 @@ fun defaultThemeColorState(): ThemeColorState {
                     MaterialTheme.colorScheme.secondary.toArgb(),
                     MaterialTheme.colorScheme.surface.toArgb(),
                     .706f,
-                )
+                ),
             ),
     )
 }
