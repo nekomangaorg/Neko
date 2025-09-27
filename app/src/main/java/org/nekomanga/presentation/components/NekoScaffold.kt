@@ -418,13 +418,6 @@ fun SearchOutlineDummyTopAppBar(
                         expanded = false,
                         onExpandedChange = {},
                         onQueryChange = {},
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Green,
-                                unfocusedContainerColor = Color.Blue,
-                                disabledContainerColor = Color.Gray,
-                                errorContainerColor = Color.Red,
-                            ),
                         onSearch = {},
                         placeholder = {
                             Text(
