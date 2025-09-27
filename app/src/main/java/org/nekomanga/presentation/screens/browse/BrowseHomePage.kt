@@ -52,7 +52,10 @@ fun BrowseHomePage(
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val coverSize =
-        remember(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp) {
+        remember(
+            LocalConfiguration.current.screenWidthDp,
+            LocalConfiguration.current.screenHeightDp,
+        ) {
             (maxOf(
                     LocalConfiguration.current.screenHeightDp,
                     LocalConfiguration.current.screenWidthDp,
@@ -95,7 +98,7 @@ fun BrowseHomePage(
                         text = headerText,
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface
                             ),
                     )
                     Gap(Size.tiny)
@@ -114,10 +117,8 @@ fun BrowseHomePage(
             ) {
                 item { Gap(Size.small) }
                 val manga = homePageManga.displayManga.filter { it.isVisible }
-                items(
-                    items = manga,
-                    key = { displayManga -> displayManga.mangaId },
-                ) { displayManga ->
+                items(items = manga, key = { displayManga -> displayManga.mangaId }) { displayManga
+                    ->
                     Box {
                         Box(
                             modifier =
@@ -125,7 +126,7 @@ fun BrowseHomePage(
                                     .combinedClickable(
                                         onClick = { onClick(displayManga.mangaId) },
                                         onLongClick = { onLongClick(displayManga) },
-                                    ),
+                                    )
                         ) {
                             Column(modifier = Modifier.width(coverSize)) {
                                 MangaCover.Square.invoke(
@@ -157,7 +158,7 @@ fun BrowseHomePage(
                         text = stringResource(id = R.string.random_manga),
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface
                             ),
                     )
                     Gap(Size.tiny)

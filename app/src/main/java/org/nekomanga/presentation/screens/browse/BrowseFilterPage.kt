@@ -68,7 +68,7 @@ fun BrowseFilterPage(
                     modifier =
                         Modifier.align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .padding(horizontal = Size.small),
+                            .padding(horizontal = Size.small)
                 )
             }
         }
