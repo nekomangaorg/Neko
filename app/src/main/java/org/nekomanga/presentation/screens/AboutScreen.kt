@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipButton
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,6 +49,7 @@ import org.nekomanga.constants.Constants.PRIVACY_POLICY_URL
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
@@ -253,6 +253,6 @@ private fun LinkIcon(
         icon = icon,
         painter = painter,
         enabledTint = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
-        buttonClicked = { uriHandler.openUri(url) },
+        onClick = { uriHandler.openUri(url) },
     )
 }

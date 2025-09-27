@@ -1,16 +1,17 @@
-@file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.ripple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -20,15 +21,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
 /**
@@ -44,15 +44,36 @@ fun ToolTipButton(
     painter: Painter? = null,
     isEnabled: Boolean = true,
     enabledTint: Color = MaterialTheme.colorScheme.onSurface,
-    buttonClicked: () -> Unit = {},
+    onClick: () -> Unit = {},
 ) {
     require(icon != null || painter != null)
 
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val textFieldTooltipState = rememberTooltipState()
+
+    val longClick: () -> Unit = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        scope.launch { textFieldTooltipState.show() }
+    }
+
+    val clickableModifier =
+        if (isEnabled) {
+            Modifier.combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = false, radius = 20.dp),
+                onClickLabel = toolTipLabel,
+                role = Role.Button,
+                onClick = onClick,
+                onLongClick = longClick,
+            )
+        } else {
+            Modifier
+        }
+
     TooltipBox(
-        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        positionProvider =
+            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Below, Size.tiny),
         state = textFieldTooltipState,
         tooltip = {
             PlainTooltip(
@@ -67,82 +88,36 @@ fun ToolTipButton(
             }
         },
     ) {
-        CombinedClickableIconButton(
-            enabled = isEnabled,
-            enabledTint = enabledTint,
-            modifier =
-                modifier.iconButtonCombinedClickable(
-                    toolTipLabel = toolTipLabel,
-                    onClick = buttonClicked,
-                    isEnabled = isEnabled,
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        scope.launch { textFieldTooltipState.show() }
-                    },
-                ),
+        Box(
+            modifier = modifier.size(40.dp).then(clickableModifier),
+            contentAlignment = Alignment.Center,
         ) {
-            if (icon != null) {
-                Icon(imageVector = icon, modifier = iconModifier, contentDescription = toolTipLabel)
-            } else {
-                Icon(
-                    painter = painter!!,
-                    modifier = iconModifier,
-                    contentDescription = toolTipLabel,
-                )
+            val contentColor =
+                if (isEnabled) {
+                    enabledTint
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.disabledAlphaLowContrast
+                    )
+                }
+            CompositionLocalProvider(LocalContentColor provides contentColor) {
+                when {
+                    icon != null -> {
+                        Icon(
+                            imageVector = icon,
+                            modifier = iconModifier,
+                            contentDescription = toolTipLabel,
+                        )
+                    }
+                    painter != null -> {
+                        Icon(
+                            painter = painter,
+                            modifier = iconModifier,
+                            contentDescription = toolTipLabel,
+                        )
+                    }
+                }
             }
         }
-    }
-}
-
-/**
- * This button doesnt override clickable, and allows you to pass a combined clickable to do long,
- * double, and normal click
- */
-@Composable
-fun CombinedClickableIconButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    enabledTint: Color,
-    content: @Composable () -> Unit,
-) {
-    Box(
-        modifier = modifier.minimumInteractiveComponentSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        val contentColor =
-            if (enabled) {
-                enabledTint
-            } else {
-                MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = NekoColors.disabledAlphaLowContrast
-                )
-            }
-        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
-    }
-}
-
-/**
- * This button wraps combinedClickable with the remember ripple from a normal IconButton, and is to
- * be used with the CombinedClickableIconButton
- */
-fun Modifier.iconButtonCombinedClickable(
-    toolTipLabel: String,
-    isEnabled: Boolean,
-    onLongClick: (() -> Unit)? = null,
-    onDoubleClick: (() -> Unit)? = null,
-    onClick: () -> Unit,
-) = composed {
-    if (isEnabled) {
-        combinedClickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = ripple(bounded = false),
-            onClickLabel = toolTipLabel,
-            role = Role.Button,
-            onClick = onClick,
-            onLongClick = onLongClick,
-            onDoubleClick = onDoubleClick,
-        )
-    } else {
-        this
     }
 }

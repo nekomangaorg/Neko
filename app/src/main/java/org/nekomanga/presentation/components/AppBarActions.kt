@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components
 
-import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Favorite
@@ -81,7 +80,7 @@ fun AppBarActions(
             toolTipLabel = it.title.asString(),
             icon = it.icon,
             isEnabled = it.isEnabled,
-            buttonClicked = it.onClick,
+            onClick = it.onClick,
             enabledTint = tint,
         )
     }
@@ -91,7 +90,7 @@ fun AppBarActions(
         ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
-            buttonClicked = { showMenu = !showMenu },
+            onClick = { showMenu = !showMenu },
             enabledTint = tint,
         )
 
@@ -110,7 +109,7 @@ fun AppBarActions(
         ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
-            buttonClicked = { showMenu = !showMenu },
+            onClick = { showMenu = !showMenu },
             enabledTint = tint,
         )
 

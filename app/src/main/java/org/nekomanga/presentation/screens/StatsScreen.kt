@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ZoomInMap
 import androidx.compose.material.icons.filled.ZoomOutMap
@@ -18,6 +17,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
@@ -80,7 +80,7 @@ fun StatsScreen(
                 ToolTipButton(
                     toolTipLabel = stringResource(id = actionText),
                     icon = actionIcon,
-                    buttonClicked = onSwitchClick,
+                    onClick = onSwitchClick,
                 )
             }
         },

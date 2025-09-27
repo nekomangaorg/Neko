@@ -1032,6 +1032,7 @@ class MangaDetailPresenter(
                                                             is
                                                             TrackingConstants.TrackSearchResult.Success
                                                     ) {
+
                                                         val trackSearchItem =
                                                             trackResult.trackSearchResult[0]
                                                         val trackingUpdate =
