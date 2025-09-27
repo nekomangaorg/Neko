@@ -23,6 +23,7 @@ import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -266,13 +267,27 @@ class BrowsePresenter(
                         }
                     }
                     .onSuccess {
+                        val groupedManga =
+                            it.groupBy { manga -> manga.displayTextRes!! }
+                                .map { entry ->
+                                    entry.key to
+                                        entry.value
+                                            .map { manga -> manga.copy(displayTextRes = null) }
+                                            .toImmutableList()
+                                }
+                                .toMap()
+                                .toImmutableMap()
+
                         _browseScreenState.update { state ->
                             state.copy(
                                 displayMangaHolder =
                                     DisplayMangaHolder(
-                                        BrowseScreenType.Follows,
-                                        it.distinctBy { it.url }.toImmutableList(),
-                                        it.filterVisibility(preferences).toImmutableList(),
+                                        resultType = BrowseScreenType.Follows,
+                                        allDisplayManga =
+                                            it.distinctBy { manga -> manga.url }.toImmutableList(),
+                                        filteredDisplayManga =
+                                            it.filterVisibility(preferences).toImmutableList(),
+                                        groupedDisplayManga = groupedManga,
                                     ),
                                 initialLoading = false,
                             )
