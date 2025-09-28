@@ -1,5 +1,7 @@
 package org.nekomanga.presentation.screens.library
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,13 +17,20 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
@@ -42,6 +51,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun HorizontalCategoriesPage(
     contentPadding: PaddingValues,
+    selectionMode: Boolean,
     libraryScreenState: LibraryScreenState,
     libraryScreenActions: LibraryScreenActions,
     libraryCategoryActions: LibraryCategoryActions,
@@ -81,14 +91,45 @@ fun HorizontalCategoriesPage(
 
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().weight(1f)) { page ->
             val item = libraryScreenState.items[page]
+
+            val allSelected by
+                remember(selectionMode, selectedIds) {
+                    mutableStateOf(
+                        item.libraryItems.isNotEmpty() &&
+                            item.libraryItems
+                                .map { it.displayManga.mangaId }
+                                .all { id -> id in selectedIds }
+                    )
+                }
             when (libraryScreenState.libraryDisplayMode) {
                 is LibraryDisplayMode.ComfortableGrid,
                 is LibraryDisplayMode.CompactGrid -> {
                     Column {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .clickable(
+                                        enabled = selectionMode,
+                                        onClick = {
+                                            libraryScreenActions.selectAllLibraryMangaItems(
+                                                item.libraryItems
+                                            )
+                                        },
+                                    ),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End,
                         ) {
+                            AnimatedVisibility(selectionMode) {
+                                Icon(
+                                    imageVector =
+                                        if (allSelected) Icons.Default.CheckCircleOutline
+                                        else Icons.Outlined.Circle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                )
+                                Gap(Size.medium)
+                            }
+
                             CategorySortButtons(
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },

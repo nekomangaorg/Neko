@@ -59,6 +59,7 @@ fun LibraryPage(
     if (libraryScreenState.horizontalCategories) {
         HorizontalCategoriesPage(
             contentPadding = contentPadding,
+            selectionMode = selectionMode,
             libraryScreenState = libraryScreenState,
             libraryScreenActions = libraryScreenActions,
             libraryCategoryActions = libraryCategoryActions,
