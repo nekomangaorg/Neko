@@ -176,9 +176,8 @@ class MangaDetailController(private val mangaId: Long) :
                     delete = presenter::deleteChapters,
                     clearRemoved = presenter::clearRemovedChapters,
                     openNext = {
-                        presenter.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter?.let {
-                            openChapter(context, it.toDbChapter())
-                        }
+                        presenter.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
+                            ?.let { openChapter(context, it.toDbChapter()) }
                     },
                     open = { chapterItem ->
                         openChapter(context, chapterItem.chapter.toDbChapter())
@@ -264,7 +263,11 @@ class MangaDetailController(private val mangaId: Long) :
         viewScope.launch {
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
 
-            val cover = presenter.shareMangaCover(dir, presenter.mangaDetailScreenState.value.currentArtwork)
+            val cover =
+                presenter.shareMangaCover(
+                    dir,
+                    presenter.mangaDetailScreenState.value.currentArtwork,
+                )
             val sharableCover = cover?.getUriWithAuthority(context)
 
             withUIContext {

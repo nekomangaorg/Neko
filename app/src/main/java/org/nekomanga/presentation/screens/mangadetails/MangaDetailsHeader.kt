@@ -118,9 +118,9 @@ fun MangaDetailsHeader(
                             .background(
                                 Brush.verticalGradient(
                                     colors =
-                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
-                                ),
-                            ),
+                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
+                                )
+                            )
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
@@ -163,7 +163,9 @@ fun MangaDetailsHeader(
                                 hideButtonTextProvider = {
                                     mangaDetailScreenState.value.hideButtonText
                                 },
-                                isInitializedProvider = { mangaDetailScreenState.value.initialized },
+                                isInitializedProvider = {
+                                    mangaDetailScreenState.value.initialized
+                                },
                                 isMergedProvider = {
                                     mangaDetailScreenState.value.isMerged is
                                         MergeConstants.IsMergedManga.Yes

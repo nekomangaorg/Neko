@@ -101,7 +101,7 @@ fun DetailsBottomSheet(
                             trackAndService,
                             trackingDate,
                             mangaDetailScreenState.value.trackingSuggestedDates,
-                        ),
+                        )
                     )
                 },
                 trackingFinishDateClick = { trackAndService, trackingDate ->
@@ -111,7 +111,7 @@ fun DetailsBottomSheet(
                             trackAndService,
                             trackingDate,
                             mangaDetailScreenState.value.trackingSuggestedDates,
-                        ),
+                        )
                     )
                 },
             )
@@ -146,7 +146,7 @@ fun DetailsBottomSheet(
                         TrackingConstants.TrackAndService(
                             trackSearch.trackItem,
                             currentScreen.trackingService,
-                        ),
+                        )
                     )
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },

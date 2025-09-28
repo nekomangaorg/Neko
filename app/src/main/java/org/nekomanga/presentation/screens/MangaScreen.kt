@@ -155,7 +155,7 @@ fun MangaScreen(
             mutableStateOf(
                 if (
                     mangaDetailScreenState.value.themeBasedOffCovers &&
-                    mangaDetailScreenState.value.vibrantColor != null
+                        mangaDetailScreenState.value.vibrantColor != null
                 ) {
                     val color =
                         getButtonThemeColor(
@@ -168,12 +168,12 @@ fun MangaScreen(
                         textSelectionColors = dynamicTextSelectionColor(color),
                         altContainerColor =
                             Color(
-                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f),
+                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)
                             ),
                     )
                 } else {
                     defaultThemeColorState
-                },
+                }
             )
         }
 
@@ -243,7 +243,7 @@ fun MangaScreen(
                                 WindowInsets.navigationBars
                                     .only(WindowInsetsSides.Bottom)
                                     .asPaddingValues()
-                                    .calculateBottomPadding(),
+                                    .calculateBottomPadding()
                         )
 
                     val chapterContentPadding =
@@ -261,11 +261,7 @@ fun MangaScreen(
                         LocalTextSelectionColors provides themeColorState.textSelectionColors,
                     ) {
                         val detailsState =
-                            remember(
-                                themeColorState,
-                                mangaDetailScreenState,
-                                windowSizeClass,
-                            ) {
+                            remember(themeColorState, mangaDetailScreenState, windowSizeClass) {
                                 DetailsState(
                                     themeColorState = themeColorState,
                                     mangaDetailScreenState = mangaDetailScreenState,
@@ -367,7 +363,7 @@ fun MangaScreen(
                                 chapters = mangaDetailScreenState.value.removedChapters,
                                 onConfirm = {
                                     chapterActions.delete(
-                                        mangaDetailScreenState.value.removedChapters,
+                                        mangaDetailScreenState.value.removedChapters
                                     )
                                     chapterActions.clearRemoved
                                 },
@@ -509,21 +505,14 @@ private fun ChapterRow(
             chapterActions.download(listOf(chapterItem), downloadAction)
         },
         markPrevious = { read ->
-            val chaptersToMark =
-                mangaDetailScreenState.value.activeChapters.subList(
-                    0,
-                    index,
-                )
+            val chaptersToMark = mangaDetailScreenState.value.activeChapters.subList(0, index)
             val lastIndex = mangaDetailScreenState.value.activeChapters.lastIndex
             val altChapters =
                 if (index == lastIndex) {
                     emptyList()
                 } else {
                     mangaDetailScreenState.value.activeChapters.slice(
-                        IntRange(
-                            index + 1,
-                            lastIndex,
-                        ),
+                        IntRange(index + 1, lastIndex)
                     )
                 }
             val action =
@@ -595,7 +584,7 @@ private fun Details(
                                 addingToLibrary = true,
                                 setCategories = categoryActions.set,
                                 addToLibraryClick = { toggleFavorite(false) },
-                            ),
+                            )
                         )
                     }
                 } else {
@@ -611,7 +600,7 @@ private fun Details(
                     DetailsBottomSheetScreen.CategoriesSheet(
                         addingToLibrary = false,
                         setCategories = categoryActions.set,
-                    ),
+                    )
                 )
             }
         }
@@ -671,7 +660,7 @@ fun defaultThemeColorState(): ThemeColorState {
                     MaterialTheme.colorScheme.secondary.toArgb(),
                     MaterialTheme.colorScheme.surface.toArgb(),
                     .706f,
-                ),
+                )
             ),
     )
 }
