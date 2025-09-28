@@ -323,7 +323,7 @@ class MangaDetailPresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
-            category.order = (_generalState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
+            category.order = (_mangaDetailScreenState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             updateCategoryFlows()
         }
