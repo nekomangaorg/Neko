@@ -53,6 +53,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     filterToggled = presenter::filterToggled,
                     downloadChapters = presenter::downloadChapters,
                     shareManga = { shareManga(context) },
+                    markMangaChapters = presenter::markChapters,
                     mangaStartReadingClick = { mangaId ->
                         presenter.openNextUnread(
                             mangaId,

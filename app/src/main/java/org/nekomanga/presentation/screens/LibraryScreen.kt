@@ -42,9 +42,11 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoColors
@@ -93,6 +95,12 @@ fun LibraryScreen(
         }
 
     var deleteMangaConfirmation by remember { mutableStateOf(false) }
+
+    var markActionConfirmation by remember { mutableStateOf<ChapterMarkActions?>(null) }
+
+    var removeActionConfirmation by remember {
+        mutableStateOf<MangaConstants.DownloadAction?>(null)
+    }
 
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
@@ -172,11 +180,17 @@ fun LibraryScreen(
                         if (selectionMode) {
                             LibraryAppBarActions(
                                 downloadChapters = libraryScreenActions.downloadChapters,
+                                removeDownloads = { removeAction ->
+                                    removeActionConfirmation = removeAction
+                                },
                                 shareManga = libraryScreenActions.shareManga,
                                 editCategoryClick = {
                                     scope.launch {
                                         openSheet(LibraryBottomSheetScreen.CategorySheet)
                                     }
+                                },
+                                markChapterClick = { markAction ->
+                                    markActionConfirmation = markAction
                                 },
                                 removeFromLibraryClick = { deleteMangaConfirmation = true },
                             )
@@ -256,6 +270,53 @@ fun LibraryScreen(
                                     },
                                     onConfirm = {
                                         libraryScreenActions.deleteSelectedLibraryMangaItems()
+                                    },
+                                )
+                            }
+                            if (markActionConfirmation != null) {
+                                val (title, body) =
+                                    when (markActionConfirmation is ChapterMarkActions.Read) {
+                                        true ->
+                                            R.string.mark_all_as_read to
+                                                R.string.mark_all_chapters_as_read
+                                        false ->
+                                            R.string.mark_all_as_unread to
+                                                R.string.mark_all_chapters_as_unread
+                                    }
+                                ConfirmationDialog(
+                                    title = stringResource(title),
+                                    body = stringResource(body),
+                                    confirmButton = stringResource(R.string.mark),
+                                    onDismiss = { markActionConfirmation = null },
+                                    onConfirm = {
+                                        libraryScreenActions.markMangaChapters(
+                                            markActionConfirmation!!
+                                        )
+                                    },
+                                )
+                            }
+                            if (removeActionConfirmation != null) {
+                                val (title, body) =
+                                    when (
+                                        removeActionConfirmation is
+                                            MangaConstants.DownloadAction.RemoveAll
+                                    ) {
+                                        true ->
+                                            R.string.remove_downloads to
+                                                R.string.remove_all_downloads
+                                        false ->
+                                            R.string.remove_downloads to
+                                                R.string.remove_all_read_downloads
+                                    }
+                                ConfirmationDialog(
+                                    title = stringResource(title),
+                                    body = stringResource(body),
+                                    confirmButton = stringResource(R.string.remove),
+                                    onDismiss = { removeActionConfirmation = null },
+                                    onConfirm = {
+                                        libraryScreenActions.downloadChapters(
+                                            removeActionConfirmation!!
+                                        )
                                     },
                                 )
                             }

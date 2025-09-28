@@ -77,6 +77,8 @@
     <string name="no_chapters_error">No chapters found</string>
     <string name="no_pages_found">No pages found</string>
     <string name="remove_all_downloads">Remove all downloads?</string>
+    <string name="remove_all_read_downloads">Remove all read downloads?</string>
+
     <string name="no_chapters_to_delete">No chapters to delete</string>
     <string name="by_source_order">By source\'s order</string>
     <string name="by_smart_order">By smart order</string>
@@ -1244,6 +1246,7 @@
     <string name="less">Less</string>
     <string name="loading">Loading…</string>
     <string name="lock">Lock</string>
+    <string name="mark">Mark</string>
     <string name="mark_as">Mark as</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_read">Mark read</string>

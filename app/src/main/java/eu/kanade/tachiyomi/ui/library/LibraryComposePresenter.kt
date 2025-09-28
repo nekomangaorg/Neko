@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -41,7 +42,6 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.toLibraryMangaItem
-import kotlin.collections.mapNotNull
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -67,11 +67,14 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.util.system.filterAsync
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
@@ -87,6 +90,7 @@ class LibraryComposePresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     val chapterFilter: ChapterFilter = Injekt.get(),
     val workManager: WorkManager = Injekt.get(),
+    val chapterUseCases: ChapterUseCases = Injekt.get(),
 ) : BaseCoroutinePresenter<LibraryComposeController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
@@ -1002,6 +1006,23 @@ class LibraryComposePresenter(
 
             _libraryScreenState.update {
                 it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+            }
+        }
+    }
+
+    fun markChapters(markAction: ChapterMarkActions) {
+        presenterScope.launchIO {
+            val selectedItems = _libraryScreenState.value.selectedItems
+            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
+
+            selectedItems.mapAsync { selectedItem ->
+                val dbManga = db.getManga(selectedItem.displayManga.mangaId).executeOnIO()!!
+                val chapterItems =
+                    db.getChapters(selectedItem.displayManga.mangaId).executeOnIO().map {
+                        it.toSimpleChapter()!!.toChapterItem()
+                    }
+                chapterUseCases.markChapters(markAction, chapterItems)
+                chapterUseCases.markChaptersRemote(markAction, dbManga.uuid(), chapterItems)
             }
         }
     }

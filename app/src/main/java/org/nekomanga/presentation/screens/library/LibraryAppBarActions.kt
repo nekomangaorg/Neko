@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import org.nekomanga.R
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
@@ -14,8 +15,10 @@ import org.nekomanga.presentation.components.UiText
 @Composable
 fun LibraryAppBarActions(
     downloadChapters: (MangaConstants.DownloadAction) -> Unit,
+    removeDownloads: (MangaConstants.DownloadAction) -> Unit,
     shareManga: () -> Unit,
     editCategoryClick: () -> Unit,
+    markChapterClick: (ChapterMarkActions) -> Unit,
     removeFromLibraryClick: () -> Unit,
 ) {
     AppBarActions(
@@ -89,11 +92,11 @@ fun LibraryAppBarActions(
                         listOf(
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.read),
-                                onClick = {},
+                                onClick = { markChapterClick(ChapterMarkActions.Read()) },
                             ),
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.unread),
-                                onClick = {},
+                                onClick = { markChapterClick(ChapterMarkActions.Unread()) },
                             ),
                         ),
                 ),
@@ -104,13 +107,13 @@ fun LibraryAppBarActions(
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.all),
                                 onClick = {
-                                    downloadChapters(MangaConstants.DownloadAction.RemoveAll)
+                                    removeDownloads(MangaConstants.DownloadAction.RemoveAll)
                                 },
                             ),
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.read),
                                 onClick = {
-                                    downloadChapters(MangaConstants.DownloadAction.RemoveRead)
+                                    removeDownloads(MangaConstants.DownloadAction.RemoveRead)
                                 },
                             ),
                         ),

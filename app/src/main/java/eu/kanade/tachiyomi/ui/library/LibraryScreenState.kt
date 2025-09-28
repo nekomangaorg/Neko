@@ -20,6 +20,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText
@@ -63,6 +64,7 @@ data class LibraryScreenActions(
     val clearActiveFilters: () -> Unit,
     val downloadChapters: (MangaConstants.DownloadAction) -> Unit,
     val shareManga: () -> Unit,
+    val markMangaChapters: (ChapterMarkActions) -> Unit,
     val filterToggled: (LibraryFilterType) -> Unit,
 )
 
