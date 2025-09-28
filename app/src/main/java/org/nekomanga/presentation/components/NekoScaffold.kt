@@ -474,7 +474,7 @@ fun SearchOutlineWithActionsTopAppBar(
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
                                         icon = navigationIcon,
-                                        buttonClicked = onNavigationIconClicked,
+                                        onClick = onNavigationIconClicked,
                                     )
                                 }
                                 if (searchEnabled) {
@@ -482,7 +482,7 @@ fun SearchOutlineWithActionsTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.cancel_search),
                                         icon = Icons.Filled.SearchOff,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
+                                        onClick = {
                                             onSearchText("")
                                             searchText = ""
                                             searchEnabled = false
@@ -495,7 +495,7 @@ fun SearchOutlineWithActionsTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = { searchEnabled = true },
+                                        onClick = { searchEnabled = true },
                                     )
                                 }
                             }
@@ -511,7 +511,7 @@ fun SearchOutlineWithActionsTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.clear),
                                         icon = Icons.Filled.Close,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        buttonClicked = {
+                                        onClick = {
                                             onSearchText("")
                                             searchText = ""
                                         },

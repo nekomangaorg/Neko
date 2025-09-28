@@ -155,8 +155,6 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
 
     val unknownList = listOf("Unknown")
 
-    val altTitles = this.getAltTitles()
-
     val genreList =
         this.genre
             ?.split(",")
@@ -202,6 +200,7 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
         userCover = this.user_cover,
+        url = MdConstants.baseUrl + this.url + "/" + this.getSlug(),
         rating = ((mangaRating * 100).roundToInt() / 100.0),
         addedToLibraryDate = this.date_added,
         latestChapterDate = this.last_update,

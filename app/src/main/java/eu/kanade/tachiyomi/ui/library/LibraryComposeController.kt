@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     clearActiveFilters = presenter::clearActiveFilters,
                     filterToggled = presenter::filterToggled,
                     downloadChapters = presenter::downloadChapters,
+                    shareManga = { shareManga(context) },
                     mangaStartReadingClick = { mangaId ->
                         presenter.openNextUnread(
                             mangaId,
@@ -123,6 +125,17 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
         router.setRoot(
             BrowseController(query).withFadeTransaction().tag(R.id.nav_browse.toString())
         )
+    }
+
+    private fun shareManga(context: Context) {
+        val urls = presenter.getSelectedMangaUrls()
+        if (urls.isEmpty()) return
+        val intent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/*"
+                putExtra(Intent.EXTRA_TEXT, urls)
+            }
+        startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
     }
 
     private fun updateLibrary(context: Context) {

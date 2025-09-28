@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.toLibraryMangaItem
+import kotlin.collections.mapNotNull
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -1069,6 +1070,16 @@ class LibraryComposePresenter(
             chapter ?: return@launchIO
             openChapter(manga, chapter)
         }
+    }
+
+    fun getSelectedMangaUrls(): String {
+        val urls =
+            _libraryScreenState.value.selectedItems
+                .mapNotNull { selected -> selected.url }
+                .distinct()
+                .joinToString("\n")
+        presenterScope.launchIO { clearSelectedManga() }
+        return urls
     }
 
     fun clearSelectedManga() {

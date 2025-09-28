@@ -21,6 +21,7 @@ data class SourceManga(
 data class LibraryMangaItem(
     val displayManga: DisplayManga,
     val userCover: String?,
+    val url: String = "",
     val addedToLibraryDate: Long = 0L,
     val latestChapterDate: Long = 0L,
     val unreadCount: Int = 0,

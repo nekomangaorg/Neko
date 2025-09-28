@@ -62,6 +62,7 @@ data class LibraryScreenActions(
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,
     val downloadChapters: (MangaConstants.DownloadAction) -> Unit,
+    val shareManga: () -> Unit,
     val filterToggled: (LibraryFilterType) -> Unit,
 )
 

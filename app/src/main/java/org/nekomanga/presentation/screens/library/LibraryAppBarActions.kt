@@ -14,6 +14,7 @@ import org.nekomanga.presentation.components.UiText
 @Composable
 fun LibraryAppBarActions(
     downloadChapters: (MangaConstants.DownloadAction) -> Unit,
+    shareManga: () -> Unit,
     editCategoryClick: () -> Unit,
     removeFromLibraryClick: () -> Unit,
 ) {
@@ -114,7 +115,10 @@ fun LibraryAppBarActions(
                             ),
                         ),
                 ),
-                AppBar.OverflowAction(title = UiText.StringResource(R.string.share), onClick = {}),
+                AppBar.OverflowAction(
+                    title = UiText.StringResource(R.string.share),
+                    onClick = shareManga,
+                ),
                 AppBar.OverflowAction(
                     title = UiText.StringResource(R.string.add_to_follows),
                     onClick = {},

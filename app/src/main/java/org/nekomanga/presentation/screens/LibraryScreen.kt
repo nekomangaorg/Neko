@@ -172,6 +172,7 @@ fun LibraryScreen(
                         if (selectionMode) {
                             LibraryAppBarActions(
                                 downloadChapters = libraryScreenActions.downloadChapters,
+                                shareManga = libraryScreenActions.shareManga,
                                 editCategoryClick = {
                                     scope.launch {
                                         openSheet(LibraryBottomSheetScreen.CategorySheet)
