@@ -4,8 +4,10 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
@@ -53,6 +55,7 @@ data class DisplayMangaHolder(
     val resultType: BrowseScreenType = BrowseScreenType.None,
     val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
     val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val groupedDisplayManga: ImmutableMap<Int, ImmutableList<DisplayManga>> = persistentMapOf(),
 )
 
 enum class BrowseScreenType {

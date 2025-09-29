@@ -2,10 +2,7 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGridWithHeader
@@ -31,21 +28,9 @@ fun BrowseFollowsPage(
             contentPadding = contentPadding,
         )
     } else {
-        val groupedManga =
-            remember(displayMangaHolder) {
-                displayMangaHolder.filteredDisplayManga
-                    .groupBy { it.displayTextRes!! }
-                    .map { entry ->
-                        entry.key to
-                            entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
-                    }
-                    .toMap()
-                    .toImmutableMap()
-            }
-
         if (isList) {
             MangaListWithHeader(
-                groupedManga = groupedManga,
+                groupedManga = displayMangaHolder.groupedDisplayManga,
                 shouldOutlineCover = outlineCovers,
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -53,7 +38,7 @@ fun BrowseFollowsPage(
             )
         } else {
             MangaGridWithHeader(
-                groupedManga = groupedManga,
+                groupedManga = displayMangaHolder.groupedDisplayManga,
                 shouldOutlineCover = outlineCovers,
                 columns = numberOfColumns(rawValue = rawColumnCount),
                 isComfortable = isComfortableGrid,

@@ -420,7 +420,8 @@
     <string name="latest">Latest uploads</string>
     <string name="feed_updates">Feed updates</string>
     <string name="recently_added">Recently added</string>
-    <string name="popularNewTitles">Popular new titles</string>
+    <string name="popular_new_titles">Popular new titles</string>
+    <string name="latest_chapters">Latest chapters</string>
     <string name="browse">Browse</string>
     <string name="has_available_chapters">Has available chapters</string>
     <string name="tag_inclusion_mode">Tag inclusion mode</string>
