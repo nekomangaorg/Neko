@@ -55,7 +55,13 @@ class AlternativeMangaCoverFetcher(
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> {
-                fileLoader(File(url.substringAfter("file://")))
+                val fileName = url.substringAfter("file://")
+                val file =
+                    when (fileName.startsWith("chapterPage-")) {
+                        true -> coverCache.getCustomCoverFile(mangaId)
+                        false -> File(url)
+                    }
+                fileLoader(file)
             }
             null -> error("Invalid image")
         }
