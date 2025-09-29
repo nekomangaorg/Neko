@@ -54,9 +54,7 @@ fun BrowseHomePage(
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val screenHeight = LocalConfiguration.current.screenHeightDp
     val coverSize =
-        remember(screenWidth, screenHeight) {
-            (maxOf(screenHeight, screenWidth) / 5).dp
-        }
+        remember(screenWidth, screenHeight) { (maxOf(screenHeight, screenWidth) / 5).dp }
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = contentPadding) {
         items(
