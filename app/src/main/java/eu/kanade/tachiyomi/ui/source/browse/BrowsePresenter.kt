@@ -4,11 +4,10 @@ import androidx.compose.ui.state.ToggleableState
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
@@ -20,7 +19,6 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
@@ -31,18 +29,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.domain.filter.DexFilters
-import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -69,7 +62,7 @@ class BrowsePresenter(
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
-                filters = createInitialDexFilter(incomingQuery),
+                filters = browseRepository.createInitialDexFilter(incomingQuery),
                 defaultContentRatings =
                     mangaDexPreferences.visibleContentRatings().get().toImmutableSet(),
                 screenType = BrowseScreenType.Homepage,
@@ -77,43 +70,34 @@ class BrowsePresenter(
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
-    private fun createInitialDexFilter(incomingQuery: String): DexFilters {
-        val enabledContentRatings = mangaDexPreferences.visibleContentRatings().get()
-        val contentRatings =
-            MangaContentRating.getOrdered()
-                .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
-                .toImmutableList()
+    private var state = State()
+        set(value) {
+            field = value
+        }
 
-        return DexFilters(
-            query = Filter.Query(incomingQuery, QueryType.Title),
-            contentRatings = contentRatings,
-            contentRatingVisible = mangaDexPreferences.showContentRatingFilter().get(),
-        )
-    }
-
-    private val paginator =
+    private val paginator by lazy {
         DefaultPaginator(
-            initialKey = _browseScreenState.value.page,
+            initialKey = state.page,
             onLoadUpdated = { _browseScreenState.update { state -> state.copy(pageLoading = it) } },
             onRequest = {
                 browseRepository.getSearchPage(
-                    browseScreenState.value.page,
                     browseScreenState.value.filters,
+                    state.page,
                 )
             },
-            getNextKey = { _browseScreenState.value.page + 1 },
+            getNextKey = { state.page + 1 },
             onError = { resultError ->
                 _browseScreenState.update {
                     it.copy(
                         initialLoading = false,
                         pageLoading = false,
                         error =
-                            UiText.String(
-                                when (resultError) {
-                                    is ResultError.Generic -> resultError.errorString
-                                    else -> (resultError as ResultError.HttpError).message
-                                }
-                            ),
+                        UiText.String(
+                            when (resultError) {
+                                is ResultError.Generic -> resultError.errorString
+                                else -> (resultError as ResultError.HttpError).message
+                            }
+                        ),
                     )
                 }
             },
@@ -128,26 +112,30 @@ class BrowsePresenter(
                     state.copy(
                         screenType = BrowseScreenType.Filter,
                         displayMangaHolder =
-                            DisplayMangaHolder(
-                                BrowseScreenType.Filter,
-                                allDisplayManga.toImmutableList(),
-                                filteredDisplayManga.toImmutableList(),
-                            ),
+                        DisplayMangaHolder(
+                            BrowseScreenType.Filter,
+                            allDisplayManga.toImmutableList(),
+                            filteredDisplayManga.toImmutableList(),
+                        ),
                         initialLoading = false,
                         pageLoading = false,
-                        page = nextKey,
-                        endReached = !hasNextPage,
                     )
                 }
+                state = state.copy(page = nextKey, endReached = !hasNextPage)
                 if (filteredDisplayManga.isEmpty()) {
                     loadNextItems()
                 }
             },
         )
+    }
+
+    private lateinit var filterHandler: FilterHandler
 
     override fun onCreate() {
         super.onCreate()
         isOnline()
+
+        filterHandler = FilterHandler(presenterScope, browseRepository, db, _browseScreenState)
 
         if (_browseScreenState.value.firstLoad) {
             if (browseScreenState.value.filters.query.text.isNotBlank()) {
@@ -157,7 +145,7 @@ class BrowsePresenter(
             }
         }
 
-        updateBrowseFilters(_browseScreenState.value.firstLoad)
+        filterHandler.savedFilters(_browseScreenState.value.firstLoad)
 
         presenterScope.launch {
             _browseScreenState.update {
@@ -221,8 +209,34 @@ class BrowsePresenter(
         }
     }
 
-    fun loadNextItems() {
-        presenterScope.launch { paginator.loadNextItems() }
+    fun handle(action: BrowseAction) {
+        when (action) {
+            BrowseAction.LoadNextPage -> loadNextItems()
+            BrowseAction.RandomManga -> randomManga()
+            BrowseAction.Retry -> retry()
+            BrowseAction.SwitchDisplayMode -> switchDisplayMode()
+            BrowseAction.SwitchLibraryVisibility -> switchLibraryVisibility()
+            BrowseAction.ToggleIncognito -> toggleIncognitoMode()
+            is BrowseAction.AddNewCategory -> addNewCategory(action.newCategory)
+            is BrowseAction.CreatorSearch -> searchCreator(action.creator)
+            is BrowseAction.DeleteFilter -> filterHandler.delete(action.name)
+            is BrowseAction.FilterChanged -> filterHandler.onFilterChanged(action.filter)
+            is BrowseAction.LoadFilter -> filterHandler.load(action.browseFilterImpl)
+            is BrowseAction.MarkFilterAsDefault ->
+                filterHandler.markAsDefault(action.name, action.makeDefault)
+            is BrowseAction.OtherClick -> otherClick(action.uuid)
+            BrowseAction.ResetFilter -> filterHandler.reset()
+            is BrowseAction.SaveFilter -> filterHandler.save(action.name)
+            is BrowseAction.SetScreenType -> changeScreenType(action.browseScreenType, action.forceUpdate)
+            is BrowseAction.TagSearch -> searchTag(action.tag)
+            is BrowseAction.ToggleFavorite -> toggleFavorite(action.mangaId, action.categoryItems)
+        }
+    }
+
+    private fun loadNextItems() {
+        if (!state.endReached) {
+            presenterScope.launch { paginator.loadNextItems() }
+        }
     }
 
     private fun getHomepage() {
@@ -282,9 +296,9 @@ class BrowsePresenter(
         }
     }
 
-    fun retry() {
+    private fun retry() {
         presenterScope.launchIO {
-            val initialLoading = _browseScreenState.value.page == 1
+            val initialLoading = state.page == 1
             _browseScreenState.update { state ->
                 state.copy(initialLoading = initialLoading, error = null)
             }
@@ -295,13 +309,14 @@ class BrowsePresenter(
         }
     }
 
-    fun getSearchPage() {
+    private fun getSearchPage() {
         presenterScope.launchIO {
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(initialLoading = true, error = null)
             }
+            state = state.copy(page = 1)
 
             val currentQuery = browseScreenState.value.filters.query.text
             val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
@@ -384,9 +399,9 @@ class BrowsePresenter(
                                                     ),
                                                 initialLoading = false,
                                                 pageLoading = false,
-                                                endReached = true,
                                             )
                                         }
+                                        state = state.copy(endReached = true)
                                     }
                             }
                         }
@@ -462,7 +477,8 @@ class BrowsePresenter(
                         it.copy(isDeepLink = true, title = UiText.StringResource(R.string.list))
                     }
                     val searchFilters =
-                        createInitialDexFilter("")
+                        browseRepository
+                            .createInitialDexFilter()
                             .copy(
                                 queryMode = QueryType.List,
                                 query = Filter.Query(text = uuid, type = QueryType.List),
@@ -495,9 +511,9 @@ class BrowsePresenter(
                                         ),
                                     initialLoading = false,
                                     pageLoading = false,
-                                    endReached = true,
                                 )
                             }
+                            state = state.copy(endReached = true)
                         }
                 }
                 DeepLinkType.Author -> {
@@ -505,7 +521,9 @@ class BrowsePresenter(
                         it.copy(isDeepLink = true, title = UiText.StringResource(R.string.author))
                     }
                     val searchFilters =
-                        createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid = uuid))
+                        browseRepository
+                            .createInitialDexFilter()
+                            .copy(authorId = Filter.AuthorId(uuid = uuid))
                     _browseScreenState.update { it.copy(filters = searchFilters) }
                     if (!_browseScreenState.value.handledIncomingQuery) {
                         _browseScreenState.update { it.copy(handledIncomingQuery = true) }
@@ -520,7 +538,9 @@ class BrowsePresenter(
                         )
                     }
                     val searchFilters =
-                        createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid = uuid))
+                        browseRepository
+                            .createInitialDexFilter()
+                            .copy(groupId = Filter.GroupId(uuid = uuid))
                     _browseScreenState.update { it.copy(filters = searchFilters) }
                     if (!_browseScreenState.value.handledIncomingQuery) {
                         _browseScreenState.update { it.copy(handledIncomingQuery = true) }
@@ -531,19 +551,25 @@ class BrowsePresenter(
         }
     }
 
-    fun otherClick(uuid: String) {
+    private fun otherClick(uuid: String) {
         presenterScope.launch {
             if (browseScreenState.value.filters.queryMode == QueryType.Author) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid))
+                        filters =
+                            browseRepository
+                                .createInitialDexFilter()
+                                .copy(authorId = Filter.AuthorId(uuid))
                     )
                 }
                 getSearchPage()
             } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid))
+                        filters =
+                            browseRepository
+                                .createInitialDexFilter()
+                                .copy(groupId = Filter.GroupId(uuid))
                     )
                 }
                 getSearchPage()
@@ -551,11 +577,11 @@ class BrowsePresenter(
         }
     }
 
-    fun toggleIncognitoMode() {
+    private fun toggleIncognitoMode() {
         presenterScope.launch { securityPreferences.incognitoMode().toggle() }
     }
 
-    fun randomManga() {
+    private fun randomManga() {
         presenterScope.launch {
             _browseScreenState.update { it.copy(initialLoading = true) }
             browseRepository
@@ -572,7 +598,7 @@ class BrowsePresenter(
         }
     }
 
-    fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
+    private fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         presenterScope.launch {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
@@ -667,233 +693,16 @@ class BrowsePresenter(
         }
     }
 
-    fun saveFilter(name: String) {
-        presenterScope.launch {
-            val browseFilter =
-                BrowseFilterImpl(
-                    name = name,
-                    dexFilters = Json.encodeToString(browseScreenState.value.filters),
-                )
-            db.insertBrowseFilter(browseFilter).executeAsBlocking()
-            updateBrowseFilters()
-        }
+    private fun searchTag(tag: String) {
+        filterHandler.searchTag(tag, ::getSearchPage)
     }
 
-    fun loadFilter(browseFilterImpl: BrowseFilterImpl) {
-        presenterScope.launch {
-            val dexFilters = Json.decodeFromString<DexFilters>(browseFilterImpl.dexFilters)
-            _browseScreenState.update { it.copy(filters = dexFilters) }
-        }
-    }
-
-    fun markFilterAsDefault(name: String, makeDefault: Boolean) {
-        presenterScope.launch {
-            val updatedFilters =
-                browseScreenState.value.savedFilters.map {
-                    if (it.name == name) {
-                        it.copy(default = makeDefault)
-                    } else {
-                        it.copy(default = false)
-                    }
-                }
-            db.insertBrowseFilters(updatedFilters).executeAsBlocking()
-            updateBrowseFilters()
-        }
-    }
-
-    fun deleteFilter(name: String) {
-        presenterScope.launch {
-            db.deleteBrowseFilter(name).executeAsBlocking()
-            updateBrowseFilters()
-        }
-    }
-
-    fun resetFilter() {
-        presenterScope.launch {
-            val resetFilters = createInitialDexFilter("")
-            _browseScreenState.update { it.copy(filters = resetFilters) }
-        }
-    }
-
-    fun searchTag(tag: String) {
-        presenterScope.launch {
-            val blankFilter = createInitialDexFilter("")
-
-            val filters =
-                if (tag.startsWith("Content rating: ")) {
-                    val rating =
-                        MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
-                    blankFilter.copy(
-                        contentRatings =
-                            blankFilter.contentRatings.map {
-                                if (it.rating == rating) it.copy(state = true)
-                                else it.copy(state = false)
-                            }
-                    )
-                } else {
-                    blankFilter.copy(
-                        tags =
-                            blankFilter.tags.map {
-                                if (it.tag.prettyPrint.equals(tag, true))
-                                    it.copy(state = ToggleableState.On)
-                                else it
-                            }
-                    )
-                }
-            _browseScreenState.update { it.copy(filters = filters) }
-            getSearchPage()
-        }
-    }
-
-    fun searchCreator(creator: String) {
-        presenterScope.launch {
-            val blankFilter = createInitialDexFilter("")
-            _browseScreenState.update {
-                it.copy(
-                    filters =
-                        blankFilter.copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(creator, QueryType.Author),
-                        )
-                )
-            }
-
-            getSearchPage()
-        }
-    }
-
-    fun filterChanged(newFilter: Filter) {
-        presenterScope.launch {
-            val updatedFilters =
-                when (newFilter) {
-                    is Filter.ContentRating -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.contentRatings,
-                                { it.rating == newFilter.rating },
-                                newFilter,
-                            )
-                        if (list.none { it.state }) {
-                            val default =
-                                lookupAndReplaceEntry(
-                                    list,
-                                    { it.rating == MangaContentRating.Safe },
-                                    Filter.ContentRating(MangaContentRating.Safe, true),
-                                )
-                            browseScreenState.value.filters.copy(contentRatings = default)
-                        } else {
-                            browseScreenState.value.filters.copy(contentRatings = list)
-                        }
-                    }
-                    is Filter.OriginalLanguage -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.originalLanguage,
-                                { it.language == newFilter.language },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(originalLanguage = list)
-                    }
-                    is Filter.PublicationDemographic -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.publicationDemographics,
-                                { it.demographic == newFilter.demographic },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(publicationDemographics = list)
-                    }
-                    is Filter.Status -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.statuses,
-                                { it.status == newFilter.status },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(statuses = list)
-                    }
-                    is Filter.Tag -> {
-                        val list =
-                            lookupAndReplaceEntry(
-                                browseScreenState.value.filters.tags,
-                                { it.tag == newFilter.tag },
-                                newFilter,
-                            )
-                        browseScreenState.value.filters.copy(tags = list)
-                    }
-                    is Filter.Sort -> {
-                        val filterMode =
-                            when (newFilter.state) {
-                                true -> newFilter.sort
-                                false -> MdSort.Best
-                            }
-
-                        browseScreenState.value.filters.copy(
-                            sort = Filter.Sort.getSortList(filterMode)
-                        )
-                    }
-                    is Filter.HasAvailableChapters -> {
-                        browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)
-                    }
-                    is Filter.TagInclusionMode -> {
-                        browseScreenState.value.filters.copy(tagInclusionMode = newFilter)
-                    }
-                    is Filter.TagExclusionMode -> {
-                        browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
-                    }
-                    is Filter.Query -> {
-                        when (newFilter.type) {
-                            QueryType.Title -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Title,
-                                    query = newFilter,
-                                )
-                            }
-                            QueryType.Author -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Author,
-                                    query = newFilter,
-                                )
-                            }
-                            QueryType.Group -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.Group,
-                                    query = newFilter,
-                                )
-                            }
-                            QueryType.List -> {
-                                browseScreenState.value.filters.copy(
-                                    queryMode = QueryType.List,
-                                    query = newFilter,
-                                )
-                            }
-                        }
-                    }
-                    is Filter.AuthorId -> {
-                        browseScreenState.value.filters.copy(authorId = newFilter)
-                    }
-                    is Filter.GroupId -> {
-                        browseScreenState.value.filters.copy(groupId = newFilter)
-                    }
-                }
-
-            _browseScreenState.update { it.copy(filters = updatedFilters) }
-        }
-    }
-
-    private fun <T> lookupAndReplaceEntry(
-        list: List<T>,
-        indexMethod: (T) -> Boolean,
-        newEntry: T,
-    ): ImmutableList<T> {
-        val index = list.indexOfFirst { indexMethod(it) }
-        val mutableList = list.toMutableList()
-        mutableList[index] = newEntry
-        return mutableList.toImmutableList()
+    private fun searchCreator(creator: String) {
+        filterHandler.searchCreator(creator, ::getSearchPage)
     }
 
     /** Add New Category */
-    fun addNewCategory(newCategory: String) {
+    private fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
             db.insertCategory(category).executeAsBlocking()
@@ -909,11 +718,11 @@ class BrowsePresenter(
         }
     }
 
-    fun switchDisplayMode() {
+    private fun switchDisplayMode() {
         preferences.browseAsList().set(!browseScreenState.value.isList)
     }
 
-    fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
+    private fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
         presenterScope.launch {
             when (browseScreenType) {
                 BrowseScreenType.Follows -> getFollows(forceUpdate)
@@ -924,23 +733,8 @@ class BrowsePresenter(
         }
     }
 
-    fun switchLibraryVisibility() {
+    private fun switchLibraryVisibility() {
         preferences.browseDisplayMode().set((browseScreenState.value.showLibraryEntries + 1) % 3)
-    }
-
-    private fun updateBrowseFilters(initialLoad: Boolean = false) {
-        presenterScope.launch {
-            val filters = db.getBrowseFilters().executeAsBlocking().toImmutableList()
-            _browseScreenState.update { it.copy(savedFilters = filters) }
-            if (initialLoad) {
-                filters
-                    .firstOrNull { it.default }
-                    ?.let { filter ->
-                        val dexFilters = Json.decodeFromString<DexFilters>(filter.dexFilters)
-                        _browseScreenState.update { it.copy(filters = dexFilters) }
-                    }
-            }
-        }
     }
 
     fun updateMangaForChanges() {
@@ -985,4 +779,9 @@ class BrowsePresenter(
             false
         }
     }
+
+    private data class State(
+        val page: Int = 1,
+        val endReached: Boolean = false,
+    )
 }
