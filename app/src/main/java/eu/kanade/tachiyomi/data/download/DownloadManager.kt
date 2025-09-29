@@ -74,8 +74,6 @@ class DownloadManager(val context: Context) {
     val isDownloaderRunning
         get() = DownloadJob.isRunningFlow(context)
 
-    fun isDownloadRunningTemp() = downloader.isRunning
-
     /**
      * Tells the downloader to begin downloads.
      *

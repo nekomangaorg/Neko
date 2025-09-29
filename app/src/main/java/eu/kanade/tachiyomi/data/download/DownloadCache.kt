@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download
 
-import android.content.Context
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -32,13 +31,11 @@ import uy.kohesive.injekt.injectLazy
  * defined in [renewInterval] as we don't have any control over the filesystem and the user can
  * delete the folders at any time without the app noticing.
  *
- * @param context the application context.
  * @param provider the downloads directories provider.
  * @param sourceManager the source manager.
  * @param preferences the preferences of the app.
  */
 class DownloadCache(
-    private val context: Context,
     private val provider: DownloadProvider,
     private val sourceManager: SourceManager,
     private val storageManager: StorageManager = Injekt.get(),
@@ -63,6 +60,7 @@ class DownloadCache(
             .onEach { forceRenewCache() } // invalidate cache
             .launchIn(scope)
     }
+
 
     /**
      * Returns true if the chapter is downloaded.

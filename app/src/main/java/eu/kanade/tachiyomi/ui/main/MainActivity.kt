@@ -337,8 +337,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 setRoot(
                     when (id) {
-                        R.id.nav_library -> LibraryController()
-                        R.id.nav_feed -> LibraryComposeController() // FeedController()
+                        R.id.nav_library -> LibraryComposeController()
+                        R.id.nav_feed -> FeedController() // FeedController()
                         else -> BrowseController()
                     },
                     id,
