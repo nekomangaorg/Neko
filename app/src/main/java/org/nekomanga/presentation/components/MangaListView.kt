@@ -94,7 +94,7 @@ fun MangaListWithHeader(
             ) { _, displayManga ->
                 MangaRow(
                     displayManga = displayManga,
-                    shouldOutlineCover,
+                    shouldOutlineCover = shouldOutlineCover,
                     modifier =
                         Modifier.fillMaxWidth()
                             .wrapContentHeight()
@@ -110,14 +110,16 @@ fun MangaListWithHeader(
 
 @Composable
 fun MangaRow(
+    modifier: Modifier = Modifier,
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     isSelected: Boolean = false,
     showUnreadBadge: Boolean = false,
     showDownloadBadge: Boolean = false,
+    showStartReadingButton: Boolean = false,
+    onStartReadingClick: () -> Unit = {},
     unreadCount: Int = 0,
     downloadCount: Int = 0,
-    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
@@ -159,6 +161,10 @@ fun MangaRow(
                 unreadCount = unreadCount,
                 downloadCount = downloadCount,
             )
+        }
+        if (showStartReadingButton) {
+            Gap(Size.tiny)
+            StartReadingButton(onStartReadingClick = onStartReadingClick)
         }
     }
 }

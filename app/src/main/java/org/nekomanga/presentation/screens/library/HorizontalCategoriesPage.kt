@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -117,7 +118,6 @@ fun HorizontalCategoriesPage(
                                         },
                                     ),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End,
                         ) {
                             AnimatedVisibility(selectionMode) {
                                 Icon(
@@ -127,8 +127,8 @@ fun HorizontalCategoriesPage(
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.tertiary,
                                 )
-                                Gap(Size.medium)
                             }
+                            Spacer(modifier = Modifier.weight(1f))
 
                             CategorySortButtons(
                                 enabled = true,
@@ -196,11 +196,32 @@ fun HorizontalCategoriesPage(
                     }
                 }
                 is LibraryDisplayMode.List -> {
-                    Column {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .clickable(
+                                        enabled = selectionMode,
+                                        onClick = {
+                                            libraryScreenActions.selectAllLibraryMangaItems(
+                                                item.libraryItems
+                                            )
+                                        },
+                                    ),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            Gap(Size.medium)
+                            AnimatedVisibility(selectionMode) {
+                                Icon(
+                                    imageVector =
+                                        if (allSelected) Icons.Default.CheckCircleOutline
+                                        else Icons.Outlined.Circle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+
                             CategorySortButtons(
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },
@@ -225,34 +246,6 @@ fun HorizontalCategoriesPage(
                             contentPadding =
                                 PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                         ) {
-                            item {
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    CategorySortButtons(
-                                        enabled = true,
-                                        categorySortClick = {
-                                            categorySortClick(item.categoryItem)
-                                        },
-                                        sortString =
-                                            stringResource(
-                                                item.categoryItem.sortOrder.stringRes(
-                                                    item.categoryItem.isDynamic
-                                                )
-                                            ),
-                                        isAscending = item.categoryItem.isAscending,
-                                        categoryIsRefreshing = item.isRefreshing,
-                                        ascendingClick = {
-                                            libraryCategoryActions.categoryAscendingClick(
-                                                item.categoryItem
-                                            )
-                                        },
-                                        categoryRefreshClick = {
-                                            libraryCategoryActions.categoryRefreshClick(
-                                                item.categoryItem
-                                            )
-                                        },
-                                    )
-                                }
-                            }
                             itemsIndexed(
                                 items = item.libraryItems,
                                 key = { _, libraryItem -> libraryItem.displayManga.mangaId },
@@ -311,6 +304,11 @@ private fun ListItem(
             displayManga = libraryItem.displayManga,
             isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
             showUnreadBadge = libraryScreenState.showUnreadBadges,
+            showStartReadingButton =
+                libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+            onStartReadingClick = {
+                libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
+            },
             unreadCount = libraryItem.unreadCount,
             showDownloadBadge = libraryScreenState.showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
