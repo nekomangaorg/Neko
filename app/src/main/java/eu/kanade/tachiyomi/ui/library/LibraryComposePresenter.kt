@@ -872,38 +872,27 @@ class LibraryComposePresenter(
 
     fun updateDownloadBadges(mangaId: Long) {
         presenterScope.launchIO {
-            _libraryScreenState.value.items.forEachIndexed { index, libraryItem ->
-                presenterScope.launchIO {
-                    var done = false
-                    var updatedDownloadCount = -1
-                    val items =
-                        libraryItem.libraryItems
-                            .map {
-                                if (it.displayManga.mangaId == mangaId && !done) {
-                                    if (done) {
-                                        it.copy(downloadCount = updatedDownloadCount)
-                                    } else {
-                                        val dbManga =
-                                            db.getManga(it.displayManga.mangaId).executeOnIO()!!
-                                        updatedDownloadCount =
-                                            downloadManager.getDownloadCount(dbManga)
-                                        done = true
-                                        it.copy(
-                                            downloadCount =
-                                                downloadManager.getDownloadCount(dbManga)
-                                        )
-                                    }
-                                } else {
-                                    it
-                                }
-                            }
-                            .toPersistentList()
-                    val mutableItemList = _libraryScreenState.value.items.toMutableList()
-                    mutableItemList[index] = libraryItem.copy(libraryItems = items)
-                    _libraryScreenState.update {
-                        it.copy(items = mutableItemList.toPersistentList())
-                    }
-                }
+            val manga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
+            val downloadCount = downloadManager.getDownloadCount(manga)
+            _libraryScreenState.update { state ->
+                val newItems =
+                    state.items
+                        .map { categoryItem ->
+                            categoryItem.copy(
+                                libraryItems =
+                                    categoryItem.libraryItems
+                                        .map { libraryMangaItem ->
+                                            if (libraryMangaItem.displayManga.mangaId == mangaId) {
+                                                libraryMangaItem.copy(downloadCount = downloadCount)
+                                            } else {
+                                                libraryMangaItem
+                                            }
+                                        }
+                                        .toPersistentList()
+                            )
+                        }
+                        .toPersistentList()
+                state.copy(items = newItems)
             }
         }
     }
@@ -1035,8 +1024,7 @@ class LibraryComposePresenter(
                 downloadAction == DownloadAction.Cancel ||
                     downloadAction == DownloadAction.Download ||
                     downloadAction == DownloadAction.Remove ||
-                    downloadAction == DownloadAction.ImmediateDownload ||
-                    downloadAction == DownloadAction.Remove
+                    downloadAction == DownloadAction.ImmediateDownload
             ) {
                 return@launchIO
             }
