@@ -61,7 +61,6 @@ class DownloadCache(
             .launchIn(scope)
     }
 
-
     /**
      * Returns true if the chapter is downloaded.
      *

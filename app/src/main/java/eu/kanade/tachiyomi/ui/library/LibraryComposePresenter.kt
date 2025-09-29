@@ -315,8 +315,6 @@ class LibraryComposePresenter(
         }
     }
 
-
-
     fun libraryMangaListFlow(): Flow<List<LibraryMangaItem>> {
         return db.getLibraryMangaList()
             .asFlow()
@@ -810,7 +808,7 @@ class LibraryComposePresenter(
     }
 
     fun observeLibraryUpdates() {
-        pausablePresenterScope.launchIO {
+        presenterScope.launchIO {
             workManager
                 .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
                 .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
@@ -820,7 +818,7 @@ class LibraryComposePresenter(
                 }
         }
 
-        pausablePresenterScope.launchIO {
+        presenterScope.launchIO {
             filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
                 _libraryScreenState.update {
                     it.copy(
@@ -831,7 +829,7 @@ class LibraryComposePresenter(
             }
         }
 
-        pausablePresenterScope.launchIO {
+        presenterScope.launchIO {
             downloadManager
                 .statusFlow()
                 .catch { error -> TimberKt.e(error) }
@@ -842,7 +840,11 @@ class LibraryComposePresenter(
                 }
         }
 
-        pausablePresenterScope.launchIO {
+        presenterScope.launchIO {
+            downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
+        }
+
+        presenterScope.launchIO {
             flow {
                     while (true) {
                         _libraryScreenState.value.items.forEachIndexed { index, libraryCategoryItem
@@ -1055,12 +1057,10 @@ class LibraryComposePresenter(
                     }
                     DownloadAction.RemoveAll -> {
                         downloadManager.deleteChapters(dbManga, dbChapters)
-                        updateDownloadBadges(displayManga.mangaId)
                     }
                     DownloadAction.RemoveRead -> {
                         val readDbChapters = dbChapters.filter { it.read }
                         downloadManager.deleteChapters(dbManga, readDbChapters)
-                        updateDownloadBadges(displayManga.mangaId)
                     }
                     else -> Unit
                 }
