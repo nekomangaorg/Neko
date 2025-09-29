@@ -41,7 +41,8 @@ internal class DownloadSettingsScreen(
             ),
             Preference.PreferenceItem.SwitchPreference(
                 pref = readerPreferences.splitTallImages(),
-                title = stringResource(R.string.split_tall_images_summary),
+                title = stringResource(R.string.split_tall_images),
+                subtitle = stringResource(R.string.split_tall_images_summary),
             ),
             removeAfterReadGroup(),
             downloadNewChaptersGroup(),
