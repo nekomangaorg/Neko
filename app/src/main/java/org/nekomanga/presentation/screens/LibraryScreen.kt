@@ -221,7 +221,7 @@ fun LibraryScreen(
                                                 mainDropdownShowing = visible
                                             },
                                         ),
-                                    ),
+                                    )
                             )
                         }
                     },
