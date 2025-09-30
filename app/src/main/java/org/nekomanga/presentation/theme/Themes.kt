@@ -60,7 +60,7 @@ enum class Themes {
             this == Red -> R.string.strawberry_daiquiri
             this == Tako -> R.string.tako
             this == Green -> R.string.tropical
-            else -> R.string.white_theme // Default
+            else -> R.string.app_name // Default
         }
     }
 
@@ -68,7 +68,6 @@ enum class Themes {
     fun darkNameRes(): Int {
         return when {
             this == Monet -> R.string.a_calmer_you
-            this == Neko -> R.string.white_theme
             this == Pink -> R.string.midnight_dusk
             this == BlueGreen -> R.string.sapphire_dusk
             this == Purple -> R.string.violet

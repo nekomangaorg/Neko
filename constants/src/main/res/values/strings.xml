@@ -834,7 +834,7 @@
     <string name="violet">Violet</string>
     <string name="hot_pink">Hot Pink</string>
     <string name="tropical">Tropical</string>
-    <string name="white_theme">Neko Pure</string>
+    <string name="legacy_neko">Neko 2.0</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>
