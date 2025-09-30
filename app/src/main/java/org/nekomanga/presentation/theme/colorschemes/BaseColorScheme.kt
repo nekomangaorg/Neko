@@ -2,6 +2,7 @@ package org.nekomanga.presentation.theme.colorschemes
 
 import androidx.compose.material3.ColorScheme
 
+// Generate from https://materialkolor.com/
 internal abstract class BaseColorScheme {
 
     abstract val darkScheme: ColorScheme
