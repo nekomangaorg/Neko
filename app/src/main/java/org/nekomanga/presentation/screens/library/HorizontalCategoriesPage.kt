@@ -154,7 +154,10 @@ fun HorizontalCategoriesPage(
                             modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
                             horizontalArrangement = Arrangement.spacedBy(Size.small),
                             contentPadding =
-                                PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                                PaddingValues(
+                                    bottom = contentPadding.calculateBottomPadding(),
+                                    top = Size.small,
+                                ),
                         ) {
                             items(items = item.libraryItems, key = { it.displayManga.mangaId }) {
                                 libraryItem ->
