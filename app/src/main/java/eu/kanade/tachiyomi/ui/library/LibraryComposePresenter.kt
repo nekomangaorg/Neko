@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
@@ -944,6 +945,19 @@ class LibraryComposePresenter(
 
     fun search(searchQuery: String?) {
         _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
+    }
+
+    /** sync selected manga to mangadex follows */
+    fun syncMangaToDex() {
+        presenterScope.launchIO {
+            val mangaIds =
+                _libraryScreenState.value.selectedItems
+                    .map { it.displayManga.mangaId }
+                    .distinct()
+                    .joinToString()
+            StatusSyncJob.startNow(workManager, mangaIds)
+            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
+        }
     }
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {

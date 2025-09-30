@@ -54,6 +54,7 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
                     downloadChapters = presenter::downloadChapters,
                     shareManga = { shareManga(context) },
                     markMangaChapters = presenter::markChapters,
+                    syncMangaToDex = presenter::syncMangaToDex,
                     mangaStartReadingClick = { mangaId ->
                         presenter.openNextUnread(
                             mangaId,

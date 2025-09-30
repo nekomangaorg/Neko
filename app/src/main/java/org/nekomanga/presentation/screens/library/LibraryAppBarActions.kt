@@ -18,6 +18,7 @@ fun LibraryAppBarActions(
     removeDownloads: (MangaConstants.DownloadAction) -> Unit,
     shareManga: () -> Unit,
     editCategoryClick: () -> Unit,
+    syncMangaToDexClick: () -> Unit,
     markChapterClick: (ChapterMarkActions) -> Unit,
     removeFromLibraryClick: () -> Unit,
 ) {
@@ -124,7 +125,7 @@ fun LibraryAppBarActions(
                 ),
                 AppBar.OverflowAction(
                     title = UiText.StringResource(R.string.add_to_follows),
-                    onClick = {},
+                    onClick = syncMangaToDexClick,
                 ),
             ),
     )

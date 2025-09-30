@@ -184,6 +184,7 @@ fun LibraryScreen(
                                     removeActionConfirmation = removeAction
                                 },
                                 shareManga = libraryScreenActions.shareManga,
+                                syncMangaToDexClick = libraryScreenActions.syncMangaToDex,
                                 editCategoryClick = {
                                     scope.launch {
                                         openSheet(LibraryBottomSheetScreen.CategorySheet)

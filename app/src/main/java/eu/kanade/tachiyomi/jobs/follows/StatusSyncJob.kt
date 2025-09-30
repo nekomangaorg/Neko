@@ -185,6 +185,18 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
         const val entireLibraryToDex: String = "0"
         const val entireFollowsFromDex = "1"
 
+        fun startNow(workManager: WorkManager, syncToMangadex: String) {
+            val request =
+                OneTimeWorkRequestBuilder<StatusSyncJob>()
+                    .addTag(TAG)
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(
+                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build()
+                    )
+                    .build()
+            workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+        }
+
         fun startNow(context: Context, syncToMangadex: String) {
             val request =
                 OneTimeWorkRequestBuilder<StatusSyncJob>()

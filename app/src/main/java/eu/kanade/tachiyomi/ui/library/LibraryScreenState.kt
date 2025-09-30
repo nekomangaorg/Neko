@@ -64,6 +64,7 @@ data class LibraryScreenActions(
     val clearActiveFilters: () -> Unit,
     val downloadChapters: (MangaConstants.DownloadAction) -> Unit,
     val shareManga: () -> Unit,
+    val syncMangaToDex: () -> Unit,
     val markMangaChapters: (ChapterMarkActions) -> Unit,
     val filterToggled: (LibraryFilterType) -> Unit,
 )
