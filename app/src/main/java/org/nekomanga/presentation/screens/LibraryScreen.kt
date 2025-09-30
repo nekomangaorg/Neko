@@ -226,7 +226,9 @@ fun LibraryScreen(
                         }
                     },
                     underHeaderActions = {
-                        AnimatedVisibility(!selectionMode) {
+                        AnimatedVisibility(
+                            !selectionMode && libraryScreenState.value.showLibraryButtonBar
+                        ) {
                             LibraryButtonBar(
                                 libraryScreenActions = libraryScreenActions,
                                 libraryScreenState = libraryScreenState,

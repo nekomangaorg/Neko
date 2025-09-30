@@ -26,6 +26,8 @@ object PreferenceKeys {
 
     const val libraryHorizontalCategories = "library_horizontal_categories"
 
+    const val showLibraryButtonBar = "show_library_button_bar"
+
     const val removeAfterReadSlots = "remove_after_read_slots"
 
     const val deleteRemovedChapters = "delete_removed_chapters"
