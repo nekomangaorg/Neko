@@ -37,6 +37,8 @@ class ChapterExtensionsTest {
                     oldMangaDexChapterId = null,
                     scanlator = "",
                     uploader = "",
+                    isUnavailable = false,
+                    smartOrder = 0,
                 )
         )
     }
