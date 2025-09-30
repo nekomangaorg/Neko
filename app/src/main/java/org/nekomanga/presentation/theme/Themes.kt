@@ -59,7 +59,7 @@ enum class Themes {
             this == Purple -> R.string.lavender
             this == Red -> R.string.strawberry_daiquiri
             this == Tako -> R.string.tako
-            this == Green -> R.string.lime_time
+            this == Green -> R.string.tropical
             else -> R.string.white_theme // Default
         }
     }
@@ -73,7 +73,6 @@ enum class Themes {
             this == BlueGreen -> R.string.sapphire_dusk
             this == Purple -> R.string.violet
             this == Red -> R.string.chocolate_strawberries
-            this == Green -> R.string.flat_lime
             else -> this.nameRes()
         }
     }
