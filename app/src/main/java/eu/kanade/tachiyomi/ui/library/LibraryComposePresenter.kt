@@ -422,6 +422,13 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
+            preferences.showLibraryButtonBar().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
+            }
+        }
+
+        presenterScope.launchIO {
             combine(
                     libraryPreferences.gridSize().changes(),
                     libraryPreferences.layout().changes(),
@@ -593,6 +600,10 @@ class LibraryComposePresenter(
 
     fun horizontalCategoriesToggled() {
         presenterScope.launchIO { preferences.libraryHorizontalCategories().toggle() }
+    }
+
+    fun showLibraryButtonBarToggled() {
+        presenterScope.launchIO { preferences.showLibraryButtonBar().toggle() }
     }
 
     fun clearActiveFilters() {

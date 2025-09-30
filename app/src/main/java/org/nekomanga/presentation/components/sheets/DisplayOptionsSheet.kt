@@ -61,6 +61,8 @@ fun DisplayOptionsSheet(
     startReadingButtonToggled: () -> Unit,
     horizontalCategoriesEnabled: Boolean,
     horizontalCategoriesToggled: () -> Unit,
+    showLibraryButtonBarEnabled: Boolean,
+    showLibraryButtonBarToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -214,6 +216,13 @@ fun DisplayOptionsSheet(
                         enabled = horizontalCategoriesEnabled,
                         onClick = horizontalCategoriesToggled,
                         text = stringResource(R.string.horizontal_categories),
+                    )
+                }
+                item {
+                    ToggleRow(
+                        enabled = showLibraryButtonBarEnabled,
+                        onClick = showLibraryButtonBarToggled,
+                        text = stringResource(R.string.show_library_action_bar),
                     )
                 }
             }
