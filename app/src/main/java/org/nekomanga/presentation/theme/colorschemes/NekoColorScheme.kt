@@ -62,7 +62,7 @@ internal object NekoColorScheme : BaseColorScheme() {
         )
 
     // Generated using MaterialKolor Builder version 1.2.1 (103)
-// https://materialkolor.com/?color_seed=FF6EFFAE&color_primary=FF6EFFAE&color_tertiary=FF3DDA83&color_neutral=FF292929&color_neutralvariant=FF292929&dark_mode=true&style=Rainbow&color_spec=SPEC_2025&package_name=com.example.app
+    // https://materialkolor.com/?color_seed=FF6EFFAE&color_primary=FF6EFFAE&color_tertiary=FF3DDA83&color_neutral=FF292929&color_neutralvariant=FF292929&dark_mode=true&style=Rainbow&color_spec=SPEC_2025&package_name=com.example.app
     override val darkScheme =
         darkColorScheme(
             primary = Color(0xFF6CFDAC),
