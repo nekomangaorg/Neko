@@ -115,49 +115,56 @@ fun DisplayOptionsSheet(
                         }
                     }
                 }
-                item {
-                    var sliderPosition by rememberSaveable {
-                        mutableFloatStateOf(((rawColumnCount + .5f) * 2f).roundToInt().toFloat())
-                    }
 
-                    Column(modifier = Modifier.padding(horizontal = Size.medium)) {
-                        val context = LocalContext.current
-                        val isPortrait = !context.isLandscape()
-                        val numberOfColumns =
-                            numberOfColumns(rawValue = sliderPosition, forText = true)
-                        val numberOfColumnsAlt =
-                            numberOfColumns(
-                                rawValue = sliderPosition,
-                                forText = true,
-                                useHeight = true,
+                if (currentLibraryDisplayMode != LibraryDisplayMode.List) {
+                    item {
+                        var sliderPosition by rememberSaveable {
+                            mutableFloatStateOf(
+                                ((rawColumnCount + .5f) * 2f).roundToInt().toFloat()
                             )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text =
-                                "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
-                        )
-                        Gap(Size.tiny)
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Slider(
-                                modifier = Modifier.weight(1f),
-                                value = sliderPosition,
-                                onValueChange = { sliderPosition = it },
-                                onValueChangeFinished = {
-                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                },
-                                steps = 8,
-                                valueRange = 0f..7f,
+                        }
+
+                        Column(
+                            modifier = Modifier.padding(horizontal = Size.medium).animateItem()
+                        ) {
+                            val context = LocalContext.current
+                            val isPortrait = !context.isLandscape()
+                            val numberOfColumns =
+                                numberOfColumns(rawValue = sliderPosition, forText = true)
+                            val numberOfColumnsAlt =
+                                numberOfColumns(
+                                    rawValue = sliderPosition,
+                                    forText = true,
+                                    useHeight = true,
+                                )
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                text =
+                                    "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
                             )
                             Gap(Size.tiny)
-                            TextButton(
-                                onClick = {
-                                    sliderPosition = 3f
-                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                },
-                                shapes = ButtonDefaults.shapes(),
-                            ) {
-                                Text(stringResource(R.string.reset))
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Slider(
+                                    modifier = Modifier.weight(1f),
+                                    value = sliderPosition,
+                                    onValueChange = { sliderPosition = it },
+                                    onValueChangeFinished = {
+                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                    },
+                                    steps = 8,
+                                    valueRange = 0f..7f,
+                                )
+                                Gap(Size.tiny)
+                                TextButton(
+                                    onClick = {
+                                        sliderPosition = 3f
+                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                    },
+                                    shapes = ButtonDefaults.shapes(),
+                                ) {
+                                    Text(stringResource(R.string.reset))
+                                }
                             }
                         }
                     }
