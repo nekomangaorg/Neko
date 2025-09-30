@@ -235,9 +235,9 @@
     <string name="can_be_found_in_library_filters">Can also be found by expanding library filters</string>
     <string name="display_options_can_be">Display options can be found by expanding the library filter in the Library tab.</string>
     <string name="list">List</string>
-    <string name="comfortable_grid">Comfy Grid</string>
+    <string name="comfortable_grid">Comfy</string>
     <string name="cover_only_grid">Cover-only grid</string>
-    <string name="compact_grid">Compact Grid</string>
+    <string name="compact_grid">Compact</string>
     <string name="download_badge">Download badges</string>
     <string name="unread_badge">Unread badges</string>
     <string name="show_start_reading_button">Show start reading button</string>

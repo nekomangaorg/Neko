@@ -412,7 +412,7 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
-            preferences
+            libraryPreferences
                 .libraryHorizontalCategories()
                 .changes()
                 .distinctUntilChanged()
