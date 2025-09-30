@@ -422,10 +422,13 @@ class LibraryComposePresenter(
         }
 
         presenterScope.launchIO {
-            preferences.showLibraryButtonBar().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _libraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
-            }
+            libraryPreferences
+                .showLibraryButtonBar()
+                .changes()
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    _libraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
+                }
         }
 
         presenterScope.launchIO {
@@ -599,11 +602,11 @@ class LibraryComposePresenter(
     }
 
     fun horizontalCategoriesToggled() {
-        presenterScope.launchIO { preferences.libraryHorizontalCategories().toggle() }
+        presenterScope.launchIO { libraryPreferences.libraryHorizontalCategories().toggle() }
     }
 
     fun showLibraryButtonBarToggled() {
-        presenterScope.launchIO { preferences.showLibraryButtonBar().toggle() }
+        presenterScope.launchIO { libraryPreferences.showLibraryButtonBar().toggle() }
     }
 
     fun clearActiveFilters() {

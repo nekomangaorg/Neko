@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -190,6 +191,7 @@ fun DisplayOptionsSheet(
                         Gap(Size.small)
                     }
                 }
+                item { HorizontalDivider() }
                 item {
                     ToggleRow(
                         enabled = unreadBadgesEnabled,
@@ -211,18 +213,19 @@ fun DisplayOptionsSheet(
                         text = stringResource(R.string.show_start_reading_button),
                     )
                 }
-                item {
-                    ToggleRow(
-                        enabled = horizontalCategoriesEnabled,
-                        onClick = horizontalCategoriesToggled,
-                        text = stringResource(R.string.horizontal_categories),
-                    )
-                }
+                item { HorizontalDivider() }
                 item {
                     ToggleRow(
                         enabled = showLibraryButtonBarEnabled,
                         onClick = showLibraryButtonBarToggled,
                         text = stringResource(R.string.show_library_action_bar),
+                    )
+                }
+                item {
+                    ToggleRow(
+                        enabled = horizontalCategoriesEnabled,
+                        onClick = horizontalCategoriesToggled,
+                        text = stringResource(R.string.horizontal_categories),
                     )
                 }
             }

@@ -92,6 +92,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun libraryHorizontalCategories() =
         this.preferenceStore.getBoolean("library_horizontal_categories", false)
 
+    fun showLibraryButtonBar() = this.preferenceStore.getBoolean("show_library_button_bar", true)
+
     fun showCategoriesHeaderCount() = this.preferenceStore.getBoolean("display_number_of_items")
 
     fun showAllCategories() = this.preferenceStore.getBoolean("show_all_categories", true)
