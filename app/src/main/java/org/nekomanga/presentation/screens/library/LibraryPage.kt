@@ -243,6 +243,11 @@ private fun ListItem(
             unreadCount = libraryItem.unreadCount,
             showDownloadBadge = libraryScreenState.showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
+            showStartReadingButton =
+                libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+            onStartReadingClick = {
+                libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
+            },
             shouldOutlineCover = libraryScreenState.outlineCovers,
         )
     }
