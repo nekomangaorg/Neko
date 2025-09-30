@@ -14,6 +14,7 @@ internal class MonetColorScheme(context: Context) : BaseColorScheme() {
         } else {
             NekoColorScheme
         }
+
     override val darkScheme = monet.darkScheme
     override val lightScheme = monet.lightScheme
 }
