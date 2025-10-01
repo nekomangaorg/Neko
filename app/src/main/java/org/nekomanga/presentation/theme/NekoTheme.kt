@@ -10,16 +10,19 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.theme.Typefaces.appTypography
-import org.nekomanga.presentation.theme.colorschemes.BlueGreenColorScheme
+import org.nekomanga.presentation.theme.colorschemes.BlueColorScheme
+import org.nekomanga.presentation.theme.colorschemes.BrownColorScheme
 import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
+import org.nekomanga.presentation.theme.colorschemes.MonochromeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.NordColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
-import org.nekomanga.presentation.theme.colorschemes.OutRunColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
-import org.nekomanga.presentation.theme.colorschemes.RedColorScheme
+import org.nekomanga.presentation.theme.colorschemes.RetroColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.TealColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -61,14 +64,17 @@ fun colorSchemeFromTheme(
     isSystemInDarkTheme: Boolean,
 ): ColorScheme {
     return when (theme) {
-        Themes.BlueGreen -> BlueGreenColorScheme
+        Themes.Blue -> BlueColorScheme
+        Themes.Teal -> TealColorScheme
         Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(context)
+        Themes.Monochrome -> MonochromeColorScheme
+        Themes.Nord -> NordColorScheme
         Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
-        Themes.Outrun -> OutRunColorScheme
-        Themes.Red -> RedColorScheme
+        Themes.Retro -> RetroColorScheme
+        Themes.Brown -> BrownColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme)

@@ -69,7 +69,7 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
             onClick,
         )
         Text(
-            text = stringResource(id = if (isDarkTheme) theme.darkNameRes() else theme.nameRes()),
+            text = stringResource(id = theme.nameRes()),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodySmall,
         )

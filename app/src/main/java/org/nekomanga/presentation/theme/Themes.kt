@@ -11,11 +11,14 @@ enum class Themes {
     Purple,
     Green,
     Orange,
-    Outrun,
     Pink,
-    Red,
+    Retro,
+    Blue,
+    Brown,
     Tako,
-    BlueGreen;
+    Teal,
+    Nord,
+    Monochrome;
 
     fun isDarkTheme() = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
@@ -29,12 +32,10 @@ enum class Themes {
     fun styleRes(): Int {
         return when {
             this == Monet -> R.style.Theme_Tachiyomi_Monet
-            this == Outrun -> R.style.Theme_Tachiyomi_Outrun
+            this == Retro -> R.style.Theme_Tachiyomi_Outrun
             this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
             this == Orange -> R.style.Theme_Tachiyomi_MangaDex
-            this == BlueGreen -> R.style.Theme_Tachiyomi_SapphireDusk
             this == Purple -> R.style.Theme_Tachiyomi_Lavender
-            this == Red -> R.style.Theme_Tachiyomi_Strawberries
             this == Tako -> R.style.Theme_Tachiyomi_Tako
             this == Green -> R.style.Theme_Tachiyomi_FlatLime
             else -> R.style.Theme_Tachiyomi // DEFAULT
@@ -42,37 +43,25 @@ enum class Themes {
     }
 
     fun nightMode(): Int {
-        return when {
-            this == Outrun -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
+        return AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
 
     @StringRes
     fun nameRes(): Int {
         return when {
-            this == Monet -> R.string.a_brighter_you
-            this == Outrun -> R.string.outrun
+            this == Monet -> R.string.dynamic
+            this == Retro -> R.string.retro
             this == Pink -> R.string.spring_blossom
             this == Orange -> R.string.orange_juice
-            this == BlueGreen -> R.string.teal_ocean
-            this == Purple -> R.string.lavender
-            this == Red -> R.string.strawberry_daiquiri
+            this == Teal -> R.string.teal_ocean
+            this == Purple -> R.string.royal
+            this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
-            this == Green -> R.string.tropical
+            this == Nord -> R.string.nord
+            this == Green -> R.string.jungle
+            this == Blue -> R.string.crayon_blue
+            this == Monochrome -> R.string.monochrome
             else -> R.string.app_name // Default
-        }
-    }
-
-    @StringRes
-    fun darkNameRes(): Int {
-        return when {
-            this == Monet -> R.string.a_calmer_you
-            this == Pink -> R.string.midnight_dusk
-            this == BlueGreen -> R.string.sapphire_dusk
-            this == Purple -> R.string.violet
-            this == Red -> R.string.chocolate_strawberries
-            else -> this.nameRes()
         }
     }
 }
