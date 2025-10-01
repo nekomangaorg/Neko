@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import androidx.core.widget.NestedScrollView
 import androidx.viewbinding.ViewBinding
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import org.nekomanga.domain.library.LibraryPreferences
@@ -37,13 +36,6 @@ constructor(context: Context, attrs: AttributeSet? = null) : NestedScrollView(co
         setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         initGeneralPreferences()
     }
-}
-
-abstract class BaseLibraryDisplayView<VB : ViewBinding>
-@JvmOverloads
-constructor(context: Context, attrs: AttributeSet? = null) :
-    BaseTabbedScrollView<VB>(context, attrs) {
-    var controller: LibraryController? = null
 }
 
 abstract class BaseReaderSettingsView<VB : ViewBinding>
