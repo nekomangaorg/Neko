@@ -164,6 +164,7 @@ fun LibraryPage(
             }
             FastScroller(
                 state = lazyListState,
+                modifier = Modifier.align(Alignment.CenterEnd),
                 thumbColor = MaterialTheme.colorScheme.primary,
                 thumbInactiveColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
             )
