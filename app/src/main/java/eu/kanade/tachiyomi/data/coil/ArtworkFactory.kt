@@ -35,6 +35,8 @@ class ArtworkFactory(
             false ->
                 AlternativeMangaCoverFetcher(
                     url = data.url,
+                    inLibrary = data.inLibrary,
+                    userCover = data.userCover,
                     mangaId = data.mangaId,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
