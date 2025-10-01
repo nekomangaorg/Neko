@@ -15,10 +15,10 @@ import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
-import org.nekomanga.presentation.theme.colorschemes.OutRunColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
 import org.nekomanga.presentation.theme.colorschemes.RedColorScheme
+import org.nekomanga.presentation.theme.colorschemes.RetroColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -63,7 +63,7 @@ fun colorSchemeFromTheme(
         Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
-        Themes.Outrun -> OutRunColorScheme
+        Themes.Retro -> RetroColorScheme
         Themes.Red -> RedColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme

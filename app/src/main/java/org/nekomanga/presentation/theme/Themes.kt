@@ -11,9 +11,9 @@ enum class Themes {
     Purple,
     Green,
     Orange,
-    Outrun,
     Pink,
     Red,
+    Retro,
     Tako,
     BlueGreen;
 
@@ -29,7 +29,7 @@ enum class Themes {
     fun styleRes(): Int {
         return when {
             this == Monet -> R.style.Theme_Tachiyomi_Monet
-            this == Outrun -> R.style.Theme_Tachiyomi_Outrun
+            this == Retro -> R.style.Theme_Tachiyomi_Outrun
             this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
             this == Orange -> R.style.Theme_Tachiyomi_MangaDex
             this == BlueGreen -> R.style.Theme_Tachiyomi_SapphireDusk
@@ -42,17 +42,14 @@ enum class Themes {
     }
 
     fun nightMode(): Int {
-        return when {
-            this == Outrun -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
+        return AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
 
     @StringRes
     fun nameRes(): Int {
         return when {
             this == Monet -> R.string.a_brighter_you
-            this == Outrun -> R.string.outrun
+            this == Retro -> R.string.retro
             this == Pink -> R.string.spring_blossom
             this == Orange -> R.string.orange_juice
             this == BlueGreen -> R.string.teal_ocean
