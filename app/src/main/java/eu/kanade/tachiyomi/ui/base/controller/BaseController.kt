@@ -54,6 +54,9 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) : Contro
         return binding.root
     }
 
+    val onRoot: Boolean
+        get() = router.backstack.lastOrNull()?.controller == this
+
     abstract fun createBinding(inflater: LayoutInflater): VB
 
     open fun onViewCreated(view: View) {}

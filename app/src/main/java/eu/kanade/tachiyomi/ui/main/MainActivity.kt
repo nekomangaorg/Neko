@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.assist.AssistContent
@@ -18,8 +17,6 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.annotation.IdRes
-import androidx.appcompat.widget.Toolbar
-import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -47,7 +44,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -60,7 +56,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
@@ -98,25 +93,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val hideBottomNav
-        get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
+        get() = router.backstackSize > 1
 
     private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
-    private var tabAnimation: ValueAnimator? = null
-    private var searchBarAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
-    var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
-
-    private val actionButtonSize: Pair<Int, Int> by lazy {
-        val attrs = intArrayOf(android.R.attr.minWidth, android.R.attr.minHeight)
-        val ta =
-            obtainStyledAttributes(androidx.appcompat.R.style.Widget_AppCompat_ActionButton, attrs)
-        val dimenW = ta.getDimensionPixelSize(0, 0.dpToPx)
-        val dimenH = ta.getDimensionPixelSize(1, 0.dpToPx)
-        ta.recycle()
-        dimenW to dimenH
-    }
 
     override fun attachBaseContext(newBase: Context?) {
         ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
@@ -151,7 +133,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         }
-        var continueSwitchingTabs = false
 
         val container: ViewGroup = binding.controllerContainer
 
@@ -538,36 +519,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         from: Controller? = null,
         isPush: Boolean = false,
     ) {
-        if (from is DialogController || to is DialogController) {
-            return
-        }
-        reEnableBackPressedCallBack()
-        val onRoot = router.backstackSize == 1
 
+        reEnableBackPressedCallBack()
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
-        if (nav == binding.sideNav) {
-            nav.isVisible = !hideBottomNav
-            /*
-                        updateControllersWithSideNavChanges(from)
-            */
-            nav.alpha = 1f
-        } else {
-            val alphaAnimation = ValueAnimator.ofFloat(nav.alpha, if (hideBottomNav) 0f else 1f)
-            alphaAnimation.addUpdateListener { valueAnimator ->
-                nav.alpha = valueAnimator.animatedValue as Float
-            }
-            alphaAnimation.doOnEnd {
-                nav.isVisible = !hideBottomNav
-                binding.bottomView?.visibility =
-                    if (hideBottomNav) {
-                        View.GONE
-                    } else {
-                        binding.bottomView?.visibility ?: View.GONE
-                    }
-            }
-            alphaAnimation.duration = 200
-            alphaAnimation.startDelay = 50
-        }
+        nav.isVisible = !hideBottomNav
+        /*
+                    updateControllersWithSideNavChanges(from)
+        */
+        nav.alpha = 1f
     }
 
     /*private fun updateControllersWithSideNavChanges(extraController: Controller? = null) {
@@ -647,9 +606,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         )
 
     companion object {
-
-        private const val SWIPE_THRESHOLD = 100
-        private const val SWIPE_VELOCITY_THRESHOLD = 100
 
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"

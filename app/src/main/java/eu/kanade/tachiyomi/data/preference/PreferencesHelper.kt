@@ -175,17 +175,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
 
     // Tutorial preferences
-    fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
-
-    fun shownLongPressCategoryTutorial() =
-        this.preferenceStore.getBoolean("shown_long_press_category")
-
-    fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
-
-    fun hideBottomNavOnScroll() =
-        this.preferenceStore.getBoolean(
-            "false_key"
-        ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
