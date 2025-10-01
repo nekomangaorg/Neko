@@ -121,7 +121,7 @@ fun AboutScreen(
 
             LazyColumn(
                 contentPadding = recyclerContentPadding,
-                verticalArrangement = Arrangement.spacedBy(Size.extraTiny),
+                verticalArrangement = Arrangement.spacedBy(Size.tiny),
             ) {
                 item { LogoHeader() }
                 item { Spacer(modifier = Modifier.size(Size.large)) }

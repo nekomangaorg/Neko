@@ -26,20 +26,20 @@ fun ExpressiveListCard(
                     RoundedCornerShape(
                         topStart = Size.medium,
                         topEnd = Size.medium,
-                        bottomEnd = Size.small,
-                        bottomStart = Size.small,
+                        bottomEnd = Size.tiny,
+                        bottomStart = Size.tiny,
                     )
                 ListCardType.Center ->
                     RoundedCornerShape(
-                        topStart = Size.small,
-                        topEnd = Size.small,
-                        bottomEnd = Size.small,
-                        bottomStart = Size.small,
+                        topStart = Size.tiny,
+                        topEnd = Size.tiny,
+                        bottomEnd = Size.tiny,
+                        bottomStart = Size.tiny,
                     )
                 ListCardType.Bottom ->
                     RoundedCornerShape(
-                        topStart = Size.small,
-                        topEnd = Size.small,
+                        topStart = Size.tiny,
+                        topEnd = Size.tiny,
                         bottomEnd = Size.medium,
                         bottomStart = Size.medium,
                     )

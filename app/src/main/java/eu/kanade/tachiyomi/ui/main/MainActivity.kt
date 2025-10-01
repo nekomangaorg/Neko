@@ -313,6 +313,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 when (router.backstack.firstOrNull()?.controller) {
                     is FeedController -> R.id.nav_feed
                     is BrowseController -> R.id.nav_browse
+                    is LibraryController -> R.id.nav_feed
                     else -> R.id.nav_library
                 }
         }
@@ -336,7 +337,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 setRoot(
                     when (id) {
                         R.id.nav_library -> LibraryController()
-                        R.id.nav_feed -> FeedController()
+                        R.id.nav_feed -> FeedController() // FeedController()
                         else -> BrowseController()
                     },
                     id,
@@ -1082,12 +1083,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        ev?.let {
-            gestureDetector?.onTouchEvent(it)
-            (router.backstack.lastOrNull()?.controller as? LibraryController)?.handleGeneralEvent(
-                it
-            )
-        }
+        ev?.let { gestureDetector?.onTouchEvent(it) }
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -1170,6 +1166,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     .filterNotNull()
                     .filterNot { it is BrowseController }
                     .filterNot { it is FeedController }
+                    .filterNot { it is LibraryController }
                     .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->

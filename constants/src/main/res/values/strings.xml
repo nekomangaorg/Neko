@@ -25,8 +25,8 @@
     <string name="creator">Creator</string>
     <string name="artist">Artist</string>
     <string name="description">Description</string>
-    <string name="move_x_to">Move %1$s to…</string>
-    <string name="add_x_to">Add %1$s to…</string>
+    <string name="move_x_to">Move to..</string>
+    <string name="add_x_to">Add to..</string>
 
     <!-- Status -->
     <string name="ongoing">Ongoing</string>
@@ -69,6 +69,7 @@
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
     <string name="unavailable">Unavailable</string>
+    <string name="no_unavailable">No Unavailable</string>
     <string name="available">Available</string>
     <string name="removed_bookmark">Removed bookmark</string>
     <string name="chapters_removed">Chapters removed.</string>
@@ -76,6 +77,8 @@
     <string name="no_chapters_error">No chapters found</string>
     <string name="no_pages_found">No pages found</string>
     <string name="remove_all_downloads">Remove all downloads?</string>
+    <string name="remove_all_read_downloads">Remove all read downloads?</string>
+
     <string name="no_chapters_to_delete">No chapters to delete</string>
     <string name="by_source_order">By source\'s order</string>
     <string name="by_smart_order">By smart order</string>
@@ -181,7 +184,7 @@
     <string name="updating_library">Updating library</string>
     <string name="selected_">Selected: %1$d</string>
     <string name="local">Local</string>
-    <string name="remove_from_library_question">Remove from library?</string>
+    <string name="remove_from_library_question">Remove from library? All files will be deleted.</string>
     <string name="manga_from_library">Manga from library</string>
     <string name="delete_downloads">Delete downloads</string>
     <string name="deleted_downloads">Deleted downloads</string>
@@ -206,13 +209,13 @@
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
     <string name="search_library">Search library</string>
-    <string name="search_globally">Search \"%1$s\" MangaDex</string>
+    <string name="search_globally">Search on MangaDex</string>
 
     <string name="copy">Copy</string>
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
     <string name="series">Series</string>
-    <string name="group_library_by">Group library by…</string>
+    <string name="group_library_by">Group by</string>
     <string name="content_rating">Content rating</string>
     <string name="tracking_status">Tracking status</string>
     <string name="ungrouped">Ungrouped</string>
@@ -232,11 +235,14 @@
     <string name="can_be_found_in_library_filters">Can also be found by expanding library filters</string>
     <string name="display_options_can_be">Display options can be found by expanding the library filter in the Library tab.</string>
     <string name="list">List</string>
-    <string name="comfortable_grid">Comfortable Grid</string>
+    <string name="comfortable_grid">Comfy</string>
     <string name="cover_only_grid">Cover-only grid</string>
-    <string name="compact_grid">Compact Grid</string>
+    <string name="compact_grid">Compact</string>
     <string name="download_badge">Download badges</string>
-    <string name="hide_start_reading_button">Hide start reading button</string>
+    <string name="unread_badge">Unread badges</string>
+    <string name="show_start_reading_button">Show start reading button</string>
+    <string name="horizontal_categories">Horizontal categories</string>
+    <string name="show_library_action_bar">Show library action bar</string>
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="use_staggered_grid">Use staggered grid</string>
@@ -1238,6 +1244,8 @@
     <string name="less">Less</string>
     <string name="loading">Loading…</string>
     <string name="lock">Lock</string>
+    <string name="mark">Mark</string>
+    <string name="mark_as">Mark as</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_read">Mark read</string>
     <string name="mark_as_unread">Mark as unread</string>

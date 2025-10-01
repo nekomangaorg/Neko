@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +31,11 @@ fun NekoTheme(content: @Composable () -> Unit) {
 
     val colorScheme = nekoThemeColorScheme()
 
-    MaterialTheme(colorScheme = colorScheme, typography = appTypography, content = content)
+    MaterialExpressiveTheme(
+        colorScheme = colorScheme,
+        typography = appTypography,
+        content = content,
+    )
 }
 
 @Composable

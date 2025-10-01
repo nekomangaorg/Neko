@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi
 
 import android.app.Application
 import androidx.core.content.ContextCompat
+import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -73,6 +74,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterCache(app) }
 
         addSingletonFactory { CoverCache(app) }
+
+        addSingletonFactory { WorkManager.getInstance(app) }
 
         addSingletonFactory { NetworkHelper(app) }
 

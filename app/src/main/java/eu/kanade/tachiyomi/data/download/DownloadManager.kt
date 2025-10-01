@@ -14,7 +14,9 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.networkStateFlow
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,7 +57,7 @@ class DownloadManager(val context: Context) {
     private val provider = DownloadProvider(context)
 
     /** Cache of downloaded chapters. */
-    private val cache = DownloadCache(context, provider, sourceManager)
+    private val cache = DownloadCache(provider, sourceManager)
 
     /** Downloader whose only task is to download chapters. */
     private val downloader = Downloader(context, provider, cache, sourceManager)
@@ -74,7 +76,8 @@ class DownloadManager(val context: Context) {
     val isDownloaderRunning
         get() = DownloadJob.isRunningFlow(context)
 
-    fun isDownloadRunningTemp() = downloader.isRunning
+    private val _removedChaptersFlow = MutableSharedFlow<Long>()
+    val removedChaptersFlow = _removedChaptersFlow.asSharedFlow()
 
     /**
      * Tells the downloader to begin downloads.
@@ -219,6 +222,15 @@ class DownloadManager(val context: Context) {
         return cache.getDownloadCount(manga)
     }
 
+    /**
+     * Returns the amount of downloaded chapters for a manga.
+     *
+     * @param manga the manga to check.
+     */
+    fun getDownloadCounts(manga: List<Manga>): Map<Long, Int> {
+        return cache.getDownloadCounts(manga.mapNotNull { it.id })
+    }
+
     /** Returns the list of downloaded file names */
     fun getAllDownloads(manga: Manga): List<UniFile> {
         return cache.getAllDownloadFiles(manga)
@@ -234,7 +246,7 @@ class DownloadManager(val context: Context) {
         downloadsByManga.forEach { entry ->
             val manga = entry.value.first().mangaItem
             val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
-            deleteChapters(entry.value.map { it.chapterItem.toDbChapter() }, dbManga)
+            deleteChapters(dbManga, entry.value.map { it.chapterItem.toDbChapter() })
         }
     }
 
@@ -248,7 +260,7 @@ class DownloadManager(val context: Context) {
         downloadsByManga.forEach { entry ->
             val manga = entry.value.first().mangaItem
             val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
-            deleteChapters(entry.value.map { it.chapterItem.chapter.toDbChapter() }, dbManga)
+            deleteChapters(dbManga, entry.value.map { it.chapterItem.chapter.toDbChapter() })
         }
     }
 
@@ -259,7 +271,7 @@ class DownloadManager(val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun deleteChapters(chapters: List<Chapter>, manga: Manga) {
+    fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
         GlobalScope.launchNonCancellable {
             launchNonCancellable { cache.removeChapters(chapters, manga) }
             launchNonCancellable { removeFromDownloadQueue(chapters) }
@@ -291,6 +303,9 @@ class DownloadManager(val context: Context) {
                         // Delete manga directory if empty
                         if (mangaDir?.listFiles()?.isEmpty() == true) {
                             deleteManga(manga, removeQueued = false)
+                        }
+                        if (manga.id != null) {
+                            _removedChaptersFlow.emit(manga.id!!)
                         }
                     }
                 }
@@ -405,7 +420,7 @@ class DownloadManager(val context: Context) {
     fun deletePendingChapters() {
         val pendingChapters = pendingDeleter.getPendingChapters()
         for ((manga, chapters) in pendingChapters) {
-            deleteChapters(chapters, manga)
+            deleteChapters(manga, chapters)
         }
     }
 

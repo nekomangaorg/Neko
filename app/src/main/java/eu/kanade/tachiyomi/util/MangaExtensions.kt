@@ -4,19 +4,24 @@ import android.app.Activity
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
@@ -114,6 +119,105 @@ fun Manga.toDisplayManga(
                 mangaId = this.id!!,
                 originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
             ),
+    )
+}
+
+fun LibraryMangaItem.toLibraryManga(): LibraryManga {
+    return LibraryManga().apply {
+        this.unread = this@toLibraryManga.unreadCount
+        this.read = this@toLibraryManga.readCount
+        this.category = this@toLibraryManga.category
+        this.bookmarkCount = this@toLibraryManga.bookmarkCount
+        this.unavailableCount = this@toLibraryManga.unavailableCount
+        this.id = this@toLibraryManga.displayManga.mangaId
+        this.url = this@toLibraryManga.displayManga.url
+        this.title = this@toLibraryManga.displayManga.title
+        this.favorite = true
+        this.initialized = true
+    }
+}
+
+fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
+
+    val displayManga = this.toDisplayManga()
+
+    this.availableCount
+
+    val mangaRating = this.rating?.toDoubleOrNull() ?: (-1).toDouble()
+
+    val seriesType =
+        when (lang_flag) {
+            "ko" -> FilterMangaType.Manhwa
+            "zh",
+            "zh-hk" -> FilterMangaType.Manhua
+            else -> FilterMangaType.Manga
+        }
+
+    val unknownList = listOf("Unknown")
+
+    val genreList =
+        this.genre
+            ?.split(",")
+            ?.filter { !it.contains("content rating:", true) }
+            ?.mapNotNull {
+                val tag = it.trim().capitalizeWords()
+                tag.ifBlank { null }
+            } ?: unknownList
+
+    val authorList =
+        when (this.author.isNullOrBlank() && this.artist.isNullOrBlank()) {
+            true -> unknownList
+            false -> {
+                listOfNotNull(
+                        author.takeUnless { it.isNullOrBlank() },
+                        artist.takeUnless { it.isNullOrBlank() },
+                    )
+                    .map {
+                        it.split(",", "/", " x ", " - ", ignoreCase = true).mapNotNull { name ->
+                            val author = name.trim()
+                            author.ifBlank { null }
+                        }
+                    }
+                    .flatten()
+                    .distinct()
+            }
+        }
+    val contentRating = getContentRating() ?: "Unknown"
+
+    val language = MdLang.fromIsoCode(lang_flag ?: "###")?.prettyPrint ?: "Unknown"
+
+    val status =
+        when (status) {
+            SManga.LICENSED -> "Licensed"
+            SManga.ONGOING -> "Ongoing"
+            SManga.COMPLETED -> "Completed"
+            SManga.PUBLICATION_COMPLETE -> "Publication Completed"
+            SManga.CANCELLED -> "Cancelled"
+            SManga.HIATUS -> "Hiatus"
+            else -> "Unknown"
+        }
+
+    return LibraryMangaItem(
+        displayManga = displayManga.copy(inLibrary = false),
+        userCover = this.user_cover,
+        url = MdConstants.baseUrl + this.url + "/" + this.getSlug(),
+        rating = ((mangaRating * 100).roundToInt() / 100.0),
+        addedToLibraryDate = this.date_added,
+        latestChapterDate = this.last_update,
+        unreadCount = this.unread,
+        readCount = this.read,
+        category = this.category,
+        altTitles = this.getAltTitles(),
+        genre = genreList,
+        author = authorList,
+        contentRating = listOf(contentRating),
+        isMerged = this.isMerged,
+        hasMissingChapters = this.missing_chapters != null,
+        language = listOf(language),
+        status = listOf(status),
+        seriesType = seriesType,
+        bookmarkCount = this.bookmarkCount,
+        unavailableCount = this.unavailableCount,
     )
 }
 

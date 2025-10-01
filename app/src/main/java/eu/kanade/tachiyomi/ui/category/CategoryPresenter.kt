@@ -11,7 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -32,13 +31,13 @@ class CategoryPresenter(
     /** Called when the presenter is created. */
     fun getCategories() {
         if (categories.isNotEmpty()) {
-            controller.setCategories(categories.map(::CategoryItem))
+            controller.setCategories(categories.map(::CategoryItemLegacy))
         }
         scope.launch(Dispatchers.IO) {
             categories.clear()
             categories.add(newCategory())
             categories.addAll(db.getCategories().executeAsBlocking())
-            val catItems = categories.map(::CategoryItem)
+            val catItems = categories.map(::CategoryItemLegacy)
             withContext(Dispatchers.Main) { controller.setCategories(catItems) }
         }
     }
@@ -87,7 +86,7 @@ class CategoryPresenter(
         val safeCategory = category ?: return
         db.deleteCategory(safeCategory).executeAsBlocking()
         categories.remove(safeCategory)
-        controller.setCategories(categories.map(::CategoryItem))
+        controller.setCategories(categories.map(::CategoryItemLegacy))
     }
 
     /**
@@ -97,8 +96,6 @@ class CategoryPresenter(
      */
     fun reorderCategories(categories: List<Category>) {
         scope.launch {
-            categories.forEach { TimberKt.d { "ESCO ${it.name} ${it.order}" } }
-
             categories.forEachIndexed { i, category ->
                 if (category.order != CREATE_CATEGORY_ORDER) category.order = i - 1
             }
@@ -106,10 +103,10 @@ class CategoryPresenter(
                 .executeOnIO()
             this@CategoryPresenter.categories = categories.sortedBy { it.order }.toMutableList()
 
-            categories.forEach { TimberKt.d { "ESCO ${it.name} ${it.order}" } }
-
             withContext(Dispatchers.Main) {
-                controller.setCategories(this@CategoryPresenter.categories.map(::CategoryItem))
+                controller.setCategories(
+                    this@CategoryPresenter.categories.map(::CategoryItemLegacy)
+                )
             }
         }
     }
@@ -133,7 +130,7 @@ class CategoryPresenter(
         category.name = name
         db.insertCategory(category).executeAsBlocking()
         categories.find { it.id == category.id }?.name = name
-        controller.setCategories(categories.map(::CategoryItem))
+        controller.setCategories(categories.map(::CategoryItemLegacy))
         return true
     }
 

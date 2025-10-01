@@ -1,6 +1,16 @@
 package eu.kanade.tachiyomi.ui.library
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.ui.graphics.vector.ImageVector
 import org.nekomanga.R
+import org.nekomanga.presentation.components.icons.ProgressClockIcon
+import org.nekomanga.presentation.components.icons.UngroupIcon
 
 object LibraryGroup {
 
@@ -13,7 +23,7 @@ object LibraryGroup {
     const val BY_LANGUAGE = 8
     const val UNGROUPED = 5
 
-    fun groupTypeStringRes(type: Int, hasCategories: Boolean = true): Int {
+    fun groupTypeStringRes(type: Int): Int {
         return when (type) {
             BY_STATUS -> R.string.status
             BY_TAG -> R.string.tag
@@ -22,7 +32,20 @@ object LibraryGroup {
             UNGROUPED -> R.string.ungrouped
             BY_CONTENT -> R.string.content_rating
             BY_LANGUAGE -> R.string.original_language
-            else -> if (hasCategories) R.string.categories else R.string.ungrouped
+            else -> R.string.categories
+        }
+    }
+
+    fun groupTypeComposeIcon(type: Int): ImageVector {
+        return when (type) {
+            BY_STATUS -> ProgressClockIcon
+            BY_TAG -> Icons.Default.Style
+            BY_TRACK_STATUS -> Icons.Default.Autorenew
+            BY_AUTHOR -> Icons.Default.Person
+            UNGROUPED -> UngroupIcon
+            BY_CONTENT -> Icons.Default.LocalLibrary
+            BY_LANGUAGE -> Icons.Default.Language
+            else -> Icons.AutoMirrored.Outlined.Label
         }
     }
 

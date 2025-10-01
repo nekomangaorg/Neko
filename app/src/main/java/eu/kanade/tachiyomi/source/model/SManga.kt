@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
+import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
 import tachiyomi.source.model.MangaInfo
 
 interface SManga : Serializable {
@@ -66,7 +67,7 @@ interface SManga : Serializable {
         get() = (this as? MangaImpl)?.ogTitle ?: title
 
     fun setAltTitles(altTitles: List<String>?) {
-        alt_titles = altTitles?.joinToString("|~|")
+        alt_titles = altTitles?.joinToString(ALT_TITLES_SEPARATOR)
     }
 
     fun copyFrom(other: SManga) {

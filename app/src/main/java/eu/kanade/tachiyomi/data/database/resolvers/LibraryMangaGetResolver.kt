@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.resolvers
 
 import android.annotation.SuppressLint
 import android.database.Cursor
+import androidx.compose.ui.util.fastAny
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -30,6 +31,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val manga = LibraryManga()
 
         mapBaseFromCursor(manga, cursor)
+
         manga.unread =
             cursor
                 .getString(cursor.getColumnIndex(MangaTable.COL_UNREAD))
@@ -47,7 +49,20 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         manga.unavailableCount =
             cursor.getInt(cursor.getColumnIndex(MangaTable.COL_UNAVAILABLE_COUNT))
 
+        val hasMergedUnread =
+            cursor.getString(cursor.getColumnIndex(MangaTable.COL_UNREAD)).filterMerged()
+
+        val hasMergedRead =
+            cursor.getString(cursor.getColumnIndex(MangaTable.COL_HAS_READ)).filterMerged()
+
+        manga.isMerged = hasMergedUnread || hasMergedRead
+
         return manga
+    }
+
+    private fun String.filterMerged(): Boolean {
+        val list = split(Constants.RAW_CHAPTER_SEPARATOR)
+        return list.fastAny { scanlator -> MergeType.containsMergeSourceName(scanlator) }
     }
 
     private fun String.filterChaptersByScanlators(manga: LibraryManga): Int {

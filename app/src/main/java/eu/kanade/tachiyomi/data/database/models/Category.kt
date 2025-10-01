@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import java.io.Serializable
 import org.nekomanga.R
+import org.nekomanga.domain.category.CategoryItem.Companion.SYSTEM_CATEGORY
 
 interface Category : Serializable {
 
@@ -21,9 +22,6 @@ interface Category : Serializable {
     var mangaSort: Char?
 
     var isAlone: Boolean
-
-    val nameLower: String
-        get() = name.lowercase()
 
     var isHidden: Boolean
 
@@ -54,9 +52,9 @@ interface Category : Serializable {
     companion object {
         fun create(name: String): Category = CategoryImpl().apply { this.name = name }
 
-        fun createDefault(): Category = create("Default").apply { id = 0 }
+        fun createSystemCategory(): Category = create(SYSTEM_CATEGORY).apply { id = 0 }
 
-        fun createDefault(context: Context): Category =
+        fun createSystemCategory(context: Context): Category =
             create(context.getString(R.string.default_value)).apply { id = 0 }
 
         fun createCustom(name: String, libSort: Int, ascending: Boolean): Category =

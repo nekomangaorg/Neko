@@ -87,7 +87,7 @@ class CategoryController(bundle: Bundle? = null) :
      *
      * @param categories The new list of categories to display.
      */
-    fun setCategories(categories: List<CategoryItem>) {
+    fun setCategories(categories: List<CategoryItemLegacy>) {
         adapter?.updateDataSet(categories)
     }
 

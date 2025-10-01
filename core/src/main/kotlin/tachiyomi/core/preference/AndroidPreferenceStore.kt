@@ -9,7 +9,6 @@ import tachiyomi.core.preference.AndroidPreference.BooleanPrimitive
 import tachiyomi.core.preference.AndroidPreference.FloatPrimitive
 import tachiyomi.core.preference.AndroidPreference.IntPrimitive
 import tachiyomi.core.preference.AndroidPreference.LongPrimitive
-import tachiyomi.core.preference.AndroidPreference.Object
 import tachiyomi.core.preference.AndroidPreference.StringPrimitive
 import tachiyomi.core.preference.AndroidPreference.StringSetPrimitive
 
@@ -43,13 +42,13 @@ class AndroidPreferenceStore(context: Context) : PreferenceStore {
         return StringSetPrimitive(sharedPreferences, keyFlow, key, defaultValue)
     }
 
-    override fun <T> getObject(
+    override fun <T> getObjectFromString(
         key: String,
         defaultValue: T,
         serializer: (T) -> String,
         deserializer: (String) -> T,
     ): Preference<T> {
-        return Object(
+        return AndroidPreference.ObjectAsString(
             preferences = sharedPreferences,
             keyFlow = keyFlow,
             key = key,
@@ -57,6 +56,26 @@ class AndroidPreferenceStore(context: Context) : PreferenceStore {
             serializer = serializer,
             deserializer = deserializer,
         )
+    }
+
+    override fun <T> getObjectFromInt(
+        key: String,
+        defaultValue: T,
+        serializer: (T) -> Int,
+        deserializer: (Int) -> T,
+    ): Preference<T> {
+        return AndroidPreference.ObjectAsInt(
+            preferences = sharedPreferences,
+            keyFlow = keyFlow,
+            key = key,
+            defaultValue = defaultValue,
+            serializer = serializer,
+            deserializer = deserializer,
+        )
+    }
+
+    override fun getAll(): Map<String, *> {
+        return sharedPreferences.all ?: emptyMap<String, Any>()
     }
 }
 

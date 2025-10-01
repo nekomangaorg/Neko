@@ -7,11 +7,13 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.toPersistentList
@@ -67,7 +69,10 @@ fun showLibraryEntriesAction(showEntries: Int, onClick: () -> Unit): AppBar.Acti
 }
 
 @Composable
-fun AppBarActions(actions: List<AppBar.AppBarAction>) {
+fun AppBarActions(
+    actions: List<AppBar.AppBarAction>,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+) {
     var showMenu by remember { mutableStateOf(false) }
 
     actions.filterIsInstance<AppBar.Action>().map {
@@ -76,6 +81,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
             icon = it.icon,
             isEnabled = it.isEnabled,
             onClick = it.onClick,
+            enabledTint = tint,
         )
     }
 
@@ -85,6 +91,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
             onClick = { showMenu = !showMenu },
+            enabledTint = tint,
         )
 
         SimpleDropdownMenu(
@@ -103,6 +110,7 @@ fun AppBarActions(actions: List<AppBar.AppBarAction>) {
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
             onClick = { showMenu = !showMenu },
+            enabledTint = tint,
         )
 
         mainDropDown.menuShowing(showMenu)

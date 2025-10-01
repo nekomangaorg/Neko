@@ -2,6 +2,17 @@ package eu.kanade.tachiyomi.ui.library
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.SortByAlpha
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.SwapVert
+import androidx.compose.ui.graphics.vector.ImageVector
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import org.nekomanga.R
 
@@ -37,18 +48,43 @@ enum class LibrarySort(
     val categoryValueDescending: Char
         get() = if (this == DragAndDrop) 'D' else 'b' + catValue * 2
 
-    @StringRes fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
+    @StringRes
+    fun stringRes(isDynamic: Boolean = false) = if (isDynamic) dynamicStringRes else stringRes
 
-    @DrawableRes fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
+    @DrawableRes
+    fun iconRes(isDynamic: Boolean = false) = if (isDynamic) dynamicIconRes else iconRes
+
+    fun composeIcon(): ImageVector {
+        return when (this) {
+            Title -> Icons.Default.SortByAlpha
+            LastRead -> Icons.Outlined.AccessTime
+            LatestChapter -> Icons.Outlined.NewReleases
+            Unread -> Icons.Filled.RemoveRedEye
+            TotalChapters -> Icons.Filled.FormatListNumbered
+            DateAdded -> Icons.Outlined.Favorite
+            DateFetched -> Icons.Outlined.CalendarMonth
+            DragAndDrop -> Icons.Outlined.SwapVert
+            Rating -> Icons.Default.BarChart
+        }
+    }
 
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
         return MaterialMenuSheet.MenuSheetItem(mainValue, iconRes(isDynamic), stringRes(isDynamic))
     }
 
     companion object {
-        fun valueOf(value: Int) = values().find { it.mainValue == value }
+        fun filteredEntries() = entries.filterNot { it == DragAndDrop }
+
+        fun filteredValueOf(char: Char?) =
+            filteredEntries().find {
+                it.categoryValue == char || it.categoryValueDescending == char
+            } ?: Title
+
+        fun filteredValueOf(value: Int) = filteredEntries().find { it.mainValue == value } ?: Title
+
+        fun valueOf(value: Int) = entries.find { it.mainValue == value } ?: Title
 
         fun valueOf(char: Char?) =
-            values().find { it.categoryValue == char || it.categoryValueDescending == char }
+            entries.find { it.categoryValue == char || it.categoryValueDescending == char } ?: Title
     }
 }

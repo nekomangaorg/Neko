@@ -2,6 +2,7 @@ package org.nekomanga.domain.category
 
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -12,22 +13,40 @@ data class CategoryItem(
     val order: Int = 0,
     val flags: Int = 0,
     val mangaOrder: ImmutableList<Long> = persistentListOf(),
-    val mangaSort: Char? = null,
+    val sortOrder: LibrarySort,
+    val isAscending: Boolean = true,
     val isAlone: Boolean = true,
     val isHidden: Boolean = false,
     val isDynamic: Boolean = false,
-    val isSystemCategory: Boolean = (id == 0 && name == "Default"),
+    val isSystemCategory: Boolean = (id == 0 && name == SYSTEM_CATEGORY),
     val sourceId: Long? = null,
-)
+) {
 
-fun CategoryItem.toDbCategory(): CategoryImpl {
+    companion object {
+        const val SYSTEM_CATEGORY = "Default"
+        const val ALL_CATEGORY = "All"
+    }
+}
+
+fun CategoryItem.toDbCategory(flipAscendingSortOrder: Boolean = false): CategoryImpl {
+
+    val categorySortOrderValue =
+        when {
+            flipAscendingSortOrder && this.isAscending ->
+                this@toDbCategory.sortOrder.categoryValueDescending
+            flipAscendingSortOrder -> this@toDbCategory.sortOrder.categoryValue
+            this.isAscending -> this@toDbCategory.sortOrder.categoryValue
+            !this.isAscending -> this@toDbCategory.sortOrder.categoryValueDescending
+            else -> this@toDbCategory.sortOrder.categoryValue
+        }
+
     return CategoryImpl().apply {
         id = this@toDbCategory.id
         name = this@toDbCategory.name
         order = this@toDbCategory.order
         flags = this@toDbCategory.flags
         mangaOrder = this@toDbCategory.mangaOrder.toList()
-        mangaSort = this@toDbCategory.mangaSort
+        mangaSort = categorySortOrderValue
         isAlone = this@toDbCategory.isAlone
         isHidden = this@toDbCategory.isHidden
         isDynamic = this@toDbCategory.isDynamic
@@ -42,7 +61,8 @@ fun Category.toCategoryItem(): CategoryItem {
         order = this.order,
         flags = this.flags,
         mangaOrder = this.mangaOrder.toImmutableList(),
-        mangaSort = this.mangaSort,
+        isAscending = this.isAscending(),
+        sortOrder = LibrarySort.filteredValueOf(this.mangaSort) ?: LibrarySort.Title,
         isAlone = this.isAlone,
         isHidden = this.isHidden,
         isDynamic = this.isDynamic,

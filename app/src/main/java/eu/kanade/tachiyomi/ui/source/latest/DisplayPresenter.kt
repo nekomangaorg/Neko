@@ -46,7 +46,7 @@ class DisplayPresenter(
                         ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
                         ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 showLibraryEntries = preferences.browseDisplayMode().get(),
             )
@@ -201,6 +201,8 @@ class DisplayPresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order =
+                (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             _displayScreenState.update {
                 it.copy(

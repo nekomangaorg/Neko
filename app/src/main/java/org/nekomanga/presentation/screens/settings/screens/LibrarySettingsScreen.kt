@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -41,7 +40,6 @@ internal class LibrarySettingsScreen(
     onNavigationIconClick: () -> Unit,
     val categories: ImmutableList<CategoryItem>,
     val viewModelScope: CoroutineScope,
-    val setLibrarySearchSuggestion: () -> Unit,
     val onAddEditCategoryClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
@@ -73,20 +71,6 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.removeArticles(),
                         title = stringResource(R.string.sort_by_ignoring_articles),
                         subtitle = stringResource(R.string.when_sorting_ignore_articles),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = libraryPreferences.showSearchSuggestions(),
-                        title = stringResource(R.string.search_suggestions),
-                        subtitle = stringResource(R.string.search_tips_show_periodically),
-                        onValueChanged = {
-                            if (it) {
-                                setLibrarySearchSuggestion()
-                            } else {
-                                DelayedLibrarySuggestionsJob.setupTask(context, false)
-                                libraryPreferences.searchSuggestions().set("")
-                            }
-                            true
-                        },
                     ),
                     Preference.PreferenceItem.InfoPreference(
                         stringResource(R.string.display_options_can_be)
@@ -301,11 +285,6 @@ internal class LibrarySettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.sort_by_ignoring_articles),
                     subtitle = stringResource(R.string.when_sorting_ignore_articles),
-                    group = stringResource(R.string.general),
-                ),
-                SearchTerm(
-                    title = stringResource(R.string.search_suggestions),
-                    subtitle = stringResource(R.string.search_tips_show_periodically),
                     group = stringResource(R.string.general),
                 ),
                 SearchTerm(

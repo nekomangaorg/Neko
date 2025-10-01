@@ -40,7 +40,7 @@ class SimilarPresenter(
             SimilarScreenState(
                 isList = preferences.browseAsList().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
             )
         )
@@ -163,6 +163,8 @@ class SimilarPresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order =
+                (_similarScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             _similarScreenState.update {
                 it.copy(

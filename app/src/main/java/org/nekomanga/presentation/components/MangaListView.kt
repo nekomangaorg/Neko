@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.util.Objects
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.domain.manga.DisplayManga
@@ -91,7 +94,7 @@ fun MangaListWithHeader(
             ) { _, displayManga ->
                 MangaRow(
                     displayManga = displayManga,
-                    shouldOutlineCover,
+                    shouldOutlineCover = shouldOutlineCover,
                     modifier =
                         Modifier.fillMaxWidth()
                             .wrapContentHeight()
@@ -106,35 +109,70 @@ fun MangaListWithHeader(
 }
 
 @Composable
-private fun MangaRow(
+fun MangaRow(
+    modifier: Modifier = Modifier,
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
-    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
+    showUnreadBadge: Boolean = false,
+    showDownloadBadge: Boolean = false,
+    showStartReadingButton: Boolean = false,
+    onStartReadingClick: () -> Unit = {},
+    unreadCount: Int = 0,
+    downloadCount: Int = 0,
 ) {
-    Row(modifier = modifier.padding(Size.tiny)) {
+    Row(
+        modifier =
+            modifier
+                .background(
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = NekoColors.mediumAlphaHighContrast
+                            )
+                        } else {
+                            Color.Transparent
+                        }
+                )
+                .padding(Size.tiny),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         MangaListCover(displayManga, shouldOutlineCover)
 
-        Column(
-            modifier = Modifier.padding(Size.tiny).align(alignment = Alignment.CenterVertically)
-        ) {
+        Column(modifier = Modifier.weight(1f).padding(Size.tiny)) {
             val titleLineCount =
                 when (displayManga.displayText.isBlank()) {
                     true -> 2
                     false -> 1
                 }
-
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
             MangaListSubtitle(
                 text = displayManga.displayText,
                 textRes = displayManga.displayTextRes,
             )
         }
+        if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
+            Gap(Size.tiny)
+            DownloadUnreadBadge(
+                offset = 0.dp,
+                outline = shouldOutlineCover,
+                showUnread = showUnreadBadge,
+                showDownloads = showDownloadBadge,
+                unreadCount = unreadCount,
+                downloadCount = downloadCount,
+            )
+        }
+        if (showStartReadingButton) {
+            Gap(Size.tiny)
+            StartReadingButton(onStartReadingClick = onStartReadingClick)
+        }
     }
 }
 
 @Composable
-private fun MangaListTitle(title: String, maxLines: Int) {
+private fun MangaListTitle(title: String, maxLines: Int, modifier: Modifier = Modifier) {
     Text(
+        modifier = modifier,
         text = title,
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurface,

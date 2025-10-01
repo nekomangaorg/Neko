@@ -323,6 +323,8 @@ class MangaDetailPresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order =
+                (_mangaDetailScreenState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             updateCategoryFlows()
         }
@@ -645,7 +647,7 @@ class MangaDetailPresenter(
                     it.isMergedChapterOfType(mergeType)
                 }
             if (!libraryPreferences.enableLocalChapters().get()) {
-                downloadManager.deleteChapters(mergedChapters, currentManga())
+                downloadManager.deleteChapters(currentManga(), mergedChapters)
             }
             db.deleteChapters(mergedChapters).executeOnIO()
 
@@ -1601,8 +1603,8 @@ class MangaDetailPresenter(
                         downloadManager.deleteManga(currentManga())
                     } else {
                         downloadManager.deleteChapters(
-                            chapterItems.map { it.chapter.toDbChapter() },
                             currentManga(),
+                            chapterItems.map { it.chapter.toDbChapter() },
                         )
                         val localDbChapters =
                             chapterItems

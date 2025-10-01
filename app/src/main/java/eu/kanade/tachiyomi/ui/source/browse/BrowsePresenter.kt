@@ -68,7 +68,7 @@ class BrowsePresenter(
                 isList = preferences.browseAsList().get(),
                 showLibraryEntries = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(incomingQuery),
                 defaultContentRatings =
@@ -911,6 +911,7 @@ class BrowsePresenter(
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
+            category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
             _browseScreenState.update {
                 it.copy(

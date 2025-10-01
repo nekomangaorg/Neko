@@ -258,7 +258,7 @@ class NotificationReceiver : BroadcastReceiver() {
             }
         if (preferences.removeAfterMarkedAsRead().get()) {
             val chaptersToDelete = dbChapters.filter { it.canDeleteChapter() }
-            downloadManager.deleteChapters(chaptersToDelete, manga)
+            downloadManager.deleteChapters(manga, chaptersToDelete)
         }
 
         if (mangaDexPreference.readingSync().get()) {

@@ -11,6 +11,8 @@ class LibraryManga : MangaImpl() {
 
     var unavailableCount: Int = 0
 
+    var isMerged: Boolean = false
+
     val availableCount
         get() = totalChapters - unavailableCount
 

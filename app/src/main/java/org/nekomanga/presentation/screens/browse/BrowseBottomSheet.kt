@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.browse
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
@@ -21,7 +20,6 @@ sealed class BrowseBottomSheetScreen {
     data class FilterSheet(val nothing: String = "") : BrowseBottomSheetScreen()
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BrowseBottomSheet(
     currentScreen: BrowseBottomSheetScreen,

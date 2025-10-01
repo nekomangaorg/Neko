@@ -380,7 +380,6 @@ fun Controller.scrollViewWith(
                     lastY = 0f
                     activityBinding?.appBar?.updateAppBarAfterY(recycler)
                     activityBinding?.toolbar?.tag = randomTag
-                    activityBinding?.toolbar?.setOnClickListener { recycler.smoothScrollToTop() }
                 } else {
                     if (
                         !customPadding &&
