@@ -16,7 +16,7 @@ enum class Themes {
     Blue,
     Brown,
     Tako,
-    BlueGreen,
+    Teal,
     Monochrome;
 
     fun isDarkTheme() = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
@@ -34,7 +34,6 @@ enum class Themes {
             this == Retro -> R.style.Theme_Tachiyomi_Outrun
             this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
             this == Orange -> R.style.Theme_Tachiyomi_MangaDex
-            this == BlueGreen -> R.style.Theme_Tachiyomi_SapphireDusk
             this == Purple -> R.style.Theme_Tachiyomi_Lavender
             this == Tako -> R.style.Theme_Tachiyomi_Tako
             this == Green -> R.style.Theme_Tachiyomi_FlatLime
@@ -49,11 +48,11 @@ enum class Themes {
     @StringRes
     fun nameRes(): Int {
         return when {
-            this == Monet -> R.string.a_brighter_you
+            this == Monet -> R.string.dynamic
             this == Retro -> R.string.retro
             this == Pink -> R.string.spring_blossom
             this == Orange -> R.string.orange_juice
-            this == BlueGreen -> R.string.teal_ocean
+            this == Teal -> R.string.teal_ocean
             this == Purple -> R.string.lavender
             this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
@@ -67,9 +66,6 @@ enum class Themes {
     @StringRes
     fun darkNameRes(): Int {
         return when {
-            this == Monet -> R.string.a_calmer_you
-            this == Pink -> R.string.midnight_dusk
-            this == BlueGreen -> R.string.sapphire_dusk
             this == Purple -> R.string.violet
             else -> this.nameRes()
         }
