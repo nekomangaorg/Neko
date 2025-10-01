@@ -13,6 +13,7 @@ enum class Themes {
     Orange,
     Pink,
     Retro,
+    Blue,
     Brown,
     Tako,
     BlueGreen,
@@ -57,6 +58,7 @@ enum class Themes {
             this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
             this == Green -> R.string.jungle
+            this == Blue -> R.string.crayon_blue
             this == Monochrome -> R.string.monochrome
             else -> R.string.app_name // Default
         }

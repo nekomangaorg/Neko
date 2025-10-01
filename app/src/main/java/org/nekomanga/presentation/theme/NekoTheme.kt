@@ -10,6 +10,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.theme.Typefaces.appTypography
+import org.nekomanga.presentation.theme.colorschemes.BlueColorScheme
 import org.nekomanga.presentation.theme.colorschemes.BlueGreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.BrownColorScheme
 import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
@@ -58,6 +59,7 @@ fun colorSchemeFromTheme(
     isSystemInDarkTheme: Boolean,
 ): ColorScheme {
     return when (theme) {
+        Themes.Blue -> BlueColorScheme
         Themes.BlueGreen -> BlueGreenColorScheme
         Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(context)
