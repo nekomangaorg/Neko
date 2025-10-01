@@ -59,7 +59,7 @@ enum class Themes {
             this == Purple -> R.string.lavender
             this == Red -> R.string.strawberry_daiquiri
             this == Tako -> R.string.tako
-            this == Green -> R.string.tropical
+            this == Green -> R.string.jungle
             else -> R.string.app_name // Default
         }
     }
