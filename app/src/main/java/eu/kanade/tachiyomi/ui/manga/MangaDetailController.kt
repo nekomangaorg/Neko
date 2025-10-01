@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.feed.FeedController
-import eu.kanade.tachiyomi.ui.library.LibraryComposeController
+import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -308,7 +308,7 @@ class MangaDetailController(private val mangaId: Long) :
         val position = router.backstackSize - backstackNumber
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
-            is LibraryComposeController,
+            is LibraryController,
             is FeedController,
             is DisplayController,
             is SimilarController -> {
@@ -337,7 +337,7 @@ class MangaDetailController(private val mangaId: Long) :
         }
 
         when (val previousController = router.backstack[router.backstackSize - 2].controller) {
-            is LibraryComposeController -> {
+            is LibraryController -> {
                 router.handleBack()
                 previousController.search(text)
             }
@@ -348,8 +348,7 @@ class MangaDetailController(private val mangaId: Long) :
                 router.handleBack()
                 (activity as? MainActivity)?.goToTab(R.id.nav_library)
                 val controller =
-                    router.getControllerWithTag(R.id.nav_library.toString())
-                        as LibraryComposeController
+                    router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
                 controller.search(text)
             }
         }

@@ -80,7 +80,7 @@ import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class LibraryComposePresenter(
+class LibraryPresenter(
     val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangadexPreferences: MangaDexPreferences = Injekt.get(),
@@ -91,7 +91,7 @@ class LibraryComposePresenter(
     val chapterFilter: ChapterFilter = Injekt.get(),
     val workManager: WorkManager = Injekt.get(),
     val chapterUseCases: ChapterUseCases = Injekt.get(),
-) : BaseCoroutinePresenter<LibraryComposeController>() {
+) : BaseCoroutinePresenter<LibraryController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
 

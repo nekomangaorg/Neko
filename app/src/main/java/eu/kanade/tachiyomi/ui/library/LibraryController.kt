@@ -22,8 +22,8 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.presentation.screens.LibraryScreen
 
-class LibraryComposeController : BaseComposeController<LibraryComposePresenter>() {
-    override val presenter = LibraryComposePresenter()
+class LibraryController : BaseComposeController<LibraryPresenter>() {
+    override val presenter = LibraryPresenter()
 
     @Composable
     override fun ScreenContent() {
