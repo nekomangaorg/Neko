@@ -1,20 +1,16 @@
 package eu.kanade.tachiyomi.util
 
-import android.app.Activity
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
-import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -49,40 +45,6 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
     if (includedCategories.isEmpty()) return true
 
     return categoriesForManga.any { it in includedCategories }
-}
-
-fun List<Manga>.moveCategories(db: DatabaseHelper, activity: Activity, onMangaMoved: () -> Unit) {
-    if (this.isEmpty()) return
-    val categories = db.getCategories().executeAsBlocking()
-    val commonCategories =
-        map { db.getCategoriesForManga(it).executeAsBlocking() }
-            .reduce { set1: Iterable<Category>, set2 ->
-                set1.intersect(set2.toSet()).toMutableList()
-            }
-            .toTypedArray()
-    val mangaCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
-    val common =
-        mangaCategories.reduce { set1, set2 -> set1.intersect(set2.toSet()).toMutableList() }
-    val mixedCategories =
-        mangaCategories.flatten().distinct().subtract(common.toSet()).toMutableList()
-    SetCategoriesSheet(
-            activity,
-            this,
-            categories.toMutableList(),
-            categories
-                .map {
-                    when (it) {
-                        in commonCategories -> TriStateCheckBox.State.CHECKED
-                        in mixedCategories -> TriStateCheckBox.State.IGNORE
-                        else -> TriStateCheckBox.State.UNCHECKED
-                    }
-                }
-                .toTypedArray(),
-            false,
-        ) {
-            onMangaMoved()
-        }
-        .show()
 }
 
 /** Takes a SourceManga and converts to a display manga */

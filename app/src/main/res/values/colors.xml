@@ -18,12 +18,8 @@
 
     <color name="read_chapter">@color/material_on_background_disabled</color>
 
-    <color name="total_badge">@color/neko_green_complementary</color>
-    <color name="total_badge_text">@color/md_white_1000</color>
-
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
 
-    <color name="strong_divider">@color/md_black_1000_38</color>
     <color name="divider">@color/md_black_1000_12</color>
 
     <color name="background">@color/md_grey_50</color>
@@ -34,13 +30,11 @@
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
     <color name="md_black_1000_54">#8A000000</color>
-    <color name="md_black_1000_38">#61000000</color>
     <color name="md_black_1000_12">#1F000000</color>
 
     <color name="md_white_1000">#FFFFFFFF</color>
     <color name="md_white_1000_76">#C2FFFFFF</color>
     <color name="md_white_1000_54">#8AFFFFFF</color>
-    <color name="md_white_1000_38">#61FFFFFF</color>
     <color name="md_white_1000_12">#1FFFFFFF</color>
 
     <!-- Material Design Colors -->
@@ -49,10 +43,7 @@
     <color name="md_grey_50">#FAFAFA</color>
 
     <color name="md_red_500">#F44336</color>
-    <color name="holo_red">#AA2200</color>
     <color name="primaryRed">#C14033</color>
-
-    <color name="pale_green">#99CC99</color>
 
     <!-- Navigation overlay colors -->
     <color name="navigation_menu">#CC95818D</color>
@@ -72,17 +63,6 @@
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
     <!-- Teal/Sapphire Theme -->
-    <color name="secondaryTealSapphire">#05B1A4</color>
-    <color name="rippleColorTealSapphire">#1F05B1A4</color>
-    <color name="secondaryVariantTealSapphire">#12524b</color>
-    <color name="primaryTealSapphire">#5f9c96</color>
-    <color name="primaryInverseTealSapphire">#a1e1db</color>
-    <color name="primaryVariantTealSapphire">#d4f1e6</color>
-    <color name="onPrimaryTealSapphire">@color/onPrimaryTachiyomi</color>
-    <color name="backgroundTealSapphire">#f0f7f7</color>
-    <color name="colorOnBackgroundTealSapphire">#DE072926</color>
-    <color name="tabBarIconColorTealSapphire">#DE072927</color>
-    <color name="appBarTextTealSapphire">#DE0a302e</color>
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#57BD79</color>
@@ -107,19 +87,10 @@
 
 
     <color name="neko_green">#3DDA83</color>
-    <color name="neko_green_complementary">#aa206c</color>
     <color name="neko_green_darker">#20aa5e</color>
 
 
     <!-- Strawberry Daiquiri Theme -->
-    <color name="primaryStrawberry">#d31d3b</color>
-    <color name="primaryVariantStrawberry">#F3E7E7</color>
-    <color name="onPrimaryStrawberry">@color/onPrimaryTachiyomi</color>
-    <color name="primaryInverseStrawberry">#ef8e9e</color>
-    <color name="secondaryStrawberry">#ED4A65</color>
-    <color name="rippleColorStrawberry">#1FED4A65</color>
-    <color name="secondaryVariantStrawberry">#68101f</color>
-    <color name="backgroundStrawberries">@color/background</color>
 
     <!-- Tako Theme -->
     <color name="primaryTako">#463561</color>

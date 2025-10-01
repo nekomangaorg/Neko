@@ -19,7 +19,6 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
         container: ViewGroup,
         savedViewState: Bundle?,
     ): View {
-        showToolbar()
         return super.onCreateView(inflater, container, savedViewState)
     }
 

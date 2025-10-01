@@ -12,8 +12,6 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -24,7 +22,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.math.BigInteger
-import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.screens.Screens
 import uy.kohesive.injekt.Injekt
@@ -40,22 +37,6 @@ class SearchActivity : MainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        binding.toolbar.navigationIcon = backDrawable
-        binding.toolbar.setNavigationOnClickListener { popToRoot() }
-        binding.searchToolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (
-                (rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
-                    rootSearchController !is SmallToolbarInterface
-            ) {
-                binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else {
-                popToRoot()
-            }
-        }
-        (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
     }
 
     // Override finishAfterTransition since the animation gets weird when launching this from other
@@ -88,21 +69,6 @@ class SearchActivity : MainActivity() {
         }
     }
 
-    override fun setFloatingToolbar(
-        show: Boolean,
-        solidBG: Boolean,
-        changeBG: Boolean,
-        showSearchAnyway: Boolean,
-    ) {
-        super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
-        val useLargeTB = binding.appBar.useLargeToolbar
-        if (!useLargeTB) {
-            binding.searchToolbar.navigationIcon = backDrawable
-        } else if (showSearchAnyway) {
-            binding.searchToolbar.navigationIcon = if (!show) searchDrawable else backDrawable
-        }
-    }
-
     private fun intentShouldGoBack() =
         intent.action in listOf(SHORTCUT_MANGA, SHORTCUT_READER_SETTINGS, SHORTCUT_BROWSE)
 
@@ -117,7 +83,6 @@ class SearchActivity : MainActivity() {
 
         reEnableBackPressedCallBack()
 
-        setFloatingToolbar(canShowFloatingToolbar(to))
         nav.isVisible = false
         binding.bottomView?.isVisible = false
     }

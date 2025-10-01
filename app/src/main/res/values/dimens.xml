@@ -4,20 +4,7 @@
 
     <!--Nav header-->
 
-    <dimen name="theme_padding_preview">6dp</dimen>
-    <dimen name="theme_text_padding_preview">5dp</dimen>
-    <dimen name="theme_text_preview">10dp</dimen>
-    <dimen name="theme_hero_preview">20dp</dimen>
-    <dimen name="theme_app_bar_margin_end">30dp</dimen>
-    <dimen name="theme_primary_margin_end">32dp</dimen>
-    <dimen name="theme_secondary_margin_end">56dp</dimen>
-    <dimen name="theme_app_bar_preview">20dp</dimen>
-    <dimen name="theme_bottom_bar_preview">26dp</dimen>
-    <dimen name="theme_bottom_item_preview">12dp</dimen>
-    <dimen name="theme_accent_width_preview">16dp</dimen>
-
     <!-- stuff from material dimens lib -->
-    <dimen name="material_layout_avatar">40dp</dimen>
     <dimen name="material_layout_keylines_screen_edge_margin">16dp</dimen>
     <dimen name="material_component_lists_icon_left_padding">16dp</dimen>
     <dimen name="material_component_dialogs_padding_around_content_area">24dp</dimen>

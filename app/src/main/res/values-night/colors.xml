@@ -14,21 +14,11 @@
     <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
 
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
-    <color name="strong_divider">@color/md_white_1000_38</color>
     <color name="divider">@color/md_white_1000_12</color>
     <color name="holo_red">#cc4444</color>
     <color name="background">#292929</color>
     <color name="gray_button">#BFBFBF</color>
 
-    <!-- Chocolate Strawberries Theme -->
-    <color name="primaryStrawberry">#e14e4e</color>
-    <color name="primaryInverseStrawberry">#9f1414</color>
-    <color name="onPrimaryStrawberry">#330303</color>
-    <color name="secondaryStrawberry">@color/holo_red</color>
-    <color name="rippleColorStrawberry">#1FAA2200</color>
-    <color name="secondaryVariantStrawberry">#f9bab2</color>
-    <color name="primaryVariantStrawberry">#2B2320</color>
-    <color name="backgroundStrawberries">#1a1716</color>
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>

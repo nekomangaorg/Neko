@@ -55,7 +55,6 @@
         <item name="materialCardViewOutlinedStyle">@style/Widget.Tachiyomi.CardView.Outlined</item>
         <item name="materialCardViewFilledStyle">@style/Widget.Tachiyomi.CardView.Filled</item>
         <item name="materialCardViewElevatedStyle">@style/Widget.Tachiyomi.CardView.Elevated</item>
-        <item name="switchPreferenceCompatStyle">@style/Widget.Tachiyomi.SwitchPreferenceCompat</item>
         <item name="android:colorBackground">?background</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
@@ -82,7 +81,6 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
-        <item name="preferenceTheme">@style/Tachiyomi.PreferenceTheme</item>
 
         <!-- Custom Attributes-->
         <item name="actionBarTintColor">?attr/colorOnBackground</item>
@@ -139,30 +137,6 @@
 
     </style>
 
-    <style name="Theme.Tachiyomi.SapphireDusk">
-        <item name="colorPrimary">@color/primaryTealSapphire</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseTealSapphire</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantTealSapphire</item>
-        <item name="colorOnPrimary">@color/onPrimaryTealSapphire</item>
-        <item name="colorSecondary">@color/secondaryTealSapphire</item>
-        <item name="colorControlHighlight">@color/rippleColorTealSapphire</item>
-        <item name="tabBarIconColor">@color/tabBarIconColorTealSapphire</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantTealSapphire</item>
-        <item name="colorOnSecondary">@color/md_black_1000</item>
-        <item name="background">@color/backgroundTealSapphire</item>
-        <item name="colorSurface">@color/backgroundTealSapphire</item>
-        <item name="colorOnBackground">@color/colorOnBackgroundTealSapphire</item>
-        <item name="actionBarTintColor">@color/appBarTextTealSapphire</item>
-        <item name="colorTertiary">?attr/colorSecondary</item>
-        <item name="colorOnTertiary">?attr/colorOnSecondary</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorDownloadBadge">@color/md_black_1000</item>
-        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
-
-    </style>
-
     <style name="Theme.Tachiyomi.Lavender">
         <item name="colorPrimary">@color/lavender_primary</item>
         <item name="colorPrimaryInverse">@color/lavender_primary_inverse</item>
@@ -185,23 +159,6 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorDownloadBadge">@color/lavender_primary_variant</item>
         <item name="colorOnDownloadBadge">@color/lavender_on_download</item>
-    </style>
-
-    <style name="Theme.Tachiyomi.Strawberries">
-        <item name="colorPrimary">@color/primaryStrawberry</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
-        <item name="colorOnPrimary">@color/onPrimaryStrawberry</item>
-        <item name="colorSurface">@color/backgroundStrawberries</item>
-        <item name="colorSecondary">@color/secondaryStrawberry</item>
-        <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
-        <item name="background">@color/backgroundStrawberries</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorError">@color/pale_green</item>
-
     </style>
 
     <!--== Tako Theme ==-->

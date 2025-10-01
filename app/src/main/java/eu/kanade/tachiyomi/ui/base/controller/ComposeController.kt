@@ -13,7 +13,6 @@ abstract class BaseComposeController<PS : BaseCoroutinePresenter<*>>(bundle: Bun
     BaseCoroutineController<EmptyComposeControllerBinding, BaseCoroutinePresenter<*>>(bundle) {
 
     override fun onViewCreated(view: View) {
-        hideToolbar()
         super.onViewCreated(view)
         binding.root.consumeWindowInsets = false
         binding.root.setContent { NekoTheme { ScreenContent() } }
@@ -32,7 +31,6 @@ abstract class BasicComposeController : BaseController<EmptyComposeControllerBin
         EmptyComposeControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
-        hideToolbar()
         super.onViewCreated(view)
         binding.root.setContent { NekoTheme { ScreenContent() } }
     }

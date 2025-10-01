@@ -37,21 +37,12 @@
     <!--=======-->
     <!--Widgets-->
     <!--=======-->
-    <style name="Theme.Widget" />
 
     <style name="Widget.Tachiyomi.ActionMode" parent="Widget.Material3.ActionMode">
         <item name="colorControlHighlight">?colorControlHighlight</item>
         <item name="background">?colorPrimaryVariant</item>
         <item name="height">?attr/mainActionBarSize</item>
         <item name="android:minHeight">?attr/mainActionBarSize</item>
-    </style>
-
-    <style name="Tachiyomi.PreferenceTheme" parent="@style/PreferenceThemeOverlay">
-        <item name="switchPreferenceCompatStyle">@style/Widget.Tachiyomi.SwitchPreferenceCompat</item>
-    </style>
-
-    <style name="Widget.Tachiyomi.SwitchPreferenceCompat" parent="Preference.SwitchPreferenceCompat.Material">
-        <item name="widgetLayout">@layout/preference_widget_material_switch</item>
     </style>
 
     <style name="Widget.Tachiyomi.CardView.Elevated" parent="Widget.Material3.CardView.Elevated">
@@ -66,35 +57,6 @@
         <item name="shapeAppearance">?attr/shapeAppearanceCornerSmall</item>
     </style>
 
-    <style name="Theme.Widget.GridView">
-        <item name="android:smoothScrollbar">true</item>
-        <item name="android:numColumns">auto_fit</item>
-        <item name="android:stretchMode">columnWidth</item>
-        <item name="android:scrollbarStyle">outsideOverlay</item>
-    </style>
-
-    <style name="Theme.Widget.GridView.Catalogue">
-        <item name="android:gravity">top|left</item>
-        <item name="android:smoothScrollbar">true</item>
-        <item name="android:cacheColorHint">@color/material_on_background_disabled</item>
-        <item name="android:fastScrollEnabled">true</item>
-        <item name="android:horizontalSpacing">0dp</item>
-        <item name="android:verticalSpacing">0dp</item>
-    </style>
-
-
-    <style name="FloatingTextView" parent="TextAppearance.AppCompat">
-        <item name="android:paddingStart">12dp</item>
-        <item name="android:paddingEnd">12dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">10dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:background">@drawable/bubble_drawable</item>
-        <item name="android:textColor">?actionBarTintColor</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:elevation">5dp</item>
-    </style>
 
     <!-- set the rounded drawable as background to your bottom sheet -->
 
@@ -224,18 +186,6 @@
 
     <style name="Theme.Widget.Button.TextButton" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">?attr/colorSecondary</item>
-    </style>
-
-    <style name="Theme.Widget.ImageBorderless" parent="Widget.AppCompat.ImageButton">
-        <item name="android:background">?selectableItemBackgroundBorderless</item>
-        <item name="android:tint">?attr/colorSecondary</item>
-        <item name="rippleColor">?colorControlHighlight</item>
-    </style>
-
-    <style name="Theme.Widget.ImageBorderless.Secondary">
-        <item name="android:background">@drawable/item_background_borderless_on_secondary</item>
-        <item name="android:tint">?attr/colorOnHopper</item>
-        <item name="rippleColor">@color/on_secondary_highlight</item>
     </style>
 
 </resources>

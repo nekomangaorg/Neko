@@ -17,20 +17,6 @@
         <item>@string/smart_by_theme_but_black</item>
     </string-array>
 
-    <string-array name="hopper_long_press">
-        <item>@string/search</item>
-        <item>@string/expand_collapse_all_categories</item>
-        <item>@string/display_options</item>
-        <item>@string/group_library_by</item>
-        <item>@string/open_random_series</item>
-    </string-array>
-
-    <string-array name="hide_hopper">
-        <item>@string/never</item>
-        <item>@string/hides_on_scroll</item>
-        <item>@string/always</item>
-    </string-array>
-
     <string-array name="image_scale_type">
         <item>@string/fit_screen</item>
         <item>@string/stretch</item>
@@ -123,12 +109,6 @@
         <item>@string/pad_cutout_areas</item>
         <item>@string/start_past_cutout</item>
         <item>@string/ignore_cutout_areas</item>
-    </string-array>
-
-    <string-array name="clean_up_downloads">
-        <item>@string/clean_orphaned_downloads</item>
-        <item>@string/clean_read_downloads</item>
-        <item>@string/clean_read_manga_not_in_library</item>
     </string-array>
 
     <string-array name="follows_options">
