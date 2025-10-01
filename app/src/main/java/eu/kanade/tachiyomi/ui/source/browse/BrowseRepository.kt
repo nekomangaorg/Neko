@@ -20,6 +20,9 @@ import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.domain.filter.Filter
+import org.nekomanga.domain.filter.QueryType
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.toDisplayResult
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -134,6 +137,20 @@ class BrowseRepository(
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
             Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList())
         }
+    }
+
+    fun createInitialDexFilter(incomingQuery: String = ""): DexFilters {
+        val enabledContentRatings = mangaDexPreferences.visibleContentRatings().get()
+        val contentRatings =
+            MangaContentRating.getOrdered()
+                .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
+                .toImmutableList()
+
+        return DexFilters(
+            query = Filter.Query(incomingQuery, QueryType.Title),
+            contentRatings = contentRatings,
+            contentRatingVisible = mangaDexPreferences.showContentRatingFilter().get(),
+        )
     }
 }
 

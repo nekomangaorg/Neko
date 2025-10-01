@@ -29,8 +29,6 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
 
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
-            switchDisplayClick = presenter::switchDisplayMode,
-            switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = router::handleBack,
             windowSizeClass = windowSizeClass,
             legacySideNav = isSideNav,
@@ -38,39 +36,49 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             openManga = ::openManga,
             filterActions =
                 FilterActions(
-                    filterClick = presenter::getSearchPage,
-                    filterChanged = presenter::filterChanged,
-                    resetClick = presenter::resetFilter,
-                    saveFilterClick = presenter::saveFilter,
-                    deleteFilterClick = presenter::deleteFilter,
-                    filterDefaultClick = presenter::markFilterAsDefault,
-                    loadFilter = presenter::loadFilter,
+                    filterClick = { presenter.handle(BrowseAction.SetScreenType(BrowseScreenType.Filter)) },
+                    filterChanged = { presenter.handle(BrowseAction.FilterChanged(it)) },
+                    resetClick = { presenter.handle(BrowseAction.ResetFilter) },
+                    saveFilterClick = { presenter.handle(BrowseAction.SaveFilter(it)) },
+                    deleteFilterClick = { presenter.handle(BrowseAction.DeleteFilter(it)) },
+                    filterDefaultClick = { name, makeDefault ->
+                        presenter.handle(BrowseAction.MarkFilterAsDefault(name, makeDefault))
+                    },
+                    loadFilter = { presenter.handle(BrowseAction.LoadFilter(it)) },
                 ),
-            addNewCategory = presenter::addNewCategory,
-            toggleFavorite = presenter::toggleFavorite,
-            loadNextPage = presenter::loadNextItems,
-            retryClick = presenter::retry,
-            otherClick = presenter::otherClick,
-            changeScreenType = presenter::changeScreenType,
-            randomClick = presenter::randomManga,
-            incognitoClick = presenter::toggleIncognitoMode,
-            settingsClick = { (this.activity as? MainActivity)?.showSettings() },
-            statsClick = { (this.activity as? MainActivity)?.showStats() },
-            aboutClick = { (this.activity as? MainActivity)?.showAbout() },
-            helpClick = {
-                (this.activity as? MainActivity)?.openInBrowser(
-                    "https://tachiyomi.org/docs/guides/troubleshooting/"
-                )
-            },
+            browseActions = BrowseActions(
+                switchDisplayClick = { presenter.handle(BrowseAction.SwitchDisplayMode) },
+                switchLibraryVisibilityClick = { presenter.handle(BrowseAction.SwitchLibraryVisibility) },
+                addNewCategory = { presenter.handle(BrowseAction.AddNewCategory(it)) },
+                toggleFavorite = { mangaId, categories ->
+                    presenter.handle(BrowseAction.ToggleFavorite(mangaId, categories))
+                },
+                loadNextPage = { presenter.handle(BrowseAction.LoadNextPage) },
+                retryClick = { presenter.handle(BrowseAction.Retry) },
+                otherClick = { presenter.handle(BrowseAction.OtherClick(it)) },
+                changeScreenType = { screenType, force ->
+                    presenter.handle(BrowseAction.SetScreenType(screenType, force))
+                },
+                randomClick = { presenter.handle(BrowseAction.RandomManga) },
+                incognitoClick = { presenter.handle(BrowseAction.ToggleIncognito) },
+                settingsClick = { (this.activity as? MainActivity)?.showSettings() },
+                statsClick = { (this.activity as? MainActivity)?.showStats() },
+                aboutClick = { (this.activity as? MainActivity)?.showAbout() },
+                helpClick = {
+                    (this.activity as? MainActivity)?.openInBrowser(
+                        "https://tachiyomi.org/docs/guides/troubleshooting/"
+                    )
+                },
+            )
         )
     }
 
     fun searchByTag(tag: String) {
-        presenter.searchTag(tag)
+        presenter.handle(BrowseAction.TagSearch(tag))
     }
 
     fun searchByCreator(creator: String) {
-        presenter.searchCreator(creator)
+        presenter.handle(BrowseAction.CreatorSearch(creator))
     }
 
     private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
