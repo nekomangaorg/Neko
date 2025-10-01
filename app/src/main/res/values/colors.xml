@@ -50,36 +50,7 @@
     <color name="navigation_next">#CCA6CFD5</color>
     <color name="navigation_prev">#CC7D1128</color>
 
-    <!-- Spring Blossom -->
-    <color name="primaryDuskDawn">#a149bf</color>
-    <color name="primaryInverseDuskDawn">#cd95e0</color>
-    <color name="secondaryDuskDawn">#c43c97</color>
-    <color name="rippleColorDuskDawn">#1Fc43c97</color>
-    <color name="secondaryVariantDuskDawn">#4c163a</color>
-    <color name="backgroundDuskDawn">#f7f4f8</color>
-    <color name="primaryVariantDuskDawn">#efe3f3</color>
-    <color name="onPrimaryDuskDawn">@color/onPrimaryTachiyomi</color>
-    <color name="colorOnBackgroundDuskDawn">#DE240728</color>
-    <color name="appBarTextDuskDawn">#DE4c0d4b</color>
-
     <!-- Teal/Sapphire Theme -->
-
-    <!-- Flat Lime Theme -->
-    <color name="primaryLime">#57BD79</color>
-    <color name="primaryVariantLime">#D9ECE0</color>
-    <color name="primaryInverseLime">#AEDFC0</color>
-    <color name="onPrimaryLime">@color/onPrimaryTachiyomi</color>
-    <color name="secondaryLime">#1DA750</color>
-    <color name="secondaryVariantLime">#065124</color>
-    <color name="rippleColorLime">#1F4AF88A</color>
-    <color name="backgroundLime">#E9EFEB</color>
-
-
-    <!--Outrun theme -->
-    <color name="outrun_pink">#dd546e</color>
-    <color name="outrun_blush">#C06C84</color>
-    <color name="outrun_black">#170c32</color>
-    <color name="outrun_dark_purple">#201147</color>
 
 
     <color name="neko_primary">#101820</color>
@@ -91,23 +62,5 @@
 
 
     <!-- Strawberry Daiquiri Theme -->
-
-    <!-- Tako Theme -->
-    <color name="primaryTako">#463561</color>
-    <color name="primaryVariantTako">#E5DCF4</color>
-    <color name="primaryInverseTako">#ac8fd9</color>
-    <color name="onPrimaryTako">@color/onPrimaryTachiyomi</color>
-    <color name="secondaryTako">#66577E</color>
-    <color name="onSecondaryTako">#F3B375</color>
-    <color name="secondaryVariantTako">#3f2b49</color>
-    <color name="tabBarIconColorTako">#574360</color>
-    <color name="rippleColorTako">#1F66577E</color>
-    <color name="backgroundTako">#F2EDF7</color>
-    <color name="actionTintTako">#221b28</color>
-    <color name="inactiveTabTako">#C2221b28</color>
-
-    <!-- MangaDex Theme -->
-    <color name="secondaryMangaDex">#FF6740</color>
-    <color name="primaryVariantMangaDex">#FFD9CF</color>
 
 </resources>

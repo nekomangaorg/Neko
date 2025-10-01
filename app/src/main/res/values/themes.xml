@@ -98,110 +98,368 @@
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
-    <style name="Theme.Tachiyomi.FlatLime">
-        <item name="colorPrimary">@color/primaryLime</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantLime</item>
-        <item name="colorOnPrimary">@color/onPrimaryLime</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
-        <item name="colorSecondary">@color/secondaryLime</item>
-        <item name="colorOnSecondary">@color/textColorPrimaryInverse</item>
-        <item name="colorControlHighlight">@color/rippleColorLime</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
-        <item name="colorSurface">@color/backgroundLime</item>
-        <item name="background">@color/backgroundLime</item>
-        <item name="colorTertiary">?attr/colorSecondary</item>
-        <item name="colorOnTertiary">@color/md_white_1000</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-
-    </style>
-
-    <style name="Theme.Tachiyomi.Outrun" />
-
-    <style name="Theme.Tachiyomi.MidnightDusk">
-        <item name="colorPrimary">@color/primaryDuskDawn</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantDuskDawn</item>
-        <item name="colorOnPrimary">@color/onPrimaryDuskDawn</item>
-        <item name="colorSecondary">@color/secondaryDuskDawn</item>
-        <item name="colorControlHighlight">@color/rippleColorDuskDawn</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
-        <item name="colorSurface">@color/backgroundDuskDawn</item>
-        <item name="background">@color/backgroundDuskDawn</item>
-        <item name="colorOnBackground">@color/colorOnBackgroundDuskDawn</item>
-        <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-
-    </style>
-
-    <style name="Theme.Tachiyomi.Lavender">
-        <item name="colorPrimary">@color/lavender_primary</item>
-        <item name="colorPrimaryInverse">@color/lavender_primary_inverse</item>
-        <item name="colorPrimaryVariant">@color/lavender_primary_variant</item>
-        <item name="colorOnPrimary">@color/lavender_on_primary</item>
-        <item name="colorSecondary">@color/lavender_secondary</item>
-        <item name="colorOnSecondary">@color/lavender_on_secondary</item>
-        <item name="colorSecondaryVariant">@color/lavender_secondary_variant</item>
-        <item name="colorTertiary">@color/lavender_tertiary</item>
-        <item name="colorOnTertiary">@color/lavender_on_tertiary</item>
-        <item name="colorControlHighlight">@color/lavender_highlight</item>
-        <item name="tabBarIconColor">@color/lavender_tab_bar_icon</item>
-        <item name="background">@color/lavender_background</item>
-        <item name="colorOnBackground">@color/lavender_on_background</item>
-        <item name="colorSurface">@color/lavender_surface</item>
-        <item name="actionBarTintColor">@color/lavender_on_surface</item>
-        <item name="elevationOverlayColor">@color/lavender_elevation_overlay</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorDownloadBadge">@color/lavender_primary_variant</item>
-        <item name="colorOnDownloadBadge">@color/lavender_on_download</item>
-    </style>
-
     <!--== Tako Theme ==-->
-    <style name="Theme.Tachiyomi.Tako">
-        <item name="colorPrimary">@color/primaryTako</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseTako</item>
-        <item name="colorOnPrimary">@color/onPrimaryTako</item>
-        <item name="colorSecondary">@color/secondaryTako</item>
-        <item name="colorOnSecondary">@color/onSecondaryTako</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantTako</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantTako</item>
-        <item name="colorTertiary">?attr/colorAccent</item>
-        <item name="colorOnTertiary">?attr/colorOnSecondary</item>
-        <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
-        <item name="colorControlHighlight">@color/rippleColorTako</item>
-        <item name="colorSurface">@color/backgroundTako</item>
-        <item name="actionBarTintColor">@color/actionTintTako</item>
-        <item name="background">@color/backgroundTako</item>
-        <item name="tabBarIconInactive">@color/inactiveTabTako</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorDownloadBadge">@color/md_black_1000</item>
-        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+    <style name="Theme.Tachiyomi.Tako" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_tako</item>
+        <item name="colorOnPrimary">@color/on_primary_tako</item>
+        <item name="colorPrimaryContainer">@color/primary_container_tako</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_tako</item>
+        <item name="inversePrimary">@color/inverse_primary_tako</item>
+        <item name="colorSecondary">@color/secondary_tako</item>
+        <item name="colorOnSecondary">@color/on_secondary_tako</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_tako</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_tako</item>
+        <item name="colorTertiary">@color/tertiary_tako</item>
+        <item name="colorOnTertiary">@color/on_tertiary_tako</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_tako</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_tako</item>
+        <item name="android:colorBackground">@color/background_tako</item>
+        <item name="colorOnBackground">@color/on_background_tako</item>
+        <item name="colorSurface">@color/surface_tako</item>
+        <item name="colorOnSurface">@color/on_surface_tako</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_tako</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_tako</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_tako</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_tako</item>
+        <item name="colorOutline">@color/outline_tako</item>
+        <item name="colorOutlineVariant">@color/outline_variant_tako</item>
+        <item name="colorError">@color/error_tako</item>
+        <item name="colorOnError">@color/on_error_tako</item>
+        <item name="colorErrorContainer">@color/error_container_tako</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_tako</item>
     </style>
 
+    <style name="Theme.Tachiyomi.Monet" parent="Theme.Base" />
 
-    <style name="Theme.Tachiyomi.MangaDex">
-        <item name="colorPrimary">@color/secondaryMangaDex</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantMangaDex</item>
-        <item name="colorSecondary">@color/secondaryMangaDex</item>
-        <item name="colorSecondaryVariant">?attr/colorSecondary</item>
-        <item name="colorOnPrimary">@color/md_white_1000</item>
-        <item name="colorOnSecondary">@color/md_black_1000</item>
-        <item name="colorControlHighlight">@color/secondaryMangaDex</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorDownloadBadge">@color/md_black_1000</item>
-        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+    <style name="Theme.Tachiyomi.Purple" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_purple</item>
+        <item name="colorOnPrimary">@color/on_primary_purple</item>
+        <item name="colorPrimaryContainer">@color/primary_container_purple</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_purple</item>
+        <item name="inversePrimary">@color/inverse_primary_purple</item>
+        <item name="colorSecondary">@color/secondary_purple</item>
+        <item name="colorOnSecondary">@color/on_secondary_purple</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_purple</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_purple</item>
+        <item name="colorTertiary">@color/tertiary_purple</item>
+        <item name="colorOnTertiary">@color/on_tertiary_purple</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_purple</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_purple</item>
+        <item name="android:colorBackground">@color/background_purple</item>
+        <item name="colorOnBackground">@color/on_background_purple</item>
+        <item name="colorSurface">@color/surface_purple</item>
+        <item name="colorOnSurface">@color/on_surface_purple</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_purple</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_purple</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_purple</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_purple</item>
+        <item name="colorOutline">@color/outline_purple</item>
+        <item name="colorOutlineVariant">@color/outline_variant_purple</item>
+        <item name="colorError">@color/error_purple</item>
+        <item name="colorOnError">@color/on_error_purple</item>
+        <item name="colorErrorContainer">@color/error_container_purple</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_purple</item>
     </style>
 
-    <style name="Theme.Tachiyomi.Monet" />
+    <style name="Theme.Tachiyomi.Blue" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorOnPrimary">@color/on_primary_blue</item>
+        <item name="colorPrimaryContainer">@color/primary_container_blue</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_blue</item>
+        <item name="inversePrimary">@color/inverse_primary_blue</item>
+        <item name="colorSecondary">@color/secondary_blue</item>
+        <item name="colorOnSecondary">@color/on_secondary_blue</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_blue</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_blue</item>
+        <item name="colorTertiary">@color/tertiary_blue</item>
+        <item name="colorOnTertiary">@color/on_tertiary_blue</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_blue</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_blue</item>
+        <item name="android:colorBackground">@color/background_blue</item>
+        <item name="colorOnBackground">@color/on_background_blue</item>
+        <item name="colorSurface">@color/surface_blue</item>
+        <item name="colorOnSurface">@color/on_surface_blue</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_blue</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_blue</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_blue</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_blue</item>
+        <item name="colorOutline">@color/outline_blue</item>
+        <item name="colorOutlineVariant">@color/outline_variant_blue</item>
+        <item name="colorError">@color/error_blue</item>
+        <item name="colorOnError">@color/on_error_blue</item>
+        <item name="colorErrorContainer">@color/error_container_blue</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_blue</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Brown" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_brown</item>
+        <item name="colorOnPrimary">@color/on_primary_brown</item>
+        <item name="colorPrimaryContainer">@color/primary_container_brown</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_brown</item>
+        <item name="inversePrimary">@color/inverse_primary_brown</item>
+        <item name="colorSecondary">@color/secondary_brown</item>
+        <item name="colorOnSecondary">@color/on_secondary_brown</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_brown</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_brown</item>
+        <item name="colorTertiary">@color/tertiary_brown</item>
+        <item name="colorOnTertiary">@color/on_tertiary_brown</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_brown</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_brown</item>
+        <item name="android:colorBackground">@color/background_brown</item>
+        <item name="colorOnBackground">@color/on_background_brown</item>
+        <item name="colorSurface">@color/surface_brown</item>
+        <item name="colorOnSurface">@color/on_surface_brown</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_brown</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_brown</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_brown</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_brown</item>
+        <item name="colorOutline">@color/outline_brown</item>
+        <item name="colorOutlineVariant">@color/outline_variant_brown</item>
+        <item name="colorError">@color/error_brown</item>
+        <item name="colorOnError">@color/on_error_brown</item>
+        <item name="colorErrorContainer">@color/error_container_brown</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_brown</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Green" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorOnPrimary">@color/on_primary_green</item>
+        <item name="colorPrimaryContainer">@color/primary_container_green</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_green</item>
+        <item name="inversePrimary">@color/inverse_primary_green</item>
+        <item name="colorSecondary">@color/secondary_green</item>
+        <item name="colorOnSecondary">@color/on_secondary_green</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_green</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_green</item>
+        <item name="colorTertiary">@color/tertiary_green</item>
+        <item name="colorOnTertiary">@color/on_tertiary_green</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_green</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_green</item>
+        <item name="android:colorBackground">@color/background_green</item>
+        <item name="colorOnBackground">@color/on_background_green</item>
+        <item name="colorSurface">@color/surface_green</item>
+        <item name="colorOnSurface">@color/on_surface_green</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_green</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_green</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_green</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_green</item>
+        <item name="colorOutline">@color/outline_green</item>
+        <item name="colorOutlineVariant">@color/outline_variant_green</item>
+        <item name="colorError">@color/error_green</item>
+        <item name="colorOnError">@color/on_error_green</item>
+        <item name="colorErrorContainer">@color/error_container_green</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_green</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Monochrome" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_monochrome</item>
+        <item name="colorOnPrimary">@color/on_primary_monochrome</item>
+        <item name="colorPrimaryContainer">@color/primary_container_monochrome</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_monochrome</item>
+        <item name="inversePrimary">@color/inverse_primary_monochrome</item>
+        <item name="colorSecondary">@color/secondary_monochrome</item>
+        <item name="colorOnSecondary">@color/on_secondary_monochrome</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_monochrome</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_monochrome</item>
+        <item name="colorTertiary">@color/tertiary_monochrome</item>
+        <item name="colorOnTertiary">@color/on_tertiary_monochrome</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_monochrome</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_monochrome</item>
+        <item name="android:colorBackground">@color/background_monochrome</item>
+        <item name="colorOnBackground">@color/on_background_monochrome</item>
+        <item name="colorSurface">@color/surface_monochrome</item>
+        <item name="colorOnSurface">@color/on_surface_monochrome</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_monochrome</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_monochrome</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_monochrome</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_monochrome</item>
+        <item name="colorOutline">@color/outline_monochrome</item>
+        <item name="colorOutlineVariant">@color/outline_variant_monochrome</item>
+        <item name="colorError">@color/error_monochrome</item>
+        <item name="colorOnError">@color/on_error_monochrome</item>
+        <item name="colorErrorContainer">@color/error_container_monochrome</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_monochrome</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Neko" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_neko</item>
+        <item name="colorOnPrimary">@color/on_primary_neko</item>
+        <item name="colorPrimaryContainer">@color/primary_container_neko</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_neko</item>
+        <item name="inversePrimary">@color/inverse_primary_neko</item>
+        <item name="colorSecondary">@color/secondary_neko</item>
+        <item name="colorOnSecondary">@color/on_secondary_neko</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_neko</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_neko</item>
+        <item name="colorTertiary">@color/tertiary_neko</item>
+        <item name="colorOnTertiary">@color/on_tertiary_neko</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_neko</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_neko</item>
+        <item name="android:colorBackground">@color/background_neko</item>
+        <item name="colorOnBackground">@color/on_background_neko</item>
+        <item name="colorSurface">@color/surface_neko</item>
+        <item name="colorOnSurface">@color/on_surface_neko</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_neko</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_neko</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_neko</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_neko</item>
+        <item name="colorOutline">@color/outline_neko</item>
+        <item name="colorOutlineVariant">@color/outline_variant_neko</item>
+        <item name="colorError">@color/error_neko</item>
+        <item name="colorOnError">@color/on_error_neko</item>
+        <item name="colorErrorContainer">@color/error_container_neko</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_neko</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Nord" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_nord</item>
+        <item name="colorOnPrimary">@color/on_primary_nord</item>
+        <item name="colorPrimaryContainer">@color/primary_container_nord</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_nord</item>
+        <item name="inversePrimary">@color/inverse_primary_nord</item>
+        <item name="colorSecondary">@color/secondary_nord</item>
+        <item name="colorOnSecondary">@color/on_secondary_nord</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_nord</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_nord</item>
+        <item name="colorTertiary">@color/tertiary_nord</item>
+        <item name="colorOnTertiary">@color/on_tertiary_nord</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_nord</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_nord</item>
+        <item name="android:colorBackground">@color/background_nord</item>
+        <item name="colorOnBackground">@color/on_background_nord</item>
+        <item name="colorSurface">@color/surface_nord</item>
+        <item name="colorOnSurface">@color/on_surface_nord</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_nord</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_nord</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_nord</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_nord</item>
+        <item name="colorOutline">@color/outline_nord</item>
+        <item name="colorOutlineVariant">@color/outline_variant_nord</item>
+        <item name="colorError">@color/error_nord</item>
+        <item name="colorOnError">@color/on_error_nord</item>
+        <item name="colorErrorContainer">@color/error_container_nord</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_nord</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Orange" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_orange</item>
+        <item name="colorOnPrimary">@color/on_primary_orange</item>
+        <item name="colorPrimaryContainer">@color/primary_container_orange</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_orange</item>
+        <item name="inversePrimary">@color/inverse_primary_orange</item>
+        <item name="colorSecondary">@color/secondary_orange</item>
+        <item name="colorOnSecondary">@color/on_secondary_orange</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_orange</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_orange</item>
+        <item name="colorTertiary">@color/tertiary_orange</item>
+        <item name="colorOnTertiary">@color/on_tertiary_orange</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_orange</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_orange</item>
+        <item name="android:colorBackground">@color/background_orange</item>
+        <item name="colorOnBackground">@color/on_background_orange</item>
+        <item name="colorSurface">@color/surface_orange</item>
+        <item name="colorOnSurface">@color/on_surface_orange</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_orange</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_orange</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_orange</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_orange</item>
+        <item name="colorOutline">@color/outline_orange</item>
+        <item name="colorOutlineVariant">@color/outline_variant_orange</item>
+        <item name="colorError">@color/error_orange</item>
+        <item name="colorOnError">@color/on_error_orange</item>
+        <item name="colorErrorContainer">@color/error_container_orange</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_orange</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Pink" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_pink</item>
+        <item name="colorOnPrimary">@color/on_primary_pink</item>
+        <item name="colorPrimaryContainer">@color/primary_container_pink</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_pink</item>
+        <item name="inversePrimary">@color/inverse_primary_pink</item>
+        <item name="colorSecondary">@color/secondary_pink</item>
+        <item name="colorOnSecondary">@color/on_secondary_pink</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_pink</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_pink</item>
+        <item name="colorTertiary">@color/tertiary_pink</item>
+        <item name="colorOnTertiary">@color/on_tertiary_pink</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_pink</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_pink</item>
+        <item name="android:colorBackground">@color/background_pink</item>
+        <item name="colorOnBackground">@color/on_background_pink</item>
+        <item name="colorSurface">@color/surface_pink</item>
+        <item name="colorOnSurface">@color/on_surface_pink</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_pink</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_pink</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_pink</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_pink</item>
+        <item name="colorOutline">@color/outline_pink</item>
+        <item name="colorOutlineVariant">@color/outline_variant_pink</item>
+        <item name="colorError">@color/error_pink</item>
+        <item name="colorOnError">@color/on_error_pink</item>
+        <item name="colorErrorContainer">@color/error_container_pink</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_pink</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Retro" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_retro</item>
+        <item name="colorOnPrimary">@color/on_primary_retro</item>
+        <item name="colorPrimaryContainer">@color/primary_container_retro</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_retro</item>
+        <item name="inversePrimary">@color/inverse_primary_retro</item>
+        <item name="colorSecondary">@color/secondary_retro</item>
+        <item name="colorOnSecondary">@color/on_secondary_retro</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_retro</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_retro</item>
+        <item name="colorTertiary">@color/tertiary_retro</item>
+        <item name="colorOnTertiary">@color/on_tertiary_retro</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_retro</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_retro</item>
+        <item name="android:colorBackground">@color/background_retro</item>
+        <item name="colorOnBackground">@color/on_background_retro</item>
+        <item name="colorSurface">@color/surface_retro</item>
+        <item name="colorOnSurface">@color/on_surface_retro</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_retro</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_retro</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_retro</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_retro</item>
+        <item name="colorOutline">@color/outline_retro</item>
+        <item name="colorOutlineVariant">@color/outline_variant_retro</item>
+        <item name="colorError">@color/error_retro</item>
+        <item name="colorOnError">@color/on_error_retro</item>
+        <item name="colorErrorContainer">@color/error_container_retro</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_retro</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Teal" parent="Theme.Base">
+        <item name="colorPrimary">@color/primary_teal</item>
+        <item name="colorOnPrimary">@color/on_primary_teal</item>
+        <item name="colorPrimaryContainer">@color/primary_container_teal</item>
+        <item name="onPrimaryContainer">@color/on_primary_container_teal</item>
+        <item name="inversePrimary">@color/inverse_primary_teal</item>
+        <item name="colorSecondary">@color/secondary_teal</item>
+        <item name="colorOnSecondary">@color/on_secondary_teal</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_teal</item>
+        <item name="onSecondaryContainer">@color/on_secondary_container_teal</item>
+        <item name="colorTertiary">@color/tertiary_teal</item>
+        <item name="colorOnTertiary">@color/on_tertiary_teal</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container_teal</item>
+        <item name="onTertiaryContainer">@color/on_tertiary_container_teal</item>
+        <item name="android:colorBackground">@color/background_teal</item>
+        <item name="colorOnBackground">@color/on_background_teal</item>
+        <item name="colorSurface">@color/surface_teal</item>
+        <item name="colorOnSurface">@color/on_surface_teal</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_teal</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_teal</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface_teal</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface_teal</item>
+        <item name="colorOutline">@color/outline_teal</item>
+        <item name="colorOutlineVariant">@color/outline_variant_teal</item>
+        <item name="colorError">@color/error_teal</item>
+        <item name="colorOnError">@color/on_error_teal</item>
+        <item name="colorErrorContainer">@color/error_container_teal</item>
+        <item name="colorOnErrorContainer">@color/on_error_container_teal</item>
+    </style>
 
     <!--===============-->
     <!-- Launch Screen -->

@@ -8,7 +8,7 @@
 
     <attr name="actionBarTintColor" format="color" />
     <attr name="readerBackground" format="color" />
-    <attr name="colorOnSecondary" format="color" />
+    <attr name="colorOnSecondary" format="color" tools:ignore="PrivateResource" />
     <attr name="colorOnTertiary" format="color" tools:ignore="PrivateResource" />
     <attr name="colorTertiary" format="color" tools:ignore="PrivateResource" />
     <attr name="textAppearanceBodySecondary" format="reference" />
