@@ -12,8 +12,8 @@ enum class Themes {
     Green,
     Orange,
     Pink,
-    Red,
     Retro,
+    Brown,
     Tako,
     BlueGreen,
     Monochrome;
@@ -35,7 +35,6 @@ enum class Themes {
             this == Orange -> R.style.Theme_Tachiyomi_MangaDex
             this == BlueGreen -> R.style.Theme_Tachiyomi_SapphireDusk
             this == Purple -> R.style.Theme_Tachiyomi_Lavender
-            this == Red -> R.style.Theme_Tachiyomi_Strawberries
             this == Tako -> R.style.Theme_Tachiyomi_Tako
             this == Green -> R.style.Theme_Tachiyomi_FlatLime
             else -> R.style.Theme_Tachiyomi // DEFAULT
@@ -55,7 +54,7 @@ enum class Themes {
             this == Orange -> R.string.orange_juice
             this == BlueGreen -> R.string.teal_ocean
             this == Purple -> R.string.lavender
-            this == Red -> R.string.strawberry_daiquiri
+            this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
             this == Green -> R.string.jungle
             this == Monochrome -> R.string.monochrome
@@ -70,7 +69,6 @@ enum class Themes {
             this == Pink -> R.string.midnight_dusk
             this == BlueGreen -> R.string.sapphire_dusk
             this == Purple -> R.string.violet
-            this == Red -> R.string.chocolate_strawberries
             else -> this.nameRes()
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.theme.Typefaces.appTypography
 import org.nekomanga.presentation.theme.colorschemes.BlueGreenColorScheme
+import org.nekomanga.presentation.theme.colorschemes.BrownColorScheme
 import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonochromeColorScheme
@@ -18,7 +19,6 @@ import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
-import org.nekomanga.presentation.theme.colorschemes.RedColorScheme
 import org.nekomanga.presentation.theme.colorschemes.RetroColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import uy.kohesive.injekt.Injekt
@@ -66,7 +66,7 @@ fun colorSchemeFromTheme(
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
         Themes.Retro -> RetroColorScheme
-        Themes.Red -> RedColorScheme
+        Themes.Brown -> BrownColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme)
