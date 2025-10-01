@@ -27,7 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -240,6 +240,18 @@ fun FeedScreen(
                                 Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                     .fillMaxSize()
                         ) {
+                            if (
+                                (feedScreenState.value.feedScreenType == FeedScreenType.History &&
+                                    historyPagingScreenState.value.pageLoading) ||
+                                    (feedScreenState.value.feedScreenType ==
+                                        FeedScreenType.Updates &&
+                                        updatesPagingScreenState.value.pageLoading)
+                            ) {
+                                ContainedLoadingIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+
                             val (feedManga, hasMoreResults) =
                                 when (feedScreenType) {
                                     FeedScreenType.Summary -> {
@@ -332,13 +344,6 @@ fun FeedScreen(
                                 ScreenFooter(
                                     screenType = feedScreenType,
                                     modifier = Modifier.align(Alignment.BottomStart),
-                                    loadingMore =
-                                        if (
-                                            feedScreenState.value.feedScreenType ==
-                                                FeedScreenType.History
-                                        )
-                                            historyPagingScreenState.value.pageLoading
-                                        else updatesPagingScreenState.value.pageLoading,
                                     showDownloads = feedScreenState.value.downloads.isNotEmpty(),
                                     downloadsSelected = feedScreenState.value.showingDownloads,
                                     downloadsClicked = feedScreenActions.toggleShowingDownloads,
@@ -392,7 +397,6 @@ fun FeedScreen(
 private fun ScreenFooter(
     screenType: FeedScreenType,
     modifier: Modifier = Modifier,
-    loadingMore: Boolean,
     showDownloads: Boolean,
     downloadsSelected: Boolean,
     downloadsClicked: () -> Unit,
@@ -402,11 +406,6 @@ private fun ScreenFooter(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Size.none),
     ) {
-        if (loadingMore) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
-            )
-        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(Size.tiny),
             verticalAlignment = Alignment.CenterVertically,

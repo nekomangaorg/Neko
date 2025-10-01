@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.ui.feed.FeedManga
@@ -150,7 +153,19 @@ private fun SummaryHeader(text: String, isRefreshing: Boolean) {
             modifier = Modifier.fillMaxWidth().weight(1f).padding(),
         )
         AnimatedVisibility(isRefreshing) {
-            CircularProgressIndicator(modifier = Modifier.size(Size.large))
+            CircularWavyProgressIndicator(
+                modifier = Modifier.size(Size.large),
+                trackStroke =
+                    Stroke(
+                        width = with(LocalDensity.current) { Size.extraTiny.toPx() },
+                        cap = StrokeCap.Round,
+                    ),
+                stroke =
+                    Stroke(
+                        width = with(LocalDensity.current) { Size.extraTiny.toPx() },
+                        cap = StrokeCap.Round,
+                    ),
+            )
         }
     }
 }
