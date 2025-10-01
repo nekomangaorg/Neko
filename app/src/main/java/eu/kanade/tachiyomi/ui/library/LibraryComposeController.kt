@@ -104,6 +104,10 @@ class LibraryComposeController : BaseComposeController<LibraryComposePresenter>(
         }
     }
 
+    fun search(searchQuery: String) {
+        presenter.search(searchQuery)
+    }
+
     private fun updateCategory(category: CategoryItem, context: Context) {
         if (!LibraryUpdateJob.categoryInQueue(category.id)) {
             LibraryUpdateJob.startNow(

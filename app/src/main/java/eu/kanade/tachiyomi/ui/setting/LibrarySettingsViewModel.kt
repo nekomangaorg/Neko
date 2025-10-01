@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -23,8 +21,6 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LibrarySettingsViewModel : ViewModel() {
@@ -48,13 +44,6 @@ class LibrarySettingsViewModel : ViewModel() {
                         .map { it.toCategoryItem() }
                         .toPersistentList()
             }
-        }
-    }
-
-    fun setLibrarySearchSuggestion() {
-        launchIO {
-            val sourceManager = Injekt.get<SourceManager>()
-            LibraryPresenter.setSearchSuggestion(libraryPreferences, db, sourceManager)
         }
     }
 

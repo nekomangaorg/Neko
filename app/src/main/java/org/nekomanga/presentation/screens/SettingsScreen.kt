@@ -141,7 +141,6 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
                             libraryPreferences = vm.libraryPreferences,
-                            setLibrarySearchSuggestion = vm::setLibrarySearchSuggestion,
                             categories = vm.allCategories.collectAsState().value,
                             viewModelScope = vm.viewModelScope,
                             onAddEditCategoryClick = { backStack.add(Screens.Settings.Categories) },

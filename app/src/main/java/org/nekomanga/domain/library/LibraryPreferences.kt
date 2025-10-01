@@ -1,9 +1,7 @@
 package org.nekomanga.domain.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
-import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
@@ -67,11 +65,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             deserializer = { i -> LibraryDisplayMode.fromInt(i) },
         )
 
-    fun layoutLegacy() =
-        this.preferenceStore.getInt(
-            "pref_display_library_layout",
-            LibraryItem.LAYOUT_COMFORTABLE_GRID,
-        )
+    fun layoutLegacy() = this.preferenceStore.getInt("pref_display_library_layout", 2)
 
     fun sortingMode() = this.preferenceStore.getInt("library_sorting_mode")
 
@@ -104,9 +98,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun lastUsedCategory() = this.preferenceStore.getInt("last_used_category")
 
     fun hopperGravity() = this.preferenceStore.getInt("hopper_gravity", 1)
-
-    fun filterOrder() =
-        this.preferenceStore.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
 
     fun hopperLongPressAction() = this.preferenceStore.getInt("hopper_long_press")
 

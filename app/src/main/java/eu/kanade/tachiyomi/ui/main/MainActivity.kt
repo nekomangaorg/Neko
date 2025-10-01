@@ -72,7 +72,6 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryComposeController
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
@@ -1084,12 +1083,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        ev?.let {
-            gestureDetector?.onTouchEvent(it)
-            (router.backstack.lastOrNull()?.controller as? LibraryController)?.handleGeneralEvent(
-                it
-            )
-        }
+        ev?.let { gestureDetector?.onTouchEvent(it) }
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()

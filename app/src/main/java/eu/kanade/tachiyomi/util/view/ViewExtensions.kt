@@ -51,10 +51,6 @@ import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -70,14 +66,9 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.powerManager
-import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
-import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import eu.kanade.tachiyomi.widget.StaggeredGridLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import kotlin.math.max
-import kotlin.math.pow
-import kotlin.math.roundToInt
 import me.saket.cascade.CascadePopupMenu
 import org.nekomanga.R
 
@@ -296,48 +287,6 @@ fun MaterialButton.resetStrokeColor() {
 fun NavigationBarView.getItemView(@IdRes id: Int): NavigationBarItemView? {
     val order = (menu as MenuBuilder).findItemIndex(id)
     return (getChildAt(0) as NavigationBarMenuView).getChildAt(order) as? NavigationBarItemView
-}
-
-fun RecyclerView.smoothScrollToTop() {
-    val linearLayoutManager = layoutManager as? LinearLayoutManager
-    val staggeredLayoutManager = layoutManager as? StaggeredGridLayoutManagerAccurateOffset
-    if (linearLayoutManager != null || staggeredLayoutManager != null) {
-        val smoothScroller: SmoothScroller =
-            object : LinearSmoothScroller(context) {
-                override fun getVerticalSnapPreference(): Int {
-                    return SNAP_TO_START
-                }
-            }
-        smoothScroller.targetPosition = 0
-        val firstItemPos =
-            linearLayoutManager?.findFirstVisibleItemPosition()
-                ?: staggeredLayoutManager?.findFirstVisibleItemPosition()
-                ?: 0
-        if (firstItemPos > 15) {
-            scrollToPosition(15)
-            post {
-                linearLayoutManager?.startSmoothScroll(smoothScroller)
-                staggeredLayoutManager?.startSmoothScroll(smoothScroller)
-            }
-        } else {
-            linearLayoutManager?.startSmoothScroll(smoothScroller)
-            staggeredLayoutManager?.startSmoothScroll(smoothScroller)
-        }
-    } else {
-        scrollToPosition(0)
-    }
-}
-
-fun View.rowsForValue(value: Float) = measuredWidth.numberOfRowsForValue(value)
-
-fun Int.numberOfRowsForValue(rawValue: Float): Int {
-    val value = (rawValue / 2f) - .5f
-    val size = 1.5f.pow(value)
-    val trueSize =
-        AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) /
-            100f
-    val dpWidth = (this.pxToDp / 100f).roundToInt()
-    return max(1, (dpWidth / trueSize).roundToInt())
 }
 
 var View.compatToolTipText: CharSequence?

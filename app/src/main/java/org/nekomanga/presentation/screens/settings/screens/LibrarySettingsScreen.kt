@@ -40,7 +40,6 @@ internal class LibrarySettingsScreen(
     onNavigationIconClick: () -> Unit,
     val categories: ImmutableList<CategoryItem>,
     val viewModelScope: CoroutineScope,
-    val setLibrarySearchSuggestion: () -> Unit,
     val onAddEditCategoryClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
 
