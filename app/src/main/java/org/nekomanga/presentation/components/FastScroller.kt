@@ -80,7 +80,8 @@ fun FastScroller(
                         if (firstVisibleItem != null) {
                             val totalVisibleItemsHeight =
                                 state.layoutInfo.visibleItemsInfo.sumOf { it.size }
-                            totalVisibleItemsHeight.toFloat() / state.layoutInfo.visibleItemsInfo.size
+                            totalVisibleItemsHeight.toFloat() /
+                                state.layoutInfo.visibleItemsInfo.size
                         } else {
                             0f
                         }
@@ -88,7 +89,8 @@ fun FastScroller(
                     if (averageItemHeight == 0f) {
                         0f
                     } else {
-                        val scrolledPastItemsHeight = state.firstVisibleItemIndex * averageItemHeight
+                        val scrolledPastItemsHeight =
+                            state.firstVisibleItemIndex * averageItemHeight
                         val scrolledPastAndVisibleOffset =
                             scrolledPastItemsHeight + state.firstVisibleItemScrollOffset
                         val totalContentHeight = totalItemsCount * averageItemHeight
@@ -106,13 +108,15 @@ fun FastScroller(
         }
     }
 
-    val alpha by animateFloatAsState(
-        targetValue = if (isVisible && (isSelected || state.isScrollInProgress)) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = if (isSelected) 0 else 500,
-            delayMillis = if (isSelected) 0 else 500,
-        ),
-    )
+    val alpha by
+        animateFloatAsState(
+            targetValue = if (isVisible && (isSelected || state.isScrollInProgress)) 1f else 0f,
+            animationSpec =
+                tween(
+                    durationMillis = if (isSelected) 0 else 500,
+                    delayMillis = if (isSelected) 0 else 500,
+                ),
+        )
 
     fun scrollTo(offsetY: Float) {
         scope.launch {
@@ -127,35 +131,36 @@ fun FastScroller(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .width(thumbWidth + 16.dp)
-            .alpha(alpha)
-            .onGloballyPositioned { containerHeight = it.size.height.toFloat() }
-            .pointerInput(Unit) {
-                detectVerticalDragGestures(
-                    onDragStart = {
-                        isSelected = true
-                        scrollTo(it.y)
-                    },
-                    onDragEnd = { isSelected = false },
-                    onVerticalDrag = { change, _ ->
-                        change.consume()
-                        scrollTo(change.position.y)
-                    },
-                )
-            },
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .width(thumbWidth + 16.dp)
+                .alpha(alpha)
+                .onGloballyPositioned { containerHeight = it.size.height.toFloat() }
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onDragStart = {
+                            isSelected = true
+                            scrollTo(it.y)
+                        },
+                        onDragEnd = { isSelected = false },
+                        onVerticalDrag = { change, _ ->
+                            change.consume()
+                            scrollTo(change.position.y)
+                        },
+                    )
+                }
     ) {
         Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset { IntOffset(0, thumbOffset.roundToInt()) }
-                .height(thumbHeight.dp)
-                .width(thumbWidth)
-                .background(
-                    color = if (isSelected) thumbColor else thumbInactiveColor,
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier.align(Alignment.TopEnd)
+                    .offset { IntOffset(0, thumbOffset.roundToInt()) }
+                    .height(thumbHeight.dp)
+                    .width(thumbWidth)
+                    .background(
+                        color = if (isSelected) thumbColor else thumbInactiveColor,
+                        shape = CircleShape,
+                    )
         )
     }
 }
