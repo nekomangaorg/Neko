@@ -819,6 +819,7 @@
     <string name="dark_blue">Dark Blue</string>
     <string name="spring_blossom">Spring Blossom</string>
     <string name="chocolate">Chocolate</string>
+    <string name="nord">Nord</string>
     <string name="dynamic">Dynamic</string>
     <string name="yotsuba">Yotsuba</string>
     <string name="tako">Tako</string>
@@ -827,8 +828,7 @@
     <string name="chocolate_strawberries">Chocolate Strawberries</string>
     <string name="orange_juice">Orange Juice</string>
     <string name="teal_ocean">Teal Ocean</string>
-    <string name="lavender">Lavender</string>
-    <string name="violet">Violet</string>
+    <string name="royal">Royal</string>
     <string name="jungle">Jungle</string>
     <string name="crayon_blue">Crayon Blue</string>
     <string name="monochrome">Monochrome</string>

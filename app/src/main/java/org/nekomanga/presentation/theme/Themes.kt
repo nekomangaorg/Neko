@@ -17,6 +17,7 @@ enum class Themes {
     Brown,
     Tako,
     Teal,
+    Nord,
     Monochrome;
 
     fun isDarkTheme() = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
@@ -53,21 +54,14 @@ enum class Themes {
             this == Pink -> R.string.spring_blossom
             this == Orange -> R.string.orange_juice
             this == Teal -> R.string.teal_ocean
-            this == Purple -> R.string.lavender
+            this == Purple -> R.string.royal
             this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
+            this == Nord -> R.string.nord
             this == Green -> R.string.jungle
             this == Blue -> R.string.crayon_blue
             this == Monochrome -> R.string.monochrome
             else -> R.string.app_name // Default
-        }
-    }
-
-    @StringRes
-    fun darkNameRes(): Int {
-        return when {
-            this == Purple -> R.string.violet
-            else -> this.nameRes()
         }
     }
 }
