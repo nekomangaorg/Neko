@@ -1,0 +1,157 @@
+package org.nekomanga.presentation.components
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFirstOrNull
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+private const val SCROLL_TIMEOUT_IN_MILLIS = 3000L
+
+@Composable
+fun FastScroller(
+    lazyListState: LazyListState,
+    modifier: Modifier = Modifier,
+    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbSelectedColor: Color = MaterialTheme.colorScheme.secondary,
+    thumbWidth: Dp = 8.dp,
+    thumbMinWidth: Dp = 48.dp,
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    var isSelected by remember { mutableStateOf(false) }
+
+    var isScrolling by remember { mutableStateOf(false) }
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isScrolling) {
+        if (isScrolling) {
+            isVisible = true
+        } else {
+            delay(SCROLL_TIMEOUT_IN_MILLIS)
+            isVisible = false
+        }
+    }
+
+    val alpha by
+        animateFloatAsState(
+            targetValue = if (isVisible) 1f else 0f,
+            animationSpec =
+                tween(
+                    durationMillis = if (isVisible) 75 else 500,
+                    delayMillis = if (isVisible) 0 else 500,
+                ),
+            label = "alpha",
+        )
+
+    val realThumbColor by
+        remember(isSelected) { mutableStateOf(if (isSelected) thumbSelectedColor else thumbColor) }
+
+    val firstVisibleItemIndex by
+        remember(lazyListState) { derivedStateOf { lazyListState.firstVisibleItemIndex } }
+    val firstVisibleItemScrollOffset by
+        remember(lazyListState) { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
+
+    val itemsCount by
+        remember(lazyListState) { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
+
+    val visibleItemsCount by
+        remember(lazyListState) {
+            derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo.size }
+        }
+
+    val averageItemSize by
+        remember(lazyListState) {
+            derivedStateOf {
+                lazyListState.layoutInfo.visibleItemsInfo
+                    .fastFirstOrNull { it.index == firstVisibleItemIndex }
+                    ?.size ?: 0
+            }
+        }
+    isScrolling = lazyListState.isScrollInProgress
+
+    Box(modifier = modifier.fillMaxHeight().width(thumbWidth + (thumbWidth / 2)).alpha(alpha)) {
+        Box(
+            modifier =
+                Modifier.align(Alignment.CenterEnd)
+                    .graphicsLayer {
+                        if (itemsCount > visibleItemsCount) {
+                            val thumbHeight =
+                                (lazyListState.layoutInfo.viewportSize.height.toFloat() /
+                                    itemsCount) * visibleItemsCount
+                            this.translationY =
+                                (firstVisibleItemIndex.toFloat() /
+                                    (itemsCount - visibleItemsCount)) *
+                                    (lazyListState.layoutInfo.viewportSize.height - thumbHeight) +
+                                    (firstVisibleItemScrollOffset.toFloat() / averageItemSize)
+                            this.scaleY =
+                                (thumbHeight / lazyListState.layoutInfo.viewportSize.height)
+                                    .coerceIn(
+                                        thumbMinWidth.value /
+                                            lazyListState.layoutInfo.viewportSize.height,
+                                        1f,
+                                    )
+                        }
+                    }
+                    .width(thumbWidth)
+                    .background(color = realThumbColor, shape = MaterialTheme.shapes.extraSmall)
+                    .draggable(
+                        state =
+                            rememberDraggableState { delta ->
+                                if (isSelected) {
+                                    coroutineScope.launch {
+                                        val currentY =
+                                            (firstVisibleItemIndex.toFloat() /
+                                                (itemsCount - visibleItemsCount)) *
+                                                (lazyListState.layoutInfo.viewportSize.height) +
+                                                (firstVisibleItemScrollOffset.toFloat() /
+                                                    averageItemSize)
+
+                                        val itemsLeft = itemsCount - visibleItemsCount
+                                        if (itemsLeft > 0) {
+                                            val scrollBy =
+                                                (delta /
+                                                    lazyListState.layoutInfo.viewportSize.height) *
+                                                    itemsLeft
+                                            lazyListState.scrollToItem(
+                                                (scrollBy + firstVisibleItemIndex)
+                                                    .toInt()
+                                                    .coerceIn(0, itemsLeft)
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                        orientation = Orientation.Vertical,
+                        startDragImmediately = true,
+                        onDragStarted = { isSelected = true },
+                        onDragStopped = { isSelected = false },
+                    )
+        )
+    }
+}
