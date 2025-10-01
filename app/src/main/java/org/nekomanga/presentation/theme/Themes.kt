@@ -15,7 +15,8 @@ enum class Themes {
     Red,
     Retro,
     Tako,
-    BlueGreen;
+    BlueGreen,
+    Monochrome;
 
     fun isDarkTheme() = nightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
@@ -57,6 +58,7 @@ enum class Themes {
             this == Red -> R.string.strawberry_daiquiri
             this == Tako -> R.string.tako
             this == Green -> R.string.jungle
+            this == Monochrome -> R.string.monochrome
             else -> R.string.app_name // Default
         }
     }

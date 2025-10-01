@@ -13,6 +13,7 @@ import org.nekomanga.presentation.theme.Typefaces.appTypography
 import org.nekomanga.presentation.theme.colorschemes.BlueGreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
+import org.nekomanga.presentation.theme.colorschemes.MonochromeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
@@ -60,6 +61,7 @@ fun colorSchemeFromTheme(
         Themes.BlueGreen -> BlueGreenColorScheme
         Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(context)
+        Themes.Monochrome -> MonochromeColorScheme
         Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
