@@ -159,8 +159,6 @@ dependencies {
     // UI
     implementation(libs.bundles.fastadapter)
 
-    implementation(libs.bundles.flexibleadapter)
-
     implementation(libs.photoView)
     implementation(libs.viewTooltip)
     implementation(libs.taptargetview)
