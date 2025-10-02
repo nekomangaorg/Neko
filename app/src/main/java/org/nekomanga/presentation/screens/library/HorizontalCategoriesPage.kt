@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -42,6 +45,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
+import org.nekomanga.presentation.components.FastScroller
 import org.nekomanga.presentation.components.MangaGridItem
 import org.nekomanga.presentation.components.MangaRow
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -149,52 +153,62 @@ fun HorizontalCategoriesPage(
                                 },
                             )
                         }
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(columns),
-                            modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
-                            horizontalArrangement = Arrangement.spacedBy(Size.small),
-                            contentPadding =
-                                PaddingValues(
-                                    bottom = contentPadding.calculateBottomPadding(),
-                                    top = Size.small,
-                                ),
-                        ) {
-                            items(items = item.libraryItems, key = { it.displayManga.mangaId }) {
-                                libraryItem ->
-                                MangaGridItem(
-                                    displayManga = libraryItem.displayManga,
-                                    showUnreadBadge = libraryScreenState.showUnreadBadges,
-                                    unreadCount = libraryItem.unreadCount,
-                                    showDownloadBadge = libraryScreenState.showDownloadBadges,
-                                    downloadCount = libraryItem.downloadCount,
-                                    shouldOutlineCover = libraryScreenState.outlineCovers,
-                                    isComfortable =
-                                        libraryScreenState.libraryDisplayMode
-                                            is LibraryDisplayMode.ComfortableGrid,
-                                    isSelected =
-                                        selectedIds.contains(libraryItem.displayManga.mangaId),
-                                    showStartReadingButton =
-                                        libraryScreenState.showStartReadingButton &&
-                                            libraryItem.unreadCount > 0,
-                                    onStartReadingClick = {
-                                        libraryScreenActions.mangaStartReadingClick(
-                                            libraryItem.displayManga.mangaId
-                                        )
-                                    },
-                                    onClick = {
-                                        if (libraryScreenState.selectedItems.isNotEmpty()) {
-                                            libraryScreenActions.mangaLongClick(libraryItem)
-                                        } else {
-                                            libraryScreenActions.mangaClick(
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            val lazyGridState = rememberLazyGridState()
+                            LazyVerticalGrid(
+                                state = lazyGridState,
+                                columns = GridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
+                                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                                contentPadding =
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding(),
+                                        top = Size.small,
+                                    ),
+                            ) {
+                                items(
+                                    items = item.libraryItems,
+                                    key = { it.displayManga.mangaId },
+                                ) { libraryItem ->
+                                    MangaGridItem(
+                                        displayManga = libraryItem.displayManga,
+                                        showUnreadBadge = libraryScreenState.showUnreadBadges,
+                                        unreadCount = libraryItem.unreadCount,
+                                        showDownloadBadge = libraryScreenState.showDownloadBadges,
+                                        downloadCount = libraryItem.downloadCount,
+                                        shouldOutlineCover = libraryScreenState.outlineCovers,
+                                        isComfortable =
+                                            libraryScreenState.libraryDisplayMode
+                                                is LibraryDisplayMode.ComfortableGrid,
+                                        isSelected =
+                                            selectedIds.contains(libraryItem.displayManga.mangaId),
+                                        showStartReadingButton =
+                                            libraryScreenState.showStartReadingButton &&
+                                                libraryItem.unreadCount > 0,
+                                        onStartReadingClick = {
+                                            libraryScreenActions.mangaStartReadingClick(
                                                 libraryItem.displayManga.mangaId
                                             )
-                                        }
-                                    },
-                                    onLongClick = {
-                                        libraryScreenActions.mangaLongClick(libraryItem)
-                                    },
-                                )
+                                        },
+                                        onClick = {
+                                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                                                libraryScreenActions.mangaLongClick(libraryItem)
+                                            } else {
+                                                libraryScreenActions.mangaClick(
+                                                    libraryItem.displayManga.mangaId
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            libraryScreenActions.mangaLongClick(libraryItem)
+                                        },
+                                    )
+                                }
                             }
+                            FastScroller(
+                                lazyGridState = lazyGridState,
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                            )
                         }
                     }
                 }
@@ -244,25 +258,34 @@ fun HorizontalCategoriesPage(
                                 },
                             )
                         }
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding =
-                                PaddingValues(bottom = contentPadding.calculateBottomPadding()),
-                        ) {
-                            itemsIndexed(
-                                items = item.libraryItems,
-                                key = { _, libraryItem -> libraryItem.displayManga.mangaId },
-                            ) { index, libraryItem ->
-                                ListItem(
-                                    index = index,
-                                    totalSize = item.libraryItems.size,
-                                    selectedIds = selectedIds,
-                                    libraryScreenState = libraryScreenState,
-                                    libraryItem = libraryItem,
-                                    libraryScreenActions = libraryScreenActions,
-                                )
-                                Gap(Size.tiny)
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            val lazyListState = rememberLazyListState()
+
+                            LazyColumn(
+                                state = lazyListState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
+                                    key = { _, libraryItem -> libraryItem.displayManga.mangaId },
+                                ) { index, libraryItem ->
+                                    ListItem(
+                                        index = index,
+                                        totalSize = item.libraryItems.size,
+                                        selectedIds = selectedIds,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryItem = libraryItem,
+                                        libraryScreenActions = libraryScreenActions,
+                                    )
+                                    Gap(Size.tiny)
+                                }
                             }
+                            FastScroller(
+                                lazyListState = lazyListState,
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                            )
                         }
                     }
                 }
