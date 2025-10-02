@@ -15,7 +15,6 @@
 
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
     <color name="divider">@color/md_white_1000_12</color>
-    <color name="holo_red">#cc4444</color>
     <color name="background">#292929</color>
     <color name="gray_button">#BFBFBF</color>
 
@@ -55,18 +54,6 @@
     <color name="colorOnBackgroundDuskDawn">@color/md_white_1000</color>
     <color name="appBarTextDuskDawn">@color/md_white_1000</color>
 
-    <!-- Teal/Sapphire Theme -->
-    <color name="secondaryTealSapphire">#589ab8</color>
-    <color name="rippleColorTealSapphire">#1F589ab8</color>
-    <color name="secondaryVariantTealSapphire">#b5ebff</color>
-    <color name="primaryTealSapphire">#80b8d1</color>
-    <color name="primaryInverseTealSapphire">#1d698b</color>
-    <color name="primaryVariantTealSapphire">#1d2528</color>
-    <color name="onPrimaryTealSapphire">#02212C</color>
-    <color name="backgroundTealSapphire">#14191b</color>
-    <color name="colorOnBackgroundTealSapphire">@color/md_white_1000</color>
-    <color name="tabBarIconColorTealSapphire">#589ab8</color>
-    <color name="appBarTextTealSapphire">@color/md_white_1000</color>
 
     <color name="primaryVariantMangaDex">#212121</color>
 

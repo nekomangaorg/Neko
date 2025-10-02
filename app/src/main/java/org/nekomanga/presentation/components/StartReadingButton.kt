@@ -1,0 +1,58 @@
+package org.nekomanga.presentation.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
+
+@Composable
+fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () -> Unit) {
+    Box(
+        modifier =
+            modifier
+                .padding(Size.extraTiny)
+                .clip(
+                    shape =
+                        RoundedCornerShape(
+                            topStart = Size.tiny,
+                            bottomStart = Size.tiny,
+                            bottomEnd = Size.tiny,
+                            topEnd = Shapes.coverRadius,
+                        )
+                )
+                .clickable(onClick = onStartReadingClick)
+                .border(
+                    width = Outline.thickness,
+                    color = Outline.color,
+                    shape =
+                        RoundedCornerShape(
+                            topStart = Size.tiny,
+                            bottomStart = Size.tiny,
+                            bottomEnd = Size.tiny,
+                            topEnd = Shapes.coverRadius,
+                        ),
+                )
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .size(Size.extraLarge)
+    ) {
+        Icon(
+            modifier = Modifier.align(Alignment.Center).size(Size.large),
+            imageVector = Icons.AutoMirrored.Default.MenuBook,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    }
+}
