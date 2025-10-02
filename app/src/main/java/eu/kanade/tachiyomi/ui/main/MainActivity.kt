@@ -407,10 +407,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     }
                 outContent.webUri = Uri.parse(url)
             }
-        /* is BrowseSourceController -> {
-            val source = controller.presenter.source
-            outContent.webUri = Uri.parse(source.baseUrl)
-        }*/
         }
     }
 
@@ -523,38 +519,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         reEnableBackPressedCallBack()
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
         nav.isVisible = !hideBottomNav
-        /*
-                    updateControllersWithSideNavChanges(from)
-        */
         nav.alpha = 1f
     }
 
-    /*private fun updateControllersWithSideNavChanges(extraController: Controller? = null) {
-        if (!isBindingInitialized || !this::router.isInitialized || this is SearchActivity) return
-        binding.sideNav?.let { sideNav ->
-            val controllers =
-                (router.backstack.map { it?.controller } + extraController)
-                    .filterNotNull()
-                    .filterNot { it is BrowseController }
-                    .filterNot { it is FeedController }
-                    .filterNot { it is LibraryController }
-                    .distinct()
-            val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
-            controllers.forEach { controller ->
-                val isRootController = controller is RootSearchInterface
-                if (controller.view?.layoutParams !is ViewGroup.MarginLayoutParams) return@forEach
-                controller.view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    marginStart =
-                        if (sideNav.isVisible) {
-                            if (isRootController) 0 else -navWidth
-                        } else {
-                            if (isRootController) navWidth else 0
-                        }
-                }
-            }
-        }
-    }
-    */
 
     fun isSideNavigation(): Boolean {
         return binding.bottomNav == null
