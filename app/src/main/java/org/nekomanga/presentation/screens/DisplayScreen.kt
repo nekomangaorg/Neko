@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -31,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -39,7 +39,6 @@ import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
@@ -142,12 +141,7 @@ fun DisplayScreen(
 
                 if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Loading(
-                            Modifier.zIndex(1f)
-                                .padding(Size.small)
-                                .padding(top = contentPadding.calculateTopPadding())
-                                .align(Alignment.TopCenter)
-                        )
+                        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 } else if (displayScreenState.value.error != null) {
                     EmptyScreen(

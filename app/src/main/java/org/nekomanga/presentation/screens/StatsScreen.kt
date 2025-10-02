@@ -89,7 +89,7 @@ fun StatsScreen(
                 statsState.value.screenState is Loading ||
                     (statsState.value.screenState is Detailed && detailedState.value.isLoading)
             ) {
-                LoadingScreen(incomingPaddingValues)
+                LoadingScreen()
             } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
                 EmptyScreen(
                     message = UiText.StringResource(resourceId = R.string.unable_to_generate_stats),

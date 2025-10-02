@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +40,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
@@ -53,7 +53,6 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.FooterFilterChip
-import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -250,12 +249,7 @@ fun BrowseScreen(
                                 .fillMaxSize()
                     ) {
                         if (browseScreenState.value.initialLoading) {
-                            Loading(
-                                Modifier.zIndex(1f)
-                                    .padding(Size.small)
-                                    .padding(recyclerContentPadding)
-                                    .align(Alignment.TopCenter)
-                            )
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                         } else if (browseScreenState.value.error != null) {
                             EmptyScreen(
                                 message = browseScreenState.value.error!!,
