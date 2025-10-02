@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="retro_colorPrimary">#FF60D6FF</color>
+    <color name="retro_colorOnPrimary">#FF00415A</color>
+    <color name="retro_colorPrimaryContainer">#FF00668A</color>
+    <color name="retro_colorOnPrimaryContainer">#FFF4FAFF</color>
+    <color name="retro_colorPrimaryInverse">#FF60D6FF</color>
+    <color name="retro_colorSecondary">#FFFF00DD</color>
+    <color name="retro_colorOnSecondary">#FFFFFFFF</color>
+    <color name="retro_colorSecondaryContainer">#FFED80FF</color>
+    <color name="retro_colorOnSecondaryContainer">#FF00415A</color>
+    <color name="retro_colorTertiary">#FFFFD6F1</color>
+    <color name="retro_colorOnTertiary">#FF733F5A</color>
+    <color name="retro_colorTertiaryContainer">#FF904F75</color>
+    <color name="retro_colorOnTertiaryContainer">#FFF7F9FF</color>
+    <color name="retro_colorBackground">#FFF7F9FF</color>
+    <color name="retro_colorOnBackground">#FF00101C</color>
+    <color name="retro_colorSurface">#FFF7F9FF</color>
+    <color name="retro_colorOnSurface">#FF00101C</color>
+    <color name="retro_colorSurfaceVariant">#FFCBE6FF</color>
+    <color name="retro_colorOnSurfaceVariant">#FF3C6380</color>
+    <color name="retro_colorOutline">#FF597F9D</color>
+    <color name="retro_colorError">#FFAC3434</color>
+    <color name="retro_colorOnError">#FFF7F6FF</color>
+</resources>

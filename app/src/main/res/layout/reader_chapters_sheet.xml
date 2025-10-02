@@ -28,7 +28,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/chapters_button"
@@ -45,7 +45,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_format_list_numbered_24dp"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/comments_button"
@@ -62,7 +62,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_view_comments_24p"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/webview_button"
@@ -79,7 +79,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_open_in_webview_24dp"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/reading_mode"
@@ -96,7 +96,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_reader_default_24dp"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/rotation_sheet_button"
@@ -114,7 +114,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_screen_rotation_24dp"
-            app:tint="?actionBarTintColor"
+            app:tint="?colorPrimary"
             tools:visibility="visible" />
 
         <ImageButton
@@ -133,7 +133,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/anim_crop_to_free"
-            app:tint="?actionBarTintColor"
+            app:tint="?colorPrimary"
             tools:visibility="visible" />
 
         <ImageButton
@@ -152,7 +152,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_palette"
-            app:tint="?actionBarTintColor"
+            app:tint="?colorPrimary"
             tools:visibility="visible" />
 
         <ImageButton
@@ -170,7 +170,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_book_open_variant_24dp"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
 
         <ImageButton
             android:id="@+id/shift_page_button"
@@ -188,7 +188,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_page_next_outline_24dp"
-            app:tint="?actionBarTintColor"
+            app:tint="?colorPrimary"
             tools:visibility="visible" />
 
         <ImageButton
@@ -205,7 +205,7 @@
             app:layout_constraintStart_toEndOf="@id/shift_page_button"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_tune_24dp"
-            app:tint="?actionBarTintColor" />
+            app:tint="?colorPrimary" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

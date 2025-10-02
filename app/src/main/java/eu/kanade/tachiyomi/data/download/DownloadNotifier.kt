@@ -68,7 +68,7 @@ internal class DownloadNotifier(private val context: Context) {
                 clearActions()
                 // Open download manager when clicked
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-                color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
+                color = ContextCompat.getColor(context, R.color.colorSecondary)
                 isDownloading = true
                 // Pause action
                 addAction(

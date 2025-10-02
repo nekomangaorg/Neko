@@ -41,7 +41,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/previous_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-        app:tint="?actionBarTintColor"
+        app:tint="?colorPrimary"
         app:srcCompat="@drawable/ic_skip_previous_24" />
 
     <LinearLayout
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="?actionBarTintColor"
+            android:textColor="?colorPrimary"
             android:textSize="15sp"
             tools:text="1-2" />
 
@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="?actionBarTintColor"
+            android:textColor="?colorPrimary"
             android:textSize="15sp"
             tools:text="15" />
 
@@ -99,7 +99,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/next_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-        app:tint="?actionBarTintColor"
+        app:tint="?colorPrimary"
         app:srcCompat="@drawable/ic_skip_next_24" />
 
     <ProgressBar

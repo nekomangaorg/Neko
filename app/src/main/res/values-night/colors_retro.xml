@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This file contains the subset of 22 color resources for the Retro Color Scheme in Dark Mode (values-night/) -->
+
+<resources>
+    <!-- Core Colors -->
+    <color name="retro_colorPrimary">#FFFFB5C7</color>
+    <color name="retro_colorOnPrimary">#FF6F2A41</color>
+    <color name="retro_colorPrimaryContainer">#FFFEA0BA</color>
+    <color name="retro_colorOnPrimaryContainer">#FF632138</color>
+    <color name="retro_colorPrimaryInverse">#FF92475E</color>
+    <color name="retro_colorSecondary">#FFCEBFEF</color>
+    <color name="retro_colorOnSecondary">#FF453A62</color>
+    <color name="retro_colorSecondaryContainer">#FF2A1F45</color>
+    <color name="retro_colorOnSecondaryContainer">#FFAA9DCB</color>
+    <color name="retro_colorTertiary">#FFE5D2FF</color>
+    <color name="retro_colorOnTertiary">#FF564377</color>
+    <color name="retro_colorTertiaryContainer">#FFD9C1FE</color>
+    <color name="retro_colorOnTertiaryContainer">#FF4D3A6D</color>
+    <color name="retro_colorBackground">#FF120139</color>
+    <color name="retro_colorOnBackground">#FFEBE1FF</color>
+    <color name="retro_colorSurface">#FF120139</color>
+    <color name="retro_colorOnSurface">#FFEBE1FF</color>
+    <color name="retro_colorSurfaceVariant">#FF2C0078</color>
+    <color name="retro_colorOnSurfaceVariant">#FF9D81F0</color>
+    <color name="retro_colorOutline">#FF7E63CF</color>
+    <color name="retro_colorError">#FFFD6F85</color>
+    <color name="retro_colorOnError">#FF490013</color>
+</resources>

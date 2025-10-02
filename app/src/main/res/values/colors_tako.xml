@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="tako_colorPrimary">#FF66577E</color>
+    <color name="tako_colorOnPrimary">#FFF3B375</color>
+    <color name="tako_colorPrimaryContainer">#FF66577E</color>
+    <color name="tako_colorOnPrimaryContainer">#FFF3B375</color>
+    <color name="tako_colorPrimaryInverse">#FFD6BAFF</color>
+    <color name="tako_colorSecondary">#FF66577E</color>
+    <color name="tako_colorOnSecondary">#FFF3B375</color>
+    <color name="tako_colorSecondaryContainer">#FFC8BED0</color>
+    <color name="tako_colorOnSecondaryContainer">#FF66577E</color>
+    <color name="tako_colorTertiary">#FFF3B375</color>
+    <color name="tako_colorOnTertiary">#FF574360</color>
+    <color name="tako_colorTertiaryContainer">#FFFDD6B0</color>
+    <color name="tako_colorOnTertiaryContainer">#FF221437</color>
+    <color name="tako_colorBackground">#FFF7F5FF</color>
+    <color name="tako_colorOnBackground">#FF1B1B22</color>
+    <color name="tako_colorSurface">#FFF7F5FF</color>
+    <color name="tako_colorOnSurface">#FF1B1B22</color>
+    <color name="tako_colorSurfaceVariant">#FFE8E0EB</color>
+    <color name="tako_colorOnSurfaceVariant">#FF49454E</color>
+    <color name="tako_colorOutline">#FF7A757E</color>
+    <color name="tako_colorError">#FFB3261E</color>
+    <color name="tako_colorOnError">#FFFFFFFF</color>
+</resources>

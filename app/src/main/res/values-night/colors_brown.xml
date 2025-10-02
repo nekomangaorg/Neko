@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brown_colorPrimary">#ECB8B4</color>
+    <color name="brown_colorOnPrimary">#3A1A17</color>
+    <color name="brown_colorPrimaryContainer">#50312B</color>
+    <color name="brown_colorOnPrimaryContainer">#FFDAD4</color>
+    <color name="brown_colorPrimaryInverse">#674840</color>
+    <color name="brown_colorSecondary">#FF8B9C</color>
+    <color name="brown_colorOnSecondary">#67001C</color>
+    <color name="brown_colorSecondaryContainer">#8E0627</color>
+    <color name="brown_colorOnSecondaryContainer">#FFDAD9</color>
+    <color name="brown_colorTertiary">#D0C8B8</color>
+    <color name="brown_colorOnTertiary">#383125</color>
+    <color name="brown_colorTertiaryContainer">#4F483A</color>
+    <color name="brown_colorOnTertiaryContainer">#EDE4DB</color>
+    <color name="brown_colorBackground">#2A2220</color>
+    <color name="brown_colorOnBackground">#FBECEB</color>
+    <color name="brown_colorSurface">#2A2220</color>
+    <color name="brown_colorOnSurface">#FBECEB</color>
+    <color name="brown_colorSurfaceVariant">#5C4F4B</color>
+    <color name="brown_colorOnSurfaceVariant">#D7C1C1</color>
+    <color name="brown_colorOutline">#9F8D8D</color>
+    <color name="brown_colorError">#FFB4AB</color>
+    <color name="brown_colorOnError">#690005</color>
+</resources>

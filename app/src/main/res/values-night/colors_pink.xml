@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pink_colorPrimary">#FF46A2</color>
+    <color name="pink_colorOnPrimary">#670034</color>
+    <color name="pink_colorPrimaryContainer">#9E0054</color>
+    <color name="pink_colorOnPrimaryContainer">#FFD9E2</color>
+    <color name="pink_colorPrimaryInverse">#C8006A</color>
+    <color name="pink_colorSecondary">#FF69B4</color>
+    <color name="pink_colorOnSecondary">#530031</color>
+    <color name="pink_colorSecondaryContainer">#910057</color>
+    <color name="pink_colorOnSecondaryContainer">#FFD9E4</color>
+    <color name="pink_colorTertiary">#FFB0D2</color>
+    <color name="pink_colorOnTertiary">#5E0D36</color>
+    <color name="pink_colorTertiaryContainer">#7A274E</color>
+    <color name="pink_colorOnTertiaryContainer">#FFD9E8</color>
+    <color name="pink_colorBackground">#1D1A1B</color>
+    <color name="pink_colorOnBackground">#E7E0E1</color>
+    <color name="pink_colorSurface">#1D1A1B</color>
+    <color name="pink_colorOnSurface">#E7E0E1</color>
+    <color name="pink_colorSurfaceVariant">#514347</color>
+    <color name="pink_colorOnSurfaceVariant">#D5C2C7</color>
+    <color name="pink_colorOutline">#9F8D91</color>
+    <color name="pink_colorError">#FFB4AB</color>
+    <color name="pink_colorOnError">#690005</color>
+</resources>

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
+import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.RectF
 import androidx.annotation.StringRes
@@ -8,15 +9,15 @@ import org.nekomanga.R
 abstract class ViewerNavigation {
 
     sealed class NavigationRegion(@param:StringRes val nameRes: Int, val colorRes: Int) {
-        object MENU : NavigationRegion(R.string.menu, R.color.navigation_menu)
+        object MENU : NavigationRegion(R.string.menu, Color.argb(0xCC, 0x95, 0x81, 0x8D))
 
-        object PREV : NavigationRegion(R.string.previous, R.color.navigation_prev)
+        object PREV : NavigationRegion(R.string.previous, Color.argb(0xCC, 0xFF, 0x77, 0x33))
 
-        object NEXT : NavigationRegion(R.string.next, R.color.navigation_next)
+        object NEXT : NavigationRegion(R.string.next, Color.argb(0xCC, 0x84, 0xE2, 0x96))
 
-        object LEFT : NavigationRegion(R.string.left, R.color.navigation_next)
+        object LEFT : NavigationRegion(R.string.left, Color.argb(0xCC, 0x7D, 0x11, 0x28))
 
-        object RIGHT : NavigationRegion(R.string.right, R.color.navigation_prev)
+        object RIGHT : NavigationRegion(R.string.right, Color.argb(0xCC, 0xA6, 0xCF, 0xD5))
 
         fun directionalRegion(LTR: Boolean): NavigationRegion {
             return if (this === LEFT || this === RIGHT) {

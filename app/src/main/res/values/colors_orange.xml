@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="orange_colorPrimary">#FF6740</color>
+    <color name="orange_colorOnPrimary">#000000</color>
+    <color name="orange_colorPrimaryContainer">#FF8463</color>
+    <color name="orange_colorOnPrimaryContainer">#000000</color>
+    <color name="orange_colorPrimaryInverse">#FFB4A2</color>
+    <color name="orange_colorSecondary">#FF6740</color>
+    <color name="orange_colorOnSecondary">#000000</color>
+    <color name="orange_colorSecondaryContainer">#FF8463</color>
+    <color name="orange_colorOnSecondaryContainer">#000000</color>
+    <color name="orange_colorTertiary">#FF6840</color>
+    <color name="orange_colorOnTertiary">#FFFFFF</color>
+    <color name="orange_colorTertiaryContainer">#FF8463</color>
+    <color name="orange_colorOnTertiaryContainer">#FFFFFF</color>
+    <color name="orange_colorBackground">#FFF8F6</color>
+    <color name="orange_colorOnBackground">#373130</color>
+    <color name="orange_colorSurface">#FFF8F6</color>
+    <color name="orange_colorOnSurface">#373130</color>
+    <color name="orange_colorSurfaceVariant">#EBE0DE</color>
+    <color name="orange_colorOnSurfaceVariant">#655D5C</color>
+    <color name="orange_colorOutline">#817977</color>
+    <color name="orange_colorError">#9E3F4E</color>
+    <color name="orange_colorOnError">#FFF7F7</color>
+</resources>
