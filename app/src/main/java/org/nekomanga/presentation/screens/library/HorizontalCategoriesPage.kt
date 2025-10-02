@@ -158,7 +158,8 @@ fun HorizontalCategoriesPage(
                             LazyVerticalGrid(
                                 state = lazyGridState,
                                 columns = GridCells.Fixed(columns),
-                                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
+                                modifier =
+                                    Modifier.fillMaxSize().padding(horizontal = Size.small),
                                 horizontalArrangement = Arrangement.spacedBy(Size.small),
                                 contentPadding =
                                     PaddingValues(
@@ -168,7 +169,7 @@ fun HorizontalCategoriesPage(
                             ) {
                                 items(
                                     items = item.libraryItems,
-                                    key = { it.displayManga.mangaId },
+                                    key = { it.displayManga.mangaId }
                                 ) { libraryItem ->
                                     MangaGridItem(
                                         displayManga = libraryItem.displayManga,
@@ -207,7 +208,7 @@ fun HorizontalCategoriesPage(
                             }
                             FastScroller(
                                 lazyGridState = lazyGridState,
-                                modifier = Modifier.align(Alignment.CenterEnd),
+                                modifier = Modifier.align(Alignment.CenterEnd)
                             )
                         }
                     }
@@ -265,7 +266,9 @@ fun HorizontalCategoriesPage(
                                 state = lazyListState,
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding()
+                                    ),
                             ) {
                                 itemsIndexed(
                                     items = item.libraryItems,

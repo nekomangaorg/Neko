@@ -42,7 +42,6 @@ fun FastScroller(
     thumbMinWidth: Dp = 48.dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
-
     var isSelected by remember { mutableStateOf(false) }
 
     val isScrolling by remember { derivedStateOf { lazyListState.isScrollInProgress } }
@@ -72,27 +71,25 @@ fun FastScroller(
     val realThumbColor by
         remember(isSelected) { mutableStateOf(if (isSelected) thumbSelectedColor else thumbColor) }
 
-    val firstVisibleItemIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
-    val firstVisibleItemScrollOffset by remember {
-        derivedStateOf { lazyListState.firstVisibleItemScrollOffset }
-    }
-
-    val itemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
-
-    val visibleItemsCount by remember {
-        derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo.size }
-    }
-
-    val averageItemSize by remember {
-        derivedStateOf {
-            val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) {
-                0
-            } else {
-                visibleItems.sumOf { it.size } / visibleItems.size
+    val firstVisibleItemIndex by
+        remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
+    val firstVisibleItemScrollOffset by
+        remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
+    val itemsCount by
+        remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
+    val visibleItemsCount by
+        remember { derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo.size } }
+    val averageItemSize by
+        remember {
+            derivedStateOf {
+                val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
+                if (visibleItems.isEmpty()) {
+                    0
+                } else {
+                    visibleItems.sumOf { it.size } / visibleItems.size
+                }
             }
         }
-    }
 
     Box(modifier = modifier.fillMaxHeight().width(thumbWidth + (thumbWidth / 2)).alpha(alpha)) {
         Box(
@@ -101,8 +98,8 @@ fun FastScroller(
                     .graphicsLayer {
                         if (itemsCount > visibleItemsCount) {
                             val thumbHeight =
-                                (lazyListState.layoutInfo.viewportSize.height.toFloat() /
-                                    itemsCount) * visibleItemsCount
+                                (lazyListState.layoutInfo.viewportSize.height.toFloat() / itemsCount) *
+                                    visibleItemsCount
 
                             val scrollOffset =
                                 if (averageItemSize != 0) {
@@ -112,17 +109,14 @@ fun FastScroller(
                                 }
 
                             this.translationY =
-                                (firstVisibleItemIndex.toFloat() /
-                                    (itemsCount - visibleItemsCount)) *
+                                (firstVisibleItemIndex.toFloat() / (itemsCount - visibleItemsCount)) *
                                     (lazyListState.layoutInfo.viewportSize.height - thumbHeight) +
                                     scrollOffset
                             this.scaleY =
-                                (thumbHeight / lazyListState.layoutInfo.viewportSize.height)
-                                    .coerceIn(
-                                        thumbMinWidth.value /
-                                            lazyListState.layoutInfo.viewportSize.height,
-                                        1f,
-                                    )
+                                (thumbHeight / lazyListState.layoutInfo.viewportSize.height).coerceIn(
+                                    thumbMinWidth.value / lazyListState.layoutInfo.viewportSize.height,
+                                    1f,
+                                )
                         }
                     }
                     .width(thumbWidth)
@@ -135,13 +129,12 @@ fun FastScroller(
                                         val itemsLeft = itemsCount - visibleItemsCount
                                         if (itemsLeft > 0) {
                                             val scrollBy =
-                                                (delta /
-                                                    lazyListState.layoutInfo.viewportSize.height) *
+                                                (delta / lazyListState.layoutInfo.viewportSize.height) *
                                                     itemsLeft
                                             lazyListState.scrollToItem(
                                                 (scrollBy + firstVisibleItemIndex)
                                                     .toInt()
-                                                    .coerceIn(0, itemsLeft)
+                                                    .coerceIn(0, itemsLeft),
                                             )
                                         }
                                     }
@@ -151,7 +144,7 @@ fun FastScroller(
                         startDragImmediately = true,
                         onDragStarted = { isSelected = true },
                         onDragStopped = { isSelected = false },
-                    )
+                    ),
         )
     }
 }
@@ -196,27 +189,30 @@ fun FastScroller(
     val realThumbColor by
         remember(isSelected) { mutableStateOf(if (isSelected) thumbSelectedColor else thumbColor) }
 
-    val firstVisibleItemIndex by remember { derivedStateOf { lazyGridState.firstVisibleItemIndex } }
-    val firstVisibleItemScrollOffset by remember {
-        derivedStateOf { lazyGridState.firstVisibleItemScrollOffset }
-    }
+    val firstVisibleItemIndex by
+        remember { derivedStateOf { lazyGridState.firstVisibleItemIndex } }
+    val firstVisibleItemScrollOffset by
+        remember { derivedStateOf { lazyGridState.firstVisibleItemScrollOffset } }
 
-    val itemsCount by remember { derivedStateOf { lazyGridState.layoutInfo.totalItemsCount } }
+    val itemsCount by
+        remember { derivedStateOf { lazyGridState.layoutInfo.totalItemsCount } }
 
-    val visibleItemsCount by remember {
-        derivedStateOf { lazyGridState.layoutInfo.visibleItemsInfo.size }
-    }
+    val visibleItemsCount by
+        remember {
+            derivedStateOf { lazyGridState.layoutInfo.visibleItemsInfo.size }
+        }
 
-    val averageItemSize by remember {
-        derivedStateOf {
-            val visibleItems = lazyGridState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) {
-                0
-            } else {
-                visibleItems.sumOf { it.size.height } / visibleItems.size
+    val averageItemSize by
+        remember {
+            derivedStateOf {
+                val visibleItems = lazyGridState.layoutInfo.visibleItemsInfo
+                if (visibleItems.isEmpty()) {
+                    0
+                } else {
+                    visibleItems.sumOf { it.size.height } / visibleItems.size
+                }
             }
         }
-    }
 
     Box(modifier = modifier.fillMaxHeight().width(thumbWidth + (thumbWidth / 2)).alpha(alpha)) {
         Box(
@@ -265,7 +261,7 @@ fun FastScroller(
                                             lazyGridState.scrollToItem(
                                                 (scrollBy + firstVisibleItemIndex)
                                                     .toInt()
-                                                    .coerceIn(0, itemsLeft)
+                                                    .coerceIn(0, itemsLeft),
                                             )
                                         }
                                     }
@@ -275,7 +271,7 @@ fun FastScroller(
                         startDragImmediately = true,
                         onDragStarted = { isSelected = true },
                         onDragStopped = { isSelected = false },
-                    )
+                    ),
         )
     }
 }

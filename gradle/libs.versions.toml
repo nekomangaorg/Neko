@@ -119,10 +119,6 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 
 #test libs
 junit = "junit:junit:4.13.2"
-junit-bom = { module = "org.junit:junit-bom", version = "5.10.2" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 mockk = "io.mockk:mockk:1.14.6"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.3"
 viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
@@ -144,7 +140,7 @@ iconics = ["iconics-core", "iconics-views", "iconics-compose"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
-tests = ["junit", "mockk", "kotest-assertions", "junit-jupiter-api", "junit-jupiter-engine", "junit-platform-launcher"]
+tests = ["junit", "mockk", "kotest-assertions"]
 retrofit = ["retrofit-core", "retrofit-serialization", "retrofit-scalars"]
 results = ["kotlin-result", "kotlin-result-coroutines"]
 rx = ["rx-android", "rx-java", "rx-relay", "rxbinding-kotlin", "rxbinding-appcompat-v7", "rxbinding-appcompat-v4", "rxbinding-recycler-v7"]
