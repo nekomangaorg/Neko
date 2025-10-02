@@ -7,18 +7,15 @@ import androidx.compose.ui.graphics.Color
 internal object BrownColorScheme : BaseColorScheme() {
     override val lightScheme =
         lightColorScheme(
-            // Chocolate primary colors on a creamy background
             primary = Color(0xFF674840),
             onPrimary = Color(0xFFFFFFFF),
             primaryContainer = Color(0xFFFFDAD4),
             onPrimaryContainer = Color(0xFF230704),
             inversePrimary = Color(0xFFECB8B4),
-            // Strawberry red accents
             secondary = Color(0xFFB72D43),
             onSecondary = Color(0xFFFFFFFF),
             secondaryContainer = Color(0xFFFFDAD9),
             onSecondaryContainer = Color(0xFF400010),
-            // Cream/Berry tertiary accents
             tertiary = Color(0xFF675F51),
             onTertiary = Color(0xFFFFFFFF),
             tertiaryContainer = Color(0xFFEDE4DB),

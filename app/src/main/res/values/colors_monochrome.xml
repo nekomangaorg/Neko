@@ -19,6 +19,7 @@
     <color name="monochrome_colorOnSurface">#000000</color>
     <color name="monochrome_colorSurfaceVariant">#FFFFFF</color>
     <color name="monochrome_colorOnSurfaceVariant">#000000</color>
+    <color name="monochrome_colorSurfaceContainer">#FFFFFFFF</color>
     <color name="monochrome_colorOutline">#000000</color>
     <color name="monochrome_colorError">#000000</color>
     <color name="monochrome_colorOnError">#FFFFFF</color>

@@ -39,6 +39,7 @@
         <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/colorSurfaceContainer</item>
         <item name="colorOutline">@color/colorOutline</item>
         <item name="colorError">@color/colorError</item>
         <item name="colorOnError">@color/colorOnError</item>
@@ -75,7 +76,7 @@
         <!-- Custom Attributes-->
         <item name="actionBarTintColor">?attr/colorOnBackground</item>
         <item name="tabBarIconColor">?attr/colorSecondary</item>
-        <item name="tabBarIconInactive">?attr/colorOnSurfaceVariant</item>
+        <item name="tabBarIconInactive">?attr/colorOnSurface</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">#B3000000</item>
         <item name="android:colorEdgeEffect">?attr/colorSecondary</item>
@@ -107,6 +108,7 @@
         <item name="colorOnSurface">@color/blue_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/blue_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/blue_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/blue_colorSurfaceContainer</item>
         <item name="colorOutline">@color/blue_colorOutline</item>
         <item name="colorError">@color/blue_colorError</item>
         <item name="colorOnError">@color/blue_colorOnError</item>
@@ -131,6 +133,7 @@
         <item name="colorOnSurface">@color/brown_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/brown_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/brown_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/brown_colorSurfaceContainer</item>
         <item name="colorOutline">@color/brown_colorOutline</item>
         <item name="colorError">@color/brown_colorError</item>
         <item name="colorOnError">@color/brown_colorOnError</item>
@@ -155,6 +158,7 @@
         <item name="colorOnSurface">@color/green_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/green_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/green_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/green_colorSurfaceContainer</item>
         <item name="colorOutline">@color/green_colorOutline</item>
         <item name="colorError">@color/green_colorError</item>
         <item name="colorOnError">@color/green_colorOnError</item>
@@ -179,6 +183,7 @@
         <item name="colorOnSurface">@color/monochrome_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/monochrome_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/monochrome_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/monochrome_colorSurfaceContainer</item>
         <item name="colorOutline">@color/monochrome_colorOutline</item>
         <item name="colorError">@color/monochrome_colorError</item>
         <item name="colorOnError">@color/monochrome_colorOnError</item>
@@ -203,6 +208,7 @@
         <item name="colorOnSurface">@color/nord_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/nord_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/nord_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/nord_colorSurfaceContainer</item>
         <item name="colorOutline">@color/nord_colorOutline</item>
         <item name="colorError">@color/nord_colorError</item>
         <item name="colorOnError">@color/nord_colorOnError</item>
@@ -227,6 +233,7 @@
         <item name="colorOnSurface">@color/orange_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/orange_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/orange_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/orange_colorSurfaceContainer</item>
         <item name="colorOutline">@color/orange_colorOutline</item>
         <item name="colorError">@color/orange_colorError</item>
         <item name="colorOnError">@color/orange_colorOnError</item>
@@ -251,6 +258,7 @@
         <item name="colorOnSurface">@color/pink_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/pink_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/pink_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/pink_colorSurfaceContainer</item>
         <item name="colorOutline">@color/pink_colorOutline</item>
         <item name="colorError">@color/pink_colorError</item>
         <item name="colorOnError">@color/pink_colorOnError</item>
@@ -275,6 +283,7 @@
         <item name="colorOnSurface">@color/purple_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/purple_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/purple_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/purple_colorSurfaceContainer</item>
         <item name="colorOutline">@color/purple_colorOutline</item>
         <item name="colorError">@color/purple_colorError</item>
         <item name="colorOnError">@color/purple_colorOnError</item>
@@ -299,6 +308,7 @@
         <item name="colorOnSurface">@color/retro_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/retro_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/retro_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/retro_colorSurfaceContainer</item>
         <item name="colorOutline">@color/retro_colorOutline</item>
         <item name="colorError">@color/retro_colorError</item>
         <item name="colorOnError">@color/retro_colorOnError</item>
@@ -323,6 +333,7 @@
         <item name="colorOnSurface">@color/tako_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/tako_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/tako_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/tako_colorSurfaceContainer</item>
         <item name="colorOutline">@color/tako_colorOutline</item>
         <item name="colorError">@color/tako_colorError</item>
         <item name="colorOnError">@color/tako_colorOnError</item>
@@ -347,6 +358,7 @@
         <item name="colorOnSurface">@color/teal_colorOnSurface</item>
         <item name="colorSurfaceVariant">@color/teal_colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/teal_colorOnSurfaceVariant</item>
+        <item name="colorSurfaceContainer">@color/teal_colorSurfaceContainer</item>
         <item name="colorOutline">@color/teal_colorOutline</item>
         <item name="colorError">@color/teal_colorError</item>
         <item name="colorOnError">@color/teal_colorOnError</item>

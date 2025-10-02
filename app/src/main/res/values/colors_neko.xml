@@ -19,6 +19,7 @@
     <color name="colorOnSurface">#2A2220</color>
     <color name="colorSurfaceVariant">#F4DDDD</color>
     <color name="colorOnSurfaceVariant">#524343</color>
+    <color name="colorSurfaceContainer">#FFF9E7E7</color>
     <color name="colorOutline">#857373</color>
     <color name="colorError">#BA1A1A</color>
     <color name="colorOnError">#FFFFFF</color>

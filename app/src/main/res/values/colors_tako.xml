@@ -20,6 +20,7 @@
     <color name="tako_colorOnSurface">#FF1B1B22</color>
     <color name="tako_colorSurfaceVariant">#FFE8E0EB</color>
     <color name="tako_colorOnSurfaceVariant">#FF49454E</color>
+    <color name="tako_colorSurfaceContainer">#FFE8E0EB</color>
     <color name="tako_colorOutline">#FF7A757E</color>
     <color name="tako_colorError">#FFB3261E</color>
     <color name="tako_colorOnError">#FFFFFFFF</color>

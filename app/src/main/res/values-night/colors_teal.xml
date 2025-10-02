@@ -17,9 +17,9 @@
     <color name="teal_colorOnBackground">#FFE0E3E1</color>
     <color name="teal_colorSurface">#FF191C1B</color>
     <color name="teal_colorOnSurface">#FFE0E3E1</color>
-    <color name="teal_colorSurfaceContainer">#FF242928</color>
     <color name="teal_colorSurfaceVariant">#FF3F4947</color>
     <color name="teal_colorOnSurfaceVariant">#FFBEC9C7</color>
+    <color name="teal_colorSurfaceContainer">#FF242928</color>
     <color name="teal_colorOutline">#FF889391</color>
     <color name="teal_colorError">#FFFFB4AB</color>
     <color name="teal_colorOnError">#FF690005</color>

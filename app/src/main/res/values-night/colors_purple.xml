@@ -19,6 +19,7 @@
     <color name="purple_colorOnSurface">#F1DFFF</color>
     <color name="purple_colorSurfaceVariant">#32194E</color>
     <color name="purple_colorOnSurfaceVariant">#A18AB7</color>
+    <color name="purple_colorSurfaceContainer">#FF240E3B</color>
     <color name="purple_colorOutline">#826D97</color>
     <color name="purple_colorError">#FF6E84</color>
     <color name="purple_colorOnError">#490013</color>

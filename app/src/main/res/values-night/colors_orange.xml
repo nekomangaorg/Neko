@@ -19,6 +19,7 @@
     <color name="orange_colorOnSurface">#EEE3E1</color>
     <color name="orange_colorSurfaceVariant">#2A2523</color>
     <color name="orange_colorOnSurfaceVariant">#9A918F</color>
+    <color name="orange_colorSurfaceContainer">#FF1C1918</color>
     <color name="orange_colorOutline">#7C7472</color>
     <color name="orange_colorError">#EC7C8A</color>
     <color name="orange_colorOnError">#490013</color>

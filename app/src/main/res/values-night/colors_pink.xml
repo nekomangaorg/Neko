@@ -19,6 +19,7 @@
     <color name="pink_colorOnSurface">#E7E0E1</color>
     <color name="pink_colorSurfaceVariant">#514347</color>
     <color name="pink_colorOnSurfaceVariant">#D5C2C7</color>
+    <color name="pink_colorSurfaceContainer">#FF292728</color>
     <color name="pink_colorOutline">#9F8D91</color>
     <color name="pink_colorError">#FFB4AB</color>
     <color name="pink_colorOnError">#690005</color>

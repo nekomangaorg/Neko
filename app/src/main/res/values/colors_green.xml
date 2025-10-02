@@ -19,6 +19,7 @@
     <color name="green_colorOnSurface">#1A1C18</color>
     <color name="green_colorSurfaceVariant">#E0E4D5</color>
     <color name="green_colorOnSurfaceVariant">#43483E</color>
+    <color name="green_colorSurfaceContainer">#FFF1F4ED</color>
     <color name="green_colorOutline">#75796E</color>
     <color name="green_colorError">#BA1A1A</color>
     <color name="green_colorOnError">#FFFFFF</color>

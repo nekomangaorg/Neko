@@ -156,7 +156,7 @@
         <item name="itemPaddingTop">10dp</item>
         <item name="android:minHeight">68dp</item>
         <item name="itemIconTint">@color/bottom_nav_item_selector</item>
-        <item name="itemRippleColor">@color/ripple_nav</item>
+        <item name="itemRippleColor">?attr/colorPrimary</item>
         <item name="itemTextColor">@color/bottom_nav_text_selector</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="android:background">?colorSurfaceContainer</item>

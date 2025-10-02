@@ -19,6 +19,7 @@
     <color name="brown_colorOnSurface">#1D1B1A</color>
     <color name="brown_colorSurfaceVariant">#F5DDDA</color>
     <color name="brown_colorOnSurfaceVariant">#524442</color>
+    <color name="brown_colorSurfaceContainer">#FFF6EFEF</color>
     <color name="brown_colorOutline">#857370</color>
     <color name="brown_colorError">#BA1A1A</color>
     <color name="brown_colorOnError">#FFFFFF</color>

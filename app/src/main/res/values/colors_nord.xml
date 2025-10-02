@@ -19,6 +19,7 @@
     <color name="nord_colorOnSurface">#2E3440</color>
     <color name="nord_colorSurfaceVariant">#DAE0EA</color>
     <color name="nord_colorOnSurfaceVariant">#2E3440</color>
+    <color name="nord_colorSurfaceContainer">#FFDAE0EA</color>
     <color name="nord_colorOutline">#2E3440</color>
     <color name="nord_colorError">#BF616A</color>
     <color name="nord_colorOnError">#ECEFF4</color>

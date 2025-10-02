@@ -23,6 +23,7 @@
     <color name="retro_colorOnSurface">#FFEBE1FF</color>
     <color name="retro_colorSurfaceVariant">#FF2C0078</color>
     <color name="retro_colorOnSurfaceVariant">#FF9D81F0</color>
+    <color nam="_colorSurfaceContainer">#FF1F0058</color>
     <color name="retro_colorOutline">#FF7E63CF</color>
     <color name="retro_colorError">#FFFD6F85</color>
     <color name="retro_colorOnError">#FF490013</color>

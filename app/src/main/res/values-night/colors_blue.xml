@@ -19,6 +19,7 @@
     <color name="blue_colorOnSurface">#E4E2E6</color>
     <color name="blue_colorSurfaceVariant">#44474F</color>
     <color name="blue_colorOnSurfaceVariant">#C4C6D0</color>
+    <color name="blue_colorSurfaceContainer">#FF232227</color>
     <color name="blue_colorOutline">#8E9099</color>
     <color name="blue_colorError">#FFB4AB</color>
     <color name="blue_colorOnError">#690005</color>
