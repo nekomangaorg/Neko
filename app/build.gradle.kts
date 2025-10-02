@@ -188,5 +188,6 @@ dependencies {
 
     implementation(libs.bundles.results)
 
+    testImplementation(platform(libs.junit.bom))
     testImplementation(libs.bundles.tests)
 }

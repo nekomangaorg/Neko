@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -46,11 +45,12 @@ fun FastScroller(
 
     var isSelected by remember { mutableStateOf(false) }
 
-    var isScrolling by remember { mutableStateOf(false) }
+    val isScrolling by remember { derivedStateOf { lazyListState.isScrollInProgress } }
+
     var isVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isScrolling) {
-        if (isScrolling) {
+    LaunchedEffect(isScrolling, isSelected) {
+        if (isScrolling || isSelected) {
             isVisible = true
         } else {
             delay(SCROLL_TIMEOUT_IN_MILLIS)
@@ -72,28 +72,24 @@ fun FastScroller(
     val realThumbColor by
         remember(isSelected) { mutableStateOf(if (isSelected) thumbSelectedColor else thumbColor) }
 
-    val firstVisibleItemIndex by
-        remember(lazyListState) { derivedStateOf { lazyListState.firstVisibleItemIndex } }
-    val firstVisibleItemScrollOffset by
-        remember(lazyListState) { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
+    val firstVisibleItemIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
+    val firstVisibleItemScrollOffset by remember {
+        derivedStateOf { lazyListState.firstVisibleItemScrollOffset }
+    }
 
-    val itemsCount by
-        remember(lazyListState) { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
+    val itemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
 
-    val visibleItemsCount by
-        remember(lazyListState) {
-            derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo.size }
+    val visibleItemsCount by remember {
+        derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo.size }
+    }
+
+    val averageItemSize by remember {
+        derivedStateOf {
+            lazyListState.layoutInfo.visibleItemsInfo
+                .fastFirstOrNull { it.index == firstVisibleItemIndex }
+                ?.size ?: 0
         }
-
-    val averageItemSize by
-        remember(lazyListState) {
-            derivedStateOf {
-                lazyListState.layoutInfo.visibleItemsInfo
-                    .fastFirstOrNull { it.index == firstVisibleItemIndex }
-                    ?.size ?: 0
-            }
-        }
-    isScrolling = lazyListState.isScrollInProgress
+    }
 
     Box(modifier = modifier.fillMaxHeight().width(thumbWidth + (thumbWidth / 2)).alpha(alpha)) {
         Box(

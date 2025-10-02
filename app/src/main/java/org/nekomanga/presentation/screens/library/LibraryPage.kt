@@ -162,7 +162,10 @@ fun LibraryPage(
                     }
                 }
             }
-            FastScroller(lazyListState = lazyListState)
+            FastScroller(
+                lazyListState = lazyListState,
+                modifier = Modifier.align(Alignment.CenterEnd),
+            )
         }
     }
 }
