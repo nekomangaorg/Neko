@@ -220,7 +220,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             setOnlyAlertOnce(false)
             setAutoCancel(false)
             setProgress(0, 0, false)
-            color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
+            color = ContextCompat.getColor(context, R.color.colorSecondary)
             clearActions()
             // Retry action
             addAction(
@@ -250,7 +250,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             setOnlyAlertOnce(false)
             setAutoCancel(false)
             setProgress(0, 0, false)
-            color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
+            color = ContextCompat.getColor(context, R.color.colorSecondary)
             clearActions()
             // Retry action
             addAction(

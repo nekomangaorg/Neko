@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="monochrome_colorPrimary">#000000</color>
+    <color name="monochrome_colorOnPrimary">#FFFFFF</color>
+    <color name="monochrome_colorPrimaryContainer">#000000</color>
+    <color name="monochrome_colorOnPrimaryContainer">#FFFFFF</color>
+    <color name="monochrome_colorPrimaryInverse">#FFFFFF</color>
+    <color name="monochrome_colorSecondary">#000000</color>
+    <color name="monochrome_colorOnSecondary">#FFFFFF</color>
+    <color name="monochrome_colorSecondaryContainer">#888888</color>
+    <color name="monochrome_colorOnSecondaryContainer">#FFFFFF</color>
+    <color name="monochrome_colorTertiary">#888888</color>
+    <color name="monochrome_colorOnTertiary">#FFFFFF</color>
+    <color name="monochrome_colorTertiaryContainer">#000000</color>
+    <color name="monochrome_colorOnTertiaryContainer">#FFFFFF</color>
+    <color name="monochrome_colorBackground">#FFFFFF</color>
+    <color name="monochrome_colorOnBackground">#000000</color>
+    <color name="monochrome_colorSurface">#FFFFFF</color>
+    <color name="monochrome_colorOnSurface">#000000</color>
+    <color name="monochrome_colorSurfaceVariant">#FFFFFF</color>
+    <color name="monochrome_colorOnSurfaceVariant">#000000</color>
+    <color name="monochrome_colorSurfaceContainer">#FFFFFFFF</color>
+    <color name="monochrome_colorOutline">#000000</color>
+    <color name="monochrome_colorError">#000000</color>
+    <color name="monochrome_colorOnError">#FFFFFF</color>
+</resources>

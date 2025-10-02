@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_colorPrimary">#7B43B1</color>
+    <color name="purple_colorOnPrimary">#FFF6FF</color>
+    <color name="purple_colorPrimaryContainer">#D9B0FF</color>
+    <color name="purple_colorOnPrimaryContainer">#561A8B</color>
+    <color name="purple_colorPrimaryInverse">#C68CFF</color>
+    <color name="purple_colorSecondary">#7A45AE</color>
+    <color name="purple_colorOnSecondary">#FFF6FF</color>
+    <color name="purple_colorSecondaryContainer">#F0DBFF</color>
+    <color name="purple_colorOnSecondaryContainer">#6C369F</color>
+    <color name="purple_colorTertiary">#7B44AE</color>
+    <color name="purple_colorOnTertiary">#FFF6FF</color>
+    <color name="purple_colorTertiaryContainer">#D4A5FF</color>
+    <color name="purple_colorOnTertiaryContainer">#4F1383</color>
+    <color name="purple_colorBackground">#FEF7FF</color>
+    <color name="purple_colorOnBackground">#372C53</color>
+    <color name="purple_colorSurface">#FEF7FF</color>
+    <color name="purple_colorOnSurface">#372C53</color>
+    <color name="purple_colorSurfaceVariant">#E9DDFF</color>
+    <color name="purple_colorOnSurfaceVariant">#655883</color>
+    <color name="purple_colorSurfaceContainer">#FFF3EAFF</color>
+    <color name="purple_colorOutline">#8174A0</color>
+    <color name="purple_colorError">#AC3149</color>
+    <color name="purple_colorOnError">#FFF7F7</color>
+</resources>

@@ -296,7 +296,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         insets.hasSideNavBar() -> Color.BLACK
                         isInNightMode() ->
                             ColorUtils.setAlphaComponent(
-                                getResourceColor(R.attr.colorPrimaryVariant),
+                                getResourceColor(R.attr.colorSurfaceContainer),
                                 179,
                             )
                         else -> Color.argb(179, 0, 0, 0)
@@ -309,11 +309,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 }
                 // if in landscape with 2/3 button mode, fully opaque nav bar
                 insets.hasSideNavBar() -> {
-                    getResourceColor(R.attr.colorPrimaryVariant)
+                    getResourceColor(R.attr.colorSurfaceContainer)
                 }
                 // if in portrait with 2/3 button mode, translucent nav bar
                 else -> {
-                    ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorPrimaryVariant), 179)
+                    ColorUtils.setAlphaComponent(
+                        getResourceColor(R.attr.colorSurfaceContainer),
+                        179,
+                    )
                 }
             }
     }
@@ -521,7 +524,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         nav.isVisible = !hideBottomNav
         nav.alpha = 1f
     }
-
 
     fun isSideNavigation(): Boolean {
         return binding.bottomNav == null

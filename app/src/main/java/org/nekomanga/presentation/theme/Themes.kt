@@ -31,14 +31,19 @@ enum class Themes {
     @StyleRes
     fun styleRes(): Int {
         return when {
-            this == Monet -> R.style.Theme_Tachiyomi_Monet
-            this == Retro -> R.style.Theme_Tachiyomi_Outrun
-            this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
-            this == Orange -> R.style.Theme_Tachiyomi_MangaDex
-            this == Purple -> R.style.Theme_Tachiyomi_Lavender
-            this == Tako -> R.style.Theme_Tachiyomi_Tako
-            this == Green -> R.style.Theme_Tachiyomi_FlatLime
-            else -> R.style.Theme_Tachiyomi // DEFAULT
+            this == Monet -> R.style.Theme_Neko_Monet
+            this == Retro -> R.style.Theme_Neko_Retro
+            this == Pink -> R.style.Theme_Neko_Pink
+            this == Orange -> R.style.Theme_Neko_Orange
+            this == Teal -> R.style.Theme_Neko_Teal
+            this == Purple -> R.style.Theme_Neko_Purple
+            this == Brown -> R.style.Theme_Neko_Brown
+            this == Tako -> R.style.Theme_Neko_Tako
+            this == Nord -> R.style.Theme_Neko_Nord
+            this == Green -> R.style.Theme_Neko_Green
+            this == Blue -> R.style.Theme_Neko_Blue
+            this == Monochrome -> R.style.Theme_Neko_Monochrome
+            else -> R.style.Theme_Neko // DEFAULT
         }
     }
 

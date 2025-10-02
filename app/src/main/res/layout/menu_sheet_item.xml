@@ -23,7 +23,7 @@
         android:ellipsize="end"
         android:textColor="?attr/colorOnBackground"
         android:textSize="13sp"
-        android:tint="@color/md_white_1000_54" />
+        android:tint="@android:color/white" />
 
     <ImageView
         android:id="@+id/menu_end_item"

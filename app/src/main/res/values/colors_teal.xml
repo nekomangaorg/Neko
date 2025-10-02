@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="teal_colorPrimary">#FF296963</color>
+    <color name="teal_colorOnPrimary">#FFE1FFFB</color>
+    <color name="teal_colorPrimaryContainer">#FFAAE9E2</color>
+    <color name="teal_colorOnPrimaryContainer">#FF135853</color>
+    <color name="teal_colorPrimaryInverse">#FFBDFDF6</color>
+    <color name="teal_colorSecondary">#FF6F5D2F</color>
+    <color name="teal_colorOnSecondary">#FFFFF8EF</color>
+    <color name="teal_colorSecondaryContainer">#FFF9E0A6</color>
+    <color name="teal_colorOnSecondaryContainer">#FF615023</color>
+    <color name="teal_colorTertiary">#FF7A5A00</color>
+    <color name="teal_colorOnTertiary">#FFFFF8F1</color>
+    <color name="teal_colorTertiaryContainer">#FFFDC74F</color>
+    <color name="teal_colorOnTertiaryContainer">#FF5B4100</color>
+    <color name="teal_colorBackground">#FFE4FFFF</color>
+    <color name="teal_colorOnBackground">#FF00393B</color>
+    <color name="teal_colorSurface">#FFE4FFFF</color>
+    <color name="teal_colorOnSurface">#FF00393B</color>
+    <color name="teal_colorSurfaceVariant">#FFB0EDEF</color>
+    <color name="teal_colorOnSurfaceVariant">#FF2A686A</color>
+    <color name="teal_colorSurfaceContainer">#FFC8F7F8</color>
+    <color name="teal_colorOutline">#FF488486</color>
+    <color name="teal_colorError">#FFAC3434</color>
+    <color name="teal_colorOnError">#FFFFF7F6</color>
+</resources>

@@ -94,7 +94,7 @@ class RestoreHelper(val context: Context) {
                 .setContentText(errorMessage)
                 .setSmallIcon(R.drawable.ic_error_24dp)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setColor(ContextCompat.getColor(context, R.color.md_red_500))
+                .setColor(ContextCompat.getColor(context, R.color.colorError))
         context.notificationManager.notify(
             Notifications.ID_BACKUP_RESTORE_ERROR,
             resultNotification.build(),

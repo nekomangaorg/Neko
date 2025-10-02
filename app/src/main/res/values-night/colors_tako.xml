@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tako_colorPrimary">#FFF3B375</color>
+    <color name="tako_colorOnPrimary">#FF38294E</color>
+    <color name="tako_colorPrimaryContainer">#FFF3B375</color>
+    <color name="tako_colorOnPrimaryContainer">#FF38294E</color>
+    <color name="tako_colorPrimaryInverse">#FF84531E</color>
+    <color name="tako_colorSecondary">#FFF3B375</color>
+    <color name="tako_colorOnSecondary">#FF38294E</color>
+    <color name="tako_colorSecondaryContainer">#FF5C4D4B</color>
+    <color name="tako_colorOnSecondaryContainer">#FFF3B375</color>
+    <color name="tako_colorTertiary">#FF66577E</color>
+    <color name="tako_colorOnTertiary">#FFF3B375</color>
+    <color name="tako_colorTertiaryContainer">#FF4E4065</color>
+    <color name="tako_colorOnTertiaryContainer">#FFEDDCFF</color>
+    <color name="tako_colorBackground">#FF21212E</color>
+    <color name="tako_colorOnBackground">#FFE3E0F2</color>
+    <color name="tako_colorSurface">#FF21212E</color>
+    <color name="tako_colorOnSurface">#FFE3E0F2</color>
+    <color name="tako_colorSurfaceVariant">#FF2A2A3C</color>
+    <color name="tako_colorOnSurfaceVariant">#FFCBC4CE</color>
+    <color name="tako_colorSurfaceContainer">#FF2A2A3C</color>
+    <color name="tako_colorOutline">#FF958F99</color>
+    <color name="tako_colorError">#FFF2B8B5</color>
+    <color name="tako_colorOnError">#FF601410</color>
+</resources>

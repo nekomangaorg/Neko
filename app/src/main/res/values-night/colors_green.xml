@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green_colorPrimary">#A6F26D</color>
+    <color name="green_colorOnPrimary">#1E3700</color>
+    <color name="green_colorPrimaryContainer">#2C5000</color>
+    <color name="green_colorOnPrimaryContainer">#B2F449</color>
+    <color name="green_colorPrimaryInverse">#386A00</color>
+    <color name="green_colorSecondary">#C4CBBE</color>
+    <color name="green_colorOnSecondary">#293423</color>
+    <color name="green_colorSecondaryContainer">#5E4941</color>
+    <color name="green_colorOnSecondaryContainer">#DAE8CD</color>
+    <color name="green_colorTertiary">#9FD0CE</color>
+    <color name="green_colorOnTertiary">#003736</color>
+    <color name="green_colorTertiaryContainer">#384F4B</color>
+    <color name="green_colorOnTertiaryContainer">#BBECEC</color>
+    <color name="green_colorBackground">#1D1513</color>
+    <color name="green_colorOnBackground">#EBE0DD</color>
+    <color name="green_colorSurface">#1D1513</color>
+    <color name="green_colorOnSurface">#EBE0DD</color>
+    <color name="green_colorSurfaceVariant">#4A3832</color>
+    <color name="green_colorOnSurfaceVariant">#D0C4C1</color>
+    <color name="green_colorSurfaceContainer">#FF2B211E</color>
+    <color name="green_colorOutline">#9C8F8B</color>
+    <color name="green_colorError">#FFB4AB</color>
+    <color name="green_colorOnError">#690005</color>
+</resources>
