@@ -2051,15 +2051,13 @@ class MangaDetailPresenter(
             val currentChapters = mangaDetailScreenState.value.activeChapters
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
             if (index >= 0) {
-                val mutableChapters = currentChapters.toMutableList()
                 val updateChapter =
-                    currentChapters[index].copy(
+                    mangaDetailScreenState.value.activeChapters[index].copy(
                         downloadState = download.status,
                         downloadProgress = download.progress,
                     )
-                mutableChapters[index] = updateChapter
                 _mangaDetailScreenState.update {
-                    it.copy(activeChapters = mutableChapters.toPersistentList())
+                    it.copy(activeChapters = it.activeChapters.set(index, updateChapter))
                 }
             }
         }
