@@ -2,13 +2,13 @@
 <resources>
     <color name="tako_colorPrimary">#FFF3B375</color>
     <color name="tako_colorOnPrimary">#FF38294E</color>
-    <color name="tako_colorPrimaryContainer">#FFF3B375</color>
-    <color name="tako_colorOnPrimaryContainer">#FF38294E</color>
+    <color name="tako_colorPrimaryContainer">#FF875B2D</color>
+    <color name="tako_colorOnPrimaryContainer">#FFFFDDA5</color>
     <color name="tako_colorPrimaryInverse">#FF84531E</color>
-    <color name="tako_colorSecondary">#FFF3B375</color>
-    <color name="tako_colorOnSecondary">#FF38294E</color>
-    <color name="tako_colorSecondaryContainer">#FF5C4D4B</color>
-    <color name="tako_colorOnSecondaryContainer">#FFF3B375</color>
+    <color name="tako_colorSecondary">#FFB6B1D0</color>
+    <color name="tako_colorOnSecondary">#FF2A2737</color>
+    <color name="tako_colorSecondaryContainer">#FF3A3A49</color>
+    <color name="tako_colorOnSecondaryContainer">#FFD1C7D6</color>
     <color name="tako_colorTertiary">#FF66577E</color>
     <color name="tako_colorOnTertiary">#FFF3B375</color>
     <color name="tako_colorTertiaryContainer">#FF4E4065</color>
