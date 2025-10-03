@@ -50,7 +50,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val typeface =
                 if (item.isCurrent) {
-                    ResourcesCompat.getFont(itemView.context, R.font.montserrat_black)
+                    ResourcesCompat.getFont(itemView.context, R.font.mplus_rounded1c_black)
                 } else {
                     null
                 }
