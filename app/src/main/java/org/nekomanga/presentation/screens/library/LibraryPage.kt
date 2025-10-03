@@ -82,6 +82,7 @@ fun LibraryPage(
             remember(libraryScreenState.selectedItems) {
                 mutableStateOf(libraryScreenState.selectedItems.map { it.displayManga.mangaId })
             }
+
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
