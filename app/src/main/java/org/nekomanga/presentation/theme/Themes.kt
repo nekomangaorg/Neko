@@ -56,7 +56,7 @@ enum class Themes {
         return when {
             this == Monet -> R.string.dynamic
             this == Retro -> R.string.miami_vice
-            this == Pink -> R.string.spring_blossom
+            this == Pink -> R.string.cherry_blossom
             this == Orange -> R.string.citrus_squeeze
             this == Teal -> R.string.teal_ocean
             this == Purple -> R.string.royal

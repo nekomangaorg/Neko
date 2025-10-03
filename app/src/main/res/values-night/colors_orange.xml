@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="orange_colorPrimary">#FFB69B</color>
+    <color name="orange_colorPrimary">#FFC07F</color>
     <color name="orange_colorOnPrimary">#752400</color>
-    <color name="orange_colorPrimaryContainer">#9F3B00</color>
-    <color name="orange_colorOnPrimaryContainer">#FFB69B</color>
+    <color name="orange_colorPrimaryContainer">#A55100</color>
+    <color name="orange_colorOnPrimaryContainer">#FFC07F</color>
     <color name="orange_colorPrimaryInverse">#FF671C</color>
     <color name="orange_colorSecondary">#CCFF66</color>
     <color name="orange_colorOnSecondary">#1D2E00</color>

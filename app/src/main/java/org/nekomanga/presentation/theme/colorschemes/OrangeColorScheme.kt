@@ -58,10 +58,10 @@ internal object OrangeColorScheme : BaseColorScheme() {
 
     override val darkScheme =
         darkColorScheme(
-            primary = Color(0xFFFFB69B),
+            primary = Color(0xFFFFC07F),
             onPrimary = Color(0xFF752400),
-            primaryContainer = Color(0xFF9F3B00),
-            onPrimaryContainer = Color(0xFFFFB69B),
+            primaryContainer = Color(0xFFA55100),
+            onPrimaryContainer = Color(0xFFFFC07F),
             secondary = Color(0xFFCCFF66),
             onSecondary = Color(0xFF1D2E00),
             secondaryContainer = Color(0xFF304000),
