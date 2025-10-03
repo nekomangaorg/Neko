@@ -5,8 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -44,9 +42,9 @@ internal fun DownloadUnreadBadge(
         SoloBadge(
             outline = outline,
             offset = offset,
-            backgroundColor = MaterialTheme.colorScheme.secondary,
+            backgroundColor = MaterialTheme.colorScheme.primary,
             count = unreadCount.toString(),
-            countColor = MaterialTheme.colorScheme.onSecondary,
+            countColor = MaterialTheme.colorScheme.onPrimary,
         )
     } else if (showDownloads && downloadCount > 0 && (!showUnread || unreadCount == 0)) {
         SoloBadge(
@@ -61,11 +59,11 @@ internal fun DownloadUnreadBadge(
             outline = outline,
             offset = offset,
             backgroundColor1 = MaterialTheme.colorScheme.surfaceVariant,
-            backgroundColor2 = MaterialTheme.colorScheme.secondary,
+            backgroundColor2 = MaterialTheme.colorScheme.primary,
             count1 = downloadCount.toString(),
             count1Color = MaterialTheme.colorScheme.onSurfaceVariant,
             count2 = unreadCount.toString(),
-            count2Color = MaterialTheme.colorScheme.onSecondary,
+            count2Color = MaterialTheme.colorScheme.onPrimary,
         )
     }
 }

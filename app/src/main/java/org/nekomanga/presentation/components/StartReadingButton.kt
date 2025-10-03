@@ -45,14 +45,14 @@ fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () ->
                             topEnd = Shapes.coverRadius,
                         ),
                 )
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(MaterialTheme.colorScheme.secondary)
                 .size(Size.extraLarge)
     ) {
         Icon(
             modifier = Modifier.align(Alignment.Center).size(Size.large),
             imageVector = Icons.AutoMirrored.Default.MenuBook,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            tint = MaterialTheme.colorScheme.onSecondary,
         )
     }
 }
