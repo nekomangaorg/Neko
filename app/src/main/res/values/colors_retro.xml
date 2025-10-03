@@ -2,17 +2,17 @@
 <resources>
     <color name="retro_colorPrimary">#FF60D6FF</color>
     <color name="retro_colorOnPrimary">#FF00415A</color>
-    <color name="retro_colorPrimaryContainer">#FF00668A</color>
-    <color name="retro_colorOnPrimaryContainer">#FFF4FAFF</color>
+    <color name="retro_colorPrimaryContainer">#FFB2EFFF</color>
+    <color name="retro_colorOnPrimaryContainer">#FF001F2A</color>
     <color name="retro_colorPrimaryInverse">#FF60D6FF</color>
     <color name="retro_colorSecondary">#FFFF00DD</color>
     <color name="retro_colorOnSecondary">#FFFFFFFF</color>
-    <color name="retro_colorSecondaryContainer">#FFED80FF</color>
-    <color name="retro_colorOnSecondaryContainer">#FF00415A</color>
-    <color name="retro_colorTertiary">#FFFFD6F1</color>
-    <color name="retro_colorOnTertiary">#FF733F5A</color>
-    <color name="retro_colorTertiaryContainer">#FF904F75</color>
-    <color name="retro_colorOnTertiaryContainer">#FFF7F9FF</color>
+    <color name="retro_colorSecondaryContainer">#FFFFD7FA</color>
+    <color name="retro_colorOnSecondaryContainer">#FF520042</color>
+    <color name="retro_colorTertiary">#FFA744E3</color>
+    <color name="retro_colorOnTertiary">#FFFFFFFF</color>
+    <color name="retro_colorTertiaryContainer">#FFF0DAFF</color>
+    <color name="retro_colorOnTertiaryContainer">#FF390066</color>
     <color name="retro_colorBackground">#FFF7F9FF</color>
     <color name="retro_colorOnBackground">#FF00101C</color>
     <color name="retro_colorSurface">#FFF7F9FF</color>

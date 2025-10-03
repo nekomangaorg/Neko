@@ -55,7 +55,7 @@ enum class Themes {
     fun nameRes(): Int {
         return when {
             this == Monet -> R.string.dynamic
-            this == Retro -> R.string.retro
+            this == Retro -> R.string.miami_vice
             this == Pink -> R.string.spring_blossom
             this == Orange -> R.string.orange_juice
             this == Teal -> R.string.teal_ocean
