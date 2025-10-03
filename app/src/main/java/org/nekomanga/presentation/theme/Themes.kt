@@ -64,9 +64,9 @@ enum class Themes {
             this == Tako -> R.string.tako
             this == Nord -> R.string.nord
             this == Green -> R.string.jungle
-            this == Blue -> R.string.crayon_blue
+            this == Blue -> R.string.crayon
             this == Monochrome -> R.string.monochrome
-            else -> R.string.app_name // Default
+            else -> R.string.kitsune_fire // Default
         }
     }
 }

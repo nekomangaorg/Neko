@@ -824,6 +824,7 @@
     <string name="light_blue">Light Blue</string>
     <string name="dark_blue">Dark Blue</string>
     <string name="cherry_blossom">Cherry Blossom</string>
+    <string name="kitsune_fire">Kitsune Fire</string>
     <string name="chocolate">Chocolate</string>
     <string name="nord">Nord</string>
     <string name="dynamic">Dynamic</string>
@@ -836,7 +837,7 @@
     <string name="teal_ocean">Teal Ocean</string>
     <string name="royal">Royal</string>
     <string name="jungle">Jungle</string>
-    <string name="crayon_blue">Crayon Blue</string>
+    <string name="crayon">Crayon</string>
     <string name="monochrome">Monochrome</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Feed)</string>
