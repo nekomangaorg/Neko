@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="blue_colorPrimary">#0057E3</color>
-    <color name="blue_colorOnPrimary">#FFFFFF</color>
-    <color name="blue_colorPrimaryContainer">#0040B4</color>
-    <color name="blue_colorOnPrimaryContainer">#B8C5FF</color>
-    <color name="blue_colorPrimaryInverse">#B8C5FF</color>
-    <color name="blue_colorSecondary">#8DAAFF</color>
-    <color name="blue_colorOnSecondary">#2D2F42</color>
-    <color name="blue_colorSecondaryContainer">#434659</color>
-    <color name="blue_colorOnSecondaryContainer">#E0E1FF</color>
+    <color name="blue_colorPrimary">#FF5391FF</color>
+    <color name="blue_colorOnPrimary">#FF002C6F</color>
+    <color name="blue_colorPrimaryContainer">#FF0043B0</color>
+    <color name="blue_colorOnPrimaryContainer">#FFC4D5FF</color>
+    <color name="blue_colorPrimaryInverse">#FF0057E3</color>
+    <color name="blue_colorSecondary">#FFACC3FF</color>
+    <color name="blue_colorOnSecondary">#FF282F45</color>
+    <color name="blue_colorSecondaryContainer">#FF40465C</color>
+    <color name="blue_colorOnSecondaryContainer">#FFD3E3FF</color>
     <color name="blue_colorTertiary">#E0BDC6</color>
     <color name="blue_colorOnTertiary">#422A31</color>
     <color name="blue_colorTertiaryContainer">#594048</color>
