@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="orange_colorPrimary">#FF6740</color>
-    <color name="orange_colorOnPrimary">#000000</color>
-    <color name="orange_colorPrimaryContainer">#FF8463</color>
-    <color name="orange_colorOnPrimaryContainer">#000000</color>
-    <color name="orange_colorPrimaryInverse">#FFB4A2</color>
-    <color name="orange_colorSecondary">#FF6740</color>
+    <color name="orange_colorPrimary">#FF671C</color>
+    <color name="orange_colorOnPrimary">#FFFFFF</color>
+    <color name="orange_colorPrimaryContainer">#FFC6AE</color>
+    <color name="orange_colorOnPrimaryContainer">#4C1500</color>
+    <color name="orange_colorPrimaryInverse">#FFB69B</color>
+    <color name="orange_colorSecondary">#A5CC00</color>
     <color name="orange_colorOnSecondary">#000000</color>
-    <color name="orange_colorSecondaryContainer">#FF8463</color>
-    <color name="orange_colorOnSecondaryContainer">#000000</color>
-    <color name="orange_colorTertiary">#FF6840</color>
+    <color name="orange_colorSecondaryContainer">#E7FFAB</color>
+    <color name="orange_colorOnSecondaryContainer">#1D2E00</color>
+    <color name="orange_colorTertiary">#D12D08</color>
     <color name="orange_colorOnTertiary">#FFFFFF</color>
-    <color name="orange_colorTertiaryContainer">#FF8463</color>
-    <color name="orange_colorOnTertiaryContainer">#FFFFFF</color>
+    <color name="orange_colorTertiaryContainer">#FFDBCE</color>
+    <color name="orange_colorOnTertiaryContainer">#430500</color>
     <color name="orange_colorBackground">#FFF8F6</color>
     <color name="orange_colorOnBackground">#373130</color>
     <color name="orange_colorSurface">#FFF8F6</color>
     <color name="orange_colorOnSurface">#373130</color>
     <color name="orange_colorSurfaceVariant">#EBE0DE</color>
     <color name="orange_colorOnSurfaceVariant">#655D5C</color>
-    <color name="orange_colorSurfaceContainer">#FFF5ECEA</color>
+    <color name="orange_colorSurfaceContainer">#F5ECEA</color>
     <color name="orange_colorOutline">#817977</color>
     <color name="orange_colorError">#9E3F4E</color>
     <color name="orange_colorOnError">#FFF7F7</color>
