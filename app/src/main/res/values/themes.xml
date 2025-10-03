@@ -65,8 +65,8 @@
         <item name="bottomNavigationStyle">@style/Widget.Neko.BottomNavigationView</item>
         <item name="navigationRailStyle">@style/Widget.Neko.NavigationRail</item>
         <item name="elevationOverlayEnabled">false</item>
-        <item name="android:fontFamily">@font/montserrat</item>
-        <item name="fontFamily">@font/montserrat</item>
+        <item name="android:fontFamily">@font/mplus_rounded</item>
+        <item name="fontFamily">@font/mplus_rounded</item>
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>

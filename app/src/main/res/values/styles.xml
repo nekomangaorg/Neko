@@ -189,18 +189,18 @@
     </style>
 
     <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
-        <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="fontFamily">@font/mplus_rounded1c_medium</item>
     </style>
 
 
     <style name="Neko.Toolbar.TitleText" parent="">
-        <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="fontFamily">@font/mplus_rounded1c_medium</item>
         <item name="android:letterSpacing">-.023</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="Neko.Toolbar.SubTitleText" parent="">
-        <item name="fontFamily">@font/montserrat_regular</item>
+        <item name="fontFamily">@font/mplus_rounded1c_regular</item>
         <item name="android:letterSpacing">-.023</item>
         <item name="android:textSize">14sp</item>
     </style>
