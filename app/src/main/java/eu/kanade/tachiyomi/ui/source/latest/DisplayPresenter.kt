@@ -168,21 +168,22 @@ class DisplayPresenter(
         presenterScope.launch {
             val index =
                 _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
-            val tempList = _displayScreenState.value.allDisplayManga.toMutableList()
-            val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
-            tempList[index] = tempDisplayManga
-
-            _displayScreenState.update { it.copy(allDisplayManga = tempList.toPersistentList()) }
+            val tempDisplayManga =
+                _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
+            _displayScreenState.update {
+                it.copy(allDisplayManga = it.allDisplayManga.set(index, tempDisplayManga))
+            }
 
             val filteredIndex =
                 _displayScreenState.value.filteredDisplayManga.indexOfFirst {
                     it.mangaId == mangaId
                 }
             if (filteredIndex >= 0) {
-                val tempFilterList = _displayScreenState.value.filteredDisplayManga.toMutableList()
-                tempFilterList[filteredIndex] = tempDisplayManga
                 _displayScreenState.update {
-                    it.copy(filteredDisplayManga = tempFilterList.toPersistentList())
+                    it.copy(
+                        filteredDisplayManga =
+                            it.filteredDisplayManga.set(filteredIndex, tempDisplayManga)
+                    )
                 }
             }
 
