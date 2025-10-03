@@ -739,19 +739,23 @@ class BrowsePresenter(
                         MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
                     blankFilter.copy(
                         contentRatings =
-                            blankFilter.contentRatings.map {
-                                if (it.rating == rating) it.copy(state = true)
-                                else it.copy(state = false)
-                            }
+                            blankFilter.contentRatings
+                                .map {
+                                    if (it.rating == rating) it.copy(state = true)
+                                    else it.copy(state = false)
+                                }
+                                .toPersistentList()
                     )
                 } else {
                     blankFilter.copy(
                         tags =
-                            blankFilter.tags.map {
-                                if (it.tag.prettyPrint.equals(tag, true))
-                                    it.copy(state = ToggleableState.On)
-                                else it
-                            }
+                            blankFilter.tags
+                                .map {
+                                    if (it.tag.prettyPrint.equals(tag, true))
+                                        it.copy(state = ToggleableState.On)
+                                    else it
+                                }
+                                .toPersistentList()
                     )
                 }
             _browseScreenState.update { it.copy(filters = filters) }
@@ -783,7 +787,7 @@ class BrowsePresenter(
                     is Filter.ContentRating -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.contentRatings,
+                                browseScreenState.value.filters.contentRatings.toPersistentList(),
                                 { it.rating == newFilter.rating },
                                 newFilter,
                             )
@@ -802,7 +806,7 @@ class BrowsePresenter(
                     is Filter.OriginalLanguage -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.originalLanguage,
+                                browseScreenState.value.filters.originalLanguage.toPersistentList(),
                                 { it.language == newFilter.language },
                                 newFilter,
                             )
@@ -811,7 +815,8 @@ class BrowsePresenter(
                     is Filter.PublicationDemographic -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.publicationDemographics,
+                                browseScreenState.value.filters.publicationDemographics
+                                    .toPersistentList(),
                                 { it.demographic == newFilter.demographic },
                                 newFilter,
                             )
@@ -820,7 +825,7 @@ class BrowsePresenter(
                     is Filter.Status -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.statuses,
+                                browseScreenState.value.filters.statuses.toPersistentList(),
                                 { it.status == newFilter.status },
                                 newFilter,
                             )
@@ -829,7 +834,7 @@ class BrowsePresenter(
                     is Filter.Tag -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.tags,
+                                browseScreenState.value.filters.tags.toPersistentList(),
                                 { it.tag == newFilter.tag },
                                 newFilter,
                             )
@@ -843,7 +848,7 @@ class BrowsePresenter(
                             }
 
                         browseScreenState.value.filters.copy(
-                            sort = Filter.Sort.getSortList(filterMode)
+                            sort = Filter.Sort.getSortList(filterMode).toPersistentList()
                         )
                     }
                     is Filter.HasAvailableChapters -> {
@@ -896,14 +901,12 @@ class BrowsePresenter(
     }
 
     private fun <T> lookupAndReplaceEntry(
-        list: List<T>,
+        list: PersistentList<T>,
         indexMethod: (T) -> Boolean,
         newEntry: T,
     ): PersistentList<T> {
         val index = list.indexOfFirst { indexMethod(it) }
-        val mutableList = list.toMutableList()
-        mutableList[index] = newEntry
-        return mutableList.toPersistentList()
+        return list.set(index, newEntry)
     }
 
     /** Add New Category */
