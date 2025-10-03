@@ -61,9 +61,8 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
@@ -259,7 +258,7 @@ private fun ChapterInfo(
                     },
                 )
             }
-            .toImmutableList()
+            .toPersistentList()
             .apply { TimberKt.d { this.toString() } }
     }
 
@@ -503,11 +502,11 @@ private fun getDropDownItems(
     isLocal: Boolean,
     showScanlator: Boolean,
     showComments: Boolean,
-    scanlators: ImmutableList<SimpleDropDownItem>,
+    scanlators: PersistentList<SimpleDropDownItem>,
     onWebView: () -> Unit,
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
-): ImmutableList<SimpleDropDownItem> {
+): PersistentList<SimpleDropDownItem> {
     return (getList(
             !isLocal,
             listOf(

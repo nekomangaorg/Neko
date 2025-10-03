@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
@@ -38,7 +38,7 @@ internal class TrackingSettingsScreen(
     override fun getTitleRes(): Int = R.string.tracking
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
 
         val context = LocalContext.current
 
@@ -269,7 +269,7 @@ internal class TrackingSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.update_tracking_after_reading)),
                 SearchTerm(title = stringResource(R.string.update_tracking_marked_read)),

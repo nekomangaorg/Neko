@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.time.ZoneId
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.nekomanga.domain.track.TrackItem
@@ -163,7 +163,7 @@ class TrackingCoordinator {
                         true -> TrackingConstants.TrackSearchResult.NoResult
                         false ->
                             TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toImmutableList(),
+                                results.map { it.toTrackSearchItem() }.toPersistentList(),
                                 hasMatchingId = id.isNotEmpty(),
                             )
                     }
@@ -194,7 +194,7 @@ class TrackingCoordinator {
                     true -> TrackingConstants.TrackSearchResult.NoResult
                     false ->
                         TrackingConstants.TrackSearchResult.Success(
-                            results.map { it.toTrackSearchItem() }.toImmutableList()
+                            results.map { it.toTrackSearchItem() }.toPersistentList()
                         )
                 }
             }

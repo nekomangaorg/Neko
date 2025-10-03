@@ -10,8 +10,8 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,7 +56,7 @@ class SimilarPresenter(
                 db.getCategories()
                     .executeAsBlocking()
                     .map { category -> category.toCategoryItem() }
-                    .toImmutableList()
+                    .toPersistentList()
             _similarScreenState.update {
                 it.copy(
                     categories = categories,
@@ -89,7 +89,7 @@ class SimilarPresenter(
                         isRefreshing = false,
                         displayManga =
                             list
-                                .associate { group -> group.type to group.manga.toImmutableList() }
+                                .associate { group -> group.type to group.manga.toPersistentList() }
                                 .toImmutableMap(),
                     )
                 }
@@ -152,7 +152,7 @@ class SimilarPresenter(
                 val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
                 tempList[mangaIndex] = tempDisplayManga
 
-                tempMap[mapKey] = tempList.toImmutableList()
+                tempMap[mapKey] = tempList.toPersistentList()
             }
 
             _similarScreenState.update { it.copy(displayManga = tempMap.toImmutableMap()) }
@@ -172,7 +172,7 @@ class SimilarPresenter(
                         db.getCategories()
                             .executeAsBlocking()
                             .map { category -> category.toCategoryItem() }
-                            .toImmutableList()
+                            .toPersistentList()
                 )
             }
         }
@@ -201,7 +201,7 @@ class SimilarPresenter(
                                             )
                                     )
                                 }
-                                .toImmutableList(),
+                                .toPersistentList(),
                         )
                     }
                     .toMap()

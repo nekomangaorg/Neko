@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -80,7 +80,7 @@ class DisplayRepository(
                         mangaListPage.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                    Ok(mangaListPage.hasNextPage to displayMangaList.toImmutableList())
+                    Ok(mangaListPage.hasNextPage to displayMangaList.toPersistentList())
                 },
                 failure = { Err(it) },
             )
@@ -129,7 +129,7 @@ class DisplayRepository(
                         mangaListPage.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                    Ok(mangaListPage.hasNextPage to displayMangaList.toImmutableList())
+                    Ok(mangaListPage.hasNextPage to displayMangaList.toPersistentList())
                 },
                 failure = { Err(it) },
             )
@@ -146,7 +146,7 @@ class DisplayRepository(
                         listResults.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                    Ok(false to displayMangaList.toImmutableList())
+                    Ok(false to displayMangaList.toPersistentList())
                 },
                 failure = { Err(it) },
             )
@@ -163,7 +163,7 @@ class DisplayRepository(
                         listResults.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                    Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
+                    Ok(listResults.hasNextPage to displayMangaList.toPersistentList())
                 },
                 failure = { Err(it) },
             )
@@ -180,7 +180,7 @@ class DisplayRepository(
                         listResults.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                    Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
+                    Ok(listResults.hasNextPage to displayMangaList.toPersistentList())
                 },
                 failure = { Err(it) },
             )

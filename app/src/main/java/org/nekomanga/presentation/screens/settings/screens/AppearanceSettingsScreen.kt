@@ -14,7 +14,7 @@ import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.getActivity
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
@@ -34,7 +34,7 @@ internal class AppearanceSettingsScreen(
     override fun getTitleRes(): Int = R.string.appearance
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
 
         val context = LocalContext.current
 
@@ -167,7 +167,7 @@ internal class AppearanceSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.light_theme),

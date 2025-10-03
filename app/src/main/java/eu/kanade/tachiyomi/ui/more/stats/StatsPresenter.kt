@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -154,13 +153,13 @@ class StatsPresenter(
                                     readDuration = getReadDurationFromHistory(history),
                                     startYear = getStartYear(history),
                                     rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                                    tags = (it.getGenres() ?: emptyList()).toImmutableList(),
+                                    tags = (it.getGenres() ?: emptyList()).toPersistentList(),
                                     userScore = getUserScore(tracks),
                                     trackers =
                                         tracks
                                             .mapNotNull { trackManager.getService(it.sync_id) }
                                             .map { prefs.context.getString(it.nameRes()) }
-                                            .toImmutableList(),
+                                            .toPersistentList(),
                                     categories =
                                         (db.getCategoriesForManga(it)
                                                 .executeAsBlocking()
@@ -170,7 +169,7 @@ class StatsPresenter(
                                                     prefs.context.getString(R.string.default_value)
                                                 ))
                                             .sorted()
-                                            .toImmutableList(),
+                                            .toPersistentList(),
                                 )
                             }
                         }
@@ -179,7 +178,7 @@ class StatsPresenter(
                 _detailState.value =
                     DetailedState(
                         isLoading = false,
-                        manga = detailedStatMangaList.toImmutableList(),
+                        manga = detailedStatMangaList.toPersistentList(),
                         categories =
                             (db.getCategories().executeAsBlocking().map { it.name } +
                                     listOf(prefs.context.getString(R.string.default_value)))
@@ -192,7 +191,7 @@ class StatsPresenter(
                                 .distinct()
                                 .filter { !it.contains("content rating:", true) }
                                 .sortedBy { it }
-                                .toImmutableList(),
+                                .toPersistentList(),
                     )
 
                 val sortedSeries =
@@ -201,10 +200,10 @@ class StatsPresenter(
                             tag to
                                 _detailState.value.manga
                                     .filter { it.tags.contains(tag) }
-                                    .toImmutableList()
+                                    .toPersistentList()
                         }
                         .sortedByDescending { it.second.count() }
-                        .toImmutableList()
+                        .toPersistentList()
                 val totalCount = sortedSeries.sumOf { it.second.size }
                 val totalDuration =
                     sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }

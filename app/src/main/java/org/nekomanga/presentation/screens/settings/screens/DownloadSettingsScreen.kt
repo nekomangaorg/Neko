@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentMap
 import org.nekomanga.R
@@ -22,13 +22,13 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class DownloadSettingsScreen(
     val preferences: PreferencesHelper,
     val readerPreferences: ReaderPreferences,
-    val allCategories: ImmutableList<CategoryItem>,
+    val allCategories: PersistentList<CategoryItem>,
     onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
     override fun getTitleRes(): Int = R.string.downloads
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
 
         return persistentListOf(
             Preference.PreferenceItem.SwitchPreference(
@@ -188,7 +188,7 @@ internal class DownloadSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.only_download_over_wifi)),
                 SearchTerm(title = stringResource(R.string.save_chapters_as_cbz)),

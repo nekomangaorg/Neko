@@ -14,12 +14,12 @@ import eu.kanade.tachiyomi.ui.setting.MangaDexSettingsViewModel
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -42,7 +42,7 @@ internal class MangaDexSettingsScreen(
     override fun getTitleRes(): Int = R.string.site_specific_settings
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
 
         return persistentListOf(
@@ -56,7 +56,7 @@ internal class MangaDexSettingsScreen(
                 imageGroup(mangaDexPreferences),
                 libraryGroup(context, mangaDexPreferences),
             )
-            .toImmutableList()
+            .toPersistentList()
     }
 
     @Composable
@@ -240,7 +240,7 @@ internal class MangaDexSettingsScreen(
                             subtitle = stringResource(R.string.reading_sync_summary),
                         ),
                     )
-                    .toImmutableList(),
+                    .toPersistentList(),
         )
     }
 
@@ -327,7 +327,7 @@ internal class MangaDexSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.show_content_rating_filter_in_search),

@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.screens.feed.updates.UpdatesCard
@@ -35,9 +35,9 @@ fun FeedSummaryPage(
     updatingUpdates: Boolean = false,
     updatingContinueReading: Boolean = false,
     updatingNewlyAdded: Boolean = false,
-    updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    continueReadingFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    continueReadingFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    newlyAddedFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
     feedScreenActions: FeedScreenActions,
 ) {

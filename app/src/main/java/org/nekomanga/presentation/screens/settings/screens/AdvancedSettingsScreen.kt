@@ -25,7 +25,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.SharedFlow
@@ -67,7 +67,7 @@ internal class AdvancedSettingsScreen(
 
     @SuppressLint("BatteryLife")
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event) } }
@@ -253,7 +253,7 @@ internal class AdvancedSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.send_crash_report),

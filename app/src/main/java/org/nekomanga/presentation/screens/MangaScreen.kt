@@ -61,7 +61,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInWebView
 import java.text.DateFormat
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -382,7 +382,7 @@ private fun VerticalLayout(
     contentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chaptersProvider: () -> ImmutableList<ChapterItem>,
+    chaptersProvider: () -> PersistentList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
@@ -404,7 +404,7 @@ private fun SideBySideLayout(
     chapterContentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chaptersProvider: () -> ImmutableList<ChapterItem>,
+    chaptersProvider: () -> PersistentList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {

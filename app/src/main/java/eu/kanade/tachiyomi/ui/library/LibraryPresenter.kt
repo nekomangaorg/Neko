@@ -877,11 +877,13 @@ class LibraryPresenter(
                         }
                     }
                 }
+                .distinctUntilChanged()
                 .collect { index ->
-                    val mutableItems = _libraryScreenState.value.items.toMutableList()
-                    mutableItems[index] =
-                        mutableItems[index].copy(isRefreshing = !mutableItems[index].isRefreshing)
-                    _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
+                    val updatedItem =
+                        _libraryScreenState.value.items[index].copy(
+                            isRefreshing = !_libraryScreenState.value.items[index].isRefreshing
+                        )
+                    _libraryScreenState.update { it.copy(items = it.items.set(index, updatedItem)) }
                 }
         }
     }

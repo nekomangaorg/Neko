@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
@@ -210,13 +210,13 @@ fun SManga.getSlug(): String {
 }
 
 /** resync homepage manga with db manga */
-fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga> {
+fun List<HomePageManga>.resync(db: DatabaseHelper): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.resync(db).toImmutableList()
+                displayManga = homePageManga.displayManga.resync(db).toPersistentList()
             )
         }
-        .toImmutableList()
+        .toPersistentList()
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
@@ -242,13 +242,13 @@ fun List<DisplayManga>.unique(): List<DisplayManga> {
 }
 
 /** Updates the visibility of HomePageManga display manga */
-fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
+fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList()
+                displayManga = homePageManga.displayManga.updateVisibility(prefs).toPersistentList()
             )
         }
-        .toImmutableList()
+        .toPersistentList()
 }
 
 /**

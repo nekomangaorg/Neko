@@ -1,7 +1,7 @@
 package org.nekomanga.presentation.screens.settings
 
 import androidx.compose.runtime.Composable
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 
@@ -9,7 +9,7 @@ import org.nekomanga.presentation.components.NekoScaffoldType
 internal fun PreferenceScaffold(
     title: String,
     onNavigationIconClicked: () -> Unit,
-    itemsProvider: @Composable () -> ImmutableList<Preference>,
+    itemsProvider: @Composable () -> PersistentList<Preference>,
 ) {
     NekoScaffold(
         type = NekoScaffoldType.Title,

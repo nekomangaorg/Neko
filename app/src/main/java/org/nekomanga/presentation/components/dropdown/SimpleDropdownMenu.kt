@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.components.NekoColors
@@ -26,7 +26,7 @@ import org.nekomanga.presentation.theme.Size
 fun SimpleDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
-    dropDownItems: ImmutableList<SimpleDropDownItem>,
+    dropDownItems: PersistentList<SimpleDropDownItem>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     val background =

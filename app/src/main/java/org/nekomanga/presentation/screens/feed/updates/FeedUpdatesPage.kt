@@ -18,9 +18,9 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
@@ -28,7 +28,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedUpdatesPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
@@ -71,7 +71,7 @@ fun FeedUpdatesPage(
 private fun Grouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
@@ -92,7 +92,7 @@ private fun Grouped(
                         .map {
                             val (read, unread) =
                                 it.value.flatMap { it.chapters }.partition { it.chapter.read }
-                            val chapters = (unread.reversed() + read).toImmutableList()
+                            val chapters = (unread.reversed() + read).toPersistentList()
                             it.value.first().copy(chapters = chapters)
                         }
                 }
@@ -161,7 +161,7 @@ private fun Grouped(
 private fun Ungrouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,

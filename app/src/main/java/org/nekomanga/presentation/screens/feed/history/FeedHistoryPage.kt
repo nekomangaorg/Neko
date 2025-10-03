@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.theme.Size
 
@@ -29,7 +29,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedHistoryPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedHistoryMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedHistoryMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
     outlineCards: Boolean,
     hasMoreResults: Boolean,

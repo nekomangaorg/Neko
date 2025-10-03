@@ -2,7 +2,7 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
@@ -13,7 +13,7 @@ import org.nekomanga.presentation.components.UiText
 @Composable
 fun MangaDetailsAppBarActions(
     chapterActions: MangaConstants.ChapterActions,
-    chaptersProvider: () -> ImmutableList<ChapterItem>,
+    chaptersProvider: () -> PersistentList<ChapterItem>,
 ) {
     AppBarActions(
         actions =

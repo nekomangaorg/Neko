@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.ui.setting.CacheData
 import eu.kanade.tachiyomi.ui.setting.CacheType
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.SharedFlow
@@ -46,7 +46,7 @@ internal class DataStorageSettingsScreen(
     override fun getTitleRes(): Int = R.string.data_storage
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event.resourceId) } }
@@ -220,7 +220,7 @@ internal class DataStorageSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.storage_location)),
                 SearchTerm(

@@ -35,7 +35,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.MangaCover
@@ -48,7 +48,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
-    feedMangaList: ImmutableList<FeedManga>,
+    feedMangaList: PersistentList<FeedManga>,
     summaryScreenPagingState: State<SummaryScreenPagingState>,
     outlineCovers: Boolean,
     outlineCards: Boolean,

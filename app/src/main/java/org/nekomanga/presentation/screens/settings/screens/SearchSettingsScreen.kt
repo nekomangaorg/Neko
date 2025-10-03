@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
@@ -227,7 +227,7 @@ private fun searchTerms() =
 private data class SettingsData(
     val settingScreenType: SettingsScreenType,
     val settingsStringTitle: String,
-    val contents: ImmutableList<SearchTerm>,
+    val contents: PersistentList<SearchTerm>,
 )
 
 private data class SearchResultItem(

@@ -52,7 +52,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.R
@@ -73,8 +73,8 @@ fun DescriptionBlock(
     titleProvider: () -> String,
     description: String,
     isInitializedProvider: () -> Boolean,
-    altTitlesProvider: () -> ImmutableList<String>,
-    genresProvider: () -> ImmutableList<String>,
+    altTitlesProvider: () -> PersistentList<String>,
+    genresProvider: () -> PersistentList<String>,
     themeColorState: ThemeColorState,
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
@@ -246,7 +246,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 
 @Composable
 private fun AltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     shouldWrap: Boolean,
     tagColor: Color,
@@ -295,7 +295,7 @@ private fun AltTitles(
 
 @Composable
 private fun FlowableAltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
     tagColor: Color,
@@ -354,7 +354,7 @@ private fun FlowableAltTitles(
 
 @Composable
 private fun ScrollableAltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
     tagColor: Color,
@@ -429,7 +429,7 @@ private fun ScrollableAltTitles(
 
 @Composable
 private fun ColumnScope.Genres(
-    genres: ImmutableList<String>,
+    genres: PersistentList<String>,
     tagColor: Color,
     themeColorState: ThemeColorState,
     genreSearch: (String) -> Unit,

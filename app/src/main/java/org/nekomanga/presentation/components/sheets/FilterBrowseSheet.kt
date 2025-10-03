@@ -59,10 +59,10 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
@@ -94,7 +94,7 @@ fun FilterBrowseSheet(
     loadFilter: (BrowseFilterImpl) -> Unit,
     filterChanged: (Filter) -> Unit,
     defaultContentRatings: ImmutableSet<String>,
-    savedFilters: ImmutableList<BrowseFilterImpl>,
+    savedFilters: PersistentList<BrowseFilterImpl>,
     bottomContentPadding: Dp = 16.dp,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
@@ -237,7 +237,7 @@ fun FilterBrowseSheet(
                 )
 
                 FilterRow(
-                    items = filters.originalLanguage.toImmutableList(),
+                    items = filters.originalLanguage.toPersistentList(),
                     expanded = originalLanguageExpanded,
                     disabled = disabled,
                     headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
@@ -252,7 +252,7 @@ fun FilterBrowseSheet(
 
                 if (filters.contentRatingVisible) {
                     FilterRow(
-                        items = filters.contentRatings.toImmutableList(),
+                        items = filters.contentRatings.toPersistentList(),
                         expanded = contentRatingExpanded,
                         disabled = disabled,
                         headerClicked = { contentRatingExpanded = !contentRatingExpanded },
@@ -269,7 +269,7 @@ fun FilterBrowseSheet(
                 }
 
                 FilterRow(
-                    items = filters.publicationDemographics.toImmutableList(),
+                    items = filters.publicationDemographics.toPersistentList(),
                     expanded = publicationDemographicExpanded,
                     disabled = disabled,
                     headerClicked = {
@@ -283,7 +283,7 @@ fun FilterBrowseSheet(
                 )
 
                 FilterRow(
-                    items = filters.statuses.toImmutableList(),
+                    items = filters.statuses.toPersistentList(),
                     expanded = statusExpanded,
                     disabled = disabled,
                     headerClicked = { statusExpanded = !statusExpanded },
@@ -295,7 +295,7 @@ fun FilterBrowseSheet(
                 )
 
                 FilterRow(
-                    items = filters.sort.toImmutableList(),
+                    items = filters.sort.toPersistentList(),
                     expanded = sortExpanded,
                     disabled = disabled,
                     headerClicked = { sortExpanded = !sortExpanded },
@@ -307,7 +307,7 @@ fun FilterBrowseSheet(
                 )
 
                 FilterTriStateRow(
-                    items = filters.tags.toImmutableList(),
+                    items = filters.tags.toPersistentList(),
                     expanded = tagExpanded,
                     disabled = disabled,
                     headerClicked = { tagExpanded = !tagExpanded },
@@ -422,7 +422,7 @@ fun FilterBrowseSheet(
 
 @Composable
 private fun <T> FilterRow(
-    items: ImmutableList<T>,
+    items: PersistentList<T>,
     expanded: Boolean,
     disabled: Boolean,
     anyEnabled: Boolean,
@@ -470,7 +470,7 @@ private fun <T> FilterRow(
 
 @Composable
 private fun <T> FilterTriStateRow(
-    items: ImmutableList<T>,
+    items: PersistentList<T>,
     expanded: Boolean,
     disabled: Boolean,
     headerClicked: () -> Unit,
@@ -652,7 +652,7 @@ fun OtherRow(
 @Composable
 fun SavedFilters(
     visible: Boolean,
-    savedFilters: ImmutableList<BrowseFilterImpl>,
+    savedFilters: PersistentList<BrowseFilterImpl>,
     nameOfEnabledFilter: String,
     loadFilter: (BrowseFilterImpl) -> Unit,
     deleteFilterClick: (String) -> Unit,
@@ -670,7 +670,7 @@ fun SavedFilters(
                         val mutableFilters = savedFilters.toMutableList()
                         val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
                         mutableStateOf(
-                            persistentListOf(enabledFilter) + mutableFilters.toImmutableList()
+                            persistentListOf(enabledFilter) + mutableFilters.toPersistentList()
                         )
                     }
                 }

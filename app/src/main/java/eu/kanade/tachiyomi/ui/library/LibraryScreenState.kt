@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentListOf
@@ -39,14 +38,14 @@ data class LibraryScreenState(
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
-    val groupByOptions: ImmutableList<Int> = persistentListOf(),
+    val groupByOptions: PersistentList<Int> = persistentListOf(),
     val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
     val showUnavailableFilter: Boolean = false,
     val showStartReadingButton: Boolean = true,
     val currentGroupBy: Int = 0,
-    val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
-    val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
-    val userCategories: ImmutableList<CategoryItem> = persistentListOf(),
+    val items: PersistentList<LibraryCategoryItem> = persistentListOf(),
+    val selectedItems: PersistentList<LibraryMangaItem> = persistentListOf(),
+    val userCategories: PersistentList<CategoryItem> = persistentListOf(),
     val horizontalCategories: Boolean = false,
     val showLibraryButtonBar: Boolean = true,
 )
@@ -104,7 +103,7 @@ data class LibraryViewItem(
 data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
     val isRefreshing: Boolean = false,
-    val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
+    val libraryItems: PersistentList<LibraryMangaItem> = persistentListOf(),
 )
 
 @Immutable

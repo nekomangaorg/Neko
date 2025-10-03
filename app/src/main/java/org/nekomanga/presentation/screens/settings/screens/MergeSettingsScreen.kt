@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.MergeScreenState
 import eu.kanade.tachiyomi.ui.setting.MergeScreenType
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
@@ -30,7 +30,7 @@ internal class MergeSettingsScreen(
     override fun getTitleRes(): Int = R.string.merge_source_settings
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         return persistentListOf(
             mergeGroup(
                 mergeState = komgaState,
@@ -106,7 +106,7 @@ internal class MergeSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.komga)),
                 SearchTerm(title = stringResource(R.string.suwayomi)),

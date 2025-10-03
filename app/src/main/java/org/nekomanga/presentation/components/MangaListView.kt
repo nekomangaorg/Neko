@@ -28,14 +28,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.util.Objects
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaList(
-    mangaList: ImmutableList<DisplayManga>,
+    mangaList: PersistentList<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
@@ -73,7 +73,7 @@ fun MangaList(
 
 @Composable
 fun MangaListWithHeader(
-    groupedManga: ImmutableMap<Int, ImmutableList<DisplayManga>>,
+    groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),

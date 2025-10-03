@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackServiceItem
 import tachiyomi.core.preference.Preference as PreferenceData
@@ -191,6 +191,6 @@ sealed class Preference {
         override val title: String,
         override val enabled: Boolean = true,
         val subtitle: String? = null,
-        val preferenceItems: ImmutableList<PreferenceItem<out Any>>,
+        val preferenceItems: PersistentList<PreferenceItem<out Any>>,
     ) : Preference()
 }

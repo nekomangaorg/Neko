@@ -45,7 +45,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import java.text.DateFormat
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -65,8 +65,8 @@ import org.nekomanga.presentation.theme.Size
 fun TrackingSheet(
     themeColor: ThemeColorState,
     inLibrary: Boolean,
-    servicesProvider: () -> ImmutableList<TrackServiceItem>,
-    tracksProvider: () -> ImmutableList<TrackItem>,
+    servicesProvider: () -> PersistentList<TrackServiceItem>,
+    tracksProvider: () -> PersistentList<TrackItem>,
     dateFormat: DateFormat,
     onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (TrackServiceItem, TrackItem?) -> Unit,

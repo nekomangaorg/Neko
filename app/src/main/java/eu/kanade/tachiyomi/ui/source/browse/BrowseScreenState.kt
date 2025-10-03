@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.ui.source.browse
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
@@ -26,8 +26,8 @@ data class BrowseScreenState(
     val incognitoMode: Boolean = false,
     val screenType: BrowseScreenType = BrowseScreenType.Homepage,
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
-    val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),
-    val otherResults: ImmutableList<DisplayResult> = persistentListOf(),
+    val homePageManga: PersistentList<HomePageManga> = persistentListOf(),
+    val otherResults: PersistentList<DisplayResult> = persistentListOf(),
     val error: UiText? = null,
     val endReached: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
@@ -42,20 +42,20 @@ data class BrowseScreenState(
     val defaultContentRatings: ImmutableSet<String>,
     val handledIncomingQuery: Boolean = false,
     val firstLoad: Boolean = true,
-    val savedFilters: ImmutableList<BrowseFilterImpl> = persistentListOf(),
-    val categories: ImmutableList<CategoryItem> = persistentListOf(),
+    val savedFilters: PersistentList<BrowseFilterImpl> = persistentListOf(),
+    val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 
 data class HomePageManga(
     val displayScreenType: DisplayScreenType,
-    val displayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val displayManga: PersistentList<DisplayManga> = persistentListOf(),
 )
 
 data class DisplayMangaHolder(
     val resultType: BrowseScreenType = BrowseScreenType.None,
-    val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
-    val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
-    val groupedDisplayManga: ImmutableMap<Int, ImmutableList<DisplayManga>> = persistentMapOf(),
+    val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val groupedDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
 )
 
 enum class BrowseScreenType {

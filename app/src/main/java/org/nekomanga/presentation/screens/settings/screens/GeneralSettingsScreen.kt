@@ -3,7 +3,7 @@ package org.nekomanga.presentation.screens.settings.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
@@ -20,7 +20,7 @@ internal class GeneralSettingsScreen(
     override fun getTitleRes(): Int = R.string.general
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         return persistentListOf(
             Preference.PreferenceItem.ListPreference(
                 pref = preferencesHelper.startingTab(),
@@ -101,7 +101,7 @@ internal class GeneralSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.starting_screen)),
                 SearchTerm(title = stringResource(R.string.date_format)),

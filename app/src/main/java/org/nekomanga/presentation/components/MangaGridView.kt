@@ -29,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.extensions.gridItems
 import org.nekomanga.presentation.theme.Shapes
@@ -38,7 +38,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaGridWithHeader(
-    groupedManga: ImmutableMap<Int, ImmutableList<DisplayManga>>,
+    groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
     shouldOutlineCover: Boolean,
     columns: Int,
     modifier: Modifier = Modifier,

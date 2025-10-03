@@ -6,8 +6,8 @@ import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import org.nekomanga.constants.MdConstants
@@ -25,42 +25,42 @@ object MangaConstants {
     data class MangaDetailScreenState(
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
-        val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val searchChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
-        val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
+        val searchChapters: PersistentList<ChapterItem> = persistentListOf(),
+        val allCategories: PersistentList<CategoryItem> = persistentListOf(),
+        val allChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
         val allUploaders: ImmutableSet<String> = persistentSetOf(),
         val allSources: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
-        val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
+        val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
         val chapterFilter: ChapterDisplay = ChapterDisplay(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
-        val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
+        val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
         val hasDefaultCategory: Boolean = false,
         val hideButtonText: Boolean = false,
         val extraLargeBackdrop: Boolean = false,
         val forcePortrait: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
-        val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
         val themeBasedOffCovers: Boolean = false,
         val wrapAltTitles: Boolean = false,
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
         val vibrantColor: Int? = null,
-        val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
-        val alternativeTitles: ImmutableList<String> = persistentListOf(),
+        val alternativeArtwork: PersistentList<Artwork> = persistentListOf(),
+        val alternativeTitles: PersistentList<String> = persistentListOf(),
         val artist: String = "",
         val author: String = "",
         val currentArtwork: Artwork,
         val currentDescription: String = "",
         val currentTitle: String = "",
-        val externalLinks: ImmutableList<ExternalLink> = persistentListOf(),
-        val genres: ImmutableList<String> = persistentListOf(),
+        val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
+        val genres: PersistentList<String> = persistentListOf(),
         val initialized: Boolean = false,
         val inLibrary: Boolean = false,
         val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
@@ -73,8 +73,8 @@ object MangaConstants {
         val status: Int = 0,
         val lastVolume: Int? = null,
         val lastChapter: Int? = null,
-        val loggedInTrackService: ImmutableList<TrackServiceItem> = persistentListOf(),
-        val tracks: ImmutableList<TrackItem> = persistentListOf(),
+        val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
+        val tracks: PersistentList<TrackItem> = persistentListOf(),
         val trackSearchResult: TrackingConstants.TrackSearchResult =
             TrackingConstants.TrackSearchResult.Loading,
         val mergeSearchResult: MergeConstants.MergeSearchResult =
@@ -97,11 +97,11 @@ object MangaConstants {
 
     data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    data class ScanlatorFilter(val scanlators: ImmutableList<ScanlatorOption>)
+    data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption>)
 
     data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
-    data class LanguageFilter(val languages: ImmutableList<LanguageOption>)
+    data class LanguageFilter(val languages: PersistentList<LanguageOption>)
 
     data class LanguageOption(val name: String, val disabled: Boolean = false)
 

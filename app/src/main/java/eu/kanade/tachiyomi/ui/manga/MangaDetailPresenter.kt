@@ -61,9 +61,8 @@ import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
@@ -273,7 +272,9 @@ class MangaDetailPresenter(
                                 1 -> Unit
                                 else -> {
                                     _mangaDetailScreenState.update {
-                                        it.copy(removedChapters = removedChapters.toImmutableList())
+                                        it.copy(
+                                            removedChapters = removedChapters.toPersistentList()
+                                        )
                                     }
                                 }
                             }
@@ -717,7 +718,7 @@ class MangaDetailPresenter(
             val altArtwork = createAltArtwork(currentManga(), currentArtwork)
             _mangaDetailScreenState.update {
                 it.copy(
-                    alternativeArtwork = altArtwork.toImmutableList(),
+                    alternativeArtwork = altArtwork.toPersistentList(),
                     currentArtwork = currentArtwork,
                 )
             }
@@ -733,7 +734,7 @@ class MangaDetailPresenter(
         )
     }
 
-    private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
+    private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): PersistentList<Artwork> {
         val quality = mangaDexPreferences.coverQuality().get()
 
         return db.getArtwork(mangaId)
@@ -750,7 +751,7 @@ class MangaDetailPresenter(
                                 currentArtwork.originalArtwork.contains(aw.fileName)),
                 )
             }
-            .toImmutableList()
+            .toPersistentList()
     }
 
     private fun updateVibrantColorFlow() {
@@ -805,7 +806,7 @@ class MangaDetailPresenter(
                                 },
                         )
                     }
-            _mangaDetailScreenState.update { it.copy(allChapters = allChapters.toImmutableList()) }
+            _mangaDetailScreenState.update { it.copy(allChapters = allChapters.toPersistentList()) }
 
             val allSources = mutableSetOf(MdConstants.name)
 
@@ -844,8 +845,8 @@ class MangaDetailPresenter(
                     activeChapters =
                         chapterSort
                             .getChaptersSorted(currentManga(), allChapters)
-                            .toImmutableList(),
-                    allChapters = allChapters.toImmutableList(),
+                            .toPersistentList(),
+                    allChapters = allChapters.toPersistentList(),
                     allScanlators = allChapterScanlators.toImmutableSet(),
                     allUploaders = allChapterUploaders.toImmutableSet(),
                     allSources = allSources.toImmutableSet(),
@@ -901,9 +902,9 @@ class MangaDetailPresenter(
 
             _mangaDetailScreenState.update { state ->
                 state.copy(
-                    allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
+                    allCategories = categories.map { it.toCategoryItem() }.toPersistentList(),
                     currentCategories =
-                        mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
+                        mangaCategories.map { it.toCategoryItem() }.toPersistentList(),
                 )
             }
         }
@@ -918,12 +919,12 @@ class MangaDetailPresenter(
                         trackManager.services
                             .filter { it.value.isLogged() }
                             .map { it.value.toTrackServiceItem() }
-                            .toImmutableList(),
+                            .toPersistentList(),
                     tracks =
                         db.getTracks(mangaId)
                             .executeAsBlocking()
                             .map { it.toTrackItem() }
-                            .toImmutableList(),
+                            .toPersistentList(),
                 )
             }
 
@@ -1067,7 +1068,7 @@ class MangaDetailPresenter(
                             db.getTracks(mangaId)
                                 .executeAsBlocking()
                                 .map { it.toTrackItem() }
-                                .toImmutableList()
+                                .toPersistentList()
                     )
                 }
             }
@@ -1200,7 +1201,7 @@ class MangaDetailPresenter(
                         disabled = filteredScanlators.contains(scanlator),
                     )
                 }
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toPersistentList())
     }
 
     /** Get scanlator filter */
@@ -1216,7 +1217,7 @@ class MangaDetailPresenter(
                         disabled = filteredScanlators.contains(scanlator),
                     )
                 }
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toPersistentList())
     }
 
     /** Get scanlator filter */
@@ -1231,7 +1232,7 @@ class MangaDetailPresenter(
                         disabled = filteredLanguages.contains(language),
                     )
                 }
-        return MangaConstants.LanguageFilter(languages = languageOptions.toImmutableList())
+        return MangaConstants.LanguageFilter(languages = languageOptions.toPersistentList())
     }
 
     private fun getFilterText(
@@ -1491,13 +1492,13 @@ class MangaDetailPresenter(
 
     private fun getMangaStateCopyFromManga(m: Manga): MangaConstants.MangaDetailScreenState {
         return mangaDetailScreenState.value.copy(
-            alternativeTitles = m.getAltTitles().toImmutableList(),
+            alternativeTitles = m.getAltTitles().toPersistentList(),
             artist = m.artist ?: "",
             author = m.author ?: "",
             currentDescription = getDescription(),
             currentTitle = m.title,
-            externalLinks = m.getExternalLinks().toImmutableList(),
-            genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
+            externalLinks = m.getExternalLinks().toPersistentList(),
+            genres = (m.getGenres(true) ?: emptyList()).toPersistentList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
             isMerged = isMerged(m),
@@ -2058,7 +2059,7 @@ class MangaDetailPresenter(
                     )
                 mutableChapters[index] = updateChapter
                 _mangaDetailScreenState.update {
-                    it.copy(activeChapters = mutableChapters.toImmutableList())
+                    it.copy(activeChapters = mutableChapters.toPersistentList())
                 }
             }
         }

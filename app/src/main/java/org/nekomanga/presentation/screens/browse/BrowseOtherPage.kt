@@ -2,7 +2,7 @@ package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.presentation.components.ResultList
@@ -11,7 +11,7 @@ import org.nekomanga.presentation.screens.EmptyScreen
 
 @Composable
 fun BrowseOtherPage(
-    results: ImmutableList<DisplayResult>,
+    results: PersistentList<DisplayResult>,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (String) -> Unit,
 ) {

@@ -15,13 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ResultList(
-    results: ImmutableList<DisplayResult>,
+    results: PersistentList<DisplayResult>,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (String) -> Unit = {},
 ) {

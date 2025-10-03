@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.feed
 
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -20,7 +20,7 @@ data class FeedScreenState(
     val groupUpdateChapters: Boolean = false,
     val incognitoMode: Boolean = false,
     val swipeRefreshEnabled: Boolean = true,
-    val downloads: ImmutableList<DownloadItem> = persistentListOf(),
+    val downloads: PersistentList<DownloadItem> = persistentListOf(),
     val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
     val downloadOnlyOnWifi: Boolean,
 )
@@ -30,8 +30,8 @@ data class HistoryScreenPagingState(
     val hasMoreResults: Boolean = true,
     val pageLoading: Boolean = false,
     val historyGrouping: FeedHistoryGroup,
-    val historyFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    val searchHistoryFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val historyFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    val searchHistoryFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     val searchQuery: String = "",
 )
 
@@ -40,18 +40,18 @@ data class UpdatesScreenPagingState(
     val hasMoreResults: Boolean = true,
     val pageLoading: Boolean = false,
     val updatesSortedByFetch: Boolean = true,
-    val updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    val searchUpdatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    val searchUpdatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     val searchQuery: String = "",
 )
 
 data class SummaryScreenPagingState(
     val updatingUpdates: Boolean = true,
-    val updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     val updatingContinueReading: Boolean = true,
-    val continueReadingList: ImmutableList<FeedManga> = persistentListOf(),
+    val continueReadingList: PersistentList<FeedManga> = persistentListOf(),
     val updatingNewlyAdded: Boolean = true,
-    val newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    val newlyAddedFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
 )
 
 enum class FeedScreenType {
@@ -116,6 +116,6 @@ data class FeedManga(
     val date: Long,
     val mangaId: Long,
     val artwork: Artwork,
-    val chapters: ImmutableList<ChapterItem>,
+    val chapters: PersistentList<ChapterItem>,
     val lastReadChapter: String = "",
 )

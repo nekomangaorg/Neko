@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.more.stats
 
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
@@ -34,16 +34,16 @@ object StatsConstants {
 
     data class DetailedState(
         val isLoading: Boolean = true,
-        val manga: ImmutableList<DetailedStatManga> = persistentListOf(),
-        val categories: ImmutableList<String> = persistentListOf(),
-        val tags: ImmutableList<String> = persistentListOf(),
+        val manga: PersistentList<DetailedStatManga> = persistentListOf(),
+        val categories: PersistentList<String> = persistentListOf(),
+        val tags: PersistentList<String> = persistentListOf(),
         val detailTagState: DetailedTagState = DetailedTagState(),
     )
 
     data class DetailedTagState(
         val totalReadDuration: Long = 0L,
         val totalChapters: Int = 0,
-        val sortedTagPairs: ImmutableList<Pair<String, ImmutableList<DetailedStatManga>>> =
+        val sortedTagPairs: PersistentList<Pair<String, PersistentList<DetailedStatManga>>> =
             persistentListOf(),
     )
 
@@ -61,9 +61,9 @@ object StatsConstants {
         val rating: Double?,
         val userScore: Double?,
         val startYear: Int?,
-        val trackers: ImmutableList<String>,
-        val tags: ImmutableList<String>,
-        val categories: ImmutableList<String>,
+        val trackers: PersistentList<String>,
+        val tags: PersistentList<String>,
+        val categories: PersistentList<String>,
     )
 
     sealed class ScreenState {

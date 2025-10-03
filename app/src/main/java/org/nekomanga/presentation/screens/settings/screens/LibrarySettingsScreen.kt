@@ -12,7 +12,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableMap
@@ -38,7 +38,7 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class LibrarySettingsScreen(
     val libraryPreferences: LibraryPreferences,
     onNavigationIconClick: () -> Unit,
-    val categories: ImmutableList<CategoryItem>,
+    val categories: PersistentList<CategoryItem>,
     val viewModelScope: CoroutineScope,
     val onAddEditCategoryClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick) {
@@ -46,7 +46,7 @@ internal class LibrarySettingsScreen(
     override fun getTitleRes(): Int = R.string.library
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
 
         return persistentListOf(
@@ -96,7 +96,7 @@ internal class LibrarySettingsScreen(
 
     @Composable
     private fun categoriesGroup(
-        categories: ImmutableList<CategoryItem>
+        categories: PersistentList<CategoryItem>
     ): Preference.PreferenceGroup {
         val alwaysAsk = Pair(-1, stringResource(R.string.always_ask))
         val nonSystemCategories =
@@ -138,7 +138,7 @@ internal class LibrarySettingsScreen(
     @Composable
     private fun globalUpdateGroup(
         context: Context,
-        allCategoryList: ImmutableList<CategoryItem>,
+        allCategoryList: PersistentList<CategoryItem>,
     ): Preference.PreferenceGroup {
 
         val libraryUpdateInterval by libraryPreferences.updateInterval().collectAsState()
@@ -275,7 +275,7 @@ internal class LibrarySettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.enable_local_manga),

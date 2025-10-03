@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import java.util.Calendar
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
@@ -62,7 +62,7 @@ class SearchHandler {
                                 information = it.attributes.biography.asMdMap<String>()["en"] ?: "",
                             )
                         }
-                        .toImmutableList()
+                        .toPersistentList()
                 Ok(ResultListPage(hasNextPage = false, results = results))
             }
     }
@@ -81,7 +81,7 @@ class SearchHandler {
                                 information = it.attributes.description ?: "",
                             )
                         }
-                        .toImmutableList()
+                        .toPersistentList()
                 Ok(ResultListPage(hasNextPage = false, results = results))
             }
     }
@@ -192,7 +192,7 @@ class SearchHandler {
                                 mangaListDto.data
                                     .distinctBy { it.id }
                                     .map { it.toSourceManga(thumbQuality) }
-                                    .toImmutableList(),
+                                    .toPersistentList(),
                         )
                     )
                 }
@@ -232,7 +232,7 @@ class SearchHandler {
                                             displayText = "No. ${offset + index + 1}",
                                         )
                                     }
-                                    .toImmutableList(),
+                                    .toPersistentList(),
                         )
                     )
                 }
@@ -245,7 +245,7 @@ class SearchHandler {
                 val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
                 val thumbQuality = mangaDexPreferences.coverQuality().get()
                 val mangaList =
-                    mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
+                    mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toPersistentList()
                 MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
             }
             .mapError {
