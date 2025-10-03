@@ -1008,24 +1008,23 @@ class LibraryPresenter(
 
     fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
         presenterScope.launchIO {
-            val currentSelected = _libraryScreenState.value.selectedItems.toMutableList()
             val index =
-                currentSelected.indexOfFirst {
+                _libraryScreenState.value.selectedItems.indexOfFirst {
                     it.displayManga.mangaId == libraryMangaItem.displayManga.mangaId
                 }
             if (index >= 0) {
-                currentSelected.removeAt(index)
+                _libraryScreenState.value.selectedItems.removeAt(index)
             } else {
                 val categoryItems =
                     db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
                         .executeOnIO()
                         .map { it.toCategoryItem() }
                 val copy = libraryMangaItem.copy(allCategories = categoryItems)
-                currentSelected.add(copy)
+                _libraryScreenState.value.selectedItems.add(copy)
             }
 
             _libraryScreenState.update {
-                it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+                it.copy(selectedItems = it.selectedItems.distinct().toPersistentList())
             }
         }
     }
