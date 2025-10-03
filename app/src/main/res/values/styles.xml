@@ -151,7 +151,12 @@
         <item name="buttonTint">@null</item>
     </style>
 
+    <style name="Widget.Neko.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/bottom_nav_item_active_indicator</item>
+    </style>
+
     <style name="Widget.Neko.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@style/Widget.Neko.ActiveIndicator</item>
         <item name="itemPaddingBottom">10dp</item>
         <item name="itemPaddingTop">10dp</item>
         <item name="android:minHeight">68dp</item>
@@ -166,6 +171,7 @@
 
 
     <style name="Widget.Neko.NavigationRail" parent="Widget.Material3.NavigationRailView">
+        <item name="itemActiveIndicatorStyle">@style/Widget.Neko.ActiveIndicator</item>
         <item name="android:minHeight">68dp</item>
         <item name="itemIconTint">@color/bottom_nav_item_selector</item>
         <item name="itemRippleColor">?colorPrimary</item>
