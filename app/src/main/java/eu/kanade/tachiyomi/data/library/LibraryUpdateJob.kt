@@ -78,9 +78,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -162,8 +160,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
 
-        jobRunningMutableStateFlow.value = true
-
         libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
         tryToSetForeground()
@@ -220,7 +216,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     Result.failure()
                 }
             } finally {
-                jobRunningMutableStateFlow.value = false
                 instance = null
                 sendUpdate(null)
                 notifier.cancelProgressNotification()
@@ -890,9 +885,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
         val updateFlow = updateMutableFlow.asSharedFlow()
-
-        private val jobRunningMutableStateFlow = MutableStateFlow(false)
-        val jobRunningStateFlow = jobRunningMutableStateFlow.asStateFlow()
 
         private val categoryUpdateMutableFlow =
             MutableSharedFlow<Int>(

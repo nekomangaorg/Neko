@@ -56,7 +56,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
@@ -830,6 +829,11 @@ class LibraryPresenter(
                 .distinctUntilChanged()
                 .collectLatest { running ->
                     _libraryScreenState.update { it.copy(isRefreshing = false) }
+                    val updatedList =
+                        _libraryScreenState.value.items
+                            .map { it.copy(isRefreshing = false) }
+                            .toPersistentList()
+                    _libraryScreenState.update { it.copy(items = updatedList) }
                 }
         }
 
@@ -860,31 +864,19 @@ class LibraryPresenter(
         }
 
         presenterScope.launchIO {
-            flow {
-                    while (true) {
-                        _libraryScreenState.value.items.forEachIndexed { index, libraryCategoryItem
-                            ->
-                            val isInQueue =
-                                LibraryUpdateJob.categoryInQueue(
-                                    libraryCategoryItem.categoryItem.id
-                                )
-                            if (
-                                (libraryCategoryItem.isRefreshing && !isInQueue) ||
-                                    (!libraryCategoryItem.isRefreshing && isInQueue)
-                            ) {
-                                emit(index)
-                            }
-                        }
+            LibraryUpdateJob.categoryUpdateFlow.distinctUntilChanged().collect { categoryId ->
+                val index =
+                    _libraryScreenState.value.items.indexOfFirst {
+                        it.categoryItem.id == categoryId
                     }
-                }
-                .distinctUntilChanged()
-                .collect { index ->
+                if (index >= 0) {
                     val updatedItem =
                         _libraryScreenState.value.items[index].copy(
                             isRefreshing = !_libraryScreenState.value.items[index].isRefreshing
                         )
                     _libraryScreenState.update { it.copy(items = it.items.set(index, updatedItem)) }
                 }
+            }
         }
     }
 
