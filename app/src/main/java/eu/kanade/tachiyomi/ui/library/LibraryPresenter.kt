@@ -114,11 +114,6 @@ class LibraryPresenter(
             transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
         }
 
-    override fun onResume() {
-        super.onResume()
-        observeLibraryUpdates()
-    }
-
     /** Save the current list to speed up loading later */
     override fun onDestroy() {
         super.onDestroy()
@@ -128,16 +123,21 @@ class LibraryPresenter(
     override fun onCreate() {
         super.onCreate()
         presenterScope.launchIO {
-            lastLibraryCategoryItems?.let { items ->
-                val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
-                _libraryScreenState.update {
-                    it.copy(
-                        isFirstLoad = false,
-                        items = items.toPersistentList(),
-                        allCollapsed = !notAllCollapsed,
-                    )
+            if (lastLibraryCategoryItems == null) {
+                _libraryScreenState.update { it.copy(isFirstLoad = true) }
+            } else {
+                lastLibraryCategoryItems?.let { items ->
+                    val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
+                    _libraryScreenState.update {
+                        it.copy(
+                            isFirstLoad = false,
+                            items = items.toPersistentList(),
+                            allCollapsed = !notAllCollapsed,
+                        )
+                    }
                 }
             }
+
             lastLibraryCategoryItems = null
         }
         observeLibraryUpdates()
@@ -803,33 +803,14 @@ class LibraryPresenter(
                 .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
                 .map { list -> list.any { !it.state.isFinished } }
                 .distinctUntilChanged()
-                .collectLatest { running ->
-                    when (running) {
-                        true -> {
-                            val updatedList =
-                                _libraryScreenState.value.items
-                                    .map { libraryCategoryItem ->
-                                        if (
-                                            LibraryUpdateJob.categoryInQueue(
-                                                libraryCategoryItem.categoryItem.id
-                                            )
-                                        ) {
-                                            libraryCategoryItem.copy(isRefreshing = true)
-                                        } else {
-                                            libraryCategoryItem
-                                        }
-                                    }
-                                    .toPersistentList()
-                            _libraryScreenState.update { it.copy(items = updatedList) }
-                        }
-                        false -> {
-                            val updatedList =
-                                _libraryScreenState.value.items
-                                    .map { it.copy(isRefreshing = false) }
-                                    .toPersistentList()
-                            _libraryScreenState.update {
-                                it.copy(isRefreshing = false, items = updatedList)
-                            }
+                .collectLatest { active ->
+                    if (!active && _libraryScreenState.value.items.fastAny { it.isRefreshing }) {
+                        val updatedList =
+                            _libraryScreenState.value.items
+                                .map { it.copy(isRefreshing = false) }
+                                .toPersistentList()
+                        _libraryScreenState.update {
+                            it.copy(isRefreshing = false, items = updatedList)
                         }
                     }
                 }
@@ -861,21 +842,19 @@ class LibraryPresenter(
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
         }
 
-        /*  presenterScope.launchIO {
-            LibraryUpdateJob.categoryUpdateFlow.distinctUntilChanged().collect { categoryId ->
+        presenterScope.launchIO {
+            LibraryUpdateJob.categoryUpdateFlow.collect { categoryId ->
                 val index =
                     _libraryScreenState.value.items.indexOfFirst {
                         it.categoryItem.id == categoryId
                     }
                 if (index >= 0) {
                     val updatedItem =
-                        _libraryScreenState.value.items[index].copy(
-                            isRefreshing = !_libraryScreenState.value.items[index].isRefreshing
-                        )
+                        _libraryScreenState.value.items[index].copy(isRefreshing = true)
                     _libraryScreenState.update { it.copy(items = it.items.set(index, updatedItem)) }
                 }
             }
-        }*/
+        }
     }
 
     fun updateDownloadBadges(mangaId: Long) {
