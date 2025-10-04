@@ -28,12 +28,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun NekoTheme(content: @Composable () -> Unit) {
-
-    val colorScheme = nekoThemeColorScheme()
+fun NekoTheme(colorScheme: ColorScheme? = null, content: @Composable () -> Unit) {
+    val finalColorScheme = colorScheme ?: nekoThemeColorScheme()
 
     MaterialExpressiveTheme(
-        colorScheme = colorScheme,
+        colorScheme = finalColorScheme,
         motionScheme = MotionScheme.expressive(),
         typography = appTypography,
         content = content,
