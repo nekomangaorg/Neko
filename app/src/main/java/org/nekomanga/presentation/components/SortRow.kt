@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,6 +20,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 fun SortRow(
@@ -86,4 +89,17 @@ private fun changeSortState(
             MangaConstants.SortState.None -> MangaConstants.SortState.Descending
         }
     sortChanged(newState)
+}
+
+@ThemePreviews
+@Composable
+private fun SortRowPreview() {
+    val isDark = isSystemInDarkTheme()
+    ThemedPreviews(isDark = isDark) { theme ->
+        SortRow(
+            sortState = MangaConstants.SortState.Ascending,
+            sortChanged = {},
+            rowText = theme.name,
+        )
+    }
 }
