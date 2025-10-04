@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -798,42 +797,41 @@ class LibraryPresenter(
         }
     }
 
-    fun dragAndDropManga(
-        fromIndex: Int,
-        toIndex: Int,
-        category: CategoryItem,
-        libraryMangaItem: LibraryMangaItem,
-    ) {
-        presenterScope.launchIO {
-            val libraryCategoryItemIndex =
-                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
-            val libraryCategoryItem = _libraryScreenState.value.items[libraryCategoryItemIndex]
-            val mutableLibraryItems = libraryCategoryItem.libraryItems.toMutableList()
-            mutableLibraryItems[toIndex] = mutableLibraryItems[fromIndex]
-            val dbCategory = category.toDbCategory()
-            dbCategory.mangaOrder = mutableLibraryItems.map { item -> item.displayManga.mangaId }
-            db.insertCategory(dbCategory).executeOnIO()
-            val updatedLibraryCategoryItem =
-                libraryCategoryItem.copy(libraryItems = mutableLibraryItems.toPersistentList())
-            val mutableItems = _libraryScreenState.value.items.toMutableList()
-            mutableItems[libraryCategoryItemIndex] = updatedLibraryCategoryItem
-            _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
-        }
-    }
-
     fun observeLibraryUpdates() {
         presenterScope.launchIO {
             workManager
                 .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
+                .map { list -> list.any { !it.state.isFinished } }
                 .distinctUntilChanged()
                 .collectLatest { running ->
-                    _libraryScreenState.update { it.copy(isRefreshing = false) }
-                    val updatedList =
-                        _libraryScreenState.value.items
-                            .map { it.copy(isRefreshing = false) }
-                            .toPersistentList()
-                    _libraryScreenState.update { it.copy(items = updatedList) }
+                    when (running) {
+                        true -> {
+                            val updatedList =
+                                _libraryScreenState.value.items
+                                    .map { libraryCategoryItem ->
+                                        if (
+                                            LibraryUpdateJob.categoryInQueue(
+                                                libraryCategoryItem.categoryItem.id
+                                            )
+                                        ) {
+                                            libraryCategoryItem.copy(isRefreshing = true)
+                                        } else {
+                                            libraryCategoryItem
+                                        }
+                                    }
+                                    .toPersistentList()
+                            _libraryScreenState.update { it.copy(items = updatedList) }
+                        }
+                        false -> {
+                            val updatedList =
+                                _libraryScreenState.value.items
+                                    .map { it.copy(isRefreshing = false) }
+                                    .toPersistentList()
+                            _libraryScreenState.update {
+                                it.copy(isRefreshing = false, items = updatedList)
+                            }
+                        }
+                    }
                 }
         }
 
@@ -863,7 +861,7 @@ class LibraryPresenter(
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
         }
 
-        presenterScope.launchIO {
+        /*  presenterScope.launchIO {
             LibraryUpdateJob.categoryUpdateFlow.distinctUntilChanged().collect { categoryId ->
                 val index =
                     _libraryScreenState.value.items.indexOfFirst {
@@ -877,7 +875,7 @@ class LibraryPresenter(
                     _libraryScreenState.update { it.copy(items = it.items.set(index, updatedItem)) }
                 }
             }
-        }
+        }*/
     }
 
     fun updateDownloadBadges(mangaId: Long) {
@@ -1004,19 +1002,20 @@ class LibraryPresenter(
                 _libraryScreenState.value.selectedItems.indexOfFirst {
                     it.displayManga.mangaId == libraryMangaItem.displayManga.mangaId
                 }
-            if (index >= 0) {
-                _libraryScreenState.value.selectedItems.removeAt(index)
-            } else {
-                val categoryItems =
-                    db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
-                        .executeOnIO()
-                        .map { it.toCategoryItem() }
-                val copy = libraryMangaItem.copy(allCategories = categoryItems)
-                _libraryScreenState.value.selectedItems.add(copy)
-            }
+            val updatedSelectedItems =
+                if (index >= 0) {
+                    _libraryScreenState.value.selectedItems.removeAt(index)
+                } else {
+                    val categoryItems =
+                        db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
+                            .executeOnIO()
+                            .map { it.toCategoryItem() }
+                    val copy = libraryMangaItem.copy(allCategories = categoryItems)
+                    _libraryScreenState.value.selectedItems.add(copy)
+                }
 
             _libraryScreenState.update {
-                it.copy(selectedItems = it.selectedItems.distinct().toPersistentList())
+                it.copy(selectedItems = updatedSelectedItems.distinct().toPersistentList())
             }
         }
     }

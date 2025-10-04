@@ -886,11 +886,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             )
         val updateFlow = updateMutableFlow.asSharedFlow()
 
-        private val categoryUpdateMutableFlow =
-            MutableSharedFlow<Int>(
-                extraBufferCapacity = 1,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST,
-            )
+        private val categoryUpdateMutableFlow = MutableSharedFlow<Int>()
         val categoryUpdateFlow = categoryUpdateMutableFlow.asSharedFlow()
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
