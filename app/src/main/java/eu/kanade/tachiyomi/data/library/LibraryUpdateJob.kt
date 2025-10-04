@@ -78,7 +78,9 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -160,6 +162,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
 
+        jobRunningMutableStateFlow.value = true
+
         libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
         tryToSetForeground()
@@ -193,7 +197,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             .distinctBy { it.id }
                     val categoryId = inputData.getInt(KEY_CATEGORY, -1)
                     if (categoryId > -1) {
-                        categoryIds.add(categoryId)
+                        addCategoryToQueue(categoryId)
                     }
                     mangaList
                 } else {
@@ -216,6 +220,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     Result.failure()
                 }
             } finally {
+                jobRunningMutableStateFlow.value = false
                 instance = null
                 sendUpdate(null)
                 notifier.cancelProgressNotification()
@@ -310,18 +315,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         val listToUpdate =
             if (categoryId != -1) {
-                categoryIds.add(categoryId)
+                addCategoryToQueue(categoryId)
                 libraryManga.filter { it.category == categoryId }
             } else {
                 val categoriesToUpdate =
                     libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
                 if (categoriesToUpdate.isNotEmpty()) {
-                    categoryIds.addAll(categoriesToUpdate)
+                    addCategoriesToQueue(categoriesToUpdate)
                     libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
                 } else {
-                    categoryIds.addAll(
-                        db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0
-                    )
+                    val categories = db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0
+                    addCategoriesToQueue(categories)
                     libraryManga.distinctBy { it.id }
                 }
             }
@@ -812,14 +816,27 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
         val mangas = filterMangaToUpdate(manga).sortedBy { it.title }
-        categoryIds.add(categoryId)
+        addCategoryToQueue(categoryId)
         addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
         val mangas = filterMangaToUpdate(getMangaToUpdate(categoryId)).sortedBy { it.title }
-        categoryIds.add(categoryId)
+        addCategoryToQueue(categoryId)
         addManga(mangas)
+    }
+
+    private fun addCategoryToQueue(categoryId: Int) {
+        if (categoryIds.add(categoryId)) {
+            emitScope.launch { categoryUpdateMutableFlow.emit(categoryId) }
+        }
+    }
+
+    private fun addCategoriesToQueue(categoryIds: List<Int>) {
+        val newIds = categoryIds.filter { this.categoryIds.add(it) }
+        if (newIds.isNotEmpty()) {
+            emitScope.launch { newIds.forEach { categoryUpdateMutableFlow.emit(it) } }
+        }
     }
 
     private fun addManga(mangaToAdd: List<LibraryManga>) {
@@ -873,6 +890,16 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
         val updateFlow = updateMutableFlow.asSharedFlow()
+
+        private val jobRunningMutableStateFlow = MutableStateFlow(false)
+        val jobRunningStateFlow = jobRunningMutableStateFlow.asStateFlow()
+
+        private val categoryUpdateMutableFlow =
+            MutableSharedFlow<Int>(
+                extraBufferCapacity = 1,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
+        val categoryUpdateFlow = categoryUpdateMutableFlow.asSharedFlow()
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val libraryPreferences = Injekt.get<LibraryPreferences>()
