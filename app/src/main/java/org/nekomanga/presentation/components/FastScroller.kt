@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -36,8 +37,8 @@ private const val SCROLL_TIMEOUT_IN_MILLIS = 3000L
 fun FastScroller(
     lazyListState: LazyListState,
     modifier: Modifier = Modifier,
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
-    thumbSelectedColor: Color = MaterialTheme.colorScheme.secondary,
+    thumbColor: Color = MaterialTheme.colorScheme.surfaceTint,
+    thumbSelectedColor: Color = MaterialTheme.colorScheme.primary,
     thumbWidth: Dp = 8.dp,
     thumbMinWidth: Dp = 48.dp,
 ) {
@@ -47,6 +48,11 @@ fun FastScroller(
     val isScrolling by remember { derivedStateOf { lazyListState.isScrollInProgress } }
 
     var isVisible by remember { mutableStateOf(false) }
+
+    val animatedThumbWidth by animateDpAsState(
+        targetValue = if (isSelected) thumbWidth + 4.dp else thumbWidth,
+        label = "thumb_width_animation",
+    )
 
     LaunchedEffect(isScrolling, isSelected) {
         if (isScrolling || isSelected) {
@@ -119,9 +125,9 @@ fun FastScroller(
                             )
                     }
                 }
-                .width(thumbWidth)
+                .width(animatedThumbWidth)
                 .fillMaxHeight()
-                .background(color = realThumbColor, shape = MaterialTheme.shapes.extraSmall)
+                .background(color = realThumbColor, shape = MaterialTheme.shapes.large)
                 .draggable(
                     state =
                     rememberDraggableState { delta ->
@@ -154,8 +160,8 @@ fun FastScroller(
 fun FastScroller(
     lazyGridState: LazyGridState,
     modifier: Modifier = Modifier,
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
-    thumbSelectedColor: Color = MaterialTheme.colorScheme.secondary,
+    thumbColor: Color = MaterialTheme.colorScheme.surfaceTint,
+    thumbSelectedColor: Color = MaterialTheme.colorScheme.primary,
     thumbWidth: Dp = 8.dp,
     thumbMinWidth: Dp = 48.dp,
 ) {
@@ -164,6 +170,11 @@ fun FastScroller(
     var isSelected by remember { mutableStateOf(false) }
 
     val isScrolling by remember { derivedStateOf { lazyGridState.isScrollInProgress } }
+
+    val animatedThumbWidth by animateDpAsState(
+        targetValue = if (isSelected) thumbWidth + 4.dp else thumbWidth,
+        label = "thumb_width_animation",
+    )
 
     var isVisible by remember { mutableStateOf(false) }
 
@@ -246,9 +257,9 @@ fun FastScroller(
                                 )
                     }
                 }
-                .width(thumbWidth)
+                .width(animatedThumbWidth)
                 .fillMaxHeight()
-                .background(color = realThumbColor, shape = MaterialTheme.shapes.extraSmall)
+                .background(color = realThumbColor, shape = MaterialTheme.shapes.large)
                 .draggable(
                     state =
                     rememberDraggableState { delta ->
