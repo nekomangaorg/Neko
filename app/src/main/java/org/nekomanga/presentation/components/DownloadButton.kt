@@ -63,11 +63,29 @@ fun DownloadButton(
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         var showChapterDropdown by remember { mutableStateOf(false) }
-        DlButton(
-            themeColorState.buttonColor,
-            defaultDisableColor = defaultDisableColor,
-            downloadState,
-            downloadProgress,
+
+        var downloadComplete by remember { mutableStateOf(false) }
+        var wasDownloading by remember { mutableStateOf(false) }
+
+        LaunchedEffect(downloadState) {
+            when (downloadState) {
+                // this reset download complete in case you remove the chapter and want to
+                // redownload it
+                Download.State.NOT_DOWNLOADED -> downloadComplete = false
+                // this signals its downloading, so a future downloaded state triggers the animation
+                Download.State.DOWNLOADING -> wasDownloading = true
+                Download.State.DOWNLOADED -> {
+                    // this will run the animation for the check
+                    if (wasDownloading) {
+                        downloadComplete = true
+                        wasDownloading = false
+                    }
+                }
+                else -> Unit
+            }
+        }
+
+        val downloadButtonModifier =
             Modifier.combinedClickable(
                 onClick = {
                     when (downloadState) {
@@ -77,8 +95,34 @@ fun DownloadButton(
                     }
                 },
                 onLongClick = {},
-            ),
-        )
+            )
+
+        when (downloadState) {
+            Download.State.ERROR ->
+                NotDownloaded(
+                    buttonColor = MaterialTheme.colorScheme.error,
+                    modifier = downloadButtonModifier,
+                )
+            Download.State.NOT_DOWNLOADED ->
+                NotDownloaded(
+                    buttonColor = themeColorState.buttonColor,
+                    modifier = downloadButtonModifier,
+                    defaultDisableColor = defaultDisableColor,
+                )
+            Download.State.QUEUE -> Queued(modifier = downloadButtonModifier)
+            Download.State.DOWNLOADED ->
+                Downloaded(
+                    buttonColor = themeColorState.buttonColor,
+                    downloadComplete = downloadComplete,
+                    modifier = downloadButtonModifier,
+                )
+            Download.State.DOWNLOADING ->
+                Downloading(
+                    buttonColor = themeColorState.buttonColor,
+                    modifier = downloadButtonModifier,
+                    downloadProgress = downloadProgress,
+                )
+        }
 
         val scope = rememberCoroutineScope()
         SimpleDropdownMenu(
@@ -125,55 +169,17 @@ fun DownloadButton(
 }
 
 @Composable
-private fun DlButton(
-    buttonColor: Color,
-    defaultDisableColor: Boolean,
-    downloadState: Download.State,
-    downloadProgress: Int,
-    modifier: Modifier = Modifier,
-) {
-    var downloadComplete by remember { mutableStateOf(false) }
-    var wasDownloading by remember { mutableStateOf(false) }
-
-    LaunchedEffect(downloadState) {
-        when (downloadState) {
-            // this reset download complete in case you remove the chapter and want to redownload it
-            Download.State.NOT_DOWNLOADED -> downloadComplete = false
-            // this signals its downloading, so a future downloaded state triggers the animation
-            Download.State.DOWNLOADING -> wasDownloading = true
-            Download.State.DOWNLOADED -> {
-                // this will run the animation for the check
-                if (wasDownloading) {
-                    downloadComplete = true
-                    wasDownloading = false
-                }
-            }
-            else -> Unit
-        }
-    }
-
-    when (downloadState) {
-        Download.State.ERROR -> NotDownloaded(MaterialTheme.colorScheme.error, modifier)
-        Download.State.NOT_DOWNLOADED -> NotDownloaded(buttonColor, modifier, defaultDisableColor)
-        Download.State.QUEUE -> Queued(modifier)
-        Download.State.DOWNLOADED -> Downloaded(buttonColor, downloadComplete, modifier)
-        Download.State.DOWNLOADING -> Downloading(buttonColor, modifier, downloadProgress)
-    }
-}
-
-@Composable
 private fun NotDownloaded(
     buttonColor: Color,
     modifier: Modifier,
     defaultDisableColor: Boolean = false,
 ) {
 
+    val disabledColor =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
     val (color, alpha) =
         when (defaultDisableColor) {
-            true ->
-                MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = NekoColors.disabledAlphaLowContrast
-                ) to NekoColors.disabledAlphaLowContrast
+            true -> disabledColor to NekoColors.disabledAlphaLowContrast
             false -> buttonColor to 1f
         }
 
@@ -216,7 +222,7 @@ private fun Downloaded(buttonColor: Color, downloadComplete: Boolean, modifier: 
 private fun Queued(modifier: Modifier) {
     val disabledColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
-    val infinitePulse = rememberInfiniteTransition()
+    val infinitePulse = rememberInfiniteTransition(label = "queuedPulse")
     val (initialState, finalState) = 0f to NekoColors.disabledAlphaLowContrast
 
     val alpha =
@@ -228,6 +234,7 @@ private fun Queued(modifier: Modifier) {
                     tween(1000, easing = EaseInOutCirc),
                     repeatMode = RepeatMode.Reverse,
                 ),
+            label = "queuedAlpha",
         )
 
     Background(color = Color.Transparent, modifier = modifier) {
@@ -250,26 +257,24 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
         when {
             downloadProgress >= Download.MaxProgress ->
                 Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
-            else ->
-                Triple(
-                    Color.Transparent,
+            else -> {
+                val disabledColor =
                     MaterialTheme.colorScheme.onSurface.copy(
                         alpha = NekoColors.disabledAlphaHighContrast
-                    ),
-                    buttonColor,
-                )
+                    )
+                Triple(Color.Transparent, disabledColor, buttonColor)
+            }
         }
 
     val backgroundColor by
         animateColorAsState(targetValue = bgColor, label = "downloadingBackgroundColor")
 
-    val animatedProgress =
+    val animatedProgress by
         animateFloatAsState(
-                targetValue = (downloadProgress / Download.MaxProgress.toFloat()),
-                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                label = "downloadingProgress",
-            )
-            .value
+            targetValue = (downloadProgress / Download.MaxProgress.toFloat()),
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+            label = "downloadingProgress",
+        )
 
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
@@ -327,7 +332,7 @@ private fun Background(
             border = borderStroke,
             color = color,
         ) {
-            content()
+            Box(contentAlignment = Alignment.Center) { content() }
         }
     }
 }
