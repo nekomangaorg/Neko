@@ -120,7 +120,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private val mangaToUpdateMap = mutableMapOf<Long, List<LibraryManga>>()
 
-    private val categoryIds = mutableSetOf<Int>()
     // List containing new updates
     private val newUpdates = mutableMapOf<LibraryManga, Array<Chapter>>()
 
@@ -914,8 +913,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG).get()
             return list.any { it.state == WorkInfo.State.RUNNING }
         }
-
-        fun categoryInQueue(id: Int?) = instance?.get()?.categoryIds?.contains(id) ?: false
 
         fun startNow(
             context: Context,
