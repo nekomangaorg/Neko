@@ -150,7 +150,6 @@ fun VerticalCategoriesPage(
     }
 }
 
-
 @Composable
 private fun RowGrid(
     modifier: Modifier = Modifier,

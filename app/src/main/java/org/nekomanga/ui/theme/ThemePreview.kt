@@ -1,6 +1,5 @@
 package org.nekomanga.ui.theme
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -19,27 +18,19 @@ import org.nekomanga.presentation.theme.Themes
 import org.nekomanga.presentation.theme.colorSchemeFromTheme
 
 @Composable
-private fun NekoThemePreview(
-    theme: Themes,
-    isDark: Boolean,
-    content: @Composable () -> Unit,
-) {
+private fun NekoThemePreview(theme: Themes, isDark: Boolean, content: @Composable () -> Unit) {
     NekoTheme(
-        colorScheme = colorSchemeFromTheme(LocalContext.current, theme = theme, isSystemInDarkTheme = isDark),
+        colorScheme =
+            colorSchemeFromTheme(LocalContext.current, theme = theme, isSystemInDarkTheme = isDark)
     ) {
-        Surface {
-            content()
-        }
+        Surface { content() }
     }
 }
 
-@Preview(name = "All Themes", showBackground = true, widthDp = 720)
-annotation class ThemePreviews
+@Preview(name = "All Themes", showBackground = true, widthDp = 720) annotation class ThemePreviews
 
 @Composable
-fun ThemedPreviews(
-    content: @Composable (theme: Themes) -> Unit,
-) {
+fun ThemedPreviews(content: @Composable (theme: Themes) -> Unit) {
     val themes = Themes.values()
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -48,7 +39,11 @@ fun ThemedPreviews(
                 Column(modifier = Modifier.weight(1f)) {
                     NekoThemePreview(theme = theme, isDark = false) {
                         Column {
-                            Text(text = "${theme.name} Light", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                text = "${theme.name} Light",
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.titleSmall,
+                            )
                             content(theme)
                         }
                     }
@@ -56,7 +51,11 @@ fun ThemedPreviews(
                 Column(modifier = Modifier.weight(1f)) {
                     NekoThemePreview(theme = theme, isDark = true) {
                         Column {
-                            Text(text = "${theme.name} Dark", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                text = "${theme.name} Dark",
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.titleSmall,
+                            )
                             content(theme)
                         }
                     }
