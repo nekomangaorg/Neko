@@ -69,7 +69,8 @@ fun DownloadButton(
 
         LaunchedEffect(downloadState) {
             when (downloadState) {
-                // this reset download complete in case you remove the chapter and want to redownload it
+                // this reset download complete in case you remove the chapter and want to
+                // redownload it
                 Download.State.NOT_DOWNLOADED -> downloadComplete = false
                 // this signals its downloading, so a future downloaded state triggers the animation
                 Download.State.DOWNLOADING -> wasDownloading = true
@@ -100,7 +101,7 @@ fun DownloadButton(
             Download.State.ERROR ->
                 NotDownloaded(
                     buttonColor = MaterialTheme.colorScheme.error,
-                    modifier = downloadButtonModifier
+                    modifier = downloadButtonModifier,
                 )
             Download.State.NOT_DOWNLOADED ->
                 NotDownloaded(
@@ -113,7 +114,7 @@ fun DownloadButton(
                 Downloaded(
                     buttonColor = themeColorState.buttonColor,
                     downloadComplete = downloadComplete,
-                    modifier = downloadButtonModifier
+                    modifier = downloadButtonModifier,
                 )
             Download.State.DOWNLOADING ->
                 Downloading(
