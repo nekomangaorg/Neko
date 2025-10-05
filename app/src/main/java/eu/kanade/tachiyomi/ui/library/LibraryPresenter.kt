@@ -284,12 +284,14 @@ class LibraryPresenter(
                                         .applyFilters(libraryFilters, trackMap, searchQuery)
                                         .toPersistentList()
 
+                                val isRefreshing =
+                                    libraryCategoryItem.libraryItems.fastAny {
+                                        it.displayManga.mangaId in mangaRefreshingState
+                                    }
+
                                 libraryCategoryItem.copy(
                                     libraryItems = sortedMangaList,
-                                    isRefreshing =
-                                        sortedMangaList.any {
-                                            it.displayManga.mangaId in mangaRefreshingState
-                                        },
+                                    isRefreshing = isRefreshing,
                                 )
                             }
                             .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
@@ -849,12 +851,8 @@ class LibraryPresenter(
         }
 
         presenterScope.launchIO {
-            LibraryUpdateJob.updateFlow.collect { mangaId ->
-                if (mangaId == null) {
-                    _mangaRefreshingState.update { emptySet() }
-                } else {
-                    _mangaRefreshingState.update { it + mangaId }
-                }
+            LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
+                _mangaRefreshingState.update { it + mangaId }
             }
         }
     }
