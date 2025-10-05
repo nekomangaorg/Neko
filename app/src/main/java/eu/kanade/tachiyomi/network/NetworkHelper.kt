@@ -90,7 +90,7 @@ class NetworkHelper(val context: Context) {
 
     private fun buildRateLimitedClient(): OkHttpClient {
         return baseClientBuilder
-            .rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES)
+            .rateLimit(permits = 5, period = 1, unit = TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
             .build()
     }
