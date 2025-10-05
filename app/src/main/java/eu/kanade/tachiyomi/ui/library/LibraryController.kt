@@ -108,7 +108,6 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
     }
 
     private fun updateCategory(category: CategoryItem, context: Context) {
-        if (!LibraryUpdateJob.categoryInQueue(category.id)) {
             LibraryUpdateJob.startNow(
                 context = context,
                 category.toDbCategory(),
@@ -124,7 +123,6 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
                         null
                     },
             )
-        }
     }
 
     private fun searchMangaDex(query: String) {
