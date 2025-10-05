@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.nekomanga.constants.Constants.NO_GROUP
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
@@ -262,11 +263,20 @@ class MangaHandler {
 
     private fun getGroupMap(results: List<ChapterDataDto>): Map<String, String> {
         return results
-            .map { chapter -> chapter.relationships }
-            .flatten()
-            .filter { it.type == MdConstants.Types.scanlator }
-            .associate { it.id to it.attributes!!.name!! }
-            .filterValues { it != "no group" }
+            .flatMap { it.relationships }
+            .mapNotNull { relationship ->
+                val name = relationship.attributes?.name
+                if (
+                    relationship.type == MdConstants.Types.scanlator &&
+                        !name.isNullOrBlank() &&
+                        !NO_GROUP.equals(name, true)
+                ) {
+                    relationship.id to name
+                } else {
+                    null
+                }
+            }
+            .toMap()
     }
 
     private suspend fun getUploaderMap(
