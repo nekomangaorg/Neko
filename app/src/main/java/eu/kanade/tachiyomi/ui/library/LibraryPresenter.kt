@@ -92,6 +92,7 @@ class LibraryPresenter(
 ) : BaseCoroutinePresenter<LibraryController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
+    private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
@@ -99,19 +100,22 @@ class LibraryPresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
         flow4: Flow<T4>,
         flow5: Flow<T5>,
         flow6: Flow<T6>,
-        transform: suspend (T1, T2, T3, T4, T5, T6) -> R,
+        flow7: Flow<T7>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R,
     ): Flow<R> =
-        combine(combine(flow, flow2, flow3, ::Triple), combine(flow4, flow5, flow6, ::Triple)) {
-            t1,
-            t2 ->
-            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
+        combine(
+            combine(flow, flow2, flow3, ::Triple),
+            combine(flow4, flow5, flow6, ::Triple),
+            flow7,
+        ) { t1, t2, f7 ->
+            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third, f7)
         }
 
     /** Save the current list to speed up loading later */
@@ -167,13 +171,15 @@ class LibraryPresenter(
                     filterPreferencesFlow(),
                     trackMapFlow(),
                     libraryViewFlow(),
+                    _mangaRefreshingState.asStateFlow(),
                 ) {
                     searchQuery,
                     libraryMangaList,
                     categoryList,
                     libraryFilters,
                     trackMap,
-                    libraryViewPreferences ->
+                    libraryViewPreferences,
+                    mangaRefreshingState ->
                     val collapsedCategorySet =
                         libraryViewPreferences.collapsedCategories
                             .mapNotNull { it.toIntOrNull() }
@@ -278,7 +284,13 @@ class LibraryPresenter(
                                         .applyFilters(libraryFilters, trackMap, searchQuery)
                                         .toPersistentList()
 
-                                libraryCategoryItem.copy(libraryItems = sortedMangaList)
+                                libraryCategoryItem.copy(
+                                    libraryItems = sortedMangaList,
+                                    isRefreshing =
+                                        sortedMangaList.any {
+                                            it.displayManga.mangaId in mangaRefreshingState
+                                        },
+                                )
                             }
                             .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
                             .toPersistentList()
@@ -804,14 +816,8 @@ class LibraryPresenter(
                 .map { list -> list.any { !it.state.isFinished } }
                 .distinctUntilChanged()
                 .collectLatest { active ->
-                    if (!active && _libraryScreenState.value.items.fastAny { it.isRefreshing }) {
-                        val updatedList =
-                            _libraryScreenState.value.items
-                                .map { it.copy(isRefreshing = false) }
-                                .toPersistentList()
-                        _libraryScreenState.update {
-                            it.copy(isRefreshing = false, items = updatedList)
-                        }
+                    if (!active) {
+                        _mangaRefreshingState.update { emptySet() }
                     }
                 }
         }
@@ -843,15 +849,11 @@ class LibraryPresenter(
         }
 
         presenterScope.launchIO {
-            LibraryUpdateJob.categoryUpdateFlow.collect { categoryId ->
-                val index =
-                    _libraryScreenState.value.items.indexOfFirst {
-                        it.categoryItem.id == categoryId
-                    }
-                if (index >= 0) {
-                    val updatedItem =
-                        _libraryScreenState.value.items[index].copy(isRefreshing = true)
-                    _libraryScreenState.update { it.copy(items = it.items.set(index, updatedItem)) }
+            LibraryUpdateJob.updateFlow.collect { mangaId ->
+                if (mangaId == null) {
+                    _mangaRefreshingState.update { emptySet() }
+                } else {
+                    _mangaRefreshingState.update { it + mangaId }
                 }
             }
         }

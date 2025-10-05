@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -68,6 +69,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -369,7 +371,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             if (!hasDownloads) {
                 hasDownloads = results.any { it }
             }
-            updateReadingStatus(mangaToUpdate)
             finishUpdates()
         }
     }
@@ -403,6 +404,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
             currentCount++
         }
+        GlobalScope.launchIO { updateReadingStatus(mangaToUpdateMap[source]) }
         mangaToUpdateMap[source] = emptyList()
         return hasDownloads
     }
