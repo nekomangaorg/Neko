@@ -47,7 +47,7 @@
         <!-- other -->
         <item name="readerBackground">?attr/colorSurface</item>
         <item name="android:listSelector">?attr/colorSecondary</item>
-        <item name="colorControlHighlight">@color/colorPrimary</item>
+        <item name="colorControlHighlight">?attr/colorPrimary</item>
         <item name="actionModeStyle">@style/Widget.Neko.ActionMode</item>
         <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
         <item name="materialCardViewOutlinedStyle">@style/Widget.Neko.CardView.Outlined</item>

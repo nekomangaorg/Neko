@@ -108,21 +108,21 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
     }
 
     private fun updateCategory(category: CategoryItem, context: Context) {
-            LibraryUpdateJob.startNow(
-                context = context,
-                category.toDbCategory(),
-                mangaToUse =
-                    if (category.isDynamic) {
-                        val libraryItems =
-                            presenter.libraryScreenState.value.items
-                                .firstOrNull { it.categoryItem.id == category.id }
-                                ?.libraryItems
-                                ?.map { it.toLibraryManga() }
-                        libraryItems
-                    } else {
-                        null
-                    },
-            )
+        LibraryUpdateJob.startNow(
+            context = context,
+            category.toDbCategory(),
+            mangaToUse =
+                if (category.isDynamic) {
+                    val libraryItems =
+                        presenter.libraryScreenState.value.items
+                            .firstOrNull { it.categoryItem.id == category.id }
+                            ?.libraryItems
+                            ?.map { it.toLibraryManga() }
+                    libraryItems
+                } else {
+                    null
+                },
+        )
     }
 
     private fun searchMangaDex(query: String) {
