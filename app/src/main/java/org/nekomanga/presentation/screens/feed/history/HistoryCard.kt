@@ -74,16 +74,22 @@ fun HistoryCard(
     val cardColor: Color by
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small)
-            else MaterialTheme.colorScheme.surfaceColorAtElevation(Size.extraTiny),
+            else if (outlineCard) CardDefaults.outlinedCardColors().containerColor
+            else CardDefaults.elevatedCardColors().containerColor,
             label = "historyCardExpansion",
         )
     val lowContrastColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-
+    val cardColors =
+        if (outlineCard) {
+            CardDefaults.outlinedCardColors().copy(containerColor = cardColor)
+        } else {
+            CardDefaults.elevatedCardColors().copy(containerColor = cardColor)
+        }
     Card(
         modifier = modifier.fillMaxWidth().padding(horizontal = Size.small).animateContentSize(),
         outlineCard = outlineCard,
-        cardColor = CardDefaults.cardColors(containerColor = cardColor),
+        cardColor = cardColors,
     ) {
         val titleColor =
             getReadTextColor(isRead = allChaptersRead, MaterialTheme.colorScheme.onSurfaceVariant)
