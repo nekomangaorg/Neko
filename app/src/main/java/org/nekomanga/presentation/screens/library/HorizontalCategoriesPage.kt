@@ -77,14 +77,18 @@ fun HorizontalCategoriesPage(
             divider = {},
         ) {
             libraryScreenState.items.forEachIndexed { index, item ->
+                val isSelected = pagerState.currentPage == index
+
                 Tab(
                     text = {
                         Text(
                             item.categoryItem.name,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color =
+                                if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
-                    selected = pagerState.currentPage == index,
+                    selected = isSelected,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                 )
             }
