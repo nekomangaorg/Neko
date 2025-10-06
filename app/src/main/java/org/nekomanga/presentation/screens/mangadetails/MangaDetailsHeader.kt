@@ -44,7 +44,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
-import org.nekomanga.R
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -248,11 +247,7 @@ private fun ColumnScope.QuickReadButton(
                     ),
             ) {
                 Text(
-                    text =
-                        stringResource(
-                            id = nextChapter.id!!,
-                            nextChapter.text,
-                        ),
+                    text = stringResource(id = nextChapter.id!!, nextChapter.text),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface,
                 )
