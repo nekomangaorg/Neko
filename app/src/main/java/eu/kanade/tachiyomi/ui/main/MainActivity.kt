@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.animation.Animator
+import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.assist.AssistContent
@@ -26,7 +28,11 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -34,6 +40,7 @@ import com.bluelinelabs.conductor.Router
 import com.google.android.material.navigation.NavigationBarView
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
@@ -73,7 +80,9 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
@@ -89,6 +98,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     protected lateinit var router: Router
 
     val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
+
+    private var pulseAnimator: Animator? = null
 
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
@@ -262,6 +273,21 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 if (!BuildConfig.DEBUG) {
                     content.post { whatsNewSheet().show() }
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WorkManager.getInstance(this@MainActivity)
+                    .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                    .map { workInfoList -> workInfoList.any { it.state == WorkInfo.State.RUNNING } }
+                    .collect { running ->
+                        if (running) {
+                            startIconPulse(binding)
+                        } else {
+                            stopIconPulse(binding)
+                        }
+                    }
             }
         }
 
@@ -573,6 +599,37 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 true
             },
         )
+
+    private fun startIconPulse(binding: MainActivityBinding) {
+        val iconView = getIconItemView(binding)
+        iconView ?: return
+        // If animation is not already running, start it
+        if (pulseAnimator == null || !pulseAnimator!!.isRunning) {
+            pulseAnimator =
+                AnimatorInflater.loadAnimator(this, R.animator.pulse_animator).apply {
+                    setTarget(iconView)
+                    start()
+                }
+        }
+    }
+
+    private fun stopIconPulse(binding: MainActivityBinding) {
+        pulseAnimator?.cancel()
+        val iconView = getIconItemView(binding)
+        iconView ?: return
+        iconView.scaleX = 1.0f
+        iconView.scaleY = 1.0f
+    }
+
+    private fun getIconItemView(binding: MainActivityBinding): View? {
+        val itemContainerView =
+            binding.bottomNav?.findViewById<View>(R.id.nav_library)
+                ?: binding.sideNav?.findViewById<View>(R.id.nav_library)
+        itemContainerView ?: return null
+        return itemContainerView.findViewById(
+            com.google.android.material.R.id.navigation_bar_item_icon_view
+        )
+    }
 
     companion object {
 

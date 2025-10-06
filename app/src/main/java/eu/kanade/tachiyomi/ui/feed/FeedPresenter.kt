@@ -1101,10 +1101,6 @@ class FeedPresenter(
         }
     }
 
-    fun refreshing(start: Boolean) {
-        presenterScope.launchIO { _feedScreenState.update { it.copy(isRefreshing = start) } }
-    }
-
     fun populateItems() {
         presenterScope.launchIO {
             _updatesScreenPagingState.update {
