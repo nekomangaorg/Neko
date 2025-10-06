@@ -152,18 +152,12 @@ private fun Grouped(
             seriesListForDate.forEachIndexed { groupIndex, feedManga ->
                 val latestChapter = feedManga.chapters.first()
 
-                // 5. Determine the ListCardType based on position *within the date group*
                 val listCardType =
                     when {
-                        // First card after the header
                         groupIndex == 0 && seriesListForDate.size > 1 -> ListCardType.Top
-                        // Last card of the group
                         groupIndex == seriesListForDate.size - 1 && seriesListForDate.size > 1 ->
                             ListCardType.Bottom
-                        // Only one item in the group
-                        seriesListForDate.size == 1 ->
-                            ListCardType.Single // Use Single if available
-                        // Middle card
+                        seriesListForDate.size == 1 -> ListCardType.Single
                         else -> ListCardType.Center
                     }
 
