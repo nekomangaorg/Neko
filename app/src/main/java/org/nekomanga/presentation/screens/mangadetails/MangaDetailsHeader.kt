@@ -42,14 +42,9 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
-import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -78,15 +73,11 @@ fun MangaDetailsHeader(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
-
-        val isExpanded =
+        var isExpanded by
             rememberSaveable(mangaDetailScreenState.value.inLibrary) {
-                when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                    true -> mutableStateOf(true)
-                    false -> mutableStateOf(!mangaDetailScreenState.value.inLibrary)
-                }
+                mutableStateOf(!mangaDetailScreenState.value.inLibrary)
             }
+
         val backdropHeight =
             when (isSearching) {
                 true -> (LocalConfiguration.current.screenHeightDp / 4).dp
@@ -142,7 +133,7 @@ fun MangaDetailsHeader(
                             mangaDetailScreenState.value.estimatedMissingChapters
                         },
                         modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
-                        isExpandedProvider = { isExpanded.value },
+                        isExpandedProvider = { isExpanded },
                         showMergedIconProvider = {
                             mangaDetailScreenState.value.isMerged is
                                 MergeConstants.IsMergedManga.Yes &&
@@ -176,26 +167,14 @@ fun MangaDetailsHeader(
                                     mangaDetailScreenState.value.trackServiceCount
                                 },
                                 themeColorState = themeColorState,
-                                favoriteClick = {
-                                    if (!mangaDetailScreenState.value.inLibrary) {
-                                        toggleFavorite()
-                                    } else {
-                                        favoriteExpanded = true
-                                    }
-                                },
+                                toggleFavorite = toggleFavorite,
                                 trackingClick = trackingClick,
                                 artworkClick = artworkClick,
                                 similarClick = similarClick,
                                 mergeClick = mergeClick,
                                 linksClick = linksClick,
                                 shareClick = shareClick,
-                            )
-                            FavoriteDropDown(
-                                favoriteExpanded = favoriteExpanded,
-                                themeColorState = themeColorState,
                                 moveCategories = moveCategories,
-                                toggleFavorite = toggleFavorite,
-                                onDismiss = { favoriteExpanded = false },
                             )
                             Gap(height = 16.dp)
                         }
@@ -225,9 +204,9 @@ fun MangaDetailsHeader(
                     altTitlesProvider = { mangaDetailScreenState.value.alternativeTitles },
                     genresProvider = { mangaDetailScreenState.value.genres },
                     themeColorState = themeColorState,
-                    isExpanded = isExpanded.value,
+                    isExpanded = isExpanded,
                     wrapAltTitles = mangaDetailScreenState.value.wrapAltTitles,
-                    expandCollapseClick = { isExpanded.value = !isExpanded.value },
+                    expandCollapseClick = { isExpanded = !isExpanded },
                     genreSearch = descriptionActions.genreSearch,
                     genreSearchLibrary = descriptionActions.genreSearchLibrary,
                     altTitleClick = descriptionActions.altTitleClick,
@@ -248,11 +227,12 @@ fun MangaDetailsHeader(
 
 @Composable
 private fun ColumnScope.QuickReadButton(
-    quickReadTextProvider: () -> NextUnreadChapter,
+    quickReadTextProvider: () -> MangaConstants.NextUnreadChapter,
     themeColorState: ThemeColorState,
     quickReadClick: () -> Unit,
 ) {
-    if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
+    val nextChapter = quickReadTextProvider()
+    if (nextChapter.text.isNotEmpty() && nextChapter.id != null) {
         Gap(Size.tiny)
         CompositionLocalProvider(
             LocalRippleConfiguration provides
@@ -270,8 +250,8 @@ private fun ColumnScope.QuickReadButton(
                 Text(
                     text =
                         stringResource(
-                            id = quickReadTextProvider().id!!,
-                            quickReadTextProvider().text,
+                            id = nextChapter.id!!,
+                            nextChapter.text,
                         ),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface,
@@ -279,30 +259,4 @@ private fun ColumnScope.QuickReadButton(
             }
         }
     }
-}
-
-@Composable
-private fun FavoriteDropDown(
-    favoriteExpanded: Boolean,
-    themeColorState: ThemeColorState,
-    moveCategories: () -> Unit,
-    toggleFavorite: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    SimpleDropdownMenu(
-        expanded = favoriteExpanded,
-        themeColorState = themeColorState,
-        onDismiss = onDismiss,
-        dropDownItems =
-            persistentListOf(
-                SimpleDropDownItem.Action(
-                    text = UiText.StringResource(R.string.remove_from_library),
-                    onClick = { toggleFavorite() },
-                ),
-                SimpleDropDownItem.Action(
-                    text = UiText.StringResource(R.string.edit_categories),
-                    onClick = { moveCategories() },
-                ),
-            ),
-    )
 }

@@ -40,7 +40,11 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -54,19 +58,21 @@ fun ButtonBlock(
     loggedIntoTrackersProvider: () -> Boolean,
     trackServiceCountProvider: () -> Int,
     themeColorState: ThemeColorState,
-    favoriteClick: () -> Unit = {},
+    toggleFavorite: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
+    moveCategories: () -> Unit = {},
 ) {
     if (!isInitializedProvider()) {
         return
     }
 
     val shape = RoundedCornerShape(35)
+    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
     val checkedButtonColors =
         ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
@@ -117,7 +123,13 @@ fun ButtonBlock(
             colors = favConfig.buttonColors,
             modifier = Modifier.size(Size.huge),
             shape = shape,
-            onClick = favoriteClick,
+            onClick = {
+                if (!inLibraryProvider()) {
+                    toggleFavorite()
+                } else {
+                    favoriteExpanded = true
+                }
+            },
             border = favConfig.borderStroke,
             contentPadding = PaddingValues(Size.none),
         ) {
@@ -126,6 +138,28 @@ fun ButtonBlock(
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = themeColorState.buttonColor,
+            )
+            SimpleDropdownMenu(
+                expanded = favoriteExpanded,
+                themeColorState = themeColorState,
+                onDismiss = { favoriteExpanded = false },
+                dropDownItems =
+                    persistentListOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.remove_from_library),
+                            onClick = {
+                                toggleFavorite()
+                                favoriteExpanded = false
+                            },
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.edit_categories),
+                            onClick = {
+                                moveCategories()
+                                favoriteExpanded = false
+                            },
+                        ),
+                    ),
             )
         }
 
