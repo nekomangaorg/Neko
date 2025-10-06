@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.compose.Image
@@ -124,11 +123,8 @@ private fun Row(
             Column {
                 Text(
                     text = title.asString(),
-                    style =
-                        MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            letterSpacing = (-.5).sp,
-                        ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 if (subTitle != null) {
                     Text(
@@ -138,8 +134,7 @@ private fun Row(
                                 color =
                                     MaterialTheme.colorScheme.onSurface.copy(
                                         alpha = NekoColors.mediumAlphaLowContrast
-                                    ),
-                                letterSpacing = (-.5).sp,
+                                    )
                             ),
                     )
                 }

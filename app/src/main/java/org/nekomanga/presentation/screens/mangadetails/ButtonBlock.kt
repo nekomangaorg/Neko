@@ -35,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -340,7 +339,6 @@ private fun RowScope.ButtonText(text: String, color: Color) {
             style =
                 MaterialTheme.typography.bodyLarge.copy(
                     color = color.copy(alpha = .8f),
-                    letterSpacing = (-.5).sp,
                     fontWeight = FontWeight.Medium,
                 ),
         )

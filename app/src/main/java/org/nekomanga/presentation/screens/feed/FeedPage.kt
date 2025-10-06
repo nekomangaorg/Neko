@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
@@ -184,12 +183,7 @@ fun FeedChapterTitleLine(
         }
         Text(
             text = title,
-            style =
-                style.copy(
-                    color = textColor,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp,
-                ),
+            style = style.copy(color = textColor, fontWeight = FontWeight.Medium),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

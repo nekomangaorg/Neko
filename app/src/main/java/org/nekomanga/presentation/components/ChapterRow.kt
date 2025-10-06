@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
@@ -339,7 +338,6 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyLarge.copy(
                             color = textColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp,
                         ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -385,7 +383,6 @@ private fun ChapterInfo(
                                     MaterialTheme.typography.bodyMedium.copy(
                                         color = secondaryTextColor,
                                         fontWeight = FontWeight.Medium,
-                                        letterSpacing = (-.6).sp,
                                     ),
                             )
                         }
@@ -415,7 +412,6 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp,
                         ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,

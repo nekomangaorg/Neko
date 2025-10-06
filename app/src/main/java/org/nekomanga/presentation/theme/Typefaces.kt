@@ -1,14 +1,16 @@
 package org.nekomanga.presentation.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import org.nekomanga.R
 
 object Typefaces {
     private val defaultTypography = Typography()
+
+    private const val LETTER_SPACING = -.6
     val mplusRounded =
         FontFamily(
             Font(R.font.mplus_rounded1c_thin, FontWeight.Thin),
@@ -22,22 +24,80 @@ object Typefaces {
 
     val appTypography =
         Typography(
-            displayLarge = defaultTypography.displayLarge.copy(fontFamily = mplusRounded),
-            displayMedium = defaultTypography.displayMedium.copy(fontFamily = mplusRounded),
-            displaySmall = defaultTypography.displaySmall.copy(fontFamily = mplusRounded),
-            headlineLarge = defaultTypography.headlineLarge.copy(fontFamily = mplusRounded),
-            headlineMedium = defaultTypography.headlineMedium.copy(fontFamily = mplusRounded),
-            headlineSmall = defaultTypography.headlineSmall.copy(fontFamily = mplusRounded),
-            titleLarge = defaultTypography.titleLarge.copy(fontFamily = mplusRounded),
-            titleMedium = defaultTypography.titleMedium.copy(fontFamily = mplusRounded),
-            titleSmall = defaultTypography.titleSmall.copy(fontFamily = mplusRounded),
-            bodyLarge = defaultTypography.bodyLarge.copy(fontFamily = mplusRounded),
-            bodyMedium = defaultTypography.bodyMedium.copy(fontFamily = mplusRounded),
-            bodySmall = defaultTypography.bodySmall.copy(fontFamily = mplusRounded),
-            labelLarge = defaultTypography.labelLarge.copy(fontFamily = mplusRounded),
-            labelMedium = defaultTypography.labelMedium.copy(fontFamily = mplusRounded),
-            labelSmall = defaultTypography.labelSmall.copy(fontFamily = mplusRounded),
+            displayLarge =
+                defaultTypography.displayLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            displayMedium =
+                defaultTypography.displayMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            displaySmall =
+                defaultTypography.displaySmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineLarge =
+                defaultTypography.headlineLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineMedium =
+                defaultTypography.headlineMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineSmall =
+                defaultTypography.headlineSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleLarge =
+                defaultTypography.titleLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleMedium =
+                defaultTypography.titleMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleSmall =
+                defaultTypography.titleSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodyLarge =
+                defaultTypography.bodyLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodyMedium =
+                defaultTypography.bodyMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodySmall =
+                defaultTypography.bodySmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelLarge =
+                defaultTypography.labelLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelMedium =
+                defaultTypography.labelMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelSmall =
+                defaultTypography.labelSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
         )
-
-    val LocalTypography = staticCompositionLocalOf { appTypography }
 }

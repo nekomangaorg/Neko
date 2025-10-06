@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import kotlinx.collections.immutable.PersistentList
 import me.saket.cascade.CascadeColumnScope
@@ -46,10 +45,7 @@ fun SimpleDropdownMenu(
         onDismissRequest = onDismiss,
     ) {
         val enabledStyle =
-            MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                letterSpacing = (-.5).sp,
-            )
+            MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
         val disabledStyle =
             enabledStyle.copy(enabledStyle.color.copy(alpha = NekoColors.disabledAlphaLowContrast))
 

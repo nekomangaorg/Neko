@@ -40,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
@@ -383,7 +382,7 @@ private fun TrackRowTwo(
 
                 Text(
                     text = chapterText,
-                    style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }

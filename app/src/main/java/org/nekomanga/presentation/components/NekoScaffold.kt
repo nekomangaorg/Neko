@@ -62,7 +62,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.canlioya.appbarlayoutcompose.FlexibleTopBar
 import com.canlioya.appbarlayoutcompose.FlexibleTopBarColors
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -744,12 +743,7 @@ private fun TitleOnlyTopAppBar(
     CenterAlignedTopAppBar(
         colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         modifier = Modifier.statusBarsPadding(),
-        title = {
-            AutoSizeText(
-                text = title,
-                style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp),
-            )
-        },
+        title = { AutoSizeText(text = title, style = MaterialTheme.typography.titleLarge) },
         navigationIcon = {
             if (incognitoMode) {
                 Image(

@@ -36,7 +36,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
@@ -363,12 +362,7 @@ private fun ScanlatorLine(scanlator: String, textColor: Color, style: TextStyle)
     if (scanlator.isNotBlank()) {
         Text(
             text = scanlator,
-            style =
-                style.copy(
-                    color = textColor,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp,
-                ),
+            style = style.copy(color = textColor, fontWeight = FontWeight.Medium),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
