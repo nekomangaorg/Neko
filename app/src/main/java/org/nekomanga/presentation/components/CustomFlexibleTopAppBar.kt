@@ -1,4 +1,4 @@
-package com.canlioya.appbarlayoutcompose
+package org.nekomanga.presentation.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec

@@ -7,11 +7,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -60,10 +63,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import com.canlioya.appbarlayoutcompose.FlexibleTopBar
-import com.canlioya.appbarlayoutcompose.FlexibleTopBarColors
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -427,11 +428,10 @@ fun SearchOutlineWithActionsTopAppBar(
 
     val focusManager = LocalFocusManager.current
     FlexibleTopBar(
-        modifier = Modifier.statusBarsPadding(),
         scrollBehavior = scrollBehavior,
         colors = FlexibleTopBarColors(containerColor = color, scrolledContainerColor = color),
     ) {
-        Column {
+        Column(Modifier.fillMaxWidth().statusBarsPadding()) {
             SearchBar(
                 modifier =
                     Modifier.fillMaxWidth()
@@ -740,28 +740,49 @@ private fun TitleOnlyTopAppBar(
     isRoot: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    CenterAlignedTopAppBar(
-        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
-        modifier = Modifier.statusBarsPadding(),
-        title = { AutoSizeText(text = title, style = MaterialTheme.typography.titleLarge) },
-        navigationIcon = {
-            if (incognitoMode) {
-                Image(
-                    CommunityMaterial.Icon2.cmd_incognito_circle,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current),
-                    modifier = Modifier.padding(start = 12.dp).size(32.dp),
-                )
-            } else if (!isRoot) {
-                ToolTipButton(
-                    toolTipLabel = navigationIconLabel,
-                    icon = navigationIcon,
-                    onClick = onNavigationIconClicked,
-                )
-            }
-        },
-        actions = actions,
+    val toolbarSize = Size.extraExtraHuge
+    FlexibleTopBar(
         scrollBehavior = scrollBehavior,
-    )
+        colors =
+            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.tiny)
+        ) {
+            AutoSizeText(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(toolbarSize),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+            ) {
+                if (incognitoMode) {
+                    Image(
+                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                        modifier = Modifier.size(Size.extraLarge),
+                    )
+                } else if (!isRoot) {
+                    ToolTipButton(
+                        toolTipLabel = navigationIconLabel,
+                        icon = navigationIcon,
+                        onClick = onNavigationIconClicked,
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(toolbarSize),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+            ) {
+                actions()
+            }
+        }
+    }
 }
 
 @Composable
