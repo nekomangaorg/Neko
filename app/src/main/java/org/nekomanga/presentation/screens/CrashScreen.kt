@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.util.CrashLogUtil
+import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
@@ -104,6 +105,7 @@ fun CrashScreen(exception: Throwable?, onRestartClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            Gap(paddingValues.calculateBottomPadding())
         }
     }
 }
