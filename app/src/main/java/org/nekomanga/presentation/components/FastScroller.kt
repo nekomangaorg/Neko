@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val SCROLL_TIMEOUT_IN_MILLIS = 3000L
+private const val SCROLL_TIMEOUT_IN_MILLIS = 1500L
 
 @Composable
 fun FastScroller(
@@ -52,6 +52,7 @@ fun FastScroller(
     val animatedThumbWidth by animateDpAsState(
         targetValue = if (isSelected) thumbWidth + 4.dp else thumbWidth,
         label = "thumb_width_animation",
+        animationSpec = tween(durationMillis = 150),
     )
 
     LaunchedEffect(isScrolling, isSelected) {
@@ -174,6 +175,7 @@ fun FastScroller(
     val animatedThumbWidth by animateDpAsState(
         targetValue = if (isSelected) thumbWidth + 4.dp else thumbWidth,
         label = "thumb_width_animation",
+        animationSpec = tween(durationMillis = 150),
     )
 
     var isVisible by remember { mutableStateOf(false) }

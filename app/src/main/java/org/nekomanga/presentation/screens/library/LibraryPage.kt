@@ -165,7 +165,7 @@ fun LibraryPage(
             }
             FastScroller(
                 lazyListState = lazyListState,
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.align(Alignment.TopEnd).padding(top = contentPadding.calculateTopPadding()),
             )
         }
     }

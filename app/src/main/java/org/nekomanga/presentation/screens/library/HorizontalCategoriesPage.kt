@@ -208,7 +208,7 @@ fun HorizontalCategoriesPage(
                             }
                             FastScroller(
                                 lazyGridState = lazyGridState,
-                                modifier = Modifier.align(Alignment.CenterEnd)
+                                modifier = Modifier.align(Alignment.TopEnd)
                             )
                         }
                     }
@@ -287,7 +287,7 @@ fun HorizontalCategoriesPage(
                             }
                             FastScroller(
                                 lazyListState = lazyListState,
-                                modifier = Modifier.align(Alignment.CenterEnd),
+                                modifier = Modifier.align(Alignment.TopEnd),
                             )
                         }
                     }
