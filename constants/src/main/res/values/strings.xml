@@ -258,9 +258,9 @@
     <string name="display_as_">Display as %1$s</string>
     <string name="display_as_grid">Display as grid</string>
     <string name="display_as_list">Display as list</string>
-    <string name="hide_library_manga">Hide library entries</string>
-    <string name="show_all_manga">Show all entries</string>
-    <string name="show_library_manga">Show only library entries</string>
+    <string name="hide_library_manga">No library results</string>
+    <string name="show_all_manga">All results</string>
+    <string name="show_library_manga">Only library results</string>
     <string name="hide_category_hopper">Hide category hopper</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>

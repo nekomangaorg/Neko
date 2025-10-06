@@ -1,12 +1,7 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ViewModule
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,52 +16,6 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-
-fun listGridAppBarAction(
-    isList: Boolean,
-    isEnabled: Boolean = true,
-    onClick: () -> Unit,
-): AppBar.Action {
-    return when (isList) {
-        true ->
-            AppBar.Action(
-                title = UiText.StringResource(resourceId = R.string.display_as_grid),
-                icon = Icons.Filled.ViewModule,
-                onClick = onClick,
-                isEnabled = isEnabled,
-            )
-        false ->
-            AppBar.Action(
-                title = UiText.StringResource(resourceId = R.string.display_as_list),
-                icon = Icons.AutoMirrored.Filled.ViewList,
-                onClick = onClick,
-                isEnabled = isEnabled,
-            )
-    }
-}
-
-fun showLibraryEntriesAction(showEntries: Int, onClick: () -> Unit): AppBar.Action {
-    return when (showEntries % 3) {
-        2 ->
-            AppBar.Action(
-                title = UiText.StringResource(R.string.show_all_manga),
-                icon = Icons.Filled.Visibility,
-                onClick = onClick,
-            )
-        1 ->
-            AppBar.Action(
-                title = UiText.StringResource(R.string.show_library_manga),
-                icon = Icons.Filled.Favorite,
-                onClick = onClick,
-            )
-        else ->
-            AppBar.Action(
-                title = UiText.StringResource(R.string.hide_library_manga),
-                icon = Icons.Filled.VisibilityOff,
-                onClick = onClick,
-            )
-    }
-}
 
 @Composable
 fun AppBarActions(

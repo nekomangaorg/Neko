@@ -9,9 +9,11 @@ import org.nekomanga.domain.manga.DisplayManga
 
 data class SimilarScreenState(
     val isRefreshing: Boolean = false,
-    val displayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
+    val allDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
+    val filteredDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
     val error: String? = null,
     val isList: Boolean,
+    val libraryEntryVisibility: Int,
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,

@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -38,16 +40,16 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.listGridAppBarAction
-import org.nekomanga.presentation.components.sheets.EditCategorySheet
-import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.functions.numberOfColumns
+import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
+import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -55,7 +57,7 @@ import org.nekomanga.presentation.theme.Size
 fun DisplayScreen(
     displayScreenState: State<DisplayScreenState>,
     switchDisplayClick: () -> Unit,
-    switchLibraryVisibilityClick: () -> Unit,
+    libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -70,26 +72,38 @@ fun DisplayScreen(
             skipHalfExpanded = true,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
-    var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
+
+    var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
 
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
+
+    val openSheet: (DisplaySheetScreen) -> Unit = {
+        scope.launch {
+            currentBottomSheet = it
+            sheetState.show()
+        }
+    }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                EditCategorySheet(
-                    addingToLibrary = true,
-                    categories = displayScreenState.value.categories,
-                    cancelClick = { scope.launch { sheetState.hide() } },
-                    addNewCategory = addNewCategory,
-                    confirmClicked = { selectedCategories ->
-                        scope.launch { sheetState.hide() }
-                        longClickedMangaId?.let { toggleFavorite(it, selectedCategories) }
-                    },
-                )
+                currentBottomSheet?.let { currentSheet ->
+                    DisplayScreenSheet(
+                        currentScreen = currentSheet,
+                        addNewCategory = addNewCategory,
+                        contentPadding =
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues(),
+                        closeSheet = { scope.launch { sheetState.hide() } },
+                        categories = displayScreenState.value.categories,
+                        isList = displayScreenState.value.isList,
+                        libraryEntryVisibility = displayScreenState.value.libraryEntryVisibility,
+                    )
+                }
             }
         },
     ) {
@@ -104,14 +118,22 @@ fun DisplayScreen(
                 AppBarActions(
                     actions =
                         listOf(
-                            listGridAppBarAction(
-                                isList = displayScreenState.value.isList,
-                                onClick = switchDisplayClick,
-                            ),
-                            showLibraryEntriesAction(
-                                showEntries = displayScreenState.value.showLibraryEntries,
-                                onClick = switchLibraryVisibilityClick,
-                            ),
+                            AppBar.Action(
+                                title = UiText.StringResource(R.string.settings),
+                                icon = Icons.Outlined.Tune,
+                                onClick = {
+                                    scope.launch {
+                                        openSheet(
+                                            DisplaySheetScreen.BrowseDisplayOptionsSheet(
+                                                showIsList = true,
+                                                switchDisplayClick = switchDisplayClick,
+                                                libraryEntryVisibilityClick =
+                                                    libraryEntryVisibilityClick,
+                                            )
+                                        )
+                                    }
+                                },
+                            )
                         )
                 )
             },
@@ -131,8 +153,14 @@ fun DisplayScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
                         scope.launch {
-                            longClickedMangaId = displayManga.mangaId
-                            sheetState.show()
+                            openSheet(
+                                DisplaySheetScreen.CategoriesSheet(
+                                    setCategories = { selectedCategories ->
+                                        scope.launch { sheetState.hide() }
+                                        toggleFavorite(displayManga.mangaId, selectedCategories)
+                                    }
+                                )
+                            )
                         }
                     } else {
                         toggleFavorite(displayManga.mangaId, emptyList())

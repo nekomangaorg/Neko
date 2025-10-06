@@ -22,7 +22,7 @@ data class DisplayScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,
-    val showLibraryEntries: Int,
+    val libraryEntryVisibility: Int,
     val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 

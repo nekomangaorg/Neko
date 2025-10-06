@@ -85,24 +85,26 @@ fun MangaListWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
-            stickyHeader { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
-            itemsIndexed(
-                mangaList,
-                key = { _, displayManga ->
-                    Objects.hash(displayManga.title, displayManga.mangaId, stringRes)
-                },
-            ) { _, displayManga ->
-                MangaRow(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .wrapContentHeight()
-                            .combinedClickable(
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            ),
-                )
+            if (mangaList.isNotEmpty()) {
+                stickyHeader { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
+                itemsIndexed(
+                    mangaList,
+                    key = { _, displayManga ->
+                        Objects.hash(displayManga.title, displayManga.mangaId, stringRes)
+                    },
+                ) { _, displayManga ->
+                    MangaRow(
+                        displayManga = displayManga,
+                        shouldOutlineCover = shouldOutlineCover,
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .wrapContentHeight()
+                                .combinedClickable(
+                                    onClick = { onClick(displayManga.mangaId) },
+                                    onLongClick = { onLongClick(displayManga) },
+                                ),
+                    )
+                }
             }
         }
     }

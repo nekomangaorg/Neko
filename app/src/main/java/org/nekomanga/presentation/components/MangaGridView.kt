@@ -53,20 +53,24 @@ fun MangaGridWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
-            stickyHeader { HeaderCard { DefaultHeaderText(text = stringResource(id = stringRes)) } }
-            gridItems(
-                items = allGrids,
-                columns = columns,
-                modifier = Modifier.padding(horizontal = Size.small),
-                horizontalArrangement = Arrangement.spacedBy(Size.small),
-            ) { displayManga ->
-                MangaGridItem(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    isComfortable = isComfortable,
-                    onClick = { onClick(displayManga.mangaId) },
-                    onLongClick = { onLongClick(displayManga) },
-                )
+            if (allGrids.isNotEmpty()) {
+                stickyHeader {
+                    HeaderCard { DefaultHeaderText(text = stringResource(id = stringRes)) }
+                }
+                gridItems(
+                    items = allGrids,
+                    columns = columns,
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                ) { displayManga ->
+                    MangaGridItem(
+                        displayManga = displayManga,
+                        shouldOutlineCover = shouldOutlineCover,
+                        isComfortable = isComfortable,
+                        onClick = { onClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga) },
+                    )
+                }
             }
         }
     }

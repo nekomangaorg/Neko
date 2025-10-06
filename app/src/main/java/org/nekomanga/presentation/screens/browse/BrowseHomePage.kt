@@ -82,57 +82,61 @@ fun BrowseHomePage(
                     is DisplayScreenType.FeedUpdates ->
                         stringResource(homePageManga.displayScreenType.titleRes)
                 }
-            TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = headerText,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                    Gap(Size.tiny)
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        modifier = Modifier.size(Size.large),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = null,
-                    )
-                }
-            }
-            Gap(Size.tiny)
-            LazyRow(
-                modifier = Modifier.wrapContentHeight(),
-                horizontalArrangement = Arrangement.spacedBy(Size.small),
-                contentPadding = PaddingValues(horizontal = Size.small),
-            ) {
-                val manga = homePageManga.displayManga.filter { it.isVisible }
-                items(items = manga, key = { displayManga -> displayManga.mangaId }) { displayManga
-                    ->
-                    Box {
-                        Box(
-                            modifier =
-                                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                                    .combinedClickable(
-                                        onClick = { onClick(displayManga.mangaId) },
-                                        onLongClick = { onLongClick(displayManga) },
-                                    )
-                        ) {
-                            Column(modifier = Modifier.width(coverSize)) {
-                                MangaCover.Square(
-                                    artwork = displayManga.currentArtwork,
-                                    shouldOutlineCover = shouldOutlineCover,
-                                    modifier = Modifier.requiredHeight(coverSize),
-                                )
-                                MangaGridTitle(title = displayManga.title)
-                                MangaGridSubtitle(subtitleText = displayManga.displayText)
-                            }
-                        }
+            val mangaList = homePageManga.displayManga.filter { it.isVisible }
 
-                        if (displayManga.inLibrary) {
-                            InLibraryBadge(shouldOutlineCover)
+            if (mangaList.isNotEmpty()) {
+                TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = headerText,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Gap(Size.tiny)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                            modifier = Modifier.size(Size.large),
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = null,
+                        )
+                    }
+                }
+                Gap(Size.tiny)
+                LazyRow(
+                    modifier = Modifier.wrapContentHeight(),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    contentPadding = PaddingValues(horizontal = Size.small),
+                ) {
+                    val manga = homePageManga.displayManga.filter { it.isVisible }
+                    items(items = manga, key = { displayManga -> displayManga.mangaId }) {
+                        displayManga ->
+                        Box {
+                            Box(
+                                modifier =
+                                    Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                                        .combinedClickable(
+                                            onClick = { onClick(displayManga.mangaId) },
+                                            onLongClick = { onLongClick(displayManga) },
+                                        )
+                            ) {
+                                Column(modifier = Modifier.width(coverSize)) {
+                                    MangaCover.Square(
+                                        artwork = displayManga.currentArtwork,
+                                        shouldOutlineCover = shouldOutlineCover,
+                                        modifier = Modifier.requiredHeight(coverSize),
+                                    )
+                                    MangaGridTitle(title = displayManga.title)
+                                    MangaGridSubtitle(subtitleText = displayManga.displayText)
+                                }
+                            }
+
+                            if (displayManga.inLibrary) {
+                                InLibraryBadge(shouldOutlineCover)
+                            }
                         }
                     }
                 }

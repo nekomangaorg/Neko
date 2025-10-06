@@ -65,7 +65,7 @@ class BrowsePresenter(
         MutableStateFlow(
             BrowseScreenState(
                 isList = preferences.browseAsList().get(),
-                showLibraryEntries = preferences.browseDisplayMode().get(),
+                libraryEntryVisibility = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
@@ -197,8 +197,8 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { show ->
-                _browseScreenState.update { it.copy(showLibraryEntries = show) }
+            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+                _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
                 presenterScope.launch {
                     _browseScreenState.update {
                         it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
@@ -626,15 +626,14 @@ class BrowsePresenter(
             val tempList =
                 _browseScreenState.value.homePageManga
                     .map { homePageManga ->
-                        val index =
-                            homePageManga.displayManga.indexOfFirst { it.mangaId == mangaId }
+                        val list = homePageManga.displayManga
+                        val index = list.indexOfFirst { it.mangaId == mangaId }
                         if (index == -1) {
                             homePageManga
                         } else {
-                            val tempMangaList = homePageManga.displayManga.toMutableList()
-                            val tempDisplayManga = tempMangaList[index].copy(inLibrary = favorite)
-                            tempMangaList[index] = tempDisplayManga
-                            homePageManga.copy(displayManga = tempMangaList.toPersistentList())
+                            val updatedList =
+                                list.set(index, list[index].copy(inLibrary = favorite))
+                            homePageManga.copy(displayManga = updatedList)
                         }
                     }
                     .toPersistentList()
@@ -942,8 +941,8 @@ class BrowsePresenter(
         }
     }
 
-    fun switchLibraryVisibility() {
-        preferences.browseDisplayMode().set((browseScreenState.value.showLibraryEntries + 1) % 3)
+    fun switchLibraryEntryVisibility(visibility: Int) {
+        preferences.browseDisplayMode().set(visibility)
     }
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {

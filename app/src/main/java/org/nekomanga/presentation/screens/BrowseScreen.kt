@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -57,9 +59,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
-import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
@@ -74,7 +74,7 @@ import org.nekomanga.presentation.theme.Size
 fun BrowseScreen(
     browseScreenState: State<BrowseScreenState>,
     switchDisplayClick: () -> Unit,
-    switchLibraryVisibilityClick: () -> Unit,
+    libraryEntryVisibilityClick: (Int) -> Unit,
     windowSizeClass: WindowSizeClass,
     legacySideNav: Boolean,
     onBackPress: () -> Unit,
@@ -109,8 +109,6 @@ fun BrowseScreen(
     val browseScreenType = browseScreenState.value.screenType
 
     // var sortType by remember { mutableStateOf(Sort.Entries) }
-
-    var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
@@ -166,25 +164,28 @@ fun BrowseScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                            when (
-                                browseScreenType != BrowseScreenType.Homepage &&
-                                    browseScreenType != BrowseScreenType.Other
-                            ) {
-                                true ->
-                                    listOf(
-                                        listGridAppBarAction(
-                                            isList = browseScreenState.value.isList,
-                                            onClick = switchDisplayClick,
-                                        )
-                                    )
-                                false -> emptyList()
-                            } +
-                                listOf(
-                                    showLibraryEntriesAction(
-                                        showEntries = browseScreenState.value.showLibraryEntries,
-                                        onClick = switchLibraryVisibilityClick,
-                                    )
-                                ) +
+                            listOf(
+                                AppBar.Action(
+                                    title = UiText.StringResource(R.string.settings),
+                                    icon = Icons.Outlined.Tune,
+                                    onClick = {
+                                        scope.launch {
+                                            openSheet(
+                                                BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
+                                                    showIsList =
+                                                        browseScreenType !=
+                                                            BrowseScreenType.Homepage &&
+                                                            browseScreenType !=
+                                                                BrowseScreenType.Other,
+                                                    switchDisplayClick = switchDisplayClick,
+                                                    libraryEntryVisibilityClick =
+                                                        libraryEntryVisibilityClick,
+                                                )
+                                            )
+                                        }
+                                    },
+                                )
+                            ) +
                                 if (browseScreenState.value.isDeepLink) {
                                     emptyList()
                                 } else {
@@ -226,14 +227,11 @@ fun BrowseScreen(
                             !displayManga.inLibrary && browseScreenState.value.promptForCategories
                         ) {
                             scope.launch {
-                                longClickedMangaId = displayManga.mangaId
                                 openSheet(
                                     BrowseBottomSheetScreen.CategoriesSheet(
                                         setCategories = { selectedCategories ->
                                             scope.launch { sheetState.hide() }
-                                            longClickedMangaId?.let {
-                                                toggleFavorite(it, selectedCategories)
-                                            }
+                                            toggleFavorite(displayManga.mangaId, selectedCategories)
                                         }
                                     )
                                 )

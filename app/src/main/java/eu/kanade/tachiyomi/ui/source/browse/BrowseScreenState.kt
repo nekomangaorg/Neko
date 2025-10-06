@@ -33,7 +33,7 @@ data class BrowseScreenState(
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
     val isList: Boolean,
-    val showLibraryEntries: Int,
+    val libraryEntryVisibility: Int,
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
@@ -57,6 +57,12 @@ data class DisplayMangaHolder(
     val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
     val groupedDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
 )
+
+object LibraryEntryVisibility {
+    const val SHOW_ALL = 0
+    const val SHOW_NOT_IN_LIBRARY = 1
+    const val SHOW_IN_LIBRARY = 2
+}
 
 enum class BrowseScreenType {
     Homepage,
