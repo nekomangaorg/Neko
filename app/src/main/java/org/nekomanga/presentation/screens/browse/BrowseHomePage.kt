@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -89,26 +90,24 @@ fun BrowseHomePage(
                 ) {
                     Text(
                         text = headerText,
-                        style =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     Gap(Size.tiny)
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Size.large),
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
             Gap(Size.tiny)
             LazyRow(
-                modifier = Modifier.requiredHeight(coverSize + 60.dp),
+                modifier = Modifier.wrapContentHeight(),
                 horizontalArrangement = Arrangement.spacedBy(Size.small),
+                contentPadding = PaddingValues(horizontal = Size.small),
             ) {
-                item { Gap(Size.small) }
                 val manga = homePageManga.displayManga.filter { it.isVisible }
                 items(items = manga, key = { displayManga -> displayManga.mangaId }) { displayManga
                     ->
@@ -122,7 +121,7 @@ fun BrowseHomePage(
                                     )
                         ) {
                             Column(modifier = Modifier.width(coverSize)) {
-                                MangaCover.Square.invoke(
+                                MangaCover.Square(
                                     artwork = displayManga.currentArtwork,
                                     shouldOutlineCover = shouldOutlineCover,
                                     modifier = Modifier.requiredHeight(coverSize),
@@ -137,7 +136,6 @@ fun BrowseHomePage(
                         }
                     }
                 }
-                item { Gap(Size.small) }
             }
         }
         item {
@@ -149,17 +147,15 @@ fun BrowseHomePage(
                 ) {
                     Text(
                         text = stringResource(id = R.string.random_manga),
-                        style =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     Gap(Size.tiny)
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Size.large),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }

@@ -251,15 +251,13 @@ fun BoxScope.CompactGridItem(
 @Composable
 fun MangaGridTitle(
     title: String,
-    maxLines: Int = 2,
+    maxLines: Int = 3,
     isComfortable: Boolean = true,
     hasSubtitle: Boolean = false,
 ) {
     Text(
         text = title,
-        style =
-            if (isComfortable) MaterialTheme.typography.bodySmall
-            else MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyMedium,
         color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
         fontWeight = FontWeight.Medium,
         maxLines = maxLines,
@@ -268,8 +266,8 @@ fun MangaGridTitle(
             Modifier.padding(
                 top = Size.tiny,
                 bottom = if (hasSubtitle) Size.none else Size.tiny,
-                start = 6.dp,
-                end = 6.dp,
+                start = Size.tiny,
+                end = Size.tiny,
             ),
     )
 }
@@ -279,7 +277,9 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
     if (subtitleText.isNotBlank()) {
         Text(
             text = subtitleText,
-            style = MaterialTheme.typography.bodySmall,
+            style =
+                if (isComfortable) MaterialTheme.typography.bodyMedium
+                else MaterialTheme.typography.bodySmall,
             maxLines = 1,
             color =
                 if (isComfortable) MaterialTheme.colorScheme.onSurface
@@ -287,7 +287,12 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier =
-                Modifier.padding(top = Size.none, bottom = Size.tiny, start = 6.dp, end = 6.dp),
+                Modifier.padding(
+                    top = Size.none,
+                    bottom = Size.tiny,
+                    start = Size.tiny,
+                    end = Size.tiny,
+                ),
         )
     }
 }
