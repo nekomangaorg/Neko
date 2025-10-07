@@ -13,8 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -65,6 +63,13 @@ fun BrowseDisplayOptionsSheet(
             ) {
                 if (showIsList) {
                     item {
+                        Text(
+                            text = stringResource(R.string.display_as),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                        )
+                    }
+                    item {
                         Row(
                             Modifier.fillMaxWidth().padding(horizontal = Size.medium),
                             horizontalArrangement = Arrangement.Center,
@@ -74,7 +79,7 @@ fun BrowseDisplayOptionsSheet(
                                 onCheckedChange = { switchDisplayClick() },
                                 shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
                             ) {
-                                Text(stringResource(R.string.display_as_list))
+                                Text(stringResource(R.string.list))
                             }
                             Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
                             ToggleButton(
@@ -82,10 +87,17 @@ fun BrowseDisplayOptionsSheet(
                                 onCheckedChange = { switchDisplayClick() },
                                 shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
                             ) {
-                                Text(stringResource(R.string.display_as_grid))
+                                Text(stringResource(R.string.grid))
                             }
                         }
                     }
+                }
+                item {
+                    Text(
+                        text = stringResource(R.string.filter_results),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                    )
                 }
 
                 item {

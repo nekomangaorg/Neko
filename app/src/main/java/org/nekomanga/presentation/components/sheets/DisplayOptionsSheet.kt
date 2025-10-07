@@ -70,7 +70,7 @@ fun DisplayOptionsSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .9
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp
 
         BaseSheet(
             themeColor = themeColorState,

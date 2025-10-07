@@ -236,7 +236,6 @@
     <string name="display_options_can_be">Display options can be found by expanding the library filter in the Library tab.</string>
     <string name="list">List</string>
     <string name="comfortable_grid">Comfy</string>
-    <string name="cover_only_grid">Cover-only grid</string>
     <string name="compact_grid">Compact</string>
     <string name="download_badge">Download badges</string>
     <string name="unread_badge">Unread badges</string>
@@ -255,12 +254,11 @@
     <string name="show_unread_count">Show unread count</string>
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
-    <string name="display_as_">Display as %1$s</string>
-    <string name="display_as_grid">Display as grid</string>
-    <string name="display_as_list">Display as list</string>
-    <string name="hide_library_manga">No library results</string>
-    <string name="show_all_manga">All results</string>
-    <string name="show_library_manga">Only library results</string>
+    <string name="grid">Grid</string>
+    <string name="filter_results">Filter results</string>
+    <string name="hide_library_manga">No library</string>
+    <string name="show_all_manga">All</string>
+    <string name="show_library_manga">Library</string>
     <string name="hide_category_hopper">Hide category hopper</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>
