@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -37,12 +38,14 @@ class SimilarPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
     private val _similarScreenState =
         MutableStateFlow(
             SimilarScreenState(
                 isList = preferences.browseAsList().get(),
+                incognitoMode = securityPreferences.incognitoMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),

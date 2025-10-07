@@ -7,7 +7,10 @@ import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScaffold
 
-internal abstract class SearchableSettings(val onNavigationBackClick: () -> Unit) {
+internal abstract class SearchableSettings(
+    val onNavigationBackClick: () -> Unit,
+    val incognitoMode: Boolean,
+) {
 
     @StringRes abstract fun getTitleRes(): Int
 
@@ -17,6 +20,7 @@ internal abstract class SearchableSettings(val onNavigationBackClick: () -> Unit
     fun Content() {
         PreferenceScaffold(
             title = stringResource(getTitleRes()),
+            incognitoMode = incognitoMode,
             onNavigationIconClicked = onNavigationBackClick,
             itemsProvider = { getPreferences() },
         )

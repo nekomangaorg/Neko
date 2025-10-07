@@ -36,12 +36,13 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class DataStorageSettingsScreen(
+    incognitoMode: Boolean,
     val storagePreferences: StoragePreferences,
     val cacheData: CacheData,
     val clearCache: (CacheType) -> Unit,
     val toastEvent: SharedFlow<UiText.StringResource>,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.data_storage
 

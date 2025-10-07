@@ -110,6 +110,7 @@ fun DisplayScreen(
         NekoScaffold(
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
+            incognitoMode = displayScreenState.value.incognitoMode,
             title =
                 if (displayScreenState.value.titleRes != null)
                     stringResource(id = displayScreenState.value.titleRes!!)

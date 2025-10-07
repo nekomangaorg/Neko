@@ -105,6 +105,7 @@ fun SimilarScreen(
         NekoScaffold(
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
+            incognitoMode = similarScreenState.value.incognitoMode,
             title = stringResource(id = R.string.similar),
             actions = {
                 AppBarActions(

@@ -20,11 +20,12 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 
 internal class DownloadSettingsScreen(
+    incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val readerPreferences: ReaderPreferences,
     val allCategories: PersistentList<CategoryItem>,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.downloads
 
     @Composable

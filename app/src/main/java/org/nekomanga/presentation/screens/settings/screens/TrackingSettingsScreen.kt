@@ -27,6 +27,7 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class TrackingSettingsScreen(
+    incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val trackingScreenState: TrackingSettingsViewModel.TrackingSettingsState,
     val updateAutoAddTrack: (Boolean, TrackServiceItem) -> Unit,
@@ -34,7 +35,7 @@ internal class TrackingSettingsScreen(
     val login: (TrackServiceItem, String, String) -> Unit,
     val loginEvent: SharedFlow<MergeLoginEvent>,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.tracking
 
     @Composable

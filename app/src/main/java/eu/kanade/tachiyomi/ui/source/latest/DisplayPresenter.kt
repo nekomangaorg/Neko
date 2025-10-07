@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -32,6 +33,7 @@ class DisplayPresenter(
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<DisplayController>() {
 
@@ -39,6 +41,7 @@ class DisplayPresenter(
         MutableStateFlow(
             DisplayScreenState(
                 isList = preferences.browseAsList().get(),
+                incognitoMode = securityPreferences.incognitoMode().get(),
                 title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
                 titleRes =
                     (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes

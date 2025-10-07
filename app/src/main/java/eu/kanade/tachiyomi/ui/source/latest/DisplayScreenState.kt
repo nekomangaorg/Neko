@@ -10,6 +10,7 @@ import org.nekomanga.domain.manga.DisplayManga
 
 data class DisplayScreenState(
     val isLoading: Boolean = false,
+    val incognitoMode: Boolean = false,
     val title: String = "",
     val titleRes: Int? = null,
     val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),

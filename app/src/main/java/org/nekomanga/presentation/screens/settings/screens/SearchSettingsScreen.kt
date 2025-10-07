@@ -40,6 +40,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun SettingsSearchScreen(
     modifier: Modifier = Modifier,
+    incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit,
     navigate: (NavKey) -> Unit,
 ) {
@@ -64,6 +65,7 @@ fun SettingsSearchScreen(
 
     NekoScaffold(
         type = NekoScaffoldType.SearchOutline,
+        incognitoMode = incognitoMode,
         focusRequester = focusRequester,
         onNavigationIconClicked = onNavigationIconClicked,
         searchPlaceHolder = stringResource(R.string.search_settings),

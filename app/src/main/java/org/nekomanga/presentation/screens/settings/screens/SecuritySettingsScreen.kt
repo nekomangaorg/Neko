@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.screens.settings.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -20,9 +18,10 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class SecuritySettingsScreen(
+    incognitoMode: Boolean,
     val securityPreferences: SecurityPreferences,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.security
 

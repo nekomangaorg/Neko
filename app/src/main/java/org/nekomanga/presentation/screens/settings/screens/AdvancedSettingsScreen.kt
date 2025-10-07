@@ -53,6 +53,7 @@ import tachiyomi.core.network.PREF_DOH_SHECAN
 import tachiyomi.core.util.system.setDefaultSettings
 
 internal class AdvancedSettingsScreen(
+    incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val networkPreferences: NetworkPreferences,
     val toastEvent: SharedFlow<UiText>,
@@ -61,7 +62,7 @@ internal class AdvancedSettingsScreen(
     val reindexDownloads: () -> Unit,
     val clearDatabase: (Boolean) -> Unit,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.advanced
 

@@ -27,10 +27,11 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 import org.nekomanga.presentation.theme.Size
 
 internal class AppearanceSettingsScreen(
+    incognitoMode: Boolean,
     val mangaDetailsPreferences: MangaDetailsPreferences,
     val preferences: PreferencesHelper,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.appearance
 
     @Composable

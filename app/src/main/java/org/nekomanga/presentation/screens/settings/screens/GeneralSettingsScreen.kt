@@ -11,11 +11,12 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class GeneralSettingsScreen(
+    incognitoMode: Boolean,
     val preferencesHelper: PreferencesHelper,
     val showNotificationSetting: Boolean,
     onNavigationIconClick: () -> Unit,
     val manageNotificationsClicked: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.general
 

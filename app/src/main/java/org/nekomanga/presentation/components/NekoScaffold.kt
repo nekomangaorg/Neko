@@ -132,6 +132,7 @@ fun NekoScaffold(
                             subtitle = subtitle,
                             navigationIconLabel = navigationIconLabel,
                             navigationIcon = navigationIcon,
+                            incognitoMode = incognitoMode,
                             onNavigationIconClicked = onNavigationIconClicked,
                             actions = actions,
                             scrollBehavior = scrollBehavior,
@@ -159,6 +160,7 @@ fun NekoScaffold(
                             focusRequester = focusRequester,
                             onNavigationIconClicked = onNavigationIconClicked,
                             onSearchDisabled = onSearchDisabled,
+                            incognitoMode = incognitoMode,
                             actions = actions,
                             scrollBehavior = scrollBehavior,
                         )
@@ -172,6 +174,7 @@ fun NekoScaffold(
                             navigationIcon = navigationIcon,
                             focusRequester = focusRequester,
                             onNavigationIconClicked = onNavigationIconClicked,
+                            incognitoMode = incognitoMode,
                             actions = actions,
                             scrollBehavior = scrollBehavior,
                         )
@@ -213,6 +216,7 @@ private fun TitleAndSubtitleTopAppBar(
     subtitle: String,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
@@ -243,6 +247,14 @@ private fun TitleAndSubtitleTopAppBar(
                     onClick = onNavigationIconClicked,
                     enabledTint = onColor,
                 )
+                if (incognitoMode) {
+                    Gap(Size.smedium)
+                    Image(
+                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                        modifier = Modifier.size(Size.extraLarge).zIndex(1f),
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth().heightIn(Size.appBarHeight),
@@ -263,6 +275,7 @@ fun SearchOutlineTopAppBar(
     navigationEnabled: Boolean,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    incognitoMode: Boolean,
     focusRequester: FocusRequester,
     onNavigationIconClicked: () -> Unit,
     onSearchDisabled: () -> Unit,
@@ -307,7 +320,7 @@ fun SearchOutlineTopAppBar(
                         onSearch = { onSearchText(it) },
                         placeholder = { Text(text = searchPlaceHolder) },
                         leadingIcon = {
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (navigationEnabled) {
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
@@ -333,6 +346,15 @@ fun SearchOutlineTopAppBar(
                                         icon = Icons.Filled.Search,
                                         onClick = { searchEnabled = true },
                                     )
+                                }
+                                if (incognitoMode) {
+                                    Gap(Size.small)
+                                    Image(
+                                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                                        modifier = Modifier.size(Size.extraLarge).zIndex(1f),
+                                    )
+                                    Gap(Size.small)
                                 }
                             }
                         },
@@ -507,6 +529,7 @@ fun SearchOutlineDummyTopAppBar(
     navigationEnabled: Boolean,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    incognitoMode: Boolean,
     focusRequester: FocusRequester,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
@@ -530,10 +553,6 @@ fun SearchOutlineDummyTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = "",
@@ -541,14 +560,9 @@ fun SearchOutlineDummyTopAppBar(
                         onExpandedChange = {},
                         onQueryChange = {},
                         onSearch = {},
-                        placeholder = {
-                            Text(
-                                text = searchPlaceHolder,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
+                        placeholder = { Text(text = searchPlaceHolder) },
                         leadingIcon = {
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (navigationEnabled) {
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
@@ -559,19 +573,26 @@ fun SearchOutlineDummyTopAppBar(
                                     ToolTipButton(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
-                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         onClick = { onSearchEnabled() },
                                     )
+                                }
+                                if (incognitoMode) {
+                                    Gap(Size.small)
+                                    Image(
+                                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                                        modifier = Modifier.size(Size.extraLarge).zIndex(1f),
+                                    )
+                                    Gap(Size.small)
                                 }
                             }
                         },
                         trailingIcon = {
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (navigationEnabled) {
                                     ToolTipButton(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
-                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         onClick = { onSearchEnabled() },
                                     )
                                 } else {
@@ -623,12 +644,13 @@ private fun NoTitleSearchTopAppBar(
                         onClick = onNavigationIconClicked,
                     )
                     if (incognitoMode) {
-                        Gap(Size.smedium)
+                        Gap(Size.small)
                         Image(
                             CommunityMaterial.Icon2.cmd_incognito_circle,
                             colorFilter = ColorFilter.tint(LocalContentColor.current),
                             modifier = Modifier.size(Size.extraLarge).zIndex(1f),
                         )
+                        Gap(Size.small)
                     }
                 }
                 if (showTextField) {
@@ -759,6 +781,7 @@ private fun TitleOnlyTopAppBar(
                         colorFilter = ColorFilter.tint(LocalContentColor.current),
                         modifier = Modifier.size(Size.extraLarge),
                     )
+                    Gap(Size.small)
                 }
             }
             Row(
