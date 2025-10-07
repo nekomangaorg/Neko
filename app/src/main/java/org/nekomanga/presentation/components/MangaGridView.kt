@@ -281,9 +281,7 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
     if (subtitleText.isNotBlank()) {
         Text(
             text = subtitleText,
-            style =
-                if (isComfortable) MaterialTheme.typography.bodyMedium
-                else MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             color =
                 if (isComfortable) MaterialTheme.colorScheme.onSurface
