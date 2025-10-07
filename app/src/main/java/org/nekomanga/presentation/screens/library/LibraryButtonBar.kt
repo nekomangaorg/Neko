@@ -51,7 +51,7 @@ fun LibraryButtonBar(
         modifier = modifier.fillMaxWidth().horizontalScroll(filterScrollState),
         horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
-        Gap(Size.small)
+        Gap(Size.tiny)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)

@@ -278,98 +278,89 @@ fun SearchOutlineTopAppBar(
         colors =
             FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(Size.appBarHeight),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-            ) {
-                SearchBar(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = Size.small)
-                            .onFocusChanged {
-                                if (it.hasFocus) {
-                                    searchEnabled = true
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+            SearchBar(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(horizontal = Size.small)
+                        .onFocusChanged {
+                            if (it.hasFocus) {
+                                searchEnabled = true
+                            }
+                        }
+                        .focusRequester(focusRequester),
+                expanded = false,
+                onExpandedChange = {},
+                colors =
+                    SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = searchText,
+                        expanded = false,
+                        onExpandedChange = {},
+                        onQueryChange = {
+                            searchText = it
+                            onSearchText(it)
+                        },
+                        onSearch = { onSearchText(it) },
+                        placeholder = { Text(text = searchPlaceHolder) },
+                        leadingIcon = {
+                            Row {
+                                if (navigationEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = navigationIconLabel,
+                                        icon = navigationIcon,
+                                        onClick = onNavigationIconClicked,
+                                    )
+                                }
+                                if (searchEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.cancel_search),
+                                        icon = Icons.Filled.SearchOff,
+                                        onClick = {
+                                            onSearchText("")
+                                            searchText = ""
+                                            searchEnabled = false
+                                            focusManager.clearFocus()
+                                            onSearchDisabled()
+                                        },
+                                    )
+                                } else {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
+                                        onClick = { searchEnabled = true },
+                                    )
                                 }
                             }
-                            .focusRequester(focusRequester),
-                    expanded = false,
-                    onExpandedChange = {},
-                    colors =
-                        SearchBarDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = searchText,
-                            expanded = false,
-                            onExpandedChange = {},
-                            onQueryChange = {
-                                searchText = it
-                                onSearchText(it)
-                            },
-                            onSearch = { onSearchText(it) },
-                            placeholder = { Text(text = searchPlaceHolder) },
-                            leadingIcon = {
-                                Row {
-                                    if (navigationEnabled) {
-                                        ToolTipButton(
-                                            toolTipLabel = navigationIconLabel,
-                                            icon = navigationIcon,
-                                            onClick = onNavigationIconClicked,
-                                        )
-                                    }
-                                    if (searchEnabled) {
-                                        ToolTipButton(
-                                            toolTipLabel =
-                                                stringResource(id = R.string.cancel_search),
-                                            icon = Icons.Filled.SearchOff,
-                                            onClick = {
-                                                onSearchText("")
-                                                searchText = ""
-                                                searchEnabled = false
-                                                focusManager.clearFocus()
-                                                onSearchDisabled()
-                                            },
-                                        )
-                                    } else {
-                                        ToolTipButton(
-                                            toolTipLabel = stringResource(id = R.string.search),
-                                            icon = Icons.Filled.Search,
-                                            onClick = { searchEnabled = true },
-                                        )
-                                    }
+                        },
+                        trailingIcon = {
+                            Row {
+                                AnimatedVisibility(
+                                    visible = searchText.isNotBlank(),
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.clear),
+                                        icon = Icons.Filled.Close,
+                                        onClick = {
+                                            onSearchText("")
+                                            searchText = ""
+                                        },
+                                    )
                                 }
-                            },
-                            trailingIcon = {
-                                Row {
-                                    AnimatedVisibility(
-                                        visible = searchText.isNotBlank(),
-                                        enter = fadeIn(),
-                                        exit = fadeOut(),
-                                    ) {
-                                        ToolTipButton(
-                                            toolTipLabel = stringResource(id = R.string.clear),
-                                            icon = Icons.Filled.Close,
-                                            onClick = {
-                                                onSearchText("")
-                                                searchText = ""
-                                            },
-                                        )
-                                    }
-                                    if (!searchEnabled) {
-                                        actions()
-                                    }
+                                if (!searchEnabled) {
+                                    actions()
                                 }
-                            },
-                        )
-                    },
-                    content = {},
-                )
-            }
+                            }
+                        },
+                    )
+                },
+                content = {},
+            )
         }
     }
 }
@@ -526,82 +517,72 @@ fun SearchOutlineDummyTopAppBar(
         colors =
             FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(Size.appBarHeight),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-            ) {
-                SearchBar(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = Size.small)
-                            .onFocusChanged {
-                                if (it.hasFocus) {
-                                    onSearchEnabled()
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+            SearchBar(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(horizontal = Size.small)
+                        .onFocusChanged {
+                            if (it.hasFocus) {
+                                onSearchEnabled()
+                            }
+                        }
+                        .focusRequester(focusRequester),
+                expanded = false,
+                onExpandedChange = {},
+                colors =
+                    SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = "",
+                        expanded = false,
+                        onExpandedChange = {},
+                        onQueryChange = {},
+                        onSearch = {},
+                        placeholder = {
+                            Text(
+                                text = searchPlaceHolder,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        leadingIcon = {
+                            Row {
+                                if (navigationEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = navigationIconLabel,
+                                        icon = navigationIcon,
+                                        onClick = onNavigationIconClicked,
+                                    )
+                                } else {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        onClick = { onSearchEnabled() },
+                                    )
                                 }
                             }
-                            .focusRequester(focusRequester),
-                    expanded = false,
-                    onExpandedChange = {},
-                    colors =
-                        SearchBarDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = "",
-                            expanded = false,
-                            onExpandedChange = {},
-                            onQueryChange = {},
-                            onSearch = {},
-                            placeholder = {
-                                Text(
-                                    text = searchPlaceHolder,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                            leadingIcon = {
-                                Row {
-                                    if (navigationEnabled) {
-                                        ToolTipButton(
-                                            toolTipLabel = navigationIconLabel,
-                                            icon = navigationIcon,
-                                            onClick = onNavigationIconClicked,
-                                        )
-                                    } else {
-                                        ToolTipButton(
-                                            toolTipLabel = stringResource(id = R.string.search),
-                                            icon = Icons.Filled.Search,
-                                            enabledTint =
-                                                MaterialTheme.colorScheme.onSurfaceVariant,
-                                            onClick = { onSearchEnabled() },
-                                        )
-                                    }
+                        },
+                        trailingIcon = {
+                            Row {
+                                if (navigationEnabled) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.search),
+                                        icon = Icons.Filled.Search,
+                                        enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        onClick = { onSearchEnabled() },
+                                    )
+                                } else {
+                                    actions()
                                 }
-                            },
-                            trailingIcon = {
-                                Row {
-                                    if (navigationEnabled) {
-                                        ToolTipButton(
-                                            toolTipLabel = stringResource(id = R.string.search),
-                                            icon = Icons.Filled.Search,
-                                            enabledTint =
-                                                MaterialTheme.colorScheme.onSurfaceVariant,
-                                            onClick = { onSearchEnabled() },
-                                        )
-                                    } else {
-                                        actions()
-                                    }
-                                }
-                            },
-                        )
-                    },
-                    content = {},
-                )
-            }
+                            }
+                        },
+                    )
+                },
+                content = {},
+            )
         }
     }
 }

@@ -57,18 +57,9 @@ fun FeedHistoryPage(
                 item {
                     Text(
                         text = dateString,
-                        style =
-                            MaterialTheme.typography.labelLarge.copy(
-                                color = MaterialTheme.colorScheme.secondary
-                            ),
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(
-                                    start = Size.small,
-                                    end = Size.small,
-                                    top = Size.small,
-                                    bottom = Size.small,
-                                ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.fillMaxWidth().padding(Size.small),
                     )
                 }
             } else {

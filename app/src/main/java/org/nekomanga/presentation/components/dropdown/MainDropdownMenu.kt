@@ -15,14 +15,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import me.saket.cascade.CascadeDropdownMenu
@@ -45,11 +42,6 @@ fun MainDropdownMenu(
     helpClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val background = MaterialTheme.colorScheme.background
-    val secondary = MaterialTheme.colorScheme.secondary
-    val backgroundArgb = remember {
-        ColorUtils.blendARGB(background.toArgb(), secondary.toArgb(), 0.05f)
-    }
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(surface = MaterialTheme.colorScheme.surface),
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),

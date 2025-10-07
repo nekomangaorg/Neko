@@ -133,10 +133,8 @@ private fun Grouped(
                     item {
                         Text(
                             text = stringResource(id = prefix, dateString),
-                            style =
-                                MaterialTheme.typography.labelLarge.copy(
-                                    color = MaterialTheme.colorScheme.primary
-                                ),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.titleLarge,
                             modifier =
                                 Modifier.padding(
                                     start = Size.small,
@@ -240,10 +238,8 @@ private fun Ungrouped(
                 item {
                     Text(
                         text = stringResource(id = prefix, dateString),
-                        style =
-                            MaterialTheme.typography.labelLarge.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier =
                             Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
                     )
