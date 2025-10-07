@@ -912,7 +912,7 @@ class FeedPresenter(
                 )
             if (continueReadingFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = continueReadingList.toPersistentList())
+                    it.copy(continueReadingList = continueReadingList.toPersistentList())
                 }
             }
 
