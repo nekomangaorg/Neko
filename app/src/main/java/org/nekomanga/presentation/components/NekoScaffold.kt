@@ -5,14 +5,13 @@ package org.nekomanga.presentation.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -65,6 +64,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.zIndex
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -127,15 +127,6 @@ fun NekoScaffold(
                             isRoot = isRoot,
                             scrollBehavior = scrollBehavior,
                         )
-                    NekoScaffoldType.NoTitle ->
-                        NoTitleTopAppBar(
-                            color = color,
-                            navigationIconLabel = navigationIconLabel,
-                            navigationIcon = navigationIcon,
-                            onNavigationIconClicked = onNavigationIconClicked,
-                            actions = actions,
-                            scrollBehavior = scrollBehavior,
-                        )
                     NekoScaffoldType.TitleAndSubtitle ->
                         TitleAndSubtitleTopAppBar(
                             color = color,
@@ -157,6 +148,7 @@ fun NekoScaffold(
                             navigationIcon = navigationIcon,
                             onNavigationIconClicked = onNavigationIconClicked,
                             actions = actions,
+                            incognitoMode = incognitoMode,
                             scrollBehavior = scrollBehavior,
                         )
                     NekoScaffoldType.SearchOutline ->
@@ -195,6 +187,7 @@ fun NekoScaffold(
                             navigationEnabled = searchNavigationEnabled,
                             navigationIconLabel = navigationIconLabel,
                             navigationIcon = navigationIcon,
+                            incognitoMode = incognitoMode,
                             focusRequester = focusRequester,
                             onNavigationIconClicked = onNavigationIconClicked,
                             onSearchDisabled = onSearchDisabled,
@@ -416,6 +409,7 @@ fun SearchOutlineWithActionsTopAppBar(
     navigationEnabled: Boolean,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    incognitoMode: Boolean,
     focusRequester: FocusRequester,
     onNavigationIconClicked: () -> Unit,
     onSearchDisabled: () -> Unit,
@@ -468,7 +462,7 @@ fun SearchOutlineWithActionsTopAppBar(
                             )
                         },
                         leadingIcon = {
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (navigationEnabled) {
                                     ToolTipButton(
                                         toolTipLabel = navigationIconLabel,
@@ -496,6 +490,15 @@ fun SearchOutlineWithActionsTopAppBar(
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         onClick = { searchEnabled = true },
                                     )
+                                }
+                                if (incognitoMode) {
+                                    Gap(Size.small)
+                                    Image(
+                                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                                        modifier = Modifier.size(Size.extraLarge),
+                                    )
+                                    Gap(Size.small)
                                 }
                             }
                         },
@@ -627,6 +630,7 @@ private fun NoTitleSearchTopAppBar(
     color: Color,
     navigationIconLabel: String,
     navigationIcon: ImageVector,
+    incognitoMode: Boolean = false,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
@@ -635,29 +639,40 @@ private fun NoTitleSearchTopAppBar(
     var showTextField by rememberSaveable { mutableStateOf(false) }
     var alreadyRequestedFocus by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-
-    TopAppBar(
-        title = {},
-        modifier = Modifier.statusBarsPadding(),
-        navigationIcon = {
-            ToolTipButton(
-                toolTipLabel = navigationIconLabel,
-                icon = navigationIcon,
-                onClick = onNavigationIconClicked,
-            )
-        },
-        actions = {
-            AnimatedVisibility(
-                visible = showTextField,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-            ) {
-                // research on configuration change
-
+    FlexibleTopBar(
+        scrollBehavior = scrollBehavior,
+        colors =
+            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
+    ) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = Size.small, vertical = Size.small)
+                    .heightIn(Size.appBarHeight),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ToolTipButton(
+                    toolTipLabel = navigationIconLabel,
+                    icon = navigationIcon,
+                    onClick = onNavigationIconClicked,
+                )
+                if (incognitoMode) {
+                    Gap(Size.smedium)
+                    Image(
+                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                        modifier = Modifier.size(Size.extraLarge).zIndex(1f),
+                    )
+                }
+            }
+            if (showTextField) {
                 OutlinedTextField(
                     modifier =
                         Modifier.weight(1f)
-                            .padding(top = Size.small, bottom = Size.small, start = Size.extraLarge)
+                            .padding(horizontal = Size.small)
                             .focusRequester(focusRequester),
                     value = searchText,
                     placeholder = { Text(text = stringResource(id = R.string.search_chapters)) },
@@ -705,27 +720,29 @@ private fun NoTitleSearchTopAppBar(
                         onSearchText(searchText)
                     }
                 }
+            } else {
+                Spacer(Modifier.weight(1f))
             }
-            val icon =
-                when (showTextField) {
-                    true -> Icons.Filled.SearchOff
-                    false -> Icons.Filled.Search
-                }
-            ToolTipButton(
-                toolTipLabel = searchPlaceHolder,
-                icon = icon,
-                onClick = {
-                    searchText = ""
-                    alreadyRequestedFocus = false
-                    onSearchText(null)
-                    showTextField = !showTextField
-                },
-            )
-            Row { actions() }
-        },
-        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
-        scrollBehavior = scrollBehavior,
-    )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val icon =
+                    when (showTextField) {
+                        true -> Icons.Filled.SearchOff
+                        false -> Icons.Filled.Search
+                    }
+                ToolTipButton(
+                    toolTipLabel = searchPlaceHolder,
+                    icon = icon,
+                    onClick = {
+                        searchText = ""
+                        alreadyRequestedFocus = false
+                        onSearchText(null)
+                        showTextField = !showTextField
+                    },
+                )
+                actions()
+            }
+        }
+    }
 }
 
 @Composable
@@ -740,7 +757,6 @@ private fun TitleOnlyTopAppBar(
     isRoot: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val toolbarSize = Size.extraExtraHuge
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors =
@@ -756,26 +772,28 @@ private fun TitleOnlyTopAppBar(
                 modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center),
             )
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(toolbarSize),
+                modifier = Modifier.fillMaxWidth().heightIn(Size.appBarHeight),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                if (incognitoMode) {
-                    Image(
-                        CommunityMaterial.Icon2.cmd_incognito_circle,
-                        colorFilter = ColorFilter.tint(LocalContentColor.current),
-                        modifier = Modifier.size(Size.extraLarge),
-                    )
-                } else if (!isRoot) {
+                if (!isRoot) {
                     ToolTipButton(
                         toolTipLabel = navigationIconLabel,
                         icon = navigationIcon,
                         onClick = onNavigationIconClicked,
                     )
                 }
+                if (incognitoMode) {
+                    Gap(Size.small)
+                    Image(
+                        CommunityMaterial.Icon2.cmd_incognito_circle,
+                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                        modifier = Modifier.size(Size.extraLarge),
+                    )
+                }
             }
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(toolbarSize),
+                modifier = Modifier.fillMaxWidth().heightIn(Size.appBarHeight),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
             ) {
@@ -812,7 +830,6 @@ fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Triple<Color, Col
 enum class NekoScaffoldType {
     TitleAndSubtitle,
     Title,
-    NoTitle,
     Search,
     SearchOutline,
     SearchOutlineDummy,

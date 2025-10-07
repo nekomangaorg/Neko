@@ -85,6 +85,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -115,6 +116,7 @@ class MangaDetailPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val libraryPreferences: LibraryPreferences = Injekt.get(),
+    val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -175,6 +177,7 @@ class MangaDetailPresenter(
 
             _mangaDetailScreenState.update {
                 it.copy(
+                    incognitoMode = securityPreferences.incognitoMode().get(),
                     hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                     extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),

@@ -221,6 +221,7 @@ fun MangaScreen(
             onNavigationIconClicked = onBackPressed,
             themeColorState = themeColorState,
             searchPlaceHolder = stringResource(id = R.string.search_chapters),
+            incognitoMode = mangaDetailScreenState.value.incognitoMode,
             onSearch = onSearch,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {

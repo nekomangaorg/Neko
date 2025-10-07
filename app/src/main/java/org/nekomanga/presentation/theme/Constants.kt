@@ -22,6 +22,7 @@ object Size {
     val extraHuge = 56.dp
     val extraExtraHuge = 64.dp
 
+    val appBarHeight = 64.dp
     val navBarSize = 68.dp
     val squareHistoryCover = 72.dp
 }

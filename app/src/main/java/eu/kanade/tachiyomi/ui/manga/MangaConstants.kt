@@ -45,6 +45,7 @@ object MangaConstants {
         val hideButtonText: Boolean = false,
         val extraLargeBackdrop: Boolean = false,
         val forcePortrait: Boolean = false,
+        val incognitoMode: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
         val themeBasedOffCovers: Boolean = false,
