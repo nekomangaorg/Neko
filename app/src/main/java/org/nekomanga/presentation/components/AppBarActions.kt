@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme
@@ -36,44 +37,48 @@ fun AppBarActions(
 
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
-        ToolTipButton(
-            toolTipLabel = stringResource(R.string.more),
-            icon = Icons.Filled.MoreVert,
-            onClick = { showMenu = !showMenu },
-            enabledTint = tint,
-        )
+        Box {
+            ToolTipButton(
+                toolTipLabel = stringResource(R.string.more),
+                icon = Icons.Filled.MoreVert,
+                onClick = { showMenu = !showMenu },
+                enabledTint = tint,
+            )
 
-        SimpleDropdownMenu(
-            expanded = showMenu,
-            onDismiss = { showMenu = false },
-            dropDownItems =
-                overflowActions
-                    .map { appBarAction -> appBarAction.toSimpleAction() }
-                    .toPersistentList(),
-        )
+            SimpleDropdownMenu(
+                expanded = showMenu,
+                onDismiss = { showMenu = false },
+                dropDownItems =
+                    overflowActions
+                        .map { appBarAction -> appBarAction.toSimpleAction() }
+                        .toPersistentList(),
+            )
+        }
     }
 
     val mainDropDown = actions.filterIsInstance<AppBar.MainDropdown>().firstOrNull()
     if (mainDropDown != null) {
-        ToolTipButton(
-            toolTipLabel = stringResource(R.string.more),
-            icon = Icons.Filled.MoreVert,
-            onClick = { showMenu = !showMenu },
-            enabledTint = tint,
-        )
+        Box {
+            ToolTipButton(
+                toolTipLabel = stringResource(R.string.more),
+                icon = Icons.Filled.MoreVert,
+                onClick = { showMenu = !showMenu },
+                enabledTint = tint,
+            )
 
-        mainDropDown.menuShowing(showMenu)
+            mainDropDown.menuShowing(showMenu)
 
-        MainDropdownMenu(
-            expanded = showMenu,
-            incognitoModeEnabled = mainDropDown.incognitoMode,
-            incognitoModeClick = mainDropDown.incognitoModeClick,
-            settingsClick = mainDropDown.settingsClick,
-            statsClick = mainDropDown.statsClick,
-            aboutClick = mainDropDown.aboutClick,
-            helpClick = mainDropDown.helpClick,
-            onDismiss = { showMenu = false },
-        )
+            MainDropdownMenu(
+                expanded = showMenu,
+                incognitoModeEnabled = mainDropDown.incognitoMode,
+                incognitoModeClick = mainDropDown.incognitoModeClick,
+                settingsClick = mainDropDown.settingsClick,
+                statsClick = mainDropDown.statsClick,
+                aboutClick = mainDropDown.aboutClick,
+                helpClick = mainDropDown.helpClick,
+                onDismiss = { showMenu = false },
+            )
+        }
     }
 }
 
