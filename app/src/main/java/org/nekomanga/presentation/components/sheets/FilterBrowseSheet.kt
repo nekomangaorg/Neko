@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
@@ -70,6 +71,7 @@ import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.filter.TagMode
+import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.FilterChipWrapper
@@ -175,43 +177,34 @@ fun FilterBrowseSheet(
                             R.string.list_id
                         }
                     }
-
-                FlowRow(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                val items = remember {
+                    listOf(QueryType.Title, QueryType.Author, QueryType.Group, QueryType.List)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(Size.tiny),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Title,
-                        {
+                    ButtonGroup(
+                        items = items,
+                        selectedItem = filters.queryMode,
+                        onItemClick = {
                             queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Title))
+                            filterChanged(Filter.Query("", it))
                         },
-                        stringResource(id = R.string.title),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Author,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Author))
-                        },
-                        stringResource(id = R.string.author),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Group,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Group))
-                        },
-                        stringResource(id = R.string.scanlator_group),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.List,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.List))
-                        },
-                        stringResource(id = R.string.list_id),
-                    )
+                    ) { item ->
+                        val name =
+                            when (item) {
+                                QueryType.Title -> stringResource(id = R.string.title)
+                                QueryType.Author -> stringResource(id = R.string.author)
+                                QueryType.Group -> stringResource(id = R.string.scanlator_group)
+                                QueryType.List -> stringResource(id = R.string.list_id)
+                            }
+                        Text(
+                            text = name,
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
 
                 val isError =

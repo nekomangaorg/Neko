@@ -372,10 +372,8 @@ fun BrowseScreen(
                                     }
                                 Text(
                                     text = name,
-                                    style =
-                                        MaterialTheme.typography.labelLarge.copy(
-                                            fontWeight = FontWeight.Medium
-                                        ),
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelLarge,
                                 )
                             }
                         }
