@@ -67,9 +67,9 @@ fun SaveFilterDialog(
                         maxLines = 1,
                         colors =
                             OutlinedTextFieldDefaults.colors(
-                                cursorColor = themeColorState.buttonColor,
-                                focusedLabelColor = themeColorState.buttonColor,
-                                focusedBorderColor = themeColorState.buttonColor,
+                                cursorColor = themeColorState.primaryColor,
+                                focusedLabelColor = themeColorState.primaryColor,
+                                focusedBorderColor = themeColorState.primaryColor,
                             ),
                     )
                     Gap(Size.extraTiny)
@@ -91,7 +91,7 @@ fun SaveFilterDialog(
                     },
                     enabled = saveEnabled,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.save))
                 }
@@ -100,7 +100,7 @@ fun SaveFilterDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

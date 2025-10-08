@@ -152,7 +152,7 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
         when (trackSearchResult) {
             is TrackSearchResult.Loading ->
                 CircularProgressIndicator(
-                    color = themeColorState.buttonColor,
+                    color = themeColorState.primaryColor,
                     modifier = Modifier.size(32.dp),
                 )
             is TrackSearchResult.NoResult ->
@@ -181,7 +181,7 @@ private fun TrackSearchItem(
 
     val (backdropColor, outlineColor) =
         if (isSelected) {
-            themeColorState.altContainerColor to themeColorState.buttonColor
+            themeColorState.containerColor to themeColorState.primaryColor
         } else {
             MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.outline
         }

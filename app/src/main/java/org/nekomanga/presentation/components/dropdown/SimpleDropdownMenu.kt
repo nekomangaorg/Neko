@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components.dropdown
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +17,6 @@ import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -28,30 +28,25 @@ fun SimpleDropdownMenu(
     dropDownItems: PersistentList<SimpleDropDownItem>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
-    val background =
-        Modifier.background(
-            color =
-                MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                    themeColorState.buttonColor,
-                    8.dp,
-                )
-        )
     CascadeDropdownMenu(
         expanded = expanded,
-        offset = DpOffset(Size.small, Size.small),
-        fixedWidth = 225.dp,
-        modifier = background,
+        offset = DpOffset(Size.smedium, Size.none),
+        fixedWidth = 250.dp,
+        modifier =
+            Modifier.background(
+                color = themeColorState.containerColor.copy(alpha = NekoColors.highAlphaLowContrast)
+            ),
         properties = PopupProperties(),
+        shape = RoundedCornerShape(Size.medium),
         onDismissRequest = onDismiss,
     ) {
         val enabledStyle =
-            MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
+            MaterialTheme.typography.bodyLarge.copy(color = themeColorState.onContainerColor)
         val disabledStyle =
             enabledStyle.copy(enabledStyle.color.copy(alpha = NekoColors.disabledAlphaLowContrast))
 
         dropDownItems.forEach { item ->
             Row(
-                modifier = background,
                 item = item,
                 enabledStyle = enabledStyle,
                 disabledStyle = disabledStyle,
@@ -63,7 +58,6 @@ fun SimpleDropdownMenu(
 
 @Composable
 private fun CascadeColumnScope.Row(
-    modifier: Modifier,
     item: SimpleDropDownItem,
     enabledStyle: TextStyle,
     disabledStyle: TextStyle,
@@ -80,13 +74,11 @@ private fun CascadeColumnScope.Row(
                 }
 
             DropdownMenuItem(
-                modifier = modifier,
                 text = { Text(text = item.text.asString(), style = style) },
                 enabled = item.enabled,
                 children = {
                     for (child in item.children) {
                         Row(
-                            modifier = modifier,
                             item = child,
                             enabledStyle = enabledStyle,
                             disabledStyle = disabledStyle,
@@ -95,10 +87,7 @@ private fun CascadeColumnScope.Row(
                     }
                 },
                 childrenHeader = {
-                    DropdownMenuHeader(
-                        modifier = modifier,
-                        text = { Text(text = item.text.asString(), style = style) },
-                    )
+                    DropdownMenuHeader(text = { Text(text = item.text.asString(), style = style) })
                 },
             )
         }
@@ -109,7 +98,6 @@ private fun CascadeColumnScope.Row(
                     false -> disabledStyle
                 }
             Item(
-                modifier = modifier,
                 text = item.text.asString(),
                 style = style,
                 enabled = item.enabled,
@@ -122,7 +110,6 @@ private fun CascadeColumnScope.Row(
 
 @Composable
 private fun Item(
-    modifier: Modifier,
     text: String,
     style: TextStyle,
     enabled: Boolean = true,
@@ -130,7 +117,6 @@ private fun Item(
     onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
-        modifier = modifier,
         enabled = enabled,
         text = { Text(text = text, style = style) },
         onClick = {

@@ -121,13 +121,13 @@ fun ChapterRow(
                 icon = {
                     SwipeIcon(
                         icon = readIcon,
-                        contentColor = themeColor.buttonColor,
+                        contentColor = themeColor.primaryColor,
                         text = stringResource(readText),
                     )
                 },
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                        themeColor.buttonColor,
+                        themeColor.primaryColor,
                         Size.small,
                     ),
                 onSwipe = onRead,
@@ -138,13 +138,13 @@ fun ChapterRow(
                 icon = {
                     SwipeIcon(
                         icon = bookmarkIcon,
-                        contentColor = themeColor.buttonColor,
+                        contentColor = themeColor.primaryColor,
                         text = stringResource(bookmarkText),
                     )
                 },
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                        themeColor.buttonColor,
+                        themeColor.primaryColor,
                         Size.small,
                     ),
                 onSwipe = onBookmark,
@@ -155,7 +155,7 @@ fun ChapterRow(
             endSwipeActions = listOf(markReadSwipeAction),
             backgroundInitialSwipeColor =
                 MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                    themeColor.buttonColor,
+                    themeColor.primaryColor,
                     Size.medium,
                 ),
         ) {
@@ -328,7 +328,7 @@ private fun ChapterInfo(
                         imageVector = Icons.Filled.Bookmark,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp).align(Alignment.CenterVertically),
-                        tint = themeColorState.buttonColor,
+                        tint = themeColorState.primaryColor,
                     )
                     Gap(Size.tiny)
                 }
@@ -436,7 +436,7 @@ private fun ChapterInfo(
                         Modifier.align(Alignment.CenterVertically)
                             .padding(Size.smedium)
                             .size(Size.large),
-                    tint = themeColorState.buttonColor,
+                    tint = themeColorState.primaryColor,
                 )
             }
             localCopy -> {
@@ -474,7 +474,7 @@ private fun ChapterInfo(
                                 imageVector = Icons.Outlined.FolderOpen,
                                 contentDescription = null,
                                 modifier = Modifier.requiredSize(24.dp),
-                                tint = themeColorState.buttonColor,
+                                tint = themeColorState.primaryColor,
                             )
                         }
                     }

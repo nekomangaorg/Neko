@@ -17,11 +17,14 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
 fun AppBarActions(
     actions: List<AppBar.AppBarAction>,
     tint: Color = MaterialTheme.colorScheme.onSurface,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -46,6 +49,7 @@ fun AppBarActions(
             )
 
             SimpleDropdownMenu(
+                themeColorState = themeColorState,
                 expanded = showMenu,
                 onDismiss = { showMenu = false },
                 dropDownItems =
@@ -69,6 +73,7 @@ fun AppBarActions(
             mainDropDown.menuShowing(showMenu)
 
             MainDropdownMenu(
+                themeColorState = themeColorState,
                 expanded = showMenu,
                 incognitoModeEnabled = mainDropDown.incognitoMode,
                 incognitoModeClick = mainDropDown.incognitoModeClick,

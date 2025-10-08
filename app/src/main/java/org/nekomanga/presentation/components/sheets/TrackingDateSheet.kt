@@ -134,7 +134,7 @@ fun TrackingDateSheet(
                     text = stringResource(id = R.string.remove),
                     style =
                         MaterialTheme.typography.titleMedium.copy(
-                            color = themeColorState.buttonColor
+                            color = themeColorState.primaryColor
                         ),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -184,7 +184,7 @@ fun TrackingDateSheet(
                             ),
                         style =
                             MaterialTheme.typography.titleMedium.copy(
-                                color = themeColorState.buttonColor
+                                color = themeColorState.primaryColor
                             ),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -199,7 +199,7 @@ fun TrackingDateSheet(
                     text = stringResource(id = R.string.edit),
                     style =
                         MaterialTheme.typography.titleMedium.copy(
-                            color = themeColorState.buttonColor
+                            color = themeColorState.primaryColor
                         ),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -228,7 +228,7 @@ fun TrackingDateSheet(
                         MaterialTheme.typography.headlineSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         ),
-                    cursorBrush = SolidColor(themeColorState.buttonColor),
+                    cursorBrush = SolidColor(themeColorState.primaryColor),
                     hintTextStyle =
                         MaterialTheme.typography.headlineSmall.copy(
                             color =
@@ -246,7 +246,7 @@ fun TrackingDateSheet(
                     },
                     colors =
                         ButtonDefaults.elevatedButtonColors(
-                            containerColor = themeColorState.buttonColor,
+                            containerColor = themeColorState.primaryColor,
                             contentColor = MaterialTheme.colorScheme.surface,
                         ),
                     enabled = newDate != null,

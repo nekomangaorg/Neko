@@ -101,7 +101,7 @@ fun EditCategorySheet(
                         text = stringResource(id = R.string.plus_new_category),
                         style =
                             MaterialTheme.typography.titleSmall.copy(
-                                color = themeColorState.buttonColor
+                                color = themeColorState.primaryColor
                             ),
                     )
                 }
@@ -149,7 +149,7 @@ fun EditCategorySheet(
                 TextButton(
                     onClick = cancelClick,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),
@@ -164,7 +164,7 @@ fun EditCategorySheet(
                     },
                     colors =
                         ButtonDefaults.elevatedButtonColors(
-                            containerColor = themeColorState.buttonColor
+                            containerColor = themeColorState.primaryColor
                         ),
                 ) {
                     Text(

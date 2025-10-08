@@ -80,7 +80,7 @@ fun TrackingStatusDialog(
                                 onClick = { clicked() },
                                 colors =
                                     RadioButtonDefaults.colors(
-                                        selectedColor = themeColorState.buttonColor
+                                        selectedColor = themeColorState.primaryColor
                                     ),
                             )
                             Gap(Size.small)
@@ -97,7 +97,7 @@ fun TrackingStatusDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

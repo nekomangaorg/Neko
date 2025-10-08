@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components.dropdown
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.DpOffset
@@ -28,11 +30,20 @@ import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
+private data class MenuItem(
+    val title: UiText,
+    val icon: UiIcon,
+    val subtitle: UiText? = null,
+    val onClick: () -> Unit,
+)
+
 @Composable
 fun MainDropdownMenu(
+    themeColorState: ThemeColorState = defaultThemeColorState(),
     expanded: Boolean,
     incognitoModeEnabled: Boolean,
     incognitoModeClick: () -> Unit,
@@ -42,61 +53,76 @@ fun MainDropdownMenu(
     helpClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = MaterialTheme.colorScheme.copy(surface = MaterialTheme.colorScheme.surface),
-        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),
-    ) {
-        CompositionLocalProvider(
-            LocalRippleConfiguration provides (defaultThemeColorState().rippleConfiguration)
-        ) {
-            CascadeDropdownMenu(
-                expanded = expanded,
-                offset = DpOffset(12.dp, Size.none),
-                fixedWidth = 250.dp,
-                properties = PopupProperties(),
-                onDismissRequest = onDismiss,
-            ) {
-                val (incognitoText, incognitoIcon) =
-                    when (incognitoModeEnabled) {
-                        true ->
-                            R.string.turn_off_incognito_mode to
-                                CommunityMaterial.Icon2.cmd_incognito_off
-                        false ->
-                            R.string.turn_on_incognito_mode to CommunityMaterial.Icon2.cmd_incognito
-                    }
 
-                Row(
+    val menuItems =
+        remember(incognitoModeEnabled) {
+            val (incognitoText, incognitoIcon) =
+                if (incognitoModeEnabled) {
+                    R.string.turn_off_incognito_mode to CommunityMaterial.Icon2.cmd_incognito_off
+                } else {
+                    R.string.turn_on_incognito_mode to CommunityMaterial.Icon2.cmd_incognito
+                }
+
+            listOf(
+                MenuItem(
                     title = UiText.StringResource(incognitoText),
-                    subTitle = UiText.StringResource(R.string.pauses_reading_history),
+                    subtitle = UiText.StringResource(R.string.pauses_reading_history),
                     icon = UiIcon.IIcon(incognitoIcon),
                     onClick = incognitoModeClick,
-                    onDismiss = onDismiss,
-                )
-                Divider()
-                Row(
+                ),
+                MenuItem(
                     title = UiText.StringResource(R.string.settings),
                     icon = UiIcon.Icon(Icons.Outlined.Settings),
                     onClick = settingsClick,
-                    onDismiss = onDismiss,
-                )
-                Row(
+                ),
+                MenuItem(
                     title = UiText.StringResource(R.string.stats),
                     icon = UiIcon.Icon(Icons.Outlined.QueryStats),
                     onClick = statsClick,
-                    onDismiss = onDismiss,
-                )
-                Row(
+                ),
+                MenuItem(
                     title = UiText.StringResource(R.string.about),
                     icon = UiIcon.Icon(Icons.Outlined.Info),
                     onClick = aboutClick,
-                    onDismiss = onDismiss,
-                )
-                Row(
+                ),
+                MenuItem(
                     title = UiText.StringResource(R.string.help),
                     icon = UiIcon.Icon(Icons.AutoMirrored.Outlined.HelpOutline),
                     onClick = helpClick,
-                    onDismiss = onDismiss,
+                ),
+            )
+        }
+
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides (themeColorState.rippleConfiguration)
+    ) {
+        CascadeDropdownMenu(
+            expanded = expanded,
+            modifier =
+                Modifier.background(
+                    color =
+                        themeColorState.containerColor.copy(alpha = NekoColors.highAlphaLowContrast)
+                ),
+            offset = DpOffset(Size.smedium, Size.none),
+            fixedWidth = 250.dp,
+            shape = RoundedCornerShape(Size.medium),
+            properties = PopupProperties(),
+            onDismissRequest = onDismiss,
+        ) {
+            menuItems.forEachIndexed { index, item ->
+                Row(
+                    themeColorState = themeColorState,
+                    title = item.title,
+                    subTitle = item.subtitle,
+                    icon = item.icon,
+                    onClick = {
+                        item.onClick()
+                        onDismiss()
+                    },
                 )
+                if (index == 0) {
+                    Divider()
+                }
             }
         }
     }
@@ -104,18 +130,18 @@ fun MainDropdownMenu(
 
 @Composable
 private fun Row(
+    themeColorState: ThemeColorState,
     title: UiText,
     subTitle: UiText? = null,
     icon: UiIcon,
     onClick: () -> Unit,
-    onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
         text = {
             Column {
                 Text(
                     text = title.asString(),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = themeColorState.onContainerColor,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 if (subTitle != null) {
@@ -124,7 +150,7 @@ private fun Row(
                         style =
                             MaterialTheme.typography.bodySmall.copy(
                                 color =
-                                    MaterialTheme.colorScheme.onSurface.copy(
+                                    themeColorState.onContainerColor.copy(
                                         alpha = NekoColors.mediumAlphaLowContrast
                                     )
                             ),
@@ -137,21 +163,18 @@ private fun Row(
                 is UiIcon.Icon ->
                     Icon(
                         imageVector = icon.icon,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Size.large),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = themeColorState.onContainerColor,
                     )
                 is UiIcon.IIcon ->
                     Image(
                         asset = icon.icon,
-                        modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
+                        modifier = Modifier.size(Size.large),
+                        colorFilter = ColorFilter.tint(color = themeColorState.onContainerColor),
                     )
             }
         },
-        onClick = {
-            onClick()
-            onDismiss()
-        },
+        onClick = onClick,
     )
 }

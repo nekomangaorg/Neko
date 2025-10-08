@@ -118,14 +118,14 @@ private fun Sort(
                     Text(
                         text = stringResource(id = R.string.set_as_default),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
                 TextButton(onClick = { changeSort(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }
@@ -193,14 +193,14 @@ private fun Filter(
                     Text(
                         text = stringResource(id = R.string.set_as_default),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
                 TextButton(onClick = { changeFilter(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }
@@ -342,7 +342,7 @@ private fun Scanlator(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }
@@ -403,7 +403,7 @@ private fun Language(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }

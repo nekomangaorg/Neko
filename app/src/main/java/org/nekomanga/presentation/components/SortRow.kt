@@ -37,7 +37,7 @@ fun SortRow(
             true ->
                 MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to
                     MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
-            false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface
+            false -> themeColorState.primaryColor to MaterialTheme.colorScheme.onSurface
         }
 
     Row(

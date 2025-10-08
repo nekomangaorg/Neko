@@ -88,7 +88,7 @@ fun DescriptionBlock(
 
     val tagColor =
         MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-            themeColorState.buttonColor,
+            themeColorState.primaryColor,
             16.dp,
         )
 
@@ -153,7 +153,7 @@ fun DescriptionBlock(
                             )
                 ) {
                     MoreLessButton(
-                        themeColorState.buttonColor,
+                        themeColorState.primaryColor,
                         true,
                         Modifier.align(Alignment.TopEnd),
                     )
@@ -205,7 +205,7 @@ fun DescriptionBlock(
                 Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
                 MoreLessButton(
-                    buttonColor = themeColorState.buttonColor,
+                    buttonColor = themeColorState.primaryColor,
                     isMore = false,
                     clickable.align(Alignment.End),
                 )
@@ -313,7 +313,7 @@ private fun FlowableAltTitles(
                 Text(
                     text = stringResource(id = R.string.reset),
                     style = MaterialTheme.typography.labelLarge,
-                    color = themeColorState.buttonColor,
+                    color = themeColorState.primaryColor,
                 )
             }
         }
@@ -384,7 +384,7 @@ private fun ScrollableAltTitles(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }

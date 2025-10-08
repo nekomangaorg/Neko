@@ -68,7 +68,7 @@ fun TrackingScoreDialog(
                             currentIndex = trackAndService.service.scoreList.indexOf(newScore)
                         },
                         list = trackAndService.service.scoreList,
-                        dividersColor = themeColorState.buttonColor,
+                        dividersColor = themeColorState.primaryColor,
                         textStyle =
                             MaterialTheme.typography.titleMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface
@@ -81,7 +81,7 @@ fun TrackingScoreDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
@@ -93,7 +93,7 @@ fun TrackingScoreDialog(
                         onDismiss()
                     },
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }

@@ -79,14 +79,14 @@ fun ButtonBlock(
     var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
     val checkedButtonColors =
-        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
+        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.containerColor)
     val checkedBorderStroke = BorderStroke(Size.extraExtraTiny, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke =
         BorderStroke(
             Size.extraExtraTiny,
-            themeColorState.altContainerColor.copy(alpha = NekoColors.mediumAlphaHighContrast),
+            themeColorState.containerColor.copy(alpha = NekoColors.mediumAlphaHighContrast),
         )
     val (padding, iconicsPadding, buttonModifier) =
         when (hideButtonTextProvider()) {
@@ -144,7 +144,7 @@ fun ButtonBlock(
                 imageVector = favConfig.icon!!,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = themeColorState.buttonColor,
+                tint = themeColorState.primaryColor,
             )
             SimpleDropdownMenu(
                 expanded = favoriteExpanded,
@@ -209,7 +209,7 @@ fun ButtonBlock(
                         }
                     IconicsButtonContent(
                         iIcon = icon,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         hideText = hideButtonTextProvider(),
                         text = "",
                         iconicsSize = 28.dp,
@@ -217,7 +217,7 @@ fun ButtonBlock(
                 } else {
                     ButtonContent(
                         trackerConfig.icon!!,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         hideText = hideButtonTextProvider(),
                         text = trackerConfig.text,
                     )
@@ -234,7 +234,7 @@ fun ButtonBlock(
         ) {
             IconicsButtonContent(
                 iIcon = MaterialDesignDx.Icon.gmf_art_track,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(id = R.string.artwork),
                 iconicsSize = 32.dp,
@@ -250,7 +250,7 @@ fun ButtonBlock(
         ) {
             ButtonContent(
                 Icons.Filled.AccountTree,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.similar_work),
             )
@@ -284,7 +284,7 @@ fun ButtonBlock(
         ) {
             IconicsButtonContent(
                 iIcon = mergeConfig.iIcon!!,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = mergeConfig.text,
                 iconicsSize = 28.dp,
@@ -300,7 +300,7 @@ fun ButtonBlock(
         ) {
             ButtonContent(
                 icon = Icons.Filled.OpenInBrowser,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.links),
             )
@@ -315,7 +315,7 @@ fun ButtonBlock(
         ) {
             ButtonContent(
                 icon = Icons.Filled.Share,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.share),
             )

@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -162,14 +163,19 @@ fun MangaScreen(
                             Color(mangaDetailScreenState.value.vibrantColor!!),
                             isDarkTheme,
                         )
+
+                    val containerColor =
+                        Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f))
+
+                    val onContainerColor =
+                        if (containerColor.luminance() > .5f) Color.Black else Color.White
+
                     ThemeColorState(
-                        buttonColor = color,
+                        primaryColor = color,
                         rippleConfiguration = nekoRippleConfiguration(color),
                         textSelectionColors = dynamicTextSelectionColor(color),
-                        altContainerColor =
-                            Color(
-                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)
-                            ),
+                        containerColor = containerColor,
+                        onContainerColor,
                     )
                 } else {
                     defaultThemeColorState
@@ -223,10 +229,11 @@ fun MangaScreen(
             searchPlaceHolder = stringResource(id = R.string.search_chapters),
             incognitoMode = mangaDetailScreenState.value.incognitoMode,
             onSearch = onSearch,
-            snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
+            snackBarHost = snackbarHost(snackbarHostState, themeColorState.primaryColor),
             actions = {
                 MangaDetailsAppBarActions(
                     chapterActions = chapterActions,
+                    themeColorState = themeColorState,
                     chaptersProvider = { mangaDetailScreenState.value.activeChapters },
                 )
             },
@@ -235,8 +242,8 @@ fun MangaScreen(
                     refreshing = mangaDetailScreenState.value.isRefreshing,
                     onRefresh = onRefresh,
                     indicatorOffset = incomingPaddingValues.calculateTopPadding(),
-                    backgroundColor = themeColorState.buttonColor,
-                    contentColor = MaterialTheme.colorScheme.surface,
+                    backgroundColor = themeColorState.containerColor,
+                    contentColor = themeColorState.primaryColor,
                 ) {
                     val mangaDetailContentPadding =
                         PaddingValues(
@@ -638,23 +645,26 @@ private fun Details(
 }
 
 class ThemeColorState(
-    buttonColor: Color,
+    primaryColor: Color,
     rippleConfiguration: RippleConfiguration,
     textSelectionColors: TextSelectionColors,
-    altContainerColor: Color,
+    containerColor: Color,
+    onContainerColor: Color,
 ) {
-    var buttonColor by mutableStateOf(buttonColor)
+    var primaryColor by mutableStateOf(primaryColor)
     var rippleConfiguration by mutableStateOf(rippleConfiguration)
     var textSelectionColors by mutableStateOf(textSelectionColors)
-    var altContainerColor by mutableStateOf(altContainerColor)
+    var containerColor by mutableStateOf(containerColor)
+    var onContainerColor by mutableStateOf(onContainerColor)
 }
 
 @Composable
 fun defaultThemeColorState(): ThemeColorState {
     return ThemeColorState(
-        buttonColor = MaterialTheme.colorScheme.primary,
+        primaryColor = MaterialTheme.colorScheme.primary,
         rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
-        altContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
 }

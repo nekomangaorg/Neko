@@ -234,7 +234,7 @@ private fun ColumnScope.QuickReadButton(
         Gap(Size.tiny)
         CompositionLocalProvider(
             LocalRippleConfiguration provides
-                nekoRippleConfiguration(themeColorState.altContainerColor)
+                nekoRippleConfiguration(themeColorState.containerColor)
         ) {
             ElevatedButton(
                 onClick = quickReadClick,
@@ -242,11 +242,11 @@ private fun ColumnScope.QuickReadButton(
                 modifier = Modifier.fillMaxWidth().padding(Size.small),
                 colors =
                     ButtonDefaults.elevatedButtonColors(
-                        containerColor = themeColorState.buttonColor
+                        containerColor = themeColorState.primaryColor
                     ),
             ) {
                 Text(
-                    text = stringResource(id = nextChapter.id!!, nextChapter.text),
+                    text = stringResource(id = nextChapter.id, nextChapter.text),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface,
                 )

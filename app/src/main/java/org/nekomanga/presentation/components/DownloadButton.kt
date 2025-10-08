@@ -105,20 +105,20 @@ fun DownloadButton(
                 )
             Download.State.NOT_DOWNLOADED ->
                 NotDownloaded(
-                    buttonColor = themeColorState.buttonColor,
+                    buttonColor = themeColorState.primaryColor,
                     modifier = downloadButtonModifier,
                     defaultDisableColor = defaultDisableColor,
                 )
             Download.State.QUEUE -> Queued(modifier = downloadButtonModifier)
             Download.State.DOWNLOADED ->
                 Downloaded(
-                    buttonColor = themeColorState.buttonColor,
+                    buttonColor = themeColorState.primaryColor,
                     downloadComplete = downloadComplete,
                     modifier = downloadButtonModifier,
                 )
             Download.State.DOWNLOADING ->
                 Downloading(
-                    buttonColor = themeColorState.buttonColor,
+                    buttonColor = themeColorState.primaryColor,
                     modifier = downloadButtonModifier,
                     downloadProgress = downloadProgress,
                 )

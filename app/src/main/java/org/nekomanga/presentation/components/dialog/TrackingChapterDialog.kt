@@ -67,7 +67,7 @@ fun TrackingChapterDialog(
                             MaterialTheme.typography.titleMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface
                             ),
-                        dividersColor = themeColorState.buttonColor,
+                        dividersColor = themeColorState.primaryColor,
                     )
                 }
             },
@@ -76,7 +76,7 @@ fun TrackingChapterDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
@@ -88,7 +88,7 @@ fun TrackingChapterDialog(
                         onDismiss()
                     },
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }

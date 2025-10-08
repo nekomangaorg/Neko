@@ -281,7 +281,7 @@ private fun NoTrack(
         Logo(service = service, track = null, onClick = onLogoClick)
         Text(
             text = stringResource(id = R.string.add_tracking),
-            color = themeColor.buttonColor,
+            color = themeColor.primaryColor,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -329,7 +329,7 @@ private fun TrackRowOne(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = null,
                     modifier = Modifier.padding(end = Size.small).size(24.dp),
-                    tint = themeColor.buttonColor,
+                    tint = themeColor.primaryColor,
                 )
             }
         }
