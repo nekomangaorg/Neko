@@ -71,6 +71,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
     }
 
     override suspend fun doWork(): Result {
+        tryToSetForeground()
         val idleRun = inputData.getBoolean(IDLE_RUN, false)
         val url: String
         if (idleRun) {
@@ -101,7 +102,6 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             url = inputData.getString(EXTRA_DOWNLOAD_URL) ?: return Result.failure()
         }
 
-        tryToSetForeground()
         instance = WeakReference(this)
 
         val notifyOnInstall = inputData.getBoolean(EXTRA_NOTIFY_ON_INSTALL, false)
