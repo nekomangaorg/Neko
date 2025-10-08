@@ -46,6 +46,7 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -83,7 +84,10 @@ fun ButtonBlock(
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke =
-        BorderStroke(Size.extraExtraTiny, themeColorState.altContainerColor.copy(alpha = .8f))
+        BorderStroke(
+            Size.extraExtraTiny,
+            themeColorState.altContainerColor.copy(alpha = NekoColors.mediumAlphaHighContrast),
+        )
     val (padding, iconicsPadding, buttonModifier) =
         when (hideButtonTextProvider()) {
             true ->

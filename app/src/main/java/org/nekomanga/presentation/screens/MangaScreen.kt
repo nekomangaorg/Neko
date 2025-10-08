@@ -652,16 +652,9 @@ class ThemeColorState(
 @Composable
 fun defaultThemeColorState(): ThemeColorState {
     return ThemeColorState(
-        buttonColor = MaterialTheme.colorScheme.secondary,
+        buttonColor = MaterialTheme.colorScheme.primary,
         rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
-        altContainerColor =
-            Color(
-                ColorUtils.blendARGB(
-                    MaterialTheme.colorScheme.secondary.toArgb(),
-                    MaterialTheme.colorScheme.surface.toArgb(),
-                    .706f,
-                )
-            ),
+        altContainerColor = MaterialTheme.colorScheme.primaryContainer,
     )
 }
