@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -21,7 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -31,7 +32,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
@@ -213,14 +217,21 @@ fun DisplayScreen(
                     }
                     if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
                         Box(Modifier.fillMaxSize()) {
-                            LinearProgressIndicator(
+                            val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                            val stroke =
+                                remember(strokeWidth) {
+                                    Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                }
+                            LinearWavyProgressIndicator(
                                 modifier =
-                                    Modifier.padding(
-                                            bottom =
-                                                contentPadding.calculateBottomPadding() + Size.small
-                                        )
-                                        .align(Alignment.BottomCenter)
-                                        .fillMaxWidth()
+                                    Modifier.fillMaxWidth()
+                                        .align(Alignment.TopStart)
+                                        .statusBarsPadding(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor =
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                stroke = stroke,
+                                trackStroke = stroke,
                             )
                         }
                     }
