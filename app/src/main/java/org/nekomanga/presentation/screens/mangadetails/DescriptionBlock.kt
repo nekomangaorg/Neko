@@ -263,7 +263,7 @@ private fun AltTitles(
 
         Text(
             text = "Alt Titles:",
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             color =
                 MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
@@ -312,7 +312,7 @@ private fun FlowableAltTitles(
             TextButton(onClick = resetClick) {
                 Text(
                     text = stringResource(id = R.string.reset),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = themeColorState.buttonColor,
                 )
             }
@@ -343,7 +343,7 @@ private fun FlowableAltTitles(
                 label = {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(Size.none),
                     )
                 },
@@ -383,7 +383,7 @@ private fun ScrollableAltTitles(
                 TextButton(onClick = resetClick) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
@@ -417,7 +417,7 @@ private fun ScrollableAltTitles(
                 label = {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(Size.none),
                     )
                 },
@@ -439,7 +439,7 @@ private fun ColumnScope.Genres(
 
     Text(
         text = "Tags:",
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
     Gap(Size.tiny)

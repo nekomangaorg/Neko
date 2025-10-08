@@ -62,7 +62,10 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
                     val endChap = chpNum - 1
                     when (beginningChp == endChap) {
                         true -> estimateChapters.add("Ch.$beginningChp")
-                        false -> estimateChapters.add("Ch.$beginningChp ? Ch.$endChap")
+                        false ->
+                            estimateChapters.add(
+                                "Ch.$beginningChp ${Constants.RIGHT_ARROW_SEPARATOR} Ch.$endChap"
+                            )
                     }
                 }
             }

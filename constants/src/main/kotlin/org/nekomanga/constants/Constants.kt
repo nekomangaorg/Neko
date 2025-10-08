@@ -17,6 +17,8 @@ object Constants {
     const val LOCAL_SOURCE = "Local"
 
     const val SEPARATOR = " · "
+
+    const val RIGHT_ARROW_SEPARATOR = " → "
     const val SCANLATOR_SEPARATOR = " & "
 
     const val ALT_TITLES_SEPARATOR = "|~|"

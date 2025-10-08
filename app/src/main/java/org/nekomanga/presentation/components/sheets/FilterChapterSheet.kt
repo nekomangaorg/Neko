@@ -110,21 +110,21 @@ private fun Sort(
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = stringResource(id = R.string.sort),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (!sortFilter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
                     Text(
                         text = stringResource(id = R.string.set_as_default),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
                 TextButton(onClick = { changeSort(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
@@ -184,7 +184,7 @@ private fun Filter(
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = stringResource(id = R.string.filter_and_display),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
@@ -192,14 +192,14 @@ private fun Filter(
                 TextButton(onClick = setGlobal) {
                     Text(
                         text = stringResource(id = R.string.set_as_default),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
                 TextButton(onClick = { changeFilter(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
@@ -334,14 +334,14 @@ private fun Scanlator(
                             if (isSourceFilter) R.string.filter_source
                             else R.string.filter_scanlators
                     ),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (scanlatorFilter.scanlators.any { it.disabled }) {
                 TextButton(onClick = { changeScanlatorFilter(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }
@@ -395,14 +395,14 @@ private fun Language(
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = stringResource(id = R.string.filter_languages),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (languageFilter.languages.any { it.disabled }) {
                 TextButton(onClick = { changeLanguageFilter(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = themeColorState.buttonColor,
                     )
                 }

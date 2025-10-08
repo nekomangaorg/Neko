@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
@@ -27,7 +26,7 @@ fun Chip(label: String, containerColor: Color, modifier: Modifier = Modifier) {
             text = label,
             style = MaterialTheme.typography.labelLarge,
             modifier =
-                Modifier.padding(vertical = 12.dp, horizontal = 12.dp)
+                Modifier.padding(vertical = Size.small, horizontal = Size.smedium)
                     .background(Color.Transparent),
             color =
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(
