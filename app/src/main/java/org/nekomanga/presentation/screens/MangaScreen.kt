@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -79,6 +78,7 @@ import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.snackbar.snackbarHost
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -145,6 +145,7 @@ fun MangaScreen(
 
     val isDarkTheme = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     val defaultThemeColorState = defaultThemeColorState()
 
@@ -168,14 +169,22 @@ fun MangaScreen(
                         Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f))
 
                     val onContainerColor =
-                        if (containerColor.luminance() > .5f) Color.Black else Color.White
+                        Color(ColorUtils.blendARGB(color.toArgb(), onSurfaceColor.toArgb(), .706f))
+
+                    val altContainerColor =
+                        surfaceColor.surfaceColorAtElevationCustomColor(
+                            surfaceColor,
+                            color,
+                            Size.small,
+                        )
 
                     ThemeColorState(
                         primaryColor = color,
                         rippleConfiguration = nekoRippleConfiguration(color),
                         textSelectionColors = dynamicTextSelectionColor(color),
                         containerColor = containerColor,
-                        onContainerColor,
+                        onContainerColor = onContainerColor,
+                        altContainerColor = altContainerColor,
                     )
                 } else {
                     defaultThemeColorState
@@ -650,21 +659,31 @@ class ThemeColorState(
     textSelectionColors: TextSelectionColors,
     containerColor: Color,
     onContainerColor: Color,
+    altContainerColor: Color,
 ) {
     var primaryColor by mutableStateOf(primaryColor)
     var rippleConfiguration by mutableStateOf(rippleConfiguration)
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var containerColor by mutableStateOf(containerColor)
     var onContainerColor by mutableStateOf(onContainerColor)
+    var altContainerColor by mutableStateOf(altContainerColor)
 }
 
 @Composable
 fun defaultThemeColorState(): ThemeColorState {
+
+    val altContainerColor =
+        MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+            MaterialTheme.colorScheme.primary,
+            Size.small,
+        )
+
     return ThemeColorState(
         primaryColor = MaterialTheme.colorScheme.primary,
         rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        altContainerColor = altContainerColor,
     )
 }

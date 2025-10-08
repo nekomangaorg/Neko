@@ -93,35 +93,41 @@ fun MainDropdownMenu(
             )
         }
 
-    CompositionLocalProvider(
-        LocalRippleConfiguration provides (themeColorState.rippleConfiguration)
-    ) {
-        CascadeDropdownMenu(
-            expanded = expanded,
-            modifier =
-                Modifier.background(
-                    color =
-                        themeColorState.containerColor.copy(alpha = NekoColors.highAlphaLowContrast)
-                ),
-            offset = DpOffset(Size.smedium, Size.none),
-            fixedWidth = 250.dp,
-            shape = RoundedCornerShape(Size.medium),
-            properties = PopupProperties(),
-            onDismissRequest = onDismiss,
+    val colors =
+        MaterialTheme.colorScheme.copy(
+            primary = themeColorState.primaryColor,
+            surface = themeColorState.altContainerColor,
+            surfaceContainer = themeColorState.altContainerColor,
+            onSurface = themeColorState.onContainerColor,
+            onSurfaceVariant = themeColorState.onContainerColor,
+        )
+
+    MaterialTheme(colorScheme = colors) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides (themeColorState.rippleConfiguration)
         ) {
-            menuItems.forEachIndexed { index, item ->
-                Row(
-                    themeColorState = themeColorState,
-                    title = item.title,
-                    subTitle = item.subtitle,
-                    icon = item.icon,
-                    onClick = {
-                        item.onClick()
-                        onDismiss()
-                    },
-                )
-                if (index == 0) {
-                    Divider()
+            CascadeDropdownMenu(
+                expanded = expanded,
+                offset = DpOffset(Size.smedium, Size.none),
+                fixedWidth = 250.dp,
+                modifier = Modifier.background(color = themeColorState.altContainerColor),
+                shape = RoundedCornerShape(Size.medium),
+                properties = PopupProperties(),
+                onDismissRequest = onDismiss,
+            ) {
+                menuItems.forEachIndexed { index, item ->
+                    Row(
+                        title = item.title,
+                        subTitle = item.subtitle,
+                        icon = item.icon,
+                        onClick = {
+                            item.onClick()
+                            onDismiss()
+                        },
+                    )
+                    if (index == 0) {
+                        Divider()
+                    }
                 }
             }
         }
@@ -129,19 +135,13 @@ fun MainDropdownMenu(
 }
 
 @Composable
-private fun Row(
-    themeColorState: ThemeColorState,
-    title: UiText,
-    subTitle: UiText? = null,
-    icon: UiIcon,
-    onClick: () -> Unit,
-) {
+private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: () -> Unit) {
     MaterialDropdownMenuItem(
         text = {
             Column {
                 Text(
                     text = title.asString(),
-                    color = themeColorState.onContainerColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 if (subTitle != null) {
@@ -150,7 +150,7 @@ private fun Row(
                         style =
                             MaterialTheme.typography.bodySmall.copy(
                                 color =
-                                    themeColorState.onContainerColor.copy(
+                                    MaterialTheme.colorScheme.onSurface.copy(
                                         alpha = NekoColors.mediumAlphaLowContrast
                                     )
                             ),
@@ -165,13 +165,13 @@ private fun Row(
                         imageVector = icon.icon,
                         modifier = Modifier.size(Size.large),
                         contentDescription = null,
-                        tint = themeColorState.onContainerColor,
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 is UiIcon.IIcon ->
                     Image(
                         asset = icon.icon,
                         modifier = Modifier.size(Size.large),
-                        colorFilter = ColorFilter.tint(color = themeColorState.onContainerColor),
+                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
                     )
             }
         },
