@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +41,7 @@ fun FastScroller(
     thumbColor: Color = MaterialTheme.colorScheme.surfaceTint,
     thumbSelectedColor: Color = MaterialTheme.colorScheme.primary,
     thumbWidth: Dp = 8.dp,
-    thumbMinWidth: Dp = 48.dp,
+    thumbMinWidth: Dp = 64.dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var isSelected by remember { mutableStateOf(false) }
@@ -128,7 +129,7 @@ fun FastScroller(
                 }
                 .width(animatedThumbWidth)
                 .fillMaxHeight()
-                .background(color = realThumbColor, shape = MaterialTheme.shapes.large)
+                .background(color = realThumbColor, shape = CircleShape)
                 .draggable(
                     state =
                     rememberDraggableState { delta ->
@@ -164,7 +165,7 @@ fun FastScroller(
     thumbColor: Color = MaterialTheme.colorScheme.surfaceTint,
     thumbSelectedColor: Color = MaterialTheme.colorScheme.primary,
     thumbWidth: Dp = 8.dp,
-    thumbMinWidth: Dp = 48.dp,
+    thumbMinWidth: Dp = 64.dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -261,7 +262,7 @@ fun FastScroller(
                 }
                 .width(animatedThumbWidth)
                 .fillMaxHeight()
-                .background(color = realThumbColor, shape = MaterialTheme.shapes.large)
+                .background(color = realThumbColor, shape = CircleShape)
                 .draggable(
                     state =
                     rememberDraggableState { delta ->
