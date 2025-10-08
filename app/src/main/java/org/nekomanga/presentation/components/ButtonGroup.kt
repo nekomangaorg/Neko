@@ -1,15 +1,22 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.theme.Size
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 fun <T> ButtonGroup(
@@ -19,34 +26,54 @@ fun <T> ButtonGroup(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.(T) -> Unit,
 ) {
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+    ) {
         items.forEachIndexed { index, item ->
             val isSelected = item == selectedItem
-            SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = items.size),
-                onClick = { onItemClick(item) },
-                selected = isSelected,
+
+            ToggleButton(
+                checked = isSelected,
+                onCheckedChange = { _ -> onItemClick(item) },
                 colors =
-                    SegmentedButtonDefaults.colors(
-                        activeContainerColor = MaterialTheme.colorScheme.primary,
-                        activeContentColor = MaterialTheme.colorScheme.onPrimary,
-                        inactiveContainerColor =
-                            MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                                MaterialTheme.colorScheme.primary,
-                                Size.small,
-                            ),
-                        inactiveContentColor = MaterialTheme.colorScheme.primary,
-                        activeBorderColor = MaterialTheme.colorScheme.primary,
-                        inactiveBorderColor =
-                            MaterialTheme.colorScheme.primary.copy(
-                                alpha = NekoColors.veryLowContrast
-                            ),
+                    ToggleButtonDefaults.toggleButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        checkedContainerColor = MaterialTheme.colorScheme.primary,
+                        checkedContentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
-                modifier = Modifier.defaultMinSize(minHeight = Size.large),
-                icon = {},
+                shapes =
+                    when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        items.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
             ) {
                 content(item)
             }
+        }
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun ButtonGroupPreview() {
+    ThemedPreviews {
+        // Define the items for the button group
+        val timePeriods = listOf("Summary", "History", "Updates")
+
+        // State to track the currently selected item
+        var selectedPeriod by remember { mutableStateOf(timePeriods.first()) }
+
+        ButtonGroup(
+            items = timePeriods,
+            selectedItem = selectedPeriod,
+            onItemClick = { item -> selectedPeriod = item },
+            modifier = Modifier.fillMaxWidth(0.8f), // Constrain width for better visualization
+        ) { item ->
+            // The content for each button: a Text composable
+            Text(text = item)
         }
     }
 }

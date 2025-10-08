@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -365,6 +366,7 @@ fun FeedScreen(
                                 ButtonGroup(
                                     modifier =
                                         Modifier.align(Alignment.BottomStart)
+                                            .fillMaxWidth()
                                             .padding(horizontal = Size.tiny),
                                     items = items,
                                     selectedItem = selectedItem,
