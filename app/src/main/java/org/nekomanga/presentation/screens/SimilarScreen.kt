@@ -132,9 +132,8 @@ fun SimilarScreen(
             },
             content = { incomingPaddingValues ->
                 PullRefresh(
-                    refreshing = similarScreenState.value.isRefreshing,
+                    isRefreshing = similarScreenState.value.isRefreshing,
                     onRefresh = onRefresh,
-                    indicatorOffset = (incomingPaddingValues.calculateTopPadding() + Size.huge),
                 ) {
                     val haptic = LocalHapticFeedback.current
 

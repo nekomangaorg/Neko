@@ -248,11 +248,9 @@ fun MangaScreen(
             },
             content = { incomingPaddingValues ->
                 PullRefresh(
-                    refreshing = mangaDetailScreenState.value.isRefreshing,
+                    isRefreshing = mangaDetailScreenState.value.isRefreshing,
                     onRefresh = onRefresh,
-                    indicatorOffset = incomingPaddingValues.calculateTopPadding(),
-                    backgroundColor = themeColorState.containerColor,
-                    contentColor = themeColorState.primaryColor,
+                    trackColor = themeColorState.primaryColor,
                 ) {
                     val mangaDetailContentPadding =
                         PaddingValues(
