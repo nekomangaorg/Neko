@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Check
@@ -75,7 +75,6 @@ fun ButtonBlock(
         return
     }
 
-    val shape = RoundedCornerShape(35)
     var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
     val checkedButtonColors =
@@ -85,7 +84,6 @@ fun ButtonBlock(
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke =
         BorderStroke(Size.extraExtraTiny, themeColorState.altContainerColor.copy(alpha = .8f))
-    val gapBetweenButtons = Size.small
     val (padding, iconicsPadding, buttonModifier) =
         when (hideButtonTextProvider()) {
             true ->
@@ -104,6 +102,7 @@ fun ButtonBlock(
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         val favConfig =
             when (inLibraryProvider()) {
@@ -124,9 +123,9 @@ fun ButtonBlock(
             }
 
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             colors = favConfig.buttonColors,
             modifier = Modifier.size(Size.huge),
-            shape = shape,
             onClick = {
                 if (!inLibraryProvider()) {
                     toggleFavorite()
@@ -168,7 +167,6 @@ fun ButtonBlock(
         }
 
         if (loggedIntoTrackersProvider()) {
-            Gap(gapBetweenButtons)
 
             val trackerConfig =
                 when {
@@ -191,7 +189,7 @@ fun ButtonBlock(
             OutlinedButton(
                 onClick = trackingClick,
                 modifier = buttonModifier,
-                shape = shape,
+                shapes = ButtonDefaults.shapes(),
                 colors = trackerConfig.buttonColors,
                 border = trackerConfig.borderStroke,
                 contentPadding = padding,
@@ -223,12 +221,10 @@ fun ButtonBlock(
             }
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = artworkClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = iconicsPadding,
         ) {
@@ -241,12 +237,10 @@ fun ButtonBlock(
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = similarClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
@@ -257,8 +251,6 @@ fun ButtonBlock(
                 text = stringResource(R.string.similar_work),
             )
         }
-
-        Gap(gapBetweenButtons)
 
         val mergeConfig =
             when (isMergedProvider()) {
@@ -279,9 +271,9 @@ fun ButtonBlock(
             }
 
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = mergeClick,
             modifier = buttonModifier,
-            shape = shape,
             colors = mergeConfig.buttonColors,
             border = mergeConfig.borderStroke,
             contentPadding = iconicsPadding,
@@ -295,12 +287,10 @@ fun ButtonBlock(
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = linksClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
@@ -312,12 +302,10 @@ fun ButtonBlock(
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = shareClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
