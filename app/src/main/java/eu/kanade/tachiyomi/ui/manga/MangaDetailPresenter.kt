@@ -79,6 +79,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -243,23 +244,19 @@ class MangaDetailPresenter(
 
             mangaUpdateCoordinator
                 .update(currentManga(), presenterScope, isMerging)
-                .catch { e ->
-                    e.message?.let { _snackbarState.emit(SnackbarState(message = it)) }
-                    _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
-                }
+                .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
+                .catch { e -> e.message?.let { _snackbarState.emit(SnackbarState(message = it)) } }
                 .collect { result ->
                     when (result) {
                         is MangaResult.Error -> {
                             _snackbarState.emit(
                                 SnackbarState(message = result.text, messageRes = result.id)
                             )
-                            _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
                         }
                         is MangaResult.Success -> {
                             updateAllFlows()
                             refreshTracking()
                             syncChaptersReadStatus()
-                            _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
                         }
                         is MangaResult.UpdatedChapters -> Unit
                         is MangaResult.UpdatedManga -> {
