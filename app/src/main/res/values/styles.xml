@@ -31,7 +31,7 @@
 
     <style name="TextAppearance.Widget.Tab" parent="TextAppearance.MaterialComponents.Button">
         <item name="android:textAllCaps">false</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
     </style>
 
     <!--=======-->
@@ -164,7 +164,7 @@
         <item name="itemRippleColor">?attr/colorPrimary</item>
         <item name="itemTextColor">@color/bottom_nav_text_selector</item>
         <item name="labelVisibilityMode">labeled</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
         <item name="android:background">?colorSurfaceContainer</item>
         <item name="tabBarIconColor">?tabBarIconColor</item>
         <item name="tabRippleColor">?colorControlHighlight</item>
@@ -177,7 +177,7 @@
         <item name="itemIconTint">@color/bottom_nav_item_selector</item>
         <item name="itemRippleColor">?colorPrimary</item>
         <item name="itemTextColor">@color/bottom_nav_text_selector</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="android:background">?colorSurfaceContainer</item>
         <item name="tabBarIconColor">?tabBarIconColor</item>
@@ -189,7 +189,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="backgroundTint">@color/mtrl_btn_bg_selector</item>
         <item name="android:textColor">@color/primary_button_text_color_selector</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
     </style>
 
     <style name="Theme.Widget.Button.TextButton" parent="Widget.Material3.Button.TextButton">
@@ -203,13 +203,13 @@
 
     <style name="Neko.Toolbar.TitleText" parent="">
         <item name="fontFamily">@font/mplus_rounded1c_medium</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="Neko.Toolbar.SubTitleText" parent="">
         <item name="fontFamily">@font/mplus_rounded1c_regular</item>
-        <item name="android:letterSpacing">-.5</item>
+        <item name="android:letterSpacing">-.4</item>
         <item name="android:textSize">14sp</item>
     </style>
 

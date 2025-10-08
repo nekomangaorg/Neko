@@ -10,7 +10,7 @@ import org.nekomanga.R
 object Typefaces {
     private val defaultTypography = Typography()
 
-    private const val LETTER_SPACING = -.5
+    private const val LETTER_SPACING = -.4
     val mplusRounded =
         FontFamily(
             Font(R.font.mplus_rounded1c_thin, FontWeight.Thin),
