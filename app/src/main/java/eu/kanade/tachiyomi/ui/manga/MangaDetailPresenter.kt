@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.util.fastAll
 import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
@@ -196,10 +197,11 @@ class MangaDetailPresenter(
                 onRefresh()
             } else {
                 val dbChapters = db.getChapters(mangaId).executeOnIO()
-                if (dbChapters.size > 1 && dbChapters.all { it.smart_order == 0 }) onRefresh()
-                else {
-                    updateAllFlows(dbChapters)
+                if (dbChapters.size > 1 && dbChapters.fastAll { it.smart_order == 0 }) {
+                    onRefresh()
+                } else {
                     refreshTracking()
+                    updateAllFlows()
                     syncChaptersReadStatus()
                 }
             }
@@ -416,7 +418,7 @@ class MangaDetailPresenter(
             // add a slight delay in case the tracking flow is slower
 
             var count = 0
-            while (count < 5 && mangaDetailScreenState.value.tracks.isEmpty()) {
+            while (count < 3 && mangaDetailScreenState.value.tracks.isEmpty()) {
                 delay(1000)
                 count++
             }

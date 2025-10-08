@@ -160,8 +160,6 @@ dependencies {
     implementation(libs.bundles.fastadapter)
 
     implementation(libs.photoView)
-    implementation(libs.viewTooltip)
-    implementation(libs.taptargetview)
     implementation(libs.cascade)
     implementation(libs.cascade.compose)
 
@@ -177,7 +175,6 @@ dependencies {
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
-    implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.sandwich)

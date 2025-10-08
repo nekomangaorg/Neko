@@ -97,7 +97,6 @@ sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVer
 sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }
 sandwich-retrofit-serialization = { module = "com.github.skydoves:sandwich-retrofit-serialization", version.ref = "sandwichVersion" }
 
-taptargetview = { module = "com.getkeepsafe.taptargetview:taptargetview", version.ref = "taptargetviewVersion" }
 versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 
 timber = "com.jakewharton.timber:timber:5.0.1"
@@ -106,7 +105,6 @@ aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", ve
 
 leakcanary = "com.squareup.leakcanary:leakcanary-android:2.14"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
-fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
@@ -118,7 +116,6 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.14.6"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.3"
-viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibVersion" }

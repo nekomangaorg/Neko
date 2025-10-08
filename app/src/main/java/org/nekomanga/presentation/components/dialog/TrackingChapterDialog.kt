@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.chargemap.compose.numberpicker.NumberPicker
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.presentation.components.ExpressivePicker
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -58,16 +57,12 @@ fun TrackingChapterDialog(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 ) {
-                    NumberPicker(
-                        modifier = Modifier.fillMaxWidth(.4f),
+                    ExpressivePicker(
                         value = currentChapter,
+                        themeColorState = themeColorState,
+                        items = (0..range).toList(),
                         onValueChange = { newChapter -> currentChapter = newChapter },
-                        range = 0..range,
-                        textStyle =
-                            MaterialTheme.typography.titleMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                        dividersColor = themeColorState.primaryColor,
+                        modifier = Modifier.fillMaxWidth(.4f),
                     )
                 }
             },
