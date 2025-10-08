@@ -6,4 +6,8 @@
     <color name="material_red_500">#F44336</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="read_chapter">@color/material_on_background_disabled</color>
+
+    <color name="navigation_menu">#CC95818D</color>
+    <color name="navigation_next">#CCFF124A</color>
+    <color name="navigation_prev">#CCFFD9DF</color>
 </resources>
