@@ -258,7 +258,6 @@ private fun ChapterInfo(
                 )
             }
             .toPersistentList()
-            .apply { TimberKt.d { this.toString() } }
     }
 
     val haptic = LocalHapticFeedback.current

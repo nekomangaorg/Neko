@@ -241,50 +241,55 @@ class MangaDetailPresenter(
 
             _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
 
-            mangaUpdateCoordinator.update(currentManga(), presenterScope, isMerging).collect {
-                result ->
-                when (result) {
-                    is MangaResult.Error -> {
-                        _snackbarState.emit(
-                            SnackbarState(message = result.text, messageRes = result.id)
-                        )
-                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
-                    }
-                    is MangaResult.Success -> {
-                        updateAllFlows()
-                        refreshTracking()
-                        syncChaptersReadStatus()
-                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
-                    }
-                    is MangaResult.UpdatedChapters -> Unit
-                    is MangaResult.UpdatedManga -> {
-                        updateMangaFlow()
-                    }
-                    is MangaResult.UpdatedArtwork -> {
-                        updateArtworkFlow()
-                    }
-                    is MangaResult.ChaptersRemoved -> {
-                        val removedChapters =
-                            mangaDetailScreenState.value.allChapters.filter {
-                                it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
-                            }
+            mangaUpdateCoordinator
+                .update(currentManga(), presenterScope, isMerging)
+                .catch { e ->
+                    e.message?.let { _snackbarState.emit(SnackbarState(message = it)) }
+                    _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
+                }
+                .collect { result ->
+                    when (result) {
+                        is MangaResult.Error -> {
+                            _snackbarState.emit(
+                                SnackbarState(message = result.text, messageRes = result.id)
+                            )
+                            _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
+                        }
+                        is MangaResult.Success -> {
+                            updateAllFlows()
+                            refreshTracking()
+                            syncChaptersReadStatus()
+                            _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
+                        }
+                        is MangaResult.UpdatedChapters -> Unit
+                        is MangaResult.UpdatedManga -> {
+                            updateMangaFlow()
+                        }
+                        is MangaResult.UpdatedArtwork -> {
+                            updateArtworkFlow()
+                        }
+                        is MangaResult.ChaptersRemoved -> {
+                            val removedChapters =
+                                mangaDetailScreenState.value.allChapters.filter {
+                                    it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
+                                }
 
-                        if (removedChapters.isNotEmpty()) {
-                            when (preferences.deleteRemovedChapters().get()) {
-                                2 -> deleteChapters(removedChapters)
-                                1 -> Unit
-                                else -> {
-                                    _mangaDetailScreenState.update {
-                                        it.copy(
-                                            removedChapters = removedChapters.toPersistentList()
-                                        )
+                            if (removedChapters.isNotEmpty()) {
+                                when (preferences.deleteRemovedChapters().get()) {
+                                    2 -> deleteChapters(removedChapters)
+                                    1 -> Unit
+                                    else -> {
+                                        _mangaDetailScreenState.update {
+                                            it.copy(
+                                                removedChapters = removedChapters.toPersistentList()
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
         }
     }
 
