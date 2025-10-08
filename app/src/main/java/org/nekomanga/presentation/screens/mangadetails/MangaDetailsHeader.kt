@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -239,7 +238,7 @@ private fun ColumnScope.QuickReadButton(
         ) {
             ElevatedButton(
                 onClick = quickReadClick,
-                shape = RoundedCornerShape(35),
+                shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth().padding(Size.small),
                 colors =
                     ButtonDefaults.elevatedButtonColors(
