@@ -236,10 +236,12 @@ fun FeedScreen(
                         ) {
                             if (
                                 (feedScreenState.value.feedScreenType == FeedScreenType.History &&
-                                    historyPagingScreenState.value.pageLoading) ||
+                                    historyPagingScreenState.value.pageLoading &&
+                                    historyPagingScreenState.value.offset == 0) ||
                                     (feedScreenState.value.feedScreenType ==
                                         FeedScreenType.Updates &&
-                                        updatesPagingScreenState.value.pageLoading)
+                                        updatesPagingScreenState.value.pageLoading &&
+                                        updatesPagingScreenState.value.offset == 0)
                             ) {
                                 ContainedLoadingIndicator(
                                     modifier = Modifier.align(Alignment.Center)
