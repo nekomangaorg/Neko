@@ -533,6 +533,7 @@ fun OtherRow(
         AnimatedVisibility(visible = isExpanded, enter = slideEnter(), exit = slideExit()) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CheckboxRow(
+                    modifier = Modifier.fillMaxWidth(),
                     checkedState = filters.hasAvailableChapters.state,
                     checkedChange = { newState ->
                         filterChanged(filters.hasAvailableChapters.copy(state = newState))
