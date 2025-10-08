@@ -269,11 +269,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (Migrations.upgrade(preferences)) {
-                if (!BuildConfig.DEBUG) {
-                    content.post { whatsNewSheet().show() }
-                }
-            }
+             if (Migrations.upgrade(preferences)) {
+               if (!BuildConfig.DEBUG) {
+            content.post { whatsNewSheet().show() }
+               }
+             }
         }
 
         lifecycleScope.launch {
