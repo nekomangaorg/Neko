@@ -287,8 +287,9 @@ private fun ListItem(
 ) {
     val listCardType =
         when {
-            index == 0 && totalSize >= 1 -> ListCardType.Top
-            index == totalSize - 1 -> ListCardType.Bottom
+            index == 0 && totalSize > 1 -> ListCardType.Top
+            index == totalSize - 1 && totalSize > 1 -> ListCardType.Bottom
+            totalSize == 1 -> ListCardType.Single
             else -> ListCardType.Center
         }
     ExpressiveListCard(

@@ -111,7 +111,10 @@ fun VerticalCategoriesPage(
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
-                        items(items = item.libraryItems.chunked(columns)) { rowItems ->
+                        items(
+                            items = item.libraryItems.chunked(columns),
+                            key = { row -> row.joinToString { it.displayManga.mangaId.toString() } },
+                        ) { rowItems ->
                             RowGrid(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
@@ -129,9 +132,7 @@ fun VerticalCategoriesPage(
                     LibraryDisplayMode.List -> {
                         itemsIndexed(
                             item.libraryItems,
-                            key = { index, libraryItem ->
-                                libraryItem.displayManga.title + item.categoryItem.name
-                            },
+                            key = { _, libraryItem -> libraryItem.displayManga.mangaId },
                         ) { index, libraryItem ->
                             ListItem(
                                 index = index,
