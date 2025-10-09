@@ -2,7 +2,7 @@
 accompanist_version = "0.36.0"
 compose_version = "1.9.2"
 compose_material3_version = "1.5.0-alpha03"
-navigation3 = "1.0.0-alpha10"
+navigation3 = "1.0.0-alpha11"
 lifecycleViewmodel = "1.0.0-alpha04"
 markdown_version = "0.37.0"
 reorderable = "3.0.0"
