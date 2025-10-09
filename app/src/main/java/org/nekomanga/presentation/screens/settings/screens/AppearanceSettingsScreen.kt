@@ -89,6 +89,10 @@ internal class AppearanceSettingsScreen(
                             )
                         },
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        title = stringResource(R.string.use_vivid_colors_for_headers),
+                        pref = preferences.useVividColorHeaders(),
+                    ),
                 ),
         )
     }
@@ -178,6 +182,7 @@ internal class AppearanceSettingsScreen(
                     title = stringResource(R.string.dark_theme),
                     group = stringResource(R.string.app_theme),
                 ),
+                SearchTerm(title = stringResource(R.string.use_vivid_colors_for_headers)),
                 SearchTerm(
                     title = stringResource(R.string.force_portrait_details),
                     subtitle = stringResource(R.string.force_portrait_details_description),

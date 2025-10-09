@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -214,6 +215,13 @@ class FeedPresenter(
         presenterScope.launch {
             _feedScreenState.update {
                 it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()))
+            }
+        }
+
+        presenterScope.launchIO {
+            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _feedScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
         }
 

@@ -76,7 +76,6 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
                     startReadingButtonToggled = presenter::startReadingButtonToggled,
                     horizontalCategoriesToggled = presenter::horizontalCategoriesToggled,
                     showLibraryButtonBarToggled = presenter::showLibraryButtonBarToggled,
-                    useVividColorToggled = presenter::useVividColorToggled,
                     editCategories = presenter::editCategories,
                     addNewCategory = presenter::addNewCategory,
                 ),

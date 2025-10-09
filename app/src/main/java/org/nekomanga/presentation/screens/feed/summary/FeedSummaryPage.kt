@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
@@ -42,13 +43,22 @@ fun FeedSummaryPage(
     continueReadingFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     newlyAddedFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
+    useVividColorHeaders: Boolean,
     feedScreenActions: FeedScreenActions,
 ) {
     val scrollState = rememberLazyListState()
+
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         item {
             SummaryHeader(
                 text = stringResource(R.string.feed_continue_reading),
+                color = headerColor,
                 isRefreshing = updatingContinueReading,
             )
         }
@@ -98,6 +108,7 @@ fun FeedSummaryPage(
         item {
             SummaryHeader(
                 text = stringResource(R.string.recently_updated_manga),
+                color = headerColor,
                 isRefreshing = updatingUpdates,
             )
         }
@@ -142,6 +153,7 @@ fun FeedSummaryPage(
         item {
             SummaryHeader(
                 text = stringResource(R.string.newly_added),
+                color = headerColor,
                 isRefreshing = updatingNewlyAdded,
             )
         }
@@ -185,7 +197,7 @@ fun FeedSummaryPage(
 }
 
 @Composable
-private fun SummaryHeader(text: String, isRefreshing: Boolean) {
+private fun SummaryHeader(text: String, isRefreshing: Boolean, color: Color) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
@@ -193,7 +205,7 @@ private fun SummaryHeader(text: String, isRefreshing: Boolean) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = color,
             modifier = Modifier.fillMaxWidth().weight(1f).padding(),
         )
         AnimatedVisibility(isRefreshing) {

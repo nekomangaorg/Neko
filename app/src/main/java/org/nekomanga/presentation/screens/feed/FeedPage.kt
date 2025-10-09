@@ -51,6 +51,7 @@ fun FeedPage(
     summaryScreenPagingState: State<SummaryScreenPagingState>,
     outlineCovers: Boolean,
     outlineCards: Boolean,
+    useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
     groupedBySeries: Boolean,
@@ -67,6 +68,7 @@ fun FeedPage(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
                 outlineCovers = outlineCovers,
+                useVividColorHeaders = useVividColorHeaders,
                 feedScreenActions = feedScreenActions,
                 updatingUpdates = summaryScreenPagingState.value.updatingUpdates,
                 updatingNewlyAdded = summaryScreenPagingState.value.updatingNewlyAdded,
@@ -94,6 +96,7 @@ fun FeedPage(
             FeedUpdatesPage(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
+                useVividColorHeaders = useVividColorHeaders,
                 feedUpdatesMangaList = feedMangaList,
                 outlineCovers = outlineCovers,
                 groupedBySeries = groupedBySeries,

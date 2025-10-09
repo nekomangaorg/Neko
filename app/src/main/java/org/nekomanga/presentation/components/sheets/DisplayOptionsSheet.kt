@@ -61,8 +61,6 @@ fun DisplayOptionsSheet(
     horizontalCategoriesToggled: () -> Unit,
     showLibraryButtonBarEnabled: Boolean,
     showLibraryButtonBarToggled: () -> Unit,
-    useVividColorsEnabled: Boolean,
-    useVividColorsToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -204,12 +202,6 @@ fun DisplayOptionsSheet(
                     enabled = showLibraryButtonBarEnabled,
                     onClick = showLibraryButtonBarToggled,
                     text = stringResource(R.string.show_library_action_bar),
-                )
-
-                ToggleRow(
-                    enabled = useVividColorsEnabled,
-                    onClick = useVividColorsToggled,
-                    text = stringResource(R.string.use_vivid_colors_for_categories),
                 )
 
                 ToggleRow(

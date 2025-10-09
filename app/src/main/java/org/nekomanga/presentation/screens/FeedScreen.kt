@@ -328,6 +328,8 @@ fun FeedScreen(
                                             historyPagingScreenState.value.historyGrouping,
                                         outlineCovers = feedScreenState.value.outlineCovers,
                                         outlineCards = feedScreenState.value.outlineCards,
+                                        useVividColorHeaders =
+                                            feedScreenState.value.useVividColorHeaders,
                                         updatesFetchSort =
                                             updatesPagingScreenState.value.updatesSortedByFetch,
                                         feedScreenActions = feedScreenActions,

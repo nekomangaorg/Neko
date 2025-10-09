@@ -269,6 +269,8 @@ fun BrowseScreen(
                                                 browseScreenState.value.homePageManga,
                                             shouldOutlineCover =
                                                 browseScreenState.value.outlineCovers,
+                                            useVividColorHeaders =
+                                                browseScreenState.value.useVividColorHeaders,
                                             titleClick = homeScreenTitleClick,
                                             randomClick = randomClick,
                                             onClick = { id -> openManga(id) },

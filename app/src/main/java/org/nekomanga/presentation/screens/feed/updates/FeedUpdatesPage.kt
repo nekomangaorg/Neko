@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
@@ -33,6 +34,7 @@ fun FeedUpdatesPage(
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
+    useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
     groupedBySeries: Boolean,
@@ -40,6 +42,12 @@ fun FeedUpdatesPage(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
 ) {
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     when (groupedBySeries) {
         true -> {
             Grouped(
@@ -47,6 +55,7 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
+                headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
@@ -60,6 +69,7 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
+                headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
@@ -75,6 +85,7 @@ private fun Grouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    headerColor: Color,
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
@@ -133,7 +144,7 @@ private fun Grouped(
                     item {
                         Text(
                             text = stringResource(id = prefix, dateString),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = headerColor,
                             style = MaterialTheme.typography.titleLarge,
                             modifier =
                                 Modifier.padding(
@@ -211,6 +222,7 @@ private fun Ungrouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    headerColor: Color,
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
@@ -238,7 +250,7 @@ private fun Ungrouped(
                 item {
                     Text(
                         text = stringResource(id = prefix, dateString),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = headerColor,
                         style = MaterialTheme.typography.titleLarge,
                         modifier =
                             Modifier.padding(start = Size.small, top = Size.small, end = Size.small),

@@ -373,13 +373,10 @@ class LibraryPresenter(
     fun preferenceUpdates() {
 
         presenterScope.launchIO {
-            libraryPreferences
-                .useVividColorHeaders()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
-                }
+            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
+            }
         }
 
         presenterScope.launchIO {
@@ -626,10 +623,6 @@ class LibraryPresenter(
 
     fun showLibraryButtonBarToggled() {
         presenterScope.launchIO { libraryPreferences.showLibraryButtonBar().toggle() }
-    }
-
-    fun useVividColorToggled() {
-        presenterScope.launchIO { libraryPreferences.useVividColorHeaders().toggle() }
     }
 
     fun clearActiveFilters() {

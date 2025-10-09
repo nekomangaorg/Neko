@@ -46,6 +46,7 @@ import org.nekomanga.presentation.theme.Size
 fun BrowseHomePage(
     browseHomePageManga: PersistentList<HomePageManga>,
     shouldOutlineCover: Boolean,
+    useVividColorHeaders: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
     titleClick: (DisplayScreenType) -> Unit,
@@ -54,6 +55,13 @@ fun BrowseHomePage(
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val screenHeight = LocalConfiguration.current.screenHeightDp
+
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     val coverSize =
         remember(screenWidth, screenHeight) { (maxOf(screenHeight, screenWidth) / 5).dp }
 
@@ -93,14 +101,14 @@ fun BrowseHomePage(
                     ) {
                         Text(
                             text = headerText,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = headerColor,
                             style = MaterialTheme.typography.titleLarge,
                         )
                         Gap(Size.tiny)
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowForward,
                             modifier = Modifier.size(Size.large),
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = headerColor,
                             contentDescription = null,
                         )
                     }

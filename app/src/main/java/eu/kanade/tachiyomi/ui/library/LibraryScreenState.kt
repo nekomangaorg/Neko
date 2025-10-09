@@ -81,7 +81,6 @@ data class LibrarySheetActions(
     val startReadingButtonToggled: () -> Unit,
     val horizontalCategoriesToggled: () -> Unit,
     val showLibraryButtonBarToggled: () -> Unit,
-    val useVividColorToggled: () -> Unit,
     val addNewCategory: (String) -> Unit,
     val editCategories: (List<DisplayManga>, List<CategoryItem>) -> Unit,
 )

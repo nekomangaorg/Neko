@@ -69,6 +69,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             if (supportsDynamic) Themes.Monet else Themes.Neko,
         )
 
+    fun useVividColorHeaders() = this.preferenceStore.getBoolean("vivid_color_headers", true)
+
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
 

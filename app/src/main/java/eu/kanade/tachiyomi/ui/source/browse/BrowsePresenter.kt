@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -187,6 +188,13 @@ class BrowsePresenter(
         presenterScope.launch {
             preferences.browseAsList().changes().collectLatest {
                 _browseScreenState.update { state -> state.copy(isList = it) }
+            }
+        }
+
+        presenterScope.launchIO {
+            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _browseScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
         }
 

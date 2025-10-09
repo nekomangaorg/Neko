@@ -19,6 +19,7 @@ data class FeedScreenState(
     val outlineCards: Boolean,
     val groupUpdateChapters: Boolean = false,
     val incognitoMode: Boolean = false,
+    val useVividColorHeaders: Boolean = true,
     val swipeRefreshEnabled: Boolean = true,
     val downloads: PersistentList<DownloadItem> = persistentListOf(),
     val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
