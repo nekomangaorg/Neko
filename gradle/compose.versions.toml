@@ -1,6 +1,6 @@
 [versions]
 accompanist_version = "0.36.0"
-compose_version = "1.9.2"
+compose_version = "1.9.3"
 compose_material3_version = "1.5.0-alpha03"
 navigation3 = "1.0.0-alpha10"
 lifecycleViewmodel = "1.0.0-alpha04"
