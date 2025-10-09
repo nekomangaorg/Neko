@@ -75,6 +75,7 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.canStillGoBack
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlin.math.min
@@ -143,6 +144,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+        }
+
+        nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
+            if (!LibraryUpdateJob.isRunning(this)) {
+                LibraryUpdateJob.startNow(this)
+            }
+            true
         }
 
         val container: ViewGroup = binding.controllerContainer
