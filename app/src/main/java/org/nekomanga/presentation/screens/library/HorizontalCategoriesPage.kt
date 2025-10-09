@@ -69,6 +69,13 @@ fun HorizontalCategoriesPage(
             libraryScreenState.selectedItems.map { it.displayManga.mangaId }
         }
 
+    val indicatorColor =
+        if (libraryScreenState.useVividColorHeaders) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
     Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
         SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
@@ -84,7 +91,7 @@ fun HorizontalCategoriesPage(
                         Text(
                             item.categoryItem.name,
                             color =
-                                if (isSelected) MaterialTheme.colorScheme.primary
+                                if (isSelected) indicatorColor
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
@@ -129,12 +136,13 @@ fun HorizontalCategoriesPage(
                                         if (allSelected) Icons.Default.CheckCircleOutline
                                         else Icons.Outlined.Circle,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    tint = indicatorColor,
                                 )
                             }
                             Spacer(modifier = Modifier.weight(1f))
 
                             CategorySortButtons(
+                                textColor = indicatorColor,
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },
                                 sortString =

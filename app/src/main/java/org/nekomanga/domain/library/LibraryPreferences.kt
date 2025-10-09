@@ -130,6 +130,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showStartReadingButton() = this.preferenceStore.getBoolean("start_reading_button", true)
 
+    fun useVividColorHeaders() = this.preferenceStore.getBoolean("vivid_color_headers", true)
+
     fun showDownloadBadge() = this.preferenceStore.getBoolean("display_download_badge")
 
     fun filterDownloaded() =

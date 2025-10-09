@@ -28,6 +28,7 @@ data class LibraryScreenState(
     val searchQuery: String? = null,
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
     val hasActiveFilters: Boolean = false,
+    val useVividColorHeaders: Boolean = true,
     val libraryFilters: LibraryFilters = LibraryFilters(),
     val rawColumnCount: Float = 3f,
     val isFirstLoad: Boolean = true,
@@ -80,6 +81,7 @@ data class LibrarySheetActions(
     val startReadingButtonToggled: () -> Unit,
     val horizontalCategoriesToggled: () -> Unit,
     val showLibraryButtonBarToggled: () -> Unit,
+    val useVividColorToggled: () -> Unit,
     val addNewCategory: (String) -> Unit,
     val editCategories: (List<DisplayManga>, List<CategoryItem>) -> Unit,
 )

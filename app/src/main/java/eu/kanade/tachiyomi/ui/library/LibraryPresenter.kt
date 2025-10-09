@@ -374,6 +374,16 @@ class LibraryPresenter(
 
         presenterScope.launchIO {
             libraryPreferences
+                .useVividColorHeaders()
+                .changes()
+                .distinctUntilChanged()
+                .collectLatest { enabled ->
+                    _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
+                }
+        }
+
+        presenterScope.launchIO {
+            libraryPreferences
                 .showStartReadingButton()
                 .changes()
                 .distinctUntilChanged()
@@ -616,6 +626,10 @@ class LibraryPresenter(
 
     fun showLibraryButtonBarToggled() {
         presenterScope.launchIO { libraryPreferences.showLibraryButtonBar().toggle() }
+    }
+
+    fun useVividColorToggled() {
+        presenterScope.launchIO { libraryPreferences.useVividColorHeaders().toggle() }
     }
 
     fun clearActiveFilters() {

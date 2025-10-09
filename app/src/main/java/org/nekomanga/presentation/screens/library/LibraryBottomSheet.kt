@@ -71,6 +71,8 @@ fun LibraryBottomSheet(
                 horizontalCategoriesToggled = { librarySheetActions.horizontalCategoriesToggled() },
                 showLibraryButtonBarEnabled = libraryScreenState.showLibraryButtonBar,
                 showLibraryButtonBarToggled = { librarySheetActions.showLibraryButtonBarToggled() },
+                useVividColorsEnabled = libraryScreenState.useVividColorHeaders,
+                useVividColorsToggled = { librarySheetActions.useVividColorToggled() },
                 bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
         is LibraryBottomSheetScreen.CategorySheet -> {

@@ -80,6 +80,7 @@ fun VerticalCategoriesPage(
             item(item.categoryItem.name) {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
+                    useVividColorHeaders = libraryScreenState.useVividColorHeaders,
                     enabled = !item.libraryItems.isEmpty(),
                     isRefreshing = item.isRefreshing,
                     selectionMode = selectionMode,
@@ -247,6 +248,7 @@ private fun ListItem(
 @Composable
 private fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
+    useVividColorHeaders: Boolean,
     isRefreshing: Boolean,
     isCollapsible: Boolean,
     selectionMode: Boolean,
@@ -261,21 +263,17 @@ private fun LibraryCategoryHeader(
     val textColor by
         animateColorAsState(
             targetValue =
-                if (enabled) MaterialTheme.colorScheme.primary
-                else
+                if (enabled) {
+                    if (useVividColorHeaders) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                } else {
                     MaterialTheme.colorScheme.onSurface.copy(
                         alpha = NekoColors.disabledAlphaLowContrast
                     )
-        )
-
-    val iconColor by
-        animateColorAsState(
-            targetValue =
-                if (enabled) MaterialTheme.colorScheme.tertiary
-                else
-                    MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.disabledAlphaLowContrast
-                    )
+                }
         )
 
     Row(
@@ -302,7 +300,7 @@ private fun LibraryCategoryHeader(
                 imageVector =
                     if (allSelected) Icons.Default.CheckCircleOutline else Icons.Outlined.Circle,
                 contentDescription = null,
-                tint = iconColor,
+                tint = textColor,
             )
         }
         Gap(Size.small)
