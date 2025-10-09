@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="blue_colorPrimary">#FF0057E3</color>
+    <color name="blue_colorPrimary">#FF0066FF</color>
     <color name="blue_colorOnPrimary">#FFFFFFFF</color>
-    <color name="blue_colorPrimaryContainer">#FFB8C5FF</color>
-    <color name="blue_colorOnPrimaryContainer">#FF00174F</color>
-    <color name="blue_colorPrimaryInverse">#FFB8C5FF</color>
-    <color name="blue_colorSecondary">#FF008CFF</color>
-    <color name="blue_colorOnSecondary">#FFFFFFFF</color>
-    <color name="blue_colorSecondaryContainer">#FFD4E3FF</color>
-    <color name="blue_colorOnSecondaryContainer">#FF00274D</color>
-    <color name="blue_colorTertiary">#FFE36B00</color>
+    <color name="blue_colorPrimaryContainer">#FFD3E5FF</color>
+    <color name="blue_colorOnPrimaryContainer">#FF003D99</color>
+    <color name="blue_colorPrimaryInverse">#FF99CCFF</color>
+    <color name="blue_colorSecondary">#FF00C7FF</color>
+    <color name="blue_colorOnSecondary">#FF000000</color>
+    <color name="blue_colorSecondaryContainer">#FFE5FFFF</color>
+    <color name="blue_colorOnSecondaryContainer">#FF003D4D</color>
+    <color name="blue_colorTertiary">#FFFF6600</color>
     <color name="blue_colorOnTertiary">#FFFFFFFF</color>
-    <color name="blue_colorTertiaryContainer">#FFFFDBCA</color>
-    <color name="blue_colorOnTertiaryContainer">#FF492000</color>
-    <color name="blue_colorBackground">#FFFEFBFF</color>
-    <color name="blue_colorOnBackground">#FF1B1B1F</color>
-    <color name="blue_colorSurface">#FFFEFBFF</color>
-    <color name="blue_colorOnSurface">#FF1B1B1F</color>
-    <color name="blue_colorSurfaceVariant">#FFE1E2EC</color>
-    <color name="blue_colorOnSurfaceVariant">#FF44474F</color>
-    <color name="blue_colorSurfaceContainer">#FFF2F2F5</color>
-    <color name="blue_colorOutline">#FF74777F</color>
-    <color name="blue_colorError">#FFBA1A1A</color>
+    <color name="blue_colorTertiaryContainer">#FFFFD9B3</color>
+    <color name="blue_colorOnTertiaryContainer">#FF662900</color>
+    <color name="blue_colorBackground">#FFFFFCF5</color>
+    <color name="blue_colorOnBackground">#FF1F1E1A</color>
+    <color name="blue_colorSurface">#FFFFFCF5</color>
+    <color name="blue_colorOnSurface">#FF1F1E1A</color>
+    <color name="blue_colorSurfaceVariant">#FFE0E0D8</color>
+    <color name="blue_colorOnSurfaceVariant">#FF55554D</color>
+    <color name="blue_colorSurfaceContainer">#FFEDEDE4</color>
+    <color name="blue_colorOutline">#FF999999</color>
+    <color name="blue_colorError">#FFCC3333</color>
     <color name="blue_colorOnError">#FFFFFFFF</color>
+
 </resources>
