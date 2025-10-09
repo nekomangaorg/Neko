@@ -209,7 +209,7 @@ class LibraryPresenter(
                                     libraryMangaList = libraryMangaList,
                                     collapsedDynamicCategorySet =
                                         libraryViewPreferences.collapsedDynamicCategories,
-                                    groupType = libraryViewPreferences.groupBy,
+                                    currentLibraryGroup = libraryViewPreferences.groupBy,
                                     sortOrder = libraryViewPreferences.sortingMode,
                                     sortAscending = libraryViewPreferences.sortAscending,
                                     loggedInTrackStatus = trackMap,
@@ -701,7 +701,7 @@ class LibraryPresenter(
     fun groupByDynamic(
         libraryMangaList: List<LibraryMangaItem>,
         collapsedDynamicCategorySet: Set<String>,
-        groupType: LibraryGroup,
+        currentLibraryGroup: LibraryGroup,
         sortOrder: LibrarySort,
         sortAscending: Boolean,
         loggedInTrackStatus: Map<Long, List<String>>,
@@ -710,7 +710,7 @@ class LibraryPresenter(
 
         for (libraryMangaItem in libraryMangaList) {
             val groupingKeys =
-                when (groupType) {
+                when (currentLibraryGroup) {
                     LibraryGroup.ByAuthor -> libraryMangaItem.author
                     LibraryGroup.ByContent -> libraryMangaItem.contentRating
                     LibraryGroup.ByLanguage -> libraryMangaItem.language
@@ -727,9 +727,10 @@ class LibraryPresenter(
                 groupedMap.getOrPut(key) { mutableListOf() }.add(libraryMangaItem)
             }
         }
+        val keyComparator = currentLibraryGroup.keyComparator
 
         return groupedMap.entries
-            .sortedBy { it.key }
+            .sortedWith(compareBy(keyComparator) { it.key })
             .mapIndexed { index, entry ->
                 val categoryName = entry.key
                 val items = entry.value
@@ -740,7 +741,7 @@ class LibraryPresenter(
                         isAscending = sortAscending,
                         name = categoryName,
                         isHidden =
-                            dynamicCategoryName(groupType.type, categoryName) in
+                            dynamicCategoryName(currentLibraryGroup.type, categoryName) in
                                 collapsedDynamicCategorySet,
                         isDynamic = true,
                     )
