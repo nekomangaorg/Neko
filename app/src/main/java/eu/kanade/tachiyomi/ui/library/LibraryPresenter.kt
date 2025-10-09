@@ -16,14 +16,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
@@ -148,14 +140,20 @@ class LibraryPresenter(
         preferenceUpdates()
 
         presenterScope.launchIO {
-            // check if logged in
             val groupItems =
-                mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS, BY_AUTHOR, BY_CONTENT, BY_LANGUAGE)
+                mutableListOf(
+                    LibraryGroup.ByCategory,
+                    LibraryGroup.ByTag,
+                    LibraryGroup.ByStatus,
+                    LibraryGroup.ByAuthor,
+                    LibraryGroup.ByContent,
+                    LibraryGroup.ByLanguage,
+                )
             if (loggedServices.isNotEmpty()) {
-                groupItems.add(BY_TRACK_STATUS)
+                groupItems.add(LibraryGroup.ByTrackStatus)
             }
             if (db.getCategories().executeAsBlocking().isNotEmpty()) {
-                groupItems.add(UNGROUPED)
+                groupItems.add(LibraryGroup.Ungrouped)
             }
             _libraryScreenState.update { it.copy(groupByOptions = groupItems.toPersistentList()) }
         }
@@ -194,19 +192,19 @@ class LibraryPresenter(
 
                     val unsortedLibraryCategoryItems =
                         when (libraryViewPreferences.groupBy) {
-                            UNGROUPED -> {
-                                groupByUngrouped(
+                            LibraryGroup.ByCategory -> {
+                                groupByCategory(
                                     libraryMangaList,
-                                    libraryViewPreferences.sortingMode,
-                                    libraryViewPreferences.sortAscending,
+                                    categoryList,
+                                    collapsedCategorySet,
                                 )
                             }
-                            BY_AUTHOR,
-                            BY_CONTENT,
-                            BY_LANGUAGE,
-                            BY_STATUS,
-                            BY_TAG,
-                            BY_TRACK_STATUS -> {
+                            LibraryGroup.ByAuthor,
+                            LibraryGroup.ByContent,
+                            LibraryGroup.ByLanguage,
+                            LibraryGroup.ByStatus,
+                            LibraryGroup.ByTag,
+                            LibraryGroup.ByTrackStatus -> {
                                 groupByDynamic(
                                     libraryMangaList = libraryMangaList,
                                     collapsedDynamicCategorySet =
@@ -217,12 +215,11 @@ class LibraryPresenter(
                                     loggedInTrackStatus = trackMap,
                                 )
                             }
-                            else -> {
-                                /*BY_DEFAULT*/
-                                groupByCategory(
+                            LibraryGroup.Ungrouped -> {
+                                groupByUngrouped(
                                     libraryMangaList,
-                                    categoryList,
-                                    collapsedCategorySet,
+                                    libraryViewPreferences.sortingMode,
+                                    libraryViewPreferences.sortAscending,
                                 )
                             }
                         }
@@ -476,7 +473,7 @@ class LibraryPresenter(
                     collapsedDynamicCategories = it[1] as Set<String>,
                     sortingMode = librarySort,
                     sortAscending = it[3] as Boolean,
-                    groupBy = it[4] as Int,
+                    groupBy = it[4] as LibraryGroup,
                     showDownloadBadges = it[5] as Boolean,
                 )
             }
@@ -553,7 +550,7 @@ class LibraryPresenter(
                     val collapsedDynamicCategorySet =
                         libraryPreferences.collapsedDynamicCategories().get().toMutableSet()
                     val dynamicName =
-                        dynamicCategoryName(libraryPreferences.groupBy().get(), category.name)
+                        dynamicCategoryName(libraryPreferences.groupBy().get().type, category.name)
 
                     if (dynamicName in collapsedDynamicCategorySet) {
                         collapsedDynamicCategorySet.remove(dynamicName)
@@ -585,7 +582,7 @@ class LibraryPresenter(
         }
     }
 
-    fun groupByClick(groupBy: Int) {
+    fun groupByClick(groupBy: LibraryGroup) {
         presenterScope.launchIO { libraryPreferences.groupBy().set(groupBy) }
     }
 
@@ -671,9 +668,9 @@ class LibraryPresenter(
                 launchIO { db.setMangaCategories(mangaCategories, listOf(dbManga)) }
             }
             clearSelectedManga()
-            if (libraryPreferences.groupBy().get() == BY_DEFAULT) {
-                libraryPreferences.groupBy().set(UNGROUPED)
-                libraryPreferences.groupBy().set(BY_DEFAULT)
+            if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
+                libraryPreferences.groupBy().set(LibraryGroup.Ungrouped)
+                libraryPreferences.groupBy().set(LibraryGroup.ByCategory)
             }
         }
     }
@@ -704,7 +701,7 @@ class LibraryPresenter(
     fun groupByDynamic(
         libraryMangaList: List<LibraryMangaItem>,
         collapsedDynamicCategorySet: Set<String>,
-        groupType: Int,
+        groupType: LibraryGroup,
         sortOrder: LibrarySort,
         sortAscending: Boolean,
         loggedInTrackStatus: Map<Long, List<String>>,
@@ -714,12 +711,12 @@ class LibraryPresenter(
         for (libraryMangaItem in libraryMangaList) {
             val groupingKeys =
                 when (groupType) {
-                    BY_AUTHOR -> libraryMangaItem.author
-                    BY_CONTENT -> libraryMangaItem.contentRating
-                    BY_LANGUAGE -> libraryMangaItem.language
-                    BY_STATUS -> libraryMangaItem.status
-                    BY_TAG -> libraryMangaItem.genre
-                    BY_TRACK_STATUS -> {
+                    LibraryGroup.ByAuthor -> libraryMangaItem.author
+                    LibraryGroup.ByContent -> libraryMangaItem.contentRating
+                    LibraryGroup.ByLanguage -> libraryMangaItem.language
+                    LibraryGroup.ByStatus -> libraryMangaItem.status
+                    LibraryGroup.ByTag -> libraryMangaItem.genre
+                    LibraryGroup.ByTrackStatus -> {
                         loggedInTrackStatus[libraryMangaItem.displayManga.mangaId]
                             ?: listOf("Not tracked")
                     }
@@ -743,7 +740,7 @@ class LibraryPresenter(
                         isAscending = sortAscending,
                         name = categoryName,
                         isHidden =
-                            dynamicCategoryName(groupType, categoryName) in
+                            dynamicCategoryName(groupType.type, categoryName) in
                                 collapsedDynamicCategorySet,
                         isDynamic = true,
                     )
@@ -901,7 +898,7 @@ class LibraryPresenter(
                         } else {
                             val libraryGroupBy = libraryPreferences.groupBy().get()
                             categoryItems
-                                .map { dynamicCategoryName(libraryGroupBy, it.name) }
+                                .map { dynamicCategoryName(libraryGroupBy.type, it.name) }
                                 .toSet()
                         }
 

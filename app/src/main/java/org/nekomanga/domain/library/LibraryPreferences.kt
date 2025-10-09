@@ -1,6 +1,7 @@
 package org.nekomanga.domain.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
+import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
@@ -105,7 +106,13 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun autoHideHopper() = this.preferenceStore.getBoolean("autohide_hopper", true)
 
-    fun groupBy() = this.preferenceStore.getInt("group_library_by")
+    fun groupBy() =
+        this.preferenceStore.getObjectFromInt(
+            key = "group_library_by",
+            defaultValue = LibraryGroup.ByCategory,
+            serializer = LibraryGroup::type,
+            deserializer = LibraryGroup::fromInt,
+        )
 
     fun showCategoryInTitle() = this.preferenceStore.getBoolean("category_in_title")
 

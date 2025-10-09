@@ -38,11 +38,11 @@ data class LibraryScreenState(
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
-    val groupByOptions: PersistentList<Int> = persistentListOf(),
+    val groupByOptions: PersistentList<LibraryGroup> = persistentListOf(),
     val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
     val showUnavailableFilter: Boolean = false,
     val showStartReadingButton: Boolean = true,
-    val currentGroupBy: Int = 0,
+    val currentGroupBy: LibraryGroup = LibraryGroup.ByCategory,
     val items: PersistentList<LibraryCategoryItem> = persistentListOf(),
     val selectedItems: PersistentList<LibraryMangaItem> = persistentListOf(),
     val userCategories: PersistentList<CategoryItem> = persistentListOf(),
@@ -70,7 +70,7 @@ data class LibraryScreenActions(
 )
 
 data class LibrarySheetActions(
-    val groupByClick: (Int) -> Unit,
+    val groupByClick: (LibraryGroup) -> Unit,
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
     val libraryDisplayModeClick: (LibraryDisplayMode) -> Unit,
     val rawColumnCountChanged: (Float) -> Unit,
@@ -94,7 +94,7 @@ data class LibraryViewItem(
     val libraryDisplayMode: LibraryDisplayMode,
     val rawColumnCount: Float = 3f,
     val libraryCategoryItems: PersistentList<LibraryCategoryItem>,
-    val currentGroupBy: Int,
+    val currentGroupBy: LibraryGroup,
     val trackMap: PersistentMap<Long, List<String>>,
     val userCategories: PersistentList<CategoryItem>,
 )
@@ -111,7 +111,7 @@ data class LibraryViewPreferences(
     val collapsedDynamicCategories: Set<String>,
     val sortingMode: LibrarySort,
     val sortAscending: Boolean,
-    val groupBy: Int,
+    val groupBy: LibraryGroup,
     val showDownloadBadges: Boolean,
 )
 
