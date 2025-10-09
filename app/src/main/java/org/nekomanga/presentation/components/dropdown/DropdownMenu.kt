@@ -1,0 +1,63 @@
+package org.nekomanga.presentation.components.dropdown
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
+import me.saket.cascade.CascadeColumnScope
+import me.saket.cascade.CascadeDropdownMenu
+import org.nekomanga.presentation.components.UiIcon
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
+
+@Immutable
+data class DropdownMenuItem(
+    val title: UiText,
+    val icon: UiIcon,
+    val subtitle: UiText? = null,
+    val onClick: () -> Unit,
+)
+
+@Composable
+fun NekoDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
+    modifier: Modifier = Modifier,
+    content: @Composable CascadeColumnScope.() -> Unit,
+) {
+    val colors =
+        MaterialTheme.colorScheme.copy(
+            primary = themeColorState.primaryColor,
+            surface = themeColorState.altContainerColor,
+            surfaceContainer = themeColorState.altContainerColor,
+            onSurface = themeColorState.onContainerColor,
+            onSurfaceVariant = themeColorState.onContainerColor,
+        )
+
+    MaterialTheme(colorScheme = colors) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides (themeColorState.rippleConfiguration)
+        ) {
+            CascadeDropdownMenu(
+                expanded = expanded,
+                offset = DpOffset(Size.smedium, Size.none),
+                fixedWidth = 250.dp,
+                modifier = modifier.background(color = themeColorState.altContainerColor),
+                shape = RoundedCornerShape(Size.medium),
+                properties = PopupProperties(),
+                onDismissRequest = onDismissRequest,
+                content = content,
+            )
+        }
+    }
+}
