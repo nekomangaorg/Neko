@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import me.saket.cascade.CascadeColumnScope
 import org.nekomanga.R
 import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
@@ -85,15 +84,10 @@ fun MainDropdownMenu(
         themeColorState = themeColorState,
     ) {
         menuItems.forEachIndexed { index, item ->
-            Row(
-                title = item.title,
-                subTitle = item.subtitle,
-                icon = item.icon,
-                onClick = {
-                    item.onClick()
-                    onDismiss()
-                },
-            )
+            Row(title = item.title, subTitle = item.subtitle, icon = item.icon) {
+                item.onClick()
+                onDismiss()
+            }
             if (index == 0) {
                 Divider()
             }
@@ -102,12 +96,7 @@ fun MainDropdownMenu(
 }
 
 @Composable
-private fun CascadeColumnScope.Row(
-    title: UiText,
-    subTitle: UiText? = null,
-    icon: UiIcon,
-    onClick: () -> Unit,
-) {
+private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: () -> Unit) {
     MaterialDropdownMenuItem(
         text = {
             Column {

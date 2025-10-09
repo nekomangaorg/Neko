@@ -185,6 +185,7 @@ fun MangaScreen(
                         containerColor = containerColor,
                         onContainerColor = onContainerColor,
                         altContainerColor = altContainerColor,
+                        onAltContainerColor = color,
                     )
                 } else {
                     defaultThemeColorState
@@ -658,6 +659,7 @@ class ThemeColorState(
     containerColor: Color,
     onContainerColor: Color,
     altContainerColor: Color,
+    onAltContainerColor: Color,
 ) {
     var primaryColor by mutableStateOf(primaryColor)
     var rippleConfiguration by mutableStateOf(rippleConfiguration)
@@ -665,16 +667,11 @@ class ThemeColorState(
     var containerColor by mutableStateOf(containerColor)
     var onContainerColor by mutableStateOf(onContainerColor)
     var altContainerColor by mutableStateOf(altContainerColor)
+    var onAltContainerColor by mutableStateOf(onAltContainerColor)
 }
 
 @Composable
 fun defaultThemeColorState(): ThemeColorState {
-
-    val altContainerColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-            MaterialTheme.colorScheme.primary,
-            Size.small,
-        )
 
     return ThemeColorState(
         primaryColor = MaterialTheme.colorScheme.primary,
@@ -682,6 +679,7 @@ fun defaultThemeColorState(): ThemeColorState {
         textSelectionColors = LocalTextSelectionColors.current,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        altContainerColor = altContainerColor,
+        altContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+        onAltContainerColor = MaterialTheme.colorScheme.onSurface,
     )
 }

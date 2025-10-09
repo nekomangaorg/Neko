@@ -16,7 +16,6 @@ import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Immutable
@@ -31,7 +30,7 @@ data class DropdownMenuItem(
 fun NekoDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    themeColorState: ThemeColorState = defaultThemeColorState(),
+    themeColorState: ThemeColorState,
     modifier: Modifier = Modifier,
     content: @Composable CascadeColumnScope.() -> Unit,
 ) {
@@ -40,8 +39,8 @@ fun NekoDropdownMenu(
             primary = themeColorState.primaryColor,
             surface = themeColorState.altContainerColor,
             surfaceContainer = themeColorState.altContainerColor,
-            onSurface = themeColorState.onContainerColor,
-            onSurfaceVariant = themeColorState.onContainerColor,
+            onSurface = themeColorState.onAltContainerColor,
+            onSurfaceVariant = themeColorState.onAltContainerColor,
         )
 
     MaterialTheme(colorScheme = colors) {
@@ -52,7 +51,7 @@ fun NekoDropdownMenu(
                 expanded = expanded,
                 offset = DpOffset(Size.smedium, Size.none),
                 fixedWidth = 250.dp,
-                modifier = modifier.background(color = themeColorState.altContainerColor),
+                modifier = modifier.background(color = MaterialTheme.colorScheme.surfaceContainer),
                 shape = RoundedCornerShape(Size.medium),
                 properties = PopupProperties(),
                 onDismissRequest = onDismissRequest,
