@@ -187,6 +187,11 @@ class MangaDetailPresenter(
                     themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
                     wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
                     validMergeTypes = validMergeTypes,
+                    loggedInTrackService =
+                        trackManager.services
+                            .filter { service -> service.value.isLogged() }
+                            .map { service -> service.value.toTrackServiceItem() }
+                            .toPersistentList(),
                     vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
                 )
             }
