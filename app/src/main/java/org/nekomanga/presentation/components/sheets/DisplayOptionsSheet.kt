@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -34,7 +32,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.system.isLandscape
 import jp.wasabeef.gap.Gap
@@ -87,147 +84,131 @@ fun DisplayOptionsSheet(
                 textAlign = TextAlign.Center,
             )
             Gap(Size.large)
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(Size.medium),
             ) {
-                item {
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        LibraryDisplayMode.entries().forEachIndexed { index, libraryDisplayMode ->
-                            ToggleButton(
-                                modifier =
-                                    Modifier.weight(if (index == 1) 1.25f else 1f).semantics {
-                                        role = Role.RadioButton
-                                    },
-                                checked = libraryDisplayMode == currentLibraryDisplayMode,
-                                onCheckedChange = { libraryDisplayModeClick(libraryDisplayMode) },
-                                shapes =
-                                    when (index) {
-                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                        LibraryDisplayMode.entries().lastIndex ->
-                                            ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                    },
-                            ) {
-                                Text(libraryDisplayMode.toUiText().asString())
-                            }
-                            Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    LibraryDisplayMode.entries().forEachIndexed { index, libraryDisplayMode ->
+                        ToggleButton(
+                            modifier =
+                                Modifier.weight(if (index == 1) 1.25f else 1f).semantics {
+                                    role = Role.RadioButton
+                                },
+                            checked = libraryDisplayMode == currentLibraryDisplayMode,
+                            onCheckedChange = { libraryDisplayModeClick(libraryDisplayMode) },
+                            shapes =
+                                when (index) {
+                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                    LibraryDisplayMode.entries().lastIndex ->
+                                        ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                },
+                        ) {
+                            Text(libraryDisplayMode.toUiText().asString())
                         }
+                        Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
                     }
                 }
 
                 if (currentLibraryDisplayMode != LibraryDisplayMode.List) {
-                    item {
-                        var sliderPosition by rememberSaveable {
-                            mutableFloatStateOf(
-                                ((rawColumnCount + .5f) * 2f).roundToInt().toFloat()
-                            )
-                        }
+                    var sliderPosition by rememberSaveable {
+                        mutableFloatStateOf(((rawColumnCount + .5f) * 2f).roundToInt().toFloat())
+                    }
 
-                        Column(
-                            modifier = Modifier.padding(horizontal = Size.medium).animateItem()
-                        ) {
-                            val context = LocalContext.current
-                            val isPortrait = !context.isLandscape()
-                            val numberOfColumns =
-                                numberOfColumns(rawValue = sliderPosition, forText = true)
-                            val numberOfColumnsAlt =
-                                numberOfColumns(
-                                    rawValue = sliderPosition,
-                                    forText = true,
-                                    useHeight = true,
-                                )
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                text =
-                                    "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
+                    Column(modifier = Modifier.padding(horizontal = Size.medium)) {
+                        val context = LocalContext.current
+                        val isPortrait = !context.isLandscape()
+                        val numberOfColumns =
+                            numberOfColumns(rawValue = sliderPosition, forText = true)
+                        val numberOfColumnsAlt =
+                            numberOfColumns(
+                                rawValue = sliderPosition,
+                                forText = true,
+                                useHeight = true,
+                            )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            text =
+                                "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
+                        )
+                        Gap(Size.tiny)
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Slider(
+                                modifier = Modifier.weight(1f),
+                                value = sliderPosition,
+                                onValueChange = { sliderPosition = it },
+                                onValueChangeFinished = {
+                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                },
+                                steps = 8,
+                                valueRange = 0f..7f,
                             )
                             Gap(Size.tiny)
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                Slider(
-                                    modifier = Modifier.weight(1f),
-                                    value = sliderPosition,
-                                    onValueChange = { sliderPosition = it },
-                                    onValueChangeFinished = {
-                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                    },
-                                    steps = 8,
-                                    valueRange = 0f..7f,
-                                )
-                                Gap(Size.tiny)
-                                TextButton(
-                                    onClick = {
-                                        sliderPosition = 3f
-                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                    },
-                                    shapes = ButtonDefaults.shapes(),
-                                ) {
-                                    Text(stringResource(R.string.reset))
-                                }
+                            TextButton(
+                                onClick = {
+                                    sliderPosition = 3f
+                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                },
+                                shapes = ButtonDefaults.shapes(),
+                            ) {
+                                Text(stringResource(R.string.reset))
                             }
                         }
                     }
                 }
-                item {
-                    Row(
-                        modifier =
-                            Modifier.fillMaxWidth().clickable(onClick = outlineCoversToggled),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Gap(Size.small)
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.show_outline_around_covers),
-                        )
-                        Switch(
-                            checked = outlineCoversEnabled,
-                            onCheckedChange = { outlineCoversToggled() },
-                        )
-                        Gap(Size.small)
-                    }
-                }
-                item { HorizontalDivider() }
-                item {
-                    ToggleRow(
-                        enabled = unreadBadgesEnabled,
-                        onClick = unreadBadgesToggled,
-                        text = stringResource(id = R.string.unread_badge),
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = outlineCoversToggled),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Gap(Size.small)
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(id = R.string.show_outline_around_covers),
                     )
-                }
-                item {
-                    ToggleRow(
-                        enabled = downloadBadgesEnabled,
-                        onClick = downloadBadgesToggled,
-                        text = stringResource(R.string.download_badge),
+                    Switch(
+                        checked = outlineCoversEnabled,
+                        onCheckedChange = { outlineCoversToggled() },
                     )
+                    Gap(Size.small)
                 }
-                item {
-                    ToggleRow(
-                        enabled = showStartReadingButtonEnabled,
-                        onClick = startReadingButtonToggled,
-                        text = stringResource(R.string.show_start_reading_button),
-                    )
-                }
-                item { HorizontalDivider() }
-                item {
-                    ToggleRow(
-                        enabled = showLibraryButtonBarEnabled,
-                        onClick = showLibraryButtonBarToggled,
-                        text = stringResource(R.string.show_library_action_bar),
-                    )
-                }
-                item {
-                    ToggleRow(
-                        enabled = horizontalCategoriesEnabled,
-                        onClick = horizontalCategoriesToggled,
-                        text = stringResource(R.string.horizontal_categories),
-                    )
-                }
+
+                HorizontalDivider()
+
+                ToggleRow(
+                    enabled = unreadBadgesEnabled,
+                    onClick = unreadBadgesToggled,
+                    text = stringResource(id = R.string.unread_badge),
+                )
+
+                ToggleRow(
+                    enabled = downloadBadgesEnabled,
+                    onClick = downloadBadgesToggled,
+                    text = stringResource(R.string.download_badge),
+                )
+
+                ToggleRow(
+                    enabled = showStartReadingButtonEnabled,
+                    onClick = startReadingButtonToggled,
+                    text = stringResource(R.string.show_start_reading_button),
+                )
+                HorizontalDivider()
+                ToggleRow(
+                    enabled = showLibraryButtonBarEnabled,
+                    onClick = showLibraryButtonBarToggled,
+                    text = stringResource(R.string.show_library_action_bar),
+                )
+
+                ToggleRow(
+                    enabled = horizontalCategoriesEnabled,
+                    onClick = horizontalCategoriesToggled,
+                    text = stringResource(R.string.horizontal_categories),
+                )
             }
         }
     }
