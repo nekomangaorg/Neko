@@ -1,9 +1,7 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
@@ -11,20 +9,15 @@ import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import me.saket.cascade.CascadeDropdownMenu
+import me.saket.cascade.CascadeColumnScope
 import org.nekomanga.R
 import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
@@ -33,13 +26,6 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
-
-private data class MenuItem(
-    val title: UiText,
-    val icon: UiIcon,
-    val subtitle: UiText? = null,
-    val onClick: () -> Unit,
-)
 
 @Composable
 fun MainDropdownMenu(
@@ -64,28 +50,28 @@ fun MainDropdownMenu(
                 }
 
             listOf(
-                MenuItem(
+                DropdownMenuItem(
                     title = UiText.StringResource(incognitoText),
                     subtitle = UiText.StringResource(R.string.pauses_reading_history),
                     icon = UiIcon.IIcon(incognitoIcon),
                     onClick = incognitoModeClick,
                 ),
-                MenuItem(
+                DropdownMenuItem(
                     title = UiText.StringResource(R.string.settings),
                     icon = UiIcon.Icon(Icons.Outlined.Settings),
                     onClick = settingsClick,
                 ),
-                MenuItem(
+                DropdownMenuItem(
                     title = UiText.StringResource(R.string.stats),
                     icon = UiIcon.Icon(Icons.Outlined.QueryStats),
                     onClick = statsClick,
                 ),
-                MenuItem(
+                DropdownMenuItem(
                     title = UiText.StringResource(R.string.about),
                     icon = UiIcon.Icon(Icons.Outlined.Info),
                     onClick = aboutClick,
                 ),
-                MenuItem(
+                DropdownMenuItem(
                     title = UiText.StringResource(R.string.help),
                     icon = UiIcon.Icon(Icons.AutoMirrored.Outlined.HelpOutline),
                     onClick = helpClick,
@@ -93,49 +79,35 @@ fun MainDropdownMenu(
             )
         }
 
-    val colors =
-        MaterialTheme.colorScheme.copy(
-            primary = themeColorState.primaryColor,
-            surface = themeColorState.altContainerColor,
-            surfaceContainer = themeColorState.altContainerColor,
-            onSurface = themeColorState.onContainerColor,
-            onSurfaceVariant = themeColorState.onContainerColor,
-        )
-
-    MaterialTheme(colorScheme = colors) {
-        CompositionLocalProvider(
-            LocalRippleConfiguration provides (themeColorState.rippleConfiguration)
-        ) {
-            CascadeDropdownMenu(
-                expanded = expanded,
-                offset = DpOffset(Size.smedium, Size.none),
-                fixedWidth = 250.dp,
-                modifier = Modifier.background(color = themeColorState.altContainerColor),
-                shape = RoundedCornerShape(Size.medium),
-                properties = PopupProperties(),
-                onDismissRequest = onDismiss,
-            ) {
-                menuItems.forEachIndexed { index, item ->
-                    Row(
-                        title = item.title,
-                        subTitle = item.subtitle,
-                        icon = item.icon,
-                        onClick = {
-                            item.onClick()
-                            onDismiss()
-                        },
-                    )
-                    if (index == 0) {
-                        Divider()
-                    }
-                }
+    NekoDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        themeColorState = themeColorState,
+    ) {
+        menuItems.forEachIndexed { index, item ->
+            Row(
+                title = item.title,
+                subTitle = item.subtitle,
+                icon = item.icon,
+                onClick = {
+                    item.onClick()
+                    onDismiss()
+                },
+            )
+            if (index == 0) {
+                Divider()
             }
         }
     }
 }
 
 @Composable
-private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: () -> Unit) {
+private fun CascadeColumnScope.Row(
+    title: UiText,
+    subTitle: UiText? = null,
+    icon: UiIcon,
+    onClick: () -> Unit,
+) {
     MaterialDropdownMenuItem(
         text = {
             Column {
