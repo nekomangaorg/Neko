@@ -83,7 +83,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
@@ -164,7 +163,7 @@ class MangaDetailPresenter(
             .filter { it == currentManga().id }
             .onEach(::onUpdateManga)
             .launchIn(presenterScope)
-        presenterScope.launch {
+        presenterScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes =
@@ -176,6 +175,9 @@ class MangaDetailPresenter(
                     .filterNot { it == MergeType.MangaLife }
                     .filterNot { it == MergeType.Comick }
                     .toPersistentList()
+
+            val categories = db.getCategories().executeAsBlocking()
+            val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
             _mangaDetailScreenState.update {
                 it.copy(
@@ -193,6 +195,9 @@ class MangaDetailPresenter(
                             .map { service -> service.value.toTrackServiceItem() }
                             .toPersistentList(),
                     vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
+                    allCategories = categories.map { it.toCategoryItem() }.toPersistentList(),
+                    currentCategories =
+                        mangaCategories.map { it.toCategoryItem() }.toPersistentList(),
                 )
             }
             if (!currentManga().initialized) {
@@ -485,7 +490,7 @@ class MangaDetailPresenter(
                 }
                 .onFailure {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
-                    presenterScope.launch {
+                    presenterScope.launchIO {
                         delay(3000)
                         _snackbarState.emit(
                             SnackbarState("Error trying to mark chapters read from MangaDex $it")
@@ -767,7 +772,7 @@ class MangaDetailPresenter(
     }
 
     private fun updateVibrantColorFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _mangaDetailScreenState.update {
                 it.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
             }
@@ -908,7 +913,7 @@ class MangaDetailPresenter(
 
     /** Updates the flows for all categories, and manga categories */
     private fun updateCategoryFlows() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val categories = db.getCategories().executeAsBlocking()
             val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
@@ -1495,7 +1500,7 @@ class MangaDetailPresenter(
 
     /** Update flows for manga */
     private fun updateMangaFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             _mangaDetailScreenState.update { getMangaStateCopyFromManga(_currentManga.value!!) }
@@ -1574,7 +1579,7 @@ class MangaDetailPresenter(
 
     /** Toggle a manga as favorite */
     fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val editManga = currentManga()
             editManga.apply {
                 favorite = !favorite
@@ -1650,7 +1655,7 @@ class MangaDetailPresenter(
     /** Checks if a manga is favorited, if not then snack action to add to library */
     private fun addToLibrarySnack() {
         if (!currentManga().favorite) {
-            presenterScope.launch {
+            presenterScope.launchIO {
                 _snackbarState.emit(
                     SnackbarState(
                         messageRes = R.string.add_to_library,
@@ -1788,7 +1793,7 @@ class MangaDetailPresenter(
                                     TimberKt.e(it) {
                                         "Failed to update track chapter marked as read"
                                     }
-                                    presenterScope.launch {
+                                    presenterScope.launchIO {
                                         _snackbarState.emit(
                                             SnackbarState(
                                                 "Error trying to update tracked chapter marked as read ${it.message}"
@@ -1923,7 +1928,7 @@ class MangaDetailPresenter(
     }
 
     fun openComment(context: Context, chapterId: String) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             when (!isOnline()) {
                 true ->
                     _snackbarState.emit(
@@ -1979,7 +1984,7 @@ class MangaDetailPresenter(
                     message = blocked,
                     actionLabelRes = R.string.undo,
                     action = {
-                        presenterScope.launch {
+                        presenterScope.launchIO {
                             when (blockType) {
                                 MangaConstants.BlockType.Group -> {
                                     db.deleteScanlatorGroup(blocked).executeOnIO()
@@ -2031,7 +2036,7 @@ class MangaDetailPresenter(
      */
     override fun onResume() {
         super.onResume()
-        presenterScope.launch {
+        presenterScope.launchIO {
             updateMangaFlow()
             updateChapterFlows()
             updateTrackingFlows()
