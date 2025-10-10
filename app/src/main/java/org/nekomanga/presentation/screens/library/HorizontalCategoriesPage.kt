@@ -89,7 +89,7 @@ fun HorizontalCategoriesPage(
                 Tab(
                     text = {
                         Text(
-it p                            item.categoryItem.name,
+                           item.categoryItem.name,
                             color =
                                 if (isSelected) indicatorColor
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
