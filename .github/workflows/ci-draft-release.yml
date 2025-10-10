@@ -93,8 +93,9 @@ jobs:
       - name: Generate Custom Changelog
         id: custom_changelog
         run: |
+          chmod +x ./.github/scripts/generate_changelog.sh
           echo "CHANGELOG_BODY<<EOF" >> $GITHUB_ENV
-          ./scripts/generate_changelog.sh >> $GITHUB_ENV
+          ./.github/scripts/generate_changelog.sh >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Update GitHub Draft Release
