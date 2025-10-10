@@ -5,7 +5,9 @@ import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
+import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 
 interface CategoryQueries : DbProvider {
 
@@ -23,6 +25,18 @@ interface CategoryQueries : DbProvider {
         db.get()
             .listOfObjects(Category::class.java)
             .withQuery(RawQuery.builder().query(getCategoriesForMangaQuery()).args(mangaId).build())
+            .prepare()
+
+    fun getMangaCategoryForCategory(category: Category) =
+        db.get()
+            .listOfObjects(MangaCategory::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(MangaCategoryTable.TABLE)
+                    .where("${MangaCategoryTable.COL_CATEGORY_ID} = ?")
+                    .whereArgs(category.id)
+                    .build()
+            )
             .prepare()
 
     fun insertCategory(category: Category) = db.put().`object`(category).prepare()
