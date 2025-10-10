@@ -262,6 +262,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             clearDatabase = vm::clearDatabase,
                             cleanupDownloads = vm::cleanupDownloads,
                             reindexDownloads = vm::reindexDownloads,
+                            dedupeCategories = vm::dedupeCategories,
                             onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()

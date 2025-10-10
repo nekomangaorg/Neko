@@ -133,6 +133,14 @@
     <string name="category_with_name_exists">A category with that name already exists</string>
     <string name="category_cannot_be_blank">Category name cannot be blank</string>
     <string name="category_deleted">Category deleted</string>
+    <string name="dedupe_categories">Dedupe categories</string>
+    <string name="dedupe_categories_confirmation">Are you sure? This will delete any categories that have the same name as another and move their manga to the other category.</string>
+    <string name="dedupe_categories_summary">Delete any categories that have a duplicate name</string>
+    <string name="no_duplicate_categories">No duplicate categories found</string>
+    <plurals name="category_duplicates_removed">
+        <item quantity="one">%d duplicate category removed</item>
+        <item quantity="other">%d duplicate categories removed</item>
+    </plurals>
     <string name="long_press_category">Press and hold to edit a category</string>
     <string name="jump_to_category">Jump to category</string>
 

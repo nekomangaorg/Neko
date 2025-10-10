@@ -106,4 +106,35 @@ class AdvancedSettingsViewModel : ViewModel() {
             }
         }
     }
+
+    fun dedupeCategories() {
+        viewModelScope.launchNonCancellable {
+            launchIO {
+                val categories = db.getCategories().executeAsBlocking()
+                val categoriesByName = categories.groupBy { it.name }
+                var duplicates = 0
+                for ((_, categories) in categoriesByName) {
+                    if (categories.size > 1) {
+                        val oldest = categories.minBy { it.id!! }
+                        val others = categories.filter { it.id != oldest.id }
+                        val mangaToMove = others.flatMap { db.getMangaForCategory(it).executeAsBlocking() }
+                        db.setMangaCategories(mangaToMove, listOf(oldest))
+                        db.deleteCategories(others).executeAsBlocking()
+                        duplicates++
+                    }
+                }
+                val stringResource =
+                    if (duplicates == 0) {
+                        UiText.StringResource(R.string.no_duplicate_categories)
+                    } else {
+                        UiText.PluralsResource(
+                            R.plurals.category_duplicates_removed,
+                            duplicates,
+                            duplicates,
+                        )
+                    }
+                _toastEvent.emit(stringResource)
+            }
+        }
+    }
 }
