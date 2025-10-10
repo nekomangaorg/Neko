@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -344,8 +343,7 @@ fun BrowseScreen(
 
                             ButtonGroup(
                                 modifier =
-                                    Modifier.align(Alignment.BottomStart)
-                                        .fillMaxWidth()
+                                    Modifier.align(Alignment.BottomCenter)
                                         .padding(horizontal = Size.tiny),
                                 items = items,
                                 selectedItem = selectedItem,
