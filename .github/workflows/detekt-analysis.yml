@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Detekt Analysis
-        uses: detekt/detekt-action@v1
+        uses: detekt/detekt-github-action@v2
         with:
           # Path to the config file (optional).
           # config: ${{ github.workspace }}/config/detekt/detekt.yml

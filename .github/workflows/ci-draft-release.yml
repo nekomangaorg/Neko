@@ -21,7 +21,7 @@ jobs:
     needs: validate_gradle_wrapper
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to update the release and its tag
+      contents: write
 
     steps:
       - name: Cancel Previous Runs
@@ -48,6 +48,9 @@ jobs:
         with:
           path: app/google-services.json
           contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
+
+      - name: Install Android Build Tools
+        run: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;29.0.3"
 
       - name: Build App
         run: ./gradlew assembleStandardRelease
