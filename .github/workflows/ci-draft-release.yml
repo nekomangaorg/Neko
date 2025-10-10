@@ -68,12 +68,16 @@ jobs:
       - name: Prepare Release Artifacts and Checksums
         id: prep_artifacts
         run: |
-          ARTIFACT_DIR="${{ steps.sign_app.outputs.signedReleaseFileDirectory }}"
-          mv "$ARTIFACT_DIR"/*universal-release-unsigned-signed.apk neko-universal.apk
-          mv "$ARTIFACT_DIR"/*arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
-          mv "$ARTIFACT_DIR"/*armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
-          mv "$ARTIFACT_DIR"/*x86-release-unsigned-signed.apk neko-x86.apk
-          mv "$ARTIFACT_DIR"/*x86_64-release-unsigned-signed.apk neko-x86_64.apk
+          RELEASE_DIR="app/build/outputs/apk/standard/release"
+          echo "--- Files in release directory ---"
+          ls -l "$RELEASE_DIR"
+          echo "------------------------------------"
+          # Move and rename the files using the correct path.
+          mv "$RELEASE_DIR"/*universal-release-unsigned-signed.apk neko-universal.apk
+          mv "$RELEASE_DIR"/*arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
+          mv "$RELEASE_DIR"/*armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
+          mv "$RELEASE_DIR"/*x86-release-unsigned-signed.apk neko-x86.apk
+          mv "$RELEASE_DIR"/*x86_64-release-unsigned-signed.apk neko-x86_64.apk
           echo "SHA_TABLE<<EOF" >> $GITHUB_ENV
           echo "" >> $GITHUB_ENV
           echo "### Downloads & Checksums" >> $GITHUB_ENV
