@@ -846,6 +846,7 @@
     <string name="jungle">Jungle</string>
     <string name="crayon">Crayon</string>
     <string name="monochrome">Monochrome</string>
+    <string name="neon_nights">Neon nights</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>

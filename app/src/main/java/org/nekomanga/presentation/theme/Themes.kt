@@ -17,6 +17,7 @@ enum class Themes {
     Brown,
     Tako,
     Teal,
+    Neon,
     Nord,
     Monochrome;
 
@@ -43,6 +44,7 @@ enum class Themes {
             this == Green -> R.style.Theme_Neko_Green
             this == Blue -> R.style.Theme_Neko_Blue
             this == Monochrome -> R.style.Theme_Neko_Monochrome
+            this == Neon -> R.style.Theme_Neko_Neon
             else -> R.style.Theme_Neko // DEFAULT
         }
     }
@@ -66,6 +68,7 @@ enum class Themes {
             this == Green -> R.string.jungle
             this == Blue -> R.string.crayon
             this == Monochrome -> R.string.monochrome
+            this == Neon -> R.string.neon_nights
             else -> R.string.kitsune_fire // Default
         }
     }

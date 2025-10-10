@@ -17,6 +17,7 @@ import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonochromeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.NeonColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NordColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
@@ -67,6 +68,7 @@ fun colorSchemeFromTheme(
     return when (theme) {
         Themes.Blue -> BlueColorScheme
         Themes.Teal -> TealColorScheme
+        Themes.Neon -> NeonColorScheme
         Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(context)
         Themes.Monochrome -> MonochromeColorScheme

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="neon_colorPrimary">#FF3DDA83</color>
+    <color name="neon_colorOnPrimary">#FF003916</color>
+    <color name="neon_colorPrimaryContainer">#FF005323</color>
+    <color name="neon_colorOnPrimaryContainer">#FF5CFD9C</color>
+    <color name="neon_colorPrimaryInverse">#FF006D31</color>
+    <color name="neon_colorSecondary">#FFC4BFFF</color>
+    <color name="neon_colorOnSecondary">#FF2C2459</color>
+    <color name="neon_colorSecondaryContainer">#FF433B71</color>
+    <color name="neon_colorOnSecondaryContainer">#FFE1DFFF</color>
+    <color name="neon_colorTertiary">#FFA0C9FF</color>
+    <color name="neon_colorOnTertiary">#FF003258</color>
+    <color name="neon_colorTertiaryContainer">#FF00497C</color>
+    <color name="neon_colorOnTertiaryContainer">#FFD1E4FF</color>
+    <color name="neon_colorBackground">#FF1A1C19</color>
+    <color name="neon_colorOnBackground">#FFE2E3DD</color>
+    <color name="neon_colorSurface">#FF1A1C19</color>
+    <color name="neon_colorOnSurface">#FFE2E3DD</color>
+    <color name="neon_colorSurfaceVariant">#FF424940</color>
+    <color name="neon_colorOnSurfaceVariant">#FFC2C9BE</color>
+    <color name="neon_colorSurfaceContainer">#FF1E201D</color>
+    <color name="neon_colorOutline">#FF8C9388</color>
+    <color name="neon_colorError">#FFFFB4AB</color>
+    <color name="neon_colorOnError">#FF690005</color>
+</resources>
+

@@ -188,6 +188,34 @@
         <item name="colorError">@color/monochrome_colorError</item>
         <item name="colorOnError">@color/monochrome_colorOnError</item>
     </style>
+
+        <style name="Theme.Neko.Neon">
+            <item name="colorPrimary">@color/neon_colorPrimary</item>
+            <item name="colorOnPrimary">@color/neon_colorOnPrimary</item>
+            <item name="colorPrimaryContainer">@color/neon_colorPrimaryContainer</item>
+            <item name="colorOnPrimaryContainer">@color/neon_colorOnPrimaryContainer</item>
+            <item name="colorPrimaryInverse">@color/neon_colorPrimaryInverse</item>
+            <item name="colorSecondary">@color/neon_colorSecondary</item>
+            <item name="colorOnSecondary">@color/neon_colorOnSecondary</item>
+            <item name="colorSecondaryContainer">@color/neon_colorSecondaryContainer</item>
+            <item name="colorOnSecondaryContainer">@color/neon_colorOnSecondaryContainer</item>
+            <item name="colorTertiary">@color/neon_colorTertiary</item>
+            <item name="colorOnTertiary">@color/neon_colorOnTertiary</item>
+            <item name="colorTertiaryContainer">@color/neon_colorTertiaryContainer</item>
+            <item name="colorOnTertiaryContainer">@color/neon_colorOnTertiaryContainer</item>
+            <item name="android:colorBackground">@color/neon_colorBackground</item>
+            <item name="colorOnBackground">@color/neon_colorOnBackground</item>
+            <item name="colorSurface">@color/neon_colorSurface</item>
+            <item name="colorOnSurface">@color/neon_colorOnSurface</item>
+            <item name="colorSurfaceVariant">@color/neon_colorSurfaceVariant</item>
+            <item name="colorOnSurfaceVariant">@color/neon_colorOnSurfaceVariant</item>
+            <item name="colorSurfaceContainer">@color/neon_colorSurfaceContainer</item>
+            <item name="colorOutline">@color/neon_colorOutline</item>
+            <item name="colorError">@color/neon_colorError</item>
+            <item name="colorOnError">@color/neon_colorOnError</item>
+        </style>
+
+
     <style name="Theme.Neko.Nord">
         <item name="colorPrimary">@color/nord_colorPrimary</item>
         <item name="colorOnPrimary">@color/nord_colorOnPrimary</item>
