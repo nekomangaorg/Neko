@@ -3,19 +3,18 @@ package eu.kanade.tachiyomi.ui.setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
-import kotlin.getValue
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.presentation.components.UiText
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 // This class just holds some injects.  If a settings screen requires
@@ -110,16 +109,33 @@ class AdvancedSettingsViewModel : ViewModel() {
     fun dedupeCategories() {
         viewModelScope.launchNonCancellable {
             launchIO {
+                val tempCategories = db.getCategories().executeAsBlocking()
+
+                tempCategories.forEach {
+                    val dupe = CategoryImpl().apply { this.name = it.name }
+                    db.insertCategory(dupe).executeAsBlocking()
+                }
+
                 val categories = db.getCategories().executeAsBlocking()
+
                 val categoriesByName = categories.groupBy { it.name }
+                val allManga = db.getMangaList().executeAsBlocking()
+
                 var duplicates = 0
                 for ((_, categories) in categoriesByName) {
                     if (categories.size > 1) {
                         val oldest = categories.minBy { it.id!! }
                         val others = categories.filter { it.id != oldest.id }
-                        val mangaToMove = others.flatMap { db.getMangaForCategory(it).executeAsBlocking() }
-                        db.setMangaCategories(mangaToMove, listOf(oldest))
+                        val mangaCategoryToMove =
+                            others.flatMap { db.getMangaCategoryForCategory(it).executeAsBlocking() }
+                        if (mangaCategoryToMove.isNotEmpty()) {
+                            mangaCategoryToMove.forEach {
+                                it.category_id = oldest.id!!
+                                db.insertMangaCategory(it)
+                            }
+                        }
                         db.deleteCategories(others).executeAsBlocking()
+
                         duplicates++
                     }
                 }
