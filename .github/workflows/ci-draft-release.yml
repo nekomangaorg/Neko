@@ -50,7 +50,7 @@ jobs:
           contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
 
       - name: Install Android Build Tools
-        run: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;29.0.3"
+        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.3"
 
       - name: Build App
         run: ./gradlew assembleStandardRelease
