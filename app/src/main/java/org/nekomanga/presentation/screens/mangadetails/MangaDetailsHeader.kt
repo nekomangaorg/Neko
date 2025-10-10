@@ -71,10 +71,13 @@ fun MangaDetailsHeader(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        var isExpanded by
+        var manuallyExpanded by
             rememberSaveable(mangaDetailScreenState.value.inLibrary) {
                 mutableStateOf(!mangaDetailScreenState.value.inLibrary)
             }
+
+        val isExpanded =
+            windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded || manuallyExpanded
 
         val backdropHeight =
             when (isSearching) {
@@ -204,7 +207,7 @@ fun MangaDetailsHeader(
                     themeColorState = themeColorState,
                     isExpanded = isExpanded,
                     wrapAltTitles = mangaDetailScreenState.value.wrapAltTitles,
-                    expandCollapseClick = { isExpanded = !isExpanded },
+                    expandCollapseClick = { manuallyExpanded = !manuallyExpanded },
                     genreSearch = descriptionActions.genreSearch,
                     genreSearchLibrary = descriptionActions.genreSearchLibrary,
                     altTitleClick = descriptionActions.altTitleClick,
