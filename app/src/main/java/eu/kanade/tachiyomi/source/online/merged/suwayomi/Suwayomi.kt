@@ -207,7 +207,9 @@ class Suwayomi : MergedServerSource() {
                                 .body
                                 .use {
                                     json
-                                        .decodeFromString<SuwayomiGraphQLDto<SuwayomiGetChaptersDto>>(
+                                        .decodeFromString<
+                                            SuwayomiGraphQLDto<SuwayomiGetChaptersDto>
+                                        >(
                                             it.string()
                                         )
                                         .data
