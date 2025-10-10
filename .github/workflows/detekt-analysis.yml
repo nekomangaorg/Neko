@@ -33,7 +33,7 @@ jobs:
           report_path: ${{ github.workspace }}/detekt.sarif
 
       - name: Upload SARIF report to GitHub
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         # Ensures the report is uploaded even if Detekt finds issues and fails the job.
         if: success() || failure()
         with:
