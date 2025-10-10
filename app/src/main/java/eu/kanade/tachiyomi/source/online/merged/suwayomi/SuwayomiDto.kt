@@ -18,7 +18,11 @@ data class SuwayomiSeriesDto(
 
 @Serializable data class SuwayomiSourceDto(val name: String, val lang: String)
 
-@Serializable data class SuwayomiFetchChaptersDto(val fetchChapters: SuwayomiChaptersDto)
+@Serializable data class SuwayomiFetchChaptersDto(val fetchChapters: SuwayomiChaptersDto?)
+
+@Serializable data class SuwayomiGetChaptersDto(val chapters: SuwayomiChapterNodesDto)
+
+@Serializable data class SuwayomiChapterNodesDto(val nodes: List<SuwayomiChapterDto>)
 
 @Serializable data class SuwayomiChaptersDto(val chapters: List<SuwayomiChapterDto>)
 

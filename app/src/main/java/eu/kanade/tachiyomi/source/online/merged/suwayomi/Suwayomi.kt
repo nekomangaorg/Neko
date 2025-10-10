@@ -183,17 +183,13 @@ class Suwayomi : MergedServerSource() {
                         throw Exception("Invalid host name")
                     }
                     val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
-                    val response =
+                    val chapters =
                         customClient()
                             .newCall(
                                 POST(apiUrl, headers, fetchChaptersFormBuilder(mangaId.toLong()))
                             )
                             .await()
-
-                    val responseBody = response.body
-
-                    val chapters =
-                        responseBody
+                            .body
                             .use {
                                 json
                                     .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
@@ -201,9 +197,24 @@ class Suwayomi : MergedServerSource() {
                                     )
                                     .data
                                     .fetchChapters
-                                    .chapters
+                                    ?.chapters
                             }
-                            .sortedByDescending { it.sourceOrder }
+                            ?: customClient()
+                                .newCall(
+                                    POST(apiUrl, headers, getChaptersFormBuilder(mangaId.toLong()))
+                                )
+                                .await()
+                                .body
+                                .use {
+                                    json
+                                        .decodeFromString<SuwayomiGraphQLDto<SuwayomiGetChaptersDto>>(
+                                            it.string()
+                                        )
+                                        .data
+                                        .chapters
+                                        .nodes
+                                }
+
                     var previous: Pair<Float?, Boolean> = null to false
                     val chapterPairs =
                         chapters
@@ -359,17 +370,41 @@ class Suwayomi : MergedServerSource() {
         return Name.Sanitized(chapterName.joinToString(" "), vol, chapter, chtxt, title)
     }
 
+    // If this mutation fails due to the source, server-side, fetchChapters == null
     fun fetchChaptersFormBuilder(mangaId: Long): RequestBody {
         val variables = buildJsonObject {
             put("input", buildJsonObject { put("mangaId", JsonPrimitive(mangaId)) })
         }
         return buildJsonObject {
-                put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS_FETCH"))
+                put("operationName", JsonPrimitive("FETCH_MANGA_CHAPTERS"))
                 put(
                     "query",
                     JsonPrimitive(
-                        "mutation GET_MANGA_CHAPTERS_FETCH(\$input: FetchChaptersInput!){" +
+                        "mutation FETCH_MANGA_CHAPTERS(\$input: FetchChaptersInput!){" +
                             "fetchChapters(input: \$input) { chapters{" +
+                            "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
+                    ),
+                )
+                put("variables", variables)
+            }
+            .toString()
+            .toRequestBody("application/json".toMediaType())
+    }
+
+    // Use current server data in case the mutation fails
+    fun getChaptersFormBuilder(mangaId: Long): RequestBody {
+        val filter = buildJsonObject {
+            put("mangaId", buildJsonObject { put("equalTo", JsonPrimitive(mangaId)) })
+        }
+        val variables = buildJsonObject { put("filter", filter) }
+
+        return buildJsonObject {
+                put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "query GET_MANGA_CHAPTERS(\$filter: ChapterFilterInput!) {" +
+                            "chapters(filter: \$filter) { nodes {" +
                             "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
                     ),
                 )
