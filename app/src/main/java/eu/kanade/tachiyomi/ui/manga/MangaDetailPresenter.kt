@@ -1947,7 +1947,7 @@ class MangaDetailPresenter(
                             SnackbarState(messageRes = R.string.comments_unavailable)
                         )
                     } else {
-                        context.openInWebView(MdConstants.forumUrl + threadId)
+                        context.openInWebView(MdConstants.forumUrl + threadId, title = "Comments")
                     }
                 }
             }
