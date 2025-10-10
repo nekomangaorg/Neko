@@ -90,12 +90,22 @@ jobs:
           done
           echo "EOF" >> $GITHUB_ENV
 
+      - name: Generate Custom Changelog
+        id: custom_changelog
+        run: |
+          echo "CHANGELOG_BODY<<EOF" >> $GITHUB_ENV
+          ./scripts/generate_changelog.sh >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Update GitHub Draft Release
         uses: ncipollo/release-action@v1
         with:
-          tag: lates
-          generateReleaseNotes: true
-          body: ${{ env.SHA_TABLE }}
+          tag: latest
+          generateReleaseNotes: false
+          body: |
+            ${{ env.CHANGELOG_BODY }}
+
+            ${{ env.SHA_TABLE }}
           draft: true
           allowUpdates: true
           replacesArtifacts: true
