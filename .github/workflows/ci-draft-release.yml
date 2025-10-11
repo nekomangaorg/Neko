@@ -78,24 +78,41 @@ jobs:
           mv "$RELEASE_DIR"/*armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
           mv "$RELEASE_DIR"/*x86-release-unsigned-signed.apk neko-x86.apk
           mv "$RELEASE_DIR"/*x86_64-release-unsigned-signed.apk neko-x86_64.apk
-          echo "SHA_TABLE<<EOF" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "### Downloads & Checksums" >> $GITHUB_ENV
-          echo "| Variant     | SHA-256 Checksum |" >> $GITHUB_ENV
-          echo "|:------------|:-----------------|" >> $GITHUB_ENV
-          for apk in *.apk; do
+          {
+            echo 'sha_table<<EOF'
+            echo ""
+            echo "### Downloads & Checksums"
+            echo "| Variant     | SHA-256 Checksum |"
+            echo "|:------------|:-----------------|"
+            for apk in *.apk; do
             variant=$(echo "$apk" | sed -e 's/neko-//' -e 's/.apk//')
             checksum=$(sha256sum "$apk" | awk '{ print $1 }')
-            echo "| \`$variant\` | \`$checksum\` |" >> $GITHUB_ENV
-          done
-          echo "EOF" >> $GITHUB_ENV
+            echo "| \`$variant\` | \`$checksum\` |"
+            done
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Generate Custom Changelog
         id: custom_changelog
         run: |
-          echo "CHANGELOG_BODY<<EOF" >> $GITHUB_ENV
-          ./scripts/generate_changelog.sh >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # Get the SHA of the current commit (HEAD)
+          current_sha=$(git rev-parse HEAD)
+
+          # Get the commit SHA of the previously determined release tag
+          prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
+
+          # Debug line to confirm the correct SHAs are being used
+          echo "Comparing range: $prev_release_sha...$current_sha"
+
+          # Call the script with the correct start and end SHAs
+          CHANGELOG_CONTENT=$(./scripts/generate_changelog.sh "$prev_release_sha" "$current_sha")
+
+          # Set the multiline output for the release step
+          {
+            echo 'changelog_body<<EOF'
+            echo "$CHANGELOG_CONTENT"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Update GitHub Draft Release
         uses: ncipollo/release-action@v1
@@ -103,9 +120,9 @@ jobs:
           tag: latest
           generateReleaseNotes: false
           body: |
-            ${{ env.CHANGELOG_BODY }}
+            ${{ steps.custom_changelog.outputs.changelog_body }}
 
-            ${{ env.SHA_TABLE }}
+            ${{ steps.prep_artifacts.outputs.sha_table }}
           draft: true
           allowUpdates: true
           replacesArtifacts: true
