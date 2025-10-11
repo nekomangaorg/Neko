@@ -103,6 +103,7 @@ jobs:
       - name: Generate Custom Changelog
         id: custom_changelog
         run: |
+          chmod +x ./.github/scripts/commit_log_generation.sh
           # Get the SHA of the current commit (HEAD)
           current_sha=$(git rev-parse --short HEAD)
 
