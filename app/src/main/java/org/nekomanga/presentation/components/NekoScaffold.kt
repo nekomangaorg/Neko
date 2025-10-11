@@ -297,8 +297,9 @@ fun SearchOutlineTopAppBar(
                     Modifier.fillMaxWidth()
                         .padding(horizontal = Size.small)
                         .onFocusChanged {
-                            if (it.hasFocus) {
-                                searchEnabled = true
+                            searchEnabled = it.isFocused
+                            if (!it.isFocused) {
+                                onSearchDisabled()
                             }
                         }
                         .focusRequester(focusRequester),
@@ -344,7 +345,7 @@ fun SearchOutlineTopAppBar(
                                     ToolTipButton(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
-                                        onClick = { searchEnabled = true },
+                                        onClick = { focusRequester.requestFocus() },
                                     )
                                 }
                                 if (incognitoMode) {
@@ -418,8 +419,9 @@ fun SearchOutlineWithActionsTopAppBar(
                     Modifier.fillMaxWidth()
                         .padding(horizontal = Size.small)
                         .onFocusChanged {
-                            if (it.hasFocus) {
-                                searchEnabled = true
+                            searchEnabled = it.isFocused
+                            if (!it.isFocused) {
+                                onSearchDisabled()
                             }
                         }
                         .focusRequester(focusRequester),
@@ -475,7 +477,7 @@ fun SearchOutlineWithActionsTopAppBar(
                                         toolTipLabel = stringResource(id = R.string.search),
                                         icon = Icons.Filled.Search,
                                         enabledTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        onClick = { searchEnabled = true },
+                                        onClick = { focusRequester.requestFocus() },
                                     )
                                 }
                                 if (incognitoMode) {
