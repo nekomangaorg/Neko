@@ -105,7 +105,7 @@ jobs:
           echo "Comparing range: $prev_release_sha...$current_sha"
 
           # Call the script with the correct start and end SHAs
-          CHANGELOG_CONTENT=$(./scripts/generate_changelog.sh "$prev_release_sha" "$current_sha")
+          CHANGELOG_CONTENT=$(./.github/scripts/generate_changelog.sh "$prev_release_sha" "$current_sha")
 
           # Set the multiline output for the release step
           {
