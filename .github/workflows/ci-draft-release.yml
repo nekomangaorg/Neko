@@ -92,11 +92,19 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
+      - name: Get previous release
+        id: last_release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          excludes: 'prerelease,draft'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate Custom Changelog
         id: custom_changelog
         run: |
           # Get the SHA of the current commit (HEAD)
-          current_sha=$(git rev-parse HEAD)
+          current_sha=$(git rev-parse --short HEAD)
 
           # Get the commit SHA of the previously determined release tag
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
