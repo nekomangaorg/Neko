@@ -16,8 +16,11 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.MangaItem
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
+import eu.kanade.tachiyomi.data.database.models.toManga
+import eu.kanade.tachiyomi.data.database.models.toMangaItem
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
@@ -110,7 +113,7 @@ class ReaderViewModel(
     val eventFlow = eventChannel.receiveAsFlow()
 
     /** The manga loaded in the reader. It can be null when instantiated for a short time. */
-    val manga: Manga?
+    val manga: MangaItem?
         get() = state.value.manga
 
     val source: MangaDex
@@ -161,8 +164,8 @@ class ReaderViewModel(
     private val statusHandler: StatusHandler by injectLazy()
 
     private var hasTrackers: Boolean = false
-    private val checkTrackers: (Manga) -> Unit = { manga ->
-        val tracks = db.getTracks(manga).executeAsBlocking()
+    private val checkTrackers: (MangaItem) -> Unit = { manga ->
+        val tracks = db.getTracks(manga.toManga()).executeAsBlocking()
 
         hasTrackers = tracks.size > 0
     }
@@ -224,12 +227,13 @@ class ReaderViewModel(
             try {
                 val manga = db.getManga(mangaId).executeAsBlocking()
                 if (manga != null) {
-                    mutableState.update { it.copy(manga = manga) }
+                    val mangaItem = manga.toMangaItem()
+                    mutableState.update { it.copy(manga = mangaItem) }
                     if (chapterId == -1L) {
                         chapterId = initialChapterId
                     }
 
-                    checkTrackers(manga)
+                    checkTrackers(mangaItem)
 
                     NotificationReceiver.dismissNotification(
                         preferences.context,
@@ -266,8 +270,8 @@ class ReaderViewModel(
         val manga = manga ?: return emptyList()
         chapterItems =
             withContext(Dispatchers.IO) {
-                val chapterSort = ChapterSort(manga, chapterFilter, preferences)
-                val dbChapters = db.getChapters(manga).executeAsBlocking()
+                val chapterSort = ChapterSort(manga.toManga(), chapterFilter, preferences)
+                val dbChapters = db.getChapters(manga.toManga()).executeAsBlocking()
                 chapterSort
                     .getChaptersSorted(
                         dbChapters,
@@ -277,7 +281,7 @@ class ReaderViewModel(
                     .map {
                         ReaderChapterItem(
                             it,
-                            manga,
+                            manga.toManga(),
                             it.id == (getCurrentChapter()?.chapter?.id ?: chapterId),
                         )
                     }
@@ -1035,7 +1039,7 @@ class ReaderViewModel(
     }
 
     data class State(
-        val manga: Manga? = null,
+        val manga: MangaItem? = null,
         val viewerChapters: ViewerChapters? = null,
         val isLoadingAdjacentChapter: Boolean = false,
         val lastPage: Int? = null,

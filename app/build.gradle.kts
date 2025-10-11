@@ -183,7 +183,8 @@ dependencies {
 
     implementation(libs.bundles.results)
 
-    testImplementation(libs.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.bundles.junit)
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.mockk) { exclude(group = "junit", module = "junit") }
 }
