@@ -103,18 +103,16 @@ jobs:
       - name: Generate Custom Changelog
         id: custom_changelog
         run: |
+          set -e
           chmod +x ./.github/scripts/commit_log_generation.sh
-          # Get the SHA of the current commit (HEAD)
           current_sha=$(git rev-parse --short HEAD)
-
-          # Get the commit SHA of the previously determined release tag
+          echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
-
-          # Debug line to confirm the correct SHAs are being used
-          echo "Comparing range: $prev_release_sha...$current_sha"
+          echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
+          echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
 
           # Call the script with the correct start and end SHAs
-          CHANGELOG_CONTENT=$(./.github/scripts/generate_changelog.sh "$prev_release_sha" "$current_sha")
+          CHANGELOG_CONTENT=$(./.github/scripts/generate_changelog.sh $prev_release_sha $current_sha)
 
           # Set the multiline output for the release step
           {
