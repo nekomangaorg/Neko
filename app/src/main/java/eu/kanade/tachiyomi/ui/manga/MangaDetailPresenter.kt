@@ -138,17 +138,16 @@ class MangaDetailPresenter(
                // onRefresh()
             }
 
-            db.getManga(mangaId).asRxObservable().asFlow()
 
         }
-    }c
+    }
 
-    fun mangaFlow(mangaId: Long) = db.getManga(mangaId).asRxObservable().asFlow().map { it.toMangaItem() }.distinctUntilChanged()
-    fun chapterFlow(mangaId: Long) = db.getChapters(mangaId).asFlow().distinctUntilChanged()
-    fun allCategoriesFlow() = db.getCategories().asFlow().distinctUntilChanged()
-    fun mangaCategoriesFlow(mangaId: Long) = db.getCategoriesForManga(mangaId).asFlow().map { categories -> categories.map { it.toCategoryItem() } }.distinctUntilChanged()
+    val mangaFlow = db.getManga(mangaId).asRxObservable().asFlow().map { it.toMangaItem() }.distinctUntilChanged()
+    val chapterFlow = db.getChapters(mangaId).asFlow().distinctUntilChanged()
+    val allCategoriesFlow = db.getCategories().asFlow().distinctUntilChanged()
+    val mangaCategoriesFlow = db.getCategoriesForManga(mangaId).asFlow().map { categories -> categories.map { it.toCategoryItem() } }.distinctUntilChanged()
 
-    fun tracksFlow(mangaId: Long) = db.getTracks(mangaId).asFlow().map { tracks-> tracks.map { it.toTrackItem() } }.distinctUntilChanged()
+    val tracksFlow = db.getTracks(mangaId).asFlow().map { tracks-> tracks.map { it.toTrackItem() } }.distinctUntilChanged()
 
 
 }
