@@ -168,8 +168,7 @@ class FeedPresenter(
         lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
         lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
         lastContinueReadingList = _summaryScreenPagingState.value.continueReadingList
-        lastSummaryNewlyAddedFeedMangaList =
-            _summaryScreenPagingState.value.newlyAddedFeedMangaList
+        lastSummaryNewlyAddedFeedMangaList = _summaryScreenPagingState.value.newlyAddedFeedMangaList
     }
 
     override fun onPause() {
