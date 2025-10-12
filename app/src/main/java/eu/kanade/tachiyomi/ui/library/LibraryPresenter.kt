@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
@@ -133,15 +134,57 @@ class LibraryPresenter(
         presenterScope.launchIO {
             if (lastLibraryCategoryItems == null) {
                 _libraryScreenState.update { it.copy(isFirstLoad = true) }
+                // inital fast load
+                val mangaList = libraryMangaListFlow.first()
+                val categoryList = categoryListFlow.first()
+                val libraryViewPreferences = libraryViewFlow.first()
 
-                /* val rawMangaList =
-                    db.getLibraryMangaList().executeAsBlocking().map { it.toLibraryMangaItem() }
-                val rawCategories =
-                    db.getCategories().executeAsBlocking().map { it.toCategoryItem() }
-                val fastButUnsortedItems = groupByCategory(rawMangaList, rawCategories, emptySet())
+                val collapsedCategorySet =
+                    libraryViewPreferences.collapsedCategories
+                        .mapNotNull { it.toIntOrNull() }
+                        .toSet()
+
+                val unsortedLibraryCategoryItems =
+                    when (libraryViewPreferences.groupBy) {
+                        LibraryGroup.ByCategory -> {
+                            groupByCategory(mangaList, categoryList, collapsedCategorySet)
+                        }
+                        LibraryGroup.ByAuthor,
+                        LibraryGroup.ByContent,
+                        LibraryGroup.ByLanguage,
+                        LibraryGroup.ByStatus,
+                        LibraryGroup.ByTag -> {
+                            groupByDynamic(
+                                libraryMangaList = mangaList,
+                                collapsedDynamicCategorySet =
+                                    libraryViewPreferences.collapsedDynamicCategories,
+                                currentLibraryGroup = libraryViewPreferences.groupBy,
+                                sortOrder = libraryViewPreferences.sortingMode,
+                                sortAscending = libraryViewPreferences.sortAscending,
+                                loggedInTrackStatus = emptyMap(),
+                            )
+                        }
+                        // by track status requires an extra network call, so we will just show
+                        // ungrouped for the fast path
+                        LibraryGroup.ByTrackStatus -> {
+                            groupByUngrouped(
+                                mangaList,
+                                libraryViewPreferences.sortingMode,
+                                libraryViewPreferences.sortAscending,
+                            )
+                        }
+                        LibraryGroup.Ungrouped -> {
+                            groupByUngrouped(
+                                mangaList,
+                                libraryViewPreferences.sortingMode,
+                                libraryViewPreferences.sortAscending,
+                            )
+                        }
+                    }
+
                 _libraryScreenState.update {
-                    it.copy(items = fastButUnsortedItems.toPersistentList())
-                }*/
+                    it.copy(items = unsortedLibraryCategoryItems.toPersistentList())
+                }
             } else {
                 lastLibraryCategoryItems?.let { items ->
                     val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
