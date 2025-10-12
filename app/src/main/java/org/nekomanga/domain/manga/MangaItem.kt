@@ -1,5 +1,8 @@
-package eu.kanade.tachiyomi.data.database.models
+package org.nekomanga.domain.manga
 
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.originalTitle
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 
