@@ -38,6 +38,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +46,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -92,7 +94,7 @@ class LibraryPresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
@@ -100,14 +102,24 @@ class LibraryPresenter(
         flow5: Flow<T5>,
         flow6: Flow<T6>,
         flow7: Flow<T7>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R,
+        flow8: Flow<T8>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
     ): Flow<R> =
         combine(
             combine(flow, flow2, flow3, ::Triple),
             combine(flow4, flow5, flow6, ::Triple),
-            flow7,
-        ) { t1, t2, f7 ->
-            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third, f7)
+            combine(flow7, flow8, ::Pair),
+        ) { t1, t2, t3 ->
+            transform(
+                t1.first,
+                t1.second,
+                t1.third,
+                t2.first,
+                t2.second,
+                t2.third,
+                t3.first,
+                t3.second,
+            )
         }
 
     /** Save the current list to speed up loading later */
@@ -121,6 +133,15 @@ class LibraryPresenter(
         presenterScope.launchIO {
             if (lastLibraryCategoryItems == null) {
                 _libraryScreenState.update { it.copy(isFirstLoad = true) }
+
+                /* val rawMangaList =
+                    db.getLibraryMangaList().executeAsBlocking().map { it.toLibraryMangaItem() }
+                val rawCategories =
+                    db.getCategories().executeAsBlocking().map { it.toCategoryItem() }
+                val fastButUnsortedItems = groupByCategory(rawMangaList, rawCategories, emptySet())
+                _libraryScreenState.update {
+                    it.copy(items = fastButUnsortedItems.toPersistentList())
+                }*/
             } else {
                 lastLibraryCategoryItems?.let { items ->
                     val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
@@ -160,24 +181,23 @@ class LibraryPresenter(
 
         presenterScope.launchIO {
             combine(
-                    libraryScreenState
-                        .map { it.searchQuery }
-                        .distinctUntilChanged()
-                        .debounce(SEARCH_DEBOUNCE_MILLIS),
-                    libraryMangaListFlow(),
-                    categoryListFlow(),
-                    filterPreferencesFlow(),
-                    trackMapFlow(),
-                    libraryViewFlow(),
+                    filteredMangaListFlow,
+                    categoryListFlow,
+                    filterPreferencesFlow,
+                    trackMapFlow,
+                    libraryViewFlow,
                     _mangaRefreshingState.asStateFlow(),
+                    lastReadMangaFlow,
+                    lastFetchMangaFlow,
                 ) {
-                    searchQuery,
-                    libraryMangaList,
+                    filteredMangaList,
                     categoryList,
                     libraryFilters,
                     trackMap,
                     libraryViewPreferences,
-                    mangaRefreshingState ->
+                    mangaRefreshingState,
+                    lastReadMap,
+                    lastFetchMap ->
                     val collapsedCategorySet =
                         libraryViewPreferences.collapsedCategories
                             .mapNotNull { it.toIntOrNull() }
@@ -185,7 +205,11 @@ class LibraryPresenter(
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
-                    libraryPreferences.sortAscending().get()
+                    val downloadCountMapAsync = async {
+                        downloadManager.getDownloadCounts(
+                            filteredMangaList.map { it.displayManga.toDbManga() }
+                        )
+                    }
 
                     val layout = libraryPreferences.layout().get()
                     val gridSize = libraryPreferences.gridSize().get()
@@ -194,7 +218,7 @@ class LibraryPresenter(
                         when (libraryViewPreferences.groupBy) {
                             LibraryGroup.ByCategory -> {
                                 groupByCategory(
-                                    libraryMangaList,
+                                    filteredMangaList,
                                     categoryList,
                                     collapsedCategorySet,
                                 )
@@ -206,7 +230,7 @@ class LibraryPresenter(
                             LibraryGroup.ByTag,
                             LibraryGroup.ByTrackStatus -> {
                                 groupByDynamic(
-                                    libraryMangaList = libraryMangaList,
+                                    libraryMangaList = filteredMangaList,
                                     collapsedDynamicCategorySet =
                                         libraryViewPreferences.collapsedDynamicCategories,
                                     currentLibraryGroup = libraryViewPreferences.groupBy,
@@ -217,7 +241,7 @@ class LibraryPresenter(
                             }
                             LibraryGroup.Ungrouped -> {
                                 groupByUngrouped(
-                                    libraryMangaList,
+                                    filteredMangaList,
                                     libraryViewPreferences.sortingMode,
                                     libraryViewPreferences.sortAscending,
                                 )
@@ -226,30 +250,10 @@ class LibraryPresenter(
 
                     var allCollapsed = true
 
-                    val lastReadMap =
-                        db.getLastReadManga()
-                            .executeAsBlocking()
-                            .mapIndexed { index, manga -> manga.id!! to index }
-                            .toMap()
-                    val lastFetchMap =
-                        db.getLastFetchedManga()
-                            .executeAsBlocking()
-                            .mapIndexed { index, manga -> manga.id!! to index }
-                            .toMap()
-
-                    val allMangaItems =
-                        unsortedLibraryCategoryItems
-                            .flatMap { it.libraryItems }
-                            .distinctBy { it.displayManga.mangaId }
-
-                    val downloadCountMap =
-                        downloadManager.getDownloadCounts(
-                            allMangaItems.map { it.displayManga.toDbManga() }
-                        )
-
+                    val downloadCountMap = downloadCountMapAsync.await()
                     val items =
                         unsortedLibraryCategoryItems
-                            .map { libraryCategoryItem ->
+                            .mapAsync { libraryCategoryItem ->
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
@@ -269,7 +273,7 @@ class LibraryPresenter(
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
                                         .sortedWith(comparator)
-                                        .map { item ->
+                                        .mapAsync { item ->
                                             item.copy(
                                                 downloadCount =
                                                     downloadCountMap[item.displayManga.mangaId]
@@ -278,7 +282,7 @@ class LibraryPresenter(
                                                     trackMap[item.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
-                                        .applyFilters(libraryFilters, trackMap, searchQuery)
+                                        .applyFilters(libraryFilters, trackMap)
                                         .toPersistentList()
 
                                 val isRefreshing =
@@ -291,7 +295,7 @@ class LibraryPresenter(
                                     isRefreshing = isRefreshing,
                                 )
                             }
-                            .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
+                            .filterNot { it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
@@ -325,36 +329,31 @@ class LibraryPresenter(
         }
     }
 
-    fun libraryMangaListFlow(): Flow<List<LibraryMangaItem>> {
-        return db.getLibraryMangaList()
+    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
+        db.getLibraryMangaList()
             .asFlow()
             .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
             .distinctUntilChanged()
-    }
+            .conflate()
 
-    fun categoryListFlow(): Flow<List<CategoryItem>> {
-        return combine(
+    val categoryListFlow: Flow<List<CategoryItem>> =
+        combine(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
                 db.getCategories().asFlow(),
-            ) { combinedArray ->
-                val librarySort = LibrarySort.valueOf(combinedArray[0] as Int)
+            ) { sortingMode, sortAscending, dbCategories ->
+                val librarySort = LibrarySort.valueOf(sortingMode)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
-                    defaultCategory.copy(
-                        sortOrder = librarySort,
-                        isAscending = combinedArray[1] as Boolean,
-                    )
-                val dbCategories = combinedArray[2] as List<Category>
+                    defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
                 (listOf(updatedDefaultCategory) +
                         dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
                     .sortedBy { it.order }
             }
             .distinctUntilChanged()
-    }
 
-    fun trackMapFlow(): Flow<Map<Long, List<String>>> {
-        return db.getAllTracks()
+    val trackMapFlow: Flow<Map<Long, List<String>>> =
+        db.getAllTracks()
             .asFlow()
             .mapNotNull { tracks ->
                 tracks
@@ -368,7 +367,34 @@ class LibraryPresenter(
                     .groupBy({ it.first }, { it.second })
             }
             .distinctUntilChanged()
-    }
+
+    val lastReadMangaFlow =
+        db.getLastReadManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val lastFetchMangaFlow =
+        db.getLastFetchedManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val filteredMangaListFlow =
+        combine(
+                libraryMangaListFlow,
+                libraryScreenState
+                    .map { it.searchQuery }
+                    .distinctUntilChanged()
+                    .debounce(SEARCH_DEBOUNCE_MILLIS),
+            ) { mangaList, searchQuery ->
+                if (searchQuery.isNullOrBlank()) {
+                    mangaList
+                } else {
+                    mangaList.filter { libraryMangaItem -> libraryMangaItem.matches(searchQuery) }
+                }
+            }
+            .conflate()
 
     fun preferenceUpdates() {
 
@@ -464,8 +490,8 @@ class LibraryPresenter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun libraryViewFlow(): Flow<LibraryViewPreferences> {
-        return combine(
+    val libraryViewFlow: Flow<LibraryViewPreferences> =
+        combine(
                 libraryPreferences.collapsedCategories().changes(),
                 libraryPreferences.collapsedDynamicCategories().changes(),
                 libraryPreferences.sortingMode().changes(),
@@ -485,10 +511,9 @@ class LibraryPresenter(
                 )
             }
             .distinctUntilChanged()
-    }
 
-    private fun filterPreferencesFlow(): Flow<LibraryFilters> {
-        return combine(
+    val filterPreferencesFlow: Flow<LibraryFilters> =
+        combine(
             libraryPreferences.filterBookmarked().changes(),
             libraryPreferences.filterCompleted().changes(),
             libraryPreferences.filterDownloaded().changes(),
@@ -511,12 +536,10 @@ class LibraryPresenter(
                 filterUnread = it[8] as FilterUnread,
             )
         }
-    }
 
     private suspend fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
-        searchQuery: String?,
     ): List<LibraryMangaItem> {
         return this.filterAsync { libraryMangaItem ->
             val displayManga = libraryMangaItem.displayManga
@@ -535,8 +558,6 @@ class LibraryPresenter(
             val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
             val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
 
-            val searchCondition = libraryMangaItem.matches(searchQuery)
-
             completedCondition &&
                 downloadedCondition &&
                 unreadCondition &&
@@ -545,8 +566,7 @@ class LibraryPresenter(
                 bookmarkedCondition &&
                 mergedCondition &&
                 unavailableCondition &&
-                mangaTypeCondition &&
-                searchCondition
+                mangaTypeCondition
         }
     }
 
@@ -830,7 +850,7 @@ class LibraryPresenter(
         }
 
         presenterScope.launchIO {
-            filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
+            filterPreferencesFlow.distinctUntilChanged().collectLatest { libraryFilters ->
                 _libraryScreenState.update {
                     it.copy(
                         libraryFilters = libraryFilters,
@@ -927,10 +947,6 @@ class LibraryPresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }
-    }
-
-    fun refreshing(start: Boolean) {
-        presenterScope.launchIO { _libraryScreenState.update { it.copy(isRefreshing = start) } }
     }
 
     fun search(searchQuery: String?) {

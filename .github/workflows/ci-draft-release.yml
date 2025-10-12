@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v5
 
   build_and_release:
     name: Build and Update Draft Release
@@ -30,12 +30,12 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -78,24 +78,59 @@ jobs:
           mv "$RELEASE_DIR"/*armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
           mv "$RELEASE_DIR"/*x86-release-unsigned-signed.apk neko-x86.apk
           mv "$RELEASE_DIR"/*x86_64-release-unsigned-signed.apk neko-x86_64.apk
-          echo "SHA_TABLE<<EOF" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "### Downloads & Checksums" >> $GITHUB_ENV
-          echo "| Variant     | SHA-256 Checksum |" >> $GITHUB_ENV
-          echo "|:------------|:-----------------|" >> $GITHUB_ENV
-          for apk in *.apk; do
+          {
+            echo 'sha_table<<EOF'
+            echo ""
+            echo "### Downloads & Checksums"
+            echo "| Variant     | SHA-256 Checksum |"
+            echo "|:------------|:-----------------|"
+            for apk in *.apk; do
             variant=$(echo "$apk" | sed -e 's/neko-//' -e 's/.apk//')
             checksum=$(sha256sum "$apk" | awk '{ print $1 }')
-            echo "| \`$variant\` | \`$checksum\` |" >> $GITHUB_ENV
-          done
-          echo "EOF" >> $GITHUB_ENV
+            echo "| \`$variant\` | \`$checksum\` |"
+            done
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Get previous release
+        id: last_release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          excludes: 'prerelease,draft'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Custom Changelog
+        id: custom_changelog
+        run: |
+          set -e
+          chmod +x ./.github/scripts/generate_changelog.sh
+          current_sha=$(git rev-parse --short HEAD)
+          echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
+          prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
+          echo "The previous release SHA is: -->$prev_release_sha<--"
+          echo "The current SHA is: -->current_sha<--"
+          echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
+
+          # Call the script with the correct start and end SHAs
+          CHANGELOG_CONTENT=$(./.github/scripts/generate_changelog.sh $prev_release_sha $current_sha)
+
+          # Set the multiline output for the release step
+          {
+            echo 'changelog_body<<EOF'
+            echo "$CHANGELOG_CONTENT"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Update GitHub Draft Release
         uses: ncipollo/release-action@v1
         with:
-          tag: lates
-          generateReleaseNotes: true
-          body: ${{ env.SHA_TABLE }}
+          tag: latest
+          generateReleaseNotes: false
+          body: |
+            ${{ steps.custom_changelog.outputs.changelog_body }}
+
+            ${{ steps.prep_artifacts.outputs.sha_table }}
           draft: true
           allowUpdates: true
           replacesArtifacts: true
