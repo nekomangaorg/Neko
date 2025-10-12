@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.WorkInfo
@@ -107,10 +108,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private val hideBottomNav
         get() = router.backstackSize > 1
 
-    private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var overflowDialog: Dialog? = null
     var ogWidth: Int = Int.MAX_VALUE
+
+    private lateinit var viewModel: MainViewModel
 
     override fun attachBaseContext(newBase: Context?) {
         ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
@@ -130,6 +132,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProvider(this, MainViewModelFactory())[MainViewModel::class.java]
 
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
@@ -311,6 +315,21 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     }
             }
             .launchIn(lifecycleScope)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.updateResult.collect { result ->
+                    if (result is AppUpdateResult.NewUpdate) {
+                        val body = result.release.info
+                        val url = result.release.downloadLink
+
+                        // Create confirmation window
+                        AppUpdateNotifier.releasePageUrl = result.release.releaseLink
+                        NewUpdateDialogController(body, url).showDialog(router)
+                    }
+                }
+            }
+        }
     }
 
     fun reEnableBackPressedCallBack() {
@@ -357,7 +376,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     override fun onResume() {
         super.onResume()
-        checkForAppUpdates()
+        if (isUpdaterEnabled) {
+            viewModel.checkForAppUpdates()
+        }
         reEnableBackPressedCallBack()
     }
 
@@ -370,28 +391,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     fun saveExtras() {
         mangaShortcutManager.updateShortcuts()
         MangaCoverMetadata.savePrefs()
-    }
-
-    private fun checkForAppUpdates() {
-        if (isUpdaterEnabled) {
-            lifecycleScope.launchIO {
-                try {
-                    val result = updateChecker.checkForUpdate(this@MainActivity)
-                    if (result is AppUpdateResult.NewUpdate) {
-                        val body = result.release.info
-                        val url = result.release.downloadLink
-
-                        // Create confirmation window
-                        withContext(Dispatchers.Main) {
-                            AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                            NewUpdateDialogController(body, url).showDialog(router)
-                        }
-                    }
-                } catch (error: Exception) {
-                    TimberKt.e(error) { "Error checking for app update" }
-                }
-            }
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
