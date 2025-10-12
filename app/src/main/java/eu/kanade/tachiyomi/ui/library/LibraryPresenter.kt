@@ -689,10 +689,10 @@ class LibraryPresenter(
         presenterScope.launchIO {
             val dbCategories = categories.map { it.toDbCategory() }
 
-            mangaList.map { manga ->
+            mangaList.mapAsync { manga ->
                 val dbManga = db.getManga(manga.mangaId).executeOnIO()!!
                 val mangaCategories = dbCategories.map { MangaCategory.create(dbManga, it) }
-                launchIO { db.setMangaCategories(mangaCategories, listOf(dbManga)) }
+                db.setMangaCategories(mangaCategories, listOf(dbManga))
             }
             clearSelectedManga()
             if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
@@ -984,15 +984,15 @@ class LibraryPresenter(
 
     fun deleteSelectedLibraryMangaItems() {
         presenterScope.launchNonCancellable {
-            var currentSelected = _libraryScreenState.value.selectedItems.toList()
-            currentSelected.forEach { libraryMangaItem ->
+            val currentSelected = _libraryScreenState.value.selectedItems.toList()
+            clearSelectedManga()
+            currentSelected.mapAsync { libraryMangaItem ->
                 val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
                 dbManga.favorite = false
                 db.insertManga(dbManga).executeOnIO()
                 coverCache.deleteFromCache(dbManga)
                 downloadManager.deleteManga(dbManga)
             }
-            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
         }
     }
 
@@ -1103,7 +1103,7 @@ class LibraryPresenter(
     fun getSelectedMangaUrls(): String {
         val urls =
             _libraryScreenState.value.selectedItems
-                .mapNotNull { selected -> selected.url }
+                .map { selected -> selected.url }
                 .distinct()
                 .joinToString("\n")
         presenterScope.launchIO { clearSelectedManga() }
