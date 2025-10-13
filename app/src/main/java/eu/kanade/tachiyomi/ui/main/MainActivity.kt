@@ -108,6 +108,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private val hideBottomNav
         get() = router.backstackSize > 1
 
+    private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var overflowDialog: Dialog? = null
     var ogWidth: Int = Int.MAX_VALUE
@@ -315,21 +316,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     }
             }
             .launchIn(lifecycleScope)
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.updateResult.collect { result ->
-                    if (result is AppUpdateResult.NewUpdate) {
-                        val body = result.release.info
-                        val url = result.release.downloadLink
-
-                        // Create confirmation window
-                        AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                        NewUpdateDialogController(body, url).showDialog(router)
-                    }
-                }
-            }
-        }
     }
 
     fun reEnableBackPressedCallBack() {
@@ -376,9 +362,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     override fun onResume() {
         super.onResume()
-        if (isUpdaterEnabled) {
-            viewModel.checkForAppUpdates()
-        }
+        checkForAppUpdates()
         reEnableBackPressedCallBack()
     }
 
@@ -391,6 +375,28 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     fun saveExtras() {
         mangaShortcutManager.updateShortcuts()
         MangaCoverMetadata.savePrefs()
+    }
+
+    private fun checkForAppUpdates() {
+        if (isUpdaterEnabled) {
+            lifecycleScope.launchIO {
+                try {
+                    val result = updateChecker.checkForUpdate(this@MainActivity)
+                    if (result is AppUpdateResult.NewUpdate) {
+                        val body = result.release.info
+                        val url = result.release.downloadLink
+
+                        // Create confirmation window
+                        withContext(Dispatchers.Main) {
+                            AppUpdateNotifier.releasePageUrl = result.release.releaseLink
+                            NewUpdateDialogController(body, url).showDialog(router)
+                        }
+                    }
+                } catch (error: Exception) {
+                    TimberKt.e(error) { "Error checking for app update" }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
