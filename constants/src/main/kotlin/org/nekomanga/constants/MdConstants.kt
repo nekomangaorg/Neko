@@ -14,7 +14,8 @@ object MdConstants {
     const val cdnUrl = "https://uploads.mangadex.org"
     const val forumUrl = "https://forums.mangadex.org/threads/"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
-    const val noCoverUrl = "https://github.com/nekomangaorg/Neko/blob/main/.github/assets/404_logo.png?raw=true"
+    const val noCoverUrl =
+        "https://github.com/nekomangaorg/Neko/blob/main/.github/assets/404_logo.png?raw=true"
     const val chapterSuffix = "/chapter/"
 
     val UnsupportedOfficialGroupList =
