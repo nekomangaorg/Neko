@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.util.fastAll
-import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
@@ -1112,7 +1111,6 @@ class MangaDetailPresenterOld(
     /** Get Manga Description */
     private fun getDescription(): String {
         return when {
-            currentManga().uuid().isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
             !currentManga().description.isNullOrEmpty() -> currentManga().description!!
             !currentManga().initialized -> ""
             else -> "No description"
