@@ -161,19 +161,29 @@ fun HorizontalCategoriesPage(
                                 },
                             )
                         }
-                        LazyVerticalGrid(
+                        val gridState = rememberLazyGridState()
+                        VerticalGridFastScroller(
+                            state = gridState,
                             columns = GridCells.Fixed(columns),
-                            modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
-                            horizontalArrangement = Arrangement.spacedBy(Size.small),
-                            contentPadding =
-                                PaddingValues(
-                                    bottom = contentPadding.calculateBottomPadding(),
-                                    top = Size.small,
-                                ),
+                            contentPadding = contentPadding,
+                            arrangement = Arrangement.spacedBy(Size.small),
                         ) {
-                            items(items = item.libraryItems, key = { it.displayManga.mangaId }) {
-                                libraryItem ->
-                                MangaGridItem(
+                            LazyVerticalGrid(
+                                state = gridState,
+                                columns = GridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
+                                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                                contentPadding =
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding(),
+                                        top = Size.small,
+                                    ),
+                            ) {
+                                items(
+                                    items = item.libraryItems,
+                                    key = { it.displayManga.mangaId }
+                                ) { libraryItem ->
+                                    MangaGridItem(
                                     displayManga = libraryItem.displayManga,
                                     showUnreadBadge = libraryScreenState.showUnreadBadges,
                                     unreadCount = libraryItem.unreadCount,
@@ -256,13 +266,20 @@ fun HorizontalCategoriesPage(
                                 },
                             )
                         }
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding =
-                                PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                        val listState = rememberLazyListState()
+                        VerticalFastScroller(
+                            listState = listState,
                         ) {
-                            itemsIndexed(
-                                items = item.libraryItems,
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding()
+                                    ),
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
                                 key = { _, libraryItem -> libraryItem.displayManga.mangaId },
                             ) { index, libraryItem ->
                                 ListItem(

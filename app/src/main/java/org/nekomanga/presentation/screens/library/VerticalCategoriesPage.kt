@@ -70,14 +70,17 @@ fun VerticalCategoriesPage(
             mutableStateOf(libraryScreenState.selectedItems.map { it.displayManga.mangaId })
         }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = contentPadding,
-        state = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(0.dp),
+    VerticalFastScroller(
+        listState = lazyListState,
     ) {
-        libraryScreenState.items.forEach { item ->
-            item(item.categoryItem.name) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = contentPadding,
+            state = lazyListState,
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+        ) {
+            libraryScreenState.items.forEach { item ->
+                item(item.categoryItem.name) {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
                     useVividColorHeaders = libraryScreenState.useVividColorHeaders,

@@ -60,7 +60,7 @@ fun VerticalFastScroller(
     listState: LazyListState,
     modifier: Modifier = Modifier,
     thumbAllowed: () -> Boolean = { true },
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbColor: Color = MaterialTheme.colorScheme.secondary,
     topContentPadding: Dp = Dp.Hairline,
     bottomContentPadding: Dp = Dp.Hairline,
     endContentPadding: Dp = Dp.Hairline,
@@ -184,7 +184,7 @@ fun VerticalFastScroller(
                     val alpha = remember { Animatable(0f) }
                     val isThumbVisible = alpha.value > 0f
                     LaunchedEffect(scrolled, alpha) {
-                        scrolled.sample(100).collectLatest {
+                        scrolled.sample(50).collectLatest {
                             if (thumbAllowed()) {
                                 alpha.snapTo(1f)
                                 alpha.animateTo(0f, animationSpec = FadeOutAnimationSpec)
@@ -204,6 +204,9 @@ fun VerticalFastScroller(
                                             orientation = Orientation.Vertical,
                                             state =
                                                 rememberDraggableState { delta ->
+                                                    if (delta > 0f && !listState.canScrollForward) {
+                                                        return@rememberDraggableState
+                                                    }
                                                     val newOffsetY = thumbOffsetY + delta
                                                     thumbOffsetY =
                                                         newOffsetY.coerceIn(
@@ -280,7 +283,7 @@ fun VerticalGridFastScroller(
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
     thumbAllowed: () -> Boolean = { true },
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbColor: Color = MaterialTheme.colorScheme.secondary,
     topContentPadding: Dp = Dp.Hairline,
     bottomContentPadding: Dp = Dp.Hairline,
     endContentPadding: Dp = Dp.Hairline,
@@ -376,7 +379,7 @@ fun VerticalGridFastScroller(
                     val alpha = remember { Animatable(0f) }
                     val isThumbVisible = alpha.value > 0f
                     LaunchedEffect(scrolled, alpha) {
-                        scrolled.sample(100).collectLatest {
+                        scrolled.sample(50).collectLatest {
                             if (thumbAllowed()) {
                                 alpha.snapTo(1f)
                                 alpha.animateTo(0f, animationSpec = FadeOutAnimationSpec)
@@ -396,6 +399,9 @@ fun VerticalGridFastScroller(
                                             orientation = Orientation.Vertical,
                                             state =
                                                 rememberDraggableState { delta ->
+                                                    if (delta > 0f && !state.canScrollForward) {
+                                                        return@rememberDraggableState
+                                                    }
                                                     val newOffsetY = thumbOffsetY + delta
                                                     thumbOffsetY =
                                                         newOffsetY.coerceIn(
@@ -469,7 +475,7 @@ private val ThumbLength = 48.dp
 private val ThumbThickness = 12.dp
 private val ThumbShape = RoundedCornerShape(ThumbThickness / 2)
 private val FadeOutAnimationSpec =
-    tween<Float>(durationMillis = ViewConfiguration.getScrollBarFadeDuration(), delayMillis = 2000)
+    tween<Float>(durationMillis = ViewConfiguration.getScrollBarFadeDuration(), delayMillis = 500)
 private val ImmediateFadeOutAnimationSpec =
     tween<Float>(durationMillis = ViewConfiguration.getScrollBarFadeDuration())
 
