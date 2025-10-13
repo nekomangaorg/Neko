@@ -76,7 +76,7 @@ data class DexComments(override val id: String) : ExternalLink() {
     override fun getUrl() = "${MdConstants.forumUrl}${id}"
 }
 
-data class DexApi(override val id: String) : ExternalLink() {
+data class DexApi(override val id: SCtring) : ExternalLink() {
     override val name = "API"
     override val logo = R.drawable.ic_tracker_mangadex_logo
     override val logoColor: Long = 0xFF2B3035

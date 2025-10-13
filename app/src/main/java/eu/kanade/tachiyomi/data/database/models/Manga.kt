@@ -208,6 +208,10 @@ interface Manga : SManga {
             ?.filter { it != originalTitle } ?: emptyList()
     }
 
+    fun altTitlesToString(altTitles : List<String>): String {
+        altTitles.joinToString(ALT_TITLES_SEPARATOR)
+    }
+
     fun getExternalLinks(): List<ExternalLink> {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaUUID(url)))

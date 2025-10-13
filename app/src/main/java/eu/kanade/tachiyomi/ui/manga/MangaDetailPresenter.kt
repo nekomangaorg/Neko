@@ -48,6 +48,7 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.getDescription
 import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -133,22 +134,22 @@ class MangaDetailPresenter(
 
             }.distinctUntilChanged().collectLatest {allInfo ->
                 _mangaDetailScreenState.update { it.copy(
-                    alternativeTitles = allInfo.mangaItem.getAltTitles().toPersistentList(),
+                    alternativeTitles = allInfo.mangaItem.altTitles,
                     artist = allInfo.mangaItem.artist,
                     author = allInfo.mangaItem.author,
-                    currentDescription = if(allInfo.mangaItem.initialized),
-                    currentTitle = m.title,
-                    externalLinks = m.getExternalLinks().toPersistentList(),
+                    currentDescription = allInfo.mangaItem.getDescription(),
+                    currentTitle = allInfo.mangaItem.title,
+                    externalLinks = allInfo.mangaItem.externalLinks,
                     genres = (m.getGenres(true) ?: emptyList()).toPersistentList(),
-                    initialized = m.initialized,
-                    inLibrary = m.favorite,
+                    initialized = allInfo.mangaItem.initialized,
+                    inLibrary = allInfo.mangaItem.favorite,
                     isMerged = isMerged(m),
                     isPornographic =
                         m.getContentRating()
                             ?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
-                    langFlag = m.lang_flag,
-                    missingChapters = m.missing_chapters,
-                    originalTitle = m.originalTitle,
+                    langFlag = allInfo.mangaItem.langFlag,
+                    missingChapters = allInfo.mangaItem.missingChapters,
+                    originalTitle = allInfo.mangaItem.ogTitle,
                     stats =
                         Stats(
                             rating = m.rating,
@@ -156,9 +157,9 @@ class MangaDetailPresenter(
                             threadId = m.thread_id,
                             repliesCount = m.replies_count,
                         ),
-                    status = m.status,
-                    lastVolume = m.last_volume_number,
-                    lastChapter = m.last_chapter_number,
+                    status = allInfo.mangaItem.status,
+                    lastVolume = allInfo.mangaItem.lastVolumeNumber,
+                    lastChapter = allInfo.mangaItem.lastChapterNumber,
                     isRefreshing = allInfo.isRefreshing,
                     allChapters = allInfo.allChapterInfo.allChapters,
                     allSources = allInfo.allChapterInfo.allSources,

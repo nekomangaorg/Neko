@@ -2,8 +2,11 @@ package org.nekomanga.domain.manga
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.manga.MangaUtil
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 
@@ -32,7 +35,7 @@ data class MangaItem(
     val myAnimeListId: String,
     val mangaUpdatesId: String,
     val animePlanetId: String,
-    val other_urls: String,
+    val externalLinks: PersistentList<ExternalLink>,
     val filteredScanlators: PersistentList<String>,
     val filteredLanguage: PersistentList<String>,
     val missingChapters: String,
@@ -74,15 +77,15 @@ fun MangaItem.toManga(): Manga {
     manga.my_anime_list_id = this.myAnimeListId.takeIf { it.isNotBlank() }
     manga.manga_updates_id = this.mangaUpdatesId.takeIf { it.isNotBlank() }
     manga.anime_planet_id = this.animePlanetId.takeIf { it.isNotBlank() }
-    manga.other_urls = this.other_urls.takeIf { it.isNotBlank() }
-    manga.filtered_scanlators = this.filteredScanlators.takeIf { it.isNotBlank() }
-    manga.filtered_language = this.filteredLanguage.takeIf { it.isNotBlank() }
+    manga.other_urls = MangaUtil.externalLinksToOtherString(this.externalLinks)
+    manga.filtered_scanlators = ChapterUtil.getScanlatorString(this.filteredScanlators.toSet())
+    manga.filtered_language = ChapterUtil.getLanguageString(this.filteredLanguage.toSet())
     manga.missing_chapters = this.missingChapters.takeIf { it.isNotBlank() }
     manga.rating = this.rating.takeIf { it.isNotBlank() }
     manga.users = this.users.takeIf { it.isNotBlank() }
     manga.last_volume_number = this.lastVolumeNumber
     manga.last_chapter_number = this.lastChapterNumber
-manga.alt_titles = manga.getAltTitles().toPersistentList()
+    manga.alt_titles = MangaUtil.altTitlesToString(this.altTitles)
     manga.user_cover = this.userCover.takeIf { it.isNotBlank() }
     manga.user_title = this.userTitle.takeIf { it.isNotBlank() }
     manga.replies_count = this.repliesCount.takeIf { it.isNotBlank() }
@@ -116,9 +119,9 @@ fun Manga.toMangaItem(): MangaItem {
         myAnimeListId = this.my_anime_list_id ?: "",
         mangaUpdatesId = this.manga_updates_id ?: "",
         animePlanetId = this.anime_planet_id ?: "",
-        otherUrls = this.other_urls ?: "",
-        filteredScanlators = this.filtered_scanlators ?: "",
-        filteredLanguage = this.filtered_language ?: "",
+        externalLinks = this.getExternalLinks().toPersistentList(),
+        filteredScanlators = ChapterUtil.getScanlators(this.filtered_scanlators).toPersistentList(),
+        filteredLanguage = ChapterUtil.getLanguages(this.filtered_language).toPersistentList(),
         missingChapters = this.missing_chapters ?: "",
         rating = this.rating ?: "",
         users = this.users ?: "",
@@ -137,10 +140,11 @@ fun MangaItem.uuid(): String {
     return MdUtil.getMangaUUID(this.url)
 }
 
-private fun MangaItem.getDescription(): String {
+fun MangaItem.getDescription(): String {
     return when {
         description.isNotEmpty() -> description
         !initialized -> ""
         else -> "No description"
     }
 }
+
