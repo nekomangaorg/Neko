@@ -24,7 +24,20 @@ subprojects {
         withType<KotlinCompile> {
             compilerOptions {
                 jvmTarget.set(JvmTarget.JVM_17)
-                freeCompilerArgs.add("-Xcontext-parameters")
+                freeCompilerArgs.addAll(
+                    listOf(
+                        "-Xcontext-parameters",
+                        "-opt-in=kotlin.Experimental",
+                        "-opt-in=kotlin.RequiresOptIn",
+                        "-opt-in=kotlin.time.ExperimentalTime",
+                        "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
+                        "-opt-in=kotlin.ExperimentalStdlibApi",
+                        "-opt-in=kotlinx.coroutines.FlowPreview",
+                        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                        "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
+                        "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                    )
+                )
             }
 
             this.dependsOn("ktfmtFormat")
