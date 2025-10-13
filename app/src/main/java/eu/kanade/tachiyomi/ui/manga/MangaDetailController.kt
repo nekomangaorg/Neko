@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.StringRes
@@ -15,7 +14,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -30,20 +28,13 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
-import eu.kanade.tachiyomi.util.getSlug
-import eu.kanade.tachiyomi.util.isAvailable
-import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.system.withUIContext
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -78,23 +69,27 @@ class MangaDetailController(private val mangaId: Long) :
             mangaDetailScreenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
-            onRefresh = presenter::onRefresh,
-            onSearch = presenter::onSearch,
+            onRefresh = { /*presenter::onRefresh */ },
+            onSearch = { /*presenter::onSearch*/ },
             categoryActions =
                 CategoryActions(
                     set = { enabledCategories ->
-                        presenter.updateMangaCategories(enabledCategories)
+                        /*presenter.updateMangaCategories(enabledCategories)*/
                     },
-                    addNew = { newCategory -> presenter.addNewCategory(newCategory) },
+                    addNew = { /*newCategory -> presenter.addNewCategory(newCategory)*/ },
                 ),
             informationActions =
                 InformationActions(
                     titleLongClick = {
-                        presenter.copiedToClipboard(it)
+                        /*
+                                                presenter.copiedToClipboard(it)
+                        */
                         copyToClipboard(context, it, R.string.title)
                     },
                     creatorCopy = {
-                        presenter.copiedToClipboard(it)
+                        /*
+                                                presenter.copiedToClipboard(it)
+                        */
                         copyToClipboard(context, it, R.string.creator)
                     },
                     creatorSearch = this::creatorClicked,
@@ -103,62 +98,73 @@ class MangaDetailController(private val mangaId: Long) :
                 DescriptionActions(
                     genreSearch = this::genreSearch,
                     genreSearchLibrary = this::genreSearchLibrary,
-                    altTitleClick = presenter::setAltTitle,
-                    altTitleResetClick = { presenter.setAltTitle(null) },
+                    altTitleClick = { /*presenter::setAltTitle*/ },
+                    altTitleResetClick = { /*presenter.setAltTitle(null)*/ },
                 ),
             generatePalette = this::setPalette,
-            toggleFavorite = presenter::toggleFavorite,
+            toggleFavorite = { /*presenter::toggleFavorite*/ },
             dateFormat = preferences.dateFormat(),
             trackActions =
                 TrackActions(
                     statusChange = { statusIndex, trackAndService ->
-                        presenter.updateTrackStatus(statusIndex, trackAndService)
+                        /*
+                                                presenter.updateTrackStatus(statusIndex, trackAndService)
+                        */
                     },
                     scoreChange = { statusIndex, trackAndService ->
-                        presenter.updateTrackScore(statusIndex, trackAndService)
+                        /*
+                                                presenter.updateTrackScore(statusIndex, trackAndService)
+                        */
                     },
                     chapterChange = { newChapterNumber, trackAndService ->
-                        presenter.updateTrackChapter(newChapterNumber, trackAndService)
+                        /*
+                                                presenter.updateTrackChapter(newChapterNumber, trackAndService)
+                        */
                     },
-                    search = { title, service -> presenter.searchTracker(title, service) },
+                    search = { title, service -> /*presenter.searchTracker(title, service)*/ },
                     searchItemClick = { trackAndService ->
-                        presenter.registerTracking(trackAndService)
+                        /*
+                                                presenter.registerTracking(trackAndService)
+                        */
                     },
                     remove = { alsoRemoveFromTracker, service ->
-                        presenter.removeTracking(alsoRemoveFromTracker, service)
+                        /*
+                                                presenter.removeTracking(alsoRemoveFromTracker, service)
+                        */
                     },
-                    dateChange = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
+                    dateChange = { trackDateChange -> /*presenter.updateTrackDate(trackDateChange)*/
+                    },
                 ),
             mergeActions =
                 MergeActions(
-                    remove = presenter::removeMergedManga,
-                    search = presenter::searchMergedManga,
-                    add = presenter::addMergedManga,
+                    remove = { /*presenter::removeMergedManga*/ },
+                    search = { _, _ -> /*presenter::searchMergedManga*/ },
+                    add = { /*presenter::addMergedManga*/ },
                 ),
             similarClick = {
-                router.pushController(
+                /* router.pushController(
                     SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()
-                )
+                )*/
             },
             shareClick = { shareManga(context) },
             coverActions =
                 CoverActions(
                     share = this::shareCover,
-                    set = presenter::setCover,
-                    save = presenter::saveCover,
-                    reset = presenter::resetCover,
+                    set = { /*presenter::setCover*/ },
+                    save = { /*presenter::saveCover*/ },
+                    reset = { /*presenter::resetCover*/ },
                 ),
             chapterFilterActions =
                 ChapterFilterActions(
-                    changeSort = presenter::changeSortOption,
-                    changeFilter = presenter::changeFilterOption,
-                    changeScanlator = presenter::changeScanlatorOption,
-                    changeLanguage = presenter::changeLanguageOption,
-                    setAsGlobal = presenter::setGlobalOption,
+                    changeSort = { /*presenter::changeSortOption*/ },
+                    changeFilter = { /*presenter::changeFilterOption*/ },
+                    changeScanlator = { /*presenter::changeScanlatorOption*/ },
+                    changeLanguage = { /*presenter::changeLanguageOption*/ },
+                    setAsGlobal = { /*presenter::setGlobalOption*/ },
                 ),
             chapterActions =
                 ChapterActions(
-                    mark = presenter::markChapters,
+                    mark = { _, _ -> /*presenter::markChapters*/ },
                     download = { chapterItems, downloadAction ->
                         if (
                             chapterItems.size == 1 &&
@@ -170,11 +176,13 @@ class MangaDetailController(private val mangaId: Long) :
                                 "${chapterItems[0].chapter.scanlator} not supported, try WebView"
                             )
                         } else {
-                            presenter.downloadChapters(chapterItems, downloadAction)
+                            /*
+                                                        presenter.downloadChapters(chapterItems, downloadAction)
+                            */
                         }
                     },
-                    delete = presenter::deleteChapters,
-                    clearRemoved = presenter::clearRemovedChapters,
+                    delete = { /*presenter::deleteChapters*/ },
+                    clearRemoved = { /*presenter::clearRemovedChapters*/ },
                     openNext = {
                         presenter.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
                             ?.let { openChapter(context, it.toDbChapter()) }
@@ -182,14 +190,14 @@ class MangaDetailController(private val mangaId: Long) :
                     open = { chapterItem ->
                         openChapter(context, chapterItem.chapter.toDbChapter())
                     },
-                    blockScanlator = presenter::blockScanlator,
-                    openComment = { chapterId -> presenter.openComment(context, chapterId) },
+                    blockScanlator = { _, _ -> /*presenter::blockScanlator*/ },
+                    openComment = { chapterId -> /* presenter.openComment(context, chapterId)*/ },
                     openInBrowser = { chapterItem ->
                         if (chapterItem.chapter.isUnavailable) {
                             context.toast("Chapter is not available")
                         } else {
-                            val url = presenter.getChapterUrl(chapterItem.chapter)
-                            context.openInBrowser(url)
+                            /*val url = presenter.getChapterUrl(chapterItem.chapter)
+                            context.openInBrowser(url)*/
                         }
                     },
                 ),
@@ -203,7 +211,7 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        if (
+        /*if (
             chapter.scanlator != null &&
                 MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
@@ -212,7 +220,7 @@ class MangaDetailController(private val mangaId: Long) :
             context.toast("Chapter is not available")
         } else {
             startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
-        }
+        }*/
     }
 
     /** Generate palette from the drawable */
@@ -222,7 +230,9 @@ class MangaDetailController(private val mangaId: Long) :
             it ?: return@generate
             viewScope.launchUI {
                 val vibrantColor = it.getBestColor() ?: return@launchUI
-                presenter.updateMangaColor(vibrantColor)
+                /*
+                                presenter.updateMangaColor(vibrantColor)
+                */
             }
         }
     }
@@ -236,7 +246,7 @@ class MangaDetailController(private val mangaId: Long) :
     /** Share a cover with the given url */
     fun shareCover(context: Context, artwork: Artwork) {
         viewScope.launch {
-            val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+            /* val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
             val cover = presenter.shareMangaCover(dir, artwork)
             val sharableCover = cover?.getUriWithAuthority(context)
             withUIContext {
@@ -254,7 +264,9 @@ class MangaDetailController(private val mangaId: Long) :
                 } catch (e: Exception) {
                     context.toast(e.message)
                 }
-            }
+            }*/
+
+            */
         }
     }
 
@@ -263,14 +275,14 @@ class MangaDetailController(private val mangaId: Long) :
         viewScope.launch {
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
 
-            val cover =
+            /* val cover =
                 presenter.shareMangaCover(
                     dir,
                     presenter.mangaDetailScreenState.value.currentArtwork,
                 )
-            val sharableCover = cover?.getUriWithAuthority(context)
+            val sharableCover = cover?.getUriWithAuthority(context)*/
 
-            withUIContext {
+            /*withUIContext {
                 try {
                     val manga = presenter.manga.value!!
                     var url =
@@ -280,7 +292,7 @@ class MangaDetailController(private val mangaId: Long) :
                         Intent(Intent.ACTION_SEND).apply {
                             type = "text/*"
                             putExtra(Intent.EXTRA_TEXT, url)
-                            putExtra(Intent.EXTRA_TITLE, manga.title)
+                          putExtra(Intent.EXTRA_TITLE, manga.title)
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                             if (cover != null) {
                                 clipData = ClipData.newRawUri(null, sharableCover)
@@ -291,6 +303,8 @@ class MangaDetailController(private val mangaId: Long) :
                     context.toast(e.message)
                 }
             }
+            */
+             */
         }
     }
 

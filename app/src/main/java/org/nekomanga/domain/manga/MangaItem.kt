@@ -18,7 +18,8 @@ data class MangaItem(
     val artist: String,
     val author: String,
     val description: String,
-    val genre: String,
+    val contentRating: String,
+    val genre: PersistentList<String>,
     val status: Int,
     val coverUrl: String,
     val favorite: Boolean,
@@ -60,7 +61,7 @@ fun MangaItem.toManga(): Manga {
     manga.artist = this.artist.takeIf { it.isNotBlank() }
     manga.author = this.author.takeIf { it.isNotBlank() }
     manga.description = this.description.takeIf { it.isNotBlank() }
-    manga.genre = this.genre.takeIf { it.isNotBlank() }
+    manga.genre = MangaUtil.genresToString(genre, this.contentRating)
     manga.status = this.status
     manga.thumbnail_url = this.coverUrl.takeIf { it.isNotBlank() }
     manga.favorite = this.favorite
@@ -102,7 +103,8 @@ fun Manga.toMangaItem(): MangaItem {
         artist = this.artist ?: "",
         author = this.author ?: "",
         description = this.description ?: "",
-        genre = this.genre ?: "",
+        contentRating = MangaUtil.getContentRating(MangaUtil.getGenres(this.genre)),
+        genre = MangaUtil.getGenres(this.genre, true).toPersistentList(),
         status = this.status,
         coverUrl = this.thumbnail_url ?: "",
         favorite = this.favorite,
@@ -147,4 +149,3 @@ fun MangaItem.getDescription(): String {
         else -> "No description"
     }
 }
-

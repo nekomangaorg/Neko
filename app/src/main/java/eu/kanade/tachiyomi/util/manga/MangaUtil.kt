@@ -19,24 +19,24 @@ class MangaUtil {
                 ?.filter { it != originalTitle } ?: emptyList()
         }
 
-
-        fun altTitlesToString(altTitles : List<String>): String {
+        fun altTitlesToString(altTitles: List<String>): String {
             return altTitles.joinToString(ALT_TITLES_SEPARATOR)
         }
 
-
-        fun externalLinksToOtherString(externalLinks : List<ExternalLink>): String{
-            return externalLinks.mapNotNull { externalLink ->
-                when(externalLink){
-                    is Raw -> "raw~~${externalLink.id}"
-                    is Engtl ->"engtl~~${externalLink.id}"
-                    is BookWalker -> "bw~~${externalLink.id}"
-                    is CdJapan -> "cdj~~${externalLink.id}"
-                    is EBookJapan -> "ebj~~${externalLink.id}"
-                    is Amazon -> "amz~~${externalLink.id}"
-                    else -> null
+        fun externalLinksToOtherString(externalLinks: List<ExternalLink>): String {
+            return externalLinks
+                .mapNotNull { externalLink ->
+                    when (externalLink) {
+                        is Raw -> "raw~~${externalLink.id}"
+                        is Engtl -> "engtl~~${externalLink.id}"
+                        is BookWalker -> "bw~~${externalLink.id}"
+                        is CdJapan -> "cdj~~${externalLink.id}"
+                        is EBookJapan -> "ebj~~${externalLink.id}"
+                        is Amazon -> "amz~~${externalLink.id}"
+                        else -> null
+                    }
                 }
-            }.joinToString("||")
+                .joinToString("||")
         }
 
         fun getGenres(genres: String?, filterOutSafe: Boolean = false): List<String> {
@@ -52,18 +52,18 @@ class MangaUtil {
                 } ?: emptyList()
         }
 
-        fun genresToString(genres : List<String>, contentRating: String){
+        fun genresToString(genres: List<String>, contentRating: String?): String {
             val set = genres.toMutableSet()
-            set.add(contentRating)
-            set.map { if() }
-
+            if (!contentRating.isNullOrBlank()) {
+                set.add("Content rating: $contentRating")
+            }
+            return set.joinToString(",")
         }
 
-        fun getContentRating(genres: List<String>): String? {
+        fun getContentRating(genres: List<String>): String {
             return genres
                 .firstOrNull { it.startsWith("Content rating: ") }
-                ?.substringAfter("Content rating: ")
+                ?.substringAfter("Content rating: ") ?: ""
         }
-
     }
 }

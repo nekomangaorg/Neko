@@ -98,11 +98,13 @@ object MangaConstants {
 
     data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption>)
+    data class ScanlatorFilter(
+        val scanlators: PersistentList<ScanlatorOption> = persistentListOf()
+    )
 
     data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
-    data class LanguageFilter(val languages: PersistentList<LanguageOption>)
+    data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
 
     data class LanguageOption(val name: String, val disabled: Boolean = false)
 
