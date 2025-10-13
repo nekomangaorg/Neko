@@ -813,27 +813,23 @@ class LibraryPresenter(
         categoryList: List<CategoryItem>,
         collapsedCategorySet: Set<Int>,
     ): List<LibraryCategoryItem> {
-        if (libraryMangaList.isEmpty()) {
-            return emptyList()
-        }
-
         val mangaMap = libraryMangaList.groupBy { it.category }
 
-        return categoryList.mapNotNull { categoryItem ->
-            val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
+        val libraryItems =
+            categoryList.map { categoryItem ->
+                val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
 
-            if (categoryItem.isSystemCategory && unsortedMangaList.isEmpty()) {
-                return@mapNotNull null
+                val updatedCategoryItem =
+                    categoryItem.copy(isHidden = categoryItem.id in collapsedCategorySet)
+
+                LibraryCategoryItem(
+                    categoryItem = updatedCategoryItem,
+                    libraryItems = unsortedMangaList.toPersistentList(),
+                )
             }
 
-            val updatedCategoryItem =
-                categoryItem.copy(isHidden = categoryItem.id in collapsedCategorySet)
-
-            LibraryCategoryItem(
-                categoryItem = updatedCategoryItem,
-                libraryItems = unsortedMangaList.toPersistentList(),
-            )
-        }
+        val (empty, withManga) = libraryItems.partition { it.libraryItems.isEmpty() }
+        return withManga + empty
     }
 
     fun observeLibraryUpdates() {

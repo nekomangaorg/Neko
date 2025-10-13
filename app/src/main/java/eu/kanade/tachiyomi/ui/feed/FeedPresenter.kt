@@ -168,8 +168,7 @@ class FeedPresenter(
         lastHistoryFeedMangaList = _historyScreenPagingState.value.historyFeedMangaList
         lastSummaryUpdatesFeedMangaList = _summaryScreenPagingState.value.updatesFeedMangaList
         lastContinueReadingList = _summaryScreenPagingState.value.continueReadingList
-        lastSummaryNewlyAddedFeedMangaList =
-            _summaryScreenPagingState.value.newlyAddedFeedMangaList
+        lastSummaryNewlyAddedFeedMangaList = _summaryScreenPagingState.value.newlyAddedFeedMangaList
     }
 
     override fun onPause() {
@@ -803,19 +802,19 @@ class FeedPresenter(
         update: (PersistentList<FeedManga>) -> Unit,
     ) {
         if (feedScreenType == FeedScreenType.Updates) {
-                feedRepository.getUpdatesPage(
-                    searchQuery = _updatesScreenPagingState.value.searchQuery,
-                    offset = 0,
-                    limit = 100,
-                    uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
-                )
-            } else {
-                feedRepository.getHistoryPage(
-                    searchQuery = _historyScreenPagingState.value.searchQuery,
-                    offset = 0,
-                    group = _historyScreenPagingState.value.historyGrouping,
-                )
-            }
+            feedRepository.getUpdatesPage(
+                searchQuery = _updatesScreenPagingState.value.searchQuery,
+                offset = 0,
+                limit = 100,
+                uploadsFetchSort = _updatesScreenPagingState.value.updatesSortedByFetch,
+            )
+        } else {
+            feedRepository.getHistoryPage(
+                searchQuery = _historyScreenPagingState.value.searchQuery,
+                offset = 0,
+                group = _historyScreenPagingState.value.historyGrouping,
+            )
+        }
             .onSuccess { results -> update(results.second.toPersistentList()) }
     }
 
