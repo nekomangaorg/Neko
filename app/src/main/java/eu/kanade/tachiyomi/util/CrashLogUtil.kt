@@ -3,21 +3,21 @@ package eu.kanade.tachiyomi.util
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Process
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import eu.kanade.tachiyomi.util.system.withUIContext
-import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import okio.buffer
 import okio.sink
+import okio.source
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.domain.storage.StorageManager
@@ -36,10 +36,7 @@ class CrashLogUtil(private val context: Context) {
 
     suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
         try {
-            val storageManager: StorageManager = Injekt.get<StorageManager>()
-
-            val file = context.createFileInCacheDir("neko_crash_logs.txt")
-            Runtime.getRuntime().exec("logcat *:D -d -f ${file.absolutePath}").waitFor()
+            val storageManager: StorageManager = Injekt.get()
 
             val uniFile =
                 storageManager
@@ -48,25 +45,24 @@ class CrashLogUtil(private val context: Context) {
                         "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt"
                     ) ?: return@withNonCancellableContext
 
-            uniFile
-                .openOutputStream()
-                .also {
-                    // Force overwrite old file
-                    (it as? FileOutputStream)?.channel?.truncate(0)
+            uniFile.openOutputStream().sink().buffer().use { bufferedSink ->
+                // 1. Write header info as before
+                bufferedSink.writeUtf8(getDebugInfo())
+                if (exception != null) {
+                    bufferedSink.writeUtf8(getExceptionBlock(exception))
+                    bufferedSink.writeUtf8("\n")
                 }
-                .sink()
-                .buffer()
-                .use { bufferedSink ->
-                    bufferedSink.writeUtf8(getDebugInfo())
-                    if (exception != null) {
-                        bufferedSink.writeUtf8(getExceptionBlock(exception))
-                        bufferedSink.writeUtf8("\n")
-                    }
-                    file.readLines().forEach { line ->
-                        bufferedSink.writeUtf8(line)
-                        bufferedSink.writeUtf8("\n")
-                    }
-                }
+
+                // 2. Prepare the logcat command to output to stdout
+                val pid = Process.myPid()
+                val command = "logcat --pid=$pid *:D -d"
+                val process = Runtime.getRuntime().exec(command)
+
+                // 3. Stream the logcat output directly into the sink
+                process.inputStream.source().use { source -> bufferedSink.writeAll(source) }
+
+                process.waitFor()
+            }
 
             showNotification(uniFile.uri)
         } catch (e: IOException) {
