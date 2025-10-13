@@ -7,21 +7,23 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,13 +40,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
-import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -52,15 +53,12 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.FooterFilterChip
-import org.nekomanga.presentation.components.Loading
+import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
-import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
@@ -75,7 +73,7 @@ import org.nekomanga.presentation.theme.Size
 fun BrowseScreen(
     browseScreenState: State<BrowseScreenState>,
     switchDisplayClick: () -> Unit,
-    switchLibraryVisibilityClick: () -> Unit,
+    libraryEntryVisibilityClick: (Int) -> Unit,
     windowSizeClass: WindowSizeClass,
     legacySideNav: Boolean,
     onBackPress: () -> Unit,
@@ -110,8 +108,6 @@ fun BrowseScreen(
     val browseScreenType = browseScreenState.value.screenType
 
     // var sortType by remember { mutableStateOf(Sort.Entries) }
-
-    var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
@@ -167,25 +163,28 @@ fun BrowseScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                            when (
-                                browseScreenType != BrowseScreenType.Homepage &&
-                                    browseScreenType != BrowseScreenType.Other
-                            ) {
-                                true ->
-                                    listOf(
-                                        listGridAppBarAction(
-                                            isList = browseScreenState.value.isList,
-                                            onClick = switchDisplayClick,
-                                        )
-                                    )
-                                false -> emptyList()
-                            } +
-                                listOf(
-                                    showLibraryEntriesAction(
-                                        showEntries = browseScreenState.value.showLibraryEntries,
-                                        onClick = switchLibraryVisibilityClick,
-                                    )
-                                ) +
+                            listOf(
+                                AppBar.Action(
+                                    title = UiText.StringResource(R.string.settings),
+                                    icon = Icons.Outlined.Tune,
+                                    onClick = {
+                                        scope.launch {
+                                            openSheet(
+                                                BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
+                                                    showIsList =
+                                                        browseScreenType !=
+                                                            BrowseScreenType.Homepage &&
+                                                            browseScreenType !=
+                                                                BrowseScreenType.Other,
+                                                    switchDisplayClick = switchDisplayClick,
+                                                    libraryEntryVisibilityClick =
+                                                        libraryEntryVisibilityClick,
+                                                )
+                                            )
+                                        }
+                                    },
+                                )
+                            ) +
                                 if (browseScreenState.value.isDeepLink) {
                                     emptyList()
                                 } else {
@@ -227,14 +226,11 @@ fun BrowseScreen(
                             !displayManga.inLibrary && browseScreenState.value.promptForCategories
                         ) {
                             scope.launch {
-                                longClickedMangaId = displayManga.mangaId
                                 openSheet(
                                     BrowseBottomSheetScreen.CategoriesSheet(
                                         setCategories = { selectedCategories ->
                                             scope.launch { sheetState.hide() }
-                                            longClickedMangaId?.let {
-                                                toggleFavorite(it, selectedCategories)
-                                            }
+                                            toggleFavorite(displayManga.mangaId, selectedCategories)
                                         }
                                     )
                                 )
@@ -250,12 +246,7 @@ fun BrowseScreen(
                                 .fillMaxSize()
                     ) {
                         if (browseScreenState.value.initialLoading) {
-                            Loading(
-                                Modifier.zIndex(1f)
-                                    .padding(Size.small)
-                                    .padding(recyclerContentPadding)
-                                    .align(Alignment.TopCenter)
-                            )
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                         } else if (browseScreenState.value.error != null) {
                             EmptyScreen(
                                 message = browseScreenState.value.error!!,
@@ -277,6 +268,8 @@ fun BrowseScreen(
                                                 browseScreenState.value.homePageManga,
                                             shouldOutlineCover =
                                                 browseScreenState.value.outlineCovers,
+                                            useVividColorHeaders =
+                                                browseScreenState.value.useVividColorHeaders,
                                             titleClick = homeScreenTitleClick,
                                             randomClick = randomClick,
                                             onClick = { id -> openManga(id) },
@@ -332,24 +325,57 @@ fun BrowseScreen(
 
                         // hide these on initial load
                         if (!browseScreenState.value.hideFooterButton) {
-                            ScreenTypeFooter(
-                                screenType = browseScreenType,
-                                modifier = Modifier.align(Alignment.BottomStart),
-                                isLoggedIn = browseScreenState.value.isLoggedIn,
-                                screenTypeClick = { newScreenType: BrowseScreenType ->
+                            val items =
+                                remember(browseScreenState.value.isLoggedIn) {
+                                    listOf(BrowseScreenType.Homepage) +
+                                        if (browseScreenState.value.isLoggedIn) {
+                                            listOf(BrowseScreenType.Follows)
+                                        } else {
+                                            emptyList()
+                                        } +
+                                        listOf(BrowseScreenType.Filter)
+                                }
+
+                            val selectedItem =
+                                when (browseScreenType) {
+                                    BrowseScreenType.Homepage -> BrowseScreenType.Homepage
+                                    BrowseScreenType.Follows -> BrowseScreenType.Follows
+                                    else -> BrowseScreenType.Filter
+                                }
+
+                            ButtonGroup(
+                                modifier =
+                                    Modifier.align(Alignment.BottomCenter)
+                                        .padding(horizontal = Size.tiny),
+                                items = items,
+                                selectedItem = selectedItem,
+                                onItemClick = { item ->
                                     scope.launch { sheetState.hide() }
-                                    val sameScreen = browseScreenType == newScreenType
-                                    val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+                                    val sameScreen = browseScreenType == item
+                                    val newIsFilterScreen = item == BrowseScreenType.Filter
 
                                     if (sameScreen && !newIsFilterScreen) {
                                         // do nothing
                                     } else if (newIsFilterScreen) {
                                         openSheet(BrowseBottomSheetScreen.FilterSheet())
                                     } else {
-                                        changeScreenType(newScreenType)
+                                        changeScreenType(item)
                                     }
                                 },
-                            )
+                            ) { item ->
+                                val name =
+                                    when (item) {
+                                        BrowseScreenType.Homepage ->
+                                            stringResource(id = R.string.home_page)
+                                        BrowseScreenType.Follows -> stringResource(R.string.follows)
+                                        else -> stringResource(R.string.search)
+                                    }
+                                Text(
+                                    text = name,
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                         }
                     }
                 },
@@ -362,46 +388,6 @@ fun BrowseScreen(
                     Modifier.fillMaxSize()
                         .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
             ) {}
-        }
-    }
-}
-
-@Composable
-private fun ScreenTypeFooter(
-    screenType: BrowseScreenType,
-    modifier: Modifier = Modifier,
-    isLoggedIn: Boolean,
-    screenTypeClick: (BrowseScreenType) -> Unit,
-) {
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        item { Gap(Size.tiny) }
-        item {
-            FooterFilterChip(
-                selected = screenType == BrowseScreenType.Homepage,
-                onClick = { screenTypeClick(BrowseScreenType.Homepage) },
-                name = stringResource(id = R.string.home_page),
-            )
-        }
-        if (isLoggedIn) {
-            item {
-                FooterFilterChip(
-                    selected = screenType == BrowseScreenType.Follows,
-                    onClick = { screenTypeClick(BrowseScreenType.Follows) },
-                    name = stringResource(R.string.follows),
-                )
-            }
-        }
-        item {
-            FooterFilterChip(
-                selected =
-                    screenType == BrowseScreenType.Filter || screenType == BrowseScreenType.Other,
-                onClick = { screenTypeClick(BrowseScreenType.Filter) },
-                name = stringResource(R.string.search),
-            )
         }
     }
 }

@@ -10,10 +10,11 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
+import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
@@ -210,13 +211,13 @@ fun SManga.getSlug(): String {
 }
 
 /** resync homepage manga with db manga */
-fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga> {
+fun List<HomePageManga>.resync(db: DatabaseHelper): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.resync(db).toImmutableList()
+                displayManga = homePageManga.displayManga.resync(db).toPersistentList()
             )
         }
-        .toImmutableList()
+        .toPersistentList()
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
@@ -242,13 +243,13 @@ fun List<DisplayManga>.unique(): List<DisplayManga> {
 }
 
 /** Updates the visibility of HomePageManga display manga */
-fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
+fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList()
+                displayManga = homePageManga.displayManga.updateVisibility(prefs).toPersistentList()
             )
         }
-        .toImmutableList()
+        .toPersistentList()
 }
 
 /**
@@ -257,9 +258,11 @@ fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableLis
  */
 fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayManga> {
     return this.map { displayManga ->
-        when (prefs.browseDisplayMode().get() % 3) {
-            2 -> displayManga.copy(isVisible = displayManga.inLibrary)
-            1 -> displayManga.copy(isVisible = !displayManga.inLibrary)
+        when (prefs.browseDisplayMode().get()) {
+            LibraryEntryVisibility.SHOW_IN_LIBRARY ->
+                displayManga.copy(isVisible = displayManga.inLibrary)
+            LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY ->
+                displayManga.copy(isVisible = !displayManga.inLibrary)
             else -> displayManga.copy(isVisible = true)
         }
     }
@@ -268,8 +271,8 @@ fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayM
 /** Filters out library manga if enabled */
 fun List<DisplayManga>.filterVisibility(prefs: PreferencesHelper): List<DisplayManga> {
     return when (prefs.browseDisplayMode().get() % 3) {
-        2 -> this.filter { it.inLibrary }
-        1 -> this.filter { !it.inLibrary }
+        LibraryEntryVisibility.SHOW_IN_LIBRARY -> this.filter { it.inLibrary }
+        LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY -> this.filter { !it.inLibrary }
         else -> this
     }
 }

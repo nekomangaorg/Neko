@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -31,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.InLibraryBadge
@@ -43,8 +44,9 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseHomePage(
-    browseHomePageManga: ImmutableList<HomePageManga>,
+    browseHomePageManga: PersistentList<HomePageManga>,
     shouldOutlineCover: Boolean,
+    useVividColorHeaders: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
     titleClick: (DisplayScreenType) -> Unit,
@@ -53,6 +55,13 @@ fun BrowseHomePage(
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val screenHeight = LocalConfiguration.current.screenHeightDp
+
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     val coverSize =
         remember(screenWidth, screenHeight) { (maxOf(screenHeight, screenWidth) / 5).dp }
 
@@ -81,63 +90,64 @@ fun BrowseHomePage(
                     is DisplayScreenType.FeedUpdates ->
                         stringResource(homePageManga.displayScreenType.titleRes)
                 }
-            TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = headerText,
-                        style =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                    )
-                    Gap(Size.tiny)
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-            Gap(Size.tiny)
-            LazyRow(
-                modifier = Modifier.requiredHeight(coverSize + 60.dp),
-                horizontalArrangement = Arrangement.spacedBy(Size.small),
-            ) {
-                item { Gap(Size.small) }
-                val manga = homePageManga.displayManga.filter { it.isVisible }
-                items(items = manga, key = { displayManga -> displayManga.mangaId }) { displayManga
-                    ->
-                    Box {
-                        Box(
-                            modifier =
-                                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                                    .combinedClickable(
-                                        onClick = { onClick(displayManga.mangaId) },
-                                        onLongClick = { onLongClick(displayManga) },
-                                    )
-                        ) {
-                            Column(modifier = Modifier.width(coverSize)) {
-                                MangaCover.Square.invoke(
-                                    artwork = displayManga.currentArtwork,
-                                    shouldOutlineCover = shouldOutlineCover,
-                                    modifier = Modifier.requiredHeight(coverSize),
-                                )
-                                MangaGridTitle(title = displayManga.title)
-                                MangaGridSubtitle(subtitleText = displayManga.displayText)
-                            }
-                        }
+            val mangaList = homePageManga.displayManga.filter { it.isVisible }
 
-                        if (displayManga.inLibrary) {
-                            InLibraryBadge(shouldOutlineCover)
+            if (mangaList.isNotEmpty()) {
+                TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = headerText,
+                            color = headerColor,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Gap(Size.tiny)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                            modifier = Modifier.size(Size.large),
+                            tint = headerColor,
+                            contentDescription = null,
+                        )
+                    }
+                }
+                Gap(Size.tiny)
+                LazyRow(
+                    modifier = Modifier.wrapContentHeight(),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    contentPadding = PaddingValues(horizontal = Size.small),
+                ) {
+                    val manga = homePageManga.displayManga.filter { it.isVisible }
+                    items(items = manga, key = { displayManga -> displayManga.mangaId }) {
+                        displayManga ->
+                        Box {
+                            Box(
+                                modifier =
+                                    Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                                        .combinedClickable(
+                                            onClick = { onClick(displayManga.mangaId) },
+                                            onLongClick = { onLongClick(displayManga) },
+                                        )
+                            ) {
+                                Column(modifier = Modifier.width(coverSize)) {
+                                    MangaCover.Square(
+                                        artwork = displayManga.currentArtwork,
+                                        shouldOutlineCover = shouldOutlineCover,
+                                        modifier = Modifier.requiredHeight(coverSize),
+                                    )
+                                    MangaGridTitle(title = displayManga.title)
+                                    MangaGridSubtitle(subtitleText = displayManga.displayText)
+                                }
+                            }
+
+                            if (displayManga.inLibrary) {
+                                InLibraryBadge(shouldOutlineCover)
+                            }
                         }
                     }
                 }
-                item { Gap(Size.small) }
             }
         }
         item {
@@ -149,17 +159,15 @@ fun BrowseHomePage(
                 ) {
                     Text(
                         text = stringResource(id = R.string.random_manga),
-                        style =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     Gap(Size.tiny)
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Size.large),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }

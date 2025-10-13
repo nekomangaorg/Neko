@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nord_colorPrimary">#88C0D0</color>
+    <color name="nord_colorOnPrimary">#2E3440</color>
+    <color name="nord_colorPrimaryContainer">#88C0D0</color>
+    <color name="nord_colorOnPrimaryContainer">#2E3440</color>
+    <color name="nord_colorPrimaryInverse">#397E91</color>
+    <color name="nord_colorSecondary">#81A1C1</color>
+    <color name="nord_colorOnSecondary">#2E3440</color>
+    <color name="nord_colorSecondaryContainer">#506275</color>
+    <color name="nord_colorOnSecondaryContainer">#88C0D0</color>
+    <color name="nord_colorTertiary">#5E81AC</color>
+    <color name="nord_colorOnTertiary">#000000</color>
+    <color name="nord_colorTertiaryContainer">#5E81AC</color>
+    <color name="nord_colorOnTertiaryContainer">#000000</color>
+    <color name="nord_colorBackground">#2E3440</color>
+    <color name="nord_colorOnBackground">#ECEFF4</color>
+    <color name="nord_colorSurface">#2E3440</color>
+    <color name="nord_colorOnSurface">#ECEFF4</color>
+    <color name="nord_colorSurfaceVariant">#414C5C</color>
+    <color name="nord_colorOnSurfaceVariant">#ECEFF4</color>
+    <color name="nord_colorSurfaceContainer">#FF414C5C</color>
+    <color name="nord_colorOutline">#6d717b</color>
+    <color name="nord_colorError">#BF616A</color>
+    <color name="nord_colorOnError">#ECEFF4</color>
+</resources>

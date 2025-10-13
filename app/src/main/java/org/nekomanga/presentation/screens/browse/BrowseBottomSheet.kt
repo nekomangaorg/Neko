@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.presentation.components.sheets.BrowseDisplayOptionsSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.FilterBrowseSheet
 
@@ -18,6 +19,12 @@ sealed class BrowseBottomSheetScreen {
     ) : BrowseBottomSheetScreen()
 
     data class FilterSheet(val nothing: String = "") : BrowseBottomSheetScreen()
+
+    data class BrowseDisplayOptionsSheet(
+        val showIsList: Boolean,
+        val switchDisplayClick: () -> Unit,
+        val libraryEntryVisibilityClick: (Int) -> Unit,
+    ) : BrowseBottomSheetScreen()
 }
 
 @Composable
@@ -32,6 +39,16 @@ fun BrowseBottomSheet(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     when (currentScreen) {
+        is BrowseBottomSheetScreen.BrowseDisplayOptionsSheet -> {
+            BrowseDisplayOptionsSheet(
+                showIsList = currentScreen.showIsList,
+                isList = browseScreenState.value.isList,
+                switchDisplayClick = currentScreen.switchDisplayClick,
+                currentLibraryEntryVisibility = browseScreenState.value.libraryEntryVisibility,
+                libraryEntryVisibilityClick = currentScreen.libraryEntryVisibilityClick,
+                bottomContentPadding = contentPadding.calculateBottomPadding(),
+            )
+        }
         is BrowseBottomSheetScreen.CategoriesSheet ->
             EditCategorySheet(
                 addingToLibrary = currentScreen.addingToLibrary,

@@ -133,6 +133,14 @@
     <string name="category_with_name_exists">A category with that name already exists</string>
     <string name="category_cannot_be_blank">Category name cannot be blank</string>
     <string name="category_deleted">Category deleted</string>
+    <string name="dedupe_categories">Dedupe categories</string>
+    <string name="dedupe_categories_confirmation">Are you sure? This will delete any categories that have the same name as another and move their manga to the other category.</string>
+    <string name="dedupe_categories_summary">Delete any categories that have a duplicate name</string>
+    <string name="no_duplicate_categories">No duplicate categories found</string>
+    <plurals name="category_duplicates_removed">
+        <item quantity="one">%d duplicate category removed</item>
+        <item quantity="other">%d duplicate categories removed</item>
+    </plurals>
     <string name="long_press_category">Press and hold to edit a category</string>
     <string name="jump_to_category">Jump to category</string>
 
@@ -236,13 +244,13 @@
     <string name="display_options_can_be">Display options can be found by expanding the library filter in the Library tab.</string>
     <string name="list">List</string>
     <string name="comfortable_grid">Comfy</string>
-    <string name="cover_only_grid">Cover-only grid</string>
     <string name="compact_grid">Compact</string>
     <string name="download_badge">Download badges</string>
     <string name="unread_badge">Unread badges</string>
     <string name="show_start_reading_button">Show start reading button</string>
     <string name="horizontal_categories">Horizontal categories</string>
     <string name="show_library_action_bar">Show library action bar</string>
+    <string name="use_vivid_colors_for_headers">Use vivid colors for headers</string>
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="use_staggered_grid">Use staggered grid</string>
@@ -255,12 +263,11 @@
     <string name="show_unread_count">Show unread count</string>
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
-    <string name="display_as_">Display as %1$s</string>
-    <string name="display_as_grid">Display as grid</string>
-    <string name="display_as_list">Display as list</string>
-    <string name="hide_library_manga">Hide library entries</string>
-    <string name="show_all_manga">Show all entries</string>
-    <string name="show_library_manga">Show only library entries</string>
+    <string name="grid">Grid</string>
+    <string name="filter_results">Filter results</string>
+    <string name="hide_library_manga">Non library</string>
+    <string name="show_all_manga">All</string>
+    <string name="show_library_manga">Only library</string>
     <string name="hide_category_hopper">Hide category hopper</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>
@@ -820,10 +827,11 @@
     <string name="dark_theme">Dark theme</string>
     <string name="amoled_black">AMOLED Black</string>
     <string name="dark">Neko Green</string>
-    <string name="retro">Retro</string>
+    <string name="miami_vice">Miami Vice</string>
     <string name="light_blue">Light Blue</string>
     <string name="dark_blue">Dark Blue</string>
-    <string name="spring_blossom">Spring Blossom</string>
+    <string name="cherry_blossom">Cherry Blossom</string>
+    <string name="kitsune_fire">Kitsune Fire</string>
     <string name="chocolate">Chocolate</string>
     <string name="nord">Nord</string>
     <string name="dynamic">Dynamic</string>
@@ -832,12 +840,13 @@
     <string name="yin">Yin</string>
     <string name="yang">Yang</string>
     <string name="chocolate_strawberries">Chocolate Strawberries</string>
-    <string name="orange_juice">Orange Juice</string>
+    <string name="citrus_squeeze">Citrus squeeze</string>
     <string name="teal_ocean">Teal Ocean</string>
     <string name="royal">Royal</string>
     <string name="jungle">Jungle</string>
-    <string name="crayon_blue">Crayon Blue</string>
+    <string name="crayon">Crayon</string>
     <string name="monochrome">Monochrome</string>
+    <string name="neon_nights">Neon nights</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Feed)</string>
     <string name="system_default">System default</string>

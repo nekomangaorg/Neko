@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.ValueAnimator
+import android.animation.Animator
+import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.assist.AssistContent
@@ -18,8 +19,6 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.annotation.IdRes
-import androidx.appcompat.widget.Toolbar
-import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -29,7 +28,12 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -37,6 +41,7 @@ import com.bluelinelabs.conductor.Router
 import com.google.android.material.navigation.NavigationBarView
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
@@ -47,7 +52,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -60,7 +64,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
@@ -73,12 +76,15 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.canStillGoBack
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
@@ -95,28 +101,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
 
+    private var pulseAnimator: Animator? = null
+
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val hideBottomNav
-        get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
+        get() = router.backstackSize > 1
 
     private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
-    private var tabAnimation: ValueAnimator? = null
-    private var searchBarAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
-    var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
 
-    private val actionButtonSize: Pair<Int, Int> by lazy {
-        val attrs = intArrayOf(android.R.attr.minWidth, android.R.attr.minHeight)
-        val ta =
-            obtainStyledAttributes(androidx.appcompat.R.style.Widget_AppCompat_ActionButton, attrs)
-        val dimenW = ta.getDimensionPixelSize(0, 0.dpToPx)
-        val dimenH = ta.getDimensionPixelSize(1, 0.dpToPx)
-        ta.recycle()
-        dimenW to dimenH
-    }
+    private lateinit var viewModel: MainViewModel
 
     override fun attachBaseContext(newBase: Context?) {
         ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
@@ -137,6 +134,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
         super.onCreate(savedInstanceState)
 
+        viewModel = ViewModelProvider(this, MainViewModelFactory())[MainViewModel::class.java]
+
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -151,7 +150,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         }
-        var continueSwitchingTabs = false
+
+        nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
+            if (!LibraryUpdateJob.isRunning(this)) {
+                LibraryUpdateJob.startNow(this)
+            }
+            true
+        }
 
         val container: ViewGroup = binding.controllerContainer
 
@@ -284,6 +289,21 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             }
         }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WorkManager.getInstance(this@MainActivity)
+                    .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                    .map { workInfoList -> workInfoList.any { it.state == WorkInfo.State.RUNNING } }
+                    .collect { running ->
+                        if (running) {
+                            startIconPulse(binding)
+                        } else {
+                            stopIconPulse(binding)
+                        }
+                    }
+            }
+        }
+
         preferences
             .sideNavIconAlignment()
             .changes()
@@ -315,7 +335,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         insets.hasSideNavBar() -> Color.BLACK
                         isInNightMode() ->
                             ColorUtils.setAlphaComponent(
-                                getResourceColor(R.attr.colorPrimaryVariant),
+                                getResourceColor(R.attr.colorSurfaceContainer),
                                 179,
                             )
                         else -> Color.argb(179, 0, 0, 0)
@@ -328,11 +348,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 }
                 // if in landscape with 2/3 button mode, fully opaque nav bar
                 insets.hasSideNavBar() -> {
-                    getResourceColor(R.attr.colorPrimaryVariant)
+                    getResourceColor(R.attr.colorSurfaceContainer)
                 }
                 // if in portrait with 2/3 button mode, translucent nav bar
                 else -> {
-                    ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorPrimaryVariant), 179)
+                    ColorUtils.setAlphaComponent(
+                        getResourceColor(R.attr.colorSurfaceContainer),
+                        179,
+                    )
                 }
             }
     }
@@ -426,10 +449,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     }
                 outContent.webUri = Uri.parse(url)
             }
-        /* is BrowseSourceController -> {
-            val source = controller.presenter.source
-            outContent.webUri = Uri.parse(source.baseUrl)
-        }*/
         }
     }
 
@@ -538,64 +557,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         from: Controller? = null,
         isPush: Boolean = false,
     ) {
-        if (from is DialogController || to is DialogController) {
-            return
-        }
+
         reEnableBackPressedCallBack()
-        val onRoot = router.backstackSize == 1
-
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
-        if (nav == binding.sideNav) {
-            nav.isVisible = !hideBottomNav
-            /*
-                        updateControllersWithSideNavChanges(from)
-            */
-            nav.alpha = 1f
-        } else {
-            val alphaAnimation = ValueAnimator.ofFloat(nav.alpha, if (hideBottomNav) 0f else 1f)
-            alphaAnimation.addUpdateListener { valueAnimator ->
-                nav.alpha = valueAnimator.animatedValue as Float
-            }
-            alphaAnimation.doOnEnd {
-                nav.isVisible = !hideBottomNav
-                binding.bottomView?.visibility =
-                    if (hideBottomNav) {
-                        View.GONE
-                    } else {
-                        binding.bottomView?.visibility ?: View.GONE
-                    }
-            }
-            alphaAnimation.duration = 200
-            alphaAnimation.startDelay = 50
-        }
+        nav.isVisible = !hideBottomNav
+        nav.alpha = 1f
     }
-
-    /*private fun updateControllersWithSideNavChanges(extraController: Controller? = null) {
-        if (!isBindingInitialized || !this::router.isInitialized || this is SearchActivity) return
-        binding.sideNav?.let { sideNav ->
-            val controllers =
-                (router.backstack.map { it?.controller } + extraController)
-                    .filterNotNull()
-                    .filterNot { it is BrowseController }
-                    .filterNot { it is FeedController }
-                    .filterNot { it is LibraryController }
-                    .distinct()
-            val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
-            controllers.forEach { controller ->
-                val isRootController = controller is RootSearchInterface
-                if (controller.view?.layoutParams !is ViewGroup.MarginLayoutParams) return@forEach
-                controller.view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    marginStart =
-                        if (sideNav.isVisible) {
-                            if (isRootController) 0 else -navWidth
-                        } else {
-                            if (isRootController) navWidth else 0
-                        }
-                }
-            }
-        }
-    }
-    */
 
     fun isSideNavigation(): Boolean {
         return binding.bottomNav == null
@@ -646,10 +613,38 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             },
         )
 
-    companion object {
+    private fun startIconPulse(binding: MainActivityBinding) {
+        val iconView = getIconItemView(binding)
+        iconView ?: return
+        // If animation is not already running, start it
+        if (pulseAnimator == null || !pulseAnimator!!.isRunning) {
+            pulseAnimator =
+                AnimatorInflater.loadAnimator(this, R.animator.pulse_animator).apply {
+                    setTarget(iconView)
+                    start()
+                }
+        }
+    }
 
-        private const val SWIPE_THRESHOLD = 100
-        private const val SWIPE_VELOCITY_THRESHOLD = 100
+    private fun stopIconPulse(binding: MainActivityBinding) {
+        pulseAnimator?.cancel()
+        val iconView = getIconItemView(binding)
+        iconView ?: return
+        iconView.scaleX = 1.0f
+        iconView.scaleY = 1.0f
+    }
+
+    private fun getIconItemView(binding: MainActivityBinding): View? {
+        val itemContainerView =
+            binding.bottomNav?.findViewById<View>(R.id.nav_library)
+                ?: binding.sideNav?.findViewById<View>(R.id.nav_library)
+        itemContainerView ?: return null
+        return itemContainerView.findViewById(
+            com.google.android.material.R.id.navigation_bar_item_icon_view
+        )
+    }
+
+    companion object {
 
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"

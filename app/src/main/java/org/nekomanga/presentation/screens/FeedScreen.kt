@@ -6,20 +6,14 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -27,7 +21,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -41,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenState
@@ -49,12 +47,11 @@ import eu.kanade.tachiyomi.ui.feed.FeedSettingActions
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
-import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.FooterFilterChip
+import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -166,12 +163,8 @@ fun FeedScreen(
         ) {
             PullRefresh(
                 enabled = feedScreenState.value.swipeRefreshEnabled,
-                refreshing = feedScreenState.value.isRefreshing,
+                isRefreshing = feedScreenState.value.isRefreshing,
                 onRefresh = { feedScreenActions.updateLibrary(true) },
-                indicatorOffset =
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding() +
-                        Size.extraLarge,
             ) {
                 NekoScaffold(
                     type =
@@ -240,6 +233,20 @@ fun FeedScreen(
                                 Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
                                     .fillMaxSize()
                         ) {
+                            if (
+                                (feedScreenState.value.feedScreenType == FeedScreenType.History &&
+                                    historyPagingScreenState.value.pageLoading &&
+                                    historyPagingScreenState.value.offset == 0) ||
+                                    (feedScreenState.value.feedScreenType ==
+                                        FeedScreenType.Updates &&
+                                        updatesPagingScreenState.value.pageLoading &&
+                                        updatesPagingScreenState.value.offset == 0)
+                            ) {
+                                ContainedLoadingIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+
                             val (feedManga, hasMoreResults) =
                                 when (feedScreenType) {
                                     FeedScreenType.Summary -> {
@@ -320,6 +327,8 @@ fun FeedScreen(
                                             historyPagingScreenState.value.historyGrouping,
                                         outlineCovers = feedScreenState.value.outlineCovers,
                                         outlineCards = feedScreenState.value.outlineCards,
+                                        useVividColorHeaders =
+                                            feedScreenState.value.useVividColorHeaders,
                                         updatesFetchSort =
                                             updatesPagingScreenState.value.updatesSortedByFetch,
                                         feedScreenActions = feedScreenActions,
@@ -329,29 +338,76 @@ fun FeedScreen(
                             }
 
                             if (!feedScreenState.value.firstLoad) {
-                                ScreenFooter(
-                                    screenType = feedScreenType,
-                                    modifier = Modifier.align(Alignment.BottomStart),
-                                    loadingMore =
-                                        if (
-                                            feedScreenState.value.feedScreenType ==
-                                                FeedScreenType.History
-                                        )
-                                            historyPagingScreenState.value.pageLoading
-                                        else updatesPagingScreenState.value.pageLoading,
-                                    showDownloads = feedScreenState.value.downloads.isNotEmpty(),
-                                    downloadsSelected = feedScreenState.value.showingDownloads,
-                                    downloadsClicked = feedScreenActions.toggleShowingDownloads,
-                                    screenTypeClick = { newScreenType: FeedScreenType ->
+                                val buttonItems = remember {
+                                    listOf(
+                                        FeedScreenType.Summary,
+                                        FeedScreenType.History,
+                                        FeedScreenType.Updates,
+                                    )
+                                }
+
+                                val downloadButton = "downloads"
+                                val items: List<Any> =
+                                    if (feedScreenState.value.downloads.isNotEmpty()) {
+                                        buttonItems + downloadButton
+                                    } else {
+                                        buttonItems
+                                    }
+
+                                val selectedItem: Any =
+                                    when (feedScreenState.value.showingDownloads) {
+                                        true -> downloadButton
+                                        false -> feedScreenType
+                                    }
+
+                                ButtonGroup(
+                                    modifier =
+                                        Modifier.align(Alignment.BottomCenter)
+                                            .padding(horizontal = Size.tiny),
+                                    items = items,
+                                    selectedItem = selectedItem,
+                                    onItemClick = { item ->
                                         scope.launch { sheetState.hide() }
-                                        if (feedScreenState.value.showingDownloads) {
+                                        if (item is FeedScreenType) {
+                                            if (feedScreenState.value.showingDownloads) {
+                                                feedScreenActions.toggleShowingDownloads()
+                                            }
+                                            if (feedScreenType != item) {
+                                                feedScreenActions.switchViewType(item)
+                                            }
+                                        } else {
                                             feedScreenActions.toggleShowingDownloads()
                                         }
-                                        if (feedScreenType != newScreenType) {
-                                            feedScreenActions.switchViewType(newScreenType)
-                                        }
                                     },
-                                )
+                                ) { item ->
+                                    when (item) {
+                                        is FeedScreenType -> {
+                                            val name =
+                                                when (item) {
+                                                    FeedScreenType.History ->
+                                                        stringResource(R.string.history)
+                                                    FeedScreenType.Updates ->
+                                                        stringResource(R.string.updates)
+                                                    FeedScreenType.Summary ->
+                                                        stringResource(R.string.summary)
+                                                }
+                                            Text(
+                                                text = name,
+                                                style =
+                                                    MaterialTheme.typography.labelLarge.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                    ),
+                                            )
+                                        }
+                                        else -> {
+                                            Icon(
+                                                imageVector = Icons.Default.Downloading,
+                                                contentDescription =
+                                                    stringResource(id = R.string.downloads),
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
@@ -385,58 +441,5 @@ fun FeedScreen(
                 scope.launch { sheetState.hide() }
             },
         )
-    }
-}
-
-@Composable
-private fun ScreenFooter(
-    screenType: FeedScreenType,
-    modifier: Modifier = Modifier,
-    loadingMore: Boolean,
-    showDownloads: Boolean,
-    downloadsSelected: Boolean,
-    downloadsClicked: () -> Unit,
-    screenTypeClick: (FeedScreenType) -> Unit,
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Size.none),
-    ) {
-        if (loadingMore) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small)
-            )
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Size.tiny),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Gap(Size.tiny)
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.Summary && !downloadsSelected,
-                onClick = { screenTypeClick(FeedScreenType.Summary) },
-                name = stringResource(R.string.summary),
-            )
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.History && !downloadsSelected,
-                onClick = { screenTypeClick(FeedScreenType.History) },
-                name = stringResource(R.string.history),
-            )
-
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.Updates && !downloadsSelected,
-                onClick = { screenTypeClick(FeedScreenType.Updates) },
-                name = stringResource(R.string.updates),
-            )
-
-            if (showDownloads) {
-                FooterFilterChip(
-                    selected = downloadsSelected,
-                    onClick = downloadsClicked,
-                    name = "",
-                    icon = Icons.Default.Downloading,
-                )
-            }
-        }
     }
 }

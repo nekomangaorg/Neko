@@ -11,13 +11,14 @@ import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.unique
 import java.util.Date
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -32,6 +33,7 @@ class DisplayPresenter(
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<DisplayController>() {
 
@@ -39,6 +41,7 @@ class DisplayPresenter(
         MutableStateFlow(
             DisplayScreenState(
                 isList = preferences.browseAsList().get(),
+                incognitoMode = securityPreferences.incognitoMode().get(),
                 title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
                 titleRes =
                     (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes
@@ -48,7 +51,7 @@ class DisplayPresenter(
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
-                showLibraryEntries = preferences.browseDisplayMode().get(),
+                libraryEntryVisibility = preferences.browseDisplayMode().get(),
             )
         )
     val displayScreenState: StateFlow<DisplayScreenState> = _displayScreenState.asStateFlow()
@@ -79,9 +82,9 @@ class DisplayPresenter(
                         isLoading = false,
                         page = newKey,
                         endReached = !hasNextPage,
-                        allDisplayManga = allDisplayManga.toImmutableList(),
+                        allDisplayManga = allDisplayManga.toPersistentList(),
                         filteredDisplayManga =
-                            allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                            allDisplayManga.filterVisibility(preferences).toPersistentList(),
                     )
                 }
             },
@@ -97,7 +100,7 @@ class DisplayPresenter(
                 db.getCategories()
                     .executeAsBlocking()
                     .map { category -> category.toCategoryItem() }
-                    .toImmutableList()
+                    .toPersistentList()
             _displayScreenState.update {
                 it.copy(
                     categories = categories,
@@ -113,12 +116,12 @@ class DisplayPresenter(
             }
         }
         presenterScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { show ->
+            preferences.browseDisplayMode().changes().collectLatest { visibility ->
                 _displayScreenState.update {
                     it.copy(
-                        showLibraryEntries = show,
+                        libraryEntryVisibility = visibility,
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                            it.allDisplayManga.filterVisibility(preferences).toPersistentList(),
                     )
                 }
             }
@@ -168,21 +171,22 @@ class DisplayPresenter(
         presenterScope.launch {
             val index =
                 _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
-            val tempList = _displayScreenState.value.allDisplayManga.toMutableList()
-            val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
-            tempList[index] = tempDisplayManga
-
-            _displayScreenState.update { it.copy(allDisplayManga = tempList.toImmutableList()) }
+            val tempDisplayManga =
+                _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
+            _displayScreenState.update {
+                it.copy(allDisplayManga = it.allDisplayManga.set(index, tempDisplayManga))
+            }
 
             val filteredIndex =
                 _displayScreenState.value.filteredDisplayManga.indexOfFirst {
                     it.mangaId == mangaId
                 }
             if (filteredIndex >= 0) {
-                val tempFilterList = _displayScreenState.value.filteredDisplayManga.toMutableList()
-                tempFilterList[filteredIndex] = tempDisplayManga
                 _displayScreenState.update {
-                    it.copy(filteredDisplayManga = tempFilterList.toImmutableList())
+                    it.copy(
+                        filteredDisplayManga =
+                            it.filteredDisplayManga.set(filteredIndex, tempDisplayManga)
+                    )
                 }
             }
 
@@ -190,7 +194,7 @@ class DisplayPresenter(
                 _displayScreenState.update {
                     it.copy(
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toImmutableList()
+                            it.allDisplayManga.filterVisibility(preferences).toPersistentList()
                     )
                 }
             }
@@ -210,7 +214,7 @@ class DisplayPresenter(
                         db.getCategories()
                             .executeAsBlocking()
                             .map { category -> category.toCategoryItem() }
-                            .toImmutableList()
+                            .toPersistentList()
                 )
             }
         }
@@ -220,19 +224,19 @@ class DisplayPresenter(
         preferences.browseAsList().set(!displayScreenState.value.isList)
     }
 
-    fun switchLibraryVisibility() {
-        preferences.browseDisplayMode().set((displayScreenState.value.showLibraryEntries + 1) % 3)
+    fun switchLibraryEntryVisibility(visibility: Int) {
+        preferences.browseDisplayMode().set(visibility)
     }
 
     fun updateMangaForChanges() {
         presenterScope.launch {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).unique().toImmutableList()
+                _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
                     filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toImmutableList(),
+                        newDisplayManga.filterVisibility(preferences).toPersistentList(),
                 )
             }
         }

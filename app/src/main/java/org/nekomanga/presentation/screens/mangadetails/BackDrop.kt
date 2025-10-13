@@ -29,7 +29,7 @@ fun BackDrop(
             Box(
                 modifier =
                     Modifier.matchParentSize()
-                        .background(themeColorState.buttonColor.copy(alpha = .25f))
+                        .background(themeColorState.primaryColor.copy(alpha = .25f))
             )
         }
         val resources = LocalContext.current.resources

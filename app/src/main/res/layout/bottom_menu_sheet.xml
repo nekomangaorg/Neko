@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bottom_sheet_rounded_background"
     app:layout_constraintVertical_chainStyle="packed"
-    android:backgroundTint="?attr/background">
+    android:backgroundTint="?attr/colorSurface">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/menu_sheet_recycler"
@@ -45,7 +45,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?textAppearanceHeadlineMedium"
-            android:textColor="?actionBarTintColor"
+            android:textColor="?colorPrimary"
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -61,6 +61,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:background="@color/divider"/>
+            android:background="@color/colorOnSurfaceVariant"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

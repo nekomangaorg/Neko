@@ -14,22 +14,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
+import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedUpdatesPage(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
+    useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
     groupedBySeries: Boolean,
@@ -37,6 +42,12 @@ fun FeedUpdatesPage(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
 ) {
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     when (groupedBySeries) {
         true -> {
             Grouped(
@@ -44,6 +55,7 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
+                headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
@@ -57,6 +69,7 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
+                headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
                 updatesFetchSort = updatesFetchSort,
@@ -71,7 +84,8 @@ fun FeedUpdatesPage(
 private fun Grouped(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    headerColor: Color,
     outlineCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
@@ -82,7 +96,7 @@ private fun Grouped(
     val scrollState = rememberLazyListState()
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
-    var groupedBySeries =
+    val groupedBySeries =
         remember(feedUpdatesMangaList) {
             feedUpdatesMangaList
                 .groupBy { getDateString(it.date, now) }
@@ -92,7 +106,7 @@ private fun Grouped(
                         .map {
                             val (read, unread) =
                                 it.value.flatMap { it.chapters }.partition { it.chapter.read }
-                            val chapters = (unread.reversed() + read).toImmutableList()
+                            val chapters = (unread.reversed() + read).toPersistentList()
                             it.value.first().copy(chapters = chapters)
                         }
                 }
@@ -100,15 +114,130 @@ private fun Grouped(
         }
 
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
-        groupedBySeries.forEachIndexed { index, feedManga ->
-            if (index == 0) {
-                timeSpan = ""
+
+        // 1. Group the already processed list by date string for rendering
+        val renderedGroups = groupedBySeries.groupBy { getDateString(it.date, now) }
+
+        // 2. Iterate through the date groups
+        renderedGroups.forEach { (dateString, seriesListForDate) ->
+
+            // 3. Date Header Logic
+            if (dateString.isNotEmpty()) {
+                // Find the global index of the first item in this date group
+                // to correctly trigger the header display once per date.
+                val firstItem = seriesListForDate.first()
+                val globalIndex = groupedBySeries.indexOf(firstItem)
+
+                // The 'timeSpan' state needs to track the date string globally to prevent duplicate
+                // headers
+                if (globalIndex == 0) timeSpan = "" // Reset tracker at the start
+
+                if (timeSpan != dateString) {
+                    timeSpan = dateString
+
+                    val prefix =
+                        when (updatesFetchSort) {
+                            true -> R.string.fetched_
+                            false -> R.string.updated_
+                        }
+
+                    item {
+                        Text(
+                            text = stringResource(id = prefix, dateString),
+                            color = headerColor,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier =
+                                Modifier.padding(
+                                    start = Size.small,
+                                    top = Size.small,
+                                    end = Size.small,
+                                ),
+                        )
+                    }
+                }
             }
-            val dateString = getDateString(feedManga.date, now)
-            // there should only ever be 1
 
-            val latestChapter = feedManga.chapters.first()
+            // 4. Iterate through the series within the current date group
+            seriesListForDate.forEachIndexed { groupIndex, feedManga ->
+                val latestChapter = feedManga.chapters.first()
 
+                val listCardType =
+                    when {
+                        groupIndex == 0 && seriesListForDate.size > 1 -> ListCardType.Top
+                        groupIndex == seriesListForDate.size - 1 && seriesListForDate.size > 1 ->
+                            ListCardType.Bottom
+                        seriesListForDate.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
+                    }
+
+                // 6. Pagination Logic (needs the global index)
+                val globalIndex = groupedBySeries.indexOf(feedManga)
+
+                item {
+                    LaunchedEffect(scrollState, loadingResults) {
+                        if (
+                            globalIndex >= groupedBySeries.size - 5 &&
+                                hasMoreResults &&
+                                !loadingResults
+                        ) {
+                            loadNextPage()
+                        }
+                    }
+
+                    // 7. Wrap UpdatesCard with ExpressiveListCard
+                    ExpressiveListCard(
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        listCardType = listCardType, // Pass the calculated shape
+                    ) {
+                        UpdatesCard(
+                            chapterItem = latestChapter,
+                            numberOfChapters = feedManga.chapters.size,
+                            isGrouped = true,
+                            mangaTitle = feedManga.mangaTitle,
+                            artwork = feedManga.artwork,
+                            outlineCovers = outlineCovers,
+                            mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                            chapterClick = { chapterId ->
+                                feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
+                            },
+                            chapterSwipe = { _ -> feedScreenActions.chapterSwipe(latestChapter) },
+                            downloadClick = { action ->
+                                feedScreenActions.downloadClick(latestChapter, feedManga, action)
+                            },
+                        )
+                    }
+
+                    // Add Gap only if it's not the last card in the date group
+                    if (groupIndex != seriesListForDate.size - 1) {
+                        Gap(Size.tiny)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Ungrouped(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
+    feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
+    headerColor: Color,
+    outlineCovers: Boolean = false,
+    hasMoreResults: Boolean = false,
+    loadingResults: Boolean = false,
+    updatesFetchSort: Boolean,
+    feedScreenActions: FeedScreenActions,
+    loadNextPage: () -> Unit,
+) {
+    val scrollState = rememberLazyListState()
+    val now = Date().time
+    var timeSpan by remember { mutableStateOf("") }
+
+    LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
+        val groupedManga = feedUpdatesMangaList.groupBy { getDateString(it.date, now) }
+
+        groupedManga.forEach { (dateString, mangaListForDate) ->
             if (dateString.isNotEmpty() && timeSpan != dateString) {
                 timeSpan = dateString
 
@@ -121,116 +250,66 @@ private fun Grouped(
                 item {
                     Text(
                         text = stringResource(id = prefix, dateString),
-                        style =
-                            MaterialTheme.typography.labelLarge.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            ),
+                        color = headerColor,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier =
                             Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
                     )
                 }
             }
-            item {
-                LaunchedEffect(scrollState, loadingResults) {
-                    if (index >= groupedBySeries.size - 5 && hasMoreResults && !loadingResults) {
-                        loadNextPage()
-                    }
+
+            val chaptersForDate =
+                mangaListForDate.flatMap { feedManga ->
+                    feedManga.chapters.map { chapter -> Pair(feedManga, chapter) }
                 }
-                UpdatesCard(
-                    chapterItem = latestChapter,
-                    numberOfChapters = feedManga.chapters.size,
-                    isGrouped = true,
-                    mangaTitle = feedManga.mangaTitle,
-                    artwork = feedManga.artwork,
-                    outlineCovers = outlineCovers,
-                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                    chapterClick = { chapterId ->
-                        feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
-                    },
-                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(latestChapter) },
-                    downloadClick = { action ->
-                        feedScreenActions.downloadClick(latestChapter, feedManga, action)
-                    },
-                )
-            }
-        }
-    }
-}
 
-@Composable
-private fun Ungrouped(
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(),
-    feedUpdatesMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    outlineCovers: Boolean = false,
-    hasMoreResults: Boolean = false,
-    loadingResults: Boolean = false,
-    updatesFetchSort: Boolean,
-    feedScreenActions: FeedScreenActions,
-    loadNextPage: () -> Unit,
-) {
-    val scrollState = rememberLazyListState()
-    val now = Date().time
-    var timeSpan by remember { mutableStateOf("") }
-    LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
-        feedUpdatesMangaList.forEachIndexed { index, feedManga ->
-            if (index == 0) {
-                timeSpan = ""
-            }
-            val dateString = getDateString(feedManga.date, now)
-            // there should only ever be 1
-            feedManga.chapters.forEach { chapterItem ->
-                if (dateString.isNotEmpty() && timeSpan != dateString) {
-                    timeSpan = dateString
-
-                    val prefix =
-                        when (updatesFetchSort) {
-                            true -> R.string.fetched_
-                            false -> R.string.updated_
-                        }
-
-                    item {
-                        Text(
-                            text = stringResource(id = prefix, dateString),
-                            style =
-                                MaterialTheme.typography.labelLarge.copy(
-                                    color = MaterialTheme.colorScheme.primary
-                                ),
-                            modifier =
-                                Modifier.padding(
-                                    start = Size.small,
-                                    top = Size.small,
-                                    end = Size.small,
-                                ),
-                        )
+            chaptersForDate.forEachIndexed { chapterIndex, (feedManga, chapterItem) ->
+                val listCardType =
+                    when {
+                        chapterIndex == 0 && chaptersForDate.size > 1 -> ListCardType.Top
+                        chapterIndex == chaptersForDate.size - 1 && chaptersForDate.size > 1 ->
+                            ListCardType.Bottom
+                        chaptersForDate.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
                     }
-                }
+
+                val globalIndex =
+                    feedUpdatesMangaList.indexOf(feedManga) // Used for pagination only
+
                 item {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
-                            index >= feedUpdatesMangaList.size - 5 &&
+                            globalIndex >= feedUpdatesMangaList.size - 5 &&
                                 hasMoreResults &&
                                 !loadingResults
                         ) {
                             loadNextPage()
                         }
                     }
-                    UpdatesCard(
-                        chapterItem = chapterItem,
-                        mangaTitle = feedManga.mangaTitle,
-                        artwork = feedManga.artwork,
-                        outlineCovers = outlineCovers,
-                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                        chapterClick = { chapterId ->
-                            feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
-                        },
-                        chapterSwipe = { chapterItem ->
-                            feedScreenActions.chapterSwipe(chapterItem)
-                        },
-                        downloadClick = { action ->
-                            feedScreenActions.downloadClick(chapterItem, feedManga, action)
-                        },
-                    )
+                    ExpressiveListCard(
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        listCardType = listCardType, // Pass the correct type
+                    ) {
+                        UpdatesCard(
+                            chapterItem = chapterItem,
+                            mangaTitle = feedManga.mangaTitle,
+                            artwork = feedManga.artwork,
+                            outlineCovers = outlineCovers,
+                            mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                            chapterClick = { chapterId ->
+                                feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
+                            },
+                            chapterSwipe = { chapterItem ->
+                                feedScreenActions.chapterSwipe(chapterItem)
+                            },
+                            downloadClick = { action ->
+                                feedScreenActions.downloadClick(chapterItem, feedManga, action)
+                            },
+                        )
+                    }
+                    if (chapterIndex != chaptersForDate.size - 1) {
+                        Gap(Size.tiny)
+                    }
                 }
             }
         }

@@ -2,12 +2,11 @@ package org.nekomanga.presentation.screens.feed
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DeleteSweep
@@ -69,15 +68,15 @@ fun FeedBottomSheet(
     ) {
         Gap(16.dp)
 
-        LazyColumn(
+        Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
             when {
                 downloadScreenVisible ->
-                    downloadsContent(clearDownloadsClick, downloadOnlyOnWifi, toggleDownloadOnWifi)
+                    DownloadsContent(clearDownloadsClick, downloadOnlyOnWifi, toggleDownloadOnWifi)
                 feedScreenType == FeedScreenType.History ->
-                    historyContent(
+                    HistoryContent(
                         historyGrouping = historyGrouping,
                         outlineCovers = outlineCovers,
                         outlineCards = outlineCards,
@@ -89,7 +88,7 @@ fun FeedBottomSheet(
                         toggleSwipeRefresh = toggleSwipeRefresh,
                     )
                 feedScreenType == FeedScreenType.Updates ->
-                    uploadsContent(
+                    UploadsContent(
                         fetchSort = sortByFetched,
                         outlineCovers = outlineCovers,
                         sortClick = sortClick,
@@ -104,7 +103,8 @@ fun FeedBottomSheet(
     }
 }
 
-private fun LazyListScope.historyContent(
+@Composable
+private fun HistoryContent(
     historyGrouping: FeedHistoryGroup,
     outlineCovers: Boolean,
     outlineCards: Boolean,
@@ -115,113 +115,107 @@ private fun LazyListScope.historyContent(
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
 ) {
-    item {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(id = R.string.group_chapters_together),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        var expanded by remember { mutableStateOf(false) }
+        var selectedText =
+            when (historyGrouping) {
+                FeedHistoryGroup.No -> R.string.group_no
+                FeedHistoryGroup.Series -> R.string.group_by_series
+                FeedHistoryGroup.Day -> R.string.group_by_day
+                FeedHistoryGroup.Week -> R.string.group_by_week
+            }
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            modifier =
+                Modifier.padding(
+                    start = Size.small,
+                    top = Size.small,
+                    bottom = Size.small,
+                    end = Size.none,
+                ),
+            onExpandedChange = { expanded = !expanded },
         ) {
-            Text(
-                text = stringResource(id = R.string.group_chapters_together),
-                style = MaterialTheme.typography.bodyMedium,
+            TextField(
+                value = stringResource(id = selectedText),
+                onValueChange = {},
+                textStyle = MaterialTheme.typography.bodyMedium,
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor(),
             )
-            var expanded by remember { mutableStateOf(false) }
-            var selectedText =
-                when (historyGrouping) {
-                    FeedHistoryGroup.No -> R.string.group_no
-                    FeedHistoryGroup.Series -> R.string.group_by_series
-                    FeedHistoryGroup.Day -> R.string.group_by_day
-                    FeedHistoryGroup.Week -> R.string.group_by_week
-                }
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                modifier =
-                    Modifier.padding(
-                        start = Size.small,
-                        top = Size.small,
-                        bottom = Size.small,
-                        end = Size.none,
-                    ),
-                onExpandedChange = { expanded = !expanded },
-            ) {
-                TextField(
-                    value = stringResource(id = selectedText),
-                    onValueChange = {},
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    modifier = Modifier.menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    FeedHistoryGroup.entries.forEach { entry ->
-                        val textRes =
-                            when (entry) {
-                                FeedHistoryGroup.No -> R.string.group_no
-                                FeedHistoryGroup.Series -> R.string.group_by_series
-                                FeedHistoryGroup.Day -> R.string.group_by_day
-                                FeedHistoryGroup.Week -> R.string.group_by_week
-                            }
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(id = textRes),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            },
-                            onClick = {
-                                selectedText = textRes
-                                expanded = false
-                                groupHistoryClick(entry)
-                            },
-                        )
-                    }
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                FeedHistoryGroup.entries.forEach { entry ->
+                    val textRes =
+                        when (entry) {
+                            FeedHistoryGroup.No -> R.string.group_no
+                            FeedHistoryGroup.Series -> R.string.group_by_series
+                            FeedHistoryGroup.Day -> R.string.group_by_day
+                            FeedHistoryGroup.Week -> R.string.group_by_week
+                        }
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(id = textRes),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        },
+                        onClick = {
+                            selectedText = textRes
+                            expanded = false
+                            groupHistoryClick(entry)
+                        },
+                    )
                 }
             }
         }
     }
-    item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
-    item { SwitchRow(R.string.show_outline_around_cards, outlineCards, outlineCardsClick) }
-    item {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            TextButton(onClick = clearHistoryClick) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
-                    Text(text = stringResource(id = R.string.clear_history))
-                }
+
+    SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick)
+    SwitchRow(R.string.show_outline_around_cards, outlineCards, outlineCardsClick)
+
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        TextButton(onClick = clearHistoryClick) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
+                Text(text = stringResource(id = R.string.clear_history))
             }
         }
     }
-    item { SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh) }
+
+    SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh)
 }
 
-private fun LazyListScope.downloadsContent(
+@Composable
+private fun DownloadsContent(
     clearDownloadsClick: () -> Unit,
     downloadOnlyOnWifi: Boolean,
     toggleDownloadOnWifi: () -> Unit,
 ) {
-    item {
-        SwitchRow(
-            textRes = R.string.only_download_over_wifi,
-            downloadOnlyOnWifi,
-            toggleDownloadOnWifi,
-        )
-    }
-    item {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            TextButton(onClick = clearDownloadsClick) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Outlined.DeleteSweep, contentDescription = null)
-                    Gap(Size.small)
-                    Text(text = stringResource(id = R.string.clear_download_queue))
-                }
+
+    SwitchRow(textRes = R.string.only_download_over_wifi, downloadOnlyOnWifi, toggleDownloadOnWifi)
+
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        TextButton(onClick = clearDownloadsClick) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = Icons.Outlined.DeleteSweep, contentDescription = null)
+                Gap(Size.small)
+                Text(text = stringResource(id = R.string.clear_download_queue))
             }
         }
     }
 }
 
-private fun LazyListScope.uploadsContent(
+@Composable
+private fun UploadsContent(
     fetchSort: Boolean,
     outlineCovers: Boolean,
     groupUpdateChapters: Boolean,
@@ -231,12 +225,10 @@ private fun LazyListScope.uploadsContent(
     swipeRefreshEnabled: Boolean,
     toggleSwipeRefresh: () -> Unit,
 ) {
-    item { SwitchRow(R.string.sort_fetched_time, fetchSort, sortClick) }
-    item { SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
-    item {
-        SwitchRow(R.string.group_chapters_together, groupUpdateChapters, toggleGroupUpdateChapters)
-    }
-    item { SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh) }
+    SwitchRow(R.string.sort_fetched_time, fetchSort, sortClick)
+    SwitchRow(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick)
+    SwitchRow(R.string.group_chapters_together, groupUpdateChapters, toggleGroupUpdateChapters)
+    SwitchRow(R.string.feed_swipe_refresh_enabled, swipeRefreshEnabled, toggleSwipeRefresh)
 }
 
 @Composable

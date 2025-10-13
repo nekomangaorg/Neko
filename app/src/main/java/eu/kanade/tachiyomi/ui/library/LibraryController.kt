@@ -84,7 +84,6 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
                     categoryItemClick = presenter::categoryItemClick,
                     categoryAscendingClick = presenter::categoryAscendingClick,
                     categoryRefreshClick = { category -> updateCategory(category, context) },
-                    dragAndDropManga = presenter::dragAndDropManga,
                 ),
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
@@ -109,23 +108,21 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
     }
 
     private fun updateCategory(category: CategoryItem, context: Context) {
-        if (!LibraryUpdateJob.categoryInQueue(category.id)) {
-            LibraryUpdateJob.startNow(
-                context = context,
-                category.toDbCategory(),
-                mangaToUse =
-                    if (category.isDynamic) {
-                        val libraryItems =
-                            presenter.libraryScreenState.value.items
-                                .firstOrNull { it.categoryItem.id == category.id }
-                                ?.libraryItems
-                                ?.map { it.toLibraryManga() }
-                        libraryItems
-                    } else {
-                        null
-                    },
-            )
-        }
+        LibraryUpdateJob.startNow(
+            context = context,
+            category.toDbCategory(),
+            mangaToUse =
+                if (category.isDynamic) {
+                    val libraryItems =
+                        presenter.libraryScreenState.value.items
+                            .firstOrNull { it.categoryItem.id == category.id }
+                            ?.libraryItems
+                            ?.map { it.toLibraryManga() }
+                    libraryItems
+                } else {
+                    null
+                },
+        )
     }
 
     private fun searchMangaDex(query: String) {

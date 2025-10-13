@@ -15,7 +15,7 @@ data class DexFilters(
     val queryMode: QueryType = QueryType.Title,
     val query: Filter.Query = Filter.Query("", QueryType.Title),
     val originalLanguage: List<Filter.OriginalLanguage> =
-        MdLang.values().map { Filter.OriginalLanguage(it, false) },
+        MdLang.entries.map { Filter.OriginalLanguage(it, false) },
     val contentRatings: List<Filter.ContentRating>,
     val contentRatingVisible: Boolean = true,
     val publicationDemographics: List<Filter.PublicationDemographic> =
@@ -84,7 +84,7 @@ sealed class Filter {
     data class Sort(val sort: MdSort, val state: Boolean) : Filter() {
         companion object {
             fun getSortList(mdSortToEnable: MdSort = MdSort.Best) =
-                MdSort.values().map { Sort(it, it == mdSortToEnable) }
+                MdSort.entries.map { Sort(it, it == mdSortToEnable) }
         }
     }
 }

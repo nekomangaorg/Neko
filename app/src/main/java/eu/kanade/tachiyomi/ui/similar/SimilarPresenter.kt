@@ -5,13 +5,16 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,10 +22,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.manga.DisplayManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -33,15 +38,18 @@ class SimilarPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
     private val _similarScreenState =
         MutableStateFlow(
             SimilarScreenState(
                 isList = preferences.browseAsList().get(),
+                incognitoMode = securityPreferences.incognitoMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
+                libraryEntryVisibility = preferences.browseDisplayMode().get(),
             )
         )
 
@@ -56,7 +64,7 @@ class SimilarPresenter(
                 db.getCategories()
                     .executeAsBlocking()
                     .map { category -> category.toCategoryItem() }
-                    .toImmutableList()
+                    .toPersistentList()
             _similarScreenState.update {
                 it.copy(
                     categories = categories,
@@ -70,6 +78,17 @@ class SimilarPresenter(
                 _similarScreenState.update { state -> state.copy(isList = it) }
             }
         }
+
+        presenterScope.launch {
+            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+                _similarScreenState.update {
+                    it.copy(
+                        libraryEntryVisibility = visibility,
+                        filteredDisplayManga = it.allDisplayManga.filterByVisibility(preferences),
+                    )
+                }
+            }
+        }
     }
 
     fun refresh() {
@@ -80,17 +99,23 @@ class SimilarPresenter(
         presenterScope.launch {
             if (mangaUUID.isNotEmpty()) {
                 _similarScreenState.update {
-                    it.copy(isRefreshing = true, displayManga = persistentMapOf())
+                    it.copy(
+                        isRefreshing = true,
+                        allDisplayManga = persistentMapOf(),
+                        filteredDisplayManga = persistentMapOf(),
+                    )
                 }
 
                 val list = repo.fetchSimilar(mangaUUID, forceRefresh)
+                val allDisplayManga =
+                    list
+                        .associate { group -> group.type to group.manga.toPersistentList() }
+                        .toImmutableMap()
                 _similarScreenState.update {
                     it.copy(
                         isRefreshing = false,
-                        displayManga =
-                            list
-                                .associate { group -> group.type to group.manga.toImmutableList() }
-                                .toImmutableMap(),
+                        allDisplayManga = allDisplayManga,
+                        filteredDisplayManga = allDisplayManga.filterByVisibility(preferences),
                     )
                 }
             }
@@ -132,10 +157,33 @@ class SimilarPresenter(
         }
     }
 
+    fun switchLibraryEntryVisibility(visibility: Int) {
+        preferences.browseDisplayMode().set(visibility)
+    }
+
+    fun ImmutableMap<Int, PersistentList<DisplayManga>>.filterByVisibility(
+        prefs: PreferencesHelper
+    ): ImmutableMap<Int, PersistentList<DisplayManga>> {
+        val visibilityMode = prefs.browseDisplayMode().get()
+
+        return this.mapValues { (_, displayMangaList) ->
+                displayMangaList
+                    .filter { displayManga ->
+                        when (visibilityMode) {
+                            LibraryEntryVisibility.SHOW_IN_LIBRARY -> displayManga.inLibrary
+                            LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY -> !displayManga.inLibrary
+                            else -> true
+                        }
+                    }
+                    .toPersistentList()
+            }
+            .toImmutableMap()
+    }
+
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         presenterScope.launch {
             val listOfKeyIndex =
-                _similarScreenState.value.displayManga.mapNotNull { entry ->
+                _similarScreenState.value.allDisplayManga.mapNotNull { entry ->
                     val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
                     when (tempListIndex == -1) {
                         true -> null
@@ -143,19 +191,24 @@ class SimilarPresenter(
                     }
                 }
 
-            val tempMap = _similarScreenState.value.displayManga.toMutableMap()
+            val tempMap = _similarScreenState.value.allDisplayManga.toMutableMap()
 
             listOfKeyIndex.forEach { pair ->
                 val mapKey = pair.first
                 val mangaIndex = pair.second
-                val tempList = _similarScreenState.value.displayManga[mapKey]!!.toMutableList()
+                val tempList = _similarScreenState.value.allDisplayManga[mapKey]!!.toMutableList()
                 val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
                 tempList[mangaIndex] = tempDisplayManga
 
-                tempMap[mapKey] = tempList.toImmutableList()
+                tempMap[mapKey] = tempList.toPersistentList()
             }
 
-            _similarScreenState.update { it.copy(displayManga = tempMap.toImmutableMap()) }
+            _similarScreenState.update {
+                it.copy(
+                    allDisplayManga = tempMap.toImmutableMap(),
+                    filteredDisplayManga = tempMap.toImmutableMap().filterByVisibility(preferences),
+                )
+            }
         }
     }
 
@@ -172,7 +225,7 @@ class SimilarPresenter(
                         db.getCategories()
                             .executeAsBlocking()
                             .map { category -> category.toCategoryItem() }
-                            .toImmutableList()
+                            .toPersistentList()
                 )
             }
         }
@@ -185,7 +238,7 @@ class SimilarPresenter(
     fun updateCovers() {
         presenterScope.launch {
             val newDisplayManga =
-                _similarScreenState.value.displayManga
+                _similarScreenState.value.allDisplayManga
                     .map { entry ->
                         Pair(
                             entry.key,
@@ -201,12 +254,17 @@ class SimilarPresenter(
                                             )
                                     )
                                 }
-                                .toImmutableList(),
+                                .toPersistentList(),
                         )
                     }
                     .toMap()
                     .toImmutableMap()
-            _similarScreenState.update { it.copy(displayManga = newDisplayManga) }
+            _similarScreenState.update {
+                it.copy(
+                    allDisplayManga = newDisplayManga,
+                    filteredDisplayManga = newDisplayManga.filterByVisibility(preferences),
+                )
+            }
         }
     }
 }

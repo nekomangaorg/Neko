@@ -30,9 +30,9 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun GroupBySheet(
-    groupByOptions: List<Int>,
-    currentGroupBy: Int,
-    groupByClick: (Int) -> Unit,
+    groupByOptions: List<LibraryGroup>,
+    currentGroupBy: LibraryGroup,
+    groupByClick: (LibraryGroup) -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = Size.medium,
 ) {
@@ -74,13 +74,13 @@ fun GroupBySheet(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            imageVector = LibraryGroup.groupTypeComposeIcon(groupBy),
+                            imageVector = groupBy.icon,
                             contentDescription = null,
                             tint = textColor,
                         )
                         Gap(Size.small)
                         Text(
-                            text = stringResource(LibraryGroup.groupTypeStringRes(groupBy)),
+                            text = stringResource(groupBy.nameRes),
                             modifier = Modifier.weight(1f),
                             color = textColor,
                             style = MaterialTheme.typography.bodyLarge,

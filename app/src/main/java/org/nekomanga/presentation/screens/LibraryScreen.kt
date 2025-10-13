@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -150,12 +148,8 @@ fun LibraryScreen(
             },
         ) {
             PullRefresh(
-                refreshing = libraryScreenState.value.isRefreshing,
+                isRefreshing = libraryScreenState.value.isRefreshing,
                 onRefresh = libraryScreenActions.updateLibrary,
-                indicatorOffset =
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-                        WindowInsets.displayCutout.asPaddingValues().calculateTopPadding() +
-                        Size.extraLarge,
             ) {
                 NekoScaffold(
                     type =

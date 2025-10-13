@@ -61,7 +61,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInWebView
 import java.text.DateFormat
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -78,6 +78,7 @@ import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.snackbar.snackbarHost
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -144,6 +145,7 @@ fun MangaScreen(
 
     val isDarkTheme = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     val defaultThemeColorState = defaultThemeColorState()
 
@@ -162,14 +164,28 @@ fun MangaScreen(
                             Color(mangaDetailScreenState.value.vibrantColor!!),
                             isDarkTheme,
                         )
+
+                    val containerColor =
+                        Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f))
+
+                    val onContainerColor =
+                        Color(ColorUtils.blendARGB(color.toArgb(), onSurfaceColor.toArgb(), .706f))
+
+                    val altContainerColor =
+                        surfaceColor.surfaceColorAtElevationCustomColor(
+                            surfaceColor,
+                            color,
+                            Size.small,
+                        )
+
                     ThemeColorState(
-                        buttonColor = color,
+                        primaryColor = color,
                         rippleConfiguration = nekoRippleConfiguration(color),
                         textSelectionColors = dynamicTextSelectionColor(color),
-                        altContainerColor =
-                            Color(
-                                ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)
-                            ),
+                        containerColor = containerColor,
+                        onContainerColor = onContainerColor,
+                        altContainerColor = altContainerColor,
+                        onAltContainerColor = color,
                     )
                 } else {
                     defaultThemeColorState
@@ -221,21 +237,21 @@ fun MangaScreen(
             onNavigationIconClicked = onBackPressed,
             themeColorState = themeColorState,
             searchPlaceHolder = stringResource(id = R.string.search_chapters),
+            incognitoMode = mangaDetailScreenState.value.incognitoMode,
             onSearch = onSearch,
-            snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
+            snackBarHost = snackbarHost(snackbarHostState, themeColorState.primaryColor),
             actions = {
                 MangaDetailsAppBarActions(
                     chapterActions = chapterActions,
+                    themeColorState = themeColorState,
                     chaptersProvider = { mangaDetailScreenState.value.activeChapters },
                 )
             },
             content = { incomingPaddingValues ->
                 PullRefresh(
-                    refreshing = mangaDetailScreenState.value.isRefreshing,
+                    isRefreshing = mangaDetailScreenState.value.isRefreshing,
                     onRefresh = onRefresh,
-                    indicatorOffset = incomingPaddingValues.calculateTopPadding(),
-                    backgroundColor = themeColorState.buttonColor,
-                    contentColor = MaterialTheme.colorScheme.surface,
+                    trackColor = themeColorState.primaryColor,
                 ) {
                     val mangaDetailContentPadding =
                         PaddingValues(
@@ -382,7 +398,7 @@ private fun VerticalLayout(
     contentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chaptersProvider: () -> ImmutableList<ChapterItem>,
+    chaptersProvider: () -> PersistentList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
@@ -404,7 +420,7 @@ private fun SideBySideLayout(
     chapterContentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chaptersProvider: () -> ImmutableList<ChapterItem>,
+    chaptersProvider: () -> PersistentList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -637,30 +653,33 @@ private fun Details(
 }
 
 class ThemeColorState(
-    buttonColor: Color,
+    primaryColor: Color,
     rippleConfiguration: RippleConfiguration,
     textSelectionColors: TextSelectionColors,
+    containerColor: Color,
+    onContainerColor: Color,
     altContainerColor: Color,
+    onAltContainerColor: Color,
 ) {
-    var buttonColor by mutableStateOf(buttonColor)
+    var primaryColor by mutableStateOf(primaryColor)
     var rippleConfiguration by mutableStateOf(rippleConfiguration)
     var textSelectionColors by mutableStateOf(textSelectionColors)
+    var containerColor by mutableStateOf(containerColor)
+    var onContainerColor by mutableStateOf(onContainerColor)
     var altContainerColor by mutableStateOf(altContainerColor)
+    var onAltContainerColor by mutableStateOf(onAltContainerColor)
 }
 
 @Composable
 fun defaultThemeColorState(): ThemeColorState {
+
     return ThemeColorState(
-        buttonColor = MaterialTheme.colorScheme.secondary,
+        primaryColor = MaterialTheme.colorScheme.primary,
         rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
-        altContainerColor =
-            Color(
-                ColorUtils.blendARGB(
-                    MaterialTheme.colorScheme.secondary.toArgb(),
-                    MaterialTheme.colorScheme.surface.toArgb(),
-                    .706f,
-                )
-            ),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        altContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+        onAltContainerColor = MaterialTheme.colorScheme.onSurface,
     )
 }

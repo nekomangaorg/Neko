@@ -30,7 +30,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
-            switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
+            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
             onBackPress = router::handleBack,
             windowSizeClass = windowSizeClass,
             legacySideNav = isSideNav,

@@ -35,11 +35,11 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
             )
         },
         menuTitle = {
-            it.titleView.typeface = ResourcesCompat.getFont(context, R.font.montserrat_regular)
+            it.titleView.typeface = ResourcesCompat.getFont(context, R.font.mplus_rounded1c_regular)
             it.itemView.background = rippleDrawable()
         },
         menuItem = {
-            it.titleView.typeface = ResourcesCompat.getFont(context, R.font.montserrat_regular)
+            it.titleView.typeface = ResourcesCompat.getFont(context, R.font.mplus_rounded1c_regular)
             it.contentView.background = rippleDrawable()
             it.setGroupDividerColor(context.getResourceColor(R.attr.colorAccent))
         },

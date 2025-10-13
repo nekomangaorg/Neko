@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Autorenew
@@ -9,56 +10,116 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.nekomanga.R
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.presentation.components.icons.ProgressClockIcon
 import org.nekomanga.presentation.components.icons.UngroupIcon
 
-object LibraryGroup {
+sealed class LibraryGroup(
+    val type: Int,
+    @StringRes val nameRes: Int,
+    val icon: ImageVector,
+    val keyComparator: Comparator<String>,
+) {
+    data object ByCategory :
+        LibraryGroup(
+            type = 0,
+            nameRes = R.string.categories,
+            icon = Icons.AutoMirrored.Outlined.Label,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
 
-    const val BY_DEFAULT = 0
-    const val BY_TAG = 1
-    const val BY_STATUS = 3
-    const val BY_TRACK_STATUS = 4
-    const val BY_AUTHOR = 6
-    const val BY_CONTENT = 7
-    const val BY_LANGUAGE = 8
-    const val UNGROUPED = 5
+    data object ByTag :
+        LibraryGroup(
+            type = 1,
+            nameRes = R.string.tag,
+            icon = Icons.Default.Style,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
 
-    fun groupTypeStringRes(type: Int): Int {
-        return when (type) {
-            BY_STATUS -> R.string.status
-            BY_TAG -> R.string.tag
-            BY_TRACK_STATUS -> R.string.tracking_status
-            BY_AUTHOR -> R.string.author
-            UNGROUPED -> R.string.ungrouped
-            BY_CONTENT -> R.string.content_rating
-            BY_LANGUAGE -> R.string.original_language
-            else -> R.string.categories
+    data object ByStatus :
+        LibraryGroup(
+            type = 3,
+            nameRes = R.string.status,
+            icon = ProgressClockIcon,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
+
+    data object ByTrackStatus :
+        LibraryGroup(
+            type = 4,
+            nameRes = R.string.tracking_status,
+            icon = Icons.Default.Autorenew,
+            keyComparator =
+                compareBy {
+                    when (it.lowercase()) {
+                        "re reading" -> 1
+                        "plan to read" -> 2
+                        "on hold" -> 3
+                        "completed" -> 4
+                        "dropped" -> 5
+                        "unfollowed" -> 6
+                        else -> 0
+                    }
+                },
+        )
+
+    data object Ungrouped :
+        LibraryGroup(
+            type = 5,
+            nameRes = R.string.ungrouped,
+            icon = UngroupIcon,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
+
+    data object ByAuthor :
+        LibraryGroup(
+            type = 6,
+            nameRes = R.string.author,
+            icon = Icons.Default.Person,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
+
+    data object ByContent :
+        LibraryGroup(
+            type = 7,
+            nameRes = R.string.content_rating,
+            icon = Icons.Default.LocalLibrary,
+            keyComparator =
+                compareBy {
+                    when (it.lowercase()) {
+                        MangaContentRating.Suggestive.key -> 1
+                        MangaContentRating.Erotica.key -> 2
+                        MangaContentRating.Pornographic.key -> 3
+                        MangaContentRating.Unknown.key -> 4
+                        else -> 0 // Other statuses
+                    }
+                },
+        )
+
+    data object ByLanguage :
+        LibraryGroup(
+            type = 8,
+            nameRes = R.string.original_language,
+            icon = Icons.Default.Language,
+            keyComparator = String.CASE_INSENSITIVE_ORDER,
+        )
+
+    companion object {
+        fun fromInt(type: Int): LibraryGroup {
+            return entries.firstOrNull { it.type == type } ?: ByCategory
         }
-    }
 
-    fun groupTypeComposeIcon(type: Int): ImageVector {
-        return when (type) {
-            BY_STATUS -> ProgressClockIcon
-            BY_TAG -> Icons.Default.Style
-            BY_TRACK_STATUS -> Icons.Default.Autorenew
-            BY_AUTHOR -> Icons.Default.Person
-            UNGROUPED -> UngroupIcon
-            BY_CONTENT -> Icons.Default.LocalLibrary
-            BY_LANGUAGE -> Icons.Default.Language
-            else -> Icons.AutoMirrored.Outlined.Label
-        }
-    }
-
-    fun groupTypeDrawableRes(type: Int): Int {
-        return when (type) {
-            BY_STATUS -> R.drawable.ic_progress_clock_24dp
-            BY_TAG -> R.drawable.ic_style_24dp
-            BY_TRACK_STATUS -> R.drawable.ic_sync_24dp
-            BY_AUTHOR -> R.drawable.ic_author_24dp
-            UNGROUPED -> R.drawable.ic_ungroup_24dp
-            BY_CONTENT -> R.drawable.ic_local_library_24dp
-            BY_LANGUAGE -> R.drawable.ic_language_24dp
-            else -> R.drawable.ic_label_outline_24dp
-        }
+        val entries: List<LibraryGroup>
+            get() =
+                listOf(
+                    ByCategory,
+                    ByTag,
+                    ByStatus,
+                    ByTrackStatus,
+                    Ungrouped,
+                    ByAuthor,
+                    ByContent,
+                    ByLanguage,
+                )
     }
 }

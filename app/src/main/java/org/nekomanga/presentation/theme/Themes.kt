@@ -17,6 +17,7 @@ enum class Themes {
     Brown,
     Tako,
     Teal,
+    Neon,
     Nord,
     Monochrome;
 
@@ -31,14 +32,20 @@ enum class Themes {
     @StyleRes
     fun styleRes(): Int {
         return when {
-            this == Monet -> R.style.Theme_Tachiyomi_Monet
-            this == Retro -> R.style.Theme_Tachiyomi_Outrun
-            this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
-            this == Orange -> R.style.Theme_Tachiyomi_MangaDex
-            this == Purple -> R.style.Theme_Tachiyomi_Lavender
-            this == Tako -> R.style.Theme_Tachiyomi_Tako
-            this == Green -> R.style.Theme_Tachiyomi_FlatLime
-            else -> R.style.Theme_Tachiyomi // DEFAULT
+            this == Monet -> R.style.Theme_Neko_Monet
+            this == Retro -> R.style.Theme_Neko_Retro
+            this == Pink -> R.style.Theme_Neko_Pink
+            this == Orange -> R.style.Theme_Neko_Orange
+            this == Teal -> R.style.Theme_Neko_Teal
+            this == Purple -> R.style.Theme_Neko_Purple
+            this == Brown -> R.style.Theme_Neko_Brown
+            this == Tako -> R.style.Theme_Neko_Tako
+            this == Nord -> R.style.Theme_Neko_Nord
+            this == Green -> R.style.Theme_Neko_Green
+            this == Blue -> R.style.Theme_Neko_Blue
+            this == Monochrome -> R.style.Theme_Neko_Monochrome
+            this == Neon -> R.style.Theme_Neko_Neon
+            else -> R.style.Theme_Neko // DEFAULT
         }
     }
 
@@ -50,18 +57,19 @@ enum class Themes {
     fun nameRes(): Int {
         return when {
             this == Monet -> R.string.dynamic
-            this == Retro -> R.string.retro
-            this == Pink -> R.string.spring_blossom
-            this == Orange -> R.string.orange_juice
+            this == Retro -> R.string.miami_vice
+            this == Pink -> R.string.cherry_blossom
+            this == Orange -> R.string.citrus_squeeze
             this == Teal -> R.string.teal_ocean
             this == Purple -> R.string.royal
             this == Brown -> R.string.chocolate
             this == Tako -> R.string.tako
             this == Nord -> R.string.nord
             this == Green -> R.string.jungle
-            this == Blue -> R.string.crayon_blue
+            this == Blue -> R.string.crayon
             this == Monochrome -> R.string.monochrome
-            else -> R.string.app_name // Default
+            this == Neon -> R.string.neon_nights
+            else -> R.string.kitsune_fire // Default
         }
     }
 }

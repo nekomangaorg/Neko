@@ -48,7 +48,12 @@ fun RowScope.CategorySortButtons(
             ),
         onClick = categorySortClick,
     ) {
-        Text(text = sortString, maxLines = 1, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = sortString,
+            maxLines = 1,
+            style = MaterialTheme.typography.bodyLarge,
+            color = textColor,
+        )
     }
     Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
     IconButton(

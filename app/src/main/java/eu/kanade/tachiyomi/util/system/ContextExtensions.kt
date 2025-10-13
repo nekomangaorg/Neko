@@ -83,13 +83,13 @@ fun Context.toast(text: UiText?, duration: Int = Toast.LENGTH_SHORT) {
         when (text) {
             null -> ""
             is UiText.PluralsResource ->
-                this.resources.getQuantityString(text.resourceId, text.count, text.args)
+                this.resources.getQuantityString(text.resourceId, text.count, *text.args)
             is UiText.String -> text.str
             is UiText.StringResource -> {
                 if (text.args.isEmpty()) {
                     this.resources.getString(text.resourceId)
                 } else {
-                    this.resources.getString(text.resourceId, text.args)
+                    this.resources.getString(text.resourceId, *text.args)
                 }
             }
         }

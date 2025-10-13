@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blue_colorPrimary">#FF0066FF</color>
+    <color name="blue_colorOnPrimary">#FFFFFFFF</color>
+    <color name="blue_colorPrimaryContainer">#FFD3E5FF</color>
+    <color name="blue_colorOnPrimaryContainer">#FF003D99</color>
+    <color name="blue_colorPrimaryInverse">#FF99CCFF</color>
+    <color name="blue_colorSecondary">#FF00C7FF</color>
+    <color name="blue_colorOnSecondary">#FF000000</color>
+    <color name="blue_colorSecondaryContainer">#FFE5FFFF</color>
+    <color name="blue_colorOnSecondaryContainer">#FF003D4D</color>
+    <color name="blue_colorTertiary">#FFFF6600</color>
+    <color name="blue_colorOnTertiary">#FFFFFFFF</color>
+    <color name="blue_colorTertiaryContainer">#FFFFD9B3</color>
+    <color name="blue_colorOnTertiaryContainer">#FF662900</color>
+    <color name="blue_colorBackground">#FFFFFCF5</color>
+    <color name="blue_colorOnBackground">#FF1F1E1A</color>
+    <color name="blue_colorSurface">#FFFFFCF5</color>
+    <color name="blue_colorOnSurface">#FF1F1E1A</color>
+    <color name="blue_colorSurfaceVariant">#FFE0E0D8</color>
+    <color name="blue_colorOnSurfaceVariant">#FF55554D</color>
+    <color name="blue_colorSurfaceContainer">#FFEDEDE4</color>
+    <color name="blue_colorOutline">#FF999999</color>
+    <color name="blue_colorError">#FFCC3333</color>
+    <color name="blue_colorOnError">#FFFFFFFF</color>
+
+</resources>

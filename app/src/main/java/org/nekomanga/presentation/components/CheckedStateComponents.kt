@@ -42,7 +42,7 @@ fun CheckboxRow(
             enabled = !disabled,
             colors =
                 CheckboxDefaults.colors(
-                    checkedColor = themeColorState.buttonColor,
+                    checkedColor = themeColorState.primaryColor,
                     checkmarkColor = MaterialTheme.colorScheme.surface,
                 ),
         )

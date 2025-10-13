@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -40,12 +38,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import java.text.DateFormat
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -65,8 +62,8 @@ import org.nekomanga.presentation.theme.Size
 fun TrackingSheet(
     themeColor: ThemeColorState,
     inLibrary: Boolean,
-    servicesProvider: () -> ImmutableList<TrackServiceItem>,
-    tracksProvider: () -> ImmutableList<TrackItem>,
+    servicesProvider: () -> PersistentList<TrackServiceItem>,
+    tracksProvider: () -> PersistentList<TrackItem>,
     dateFormat: DateFormat,
     onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (TrackServiceItem, TrackItem?) -> Unit,
@@ -147,11 +144,11 @@ fun TrackingSheet(
             )
         }
 
-        LazyColumn(
+        Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
-            items(servicesProvider()) { service ->
+            servicesProvider().forEach { service ->
                 val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
 
                 val trackAndService =
@@ -282,7 +279,7 @@ private fun NoTrack(
         Logo(service = service, track = null, onClick = onLogoClick)
         Text(
             text = stringResource(id = R.string.add_tracking),
-            color = themeColor.buttonColor,
+            color = themeColor.primaryColor,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -330,7 +327,7 @@ private fun TrackRowOne(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = null,
                     modifier = Modifier.padding(end = Size.small).size(24.dp),
-                    tint = themeColor.buttonColor,
+                    tint = themeColor.primaryColor,
                 )
             }
         }
@@ -383,7 +380,7 @@ private fun TrackRowTwo(
 
                 Text(
                     text = chapterText,
-                    style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }

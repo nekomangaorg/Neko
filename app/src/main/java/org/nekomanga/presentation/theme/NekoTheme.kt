@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
@@ -16,6 +17,7 @@ import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonochromeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.NeonColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NordColorScheme
 import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
@@ -27,12 +29,12 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun NekoTheme(content: @Composable () -> Unit) {
-
-    val colorScheme = nekoThemeColorScheme()
+fun NekoTheme(colorScheme: ColorScheme? = null, content: @Composable () -> Unit) {
+    val finalColorScheme = colorScheme ?: nekoThemeColorScheme()
 
     MaterialExpressiveTheme(
-        colorScheme = colorScheme,
+        colorScheme = finalColorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = appTypography,
         content = content,
     )
@@ -66,6 +68,7 @@ fun colorSchemeFromTheme(
     return when (theme) {
         Themes.Blue -> BlueColorScheme
         Themes.Teal -> TealColorScheme
+        Themes.Neon -> NeonColorScheme
         Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(context)
         Themes.Monochrome -> MonochromeColorScheme

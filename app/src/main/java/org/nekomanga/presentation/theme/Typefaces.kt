@@ -1,43 +1,103 @@
 package org.nekomanga.presentation.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import org.nekomanga.R
 
 object Typefaces {
     private val defaultTypography = Typography()
-    val montserrat =
+
+    private const val LETTER_SPACING = -.15
+    val mplusRounded =
         FontFamily(
-            Font(R.font.montserrat_thin, FontWeight.Thin),
-            Font(R.font.montserrat_black, FontWeight.Black),
-            Font(R.font.montserrat_bold, FontWeight.Bold),
-            Font(R.font.montserrat_extra_bold, FontWeight.ExtraBold),
-            Font(R.font.montserrat_medium, FontWeight.Medium),
-            Font(R.font.montserrat_semi_bold, FontWeight.SemiBold),
-            Font(R.font.montserrat_regular, FontWeight.Normal),
+            Font(R.font.mplus_rounded1c_thin, FontWeight.Thin),
+            Font(R.font.mplus_rounded1c_black, FontWeight.Black),
+            Font(R.font.mplus_rounded1c_bold, FontWeight.Bold),
+            Font(R.font.mplus_rounded1c_extra_bold, FontWeight.ExtraBold),
+            Font(R.font.mplus_rounded1c_medium, FontWeight.Medium),
+            Font(R.font.mplus_rounded1c_semi_bold, FontWeight.SemiBold),
+            Font(R.font.mplus_rounded1c_regular, FontWeight.Normal),
         )
 
     val appTypography =
         Typography(
-            displayLarge = defaultTypography.displayLarge.copy(fontFamily = montserrat),
-            displayMedium = defaultTypography.displayMedium.copy(fontFamily = montserrat),
-            displaySmall = defaultTypography.displaySmall.copy(fontFamily = montserrat),
-            headlineLarge = defaultTypography.headlineLarge.copy(fontFamily = montserrat),
-            headlineMedium = defaultTypography.headlineMedium.copy(fontFamily = montserrat),
-            headlineSmall = defaultTypography.headlineSmall.copy(fontFamily = montserrat),
-            titleLarge = defaultTypography.titleLarge.copy(fontFamily = montserrat),
-            titleMedium = defaultTypography.titleMedium.copy(fontFamily = montserrat),
-            titleSmall = defaultTypography.titleSmall.copy(fontFamily = montserrat),
-            bodyLarge = defaultTypography.bodyLarge.copy(fontFamily = montserrat),
-            bodyMedium = defaultTypography.bodyMedium.copy(fontFamily = montserrat),
-            bodySmall = defaultTypography.bodySmall.copy(fontFamily = montserrat),
-            labelLarge = defaultTypography.labelLarge.copy(fontFamily = montserrat),
-            labelMedium = defaultTypography.labelMedium.copy(fontFamily = montserrat),
-            labelSmall = defaultTypography.labelSmall.copy(fontFamily = montserrat),
+            displayLarge =
+                defaultTypography.displayLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            displayMedium =
+                defaultTypography.displayMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            displaySmall =
+                defaultTypography.displaySmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineLarge =
+                defaultTypography.headlineLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineMedium =
+                defaultTypography.headlineMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            headlineSmall =
+                defaultTypography.headlineSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleLarge =
+                defaultTypography.titleLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleMedium =
+                defaultTypography.titleMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            titleSmall =
+                defaultTypography.titleSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodyLarge =
+                defaultTypography.bodyLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodyMedium =
+                defaultTypography.bodyMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            bodySmall =
+                defaultTypography.bodySmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelLarge =
+                defaultTypography.labelLarge.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelMedium =
+                defaultTypography.labelMedium.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
+            labelSmall =
+                defaultTypography.labelSmall.copy(
+                    fontFamily = mplusRounded,
+                    letterSpacing = LETTER_SPACING.sp,
+                ),
         )
-
-    val LocalTypography = staticCompositionLocalOf { appTypography }
 }

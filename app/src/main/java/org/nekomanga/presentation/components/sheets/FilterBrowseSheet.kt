@@ -21,9 +21,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
@@ -53,16 +50,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
@@ -70,6 +68,7 @@ import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.filter.TagMode
+import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.FilterChipWrapper
@@ -77,10 +76,8 @@ import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
-import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -94,15 +91,13 @@ fun FilterBrowseSheet(
     loadFilter: (BrowseFilterImpl) -> Unit,
     filterChanged: (Filter) -> Unit,
     defaultContentRatings: ImmutableSet<String>,
-    savedFilters: ImmutableList<BrowseFilterImpl>,
+    savedFilters: PersistentList<BrowseFilterImpl>,
     bottomContentPadding: Dp = 16.dp,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val paddingModifier = Modifier.padding(horizontal = Size.small)
-
         var originalLanguageExpanded by remember { mutableStateOf(false) }
         var contentRatingExpanded by remember { mutableStateOf(false) }
         var publicationDemographicExpanded by remember { mutableStateOf(false) }
@@ -148,192 +143,180 @@ fun FilterBrowseSheet(
 
         var queryText by remember { mutableStateOf(filters.query.text) }
 
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(topEnd = Shapes.sheetRadius, topStart = Shapes.sheetRadius),
+        BaseSheet(
+            themeColor = themeColorState,
+            maxSheetHeightPercentage = .9f,
+            bottomPaddingAroundContent = 0.dp,
+            topPaddingAroundContent = 0.dp,
         ) {
-            Column(
-                modifier =
-                    paddingModifier
-                        .verticalScroll(rememberScrollState())
-                        .weight(weight = 1f, fill = false)
+            val paddingModifier = Modifier.padding(horizontal = Size.small)
+
+            Gap(16.dp)
+
+            val titleRes =
+                when (filters.queryMode) {
+                    QueryType.Title -> {
+                        R.string.title
+                    }
+                    QueryType.Author -> {
+                        R.string.author
+                    }
+                    QueryType.Group -> {
+                        R.string.scanlator_group
+                    }
+                    QueryType.List -> {
+                        R.string.list_id
+                    }
+                }
+            val items = remember {
+                listOf(QueryType.Title, QueryType.Author, QueryType.Group, QueryType.List)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(Size.tiny),
+                horizontalArrangement = Arrangement.Center,
             ) {
-                sheetHandle()
-                Gap(16.dp)
-                val titleRes =
-                    when (filters.queryMode) {
-                        QueryType.Title -> {
-                            R.string.title
+                ButtonGroup(
+                    items = items,
+                    selectedItem = filters.queryMode,
+                    onItemClick = {
+                        queryText = ""
+                        filterChanged(Filter.Query("", it))
+                    },
+                ) { item ->
+                    val name =
+                        when (item) {
+                            QueryType.Title -> stringResource(id = R.string.title)
+                            QueryType.Author -> stringResource(id = R.string.author)
+                            QueryType.Group -> stringResource(id = R.string.scanlator_group)
+                            QueryType.List -> stringResource(id = R.string.list_id)
                         }
-                        QueryType.Author -> {
-                            R.string.author
-                        }
-                        QueryType.Group -> {
-                            R.string.scanlator_group
-                        }
-                        QueryType.List -> {
-                            R.string.list_id
-                        }
-                    }
-
-                FlowRow(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Size.small),
-                ) {
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Title,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Title))
-                        },
-                        stringResource(id = R.string.title),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Author,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Author))
-                        },
-                        stringResource(id = R.string.author),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Group,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.Group))
-                        },
-                        stringResource(id = R.string.scanlator_group),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.List,
-                        {
-                            queryText = ""
-                            filterChanged(Filter.Query("", QueryType.List))
-                        },
-                        stringResource(id = R.string.list_id),
+                    Text(
+                        text = name,
+                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
+            }
 
-                val isError =
-                    remember(filters.query.text) {
-                        if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
-                            false
-                        } else {
-                            !filters.query.text.isUUID()
-                        }
+            val isError =
+                remember(filters.query.text) {
+                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
+                        false
+                    } else {
+                        !filters.query.text.isUUID()
                     }
-
-                SearchFooter(
-                    themeColorState = themeColorState,
-                    labelText = stringResource(id = titleRes),
-                    showDivider = false,
-                    title = queryText,
-                    isError = isError,
-                    textChanged = { text: String ->
-                        queryText = text
-                        filterChanged(filters.query.copy(text = text))
-                    },
-                    search = { filterClick() },
-                )
-
-                FilterRow(
-                    items = filters.originalLanguage.toImmutableList(),
-                    expanded = originalLanguageExpanded,
-                    disabled = disabled,
-                    headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
-                    headerRes = R.string.original_language,
-                    anyEnabled = filters.originalLanguage.any { it.state },
-                    onClick = { originalLanguage ->
-                        filterChanged(originalLanguage.copy(state = !originalLanguage.state))
-                    },
-                    selected = { originalLanguage -> originalLanguage.state },
-                    name = { originalLanguage -> originalLanguage.language.prettyPrint },
-                )
-
-                if (filters.contentRatingVisible) {
-                    FilterRow(
-                        items = filters.contentRatings.toImmutableList(),
-                        expanded = contentRatingExpanded,
-                        disabled = disabled,
-                        headerClicked = { contentRatingExpanded = !contentRatingExpanded },
-                        headerRes = R.string.content_rating,
-                        anyEnabled =
-                            filters.contentRatings.any {
-                                (it.rating.key in defaultContentRatings && !it.state) ||
-                                    it.rating.key !in defaultContentRatings && it.state
-                            },
-                        onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
-                        selected = { rating -> rating.state },
-                        nameRes = { rating -> rating.rating.nameRes },
-                    )
                 }
 
+            SearchFooter(
+                themeColorState = themeColorState,
+                labelText = stringResource(id = titleRes),
+                showDivider = false,
+                title = queryText,
+                isError = isError,
+                textChanged = { text: String ->
+                    queryText = text
+                    filterChanged(filters.query.copy(text = text))
+                },
+                search = { filterClick() },
+            )
+
+            FilterRow(
+                items = filters.originalLanguage.toPersistentList(),
+                expanded = originalLanguageExpanded,
+                disabled = disabled,
+                headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
+                headerRes = R.string.original_language,
+                anyEnabled = filters.originalLanguage.any { it.state },
+                onClick = { originalLanguage ->
+                    filterChanged(originalLanguage.copy(state = !originalLanguage.state))
+                },
+                selected = { originalLanguage -> originalLanguage.state },
+                name = { originalLanguage -> originalLanguage.language.prettyPrint },
+            )
+
+            if (filters.contentRatingVisible) {
                 FilterRow(
-                    items = filters.publicationDemographics.toImmutableList(),
-                    expanded = publicationDemographicExpanded,
+                    items = filters.contentRatings.toPersistentList(),
+                    expanded = contentRatingExpanded,
                     disabled = disabled,
-                    headerClicked = {
-                        publicationDemographicExpanded = !publicationDemographicExpanded
-                    },
-                    headerRes = R.string.publication_demographic,
-                    anyEnabled = filters.publicationDemographics.any { it.state },
-                    onClick = { demo -> filterChanged(demo.copy(state = !demo.state)) },
-                    selected = { demo -> demo.state },
-                    nameRes = { demo -> demo.demographic.nameRes },
-                )
-
-                FilterRow(
-                    items = filters.statuses.toImmutableList(),
-                    expanded = statusExpanded,
-                    disabled = disabled,
-                    headerClicked = { statusExpanded = !statusExpanded },
-                    headerRes = R.string.status,
-                    anyEnabled = filters.statuses.any { it.state },
-                    onClick = { status -> filterChanged(status.copy(state = !status.state)) },
-                    selected = { status -> status.state },
-                    nameRes = { status -> status.status.statusRes },
-                )
-
-                FilterRow(
-                    items = filters.sort.toImmutableList(),
-                    expanded = sortExpanded,
-                    disabled = disabled,
-                    headerClicked = { sortExpanded = !sortExpanded },
-                    headerRes = R.string.sort,
-                    anyEnabled = filters.sort.any { it.state && it.sort != MdSort.Best },
-                    onClick = { sort -> filterChanged(sort.copy(state = !sort.state)) },
-                    selected = { sort -> sort.state },
-                    name = { sort -> sort.sort.displayName },
-                )
-
-                FilterTriStateRow(
-                    items = filters.tags.toImmutableList(),
-                    expanded = tagExpanded,
-                    disabled = disabled,
-                    headerClicked = { tagExpanded = !tagExpanded },
-                    headerRes = R.string.tag,
-                    anyEnabled = filters.tags.any { it.state != ToggleableState.Off },
-                    toggleState = { newState, tag -> filterChanged(tag.copy(state = newState)) },
-                    selected = { tag -> tag.state },
-                    name = { tag -> tag.tag.prettyPrint },
-                )
-
-                OtherRow(
-                    isExpanded = otherExpanded,
-                    disabled = disabled,
-                    themeColorState = themeColorState,
-                    onHeaderClick = { otherExpanded = !otherExpanded },
-                    filters = filters,
+                    headerClicked = { contentRatingExpanded = !contentRatingExpanded },
+                    headerRes = R.string.content_rating,
                     anyEnabled =
-                        (filters.tagExclusionMode != Filter.TagExclusionMode() ||
-                            filters.tagInclusionMode != Filter.TagInclusionMode() ||
-                            filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
-                            filters.authorId.uuid.isNotBlank() ||
-                            filters.groupId.uuid.isNotBlank()),
-                    filterChanged = filterChanged,
-                    filterClick = filterClick,
+                        filters.contentRatings.any {
+                            (it.rating.key in defaultContentRatings && !it.state) ||
+                                it.rating.key !in defaultContentRatings && it.state
+                        },
+                    onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
+                    selected = { rating -> rating.state },
+                    nameRes = { rating -> rating.rating.nameRes },
                 )
             }
+
+            FilterRow(
+                items = filters.publicationDemographics.toPersistentList(),
+                expanded = publicationDemographicExpanded,
+                disabled = disabled,
+                headerClicked = {
+                    publicationDemographicExpanded = !publicationDemographicExpanded
+                },
+                headerRes = R.string.publication_demographic,
+                anyEnabled = filters.publicationDemographics.any { it.state },
+                onClick = { demo -> filterChanged(demo.copy(state = !demo.state)) },
+                selected = { demo -> demo.state },
+                nameRes = { demo -> demo.demographic.nameRes },
+            )
+
+            FilterRow(
+                items = filters.statuses.toPersistentList(),
+                expanded = statusExpanded,
+                disabled = disabled,
+                headerClicked = { statusExpanded = !statusExpanded },
+                headerRes = R.string.status,
+                anyEnabled = filters.statuses.any { it.state },
+                onClick = { status -> filterChanged(status.copy(state = !status.state)) },
+                selected = { status -> status.state },
+                nameRes = { status -> status.status.statusRes },
+            )
+
+            FilterRow(
+                items = filters.sort.toPersistentList(),
+                expanded = sortExpanded,
+                disabled = disabled,
+                headerClicked = { sortExpanded = !sortExpanded },
+                headerRes = R.string.sort,
+                anyEnabled = filters.sort.any { it.state && it.sort != MdSort.Best },
+                onClick = { sort -> filterChanged(sort.copy(state = !sort.state)) },
+                selected = { sort -> sort.state },
+                name = { sort -> sort.sort.displayName },
+            )
+
+            FilterTriStateRow(
+                items = filters.tags.toPersistentList(),
+                expanded = tagExpanded,
+                disabled = disabled,
+                headerClicked = { tagExpanded = !tagExpanded },
+                headerRes = R.string.tag,
+                anyEnabled = filters.tags.any { it.state != ToggleableState.Off },
+                toggleState = { newState, tag -> filterChanged(tag.copy(state = newState)) },
+                selected = { tag -> tag.state },
+                name = { tag -> tag.tag.prettyPrint },
+            )
+
+            OtherRow(
+                isExpanded = otherExpanded,
+                disabled = disabled,
+                themeColorState = themeColorState,
+                onHeaderClick = { otherExpanded = !otherExpanded },
+                filters = filters,
+                anyEnabled =
+                    (filters.tagExclusionMode != Filter.TagExclusionMode() ||
+                        filters.tagInclusionMode != Filter.TagInclusionMode() ||
+                        filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
+                        filters.authorId.uuid.isNotBlank() ||
+                        filters.groupId.uuid.isNotBlank()),
+                filterChanged = filterChanged,
+                filterClick = filterClick,
+            )
 
             Gap(Size.tiny)
 
@@ -422,7 +405,7 @@ fun FilterBrowseSheet(
 
 @Composable
 private fun <T> FilterRow(
-    items: ImmutableList<T>,
+    items: PersistentList<T>,
     expanded: Boolean,
     disabled: Boolean,
     anyEnabled: Boolean,
@@ -470,7 +453,7 @@ private fun <T> FilterRow(
 
 @Composable
 private fun <T> FilterTriStateRow(
-    items: ImmutableList<T>,
+    items: PersistentList<T>,
     expanded: Boolean,
     disabled: Boolean,
     headerClicked: () -> Unit,
@@ -540,6 +523,7 @@ fun OtherRow(
         AnimatedVisibility(visible = isExpanded, enter = slideEnter(), exit = slideExit()) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CheckboxRow(
+                    modifier = Modifier.fillMaxWidth(),
                     checkedState = filters.hasAvailableChapters.state,
                     checkedChange = { newState ->
                         filterChanged(filters.hasAvailableChapters.copy(state = newState))
@@ -652,7 +636,7 @@ fun OtherRow(
 @Composable
 fun SavedFilters(
     visible: Boolean,
-    savedFilters: ImmutableList<BrowseFilterImpl>,
+    savedFilters: PersistentList<BrowseFilterImpl>,
     nameOfEnabledFilter: String,
     loadFilter: (BrowseFilterImpl) -> Unit,
     deleteFilterClick: (String) -> Unit,
@@ -670,7 +654,7 @@ fun SavedFilters(
                         val mutableFilters = savedFilters.toMutableList()
                         val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
                         mutableStateOf(
-                            persistentListOf(enabledFilter) + mutableFilters.toImmutableList()
+                            persistentListOf(enabledFilter) + mutableFilters.toPersistentList()
                         )
                     }
                 }
@@ -690,8 +674,6 @@ fun SavedFilters(
                         },
                         name = filter.name,
                     )
-                    // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() +
-                    // fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
                     if (isEnabled) {
                         Row(modifier = Modifier.animateItem()) {
                             ToolTipButton(
@@ -731,11 +713,7 @@ fun SavedFilters(
 
 private fun slideEnter(): EnterTransition {
     return slideInVertically() +
-        expandVertically(
-            // Expand from the top.
-            clip = true,
-            expandFrom = Alignment.Top,
-        ) +
+        expandVertically(clip = true, expandFrom = Alignment.Top) +
         fadeIn()
 }
 

@@ -13,9 +13,9 @@ import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlin.math.min
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
@@ -94,7 +94,7 @@ class ListHandler {
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }
-                                                .toImmutableList(),
+                                                .toPersistentList(),
                                         hasNextPage =
                                             (mangaListDto.limit + mangaListDto.offset) <
                                                 listDto.data.relationships.size,
@@ -136,7 +136,7 @@ class ListHandler {
                 Ok(
                     ListResults(
                         displayScreenType = displayScreenType!!,
-                        sourceManga = list.toImmutableList(),
+                        sourceManga = list.toPersistentList(),
                     )
                 )
         }
@@ -145,6 +145,6 @@ class ListHandler {
 
 data class ListResults(
     val displayScreenType: DisplayScreenType,
-    val sourceManga: ImmutableList<SourceManga>,
+    val sourceManga: PersistentList<SourceManga>,
     val hasNextPage: Boolean = false,
 )

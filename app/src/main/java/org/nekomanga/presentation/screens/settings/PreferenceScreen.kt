@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.delay
 import org.nekomanga.presentation.screens.settings.Preference.PreferenceItem
 import org.nekomanga.presentation.screens.settings.screens.SearchableSettings
@@ -28,7 +28,7 @@ import org.nekomanga.presentation.screens.settings.widgets.PreferenceGroupHeader
  */
 @Composable
 fun PreferenceScreen(
-    items: ImmutableList<Preference>,
+    items: PersistentList<Preference>,
     incomingHighlightKey: String? = null,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),

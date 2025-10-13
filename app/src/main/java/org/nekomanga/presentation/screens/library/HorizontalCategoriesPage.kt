@@ -73,6 +73,13 @@ fun HorizontalCategoriesPage(
             libraryScreenState.selectedItems.map { it.displayManga.mangaId }
         }
 
+    val indicatorColor =
+        if (libraryScreenState.useVividColorHeaders) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
     Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
         SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
@@ -81,14 +88,18 @@ fun HorizontalCategoriesPage(
             divider = {},
         ) {
             libraryScreenState.items.forEachIndexed { index, item ->
+                val isSelected = pagerState.currentPage == index
+
                 Tab(
                     text = {
                         Text(
                             item.categoryItem.name,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color =
+                                if (isSelected) indicatorColor
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
-                    selected = pagerState.currentPage == index,
+                    selected = isSelected,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                 )
             }
@@ -129,12 +140,13 @@ fun HorizontalCategoriesPage(
                                         if (allSelected) Icons.Default.CheckCircleOutline
                                         else Icons.Outlined.Circle,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    tint = indicatorColor,
                                 )
                             }
                             Spacer(modifier = Modifier.weight(1f))
 
                             CategorySortButtons(
+                                textColor = indicatorColor,
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },
                                 sortString =
@@ -308,8 +320,9 @@ private fun ListItem(
 ) {
     val listCardType =
         when {
-            index == 0 && totalSize >= 1 -> ListCardType.Top
-            index == totalSize - 1 -> ListCardType.Bottom
+            index == 0 && totalSize > 1 -> ListCardType.Top
+            index == totalSize - 1 && totalSize > 1 -> ListCardType.Bottom
+            totalSize == 1 -> ListCardType.Single
             else -> ListCardType.Center
         }
     ExpressiveListCard(

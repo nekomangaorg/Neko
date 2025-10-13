@@ -52,7 +52,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.R
@@ -73,8 +73,8 @@ fun DescriptionBlock(
     titleProvider: () -> String,
     description: String,
     isInitializedProvider: () -> Boolean,
-    altTitlesProvider: () -> ImmutableList<String>,
-    genresProvider: () -> ImmutableList<String>,
+    altTitlesProvider: () -> PersistentList<String>,
+    genresProvider: () -> PersistentList<String>,
     themeColorState: ThemeColorState,
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
@@ -88,7 +88,7 @@ fun DescriptionBlock(
 
     val tagColor =
         MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-            themeColorState.buttonColor,
+            themeColorState.primaryColor,
             16.dp,
         )
 
@@ -153,7 +153,7 @@ fun DescriptionBlock(
                             )
                 ) {
                     MoreLessButton(
-                        themeColorState.buttonColor,
+                        themeColorState.primaryColor,
                         true,
                         Modifier.align(Alignment.TopEnd),
                     )
@@ -205,7 +205,7 @@ fun DescriptionBlock(
                 Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
                 MoreLessButton(
-                    buttonColor = themeColorState.buttonColor,
+                    buttonColor = themeColorState.primaryColor,
                     isMore = false,
                     clickable.align(Alignment.End),
                 )
@@ -246,7 +246,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 
 @Composable
 private fun AltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     shouldWrap: Boolean,
     tagColor: Color,
@@ -263,7 +263,7 @@ private fun AltTitles(
 
         Text(
             text = "Alt Titles:",
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             color =
                 MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
@@ -295,7 +295,7 @@ private fun AltTitles(
 
 @Composable
 private fun FlowableAltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
     tagColor: Color,
@@ -312,8 +312,8 @@ private fun FlowableAltTitles(
             TextButton(onClick = resetClick) {
                 Text(
                     text = stringResource(id = R.string.reset),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = themeColorState.buttonColor,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = themeColorState.primaryColor,
                 )
             }
         }
@@ -343,7 +343,7 @@ private fun FlowableAltTitles(
                 label = {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(Size.none),
                     )
                 },
@@ -354,7 +354,7 @@ private fun FlowableAltTitles(
 
 @Composable
 private fun ScrollableAltTitles(
-    altTitles: ImmutableList<String>,
+    altTitles: PersistentList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
     tagColor: Color,
@@ -383,8 +383,8 @@ private fun ScrollableAltTitles(
                 TextButton(onClick = resetClick) {
                     Text(
                         text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = themeColorState.primaryColor,
                     )
                 }
             }
@@ -417,7 +417,7 @@ private fun ScrollableAltTitles(
                 label = {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(Size.none),
                     )
                 },
@@ -429,7 +429,7 @@ private fun ScrollableAltTitles(
 
 @Composable
 private fun ColumnScope.Genres(
-    genres: ImmutableList<String>,
+    genres: PersistentList<String>,
     tagColor: Color,
     themeColorState: ThemeColorState,
     genreSearch: (String) -> Unit,
@@ -439,7 +439,7 @@ private fun ColumnScope.Genres(
 
     Text(
         text = "Tags:",
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
     Gap(Size.tiny)

@@ -3,16 +3,16 @@ package org.nekomanga.domain.category
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 
 data class CategoryItem(
     val id: Int,
     val name: String,
     val order: Int = 0,
     val flags: Int = 0,
-    val mangaOrder: ImmutableList<Long> = persistentListOf(),
+    val mangaOrder: PersistentList<Long> = persistentListOf(),
     val sortOrder: LibrarySort,
     val isAscending: Boolean = true,
     val isAlone: Boolean = true,
@@ -60,7 +60,7 @@ fun Category.toCategoryItem(): CategoryItem {
         name = this.name,
         order = this.order,
         flags = this.flags,
-        mangaOrder = this.mangaOrder.toImmutableList(),
+        mangaOrder = this.mangaOrder.toPersistentList(),
         isAscending = this.isAscending(),
         sortOrder = LibrarySort.filteredValueOf(this.mangaSort) ?: LibrarySort.Title,
         isAlone = this.isAlone,

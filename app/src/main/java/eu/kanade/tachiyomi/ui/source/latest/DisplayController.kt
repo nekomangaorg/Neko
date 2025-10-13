@@ -23,7 +23,7 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
         DisplayScreen(
             displayScreenState = presenter.displayScreenState.collectAsStateWithLifecycle(),
             switchDisplayClick = presenter::switchDisplayMode,
-            switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
+            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
             onBackPress = router::handleBack,
             openManga = { mangaId: Long ->
                 router.pushController(MangaDetailController(mangaId).withFadeTransaction())

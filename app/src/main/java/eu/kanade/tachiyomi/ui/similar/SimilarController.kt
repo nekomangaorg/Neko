@@ -28,6 +28,7 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             onRefresh = presenter::refresh,
+            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
         )
     }
 

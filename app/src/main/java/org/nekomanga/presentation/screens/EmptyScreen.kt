@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
@@ -76,7 +76,7 @@ private val ErrorFaces =
 @Composable
 fun EmptyScreen(
     message: UiText,
-    actions: ImmutableList<Action> = persistentListOf(),
+    actions: PersistentList<Action> = persistentListOf(),
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val errorFace = remember { ErrorFaces.random() }

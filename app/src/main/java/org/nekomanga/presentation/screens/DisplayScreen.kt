@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -28,27 +32,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.listGridAppBarAction
-import org.nekomanga.presentation.components.sheets.EditCategorySheet
-import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.functions.numberOfColumns
+import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
+import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -56,7 +61,7 @@ import org.nekomanga.presentation.theme.Size
 fun DisplayScreen(
     displayScreenState: State<DisplayScreenState>,
     switchDisplayClick: () -> Unit,
-    switchLibraryVisibilityClick: () -> Unit,
+    libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -71,32 +76,45 @@ fun DisplayScreen(
             skipHalfExpanded = true,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
-    var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
+
+    var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
 
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
+
+    val openSheet: (DisplaySheetScreen) -> Unit = {
+        scope.launch {
+            currentBottomSheet = it
+            sheetState.show()
+        }
+    }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                EditCategorySheet(
-                    addingToLibrary = true,
-                    categories = displayScreenState.value.categories,
-                    cancelClick = { scope.launch { sheetState.hide() } },
-                    addNewCategory = addNewCategory,
-                    confirmClicked = { selectedCategories ->
-                        scope.launch { sheetState.hide() }
-                        longClickedMangaId?.let { toggleFavorite(it, selectedCategories) }
-                    },
-                )
+                currentBottomSheet?.let { currentSheet ->
+                    DisplayScreenSheet(
+                        currentScreen = currentSheet,
+                        addNewCategory = addNewCategory,
+                        contentPadding =
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues(),
+                        closeSheet = { scope.launch { sheetState.hide() } },
+                        categories = displayScreenState.value.categories,
+                        isList = displayScreenState.value.isList,
+                        libraryEntryVisibility = displayScreenState.value.libraryEntryVisibility,
+                    )
+                }
             }
         },
     ) {
         NekoScaffold(
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
+            incognitoMode = displayScreenState.value.incognitoMode,
             title =
                 if (displayScreenState.value.titleRes != null)
                     stringResource(id = displayScreenState.value.titleRes!!)
@@ -105,14 +123,22 @@ fun DisplayScreen(
                 AppBarActions(
                     actions =
                         listOf(
-                            listGridAppBarAction(
-                                isList = displayScreenState.value.isList,
-                                onClick = switchDisplayClick,
-                            ),
-                            showLibraryEntriesAction(
-                                showEntries = displayScreenState.value.showLibraryEntries,
-                                onClick = switchLibraryVisibilityClick,
-                            ),
+                            AppBar.Action(
+                                title = UiText.StringResource(R.string.settings),
+                                icon = Icons.Outlined.Tune,
+                                onClick = {
+                                    scope.launch {
+                                        openSheet(
+                                            DisplaySheetScreen.BrowseDisplayOptionsSheet(
+                                                showIsList = true,
+                                                switchDisplayClick = switchDisplayClick,
+                                                libraryEntryVisibilityClick =
+                                                    libraryEntryVisibilityClick,
+                                            )
+                                        )
+                                    }
+                                },
+                            )
                         )
                 )
             },
@@ -132,8 +158,14 @@ fun DisplayScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
                         scope.launch {
-                            longClickedMangaId = displayManga.mangaId
-                            sheetState.show()
+                            openSheet(
+                                DisplaySheetScreen.CategoriesSheet(
+                                    setCategories = { selectedCategories ->
+                                        scope.launch { sheetState.hide() }
+                                        toggleFavorite(displayManga.mangaId, selectedCategories)
+                                    }
+                                )
+                            )
                         }
                     } else {
                         toggleFavorite(displayManga.mangaId, emptyList())
@@ -142,12 +174,7 @@ fun DisplayScreen(
 
                 if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Loading(
-                            Modifier.zIndex(1f)
-                                .padding(Size.small)
-                                .padding(top = contentPadding.calculateTopPadding())
-                                .align(Alignment.TopCenter)
-                        )
+                        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 } else if (displayScreenState.value.error != null) {
                     EmptyScreen(
@@ -190,14 +217,21 @@ fun DisplayScreen(
                     }
                     if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
                         Box(Modifier.fillMaxSize()) {
-                            LinearProgressIndicator(
+                            val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                            val stroke =
+                                remember(strokeWidth) {
+                                    Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                }
+                            LinearWavyProgressIndicator(
                                 modifier =
-                                    Modifier.padding(
-                                            bottom =
-                                                contentPadding.calculateBottomPadding() + Size.small
-                                        )
-                                        .align(Alignment.BottomCenter)
-                                        .fillMaxWidth()
+                                    Modifier.fillMaxWidth()
+                                        .align(Alignment.TopStart)
+                                        .statusBarsPadding(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor =
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                stroke = stroke,
+                                trackStroke = stroke,
                             )
                         }
                     }

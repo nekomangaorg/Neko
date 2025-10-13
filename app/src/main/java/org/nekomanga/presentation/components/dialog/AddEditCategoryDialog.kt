@@ -66,9 +66,9 @@ fun AddEditCategoryDialog(
                         maxLines = 1,
                         colors =
                             OutlinedTextFieldDefaults.colors(
-                                cursorColor = themeColorState.buttonColor,
-                                focusedLabelColor = themeColorState.buttonColor,
-                                focusedBorderColor = themeColorState.buttonColor,
+                                cursorColor = themeColorState.primaryColor,
+                                focusedLabelColor = themeColorState.primaryColor,
+                                focusedBorderColor = themeColorState.primaryColor,
                             ),
                         isError =
                             !categoryText.text.isBlank() &&
@@ -98,7 +98,7 @@ fun AddEditCategoryDialog(
                             categoryText.text.isNotBlank() &&
                             (categorySelected.isBlank() || categorySelected != categoryText.text),
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.save))
                 }
@@ -107,7 +107,7 @@ fun AddEditCategoryDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

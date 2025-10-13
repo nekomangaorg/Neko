@@ -19,6 +19,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 fun SortRow(
@@ -35,7 +37,7 @@ fun SortRow(
             true ->
                 MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to
                     MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
-            false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface
+            false -> themeColorState.primaryColor to MaterialTheme.colorScheme.onSurface
         }
 
     Row(
@@ -86,4 +88,16 @@ private fun changeSortState(
             MangaConstants.SortState.None -> MangaConstants.SortState.Descending
         }
     sortChanged(newState)
+}
+
+@ThemePreviews
+@Composable
+private fun SortRowPreview() {
+    ThemedPreviews { theme ->
+        SortRow(
+            sortState = MangaConstants.SortState.Ascending,
+            sortChanged = {},
+            rowText = theme.name,
+        )
+    }
 }

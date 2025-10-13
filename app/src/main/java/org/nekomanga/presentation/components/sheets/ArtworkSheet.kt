@@ -116,7 +116,7 @@ fun ArtworkSheet(
                 ) {
                     ArtworkButton(
                         text = stringResource(id = R.string.save),
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         modifier = Modifier.weight(1f),
                     ) {
                         saveClick(currentImage)
@@ -124,14 +124,14 @@ fun ArtworkSheet(
                     if (inLibrary) {
                         ArtworkButton(
                             text = stringResource(id = R.string.set),
-                            color = themeColorState.buttonColor,
+                            color = themeColorState.primaryColor,
                             modifier = Modifier.weight(1f),
                         ) {
                             setClick(currentImage)
                         }
                         ArtworkButton(
                             text = stringResource(id = R.string.reset),
-                            color = themeColorState.buttonColor,
+                            color = themeColorState.primaryColor,
                             modifier = Modifier.weight(1f),
                         ) {
                             resetClick()
@@ -139,7 +139,7 @@ fun ArtworkSheet(
                     }
                     ArtworkButton(
                         text = stringResource(id = R.string.share),
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         modifier = Modifier.weight(1f),
                     ) {
                         shareClick(currentImage)
@@ -250,7 +250,7 @@ private fun ActiveIndicator(themeColorState: ThemeColorState) {
             imageVector = Icons.Filled.Star,
             modifier = Modifier.padding(Size.tiny),
             contentDescription = null,
-            tint = themeColorState.buttonColor,
+            tint = themeColorState.primaryColor,
         )
     }
 }

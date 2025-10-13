@@ -36,7 +36,14 @@ fun libraryMangaItemComparator(
                 compareBy { lastReadMap[it.displayManga.mangaId] ?: lastReadMap.size }
 
             LibrarySort.LatestChapter -> compareByDescending { it.latestChapterDate }
-            LibrarySort.Unread -> compareBy { it.unreadCount }
+            LibrarySort.Unread ->
+                compareBy {
+                    when {
+                        it.unreadCount == 0 ->
+                            if (categoryIsAscending) Integer.MAX_VALUE else Integer.MIN_VALUE
+                        else -> it.unreadCount
+                    }
+                }
             LibrarySort.TotalChapters -> compareByDescending { it.totalChapterCount }
             LibrarySort.DateAdded -> compareByDescending { it.addedToLibraryDate }
             LibrarySort.DateFetched ->

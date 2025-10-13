@@ -10,7 +10,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
@@ -39,12 +38,7 @@ fun LastReadLine(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = statuses.joinToString(Constants.SEPARATOR),
-            style =
-                style.copy(
-                    color = textColor,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp,
-                ),
+            style = style.copy(color = textColor, fontWeight = FontWeight.Medium),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

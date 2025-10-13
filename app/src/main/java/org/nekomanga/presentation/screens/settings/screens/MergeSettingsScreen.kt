@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.MergeScreenState
 import eu.kanade.tachiyomi.ui.setting.MergeScreenType
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
@@ -19,18 +19,19 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class MergeSettingsScreen(
+    incognitoMode: Boolean,
     onNavigationIconClick: () -> Unit,
     val komgaState: MergeScreenState,
     val suwayomiState: MergeScreenState,
     val logout: (MergeScreenType) -> Unit,
     val login: (MergeScreenType, String, String, String) -> Unit,
     val loginEvent: SharedFlow<MergeLoginEvent>,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.merge_source_settings
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         return persistentListOf(
             mergeGroup(
                 mergeState = komgaState,
@@ -106,7 +107,7 @@ internal class MergeSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.komga)),
                 SearchTerm(title = stringResource(R.string.suwayomi)),

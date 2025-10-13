@@ -46,7 +46,7 @@ fun ThemeSelector(
             Themes.entries
                 .filter {
                     (!it.isDarkTheme() || it.followsSystem()) &&
-                        (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                        (it.styleRes() != R.style.Theme_Neko_Monet || supportsDynamic)
                 }
                 .toSet()
         }
@@ -57,7 +57,7 @@ fun ThemeSelector(
             Themes.entries
                 .filter {
                     (it.isDarkTheme() || it.followsSystem()) &&
-                        (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                        (it.styleRes() != R.style.Theme_Neko_Monet || supportsDynamic)
                 }
                 .toSet()
         }

@@ -9,17 +9,17 @@ internal object GreenColorScheme : BaseColorScheme() {
         lightColorScheme(
             primary = Color(0xFF386A00),
             onPrimary = Color(0xFFFFFFFF),
-            primaryContainer = Color(0xFFB2F449),
+            primaryContainer = Color(0xFFCCEEA1),
             onPrimaryContainer = Color(0xFF092000),
             inversePrimary = Color(0xFFA6F26D),
-            secondary = Color(0xFF57634E),
+            secondary = Color(0xFF745900),
             onSecondary = Color(0xFFFFFFFF),
-            secondaryContainer = Color(0xFFDAE8CD),
-            onSecondaryContainer = Color(0xFF151F0F),
-            tertiary = Color(0xFF386665),
+            secondaryContainer = Color(0xFFEFE4C6),
+            onSecondaryContainer = Color(0xFF251A00),
+            tertiary = Color(0xFF006B78),
             onTertiary = Color(0xFFFFFFFF),
-            tertiaryContainer = Color(0xFFBBECEC),
-            onTertiaryContainer = Color(0xFF00201F),
+            tertiaryContainer = Color(0xFFA5F5FF),
+            onTertiaryContainer = Color(0xFF002024),
             background = Color(0xFFFCFEF7),
             onBackground = Color(0xFF1A1C18),
             surface = Color(0xFFFCFEF7),
@@ -59,24 +59,24 @@ internal object GreenColorScheme : BaseColorScheme() {
 
     override val darkScheme =
         darkColorScheme(
-            primary = Color(0xFFA6F26D), // Bright Green
+            primary = Color(0xFFA6F26D),
             onPrimary = Color(0xFF1E3700),
-            primaryContainer = Color(0xFF2C5000), // Dark Green
+            primaryContainer = Color(0xFF2C5000),
             onPrimaryContainer = Color(0xFFB2F449),
             inversePrimary = Color(0xFF386A00),
-            secondary = Color(0xFFC4CBBE), // Light Grey-Green
-            onSecondary = Color(0xFF293423),
-            secondaryContainer = Color(0xFF5E4941), // Rich Brown/Olive Container
-            onSecondaryContainer = Color(0xFFDAE8CD),
-            tertiary = Color(0xFF9FD0CE),
-            onTertiary = Color(0xFF003736),
-            tertiaryContainer = Color(0xFF384F4B),
-            onTertiaryContainer = Color(0xFFBBECEC),
-            background = Color(0xFF1D1513), // Deep Brown
+            secondary = Color(0xFFBCA784),
+            onSecondary = Color(0xFF402E00),
+            secondaryContainer = Color(0xFF5F4A00),
+            onSecondaryContainer = Color(0xFFFFDFB9),
+            tertiary = Color(0xFF83D3E0),
+            onTertiary = Color(0xFF00363D),
+            tertiaryContainer = Color(0xFF004E58),
+            onTertiaryContainer = Color(0xFFA5F5FF),
+            background = Color(0xFF1D1513),
             onBackground = Color(0xFFEBE0DD),
-            surface = Color(0xFF1D1513), // Deep Brown
+            surface = Color(0xFF1D1513),
             onSurface = Color(0xFFEBE0DD),
-            surfaceVariant = Color(0xFF4A3832), // Rich Mid Brown
+            surfaceVariant = Color(0xFF4A3832),
             onSurfaceVariant = Color(0xFFD0C4C1),
             surfaceTint = Color(0xFFA6F26D),
             inverseSurface = Color(0xFFEBE0DD),
@@ -90,8 +90,6 @@ internal object GreenColorScheme : BaseColorScheme() {
             onError = Color(0xFF690005),
             errorContainer = Color(0xFF93000A),
             onErrorContainer = Color(0xFFFFDAD6),
-
-            // Surface containers set to brown gradient
             surfaceContainerLowest = Color(0xFF110D0B),
             surfaceContainerLow = Color(0xFF241B19),
             surfaceContainer = Color(0xFF2B211E),

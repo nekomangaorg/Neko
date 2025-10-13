@@ -69,6 +69,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             if (supportsDynamic) Themes.Monet else Themes.Neko,
         )
 
+    fun useVividColorHeaders() = this.preferenceStore.getBoolean("vivid_color_headers", true)
+
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
@@ -175,17 +177,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
 
     // Tutorial preferences
-    fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
-
-    fun shownLongPressCategoryTutorial() =
-        this.preferenceStore.getBoolean("shown_long_press_category")
-
-    fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
-
-    fun hideBottomNavOnScroll() =
-        this.preferenceStore.getBoolean(
-            "false_key"
-        ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 

@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
@@ -43,8 +43,8 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun EditCategorySheet(
     addingToLibrary: Boolean,
-    categories: ImmutableList<CategoryItem>,
-    mangaCategories: ImmutableList<CategoryItem> = persistentListOf(),
+    categories: PersistentList<CategoryItem>,
+    mangaCategories: PersistentList<CategoryItem> = persistentListOf(),
     themeColorState: ThemeColorState = defaultThemeColorState(),
     bottomContentPadding: Dp = 16.dp,
     cancelClick: () -> Unit,
@@ -101,7 +101,7 @@ fun EditCategorySheet(
                         text = stringResource(id = R.string.plus_new_category),
                         style =
                             MaterialTheme.typography.titleSmall.copy(
-                                color = themeColorState.buttonColor
+                                color = themeColorState.primaryColor
                             ),
                     )
                 }
@@ -149,7 +149,7 @@ fun EditCategorySheet(
                 TextButton(
                     onClick = cancelClick,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),
@@ -164,7 +164,7 @@ fun EditCategorySheet(
                     },
                     colors =
                         ButtonDefaults.elevatedButtonColors(
-                            containerColor = themeColorState.buttonColor
+                            containerColor = themeColorState.primaryColor
                         ),
                 ) {
                     Text(

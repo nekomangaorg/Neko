@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/reader_layout"
     android:layout_width="match_parent"
-    tools:background="@color/color_button_default"
+    tools:background="?attr/colorSurfaceContainer"
     android:layout_height="match_parent"
     android:gravity="center">
 
@@ -59,7 +59,7 @@
             android:layout_height="?attr/actionBarSize"
             tools:title="Chapter 3"
             tools:subtitle="Chapter name"
-            app:titleTextColor="?actionBarTintColor"
+            app:titleTextColor="@color/colorOnSurface"
             app:titleCentered="true"
             app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
             app:subtitleCentered="true"

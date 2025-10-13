@@ -18,8 +18,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
-import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.setting.AdvancedSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.DataStorageSettingsViewModel
@@ -58,12 +57,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main)
     val wasDeepLink = remember(deepLink) { deepLink != null }
 
+    val settingsVm: SettingsViewModel = viewModel()
+
     NavDisplay(
         backStack = backStack,
         entryDecorators =
             listOf(
-                rememberSceneSetupNavEntryDecorator(),
-                rememberSavedStateNavEntryDecorator(),
+                rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),
             ),
         entryProvider =
@@ -71,6 +71,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 entry<Screens.Settings.Main> {
                     NekoScaffold(
                         type = NekoScaffoldType.SearchOutlineDummy,
+                        incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                         onNavigationIconClicked = onBackPressed,
                         title = stringResource(R.string.settings),
                         searchPlaceHolder = stringResource(R.string.search_settings),
@@ -101,6 +102,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 }
                 entry<Screens.Settings.Search> {
                     SettingsSearchScreen(
+                        incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                         onNavigationIconClicked = { reset(backStack, wasDeepLink, onBackPressed) },
                         navigate = { route ->
                             backStack.clear()
@@ -109,13 +111,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     )
                 }
                 entry<Screens.Settings.General> {
-                    val vm: SettingsViewModel = viewModel()
-
                     GeneralSettingsScreen(
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
-                            preferencesHelper = vm.preferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            preferencesHelper = settingsVm.preferences,
                             showNotificationSetting = sdkMinimumO,
                             manageNotificationsClicked = {
                                 manageNotificationClick(context, sdkMinimumO)
@@ -124,13 +125,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                         .Content()
                 }
                 entry<Screens.Settings.Appearance> {
-                    val vm: SettingsViewModel = viewModel()
                     AppearanceSettingsScreen(
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
-                            preferences = vm.preferences,
-                            mangaDetailsPreferences = vm.mangaDetailsPreferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            preferences = settingsVm.preferences,
+                            mangaDetailsPreferences = settingsVm.mangaDetailsPreferences,
                         )
                         .Content()
                 }
@@ -140,6 +141,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             libraryPreferences = vm.libraryPreferences,
                             categories = vm.allCategories.collectAsState().value,
                             viewModelScope = vm.viewModelScope,
@@ -165,6 +167,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             storagePreferences = vm.storagePreferences,
                             clearCache = vm::clearParentCache,
                             toastEvent = vm.toastEvent,
@@ -178,6 +181,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             mangaDexPreferences = vm.mangaDexPreference,
                             mangaDexSettingsState = vm.state.collectAsState().value,
                             deleteSavedFilters = vm::deleteAllBrowseFilters,
@@ -193,6 +197,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             onNavigationIconClick = {
                                 reset(backStack, wasDeepLink, onBackPressed)
                             },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             loginEvent = vm.loginEvent,
                             komgaState = vm.komgaMergeScreenState.collectAsState().value,
                             suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
@@ -202,6 +207,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 entry<Screens.Settings.Reader> {
                     val vm: ReaderSettingsViewModel = viewModel()
                     ReaderSettingsScreen(
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             readerPreferences = vm.readerPreferences,
                             onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
@@ -214,6 +220,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     DownloadSettingsScreen(
                             preferences = vm.preferences,
                             readerPreferences = vm.readerPreferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             allCategories = vm.allCategories.collectAsState().value,
                             onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
@@ -227,6 +234,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             preferences = vm.preferences,
                             trackingScreenState = vm.state.collectAsState().value,
                             updateAutoAddTrack = vm::updateAutoAddTrack,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             loginEvent = vm.loginEvent,
                             login = vm::login,
                             logout = vm::logout,
@@ -235,10 +243,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                         .Content()
                 }
                 entry<Screens.Settings.Security> {
-                    val vm: SettingsViewModel = viewModel()
-
                     SecuritySettingsScreen(
-                            securityPreferences = vm.securityPreferences,
+                            securityPreferences = settingsVm.securityPreferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
@@ -248,12 +255,14 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
                     AdvancedSettingsScreen(
                             preferences = vm.preferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             networkPreferences = vm.networkPreference,
                             toastEvent = vm.toastEvent,
                             clearNetworkCookies = vm::clearNetworkCookies,
                             clearDatabase = vm::clearDatabase,
                             cleanupDownloads = vm::cleanupDownloads,
                             reindexDownloads = vm::reindexDownloads,
+                            dedupeCategories = vm::dedupeCategories,
                             onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
                         )
                         .Content()
@@ -264,6 +273,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
                     DebugSettingsScreen(
                             toastEvent = vm.toastEvent,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             unfollowAllLibraryManga = vm::unfollowAllLibraryManga,
                             removeAllMangaWithStatusOnMangaDex =
                                 vm::removeAllMangaWithStatusOnMangaDex,

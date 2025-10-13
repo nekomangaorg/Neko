@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -78,12 +76,12 @@ fun TrackingSearchSheet(
 
             when (trackSearchResult) {
                 is TrackSearchResult.Success -> {
-                    LazyColumn(
+                    Column(
                         modifier =
                             Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        item { Gap(Size.tiny) }
+                        Gap(Size.tiny)
                         if (
                             alreadySelectedTrack == null &&
                                 trackSearchResult.hasMatchingId &&
@@ -92,7 +90,7 @@ fun TrackingSearchSheet(
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                         }
 
-                        items(trackSearchResult.trackSearchResult) { item: TrackSearchItem ->
+                        trackSearchResult.trackSearchResult.forEach { item: TrackSearchItem ->
                             TrackSearchItem(
                                 themeColorState = themeColorState,
                                 trackSearch = item,
@@ -125,7 +123,7 @@ fun TrackingSearchSheet(
                             }
                         }
 
-                        item { Gap(Size.tiny) }
+                        Gap(Size.tiny)
                     }
                 }
                 else ->
@@ -152,7 +150,7 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
         when (trackSearchResult) {
             is TrackSearchResult.Loading ->
                 CircularProgressIndicator(
-                    color = themeColorState.buttonColor,
+                    color = themeColorState.primaryColor,
                     modifier = Modifier.size(32.dp),
                 )
             is TrackSearchResult.NoResult ->
@@ -181,7 +179,7 @@ private fun TrackSearchItem(
 
     val (backdropColor, outlineColor) =
         if (isSelected) {
-            themeColorState.altContainerColor to themeColorState.buttonColor
+            themeColorState.containerColor to themeColorState.primaryColor
         } else {
             MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.outline
         }

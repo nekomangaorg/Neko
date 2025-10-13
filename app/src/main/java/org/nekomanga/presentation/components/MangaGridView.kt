@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,16 +10,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.extensions.gridItems
 import org.nekomanga.presentation.theme.Shapes
@@ -44,7 +38,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaGridWithHeader(
-    groupedManga: ImmutableMap<Int, ImmutableList<DisplayManga>>,
+    groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
     shouldOutlineCover: Boolean,
     columns: Int,
     modifier: Modifier = Modifier,
@@ -59,20 +53,23 @@ fun MangaGridWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
-            stickyHeader { HeaderCard { DefaultHeaderText(text = stringResource(id = stringRes)) } }
-            gridItems(
-                items = allGrids,
-                columns = columns,
-                modifier = Modifier.padding(horizontal = Size.small),
-                horizontalArrangement = Arrangement.spacedBy(Size.small),
-            ) { displayManga ->
-                MangaGridItem(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    isComfortable = isComfortable,
-                    onClick = { onClick(displayManga.mangaId) },
-                    onLongClick = { onLongClick(displayManga) },
-                )
+            if (allGrids.isNotEmpty()) {
+                item { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
+
+                gridItems(
+                    items = allGrids,
+                    columns = columns,
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                ) { displayManga ->
+                    MangaGridItem(
+                        displayManga = displayManga,
+                        shouldOutlineCover = shouldOutlineCover,
+                        isComfortable = isComfortable,
+                        onClick = { onClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga) },
+                    )
+                }
             }
         }
     }
@@ -194,45 +191,6 @@ fun MangaGridItem(
 }
 
 @Composable
-fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () -> Unit) {
-    Box(
-        modifier =
-            modifier
-                .padding(Size.extraTiny)
-                .clip(
-                    shape =
-                        RoundedCornerShape(
-                            topStart = Size.tiny,
-                            bottomStart = Size.tiny,
-                            bottomEnd = Size.tiny,
-                            topEnd = Shapes.coverRadius,
-                        )
-                )
-                .clickable(onClick = onStartReadingClick)
-                .border(
-                    width = Outline.thickness,
-                    color = Outline.color,
-                    shape =
-                        RoundedCornerShape(
-                            topStart = Size.tiny,
-                            bottomStart = Size.tiny,
-                            bottomEnd = Size.tiny,
-                            topEnd = Shapes.coverRadius,
-                        ),
-                )
-                .background(MaterialTheme.colorScheme.onPrimary)
-                .size(Size.extraLarge)
-    ) {
-        Icon(
-            modifier = Modifier.align(Alignment.Center).size(Size.large),
-            imageVector = Icons.AutoMirrored.Default.MenuBook,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-@Composable
 fun ComfortableGridItem(
     modifier: Modifier = Modifier,
     manga: DisplayManga,
@@ -296,15 +254,13 @@ fun BoxScope.CompactGridItem(
 @Composable
 fun MangaGridTitle(
     title: String,
-    maxLines: Int = 2,
+    maxLines: Int = 3,
     isComfortable: Boolean = true,
     hasSubtitle: Boolean = false,
 ) {
     Text(
         text = title,
-        style =
-            if (isComfortable) MaterialTheme.typography.bodySmall
-            else MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyMedium,
         color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
         fontWeight = FontWeight.Medium,
         maxLines = maxLines,
@@ -313,8 +269,8 @@ fun MangaGridTitle(
             Modifier.padding(
                 top = Size.tiny,
                 bottom = if (hasSubtitle) Size.none else Size.tiny,
-                start = 6.dp,
-                end = 6.dp,
+                start = Size.tiny,
+                end = Size.tiny,
             ),
     )
 }
@@ -332,7 +288,12 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier =
-                Modifier.padding(top = Size.none, bottom = Size.tiny, start = 6.dp, end = 6.dp),
+                Modifier.padding(
+                    top = Size.none,
+                    bottom = Size.tiny,
+                    start = Size.tiny,
+                    end = Size.tiny,
+                ),
         )
     }
 }

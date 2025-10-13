@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
@@ -35,7 +34,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.MangaCover
@@ -48,10 +47,11 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
-    feedMangaList: ImmutableList<FeedManga>,
+    feedMangaList: PersistentList<FeedManga>,
     summaryScreenPagingState: State<SummaryScreenPagingState>,
     outlineCovers: Boolean,
     outlineCards: Boolean,
+    useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
     groupedBySeries: Boolean,
@@ -68,6 +68,7 @@ fun FeedPage(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
                 outlineCovers = outlineCovers,
+                useVividColorHeaders = useVividColorHeaders,
                 feedScreenActions = feedScreenActions,
                 updatingUpdates = summaryScreenPagingState.value.updatingUpdates,
                 updatingNewlyAdded = summaryScreenPagingState.value.updatingNewlyAdded,
@@ -95,6 +96,7 @@ fun FeedPage(
             FeedUpdatesPage(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
+                useVividColorHeaders = useVividColorHeaders,
                 feedUpdatesMangaList = feedMangaList,
                 outlineCovers = outlineCovers,
                 groupedBySeries = groupedBySeries,
@@ -184,12 +186,7 @@ fun FeedChapterTitleLine(
         }
         Text(
             text = title,
-            style =
-                style.copy(
-                    color = textColor,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp,
-                ),
+            style = style.copy(color = textColor, fontWeight = FontWeight.Medium),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

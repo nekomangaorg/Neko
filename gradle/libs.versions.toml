@@ -4,17 +4,16 @@ cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 coilVersion = "3.3.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "34.3.0"
+firebaseBomVersion = "34.4.0"
 firebasePluginVersion = "3.0.6"
-googleServicesPluginVersion = "4.4.3"
+googleServicesPluginVersion = "4.4.4"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "1.16.1"
 kotlinResultVersion = "2.1.0"
 ktfmtVersion = "0.24.0"
-okhttpVersion = "5.1.0"
+okhttpVersion = "5.2.1"
 photoViewVersion = "2.3.0"
 retrofitVersion = "3.0.0"
-rxbindingVersion = "1.0.1"
 sandwichVersion = "2.1.3"
 simpleIconsVersion = "1.0.0"
 sqliteAndroidVersion = "3.49.0"
@@ -62,10 +61,6 @@ kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-res
 rx-android = "io.reactivex:rxandroid:1.2.1"
 rx-java = "io.reactivex:rxjava:1.3.8"
 rx-relay = "com.jakewharton.rxrelay:rxrelay:1.2.0"
-rxbinding-kotlin = { module = "com.jakewharton.rxbinding:rxbinding-kotlin", version.ref = "rxbindingVersion" }
-rxbinding-appcompat-v7 = { module = "com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin", version.ref = "rxbindingVersion" }
-rxbinding-appcompat-v4 = { module = "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin", version.ref = "rxbindingVersion" }
-rxbinding-recycler-v7 = { module = "com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin", version.ref = "rxbindingVersion" }
 
 j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
 
@@ -88,9 +83,6 @@ conductor-supportpref = "com.github.tachiyomiorg:conductor-support-preference:3.
 fast-adapter = { module = "com.mikepenz:fastadapter", version.ref = "fastAdapterVersion" }
 fast-adapter-binding = { module = "com.mikepenz:fastadapter-extensions-binding", version.ref = "fastAdapterVersion" }
 
-flexible-adapter-core = "com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533"
-flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c8013533"
-
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpVersion" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttpVersion" }
@@ -100,7 +92,6 @@ sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVer
 sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }
 sandwich-retrofit-serialization = { module = "com.github.skydoves:sandwich-retrofit-serialization", version.ref = "sandwichVersion" }
 
-taptargetview = { module = "com.getkeepsafe.taptargetview:taptargetview", version.ref = "taptargetviewVersion" }
 versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 
 timber = "com.jakewharton.timber:timber:5.0.1"
@@ -109,7 +100,6 @@ aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", ve
 
 leakcanary = "com.squareup.leakcanary:leakcanary-android:2.14"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
-fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
@@ -121,7 +111,6 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.14.6"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.3"
-viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibVersion" }
@@ -134,7 +123,6 @@ coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]
 conductor = ["conductor", "conductor-supportpref"]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
-flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
@@ -143,4 +131,4 @@ tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-
 tests = ["junit", "mockk", "kotest-assertions"]
 retrofit = ["retrofit-core", "retrofit-serialization", "retrofit-scalars"]
 results = ["kotlin-result", "kotlin-result-coroutines"]
-rx = ["rx-android", "rx-java", "rx-relay", "rxbinding-kotlin", "rxbinding-appcompat-v7", "rxbinding-appcompat-v4", "rxbinding-recycler-v7"]
+rx = ["rx-android", "rx-java", "rx-relay"]

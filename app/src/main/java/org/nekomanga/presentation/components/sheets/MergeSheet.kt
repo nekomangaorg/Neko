@@ -101,7 +101,7 @@ fun MergeSheet(
                 ) {
                     Text(
                         text = stringResource(id = R.string.open_merged_in_webview),
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
                 Gap(Size.tiny)
@@ -111,7 +111,7 @@ fun MergeSheet(
                 ) {
                     Text(
                         text = stringResource(id = R.string.remove_merged_source),
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                     )
                 }
                 Gap(Size.tiny)
@@ -295,7 +295,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
         when (searchResults) {
             is MergeSearchResult.Loading ->
                 CircularProgressIndicator(
-                    color = themeColorState.buttonColor,
+                    color = themeColorState.primaryColor,
                     modifier = Modifier.size(32.dp),
                 )
             is MergeSearchResult.NoResult ->
@@ -323,7 +323,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
                             },
                             colors =
                                 SuggestionChipDefaults.elevatedSuggestionChipColors(
-                                    containerColor = themeColorState.buttonColor
+                                    containerColor = themeColorState.primaryColor
                                 ),
                         )
                     }

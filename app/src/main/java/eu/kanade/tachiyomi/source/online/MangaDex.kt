@@ -34,7 +34,7 @@ import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -180,7 +180,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
+                                        listResults.sourceManga.shuffled().toPersistentList()
                                 )
                             )
                         }
@@ -193,7 +193,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
+                                        listResults.sourceManga.shuffled().toPersistentList()
                                 )
                             )
                         }
@@ -206,7 +206,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
+                                        listResults.sourceManga.shuffled().toPersistentList()
                                 )
                             )
                         }
@@ -221,7 +221,7 @@ open class MangaDex : HttpSource() {
                                 ListResults(
                                     displayScreenType = DisplayScreenType.PopularNewTitles(),
                                     sourceManga =
-                                        mangaListPage.sourceManga.shuffled().toImmutableList(),
+                                        mangaListPage.sourceManga.shuffled().toPersistentList(),
                                 )
                             )
                         }

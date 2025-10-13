@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentListOf
@@ -29,6 +28,7 @@ data class LibraryScreenState(
     val searchQuery: String? = null,
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
     val hasActiveFilters: Boolean = false,
+    val useVividColorHeaders: Boolean = true,
     val libraryFilters: LibraryFilters = LibraryFilters(),
     val rawColumnCount: Float = 3f,
     val isFirstLoad: Boolean = true,
@@ -39,14 +39,14 @@ data class LibraryScreenState(
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,
-    val groupByOptions: ImmutableList<Int> = persistentListOf(),
+    val groupByOptions: PersistentList<LibraryGroup> = persistentListOf(),
     val trackMap: PersistentMap<Long, List<String>> = persistentMapOf(),
     val showUnavailableFilter: Boolean = false,
     val showStartReadingButton: Boolean = true,
-    val currentGroupBy: Int = 0,
-    val items: ImmutableList<LibraryCategoryItem> = persistentListOf(),
-    val selectedItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
-    val userCategories: ImmutableList<CategoryItem> = persistentListOf(),
+    val currentGroupBy: LibraryGroup = LibraryGroup.ByCategory,
+    val items: PersistentList<LibraryCategoryItem> = persistentListOf(),
+    val selectedItems: PersistentList<LibraryMangaItem> = persistentListOf(),
+    val userCategories: PersistentList<CategoryItem> = persistentListOf(),
     val horizontalCategories: Boolean = false,
     val showLibraryButtonBar: Boolean = true,
 )
@@ -71,7 +71,7 @@ data class LibraryScreenActions(
 )
 
 data class LibrarySheetActions(
-    val groupByClick: (Int) -> Unit,
+    val groupByClick: (LibraryGroup) -> Unit,
     val categoryItemLibrarySortClick: (CategoryItem, LibrarySort) -> Unit,
     val libraryDisplayModeClick: (LibraryDisplayMode) -> Unit,
     val rawColumnCountChanged: (Float) -> Unit,
@@ -89,14 +89,13 @@ data class LibraryCategoryActions(
     val categoryItemClick: (CategoryItem) -> Unit,
     val categoryAscendingClick: (CategoryItem) -> Unit,
     val categoryRefreshClick: (CategoryItem) -> Unit,
-    val dragAndDropManga: (Int, Int, CategoryItem, LibraryMangaItem) -> Unit,
 )
 
 data class LibraryViewItem(
     val libraryDisplayMode: LibraryDisplayMode,
     val rawColumnCount: Float = 3f,
     val libraryCategoryItems: PersistentList<LibraryCategoryItem>,
-    val currentGroupBy: Int,
+    val currentGroupBy: LibraryGroup,
     val trackMap: PersistentMap<Long, List<String>>,
     val userCategories: PersistentList<CategoryItem>,
 )
@@ -104,7 +103,7 @@ data class LibraryViewItem(
 data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
     val isRefreshing: Boolean = false,
-    val libraryItems: ImmutableList<LibraryMangaItem> = persistentListOf(),
+    val libraryItems: PersistentList<LibraryMangaItem> = persistentListOf(),
 )
 
 @Immutable
@@ -113,7 +112,7 @@ data class LibraryViewPreferences(
     val collapsedDynamicCategories: Set<String>,
     val sortingMode: LibrarySort,
     val sortAscending: Boolean,
-    val groupBy: Int,
+    val groupBy: LibraryGroup,
     val showDownloadBadges: Boolean,
 )
 

@@ -21,7 +21,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +35,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.feed.DownloaderStatus
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
@@ -47,7 +46,7 @@ import soup.compose.material.motion.MaterialFade
 @Composable
 fun DownloadScreen(
     contentPadding: PaddingValues,
-    downloads: ImmutableList<DownloadItem>,
+    downloads: PersistentList<DownloadItem>,
     downloaderStatus: DownloaderStatus,
     downloadScreenActions: DownloadScreenActions,
 ) {
@@ -76,13 +75,6 @@ fun DownloadScreen(
 
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth().padding(Size.tiny).animateContentSize(),
-                        colors =
-                            CardDefaults.elevatedCardColors(
-                                containerColor =
-                                    MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                        Size.extraTiny
-                                    )
-                            ),
                         onClick = { expanded = !expanded },
                     ) {
                         Row(

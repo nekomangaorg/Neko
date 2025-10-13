@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.runtime.Composable
@@ -43,7 +45,11 @@ fun BaseSheet(
                 Modifier.fillMaxWidth().requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
         ) {
-            Column(modifier = Modifier.navigationBarsPadding().imePadding()) {
+            val scrollState = rememberScrollState()
+
+            Column(
+                modifier = Modifier.navigationBarsPadding().imePadding().verticalScroll(scrollState)
+            ) {
                 if (showHandle) {
                     sheetHandle()
                 }

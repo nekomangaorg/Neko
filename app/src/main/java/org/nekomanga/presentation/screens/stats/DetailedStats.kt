@@ -62,9 +62,8 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
 import kotlin.random.Random
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
@@ -74,7 +73,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun DetailedStats(
     detailedStats: DetailedState,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     windowSizeClass: WindowSizeClass,
 ) {
@@ -213,7 +212,7 @@ private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> 
 private fun TagView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -256,7 +255,7 @@ private fun TagView(
 private fun ContentRatingView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -294,7 +293,7 @@ private fun ContentRatingView(
 private fun CategoryView(
     sortType: Sort,
     detailedStats: DetailedState,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -318,7 +317,7 @@ private fun CategoryView(
             false ->
                 sortedSeries
                     .map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
-                    .toImmutableList()
+                    .toPersistentList()
         }
     }
 
@@ -346,7 +345,7 @@ private fun CategoryView(
 @Composable
 private fun StartYearView(
     detailedStats: DetailedState,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
 ) {
@@ -387,7 +386,7 @@ private fun StatusView(
     sortType: Sort,
     detailedStats: DetailedState,
     context: Context,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -426,7 +425,7 @@ private fun TypeView(
     sortType: Sort,
     detailedStats: DetailedState,
     context: Context,
-    colors: ImmutableList<Color>,
+    colors: PersistentList<Color>,
     contentPadding: PaddingValues,
     viewType: ViewType,
     sortChipClick: () -> Unit,
@@ -465,7 +464,7 @@ private fun DefaultView(
     contentPadding: PaddingValues,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
-    sortedSeries: ImmutableList<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
+    sortedSeries: PersistentList<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
     colorMap: ImmutableMap<String, Color>,
     totalCount: Int = 0,
     totalDuration: Long = 0L,
@@ -533,7 +532,7 @@ private fun DefaultView(
 
 @Composable
 private fun DetailedCardView(
-    mangaList: ImmutableList<StatsConstants.DetailedStatManga>,
+    mangaList: PersistentList<StatsConstants.DetailedStatManga>,
     contentPadding: PaddingValues,
     viewType: ViewType,
 ) {
@@ -556,7 +555,7 @@ private fun DetailedCardView(
 private fun StatCardView(
     contentPadding: PaddingValues,
     viewType: ViewType,
-    sortedSeries: ImmutableList<Pair<String, ImmutableList<StatsConstants.DetailedStatManga>>>,
+    sortedSeries: PersistentList<Pair<String, PersistentList<StatsConstants.DetailedStatManga>>>,
     color: Color,
     totalCount: Int,
     totalReadDuration: Long,
@@ -913,10 +912,10 @@ private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): ImmutableM
 }
 
 private fun <T> pieData(
-    sortedSeries: ImmutableList<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
+    sortedSeries: PersistentList<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
     colorMap: ImmutableMap<T, Color>,
     sortType: Sort,
-): ImmutableList<PieData> {
+): PersistentList<PieData> {
     return sortedSeries
         .mapNotNull { entry ->
             val data =

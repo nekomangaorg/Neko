@@ -20,9 +20,8 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -66,7 +66,7 @@ class BrowsePresenter(
         MutableStateFlow(
             BrowseScreenState(
                 isList = preferences.browseAsList().get(),
-                showLibraryEntries = preferences.browseDisplayMode().get(),
+                libraryEntryVisibility = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
@@ -83,7 +83,7 @@ class BrowsePresenter(
         val contentRatings =
             MangaContentRating.getOrdered()
                 .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
-                .toImmutableList()
+                .toPersistentList()
 
         return DexFilters(
             query = Filter.Query(incomingQuery, QueryType.Title),
@@ -124,15 +124,15 @@ class BrowsePresenter(
                         .distinctBy { it.url }
 
                 val filteredDisplayManga =
-                    allDisplayManga.filterVisibility(preferences).toImmutableList()
+                    allDisplayManga.filterVisibility(preferences).toPersistentList()
                 _browseScreenState.update { state ->
                     state.copy(
                         screenType = BrowseScreenType.Filter,
                         displayMangaHolder =
                             DisplayMangaHolder(
                                 BrowseScreenType.Filter,
-                                allDisplayManga.toImmutableList(),
-                                filteredDisplayManga.toImmutableList(),
+                                allDisplayManga.toPersistentList(),
+                                filteredDisplayManga.toPersistentList(),
                             ),
                         initialLoading = false,
                         pageLoading = false,
@@ -191,6 +191,13 @@ class BrowsePresenter(
             }
         }
 
+        presenterScope.launchIO {
+            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _browseScreenState.update { it.copy(useVividColorHeaders = enabled) }
+            }
+        }
+
         presenterScope.launch {
             securityPreferences.incognitoMode().changes().collectLatest {
                 _browseScreenState.update { state -> state.copy(incognitoMode = it) }
@@ -198,8 +205,8 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { show ->
-                _browseScreenState.update { it.copy(showLibraryEntries = show) }
+            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+                _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
                 presenterScope.launch {
                     _browseScreenState.update {
                         it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
@@ -213,7 +220,7 @@ class BrowsePresenter(
                                     filteredDisplayManga =
                                         it.displayMangaHolder.allDisplayManga
                                             .filterVisibility(preferences)
-                                            .toImmutableList()
+                                            .toPersistentList()
                                 )
                         )
                     }
@@ -273,7 +280,7 @@ class BrowsePresenter(
                                     entry.key to
                                         entry.value
                                             .map { manga -> manga.copy(displayTextRes = null) }
-                                            .toImmutableList()
+                                            .toPersistentList()
                                 }
                                 .toMap()
                                 .toImmutableMap()
@@ -284,9 +291,9 @@ class BrowsePresenter(
                                     DisplayMangaHolder(
                                         resultType = BrowseScreenType.Follows,
                                         allDisplayManga =
-                                            it.distinctBy { manga -> manga.url }.toImmutableList(),
+                                            it.distinctBy { manga -> manga.url }.toPersistentList(),
                                         filteredDisplayManga =
-                                            it.filterVisibility(preferences).toImmutableList(),
+                                            it.filterVisibility(preferences).toPersistentList(),
                                         groupedDisplayManga = groupedManga,
                                     ),
                                 initialLoading = false,
@@ -356,7 +363,7 @@ class BrowsePresenter(
                                 .onSuccess { dr ->
                                     _browseScreenState.update {
                                         it.copy(
-                                            otherResults = dr.toImmutableList(),
+                                            otherResults = dr.toPersistentList(),
                                             screenType = BrowseScreenType.Other,
                                             initialLoading = false,
                                         )
@@ -391,11 +398,11 @@ class BrowsePresenter(
                                                         BrowseScreenType.Filter,
                                                         allDisplayManga
                                                             .distinctBy { it.url }
-                                                            .toImmutableList(),
+                                                            .toPersistentList(),
                                                         allDisplayManga
                                                             .distinctBy { it.url }
                                                             .filterVisibility(preferences)
-                                                            .toImmutableList(),
+                                                            .toPersistentList(),
                                                     ),
                                                 initialLoading = false,
                                                 pageLoading = false,
@@ -503,10 +510,10 @@ class BrowsePresenter(
                                     displayMangaHolder =
                                         DisplayMangaHolder(
                                             BrowseScreenType.Filter,
-                                            allDisplayManga.toImmutableList(),
+                                            allDisplayManga.toPersistentList(),
                                             allDisplayManga
                                                 .filterVisibility(preferences)
-                                                .toImmutableList(),
+                                                .toPersistentList(),
                                         ),
                                     initialLoading = false,
                                     pageLoading = false,
@@ -627,18 +634,17 @@ class BrowsePresenter(
             val tempList =
                 _browseScreenState.value.homePageManga
                     .map { homePageManga ->
-                        val index =
-                            homePageManga.displayManga.indexOfFirst { it.mangaId == mangaId }
+                        val list = homePageManga.displayManga
+                        val index = list.indexOfFirst { it.mangaId == mangaId }
                         if (index == -1) {
                             homePageManga
                         } else {
-                            val tempMangaList = homePageManga.displayManga.toMutableList()
-                            val tempDisplayManga = tempMangaList[index].copy(inLibrary = favorite)
-                            tempMangaList[index] = tempDisplayManga
-                            homePageManga.copy(displayManga = tempMangaList.toImmutableList())
+                            val updatedList =
+                                list.set(index, list[index].copy(inLibrary = favorite))
+                            homePageManga.copy(displayManga = updatedList)
                         }
                     }
-                    .toImmutableList()
+                    .toPersistentList()
             _browseScreenState.update { it.copy(homePageManga = tempList) }
         }
         presenterScope.launch {
@@ -740,19 +746,23 @@ class BrowsePresenter(
                         MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
                     blankFilter.copy(
                         contentRatings =
-                            blankFilter.contentRatings.map {
-                                if (it.rating == rating) it.copy(state = true)
-                                else it.copy(state = false)
-                            }
+                            blankFilter.contentRatings
+                                .map {
+                                    if (it.rating == rating) it.copy(state = true)
+                                    else it.copy(state = false)
+                                }
+                                .toPersistentList()
                     )
                 } else {
                     blankFilter.copy(
                         tags =
-                            blankFilter.tags.map {
-                                if (it.tag.prettyPrint.equals(tag, true))
-                                    it.copy(state = ToggleableState.On)
-                                else it
-                            }
+                            blankFilter.tags
+                                .map {
+                                    if (it.tag.prettyPrint.equals(tag, true))
+                                        it.copy(state = ToggleableState.On)
+                                    else it
+                                }
+                                .toPersistentList()
                     )
                 }
             _browseScreenState.update { it.copy(filters = filters) }
@@ -784,7 +794,7 @@ class BrowsePresenter(
                     is Filter.ContentRating -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.contentRatings,
+                                browseScreenState.value.filters.contentRatings.toPersistentList(),
                                 { it.rating == newFilter.rating },
                                 newFilter,
                             )
@@ -803,7 +813,7 @@ class BrowsePresenter(
                     is Filter.OriginalLanguage -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.originalLanguage,
+                                browseScreenState.value.filters.originalLanguage.toPersistentList(),
                                 { it.language == newFilter.language },
                                 newFilter,
                             )
@@ -812,7 +822,8 @@ class BrowsePresenter(
                     is Filter.PublicationDemographic -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.publicationDemographics,
+                                browseScreenState.value.filters.publicationDemographics
+                                    .toPersistentList(),
                                 { it.demographic == newFilter.demographic },
                                 newFilter,
                             )
@@ -821,7 +832,7 @@ class BrowsePresenter(
                     is Filter.Status -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.statuses,
+                                browseScreenState.value.filters.statuses.toPersistentList(),
                                 { it.status == newFilter.status },
                                 newFilter,
                             )
@@ -830,7 +841,7 @@ class BrowsePresenter(
                     is Filter.Tag -> {
                         val list =
                             lookupAndReplaceEntry(
-                                browseScreenState.value.filters.tags,
+                                browseScreenState.value.filters.tags.toPersistentList(),
                                 { it.tag == newFilter.tag },
                                 newFilter,
                             )
@@ -844,7 +855,7 @@ class BrowsePresenter(
                             }
 
                         browseScreenState.value.filters.copy(
-                            sort = Filter.Sort.getSortList(filterMode)
+                            sort = Filter.Sort.getSortList(filterMode).toPersistentList()
                         )
                     }
                     is Filter.HasAvailableChapters -> {
@@ -897,14 +908,12 @@ class BrowsePresenter(
     }
 
     private fun <T> lookupAndReplaceEntry(
-        list: List<T>,
+        list: PersistentList<T>,
         indexMethod: (T) -> Boolean,
         newEntry: T,
-    ): ImmutableList<T> {
+    ): PersistentList<T> {
         val index = list.indexOfFirst { indexMethod(it) }
-        val mutableList = list.toMutableList()
-        mutableList[index] = newEntry
-        return mutableList.toImmutableList()
+        return list.set(index, newEntry)
     }
 
     /** Add New Category */
@@ -940,13 +949,13 @@ class BrowsePresenter(
         }
     }
 
-    fun switchLibraryVisibility() {
-        preferences.browseDisplayMode().set((browseScreenState.value.showLibraryEntries + 1) % 3)
+    fun switchLibraryEntryVisibility(visibility: Int) {
+        preferences.browseDisplayMode().set(visibility)
     }
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         presenterScope.launch {
-            val filters = db.getBrowseFilters().executeAsBlocking().toImmutableList()
+            val filters = db.getBrowseFilters().executeAsBlocking().toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters
@@ -973,9 +982,9 @@ class BrowsePresenter(
                     it.copy(
                         displayMangaHolder =
                             it.displayMangaHolder.copy(
-                                allDisplayManga = allDisplayManga.toImmutableList(),
+                                allDisplayManga = allDisplayManga.toPersistentList(),
                                 filteredDisplayManga =
-                                    allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                    allDisplayManga.filterVisibility(preferences).toPersistentList(),
                             )
                     )
                 }

@@ -24,8 +24,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 41
-        versionName = "2.22.5"
+        versionCode = 43
+        versionName = "3.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -159,11 +159,7 @@ dependencies {
     // UI
     implementation(libs.bundles.fastadapter)
 
-    implementation(libs.bundles.flexibleadapter)
-
     implementation(libs.photoView)
-    implementation(libs.viewTooltip)
-    implementation(libs.taptargetview)
     implementation(libs.cascade)
     implementation(libs.cascade.compose)
 
@@ -179,7 +175,6 @@ dependencies {
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
-    implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.sandwich)
@@ -188,5 +183,7 @@ dependencies {
 
     implementation(libs.bundles.results)
 
-    testImplementation(libs.bundles.tests)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotest.assertions)
+    testImplementation(libs.mockk) { exclude(group = "junit", module = "junit") }
 }

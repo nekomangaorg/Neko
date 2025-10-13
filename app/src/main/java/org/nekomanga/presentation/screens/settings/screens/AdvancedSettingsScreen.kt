@@ -25,7 +25,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.SharedFlow
@@ -36,6 +36,7 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.CleanDownloadsDialog
 import org.nekomanga.presentation.components.dialog.ClearDatabaseDialog
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 import tachiyomi.core.network.PREF_DOH_360
@@ -53,6 +54,7 @@ import tachiyomi.core.network.PREF_DOH_SHECAN
 import tachiyomi.core.util.system.setDefaultSettings
 
 internal class AdvancedSettingsScreen(
+    incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val networkPreferences: NetworkPreferences,
     val toastEvent: SharedFlow<UiText>,
@@ -60,14 +62,15 @@ internal class AdvancedSettingsScreen(
     val cleanupDownloads: (Boolean, Boolean) -> Unit,
     val reindexDownloads: () -> Unit,
     val clearDatabase: (Boolean) -> Unit,
+    val dedupeCategories: () -> Unit,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.advanced
 
     @SuppressLint("BatteryLife")
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
 
         LaunchedEffect(Unit) { toastEvent.collect { event -> context.toast(event) } }
@@ -102,7 +105,7 @@ internal class AdvancedSettingsScreen(
             ),
             backgroundActivityGroup(context),
             networkGroup(context, clearNetworkCookies),
-            dataGroup(cleanupDownloads, clearDatabase, reindexDownloads),
+            dataGroup(cleanupDownloads, clearDatabase, reindexDownloads, dedupeCategories),
         )
     }
 
@@ -209,10 +212,12 @@ internal class AdvancedSettingsScreen(
         cleanupDownloads: (Boolean, Boolean) -> Unit,
         clearDatabase: (Boolean) -> Unit,
         reindexDownloads: () -> Unit,
+        dedupeCategories: () -> Unit,
     ): Preference.PreferenceGroup {
 
         var showCleanDownloadsDialog by rememberSaveable { mutableStateOf(false) }
         var showClearDatabaseDialog by rememberSaveable { mutableStateOf(false) }
+        var showDedupeCategoriesDialog by rememberSaveable { mutableStateOf(false) }
 
         if (showCleanDownloadsDialog) {
             CleanDownloadsDialog(
@@ -225,6 +230,15 @@ internal class AdvancedSettingsScreen(
             ClearDatabaseDialog(
                 onDismiss = { showClearDatabaseDialog = false },
                 onConfirm = clearDatabase,
+            )
+        }
+
+        if (showDedupeCategoriesDialog) {
+            ConfirmationDialog(
+                title = stringResource(R.string.dedupe_categories),
+                body = stringResource(R.string.dedupe_categories_confirmation),
+                onDismiss = { showDedupeCategoriesDialog = false },
+                onConfirm = { dedupeCategories() },
             )
         }
 
@@ -247,13 +261,18 @@ internal class AdvancedSettingsScreen(
                         subtitle = stringResource(R.string.clear_database_summary),
                         onClick = { showClearDatabaseDialog = true },
                     ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.dedupe_categories),
+                        subtitle = stringResource(R.string.dedupe_categories_summary),
+                        onClick = { showDedupeCategoriesDialog = true },
+                    ),
                 ),
         )
     }
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.send_crash_report),
@@ -302,6 +321,11 @@ internal class AdvancedSettingsScreen(
                 SearchTerm(
                     title = stringResource(R.string.clear_database),
                     subtitle = stringResource(R.string.clear_database_summary),
+                    group = stringResource(R.string.data_management),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.dedupe_categories),
+                    subtitle = stringResource(R.string.dedupe_categories_summary),
                     group = stringResource(R.string.data_management),
                 ),
             )

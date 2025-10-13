@@ -120,7 +120,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private val mangaToUpdateMap = mutableMapOf<Long, List<LibraryManga>>()
 
-    private val categoryIds = mutableSetOf<Int>()
     // List containing new updates
     private val newUpdates = mutableMapOf<LibraryManga, Array<Chapter>>()
 
@@ -191,10 +190,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             .executeAsBlocking()
                             .filter { it.id in savedMangaList }
                             .distinctBy { it.id }
-                    val categoryId = inputData.getInt(KEY_CATEGORY, -1)
-                    if (categoryId > -1) {
-                        categoryIds.add(categoryId)
-                    }
                     mangaList
                 } else {
                     getMangaToUpdate()
@@ -310,18 +305,14 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         val listToUpdate =
             if (categoryId != -1) {
-                categoryIds.add(categoryId)
                 libraryManga.filter { it.category == categoryId }
             } else {
                 val categoriesToUpdate =
                     libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
                 if (categoriesToUpdate.isNotEmpty()) {
-                    categoryIds.addAll(categoriesToUpdate)
                     libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
                 } else {
-                    categoryIds.addAll(
-                        db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0
-                    )
+                    val categories = db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0
                     libraryManga.distinctBy { it.id }
                 }
             }
@@ -350,6 +341,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
+
+        emitScope.launch { mangaToAdd.forEach { mangaToUpdateMutableFlow.emit(it.id!!) } }
 
         mangaToUpdate.addAll(mangaToAdd)
 
@@ -810,20 +803,20 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         return File("")
     }
 
-    private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
+    private fun addMangaToQueue(manga: List<LibraryManga>) {
         val mangas = filterMangaToUpdate(manga).sortedBy { it.title }
-        categoryIds.add(categoryId)
         addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
         val mangas = filterMangaToUpdate(getMangaToUpdate(categoryId)).sortedBy { it.title }
-        categoryIds.add(categoryId)
         addManga(mangas)
     }
 
     private fun addManga(mangaToAdd: List<LibraryManga>) {
         val distinctManga = mangaToAdd.filter { it !in mangaToUpdate }
+        emitScope.launch { mangaToAdd.forEach { mangaToUpdateMutableFlow.emit(it.id!!) } }
+
         mangaToUpdate.addAll(distinctManga)
         distinctManga
             .groupBy { it.source }
@@ -874,6 +867,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             )
         val updateFlow = updateMutableFlow.asSharedFlow()
 
+        private val mangaToUpdateMutableFlow =
+            MutableSharedFlow<Long>(
+                extraBufferCapacity = 10,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
+        val mangaToUpdateFlow = mangaToUpdateMutableFlow.asSharedFlow()
+
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val libraryPreferences = Injekt.get<LibraryPreferences>()
             val interval = prefInterval ?: libraryPreferences.updateInterval().get()
@@ -914,8 +914,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             return list.any { it.state == WorkInfo.State.RUNNING }
         }
 
-        fun categoryInQueue(id: Int?) = instance?.get()?.categoryIds?.contains(id) ?: false
-
         fun startNow(
             context: Context,
             category: Category? = null,
@@ -925,7 +923,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             if (isRunning(context)) {
                 category?.id?.let {
                     if (mangaToUse != null) {
-                        instance?.get()?.addMangaToQueue(it, mangaToUse)
+                        instance?.get()?.addMangaToQueue(mangaToUse)
                     } else {
                         instance?.get()?.addCategory(it)
                     }

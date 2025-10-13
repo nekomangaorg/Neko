@@ -77,7 +77,7 @@ fun ColumnScope.SearchFooter(
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = null,
-                        tint = themeColorState.buttonColor,
+                        tint = themeColorState.primaryColor,
                     )
                 }
             }

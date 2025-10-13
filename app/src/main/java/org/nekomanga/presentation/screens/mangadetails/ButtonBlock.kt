@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Check
@@ -26,6 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,13 +39,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -55,28 +63,31 @@ fun ButtonBlock(
     loggedIntoTrackersProvider: () -> Boolean,
     trackServiceCountProvider: () -> Int,
     themeColorState: ThemeColorState,
-    favoriteClick: () -> Unit = {},
+    toggleFavorite: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
+    moveCategories: () -> Unit = {},
 ) {
     if (!isInitializedProvider()) {
         return
     }
 
-    val shape = RoundedCornerShape(35)
+    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
     val checkedButtonColors =
-        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
+        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.containerColor)
     val checkedBorderStroke = BorderStroke(Size.extraExtraTiny, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke =
-        BorderStroke(Size.extraExtraTiny, themeColorState.altContainerColor.copy(alpha = .8f))
-    val gapBetweenButtons = Size.small
+        BorderStroke(
+            Size.extraExtraTiny,
+            themeColorState.containerColor.copy(alpha = NekoColors.mediumAlphaHighContrast),
+        )
     val (padding, iconicsPadding, buttonModifier) =
         when (hideButtonTextProvider()) {
             true ->
@@ -95,6 +106,7 @@ fun ButtonBlock(
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         val favConfig =
             when (inLibraryProvider()) {
@@ -115,10 +127,16 @@ fun ButtonBlock(
             }
 
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             colors = favConfig.buttonColors,
             modifier = Modifier.size(Size.huge),
-            shape = shape,
-            onClick = favoriteClick,
+            onClick = {
+                if (!inLibraryProvider()) {
+                    toggleFavorite()
+                } else {
+                    favoriteExpanded = true
+                }
+            },
             border = favConfig.borderStroke,
             contentPadding = PaddingValues(Size.none),
         ) {
@@ -126,12 +144,33 @@ fun ButtonBlock(
                 imageVector = favConfig.icon!!,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = themeColorState.buttonColor,
+                tint = themeColorState.primaryColor,
+            )
+            SimpleDropdownMenu(
+                expanded = favoriteExpanded,
+                themeColorState = themeColorState,
+                onDismiss = { favoriteExpanded = false },
+                dropDownItems =
+                    persistentListOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.remove_from_library),
+                            onClick = {
+                                toggleFavorite()
+                                favoriteExpanded = false
+                            },
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.edit_categories),
+                            onClick = {
+                                moveCategories()
+                                favoriteExpanded = false
+                            },
+                        ),
+                    ),
             )
         }
 
         if (loggedIntoTrackersProvider()) {
-            Gap(gapBetweenButtons)
 
             val trackerConfig =
                 when {
@@ -154,7 +193,7 @@ fun ButtonBlock(
             OutlinedButton(
                 onClick = trackingClick,
                 modifier = buttonModifier,
-                shape = shape,
+                shapes = ButtonDefaults.shapes(),
                 colors = trackerConfig.buttonColors,
                 border = trackerConfig.borderStroke,
                 contentPadding = padding,
@@ -170,7 +209,7 @@ fun ButtonBlock(
                         }
                     IconicsButtonContent(
                         iIcon = icon,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         hideText = hideButtonTextProvider(),
                         text = "",
                         iconicsSize = 28.dp,
@@ -178,7 +217,7 @@ fun ButtonBlock(
                 } else {
                     ButtonContent(
                         trackerConfig.icon!!,
-                        color = themeColorState.buttonColor,
+                        color = themeColorState.primaryColor,
                         hideText = hideButtonTextProvider(),
                         text = trackerConfig.text,
                     )
@@ -186,42 +225,36 @@ fun ButtonBlock(
             }
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = artworkClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = iconicsPadding,
         ) {
             IconicsButtonContent(
                 iIcon = MaterialDesignDx.Icon.gmf_art_track,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(id = R.string.artwork),
                 iconicsSize = 32.dp,
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = similarClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
             ButtonContent(
                 Icons.Filled.AccountTree,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.similar_work),
             )
         }
-
-        Gap(gapBetweenButtons)
 
         val mergeConfig =
             when (isMergedProvider()) {
@@ -242,51 +275,47 @@ fun ButtonBlock(
             }
 
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = mergeClick,
             modifier = buttonModifier,
-            shape = shape,
             colors = mergeConfig.buttonColors,
             border = mergeConfig.borderStroke,
             contentPadding = iconicsPadding,
         ) {
             IconicsButtonContent(
                 iIcon = mergeConfig.iIcon!!,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = mergeConfig.text,
                 iconicsSize = 28.dp,
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = linksClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
             ButtonContent(
                 icon = Icons.Filled.OpenInBrowser,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.links),
             )
         }
 
-        Gap(gapBetweenButtons)
-
         OutlinedButton(
+            shapes = ButtonDefaults.shapes(),
             onClick = shareClick,
             modifier = buttonModifier,
-            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
             ButtonContent(
                 icon = Icons.Filled.Share,
-                color = themeColorState.buttonColor,
+                color = themeColorState.primaryColor,
                 hideText = hideButtonTextProvider(),
                 text = stringResource(R.string.share),
             )
@@ -340,7 +369,6 @@ private fun RowScope.ButtonText(text: String, color: Color) {
             style =
                 MaterialTheme.typography.bodyLarge.copy(
                     color = color.copy(alpha = .8f),
-                    letterSpacing = (-.5).sp,
                     fontWeight = FontWeight.Medium,
                 ),
         )

@@ -64,7 +64,7 @@ fun ChapterHeader(
             }
 
             FilterIcon(
-                themeColor.buttonColor,
+                themeColor.primaryColor,
                 modifier = Modifier.align(Alignment.CenterVertically),
             )
         }

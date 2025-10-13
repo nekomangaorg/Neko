@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online.merged.mangalife
 
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -66,13 +64,7 @@ class MangaLife : ReducedHttpSource() {
                         .attr("ng-src")
             }
 
-            // val searchResults =
-            val results =
-                FuzzySearch.extractSorted(query, directory.keys, 88).mapNotNull {
-                    directory[it.string]
-                }
-
-            parseMangaList(results)
+            parseMangaList(emptyList())
         }
     }
 

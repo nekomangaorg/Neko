@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
@@ -61,9 +60,8 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
@@ -123,13 +121,13 @@ fun ChapterRow(
                 icon = {
                     SwipeIcon(
                         icon = readIcon,
-                        contentColor = themeColor.buttonColor,
+                        contentColor = themeColor.primaryColor,
                         text = stringResource(readText),
                     )
                 },
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                        themeColor.buttonColor,
+                        themeColor.primaryColor,
                         Size.small,
                     ),
                 onSwipe = onRead,
@@ -140,13 +138,13 @@ fun ChapterRow(
                 icon = {
                     SwipeIcon(
                         icon = bookmarkIcon,
-                        contentColor = themeColor.buttonColor,
+                        contentColor = themeColor.primaryColor,
                         text = stringResource(bookmarkText),
                     )
                 },
                 background =
                     MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                        themeColor.buttonColor,
+                        themeColor.primaryColor,
                         Size.small,
                     ),
                 onSwipe = onBookmark,
@@ -157,7 +155,7 @@ fun ChapterRow(
             endSwipeActions = listOf(markReadSwipeAction),
             backgroundInitialSwipeColor =
                 MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                    themeColor.buttonColor,
+                    themeColor.primaryColor,
                     Size.medium,
                 ),
         ) {
@@ -259,8 +257,7 @@ private fun ChapterInfo(
                     },
                 )
             }
-            .toImmutableList()
-            .apply { TimberKt.d { this.toString() } }
+            .toPersistentList()
     }
 
     val haptic = LocalHapticFeedback.current
@@ -330,7 +327,7 @@ private fun ChapterInfo(
                         imageVector = Icons.Filled.Bookmark,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp).align(Alignment.CenterVertically),
-                        tint = themeColorState.buttonColor,
+                        tint = themeColorState.primaryColor,
                     )
                     Gap(Size.tiny)
                 }
@@ -340,7 +337,6 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyLarge.copy(
                             color = textColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp,
                         ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -386,7 +382,6 @@ private fun ChapterInfo(
                                     MaterialTheme.typography.bodyMedium.copy(
                                         color = secondaryTextColor,
                                         fontWeight = FontWeight.Medium,
-                                        letterSpacing = (-.6).sp,
                                     ),
                             )
                         }
@@ -416,7 +411,6 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp,
                         ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -441,7 +435,7 @@ private fun ChapterInfo(
                         Modifier.align(Alignment.CenterVertically)
                             .padding(Size.smedium)
                             .size(Size.large),
-                    tint = themeColorState.buttonColor,
+                    tint = themeColorState.primaryColor,
                 )
             }
             localCopy -> {
@@ -479,7 +473,7 @@ private fun ChapterInfo(
                                 imageVector = Icons.Outlined.FolderOpen,
                                 contentDescription = null,
                                 modifier = Modifier.requiredSize(24.dp),
-                                tint = themeColorState.buttonColor,
+                                tint = themeColorState.primaryColor,
                             )
                         }
                     }
@@ -503,11 +497,11 @@ private fun getDropDownItems(
     isLocal: Boolean,
     showScanlator: Boolean,
     showComments: Boolean,
-    scanlators: ImmutableList<SimpleDropDownItem>,
+    scanlators: PersistentList<SimpleDropDownItem>,
     onWebView: () -> Unit,
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
-): ImmutableList<SimpleDropDownItem> {
+): PersistentList<SimpleDropDownItem> {
     return (getList(
             !isLocal,
             listOf(

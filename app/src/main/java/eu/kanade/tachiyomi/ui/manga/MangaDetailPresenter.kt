@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.util.fastAll
 import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
@@ -61,9 +62,8 @@ import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
@@ -80,12 +80,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -116,6 +117,7 @@ class MangaDetailPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     val libraryPreferences: LibraryPreferences = Injekt.get(),
+    val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -161,7 +163,7 @@ class MangaDetailPresenter(
             .filter { it == currentManga().id }
             .onEach(::onUpdateManga)
             .launchIn(presenterScope)
-        presenterScope.launch {
+        presenterScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes =
@@ -174,8 +176,12 @@ class MangaDetailPresenter(
                     .filterNot { it == MergeType.Comick }
                     .toPersistentList()
 
+            val categories = db.getCategories().executeAsBlocking()
+            val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
+
             _mangaDetailScreenState.update {
                 it.copy(
+                    incognitoMode = securityPreferences.incognitoMode().get(),
                     hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                     extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
@@ -183,7 +189,15 @@ class MangaDetailPresenter(
                     themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
                     wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
                     validMergeTypes = validMergeTypes,
+                    loggedInTrackService =
+                        trackManager.services
+                            .filter { service -> service.value.isLogged() }
+                            .map { service -> service.value.toTrackServiceItem() }
+                            .toPersistentList(),
                     vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
+                    allCategories = categories.map { it.toCategoryItem() }.toPersistentList(),
+                    currentCategories =
+                        mangaCategories.map { it.toCategoryItem() }.toPersistentList(),
                 )
             }
             if (!currentManga().initialized) {
@@ -193,10 +207,11 @@ class MangaDetailPresenter(
                 onRefresh()
             } else {
                 val dbChapters = db.getChapters(mangaId).executeOnIO()
-                if (dbChapters.size > 1 && dbChapters.all { it.smart_order == 0 }) onRefresh()
-                else {
-                    updateAllFlows(dbChapters)
+                if (dbChapters.size > 1 && dbChapters.fastAll { it.smart_order == 0 }) {
+                    onRefresh()
+                } else {
                     refreshTracking()
+                    updateAllFlows()
                     syncChaptersReadStatus()
                 }
             }
@@ -239,48 +254,51 @@ class MangaDetailPresenter(
 
             _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
 
-            mangaUpdateCoordinator.update(currentManga(), presenterScope, isMerging).collect {
-                result ->
-                when (result) {
-                    is MangaResult.Error -> {
-                        _snackbarState.emit(
-                            SnackbarState(message = result.text, messageRes = result.id)
-                        )
-                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
-                    }
-                    is MangaResult.Success -> {
-                        updateAllFlows()
-                        refreshTracking()
-                        syncChaptersReadStatus()
-                        _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
-                    }
-                    is MangaResult.UpdatedChapters -> Unit
-                    is MangaResult.UpdatedManga -> {
-                        updateMangaFlow()
-                    }
-                    is MangaResult.UpdatedArtwork -> {
-                        updateArtworkFlow()
-                    }
-                    is MangaResult.ChaptersRemoved -> {
-                        val removedChapters =
-                            mangaDetailScreenState.value.allChapters.filter {
-                                it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
-                            }
+            mangaUpdateCoordinator
+                .update(currentManga(), presenterScope, isMerging)
+                .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
+                .catch { e -> e.message?.let { _snackbarState.emit(SnackbarState(message = it)) } }
+                .collect { result ->
+                    when (result) {
+                        is MangaResult.Error -> {
+                            _snackbarState.emit(
+                                SnackbarState(message = result.text, messageRes = result.id)
+                            )
+                        }
+                        is MangaResult.Success -> {
+                            updateAllFlows()
+                            refreshTracking()
+                            syncChaptersReadStatus()
+                        }
+                        is MangaResult.UpdatedChapters -> Unit
+                        is MangaResult.UpdatedManga -> {
+                            updateMangaFlow()
+                        }
+                        is MangaResult.UpdatedArtwork -> {
+                            updateArtworkFlow()
+                        }
+                        is MangaResult.ChaptersRemoved -> {
+                            val removedChapters =
+                                mangaDetailScreenState.value.allChapters.filter {
+                                    it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
+                                }
 
-                        if (removedChapters.isNotEmpty()) {
-                            when (preferences.deleteRemovedChapters().get()) {
-                                2 -> deleteChapters(removedChapters)
-                                1 -> Unit
-                                else -> {
-                                    _mangaDetailScreenState.update {
-                                        it.copy(removedChapters = removedChapters.toImmutableList())
+                            if (removedChapters.isNotEmpty()) {
+                                when (preferences.deleteRemovedChapters().get()) {
+                                    2 -> deleteChapters(removedChapters)
+                                    1 -> Unit
+                                    else -> {
+                                        _mangaDetailScreenState.update {
+                                            it.copy(
+                                                removedChapters = removedChapters.toPersistentList()
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
         }
     }
 
@@ -410,7 +428,7 @@ class MangaDetailPresenter(
             // add a slight delay in case the tracking flow is slower
 
             var count = 0
-            while (count < 5 && mangaDetailScreenState.value.tracks.isEmpty()) {
+            while (count < 3 && mangaDetailScreenState.value.tracks.isEmpty()) {
                 delay(1000)
                 count++
             }
@@ -472,7 +490,7 @@ class MangaDetailPresenter(
                 }
                 .onFailure {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
-                    presenterScope.launch {
+                    presenterScope.launchIO {
                         delay(3000)
                         _snackbarState.emit(
                             SnackbarState("Error trying to mark chapters read from MangaDex $it")
@@ -717,7 +735,7 @@ class MangaDetailPresenter(
             val altArtwork = createAltArtwork(currentManga(), currentArtwork)
             _mangaDetailScreenState.update {
                 it.copy(
-                    alternativeArtwork = altArtwork.toImmutableList(),
+                    alternativeArtwork = altArtwork.toPersistentList(),
                     currentArtwork = currentArtwork,
                 )
             }
@@ -733,7 +751,7 @@ class MangaDetailPresenter(
         )
     }
 
-    private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
+    private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): PersistentList<Artwork> {
         val quality = mangaDexPreferences.coverQuality().get()
 
         return db.getArtwork(mangaId)
@@ -750,11 +768,11 @@ class MangaDetailPresenter(
                                 currentArtwork.originalArtwork.contains(aw.fileName)),
                 )
             }
-            .toImmutableList()
+            .toPersistentList()
     }
 
     private fun updateVibrantColorFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _mangaDetailScreenState.update {
                 it.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
             }
@@ -805,7 +823,7 @@ class MangaDetailPresenter(
                                 },
                         )
                     }
-            _mangaDetailScreenState.update { it.copy(allChapters = allChapters.toImmutableList()) }
+            _mangaDetailScreenState.update { it.copy(allChapters = allChapters.toPersistentList()) }
 
             val allSources = mutableSetOf(MdConstants.name)
 
@@ -844,8 +862,8 @@ class MangaDetailPresenter(
                     activeChapters =
                         chapterSort
                             .getChaptersSorted(currentManga(), allChapters)
-                            .toImmutableList(),
-                    allChapters = allChapters.toImmutableList(),
+                            .toPersistentList(),
+                    allChapters = allChapters.toPersistentList(),
                     allScanlators = allChapterScanlators.toImmutableSet(),
                     allUploaders = allChapterUploaders.toImmutableSet(),
                     allSources = allSources.toImmutableSet(),
@@ -895,15 +913,15 @@ class MangaDetailPresenter(
 
     /** Updates the flows for all categories, and manga categories */
     private fun updateCategoryFlows() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val categories = db.getCategories().executeAsBlocking()
             val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
             _mangaDetailScreenState.update { state ->
                 state.copy(
-                    allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
+                    allCategories = categories.map { it.toCategoryItem() }.toPersistentList(),
                     currentCategories =
-                        mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
+                        mangaCategories.map { it.toCategoryItem() }.toPersistentList(),
                 )
             }
         }
@@ -918,12 +936,12 @@ class MangaDetailPresenter(
                         trackManager.services
                             .filter { it.value.isLogged() }
                             .map { it.value.toTrackServiceItem() }
-                            .toImmutableList(),
+                            .toPersistentList(),
                     tracks =
                         db.getTracks(mangaId)
                             .executeAsBlocking()
                             .map { it.toTrackItem() }
-                            .toImmutableList(),
+                            .toPersistentList(),
                 )
             }
 
@@ -1067,7 +1085,7 @@ class MangaDetailPresenter(
                             db.getTracks(mangaId)
                                 .executeAsBlocking()
                                 .map { it.toTrackItem() }
-                                .toImmutableList()
+                                .toPersistentList()
                     )
                 }
             }
@@ -1200,7 +1218,7 @@ class MangaDetailPresenter(
                         disabled = filteredScanlators.contains(scanlator),
                     )
                 }
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toPersistentList())
     }
 
     /** Get scanlator filter */
@@ -1216,7 +1234,7 @@ class MangaDetailPresenter(
                         disabled = filteredScanlators.contains(scanlator),
                     )
                 }
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toPersistentList())
     }
 
     /** Get scanlator filter */
@@ -1231,7 +1249,7 @@ class MangaDetailPresenter(
                         disabled = filteredLanguages.contains(language),
                     )
                 }
-        return MangaConstants.LanguageFilter(languages = languageOptions.toImmutableList())
+        return MangaConstants.LanguageFilter(languages = languageOptions.toPersistentList())
     }
 
     private fun getFilterText(
@@ -1482,7 +1500,7 @@ class MangaDetailPresenter(
 
     /** Update flows for manga */
     private fun updateMangaFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             _mangaDetailScreenState.update { getMangaStateCopyFromManga(_currentManga.value!!) }
@@ -1491,13 +1509,13 @@ class MangaDetailPresenter(
 
     private fun getMangaStateCopyFromManga(m: Manga): MangaConstants.MangaDetailScreenState {
         return mangaDetailScreenState.value.copy(
-            alternativeTitles = m.getAltTitles().toImmutableList(),
+            alternativeTitles = m.getAltTitles().toPersistentList(),
             artist = m.artist ?: "",
             author = m.author ?: "",
             currentDescription = getDescription(),
             currentTitle = m.title,
-            externalLinks = m.getExternalLinks().toImmutableList(),
-            genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
+            externalLinks = m.getExternalLinks().toPersistentList(),
+            genres = (m.getGenres(true) ?: emptyList()).toPersistentList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
             isMerged = isMerged(m),
@@ -1561,7 +1579,7 @@ class MangaDetailPresenter(
 
     /** Toggle a manga as favorite */
     fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val editManga = currentManga()
             editManga.apply {
                 favorite = !favorite
@@ -1637,7 +1655,7 @@ class MangaDetailPresenter(
     /** Checks if a manga is favorited, if not then snack action to add to library */
     private fun addToLibrarySnack() {
         if (!currentManga().favorite) {
-            presenterScope.launch {
+            presenterScope.launchIO {
                 _snackbarState.emit(
                     SnackbarState(
                         messageRes = R.string.add_to_library,
@@ -1775,7 +1793,7 @@ class MangaDetailPresenter(
                                     TimberKt.e(it) {
                                         "Failed to update track chapter marked as read"
                                     }
-                                    presenterScope.launch {
+                                    presenterScope.launchIO {
                                         _snackbarState.emit(
                                             SnackbarState(
                                                 "Error trying to update tracked chapter marked as read ${it.message}"
@@ -1910,7 +1928,7 @@ class MangaDetailPresenter(
     }
 
     fun openComment(context: Context, chapterId: String) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             when (!isOnline()) {
                 true ->
                     _snackbarState.emit(
@@ -1929,7 +1947,7 @@ class MangaDetailPresenter(
                             SnackbarState(messageRes = R.string.comments_unavailable)
                         )
                     } else {
-                        context.openInWebView(MdConstants.forumUrl + threadId)
+                        context.openInWebView(MdConstants.forumUrl + threadId, title = "Comments")
                     }
                 }
             }
@@ -1966,7 +1984,7 @@ class MangaDetailPresenter(
                     message = blocked,
                     actionLabelRes = R.string.undo,
                     action = {
-                        presenterScope.launch {
+                        presenterScope.launchIO {
                             when (blockType) {
                                 MangaConstants.BlockType.Group -> {
                                     db.deleteScanlatorGroup(blocked).executeOnIO()
@@ -2018,7 +2036,7 @@ class MangaDetailPresenter(
      */
     override fun onResume() {
         super.onResume()
-        presenterScope.launch {
+        presenterScope.launchIO {
             updateMangaFlow()
             updateChapterFlows()
             updateTrackingFlows()
@@ -2050,15 +2068,13 @@ class MangaDetailPresenter(
             val currentChapters = mangaDetailScreenState.value.activeChapters
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
             if (index >= 0) {
-                val mutableChapters = currentChapters.toMutableList()
                 val updateChapter =
-                    currentChapters[index].copy(
+                    mangaDetailScreenState.value.activeChapters[index].copy(
                         downloadState = download.status,
                         downloadProgress = download.progress,
                     )
-                mutableChapters[index] = updateChapter
                 _mangaDetailScreenState.update {
-                    it.copy(activeChapters = mutableChapters.toImmutableList())
+                    it.copy(activeChapters = it.activeChapters.set(index, updateChapter))
                 }
             }
         }

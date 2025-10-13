@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.chargemap.compose.numberpicker.ListItemPicker
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.R
+import org.nekomanga.presentation.components.ExpressivePicker
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -61,18 +60,14 @@ fun TrackingScoreDialog(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 ) {
-                    ListItemPicker(
+                    ExpressivePicker(
                         modifier = Modifier.fillMaxWidth(.4f),
+                        themeColorState = themeColorState,
+                        items = trackAndService.service.scoreList,
                         value = trackAndService.service.scoreList[currentIndex],
                         onValueChange = { newScore ->
                             currentIndex = trackAndService.service.scoreList.indexOf(newScore)
                         },
-                        list = trackAndService.service.scoreList,
-                        dividersColor = themeColorState.buttonColor,
-                        textStyle =
-                            MaterialTheme.typography.titleMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
                     )
                 }
             },
@@ -81,7 +76,7 @@ fun TrackingScoreDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
@@ -93,7 +88,7 @@ fun TrackingScoreDialog(
                         onDismiss()
                     },
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.primaryColor),
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }

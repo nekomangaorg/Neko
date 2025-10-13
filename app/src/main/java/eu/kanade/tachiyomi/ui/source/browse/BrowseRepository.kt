@@ -11,8 +11,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.DisplayResult
@@ -65,7 +64,7 @@ class BrowseRepository(
             val displayManga =
                 resultListPage.sourceManga
                     .map { it.toDisplayManga(db, sourceId = mangaDex.id) }
-                    .toImmutableList()
+                    .toPersistentList()
             Ok(displayManga)
         }
     }
@@ -130,9 +129,9 @@ class BrowseRepository(
         }
     }
 
-    suspend fun getFollows(): Result<ImmutableList<DisplayManga>, ResultError> {
+    suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList())
+            Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList())
         }
     }
 }

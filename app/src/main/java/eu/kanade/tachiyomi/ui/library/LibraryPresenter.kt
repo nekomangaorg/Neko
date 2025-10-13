@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -17,14 +16,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
 import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
@@ -47,6 +38,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,9 +46,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
@@ -94,6 +87,7 @@ class LibraryPresenter(
 ) : BaseCoroutinePresenter<LibraryController>() {
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
+    private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
@@ -101,25 +95,33 @@ class LibraryPresenter(
 
     val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
 
-    fun <T1, T2, T3, T4, T5, T6, R> combine(
+    fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
         flow: Flow<T1>,
         flow2: Flow<T2>,
         flow3: Flow<T3>,
         flow4: Flow<T4>,
         flow5: Flow<T5>,
         flow6: Flow<T6>,
-        transform: suspend (T1, T2, T3, T4, T5, T6) -> R,
+        flow7: Flow<T7>,
+        flow8: Flow<T8>,
+        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
     ): Flow<R> =
-        combine(combine(flow, flow2, flow3, ::Triple), combine(flow4, flow5, flow6, ::Triple)) {
-            t1,
-            t2 ->
-            transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
+        combine(
+            combine(flow, flow2, flow3, ::Triple),
+            combine(flow4, flow5, flow6, ::Triple),
+            combine(flow7, flow8, ::Pair),
+        ) { t1, t2, t3 ->
+            transform(
+                t1.first,
+                t1.second,
+                t1.third,
+                t2.first,
+                t2.second,
+                t2.third,
+                t3.first,
+                t3.second,
+            )
         }
-
-    override fun onResume() {
-        super.onResume()
-        observeLibraryUpdates()
-    }
 
     /** Save the current list to speed up loading later */
     override fun onDestroy() {
@@ -130,52 +132,115 @@ class LibraryPresenter(
     override fun onCreate() {
         super.onCreate()
         presenterScope.launchIO {
-            lastLibraryCategoryItems?.let { items ->
-                val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
+            if (lastLibraryCategoryItems == null) {
+                _libraryScreenState.update { it.copy(isFirstLoad = true) }
+                // inital fast load
+                val mangaList = libraryMangaListFlow.first()
+                val categoryList = categoryListFlow.first()
+                val libraryViewPreferences = libraryViewFlow.first()
+
+                val collapsedCategorySet =
+                    libraryViewPreferences.collapsedCategories
+                        .mapNotNull { it.toIntOrNull() }
+                        .toSet()
+
+                val unsortedLibraryCategoryItems =
+                    when (libraryViewPreferences.groupBy) {
+                        LibraryGroup.ByCategory -> {
+                            groupByCategory(mangaList, categoryList, collapsedCategorySet)
+                        }
+                        LibraryGroup.ByAuthor,
+                        LibraryGroup.ByContent,
+                        LibraryGroup.ByLanguage,
+                        LibraryGroup.ByStatus,
+                        LibraryGroup.ByTag -> {
+                            groupByDynamic(
+                                libraryMangaList = mangaList,
+                                collapsedDynamicCategorySet =
+                                    libraryViewPreferences.collapsedDynamicCategories,
+                                currentLibraryGroup = libraryViewPreferences.groupBy,
+                                sortOrder = libraryViewPreferences.sortingMode,
+                                sortAscending = libraryViewPreferences.sortAscending,
+                                loggedInTrackStatus = emptyMap(),
+                            )
+                        }
+                        // by track status requires an extra network call, so we will just show
+                        // ungrouped for the fast path
+                        LibraryGroup.ByTrackStatus -> {
+                            groupByUngrouped(
+                                mangaList,
+                                libraryViewPreferences.sortingMode,
+                                libraryViewPreferences.sortAscending,
+                            )
+                        }
+                        LibraryGroup.Ungrouped -> {
+                            groupByUngrouped(
+                                mangaList,
+                                libraryViewPreferences.sortingMode,
+                                libraryViewPreferences.sortAscending,
+                            )
+                        }
+                    }
+
                 _libraryScreenState.update {
-                    it.copy(
-                        isFirstLoad = false,
-                        items = items.toPersistentList(),
-                        allCollapsed = !notAllCollapsed,
-                    )
+                    it.copy(items = unsortedLibraryCategoryItems.toPersistentList())
+                }
+            } else {
+                lastLibraryCategoryItems?.let { items ->
+                    val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
+                    _libraryScreenState.update {
+                        it.copy(
+                            isFirstLoad = false,
+                            items = items.toPersistentList(),
+                            allCollapsed = !notAllCollapsed,
+                        )
+                    }
                 }
             }
+
             lastLibraryCategoryItems = null
         }
         observeLibraryUpdates()
         preferenceUpdates()
 
         presenterScope.launchIO {
-            // check if logged in
             val groupItems =
-                mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS, BY_AUTHOR, BY_CONTENT, BY_LANGUAGE)
+                mutableListOf(
+                    LibraryGroup.ByCategory,
+                    LibraryGroup.ByTag,
+                    LibraryGroup.ByStatus,
+                    LibraryGroup.ByAuthor,
+                    LibraryGroup.ByContent,
+                    LibraryGroup.ByLanguage,
+                )
             if (loggedServices.isNotEmpty()) {
-                groupItems.add(BY_TRACK_STATUS)
+                groupItems.add(LibraryGroup.ByTrackStatus)
             }
             if (db.getCategories().executeAsBlocking().isNotEmpty()) {
-                groupItems.add(UNGROUPED)
+                groupItems.add(LibraryGroup.Ungrouped)
             }
             _libraryScreenState.update { it.copy(groupByOptions = groupItems.toPersistentList()) }
         }
 
         presenterScope.launchIO {
             combine(
-                    libraryScreenState
-                        .map { it.searchQuery }
-                        .distinctUntilChanged()
-                        .debounce(SEARCH_DEBOUNCE_MILLIS),
-                    libraryMangaListFlow(),
-                    categoryListFlow(),
-                    filterPreferencesFlow(),
-                    trackMapFlow(),
-                    libraryViewFlow(),
+                    filteredMangaListFlow,
+                    categoryListFlow,
+                    filterPreferencesFlow,
+                    trackMapFlow,
+                    libraryViewFlow,
+                    _mangaRefreshingState.asStateFlow(),
+                    lastReadMangaFlow,
+                    lastFetchMangaFlow,
                 ) {
-                    searchQuery,
-                    libraryMangaList,
+                    filteredMangaList,
                     categoryList,
                     libraryFilters,
                     trackMap,
-                    libraryViewPreferences ->
+                    libraryViewPreferences,
+                    mangaRefreshingState,
+                    lastReadMap,
+                    lastFetchMap ->
                     val collapsedCategorySet =
                         libraryViewPreferences.collapsedCategories
                             .mapNotNull { it.toIntOrNull() }
@@ -183,72 +248,55 @@ class LibraryPresenter(
 
                     val removeArticles = libraryPreferences.removeArticles().get()
 
-                    libraryPreferences.sortAscending().get()
+                    val downloadCountMapAsync = async {
+                        downloadManager.getDownloadCounts(
+                            filteredMangaList.map { it.displayManga.toDbManga() }
+                        )
+                    }
 
                     val layout = libraryPreferences.layout().get()
                     val gridSize = libraryPreferences.gridSize().get()
 
                     val unsortedLibraryCategoryItems =
                         when (libraryViewPreferences.groupBy) {
-                            UNGROUPED -> {
-                                groupByUngrouped(
-                                    libraryMangaList,
-                                    libraryViewPreferences.sortingMode,
-                                    libraryViewPreferences.sortAscending,
+                            LibraryGroup.ByCategory -> {
+                                groupByCategory(
+                                    filteredMangaList,
+                                    categoryList,
+                                    collapsedCategorySet,
                                 )
                             }
-                            BY_AUTHOR,
-                            BY_CONTENT,
-                            BY_LANGUAGE,
-                            BY_STATUS,
-                            BY_TAG,
-                            BY_TRACK_STATUS -> {
+                            LibraryGroup.ByAuthor,
+                            LibraryGroup.ByContent,
+                            LibraryGroup.ByLanguage,
+                            LibraryGroup.ByStatus,
+                            LibraryGroup.ByTag,
+                            LibraryGroup.ByTrackStatus -> {
                                 groupByDynamic(
-                                    libraryMangaList = libraryMangaList,
+                                    libraryMangaList = filteredMangaList,
                                     collapsedDynamicCategorySet =
                                         libraryViewPreferences.collapsedDynamicCategories,
-                                    groupType = libraryViewPreferences.groupBy,
+                                    currentLibraryGroup = libraryViewPreferences.groupBy,
                                     sortOrder = libraryViewPreferences.sortingMode,
                                     sortAscending = libraryViewPreferences.sortAscending,
                                     loggedInTrackStatus = trackMap,
                                 )
                             }
-                            else -> {
-                                /*BY_DEFAULT*/
-                                groupByCategory(
-                                    libraryMangaList,
-                                    categoryList,
-                                    collapsedCategorySet,
+                            LibraryGroup.Ungrouped -> {
+                                groupByUngrouped(
+                                    filteredMangaList,
+                                    libraryViewPreferences.sortingMode,
+                                    libraryViewPreferences.sortAscending,
                                 )
                             }
                         }
 
                     var allCollapsed = true
 
-                    val lastReadMap =
-                        db.getLastReadManga()
-                            .executeAsBlocking()
-                            .mapIndexed { index, manga -> manga.id!! to index }
-                            .toMap()
-                    val lastFetchMap =
-                        db.getLastFetchedManga()
-                            .executeAsBlocking()
-                            .mapIndexed { index, manga -> manga.id!! to index }
-                            .toMap()
-
-                    val allMangaItems =
-                        unsortedLibraryCategoryItems
-                            .flatMap { it.libraryItems }
-                            .distinctBy { it.displayManga.mangaId }
-
-                    val downloadCountMap =
-                        downloadManager.getDownloadCounts(
-                            allMangaItems.map { it.displayManga.toDbManga() }
-                        )
-
+                    val downloadCountMap = downloadCountMapAsync.await()
                     val items =
                         unsortedLibraryCategoryItems
-                            .map { libraryCategoryItem ->
+                            .mapAsync { libraryCategoryItem ->
                                 if (!libraryCategoryItem.categoryItem.isHidden) {
                                     allCollapsed = false
                                 }
@@ -268,7 +316,7 @@ class LibraryPresenter(
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
                                         .sortedWith(comparator)
-                                        .map { item ->
+                                        .mapAsync { item ->
                                             item.copy(
                                                 downloadCount =
                                                     downloadCountMap[item.displayManga.mangaId]
@@ -277,12 +325,20 @@ class LibraryPresenter(
                                                     trackMap[item.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
-                                        .applyFilters(libraryFilters, trackMap, searchQuery)
+                                        .applyFilters(libraryFilters, trackMap)
                                         .toPersistentList()
 
-                                libraryCategoryItem.copy(libraryItems = sortedMangaList)
+                                val isRefreshing =
+                                    libraryCategoryItem.libraryItems.fastAny {
+                                        it.displayManga.mangaId in mangaRefreshingState
+                                    }
+
+                                libraryCategoryItem.copy(
+                                    libraryItems = sortedMangaList,
+                                    isRefreshing = isRefreshing,
+                                )
                             }
-                            .filterNot { !searchQuery.isNullOrBlank() && it.libraryItems.isEmpty() }
+                            .filterNot { it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
@@ -316,36 +372,31 @@ class LibraryPresenter(
         }
     }
 
-    fun libraryMangaListFlow(): Flow<List<LibraryMangaItem>> {
-        return db.getLibraryMangaList()
+    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
+        db.getLibraryMangaList()
             .asFlow()
             .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
             .distinctUntilChanged()
-    }
+            .conflate()
 
-    fun categoryListFlow(): Flow<List<CategoryItem>> {
-        return combine(
+    val categoryListFlow: Flow<List<CategoryItem>> =
+        combine(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
                 db.getCategories().asFlow(),
-            ) { combinedArray ->
-                val librarySort = LibrarySort.valueOf(combinedArray[0] as Int)
+            ) { sortingMode, sortAscending, dbCategories ->
+                val librarySort = LibrarySort.valueOf(sortingMode)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
-                    defaultCategory.copy(
-                        sortOrder = librarySort,
-                        isAscending = combinedArray[1] as Boolean,
-                    )
-                val dbCategories = combinedArray[2] as List<Category>
+                    defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
                 (listOf(updatedDefaultCategory) +
                         dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
                     .sortedBy { it.order }
             }
             .distinctUntilChanged()
-    }
 
-    fun trackMapFlow(): Flow<Map<Long, List<String>>> {
-        return db.getAllTracks()
+    val trackMapFlow: Flow<Map<Long, List<String>>> =
+        db.getAllTracks()
             .asFlow()
             .mapNotNull { tracks ->
                 tracks
@@ -359,9 +410,43 @@ class LibraryPresenter(
                     .groupBy({ it.first }, { it.second })
             }
             .distinctUntilChanged()
-    }
+
+    val lastReadMangaFlow =
+        db.getLastReadManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val lastFetchMangaFlow =
+        db.getLastFetchedManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val filteredMangaListFlow =
+        combine(
+                libraryMangaListFlow,
+                libraryScreenState
+                    .map { it.searchQuery }
+                    .distinctUntilChanged()
+                    .debounce(SEARCH_DEBOUNCE_MILLIS),
+            ) { mangaList, searchQuery ->
+                if (searchQuery.isNullOrBlank()) {
+                    mangaList
+                } else {
+                    mangaList.filter { libraryMangaItem -> libraryMangaItem.matches(searchQuery) }
+                }
+            }
+            .conflate()
 
     fun preferenceUpdates() {
+
+        presenterScope.launchIO {
+            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
+                enabled ->
+                _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
+            }
+        }
 
         presenterScope.launchIO {
             libraryPreferences
@@ -448,8 +533,8 @@ class LibraryPresenter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun libraryViewFlow(): Flow<LibraryViewPreferences> {
-        return combine(
+    val libraryViewFlow: Flow<LibraryViewPreferences> =
+        combine(
                 libraryPreferences.collapsedCategories().changes(),
                 libraryPreferences.collapsedDynamicCategories().changes(),
                 libraryPreferences.sortingMode().changes(),
@@ -464,15 +549,14 @@ class LibraryPresenter(
                     collapsedDynamicCategories = it[1] as Set<String>,
                     sortingMode = librarySort,
                     sortAscending = it[3] as Boolean,
-                    groupBy = it[4] as Int,
+                    groupBy = it[4] as LibraryGroup,
                     showDownloadBadges = it[5] as Boolean,
                 )
             }
             .distinctUntilChanged()
-    }
 
-    private fun filterPreferencesFlow(): Flow<LibraryFilters> {
-        return combine(
+    val filterPreferencesFlow: Flow<LibraryFilters> =
+        combine(
             libraryPreferences.filterBookmarked().changes(),
             libraryPreferences.filterCompleted().changes(),
             libraryPreferences.filterDownloaded().changes(),
@@ -495,12 +579,10 @@ class LibraryPresenter(
                 filterUnread = it[8] as FilterUnread,
             )
         }
-    }
 
     private suspend fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
-        searchQuery: String?,
     ): List<LibraryMangaItem> {
         return this.filterAsync { libraryMangaItem ->
             val displayManga = libraryMangaItem.displayManga
@@ -519,8 +601,6 @@ class LibraryPresenter(
             val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
             val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
 
-            val searchCondition = libraryMangaItem.matches(searchQuery)
-
             completedCondition &&
                 downloadedCondition &&
                 unreadCondition &&
@@ -529,8 +609,7 @@ class LibraryPresenter(
                 bookmarkedCondition &&
                 mergedCondition &&
                 unavailableCondition &&
-                mangaTypeCondition &&
-                searchCondition
+                mangaTypeCondition
         }
     }
 
@@ -541,7 +620,7 @@ class LibraryPresenter(
                     val collapsedDynamicCategorySet =
                         libraryPreferences.collapsedDynamicCategories().get().toMutableSet()
                     val dynamicName =
-                        dynamicCategoryName(libraryPreferences.groupBy().get(), category.name)
+                        dynamicCategoryName(libraryPreferences.groupBy().get().type, category.name)
 
                     if (dynamicName in collapsedDynamicCategorySet) {
                         collapsedDynamicCategorySet.remove(dynamicName)
@@ -573,7 +652,7 @@ class LibraryPresenter(
         }
     }
 
-    fun groupByClick(groupBy: Int) {
+    fun groupByClick(groupBy: LibraryGroup) {
         presenterScope.launchIO { libraryPreferences.groupBy().set(groupBy) }
     }
 
@@ -653,15 +732,15 @@ class LibraryPresenter(
         presenterScope.launchIO {
             val dbCategories = categories.map { it.toDbCategory() }
 
-            mangaList.map { manga ->
+            mangaList.mapAsync { manga ->
                 val dbManga = db.getManga(manga.mangaId).executeOnIO()!!
                 val mangaCategories = dbCategories.map { MangaCategory.create(dbManga, it) }
-                launchIO { db.setMangaCategories(mangaCategories, listOf(dbManga)) }
+                db.setMangaCategories(mangaCategories, listOf(dbManga))
             }
             clearSelectedManga()
-            if (libraryPreferences.groupBy().get() == BY_DEFAULT) {
-                libraryPreferences.groupBy().set(UNGROUPED)
-                libraryPreferences.groupBy().set(BY_DEFAULT)
+            if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
+                libraryPreferences.groupBy().set(LibraryGroup.Ungrouped)
+                libraryPreferences.groupBy().set(LibraryGroup.ByCategory)
             }
         }
     }
@@ -692,7 +771,7 @@ class LibraryPresenter(
     fun groupByDynamic(
         libraryMangaList: List<LibraryMangaItem>,
         collapsedDynamicCategorySet: Set<String>,
-        groupType: Int,
+        currentLibraryGroup: LibraryGroup,
         sortOrder: LibrarySort,
         sortAscending: Boolean,
         loggedInTrackStatus: Map<Long, List<String>>,
@@ -701,13 +780,13 @@ class LibraryPresenter(
 
         for (libraryMangaItem in libraryMangaList) {
             val groupingKeys =
-                when (groupType) {
-                    BY_AUTHOR -> libraryMangaItem.author
-                    BY_CONTENT -> libraryMangaItem.contentRating
-                    BY_LANGUAGE -> libraryMangaItem.language
-                    BY_STATUS -> libraryMangaItem.status
-                    BY_TAG -> libraryMangaItem.genre
-                    BY_TRACK_STATUS -> {
+                when (currentLibraryGroup) {
+                    LibraryGroup.ByAuthor -> libraryMangaItem.author
+                    LibraryGroup.ByContent -> libraryMangaItem.contentRating
+                    LibraryGroup.ByLanguage -> libraryMangaItem.language
+                    LibraryGroup.ByStatus -> libraryMangaItem.status
+                    LibraryGroup.ByTag -> libraryMangaItem.genre
+                    LibraryGroup.ByTrackStatus -> {
                         loggedInTrackStatus[libraryMangaItem.displayManga.mangaId]
                             ?: listOf("Not tracked")
                     }
@@ -718,9 +797,10 @@ class LibraryPresenter(
                 groupedMap.getOrPut(key) { mutableListOf() }.add(libraryMangaItem)
             }
         }
+        val keyComparator = currentLibraryGroup.keyComparator
 
         return groupedMap.entries
-            .sortedBy { it.key }
+            .sortedWith(compareBy(keyComparator) { it.key })
             .mapIndexed { index, entry ->
                 val categoryName = entry.key
                 val items = entry.value
@@ -731,7 +811,7 @@ class LibraryPresenter(
                         isAscending = sortAscending,
                         name = categoryName,
                         isHidden =
-                            dynamicCategoryName(groupType, categoryName) in
+                            dynamicCategoryName(currentLibraryGroup.type, categoryName) in
                                 collapsedDynamicCategorySet,
                         isDynamic = true,
                     )
@@ -799,42 +879,21 @@ class LibraryPresenter(
         }
     }
 
-    fun dragAndDropManga(
-        fromIndex: Int,
-        toIndex: Int,
-        category: CategoryItem,
-        libraryMangaItem: LibraryMangaItem,
-    ) {
-        presenterScope.launchIO {
-            val libraryCategoryItemIndex =
-                _libraryScreenState.value.items.indexOfFirst { it.categoryItem.id == category.id }
-            val libraryCategoryItem = _libraryScreenState.value.items[libraryCategoryItemIndex]
-            val mutableLibraryItems = libraryCategoryItem.libraryItems.toMutableList()
-            mutableLibraryItems[toIndex] = mutableLibraryItems[fromIndex]
-            val dbCategory = category.toDbCategory()
-            dbCategory.mangaOrder = mutableLibraryItems.map { item -> item.displayManga.mangaId }
-            db.insertCategory(dbCategory).executeOnIO()
-            val updatedLibraryCategoryItem =
-                libraryCategoryItem.copy(libraryItems = mutableLibraryItems.toPersistentList())
-            val mutableItems = _libraryScreenState.value.items.toMutableList()
-            mutableItems[libraryCategoryItemIndex] = updatedLibraryCategoryItem
-            _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
-        }
-    }
-
     fun observeLibraryUpdates() {
         presenterScope.launchIO {
             workManager
                 .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
+                .map { list -> list.any { !it.state.isFinished } }
                 .distinctUntilChanged()
-                .collectLatest { running ->
-                    _libraryScreenState.update { it.copy(isRefreshing = false) }
+                .collectLatest { active ->
+                    if (!active) {
+                        _mangaRefreshingState.update { emptySet() }
+                    }
                 }
         }
 
         presenterScope.launchIO {
-            filterPreferencesFlow().distinctUntilChanged().collectLatest { libraryFilters ->
+            filterPreferencesFlow.distinctUntilChanged().collectLatest { libraryFilters ->
                 _libraryScreenState.update {
                     it.copy(
                         libraryFilters = libraryFilters,
@@ -860,29 +919,9 @@ class LibraryPresenter(
         }
 
         presenterScope.launchIO {
-            flow {
-                    while (true) {
-                        _libraryScreenState.value.items.forEachIndexed { index, libraryCategoryItem
-                            ->
-                            val isInQueue =
-                                LibraryUpdateJob.categoryInQueue(
-                                    libraryCategoryItem.categoryItem.id
-                                )
-                            if (
-                                (libraryCategoryItem.isRefreshing && !isInQueue) ||
-                                    (!libraryCategoryItem.isRefreshing && isInQueue)
-                            ) {
-                                emit(index)
-                            }
-                        }
-                    }
-                }
-                .collect { index ->
-                    val mutableItems = _libraryScreenState.value.items.toMutableList()
-                    mutableItems[index] =
-                        mutableItems[index].copy(isRefreshing = !mutableItems[index].isRefreshing)
-                    _libraryScreenState.update { it.copy(items = mutableItems.toPersistentList()) }
-                }
+            LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
+                _mangaRefreshingState.update { it + mangaId }
+            }
         }
     }
 
@@ -930,7 +969,7 @@ class LibraryPresenter(
                         } else {
                             val libraryGroupBy = libraryPreferences.groupBy().get()
                             categoryItems
-                                .map { dynamicCategoryName(libraryGroupBy, it.name) }
+                                .map { dynamicCategoryName(libraryGroupBy.type, it.name) }
                                 .toSet()
                         }
 
@@ -951,10 +990,6 @@ class LibraryPresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }
-    }
-
-    fun refreshing(start: Boolean) {
-        presenterScope.launchIO { _libraryScreenState.update { it.copy(isRefreshing = start) } }
     }
 
     fun search(searchQuery: String?) {
@@ -992,38 +1027,38 @@ class LibraryPresenter(
 
     fun deleteSelectedLibraryMangaItems() {
         presenterScope.launchNonCancellable {
-            var currentSelected = _libraryScreenState.value.selectedItems.toList()
-            currentSelected.forEach { libraryMangaItem ->
+            val currentSelected = _libraryScreenState.value.selectedItems.toList()
+            clearSelectedManga()
+            currentSelected.mapAsync { libraryMangaItem ->
                 val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
                 dbManga.favorite = false
                 db.insertManga(dbManga).executeOnIO()
                 coverCache.deleteFromCache(dbManga)
                 downloadManager.deleteManga(dbManga)
             }
-            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
         }
     }
 
     fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
         presenterScope.launchIO {
-            val currentSelected = _libraryScreenState.value.selectedItems.toMutableList()
             val index =
-                currentSelected.indexOfFirst {
+                _libraryScreenState.value.selectedItems.indexOfFirst {
                     it.displayManga.mangaId == libraryMangaItem.displayManga.mangaId
                 }
-            if (index >= 0) {
-                currentSelected.removeAt(index)
-            } else {
-                val categoryItems =
-                    db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
-                        .executeOnIO()
-                        .map { it.toCategoryItem() }
-                val copy = libraryMangaItem.copy(allCategories = categoryItems)
-                currentSelected.add(copy)
-            }
+            val updatedSelectedItems =
+                if (index >= 0) {
+                    _libraryScreenState.value.selectedItems.removeAt(index)
+                } else {
+                    val categoryItems =
+                        db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
+                            .executeOnIO()
+                            .map { it.toCategoryItem() }
+                    val copy = libraryMangaItem.copy(allCategories = categoryItems)
+                    _libraryScreenState.value.selectedItems.add(copy)
+                }
 
             _libraryScreenState.update {
-                it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+                it.copy(selectedItems = updatedSelectedItems.distinct().toPersistentList())
             }
         }
     }
@@ -1111,7 +1146,7 @@ class LibraryPresenter(
     fun getSelectedMangaUrls(): String {
         val urls =
             _libraryScreenState.value.selectedItems
-                .mapNotNull { selected -> selected.url }
+                .map { selected -> selected.url }
                 .distinct()
                 .joinToString("\n")
         presenterScope.launchIO { clearSelectedManga() }

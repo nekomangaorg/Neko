@@ -7,9 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AutoSizeText(
@@ -17,27 +20,48 @@ fun AutoSizeText(
     style: TextStyle,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = 1,
+    minFontSize: TextUnit = 12.sp,
 ) {
-    var scaledTextStyle by remember { mutableStateOf(style) }
-    var readyToDraw by remember { mutableStateOf(false) }
+    var scaledTextStyle by remember(text, style) { mutableStateOf(style) }
+    var isTextReady by remember(text, style) { mutableStateOf(false) }
 
-    Text(
-        text,
-        modifier.drawWithContent {
-            if (readyToDraw) {
-                drawContent()
-            }
+    Layout(
+        modifier = modifier,
+        content = {
+            Text(
+                text = text,
+                style = scaledTextStyle,
+                softWrap = false,
+                maxLines = maxLines,
+                textAlign = textAlign,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                    if (isTextReady) {
+                        return@Text
+                    }
+
+                    if (textLayoutResult.didOverflowWidth || textLayoutResult.didOverflowHeight) {
+                        val newFontSize = scaledTextStyle.fontSize * 0.95
+                        if (newFontSize <= minFontSize) {
+                            scaledTextStyle = scaledTextStyle.copy(fontSize = minFontSize)
+                            isTextReady = true
+                        } else {
+                            scaledTextStyle = scaledTextStyle.copy(fontSize = newFontSize)
+                        }
+                    } else {
+                        isTextReady = true
+                    }
+                },
+            )
         },
-        style = scaledTextStyle,
-        softWrap = false,
-        maxLines = 2,
-        onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowWidth) {
-                scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
-            } else {
-                readyToDraw = true
-            }
-        },
-        textAlign = textAlign,
-    )
+    ) { measurables, constraints ->
+        val placeable = measurables.first().measure(constraints)
+
+        if (isTextReady) {
+            layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        } else {
+            layout(0, 0) {}
+        }
+    }
 }

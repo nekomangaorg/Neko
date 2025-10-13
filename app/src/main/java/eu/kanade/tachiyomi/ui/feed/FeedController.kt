@@ -113,10 +113,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
 
     private fun updateLibrary(start: Boolean, context: Context) {
         if (LibraryUpdateJob.isRunning(context) && !start) {
-            presenter.refreshing(false)
             LibraryUpdateJob.stop(context)
         } else if (!LibraryUpdateJob.isRunning(context) && start) {
-            presenter.refreshing(true)
             LibraryUpdateJob.startNow(context)
         }
     }

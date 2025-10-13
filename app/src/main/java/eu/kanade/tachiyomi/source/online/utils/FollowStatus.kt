@@ -17,16 +17,16 @@ enum class FollowStatus(val int: Int, @param:StringRes val stringRes: Int) {
 
     companion object {
         fun fromDex(value: String?): FollowStatus =
-            values().firstOrNull { it.name.lowercase(Locale.US) == value } ?: UNFOLLOWED
+            entries.firstOrNull { it.name.lowercase(Locale.US) == value } ?: UNFOLLOWED
 
         fun fromInt(value: Int): FollowStatus =
-            values().firstOrNull { it.int == value } ?: UNFOLLOWED
+            entries.firstOrNull { it.int == value } ?: UNFOLLOWED
 
         fun isUnfollowed(value: Int): Boolean {
             return value == UNFOLLOWED.int
         }
 
         fun fromStringRes(value: Int?): FollowStatus =
-            values().firstOrNull { it.stringRes == value } ?: UNFOLLOWED
+            entries.firstOrNull { it.stringRes == value } ?: UNFOLLOWED
     }
 }

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import android.os.Parcelable
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 import org.nekomanga.R
@@ -10,10 +10,11 @@ import org.nekomanga.domain.manga.DisplayManga
 
 data class DisplayScreenState(
     val isLoading: Boolean = false,
+    val incognitoMode: Boolean = false,
     val title: String = "",
     val titleRes: Int? = null,
-    val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
-    val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
     val error: String? = null,
     val endReached: Boolean = false,
     val page: Int = 1,
@@ -22,8 +23,8 @@ data class DisplayScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,
-    val showLibraryEntries: Int,
-    val categories: ImmutableList<CategoryItem> = persistentListOf(),
+    val libraryEntryVisibility: Int,
+    val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 
 @Parcelize

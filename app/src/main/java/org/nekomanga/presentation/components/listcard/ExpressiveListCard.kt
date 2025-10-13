@@ -11,6 +11,7 @@ enum class ListCardType {
     Top,
     Center,
     Bottom,
+    Single,
 }
 
 @Composable
@@ -36,6 +37,9 @@ fun ExpressiveListCard(
                         bottomEnd = Size.tiny,
                         bottomStart = Size.tiny,
                     )
+                ListCardType.Single -> {
+                    RoundedCornerShape(Size.medium)
+                }
                 ListCardType.Bottom ->
                     RoundedCornerShape(
                         topStart = Size.tiny,

@@ -14,7 +14,7 @@ import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.getActivity
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
@@ -27,14 +27,15 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 import org.nekomanga.presentation.theme.Size
 
 internal class AppearanceSettingsScreen(
+    incognitoMode: Boolean,
     val mangaDetailsPreferences: MangaDetailsPreferences,
     val preferences: PreferencesHelper,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.appearance
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
 
         val context = LocalContext.current
 
@@ -87,6 +88,10 @@ internal class AppearanceSettingsScreen(
                                 nightModePreference = preferences.nightMode(),
                             )
                         },
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        title = stringResource(R.string.use_vivid_colors_for_headers),
+                        pref = preferences.useVividColorHeaders(),
                     ),
                 ),
         )
@@ -167,7 +172,7 @@ internal class AppearanceSettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(
                     title = stringResource(R.string.light_theme),
@@ -177,6 +182,7 @@ internal class AppearanceSettingsScreen(
                     title = stringResource(R.string.dark_theme),
                     group = stringResource(R.string.app_theme),
                 ),
+                SearchTerm(title = stringResource(R.string.use_vivid_colors_for_headers)),
                 SearchTerm(
                     title = stringResource(R.string.force_portrait_details),
                     subtitle = stringResource(R.string.force_portrait_details_description),

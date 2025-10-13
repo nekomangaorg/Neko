@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.screens.settings.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -11,7 +9,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import eu.kanade.tachiyomi.util.system.getActivity
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
@@ -20,14 +18,15 @@ import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class SecuritySettingsScreen(
+    incognitoMode: Boolean,
     val securityPreferences: SecurityPreferences,
     onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.security
 
     @Composable
-    override fun getPreferences(): ImmutableList<Preference> {
+    override fun getPreferences(): PersistentList<Preference> {
         val context = LocalContext.current
         return persistentListOf(
             Preference.PreferenceItem.SwitchPreference(
@@ -83,7 +82,7 @@ internal class SecuritySettingsScreen(
 
     companion object : SearchTermProvider {
         @Composable
-        override fun getSearchTerms(): ImmutableList<SearchTerm> {
+        override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
                 SearchTerm(stringResource(R.string.lock_with_biometrics)),
                 SearchTerm(stringResource(R.string.lock_when_idle)),

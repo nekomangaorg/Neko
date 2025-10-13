@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.dto.copyTo
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 
@@ -71,7 +71,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
                     else -> (0..9).map { fraction -> "$decimal.$fraction" }
                 }
             }
-            .toImmutableList()
+            .toPersistentList()
 
     override fun getScoreList(): List<String> = _scoreList
 

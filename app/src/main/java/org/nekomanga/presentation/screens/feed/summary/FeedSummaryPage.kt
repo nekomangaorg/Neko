@@ -7,21 +7,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import kotlinx.collections.immutable.ImmutableList
+import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.screens.feed.updates.UpdatesCard
 import org.nekomanga.presentation.theme.Size
 
@@ -32,17 +39,26 @@ fun FeedSummaryPage(
     updatingUpdates: Boolean = false,
     updatingContinueReading: Boolean = false,
     updatingNewlyAdded: Boolean = false,
-    updatesFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    continueReadingFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
-    newlyAddedFeedMangaList: ImmutableList<FeedManga> = persistentListOf(),
+    updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    continueReadingFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
+    newlyAddedFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
+    useVividColorHeaders: Boolean,
     feedScreenActions: FeedScreenActions,
 ) {
     val scrollState = rememberLazyListState()
+
+    val headerColor =
+        when (useVividColorHeaders) {
+            true -> MaterialTheme.colorScheme.primary
+            false -> MaterialTheme.colorScheme.onSurface
+        }
+
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         item {
             SummaryHeader(
                 text = stringResource(R.string.feed_continue_reading),
+                color = headerColor,
                 isRefreshing = updatingContinueReading,
             )
         }
@@ -51,21 +67,83 @@ fun FeedSummaryPage(
             item { NoResults() }
         } else {
 
-            items(continueReadingFeedMangaList) { feedManga ->
+            itemsIndexed(continueReadingFeedMangaList) { index, feedManga ->
+                val listCardType =
+                    when {
+                        index == 0 && continueReadingFeedMangaList.size > 1 -> ListCardType.Top
+                        index == continueReadingFeedMangaList.size - 1 &&
+                            continueReadingFeedMangaList.size > 1 -> ListCardType.Bottom
+                        continueReadingFeedMangaList.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
+                    }
                 if (feedManga.chapters.isNotEmpty()) {
                     val chapter = feedManga.chapters.first()
-                    ContinueReadingCard(
-                        feedManga = feedManga,
-                        outlineCover = outlineCovers,
+                    ExpressiveListCard(
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        listCardType = listCardType,
+                    ) {
+                        ContinueReadingCard(
+                            feedManga = feedManga,
+                            outlineCover = outlineCovers,
+                            mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                            chapterClick = {
+                                feedScreenActions.chapterClick(
+                                    feedManga.mangaId,
+                                    chapter.chapter.id,
+                                )
+                            },
+                            deleteAllHistoryClick = {
+                                feedScreenActions.deleteAllHistoryClick(feedManga)
+                            },
+                            deleteHistoryClick = { chp ->
+                                feedScreenActions.deleteHistoryClick(feedManga, chp)
+                            },
+                        )
+                    }
+                    Gap(Size.tiny)
+                }
+            }
+        }
+
+        item {
+            SummaryHeader(
+                text = stringResource(R.string.recently_updated_manga),
+                color = headerColor,
+                isRefreshing = updatingUpdates,
+            )
+        }
+
+        if (!updatingUpdates && updatesFeedMangaList.isEmpty()) {
+            item { NoResults() }
+        } else {
+            itemsIndexed(updatesFeedMangaList) { index, feedManga ->
+                val listCardType =
+                    when {
+                        index == 0 && updatesFeedMangaList.size > 1 -> ListCardType.Top
+                        index == updatesFeedMangaList.size - 1 && updatesFeedMangaList.size > 1 ->
+                            ListCardType.Bottom
+                        updatesFeedMangaList.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
+                    }
+                val chapter = feedManga.chapters.first()
+                ExpressiveListCard(
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    listCardType = listCardType,
+                ) {
+                    UpdatesCard(
+                        chapterItem = chapter,
+                        updateDate = feedManga.date,
+                        isGrouped = false,
+                        mangaTitle = feedManga.mangaTitle,
+                        artwork = feedManga.artwork,
+                        outlineCovers = outlineCovers,
                         mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                         chapterClick = {
                             feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
                         },
-                        deleteAllHistoryClick = {
-                            feedScreenActions.deleteAllHistoryClick(feedManga)
-                        },
-                        deleteHistoryClick = { chp ->
-                            feedScreenActions.deleteHistoryClick(feedManga, chp)
+                        chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                        downloadClick = { action ->
+                            feedScreenActions.downloadClick(chapter, feedManga, action)
                         },
                     )
                 }
@@ -74,38 +152,8 @@ fun FeedSummaryPage(
 
         item {
             SummaryHeader(
-                text = stringResource(R.string.recently_updated_manga),
-                isRefreshing = updatingUpdates,
-            )
-        }
-
-        if (!updatingUpdates && updatesFeedMangaList.isEmpty()) {
-            item { NoResults() }
-        } else {
-            items(updatesFeedMangaList) { feedManga ->
-                val chapter = feedManga.chapters.first()
-                UpdatesCard(
-                    chapterItem = chapter,
-                    updateDate = feedManga.date,
-                    isGrouped = false,
-                    mangaTitle = feedManga.mangaTitle,
-                    artwork = feedManga.artwork,
-                    outlineCovers = outlineCovers,
-                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                    chapterClick = {
-                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
-                    },
-                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
-                    downloadClick = { action ->
-                        feedScreenActions.downloadClick(chapter, feedManga, action)
-                    },
-                )
-            }
-        }
-
-        item {
-            SummaryHeader(
                 text = stringResource(R.string.newly_added),
+                color = headerColor,
                 isRefreshing = updatingNewlyAdded,
             )
         }
@@ -113,44 +161,67 @@ fun FeedSummaryPage(
         if (!updatingNewlyAdded && newlyAddedFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
-            items(newlyAddedFeedMangaList) { feedManga ->
+            itemsIndexed(newlyAddedFeedMangaList) { index, feedManga ->
+                val listCardType =
+                    when {
+                        index == 0 && newlyAddedFeedMangaList.size > 1 -> ListCardType.Top
+                        index == newlyAddedFeedMangaList.size - 1 &&
+                            newlyAddedFeedMangaList.size > 1 -> ListCardType.Bottom
+                        newlyAddedFeedMangaList.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
+                    }
                 val chapter = feedManga.chapters.first()
-                NewlyAddedCard(
-                    chapterItem = chapter,
-                    mangaTitle = feedManga.mangaTitle,
-                    dateAdded = feedManga.date,
-                    artwork = feedManga.artwork,
-                    outlineCovers = outlineCovers,
-                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                    chapterClick = {
-                        feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
-                    },
-                    chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
-                    downloadClick = { action ->
-                        feedScreenActions.downloadClick(chapter, feedManga, action)
-                    },
-                )
+                ExpressiveListCard(
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    listCardType = listCardType,
+                ) {
+                    NewlyAddedCard(
+                        chapterItem = chapter,
+                        mangaTitle = feedManga.mangaTitle,
+                        dateAdded = feedManga.date,
+                        artwork = feedManga.artwork,
+                        outlineCovers = outlineCovers,
+                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                        chapterClick = {
+                            feedScreenActions.chapterClick(feedManga.mangaId, chapter.chapter.id)
+                        },
+                        chapterSwipe = { _ -> feedScreenActions.chapterSwipe(chapter) },
+                        downloadClick = { action ->
+                            feedScreenActions.downloadClick(chapter, feedManga, action)
+                        },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SummaryHeader(text: String, isRefreshing: Boolean) {
+private fun SummaryHeader(text: String, isRefreshing: Boolean, color: Color) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
-            style =
-                MaterialTheme.typography.titleMedium.copy(
-                    color = MaterialTheme.colorScheme.secondary
-                ),
+            style = MaterialTheme.typography.titleLarge,
+            color = color,
             modifier = Modifier.fillMaxWidth().weight(1f).padding(),
         )
         AnimatedVisibility(isRefreshing) {
-            CircularProgressIndicator(modifier = Modifier.size(Size.large))
+            CircularWavyProgressIndicator(
+                modifier = Modifier.size(Size.large),
+                trackStroke =
+                    Stroke(
+                        width = with(LocalDensity.current) { Size.extraTiny.toPx() },
+                        cap = StrokeCap.Round,
+                    ),
+                stroke =
+                    Stroke(
+                        width = with(LocalDensity.current) { Size.extraTiny.toPx() },
+                        cap = StrokeCap.Round,
+                    ),
+            )
         }
     }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+    <font
+        app:fontWeight="100"
+        app:font="@font/mplus_rounded1c_thin" />
+    <font
+        app:fontWeight="200"
+        app:font="@font/mplus_rounded1c_thin" />
+    <font
+        app:fontWeight="300"
+        app:font="@font/mplus_rounded1c_regular" />
+    <font
+        app:fontWeight="400"
+        app:font="@font/mplus_rounded1c_regular" />
+    <font
+        app:fontWeight="500"
+        app:font="@font/mplus_rounded1c_medium" />
+    <font
+        app:fontWeight="600"
+        app:font="@font/mplus_rounded1c_bold" />
+    <font
+        app:fontWeight="700"
+        app:font="@font/mplus_rounded1c_bold" />
+    <font
+        app:fontWeight="800"
+        app:font="@font/mplus_rounded1c_extra_bold" />
+    <font
+        app:fontWeight="900"
+        app:font="@font/mplus_rounded1c_black" />
+
+</font-family>
