@@ -108,9 +108,11 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 
 
 #test libs
-junit = "junit:junit:4.13.2"
+junit-bom = { group = "org.junit", name = "junit-bom", version = "5.9.3" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
 mockk = "io.mockk:mockk:1.14.6"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.3"
+
 
 [plugins]
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibVersion" }
@@ -128,7 +130,6 @@ iconics = ["iconics-core", "iconics-views", "iconics-compose"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
-tests = ["junit", "mockk", "kotest-assertions"]
 retrofit = ["retrofit-core", "retrofit-serialization", "retrofit-scalars"]
 results = ["kotlin-result", "kotlin-result-coroutines"]
 rx = ["rx-android", "rx-java", "rx-relay"]
