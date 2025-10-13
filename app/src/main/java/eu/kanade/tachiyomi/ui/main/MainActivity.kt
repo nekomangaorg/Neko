@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.WorkInfo
@@ -112,6 +113,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private var overflowDialog: Dialog? = null
     var ogWidth: Int = Int.MAX_VALUE
 
+    private lateinit var viewModel: MainViewModel
+
     override fun attachBaseContext(newBase: Context?) {
         ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
         super.attachBaseContext(newBase?.prepareSideNavContext())
@@ -130,6 +133,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProvider(this, MainViewModelFactory())[MainViewModel::class.java]
 
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
