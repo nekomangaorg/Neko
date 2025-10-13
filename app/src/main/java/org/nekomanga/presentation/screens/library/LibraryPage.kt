@@ -106,7 +106,9 @@ fun LibraryPage(
                             isCollapsible = collapsible,
                             categoryItemClick = {
                                 if (selectionMode) {
-                                    libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems)
+                                    libraryScreenActions.selectAllLibraryMangaItems(
+                                        item.libraryItems
+                                    )
                                 } else {
                                     libraryCategoryActions.categoryItemClick(item.categoryItem)
                                 }

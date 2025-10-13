@@ -112,22 +112,22 @@ fun HorizontalCategoriesPage(
                     Column {
                         Row(
                             modifier =
-                            Modifier.fillMaxWidth()
-                                .clickable(
-                                    enabled = selectionMode,
-                                    onClick = {
-                                        libraryScreenActions.selectAllLibraryMangaItems(
-                                            item.libraryItems
-                                        )
-                                    },
-                                ),
+                                Modifier.fillMaxWidth()
+                                    .clickable(
+                                        enabled = selectionMode,
+                                        onClick = {
+                                            libraryScreenActions.selectAllLibraryMangaItems(
+                                                item.libraryItems
+                                            )
+                                        },
+                                    ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             AnimatedVisibility(selectionMode) {
                                 Icon(
                                     imageVector =
-                                    if (allSelected) Icons.Default.CheckCircleOutline
-                                    else Icons.Outlined.Circle,
+                                        if (allSelected) Icons.Default.CheckCircleOutline
+                                        else Icons.Outlined.Circle,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.tertiary,
                                 )
@@ -138,11 +138,11 @@ fun HorizontalCategoriesPage(
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },
                                 sortString =
-                                stringResource(
-                                    item.categoryItem.sortOrder.stringRes(
-                                        item.categoryItem.isDynamic
-                                    )
-                                ),
+                                    stringResource(
+                                        item.categoryItem.sortOrder.stringRes(
+                                            item.categoryItem.isDynamic
+                                        )
+                                    ),
                                 isAscending = item.categoryItem.isAscending,
                                 categoryIsRefreshing = item.isRefreshing,
                                 ascendingClick = {
@@ -156,10 +156,11 @@ fun HorizontalCategoriesPage(
                         val lazyGridState = rememberLazyGridState()
                         val gridCells = GridCells.Fixed(columns)
                         val hArrangement = Arrangement.spacedBy(Size.small)
-                        val vgContentPadding = PaddingValues(
-                            bottom = contentPadding.calculateBottomPadding(),
-                            top = Size.small,
-                        )
+                        val vgContentPadding =
+                            PaddingValues(
+                                bottom = contentPadding.calculateBottomPadding(),
+                                top = Size.small,
+                            )
                         VerticalGridFastScroller(
                             state = lazyGridState,
                             columns = gridCells,
@@ -173,8 +174,10 @@ fun HorizontalCategoriesPage(
                                 horizontalArrangement = hArrangement,
                                 contentPadding = vgContentPadding,
                             ) {
-                                items(items = item.libraryItems, key = { it.displayManga.mangaId }) {
-                                        libraryItem ->
+                                items(
+                                    items = item.libraryItems,
+                                    key = { it.displayManga.mangaId },
+                                ) { libraryItem ->
                                     MangaGridItem(
                                         displayManga = libraryItem.displayManga,
                                         showUnreadBadge = libraryScreenState.showUnreadBadges,
@@ -183,13 +186,13 @@ fun HorizontalCategoriesPage(
                                         downloadCount = libraryItem.downloadCount,
                                         shouldOutlineCover = libraryScreenState.outlineCovers,
                                         isComfortable =
-                                        libraryScreenState.libraryDisplayMode
-                                            is LibraryDisplayMode.ComfortableGrid,
+                                            libraryScreenState.libraryDisplayMode
+                                                is LibraryDisplayMode.ComfortableGrid,
                                         isSelected =
-                                        selectedIds.contains(libraryItem.displayManga.mangaId),
+                                            selectedIds.contains(libraryItem.displayManga.mangaId),
                                         showStartReadingButton =
-                                        libraryScreenState.showStartReadingButton &&
-                                            libraryItem.unreadCount > 0,
+                                            libraryScreenState.showStartReadingButton &&
+                                                libraryItem.unreadCount > 0,
                                         onStartReadingClick = {
                                             libraryScreenActions.mangaStartReadingClick(
                                                 libraryItem.displayManga.mangaId
@@ -217,23 +220,23 @@ fun HorizontalCategoriesPage(
                     Column(modifier = Modifier.fillMaxSize()) {
                         Row(
                             modifier =
-                            Modifier.fillMaxWidth()
-                                .clickable(
-                                    enabled = selectionMode,
-                                    onClick = {
-                                        libraryScreenActions.selectAllLibraryMangaItems(
-                                            item.libraryItems
-                                        )
-                                    },
-                                ),
+                                Modifier.fillMaxWidth()
+                                    .clickable(
+                                        enabled = selectionMode,
+                                        onClick = {
+                                            libraryScreenActions.selectAllLibraryMangaItems(
+                                                item.libraryItems
+                                            )
+                                        },
+                                    ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Gap(Size.medium)
                             AnimatedVisibility(selectionMode) {
                                 Icon(
                                     imageVector =
-                                    if (allSelected) Icons.Default.CheckCircleOutline
-                                    else Icons.Outlined.Circle,
+                                        if (allSelected) Icons.Default.CheckCircleOutline
+                                        else Icons.Outlined.Circle,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.tertiary,
                                 )
@@ -244,11 +247,11 @@ fun HorizontalCategoriesPage(
                                 enabled = true,
                                 categorySortClick = { categorySortClick(item.categoryItem) },
                                 sortString =
-                                stringResource(
-                                    item.categoryItem.sortOrder.stringRes(
-                                        item.categoryItem.isDynamic
-                                    )
-                                ),
+                                    stringResource(
+                                        item.categoryItem.sortOrder.stringRes(
+                                            item.categoryItem.isDynamic
+                                        )
+                                    ),
                                 isAscending = item.categoryItem.isAscending,
                                 categoryIsRefreshing = item.isRefreshing,
                                 ascendingClick = {
@@ -268,7 +271,7 @@ fun HorizontalCategoriesPage(
                                 state = lazyListState,
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                             ) {
                                 itemsIndexed(
                                     items = item.libraryItems,
