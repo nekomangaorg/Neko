@@ -72,6 +72,7 @@ fun VerticalCategoriesPage(
 
     VerticalFastScroller(
         listState = lazyListState,
+        topContentPadding = contentPadding.calculateTopPadding(),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -81,72 +82,75 @@ fun VerticalCategoriesPage(
         ) {
             libraryScreenState.items.forEach { item ->
                 item(item.categoryItem.name) {
-                LibraryCategoryHeader(
-                    categoryItem = item.categoryItem,
-                    useVividColorHeaders = libraryScreenState.useVividColorHeaders,
-                    enabled = !item.libraryItems.isEmpty(),
-                    isRefreshing = item.isRefreshing,
-                    selectionMode = selectionMode,
-                    allSelected =
-                        item.libraryItems.isNotEmpty() &&
-                            item.libraryItems
-                                .map { it.displayManga.mangaId }
-                                .all { id -> id in selectedIds },
-                    isCollapsible = collapsible,
-                    categoryItemClick = {
-                        if (selectionMode) {
-                            libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems)
-                        } else {
-                            libraryCategoryActions.categoryItemClick(item.categoryItem)
-                        }
-                    },
-                    categorySortClick = { categorySortClick(item.categoryItem) },
-                    categoryAscendingClick = {
-                        libraryCategoryActions.categoryAscendingClick(item.categoryItem)
-                    },
-                    categoryRefreshClick = {
-                        libraryCategoryActions.categoryRefreshClick(item.categoryItem)
-                    },
-                )
-                Gap(Size.tiny)
-            }
+                    LibraryCategoryHeader(
+                        categoryItem = item.categoryItem,
+                        useVividColorHeaders = libraryScreenState.useVividColorHeaders,
+                        enabled = !item.libraryItems.isEmpty(),
+                        isRefreshing = item.isRefreshing,
+                        selectionMode = selectionMode,
+                        allSelected =
+                            item.libraryItems.isNotEmpty() &&
+                                item.libraryItems
+                                    .map { it.displayManga.mangaId }
+                                    .all { id -> id in selectedIds },
+                        isCollapsible = collapsible,
+                        categoryItemClick = {
+                            if (selectionMode) {
+                                libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems)
+                            } else {
+                                libraryCategoryActions.categoryItemClick(item.categoryItem)
+                            }
+                        },
+                        categorySortClick = { categorySortClick(item.categoryItem) },
+                        categoryAscendingClick = {
+                            libraryCategoryActions.categoryAscendingClick(item.categoryItem)
+                        },
+                        categoryRefreshClick = {
+                            libraryCategoryActions.categoryRefreshClick(item.categoryItem)
+                        },
+                    )
+                    Gap(Size.tiny)
+                }
 
-            if (!item.categoryItem.isHidden || !collapsible) {
-                when (libraryScreenState.libraryDisplayMode) {
-                    is LibraryDisplayMode.ComfortableGrid,
-                    is LibraryDisplayMode.CompactGrid -> {
-                        items(
-                            items = item.libraryItems.chunked(columns),
-                            key = { row -> row.joinToString { it.displayManga.mangaId.toString() } },
-                        ) { rowItems ->
-                            RowGrid(
-                                modifier = Modifier.animateItem(),
-                                rowItems = rowItems,
-                                selectedIds = selectedIds,
-                                libraryScreenState = libraryScreenState,
-                                columns = columns,
-                                isComfortableGrid =
-                                    libraryScreenState.libraryDisplayMode
-                                        is LibraryDisplayMode.ComfortableGrid,
-                                libraryScreenActions = libraryScreenActions,
-                            )
+                if (!item.categoryItem.isHidden || !collapsible) {
+                    when (libraryScreenState.libraryDisplayMode) {
+                        is LibraryDisplayMode.ComfortableGrid,
+                        is LibraryDisplayMode.CompactGrid -> {
+                            items(
+                                items = item.libraryItems.chunked(columns),
+                                key = { row ->
+                                    row.joinToString { it.displayManga.mangaId.toString() }
+                                },
+                            ) { rowItems ->
+                                RowGrid(
+                                    modifier = Modifier.animateItem(),
+                                    rowItems = rowItems,
+                                    selectedIds = selectedIds,
+                                    libraryScreenState = libraryScreenState,
+                                    columns = columns,
+                                    isComfortableGrid =
+                                        libraryScreenState.libraryDisplayMode
+                                            is LibraryDisplayMode.ComfortableGrid,
+                                    libraryScreenActions = libraryScreenActions,
+                                )
+                            }
                         }
-                    }
 
-                    LibraryDisplayMode.List -> {
-                        itemsIndexed(
-                            item.libraryItems,
-                            key = { _, libraryItem -> libraryItem.displayManga.mangaId },
-                        ) { index, libraryItem ->
-                            ListItem(
-                                index = index,
-                                totalSize = item.libraryItems.size,
-                                selectedIds = selectedIds,
-                                libraryScreenState = libraryScreenState,
-                                libraryItem = libraryItem,
-                                libraryScreenActions = libraryScreenActions,
-                            )
-                            Gap(Size.tiny)
+                        LibraryDisplayMode.List -> {
+                            itemsIndexed(
+                                item.libraryItems,
+                                key = { _, libraryItem -> libraryItem.displayManga.mangaId },
+                            ) { index, libraryItem ->
+                                ListItem(
+                                    index = index,
+                                    totalSize = item.libraryItems.size,
+                                    selectedIds = selectedIds,
+                                    libraryScreenState = libraryScreenState,
+                                    libraryItem = libraryItem,
+                                    libraryScreenActions = libraryScreenActions,
+                                )
+                                Gap(Size.tiny)
+                            }
                         }
                     }
                 }

@@ -181,41 +181,42 @@ fun HorizontalCategoriesPage(
                             ) {
                                 items(
                                     items = item.libraryItems,
-                                    key = { it.displayManga.mangaId }
+                                    key = { it.displayManga.mangaId },
                                 ) { libraryItem ->
                                     MangaGridItem(
-                                    displayManga = libraryItem.displayManga,
-                                    showUnreadBadge = libraryScreenState.showUnreadBadges,
-                                    unreadCount = libraryItem.unreadCount,
-                                    showDownloadBadge = libraryScreenState.showDownloadBadges,
-                                    downloadCount = libraryItem.downloadCount,
-                                    shouldOutlineCover = libraryScreenState.outlineCovers,
-                                    isComfortable =
-                                        libraryScreenState.libraryDisplayMode
-                                            is LibraryDisplayMode.ComfortableGrid,
-                                    isSelected =
-                                        selectedIds.contains(libraryItem.displayManga.mangaId),
-                                    showStartReadingButton =
-                                        libraryScreenState.showStartReadingButton &&
-                                            libraryItem.unreadCount > 0,
-                                    onStartReadingClick = {
-                                        libraryScreenActions.mangaStartReadingClick(
-                                            libraryItem.displayManga.mangaId
-                                        )
-                                    },
-                                    onClick = {
-                                        if (libraryScreenState.selectedItems.isNotEmpty()) {
-                                            libraryScreenActions.mangaLongClick(libraryItem)
-                                        } else {
-                                            libraryScreenActions.mangaClick(
+                                        displayManga = libraryItem.displayManga,
+                                        showUnreadBadge = libraryScreenState.showUnreadBadges,
+                                        unreadCount = libraryItem.unreadCount,
+                                        showDownloadBadge = libraryScreenState.showDownloadBadges,
+                                        downloadCount = libraryItem.downloadCount,
+                                        shouldOutlineCover = libraryScreenState.outlineCovers,
+                                        isComfortable =
+                                            libraryScreenState.libraryDisplayMode
+                                                is LibraryDisplayMode.ComfortableGrid,
+                                        isSelected =
+                                            selectedIds.contains(libraryItem.displayManga.mangaId),
+                                        showStartReadingButton =
+                                            libraryScreenState.showStartReadingButton &&
+                                                libraryItem.unreadCount > 0,
+                                        onStartReadingClick = {
+                                            libraryScreenActions.mangaStartReadingClick(
                                                 libraryItem.displayManga.mangaId
                                             )
-                                        }
-                                    },
-                                    onLongClick = {
-                                        libraryScreenActions.mangaLongClick(libraryItem)
-                                    },
-                                )
+                                        },
+                                        onClick = {
+                                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                                                libraryScreenActions.mangaLongClick(libraryItem)
+                                            } else {
+                                                libraryScreenActions.mangaClick(
+                                                    libraryItem.displayManga.mangaId
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            libraryScreenActions.mangaLongClick(libraryItem)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -267,30 +268,27 @@ fun HorizontalCategoriesPage(
                             )
                         }
                         val listState = rememberLazyListState()
-                        VerticalFastScroller(
-                            listState = listState,
-                        ) {
+                        VerticalFastScroller(listState = listState) {
                             LazyColumn(
                                 state = listState,
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                    PaddingValues(
-                                        bottom = contentPadding.calculateBottomPadding()
-                                    ),
+                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                             ) {
                                 itemsIndexed(
                                     items = item.libraryItems,
-                                key = { _, libraryItem -> libraryItem.displayManga.mangaId },
-                            ) { index, libraryItem ->
-                                ListItem(
-                                    index = index,
-                                    totalSize = item.libraryItems.size,
-                                    selectedIds = selectedIds,
-                                    libraryScreenState = libraryScreenState,
-                                    libraryItem = libraryItem,
-                                    libraryScreenActions = libraryScreenActions,
-                                )
-                                Gap(Size.tiny)
+                                    key = { _, libraryItem -> libraryItem.displayManga.mangaId },
+                                ) { index, libraryItem ->
+                                    ListItem(
+                                        index = index,
+                                        totalSize = item.libraryItems.size,
+                                        selectedIds = selectedIds,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryItem = libraryItem,
+                                        libraryScreenActions = libraryScreenActions,
+                                    )
+                                    Gap(Size.tiny)
+                                }
                             }
                         }
                     }
