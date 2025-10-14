@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.getActivity
 import kotlinx.collections.immutable.PersistentList
@@ -116,9 +117,16 @@ internal class AppearanceSettingsScreen(
                         pref = mangaDetailsPreferences.hideButtonText(),
                         title = stringResource(R.string.hide_button_text),
                     ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = mangaDetailsPreferences.extraLargeBackdrop(),
-                        title = stringResource(R.string.extra_large_backdrop),
+                    Preference.PreferenceItem.ListPreference(
+                        pref = mangaDetailsPreferences.backdropSize(),
+                        title = stringResource(R.string.backdrop_size),
+                        entries =
+                            persistentMapOf(
+                                MangaConstants.BackdropSize.Small to stringResource(R.string.small),
+                                MangaConstants.BackdropSize.Default to
+                                    stringResource(R.string.default_size),
+                                MangaConstants.BackdropSize.Large to stringResource(R.string.large),
+                            ),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = mangaDetailsPreferences.wrapAltTitles(),
@@ -201,7 +209,7 @@ internal class AppearanceSettingsScreen(
                     group = stringResource(R.string.details_page),
                 ),
                 SearchTerm(
-                    title = stringResource(R.string.extra_large_backdrop),
+                    title = stringResource(R.string.backdrop_size),
                     group = stringResource(R.string.details_page),
                 ),
                 SearchTerm(

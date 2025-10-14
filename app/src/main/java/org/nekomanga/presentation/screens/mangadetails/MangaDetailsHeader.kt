@@ -7,12 +7,10 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -33,8 +31,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -83,9 +79,13 @@ fun MangaDetailsHeader(
             when (isSearching) {
                 true -> (LocalConfiguration.current.screenHeightDp / 4).dp
                 false -> {
-                    when (mangaDetailScreenState.value.extraLargeBackdrop) {
-                        true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
-                        false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
+                    when (mangaDetailScreenState.value.backdropSize) {
+                        MangaConstants.BackdropSize.Small ->
+                            (LocalConfiguration.current.screenHeightDp / 2.8).dp
+                        MangaConstants.BackdropSize.Default ->
+                            (LocalConfiguration.current.screenHeightDp / 2.1).dp
+                        MangaConstants.BackdropSize.Large ->
+                            (LocalConfiguration.current.screenHeightDp / 1.2).dp
                     }
                 }
             }
@@ -94,25 +94,13 @@ fun MangaDetailsHeader(
             Box {
                 BackDrop(
                     themeColorState = themeColorState,
-                    artworkProvider = { mangaDetailScreenState.value.currentArtwork },
-                    showBackdropProvider = { mangaDetailScreenState.value.themeBasedOffCovers },
+                    artwork = mangaDetailScreenState.value.currentArtwork,
+                    showBackdrop = mangaDetailScreenState.value.themeBasedOffCovers,
                     modifier =
                         Modifier.animateContentSize()
                             .fillMaxWidth()
                             .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
                     generatePalette = generatePalette,
-                )
-                Box(
-                    modifier =
-                        Modifier.align(Alignment.BottomStart)
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors =
-                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
-                                )
-                            )
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {

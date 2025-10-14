@@ -1,7 +1,9 @@
 package org.nekomanga.domain.details
 
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import tachiyomi.core.preference.PreferenceStore
+import tachiyomi.core.preference.getEnum
 
 class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
     fun filterChapterByRead() =
@@ -37,5 +39,6 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
 
     fun hideButtonText() = this.preferenceStore.getBoolean("hide_manga_detail_button_text")
 
-    fun extraLargeBackdrop() = this.preferenceStore.getBoolean("extra_large_backdrop")
+    fun backdropSize() =
+        this.preferenceStore.getEnum("backdrop_size", MangaConstants.BackdropSize.Default)
 }

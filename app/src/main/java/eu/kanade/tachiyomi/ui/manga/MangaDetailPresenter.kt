@@ -441,7 +441,7 @@ class MangaDetailPresenter(
                     incognitoMode = securityPreferences.incognitoMode().get(),
                     hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
                     hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
-                    extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
+                    backdropSize = mangaDetailsPreferences.backdropSize().get(),
                     forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
                     themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
                     wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),

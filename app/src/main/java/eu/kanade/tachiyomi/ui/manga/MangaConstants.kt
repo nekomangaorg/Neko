@@ -43,7 +43,7 @@ object MangaConstants {
         val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
         val hasDefaultCategory: Boolean = false,
         val hideButtonText: Boolean = false,
-        val extraLargeBackdrop: Boolean = false,
+        val backdropSize: BackdropSize = BackdropSize.Default,
         val forcePortrait: Boolean = false,
         val incognitoMode: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
@@ -238,6 +238,6 @@ object MangaConstants {
     enum class BackdropSize {
         Small,
         Default,
-        Large
+        Large,
     }
 }
