@@ -580,9 +580,9 @@ private fun Details(
     shareClick: () -> Unit,
     toggleFavorite: (Boolean) -> Unit,
 ) {
-    val isLoggedIntoTrackersProvider =
+    val isLoggedIntoTrackers =
         remember(detailsState.mangaDetailScreenState) {
-            { detailsState.mangaDetailScreenState.value.loggedInTrackService.isNotEmpty() }
+            detailsState.mangaDetailScreenState.value.loggedInTrackService.isNotEmpty()
         }
 
     val toggleFavoriteProvider =
@@ -638,7 +638,7 @@ private fun Details(
         informationActions = informationActions,
         themeColorState = detailsState.themeColorState,
         generatePalette = generatePalette,
-        isLoggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
+        isLoggedIntoTrackers = isLoggedIntoTrackers,
         toggleFavorite = toggleFavoriteProvider,
         moveCategories = moveCategoriesProvider,
         trackingClick = trackingClickProvider,

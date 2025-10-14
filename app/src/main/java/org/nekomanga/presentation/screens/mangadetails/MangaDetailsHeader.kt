@@ -47,7 +47,7 @@ import org.nekomanga.presentation.theme.Size
 fun MangaDetailsHeader(
     mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     windowSizeClass: WindowSizeClass,
-    isLoggedIntoTrackersProvider: () -> Boolean,
+    isLoggedIntoTrackers: Boolean,
     isSearching: Boolean,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
@@ -140,21 +140,14 @@ fun MangaDetailsHeader(
                         Column {
                             Gap(height = 16.dp)
                             ButtonBlock(
-                                hideButtonTextProvider = {
-                                    mangaDetailScreenState.value.hideButtonText
-                                },
-                                isInitializedProvider = {
-                                    mangaDetailScreenState.value.initialized
-                                },
-                                isMergedProvider = {
-                                    mangaDetailScreenState.value.isMerged is
-                                        MergeConstants.IsMergedManga.Yes
-                                },
-                                inLibraryProvider = { mangaDetailScreenState.value.inLibrary },
-                                loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
-                                trackServiceCountProvider = {
-                                    mangaDetailScreenState.value.trackServiceCount
-                                },
+                                hideButtonText = mangaDetailScreenState.value.hideButtonText,
+                                isInitialized = mangaDetailScreenState.value.initialized,
+                                isMerged =
+                                    mangaDetailScreenState.value.isMerged
+                                        is MergeConstants.IsMergedManga.Yes,
+                                inLibrary = mangaDetailScreenState.value.inLibrary,
+                                loggedIntoTrackers = isLoggedIntoTrackers,
+                                trackServiceCount = mangaDetailScreenState.value.trackServiceCount,
                                 themeColorState = themeColorState,
                                 toggleFavorite = toggleFavorite,
                                 trackingClick = trackingClick,
