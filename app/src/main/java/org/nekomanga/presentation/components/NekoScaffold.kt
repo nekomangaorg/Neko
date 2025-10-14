@@ -286,6 +286,12 @@ fun SearchOutlineTopAppBar(
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
+    LaunchedEffect(searchEnabled) {
+        if (!searchEnabled) {
+            focusManager.clearFocus()
+        }
+    }
+
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors =
@@ -337,7 +343,6 @@ fun SearchOutlineTopAppBar(
                                             onSearchText("")
                                             searchText = ""
                                             searchEnabled = false
-                                            focusManager.clearFocus()
                                             onSearchDisabled()
                                         },
                                     )
@@ -409,6 +414,13 @@ fun SearchOutlineWithActionsTopAppBar(
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(searchEnabled) {
+        if (!searchEnabled) {
+            focusManager.clearFocus()
+        }
+    }
+
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors = FlexibleTopBarColors(containerColor = color, scrolledContainerColor = color),
@@ -468,7 +480,6 @@ fun SearchOutlineWithActionsTopAppBar(
                                             onSearchText("")
                                             searchText = ""
                                             searchEnabled = false
-                                            focusManager.clearFocus()
                                             onSearchDisabled()
                                         },
                                     )
