@@ -74,9 +74,9 @@ class MangaDetailController(private val mangaId: Long) :
             categoryActions =
                 CategoryActions(
                     set = { enabledCategories ->
-                        /*presenter.updateMangaCategories(enabledCategories)*/
+                        presenter.updateMangaCategories(enabledCategories)
                     },
-                    addNew = { /*newCategory -> presenter.addNewCategory(newCategory)*/ },
+                    addNew = { newCategory -> presenter.addNewCategory(newCategory) },
                 ),
             informationActions =
                 InformationActions(

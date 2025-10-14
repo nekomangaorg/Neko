@@ -4,7 +4,9 @@ import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -63,6 +65,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -824,6 +827,24 @@ class MangaDetailPresenter(
             _mangaDetailScreenState.update {
                 it.copy(searchChapters = filteredChapters.toPersistentList())
             }
+        }
+    }
+
+    fun addNewCategory(newCategory: String) {
+        presenterScope.launchIO {
+            val category = Category.create(newCategory)
+            category.order =
+                (_mangaDetailScreenState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
+            db.insertCategory(category).executeAsBlocking()
+        }
+    }
+
+    fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
+        presenterScope.launchIO {
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val categories =
+                enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
+            db.setMangaCategories(categories, listOf(dbManga))
         }
     }
 
