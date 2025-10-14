@@ -803,6 +803,30 @@ class MangaDetailPresenter(
         return false
     }
 
+    fun onSearch(searchQuery: String?) {
+        presenterScope.launchIO {
+            val searchActive = searchQuery != null
+
+            _mangaDetailScreenState.update { it.copy(isSearching = searchActive) }
+
+            val filteredChapters =
+                when (searchActive) {
+                    true -> {
+                        mangaDetailScreenState.value.activeChapters.filter {
+                            it.chapter.chapterTitle.contains(searchQuery, true) ||
+                                it.chapter.scanlator.contains(searchQuery, true) ||
+                                it.chapter.name.contains(searchQuery, true)
+                        }
+                    }
+                    false -> emptyList()
+                }
+
+            _mangaDetailScreenState.update {
+                it.copy(searchChapters = filteredChapters.toPersistentList())
+            }
+        }
+    }
+
     private fun mangaSortMatchesDefault(manga: Manga): Boolean {
         return (manga.sortDescending == mangaDetailsPreferences.chaptersDescAsDefault().get() &&
             manga.sorting == mangaDetailsPreferences.sortChapterOrder().get()) ||

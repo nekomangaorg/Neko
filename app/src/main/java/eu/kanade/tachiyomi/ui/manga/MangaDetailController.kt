@@ -70,7 +70,7 @@ class MangaDetailController(private val mangaId: Long) :
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
             onRefresh = presenter::onRefresh,
-            onSearch = { /*presenter::onSearch*/ },
+            onSearch = presenter::onSearch,
             categoryActions =
                 CategoryActions(
                     set = { enabledCategories ->
