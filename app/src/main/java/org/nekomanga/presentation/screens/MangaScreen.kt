@@ -548,15 +548,18 @@ fun ChapterHeader(
     mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     openSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
-    ChapterHeader(
-        themeColor = themeColorState,
-        numberOfChaptersProvider = {
+    val numberOfChapters =
+        remember(mangaDetailScreenState.value.isSearching) {
             when (mangaDetailScreenState.value.isSearching) {
                 true -> mangaDetailScreenState.value.searchChapters.size
                 false -> mangaDetailScreenState.value.activeChapters.size
             }
-        },
-        filterTextProvider = { mangaDetailScreenState.value.chapterFilterText },
+        }
+
+    ChapterHeader(
+        themeColor = themeColorState,
+        numberOfChapters = numberOfChapters,
+        filterText = mangaDetailScreenState.value.chapterFilterText,
         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
     )
 }
