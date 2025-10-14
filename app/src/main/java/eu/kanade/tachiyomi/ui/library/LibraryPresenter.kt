@@ -295,7 +295,7 @@ class LibraryPresenter(
                                     isRefreshing = isRefreshing,
                                 )
                             }
-                            .filterNot { it.libraryItems.isEmpty() }
+                            .sortedBy { it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
@@ -813,23 +813,27 @@ class LibraryPresenter(
         categoryList: List<CategoryItem>,
         collapsedCategorySet: Set<Int>,
     ): List<LibraryCategoryItem> {
+        if (libraryMangaList.isEmpty()) {
+            return emptyList()
+        }
+
         val mangaMap = libraryMangaList.groupBy { it.category }
 
-        val libraryItems =
-            categoryList.map { categoryItem ->
-                val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
+        return categoryList.mapNotNull { categoryItem ->
+            val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
 
-                val updatedCategoryItem =
-                    categoryItem.copy(isHidden = categoryItem.id in collapsedCategorySet)
-
-                LibraryCategoryItem(
-                    categoryItem = updatedCategoryItem,
-                    libraryItems = unsortedMangaList.toPersistentList(),
-                )
+            if (categoryItem.isSystemCategory && unsortedMangaList.isEmpty()) {
+                return@mapNotNull null
             }
 
-        val (empty, withManga) = libraryItems.partition { it.libraryItems.isEmpty() }
-        return withManga + empty
+            val updatedCategoryItem =
+                categoryItem.copy(isHidden = categoryItem.id in collapsedCategorySet)
+
+            LibraryCategoryItem(
+                categoryItem = updatedCategoryItem,
+                libraryItems = unsortedMangaList.toPersistentList(),
+            )
+        }
     }
 
     fun observeLibraryUpdates() {
