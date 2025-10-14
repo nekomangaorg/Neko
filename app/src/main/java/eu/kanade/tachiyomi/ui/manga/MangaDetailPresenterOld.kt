@@ -79,7 +79,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
@@ -253,51 +252,51 @@ class MangaDetailPresenterOld(
 
             _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
 
-            mangaUpdateCoordinator
-                .update(currentManga(), presenterScope, isMerging)
-                .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
-                .catch { e -> e.message?.let { _snackbarState.emit(SnackbarState(message = it)) } }
-                .collect { result ->
-                    when (result) {
-                        is MangaResult.Error -> {
-                            _snackbarState.emit(
-                                SnackbarState(message = result.text, messageRes = result.id)
-                            )
-                        }
-                        is MangaResult.Success -> {
-                            updateAllFlows()
-                            refreshTracking()
-                            syncChaptersReadStatus()
-                        }
-                        is MangaResult.UpdatedChapters -> Unit
-                        is MangaResult.UpdatedManga -> {
-                            updateMangaFlow()
-                        }
-                        is MangaResult.UpdatedArtwork -> {
-                            updateArtworkFlow()
-                        }
-                        is MangaResult.ChaptersRemoved -> {
-                            val removedChapters =
-                                mangaDetailScreenState.value.allChapters.filter {
-                                    it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
-                                }
+            /*mangaUpdateCoordinator
+            .update(currentManga(), presenterScope, isMerging)
+            .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
+            .catch { e -> e.message?.let { _snackbarState.emit(SnackbarState(message = it)) } }
+            .collect { result ->
+                when (result) {
+                    is MangaResult.Error -> {
+                        _snackbarState.emit(
+                            SnackbarState(message = result.text, messageRes = result.id)
+                        )
+                    }
+                    is MangaResult.Success -> {
+                        updateAllFlows()
+                        refreshTracking()
+                        syncChaptersReadStatus()
+                    }
+                    is MangaResult.UpdatedChapters -> Unit
+                    is MangaResult.UpdatedManga -> {
+                        updateMangaFlow()
+                    }
+                    is MangaResult.UpdatedArtwork -> {
+                        updateArtworkFlow()
+                    }
+                    is MangaResult.ChaptersRemoved -> {
+                        val removedChapters =
+                            mangaDetailScreenState.value.allChapters.filter {
+                                it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
+                            }
 
-                            if (removedChapters.isNotEmpty()) {
-                                when (preferences.deleteRemovedChapters().get()) {
-                                    2 -> deleteChapters(removedChapters)
-                                    1 -> Unit
-                                    else -> {
-                                        _mangaDetailScreenState.update {
-                                            it.copy(
-                                                removedChapters = removedChapters.toPersistentList()
-                                            )
-                                        }
+                        if (removedChapters.isNotEmpty()) {
+                            when (preferences.deleteRemovedChapters().get()) {
+                                2 -> deleteChapters(removedChapters)
+                                1 -> Unit
+                                else -> {
+                                    _mangaDetailScreenState.update {
+                                        it.copy(
+                                            removedChapters = removedChapters.toPersistentList()
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }*/
         }
     }
 
@@ -1521,14 +1520,14 @@ class MangaDetailPresenterOld(
                 m.getContentRating()
                     ?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
             langFlag = m.lang_flag,
-            missingChapters = m.missing_chapters,
+            missingChapters = m.missing_chapters ?: "",
             originalTitle = m.originalTitle,
             stats =
                 Stats(
-                    rating = m.rating,
-                    follows = m.users,
-                    threadId = m.thread_id,
-                    repliesCount = m.replies_count,
+                    rating = m.rating ?: "",
+                    follows = m.users ?: "",
+                    threadId = m.thread_id ?: "",
+                    repliesCount = m.replies_count ?: "",
                 ),
             status = m.status,
             lastVolume = m.last_volume_number,
@@ -1884,7 +1883,7 @@ class MangaDetailPresenterOld(
         presenterScope.launchIO {
             val missingChapterHolder = mangaDetailScreenState.value.allChapters.getMissingChapters()
             _mangaDetailScreenState.update {
-                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters)
+                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters ?: "")
             }
             val currentMissingChapters = missingChapterHolder.count
             if (currentMissingChapters != currentManga().missing_chapters) {

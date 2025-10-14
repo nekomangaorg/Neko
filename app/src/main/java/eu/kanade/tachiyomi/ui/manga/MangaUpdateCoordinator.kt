@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -8,34 +7,33 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
-import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
-import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
+import eu.kanade.tachiyomi.util.manga.MangaUtil
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
-import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.manga.MangaItem
+import org.nekomanga.domain.manga.toManga
+import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -58,225 +56,201 @@ class MangaUpdateCoordinator {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
-    /** Channel flow for updating the Manga/Chapters in the given scope */
-    suspend fun update(manga: Manga, scope: CoroutineScope, isMerging: Boolean) =
+    suspend fun update(mangaItem: MangaItem, isMerging: Boolean) =
         channelFlow {
-                val mangaWasInitialized = manga.initialized
-
                 if (!sourceManager.mangaDex.checkIfUp()) {
                     send(MangaResult.Error(R.string.site_down))
                     return@channelFlow
                 }
 
-                val mangaUUID = manga.uuid()
+                TimberKt.d { "Starting update for ${mangaItem.title}" }
 
-                if (mangaUUID.isDigitsOnly()) {
-                    send(MangaResult.Error(R.string.v3_manga))
-                    return@channelFlow
+                val mangaWasInitialized = mangaItem.initialized
+
+                // Run manga details and chapter updates in parallel.
+                coroutineScope {
+                    launch { updateMangaDetailsAndPersist(mangaItem) }
+                    launch { updateChapters(mangaItem, mangaWasInitialized, isMerging) }
                 }
 
-                TimberKt.d { "Begin processing manga/chapter update for manga $mangaUUID" }
-
-                val mangaJob = startMangaJob(scope, manga)
-
-                if (mangaJob.isCompleted || mangaJob.isActive) {
-                    val chapterJob = startChapterJob(scope, manga, mangaWasInitialized, isMerging)
-                    mangaJob.join()
-                    chapterJob.join()
-
-                    if (mangaJob.isCompleted && chapterJob.isCompleted) {
-                        send(MangaResult.Success)
-                    }
-                }
+                send(MangaResult.Success)
             }
             .flowOn(Dispatchers.IO)
 
-    /** Starts the updating of manga from Dex */
-    private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
-        return scope.launchIO {
-            sourceManager.mangaDex
-                .getMangaDetails(manga.uuid())
-                .onFailure {
-                    send(MangaResult.Error(text = "Error getting manga from MangaDex"))
-                    cancel()
-                }
-                .onSuccess {
-                    val resultingManga = it.first
-                    val artwork = it.second
-
-                    val originalThumbnail = manga.thumbnail_url
-
-                    resultingManga.let { networkManga ->
-                        manga.copyFrom(networkManga)
-                        manga.initialized = true
-                        // This clears custom titles from j2k/sy and if MangaDex removes the title
-                        manga.user_title?.let { customTitle ->
-                            if (
-                                customTitle != manga.originalTitle &&
-                                    customTitle !in manga.getAltTitles()
-                            ) {
-                                manga.user_title = null
-                            }
-                        }
-                        if (
-                            networkManga.thumbnail_url != null &&
-                                networkManga.thumbnail_url != originalThumbnail &&
-                                originalThumbnail != MdConstants.noCoverUrl
-                        ) {
-                            coverCache.deleteFromCache(originalThumbnail, manga.favorite)
-                        }
-                        db.insertManga(manga).executeOnIO()
-                        send(MangaResult.UpdatedManga)
-                    }
-
-                    if (artwork.isNotEmpty()) {
-                        artwork
-                            .map { art -> art.toArtworkImpl(manga.id!!) }
-                            .let { transformedArtwork ->
-                                db.deleteArtworkForManga(manga).executeOnIO()
-                                db.insertArtWorkList(transformedArtwork).executeOnIO()
-                            }
-                    }
-                    send(MangaResult.UpdatedArtwork)
-                }
-        }
-    }
-
-    /**
-     * Starts the update chapter job for the main source, as well as merged source, diffs them
-     * compared to the existing info, downloads new ones if needed
-     */
-    private fun ProducerScope<MangaResult>.startChapterJob(
-        scope: CoroutineScope,
-        manga: Manga,
-        mangaWasAlreadyInitialized: Boolean,
-        isMerging: Boolean,
-    ): Job {
-        return scope.launchIO {
-            val deferredChapters = async {
-                sourceManager.mangaDex
-                    .fetchChapterList(manga)
-                    .onFailure {
-                        send(MangaResult.Error(text = "error with MangaDex: ${it.message()}"))
-                        cancel()
-                    }
-                    .getOrElse { emptyList() }
+    /** Fetches and persists manga details and artwork from the source. */
+    private suspend fun ProducerScope<MangaResult>.updateMangaDetailsAndPersist(
+        mangaItem: MangaItem
+    ) {
+        sourceManager.mangaDex
+            .getMangaDetails(mangaItem.uuid())
+            .onFailure {
+                send(MangaResult.Error(text = "Error getting manga from MangaDex"))
+                cancel()
+                return
             }
-
-            val mergedMangaList = db.getMergeMangaList(manga).executeOnIO()
-
-            val deferredMergedChapters =
-                if (mergedMangaList.isNotEmpty()) {
-                    mergedMangaList.map { mergeManga ->
-                        async {
-                            // in the future check the merge type
-                            MergeType.getSource(mergeManga.mergeType, sourceManager)
-                                .fetchChapters(mergeManga.url)
-                                .onFailure {
-                                    send(
-                                        MangaResult.Error(
-                                            text =
-                                                "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"
-                                        )
-                                    )
-                                    this.cancel()
-                                }
-                                .getOrElse { emptyList() }
-                                .map { (sChapter, status) ->
-                                    val sameVolume =
-                                        sChapter.vol == "" ||
-                                            manga.last_volume_number == null ||
-                                            sChapter.vol == manga.last_volume_number.toString()
-                                    if (
-                                        manga.last_chapter_number != null &&
-                                            sChapter.chapter_number ==
-                                                manga.last_chapter_number?.toFloat() &&
-                                            sameVolume
-                                    ) {
-                                        sChapter.name += " [END]"
-                                    }
-                                    sChapter to status
-                                }
-                        }
-                    }
-                } else {
-                    emptyList()
-                }
-
-            val mergedChapters =
-                if (deferredMergedChapters.size > 1) {
-                    deferredMergedChapters
-                        .awaitAll()
-                        .mergeSorted(
-                            compareBy<SChapterStatusPair> { getChapterNum(it.first) != null }
-                                .thenBy { getChapterNum(it.first) }
-                        )
-                } else {
-                    deferredMergedChapters.awaitAll().flatten()
-                }
-            val readFromMerged = mergedChapters.filter { it.second }.map { it.first.url }.toSet()
-
-            val allChapters =
-                listOf(deferredChapters.await(), mergedChapters.map { it.first })
-                    .mergeSorted(
-                        compareBy<SChapter> { getChapterNum(it) != null }
-                            .thenBy { getChapterNum(it) }
+            .onSuccess { (networkManga, artwork) ->
+                var updatedMangaItem =
+                    mangaItem.copy(
+                        author = networkManga.author ?: mangaItem.author,
+                        artist = networkManga.artist ?: mangaItem.artist,
+                        description = networkManga.description ?: mangaItem.description,
+                        genre = MangaUtil.getGenres(networkManga.genre).toPersistentList(),
+                        status = networkManga.status,
+                        coverUrl = networkManga.thumbnail_url ?: mangaItem.coverUrl,
+                        initialized = true,
                     )
 
-            val (newChapters, removedChapters) =
-                syncChaptersWithSource(db, allChapters, manga, readFromMerged = readFromMerged)
-            // chapters that were added
-            if (newChapters.isNotEmpty()) {
-                val downloadNew = preferences.downloadNewChapters().get()
-                if (downloadNew && mangaWasAlreadyInitialized) {
-                    if (manga.shouldDownloadNewChapters(db, preferences)) {
-                        downloadChapters(
-                            manga,
-                            newChapters
-                                .filterNot { isMerging && it.isMergedChapter() }
-                                .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
-                                .sortedBy { it.chapter.chapterNumber },
-                        )
+                if (
+                    updatedMangaItem.userTitle.isNotEmpty() &&
+                        updatedMangaItem.userTitle != updatedMangaItem.ogTitle &&
+                        updatedMangaItem.userTitle !in updatedMangaItem.altTitles
+                ) {
+                    updatedMangaItem = updatedMangaItem.copy(userTitle = "")
+                }
+
+                if (
+                    networkManga.thumbnail_url != null &&
+                        networkManga.thumbnail_url != mangaItem.coverUrl
+                ) {
+                    coverCache.deleteFromCache(mangaItem.coverUrl, mangaItem.favorite)
+                }
+
+                val mangaForDb = updatedMangaItem.toManga()
+
+                db.inTransaction {
+                    db.insertManga(mangaForDb).executeAsBlocking()
+                    send(MangaResult.UpdatedManga)
+
+                    if (artwork.isNotEmpty()) {
+                        val artworkImpls = artwork.map { it.toArtworkImpl(updatedMangaItem.id) }
+                        db.deleteArtworkForManga(mangaForDb).executeAsBlocking()
+                        db.insertArtWorkList(artworkImpls).executeAsBlocking()
+                        send(MangaResult.UpdatedArtwork)
                     }
                 }
-                mangaShortcutManager.updateShortcuts()
             }
-            // chapters that were removed
-            if (removedChapters.isNotEmpty()) {
-                val removedChaptersId = removedChapters.mapNotNull { it.id }
-                send(MangaResult.ChaptersRemoved(removedChaptersId))
-            }
-
-            send(MangaResult.UpdatedChapters)
-        }
     }
 
-    /**
-     * Downloads the given list of chapters with the manager.
-     *
-     * @param chapters the list of chapters to download.
-     */
+    private suspend fun ProducerScope<MangaResult>.updateChapters(
+        mangaItem: MangaItem,
+        mangaWasAlreadyInitialized: Boolean,
+        isMerging: Boolean,
+    ) {
+        val manga = mangaItem.toManga()
+
+        val (allChapters, readFromMerged, errorFromMerged) = fetchAndCombineChapters(manga)
+        val (newChapters, removedChapters) =
+            syncChaptersWithSource(
+                db = db,
+                rawSourceChapters = allChapters,
+                manga = manga,
+                errorFromMerged = errorFromMerged,
+                readFromMerged = readFromMerged,
+            )
+
+        if (newChapters.isNotEmpty()) {
+            if (
+                preferences.downloadNewChapters().get() &&
+                    mangaWasAlreadyInitialized &&
+                    manga.shouldDownloadNewChapters(db, preferences)
+            ) {
+                val chaptersToDownload =
+                    newChapters
+                        .filterNot { isMerging && it.isMergedChapter() }
+                        .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                        .sortedBy { it.chapter.chapterNumber }
+                downloadChapters(manga, chaptersToDownload)
+            }
+            mangaShortcutManager.updateShortcuts()
+        }
+
+        if (removedChapters.isNotEmpty()) {
+            send(MangaResult.ChaptersRemoved(removedChapters.mapNotNull { it.id }))
+        }
+
+        send(MangaResult.UpdatedChapters)
+    }
+
+    /** Fetches chapters from the main source and any merged sources concurrently. */
+    private suspend fun ProducerScope<MangaResult>.fetchAndCombineChapters(
+        manga: Manga
+    ): Triple<List<SChapter>, Set<String>, Boolean> = coroutineScope {
+        val dexChaptersDeferred = async {
+            sourceManager.mangaDex
+                .fetchChapterList(manga)
+                .onFailure {
+                    send(MangaResult.Error(text = "MangaDex chapter fetch failed: ${it.message()}"))
+                    cancel()
+                }
+                .getOrElse { emptyList() }
+        }
+
+        var mergedSourceError = false
+
+        val mergedSourcesChapters =
+            db.getMergeMangaList(manga).executeAsBlocking().map { mergeManga ->
+                async {
+                    val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
+                    source
+                        .fetchChapters(mergeManga.url)
+                        .onFailure {
+                            TimberKt.e { "Failed to fetch from ${source.name}: ${it.message()}" }
+                            mergedSourceError = true
+                        }
+                        .getOrElse { emptyList() }
+                }
+            }
+
+        val dexChapters = dexChaptersDeferred.await()
+        val mergedChapterPairs =
+            mergedSourcesChapters
+                .awaitAll()
+                .flatten()
+                .sortedWith(compareBy { getChapterNum(it.first) })
+
+        val readFromMerged = mergedChapterPairs.filter { it.second }.map { it.first.url }.toSet()
+        val mergedChapters =
+            mergedChapterPairs.map { (sChapter, _) ->
+                val lastChapterNum = manga.last_chapter_number?.toFloat()
+                if (lastChapterNum != null && sChapter.chapter_number == lastChapterNum) {
+                    sChapter.name += " [END]"
+                }
+                sChapter
+            }
+
+        val allChapters = (dexChapters + mergedChapters).sortedWith(compareBy { getChapterNum(it) })
+        Triple(allChapters, readFromMerged, mergedSourceError)
+    }
+
+    /** Filters and downloads the given list of chapters. */
     fun downloadChapters(manga: Manga, chapters: List<ChapterItem>) {
         val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-        downloadManager.downloadChapters(
-            manga,
+        val chaptersToDownload =
             chapters
-                .filter {
-                    val scanlators = it.chapter.scanlatorList()
-                    !it.isDownloaded &&
-                        scanlators.none { scanlator -> scanlator in blockedGroups } &&
-                        (Constants.NO_GROUP !in scanlators ||
-                            it.chapter.uploader !in blockedUploaders)
-                }
-                .map { it.chapter.toDbChapter() },
-        )
+                .filter { isChapterDownloadable(it, blockedGroups, blockedUploaders) }
+                .map { it.chapter.toDbChapter() }
+
+        downloadManager.downloadChapters(manga, chaptersToDownload)
+    }
+
+    private fun isChapterDownloadable(
+        item: ChapterItem,
+        blockedGroups: Set<String>,
+        blockedUploaders: Set<String>,
+    ): Boolean {
+        if (item.isDownloaded) return false
+        val scanlators = item.chapter.scanlatorList()
+        if (scanlators.any { it in blockedGroups }) return false
+
+        // Download if it has a group OR if the uploader isn't blocked for "no group" chapters
+        val isNoGroup = Constants.NO_GROUP in scanlators
+        return !isNoGroup || item.chapter.uploader !in blockedUploaders
     }
 
     suspend fun updateGroup(group: String) {
         sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
-            // Sanity check for merged
             val scanlatorGroupImpl = it.toScanlatorGroupImpl()
             if (group == scanlatorGroupImpl.name) {
                 db.insertScanlatorGroups(listOf(scanlatorGroupImpl)).executeAsBlocking()
@@ -286,13 +260,12 @@ class MangaUpdateCoordinator {
 
     suspend fun updateUploader(uploader: String) {
         sourceManager.mangaDex.getUploader(uploader).onSuccess {
-            // Uploader only comes from the MD source
             db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
         }
     }
 }
 
-/** Types of Results that can be returned by the parent class */
+/** Represents the state of the manga update process. */
 sealed class MangaResult {
     class Error(val id: Int? = null, val text: String? = null) : MangaResult()
 

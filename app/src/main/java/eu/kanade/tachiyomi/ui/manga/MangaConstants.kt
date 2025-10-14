@@ -67,8 +67,8 @@ object MangaConstants {
         val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
         val isPornographic: Boolean = false,
         val langFlag: String? = null,
-        val missingChapters: String? = null,
-        val estimatedMissingChapters: String? = null,
+        val missingChapters: String = "",
+        val estimatedMissingChapters: String = "",
         val originalTitle: String = "",
         val stats: Stats? = null,
         val status: Int = 0,
@@ -233,5 +233,11 @@ object MangaConstants {
     enum class BlockType {
         Group,
         Uploader,
+    }
+
+    enum class BackdropSize {
+        Small,
+        Default,
+        Large
     }
 }

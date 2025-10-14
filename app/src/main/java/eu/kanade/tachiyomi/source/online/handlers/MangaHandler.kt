@@ -158,10 +158,10 @@ class MangaHandler {
                                     false -> null
                                 }
                             Stats(
-                                rating = strRating,
+                                rating = strRating ?: "",
                                 follows = stats.follows.toString(),
-                                threadId = stats.comments?.threadId?.toString(),
-                                repliesCount = stats.comments?.repliesCount?.toString(),
+                                threadId = stats.comments?.threadId?.toString() ?: "",
+                                repliesCount = stats.comments?.repliesCount?.toString() ?: "",
                             )
                         }
                     }

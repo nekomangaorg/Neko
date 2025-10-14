@@ -11,81 +11,53 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 
-data class MissingChapterHolder(val count: String? = null, val estimatedChapters: String? = null)
+data class MissingChapterHolder(val count: String = "", val estimatedChapters: String = "")
 
 fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
-    var count = 0
-    val estimateChapters = mutableListOf<String>()
 
-    if (this.isNotEmpty()) {
-        val chapterNumberArray =
-            this.asSequence()
-                .filter { it.isAvailable() }
-                .distinctBy {
-                    if (it.chapter.chapterText.isNotEmpty()) {
-                        it.chapter.volume + it.chapter.chapterText
-                    } else {
-                        it.chapter.name
-                    }
-                }
-                .sortedBy { it.chapter.chapterNumber }
-                .mapNotNull {
-                    when (it.chapter.chapterText.isEmpty() && !it.chapter.isMergedChapter()) {
-                        true -> null
-                        false -> floor(it.chapter.chapterNumber).toInt()
-                    }
-                }
-                .toList()
-                .toIntArray()
-
-        if (chapterNumberArray.isNotEmpty()) {
-            if (chapterNumberArray.first() > 1) {
-                while (count != (chapterNumberArray[0] - 1)) {
-                    estimateChapters.add("Chp. $count")
-                    count++
-
-                    if (count > 5000) {
-                        break
-                    }
+    val chapterNumbers =
+        this.asSequence()
+            .filter { it.isAvailable() }
+            .distinctBy {
+                if (it.chapter.chapterText.isNotEmpty()) {
+                    "${it.chapter.volume}-${it.chapter.chapterText}"
+                } else {
+                    it.chapter.name
                 }
             }
+            .mapNotNull { runCatching { floor(it.chapter.chapterNumber).toInt() }.getOrNull() }
+            .sorted()
+            .toList()
 
-            chapterNumberArray.forEachIndexed { index, chpNum ->
-                val lastIndex = index - 1
-                if (
-                    lastIndex >= 0 &&
-                        (chpNum - 1) > chapterNumberArray[lastIndex] &&
-                        chapterNumberArray[lastIndex] > 0
-                ) {
-                    count += (chpNum - chapterNumberArray[lastIndex]) - 1
-                    val beginningChp = (chapterNumberArray[lastIndex] + 1)
-                    val endChap = chpNum - 1
-                    when (beginningChp == endChap) {
-                        true -> estimateChapters.add("Ch.$beginningChp")
-                        false ->
-                            estimateChapters.add(
-                                "Ch.$beginningChp ${Constants.RIGHT_ARROW_SEPARATOR} Ch.$endChap"
-                            )
-                    }
+    if (chapterNumbers.isEmpty()) {
+        return MissingChapterHolder()
+    }
+
+    val missingRanges = mutableListOf<String>()
+    var totalMissing = 0
+
+    (listOf(0) + chapterNumbers).zipWithNext { prev, curr ->
+        // Check if there is a gap of one or more chapters between the current and previous
+        if (curr - prev > 1) {
+            val startOfGap = prev + 1
+            val endOfGap = curr - 1
+
+            totalMissing += (endOfGap - startOfGap + 1)
+            val rangeString =
+                if (startOfGap == endOfGap) {
+                    "Ch.$startOfGap"
+                } else {
+                    "Ch.$startOfGap ${Constants.RIGHT_ARROW_SEPARATOR} Ch.$endOfGap"
                 }
-            }
+            missingRanges.add(rangeString)
         }
     }
 
-    val actualCount =
-        if (count <= 0) {
-            null
-        } else {
-            count.toString()
-        }
-
-    val estimateChapterString =
-        when (estimateChapters.isEmpty()) {
-            true -> null
-            false -> estimateChapters.joinToString(Constants.SEPARATOR)
-        }
-
-    return MissingChapterHolder(count = actualCount, estimatedChapters = estimateChapterString)
+    return MissingChapterHolder(
+        count = totalMissing.takeIf { it > 0 }?.toString() ?: "",
+        estimatedChapters =
+            missingRanges.takeIf { it.isNotEmpty() }?.joinToString(Constants.SEPARATOR) ?: "",
+    )
 }
 
 /**

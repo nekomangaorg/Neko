@@ -60,8 +60,8 @@ fun InformationBlock(
     statusProvider: () -> Int,
     lastChapterProvider: () -> Pair<Int?, Int?>,
     isPornographicProvider: () -> Boolean,
-    missingChaptersProvider: () -> String?,
-    estimatedMissingChapterProvider: () -> String?,
+    missingChaptersProvider: () -> String,
+    estimatedMissingChapterProvider: () -> String,
     modifier: Modifier = Modifier,
     isExpandedProvider: () -> Boolean,
     showMergedIconProvider: () -> Boolean,
@@ -75,7 +75,7 @@ fun InformationBlock(
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
     Column(modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small)) {
-        if (!titleProvider().isNullOrEmpty()) {
+        if (titleProvider().isNotEmpty()) {
             NoRippleText(
                 text = titleProvider(),
                 maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,
@@ -209,9 +209,8 @@ fun InformationBlock(
             }
 
             statsProvider()?.let { stats ->
-                stats.rating?.let { rating ->
-                    val formattedRating =
-                        ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
+                stats.rating.toDoubleOrNull()?.let { rating ->
+                    val formattedRating = ((rating * 100).roundToInt() / 100.0).toString()
 
                     Gap(Size.tiny)
                     Image(
@@ -226,12 +225,11 @@ fun InformationBlock(
                         color = mediumAlpha,
                     )
                 }
-
-                stats.follows?.let { unformattedNumberOfUsers ->
+                if (stats.follows.isNotBlank()) {
                     val numberOfUsers =
                         runCatching {
                                 NumberFormat.getNumberInstance(Locale.US)
-                                    .format(unformattedNumberOfUsers.toInt())
+                                    .format(stats.follows.toInt())
                             }
                             .getOrDefault(0)
                             .toString()
@@ -250,7 +248,7 @@ fun InformationBlock(
                     )
                 }
 
-                if (stats.threadId != null) {
+                if (stats.threadId.isNotBlank()) {
 
                     val numberOfComments =
                         runCatching {
@@ -286,10 +284,10 @@ fun InformationBlock(
 
         var showEstimatedMissingChapters by remember { mutableStateOf(false) }
 
-        missingChaptersProvider()?.let { numberOfMissingChapters ->
+        if (missingChaptersProvider().isNotBlank()) {
             Gap(Size.tiny)
             NoRippleText(
-                text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters),
+                text = stringResource(id = R.string.missing_chapters, missingChaptersProvider()),
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
                 onClick = { showEstimatedMissingChapters = !showEstimatedMissingChapters },
@@ -297,11 +295,11 @@ fun InformationBlock(
         }
 
         AnimatedVisibility(visible = showEstimatedMissingChapters) {
-            estimatedMissingChapterProvider()?.let { estimates ->
+            if (estimatedMissingChapterProvider().isNotBlank()) {
                 Column {
                     Gap(Size.tiny)
                     NoRippleText(
-                        text = estimates,
+                        text = estimatedMissingChapterProvider(),
                         maxLines = 4,
                         style = MaterialTheme.typography.bodySmall,
                         color = mediumAlpha,

@@ -69,7 +69,7 @@ class MangaDetailController(private val mangaId: Long) :
             mangaDetailScreenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
-            onRefresh = { /*presenter::onRefresh */ },
+            onRefresh = presenter::onRefresh,
             onSearch = { /*presenter::onSearch*/ },
             categoryActions =
                 CategoryActions(
