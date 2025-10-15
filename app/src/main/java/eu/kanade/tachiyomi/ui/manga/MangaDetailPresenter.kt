@@ -467,10 +467,16 @@ class MangaDetailPresenter(
             .asFlow()
             .map { categories -> categories.map { it.toCategoryItem() } }
             .distinctUntilChanged()
+
     val mangaCategoriesFlow =
-        db.getCategoriesForManga(mangaId)
-            .asFlow()
-            .map { categories -> categories.map { it.toCategoryItem() } }
+        combine(db.getCategories().asFlow(), db.getMangaCategory(mangaId).asFlow()) {
+                allCategories,
+                mangaCategories ->
+                val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
+                allCategories
+                    .filter { it.id != null && it.id in mangaCategorySet }
+                    .map { it.toCategoryItem() }
+            }
             .distinctUntilChanged()
 
     val tracksFlow =

@@ -39,6 +39,18 @@ interface CategoryQueries : DbProvider {
             )
             .prepare()
 
+    fun getMangaCategory(mangaId: Long?) =
+        db.get()
+            .listOfObjects(MangaCategory::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(MangaCategoryTable.TABLE)
+                    .where("${MangaCategoryTable.COL_MANGA_ID} = ?")
+                    .whereArgs(mangaId)
+                    .build()
+            )
+            .prepare()
+
     fun insertCategory(category: Category) = db.put().`object`(category).prepare()
 
     fun insertCategories(categories: List<Category>) = db.put().objects(categories).prepare()
