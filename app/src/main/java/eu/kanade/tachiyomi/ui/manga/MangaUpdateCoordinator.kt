@@ -90,6 +90,7 @@ class MangaUpdateCoordinator {
             .onSuccess { (networkManga, artwork) ->
                 val currentManga = mangaItem.toManga()
                 currentManga.copyFrom(networkManga)
+                currentManga.initialized = true
 
                 var updatedMangaItem = currentManga.toMangaItem()
 
