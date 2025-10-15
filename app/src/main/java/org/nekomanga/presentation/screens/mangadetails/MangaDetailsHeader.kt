@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
@@ -172,9 +171,10 @@ fun MangaDetailsHeader(
             Column {
                 if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     QuickReadButton(
-                        { mangaDetailScreenState.value.nextUnreadChapter },
-                        themeColorState,
-                        quickReadClick,
+                        quickReadText =
+                            mangaDetailScreenState.value.nextUnreadChapter.text.asString(),
+                        themeColorState = themeColorState,
+                        quickReadClick = quickReadClick,
                     )
                 }
                 Gap(Size.tiny)
@@ -196,9 +196,10 @@ fun MangaDetailsHeader(
                 )
                 if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                     QuickReadButton(
-                        { mangaDetailScreenState.value.nextUnreadChapter },
-                        themeColorState,
-                        quickReadClick,
+                        quickReadText =
+                            mangaDetailScreenState.value.nextUnreadChapter.text.asString(),
+                        themeColorState = themeColorState,
+                        quickReadClick = quickReadClick,
                     )
                     Gap(Size.tiny)
                 }
@@ -209,12 +210,11 @@ fun MangaDetailsHeader(
 
 @Composable
 private fun ColumnScope.QuickReadButton(
-    quickReadTextProvider: () -> MangaConstants.NextUnreadChapter,
+    quickReadText: String,
     themeColorState: ThemeColorState,
     quickReadClick: () -> Unit,
 ) {
-    val nextChapter = quickReadTextProvider()
-    if (nextChapter.text.isNotEmpty() && nextChapter.id != null) {
+    if (quickReadText.isNotBlank()) {
         Gap(Size.tiny)
         CompositionLocalProvider(
             LocalRippleConfiguration provides
@@ -230,7 +230,7 @@ private fun ColumnScope.QuickReadButton(
                     ),
             ) {
                 Text(
-                    text = stringResource(id = nextChapter.id, nextChapter.text),
+                    text = quickReadText,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface,
                 )

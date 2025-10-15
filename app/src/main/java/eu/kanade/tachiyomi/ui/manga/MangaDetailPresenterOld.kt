@@ -105,6 +105,7 @@ import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -1869,7 +1870,7 @@ class MangaDetailPresenterOld(
                                         nextChapter.chapterText
                                     }
 
-                                NextUnreadChapter(id, readTxt, nextChapter)
+                                NextUnreadChapter(UiText.StringResource(id, readTxt), nextChapter)
                             }
                         }
                 )

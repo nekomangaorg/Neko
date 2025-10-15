@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
-import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
@@ -19,6 +18,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
+import org.nekomanga.presentation.components.UiText
 
 object MangaConstants {
 
@@ -84,8 +84,7 @@ object MangaConstants {
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
     data class NextUnreadChapter(
-        @param:StringRes val id: Int? = null,
-        val text: String = "",
+        val text: UiText = UiText.String(""),
         val simpleChapter: SimpleChapter? = null,
     )
 

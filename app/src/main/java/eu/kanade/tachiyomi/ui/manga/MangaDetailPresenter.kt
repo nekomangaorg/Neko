@@ -97,6 +97,7 @@ import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
@@ -850,29 +851,29 @@ class MangaDetailPresenter(
     ): NextUnreadChapter {
         val nextChapter =
             chapterSort.getNextUnreadChapter(mangaItem.toManga(), activeChapters)?.chapter
-        return when (nextChapter == null) {
-            true -> NextUnreadChapter()
-            false -> {
-                val id =
-                    when (nextChapter.lastPageRead > 0) {
-                        true -> R.string.continue_reading_
-                        false -> R.string.start_reading_
-                    }
-                val readTxt =
-                    if (
-                        nextChapter.isMergedChapter() ||
-                            (nextChapter.volume.isEmpty() && nextChapter.chapterText.isEmpty())
-                    ) {
-                        nextChapter.name
-                    } else if (nextChapter.volume.isNotEmpty()) {
-                        "Vol. " + nextChapter.volume + " " + nextChapter.chapterText
-                    } else {
-                        nextChapter.chapterText
-                    }
+        return nextChapter?.let { chapter ->
+            val id =
+                if (chapter.lastPageRead > 0) {
+                    R.string.continue_reading_
+                } else {
+                    R.string.start_reading_
+                }
 
-                NextUnreadChapter(id, readTxt, nextChapter)
-            }
-        }
+            val chapterText =
+                when {
+                    chapter.isMergedChapter() ||
+                        (chapter.volume.isEmpty() && chapter.chapterText.isEmpty()) -> {
+                        chapter.name
+                    }
+                    chapter.volume.isNotEmpty() -> "Vol. ${chapter.volume} ${chapter.chapterText}"
+                    else -> chapter.chapterText
+                }
+
+            NextUnreadChapter(
+                text = UiText.StringResource(id, chapterText),
+                simpleChapter = chapter,
+            )
+        } ?: NextUnreadChapter()
     }
 
     private fun isMangaStatusCompleted(
