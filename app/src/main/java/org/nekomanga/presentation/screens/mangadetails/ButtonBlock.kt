@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.mangadetails
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -264,49 +265,53 @@ private fun ActionButton(
         contentPadding =
             if (data.dropdownItems != null) PaddingValues(Size.none) else contentPadding,
     ) {
-        Icon(
-            imageVector = data.icon,
-            contentDescription = null,
-            modifier = Modifier.size(Size.large),
-            tint = themeColorState.primaryColor,
-        )
-        if (!hideText) {
-            val text = data.text.asString()
-            if (text.isNotEmpty()) {
-                Gap(Size.tiny)
-                Text(
-                    text = text,
-                    style =
-                        MaterialTheme.typography.bodyLarge.copy(
-                            color = themeColorState.primaryColor.copy(alpha = .8f),
-                            fontWeight = FontWeight.Medium,
-                        ),
+        Box {
+            Row {
+                Icon(
+                    imageVector = data.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(Size.large),
+                    tint = themeColorState.primaryColor,
                 )
+                if (!hideText) {
+                    val text = data.text.asString()
+                    if (text.isNotEmpty()) {
+                        Gap(Size.tiny)
+                        Text(
+                            text = text,
+                            style =
+                                MaterialTheme.typography.bodyLarge.copy(
+                                    color = themeColorState.primaryColor.copy(alpha = .8f),
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                        )
+                    }
+                }
             }
         }
-    }
 
-    if (data.dropdownItems != null) {
-        SimpleDropdownMenu(
-            expanded = favoriteExpanded,
-            themeColorState = themeColorState,
-            onDismiss = { favoriteExpanded = false },
-            dropDownItems =
-                data.dropdownItems
-                    .map {
-                        if (it is SimpleDropDownItem.Action) {
-                            it.copy(
-                                onClick = {
-                                    it.onClick()
-                                    favoriteExpanded = false
-                                }
-                            )
-                        } else {
-                            it
+        if (data.dropdownItems != null) {
+            SimpleDropdownMenu(
+                expanded = favoriteExpanded,
+                themeColorState = themeColorState,
+                onDismiss = { favoriteExpanded = false },
+                dropDownItems =
+                    data.dropdownItems
+                        .map {
+                            if (it is SimpleDropDownItem.Action) {
+                                it.copy(
+                                    onClick = {
+                                        it.onClick()
+                                        favoriteExpanded = false
+                                    }
+                                )
+                            } else {
+                                it
+                            }
                         }
-                    }
-                    .toPersistentList(),
-        )
+                        .toPersistentList(),
+            )
+        }
     }
 }
 
