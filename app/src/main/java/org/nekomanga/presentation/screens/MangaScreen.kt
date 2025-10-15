@@ -549,7 +549,10 @@ fun ChapterHeader(
     openSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     val numberOfChapters =
-        remember(mangaDetailScreenState.value.isSearching) {
+        remember(
+            mangaDetailScreenState.value.activeChapters.size,
+            mangaDetailScreenState.value.searchChapters.size,
+        ) {
             when (mangaDetailScreenState.value.isSearching) {
                 true -> mangaDetailScreenState.value.searchChapters.size
                 false -> mangaDetailScreenState.value.activeChapters.size

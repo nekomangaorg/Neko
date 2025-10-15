@@ -122,9 +122,9 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             mergeActions =
                 MergeActions(
-                    remove = { /*presenter::removeMergedManga*/ },
-                    search = { _, _ -> /*presenter::searchMergedManga*/ },
-                    add = { /*presenter::addMergedManga*/ },
+                    remove = presenter::removeMergedManga,
+                    search = presenter::searchMergedManga,
+                    add = presenter::addMergedManga,
                 ),
             similarClick = {
                 /* router.pushController(
@@ -141,11 +141,11 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             chapterFilterActions =
                 ChapterFilterActions(
-                    changeSort = { /*presenter::changeSortOption*/ },
-                    changeFilter = { /*presenter::changeFilterOption*/ },
-                    changeScanlator = { /*presenter::changeScanlatorOption*/ },
-                    changeLanguage = { /*presenter::changeLanguageOption*/ },
-                    setAsGlobal = { /*presenter::setGlobalOption*/ },
+                    changeSort = presenter::changeSortOption,
+                    changeFilter = presenter::changeFilterOption,
+                    changeScanlator = presenter::changeScanlatorOption,
+                    changeLanguage = presenter::changeLanguageOption,
+                    setAsGlobal = presenter::setGlobalOption,
                 ),
             chapterActions =
                 ChapterActions(

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.nekomanga.R
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -45,7 +46,10 @@ fun ChapterHeader(
         if (filterText.isNotBlank()) {
             Text(
                 text = filterText,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.mediumAlphaLowContrast
+                    ),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.requiredWidthIn(max = 200.dp).padding(end = Size.small),
                 textAlign = TextAlign.End,
@@ -61,14 +65,9 @@ fun ChapterHeader(
 @Composable
 private fun ChapterText(numberOfChapters: Int, modifier: Modifier = Modifier) {
     Text(
-        text =
-            pluralStringResource(
-                id = R.plurals.chapters_plural,
-                count = numberOfChapters,
-                formatArgs = arrayOf(numberOfChapters),
-            ),
+        text = pluralStringResource(R.plurals.chapters_plural, numberOfChapters, numberOfChapters),
         style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier,
     )
 }
