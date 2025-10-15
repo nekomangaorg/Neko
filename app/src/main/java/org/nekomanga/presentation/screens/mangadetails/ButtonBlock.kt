@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.OpenInBrowser
@@ -136,7 +135,7 @@ fun ButtonBlock(
                         val isTracked = trackServiceCount > 0
                         val trackerIcon =
                             when {
-                                isTracked && hideButtonText ->
+                                isTracked ->
                                     when (trackServiceCount) {
                                         1 -> Numeric1BoxOutlineIcon
                                         2 -> Numeric2BoxOutlineIcon
@@ -144,15 +143,13 @@ fun ButtonBlock(
                                         4 -> Numeric4BoxOutlineIcon
                                         else -> Numeric0BoxOutlineIcon
                                     }
-                                isTracked -> Icons.Filled.Check
                                 else -> Icons.Filled.Sync
                             }
                         add(
                             ActionButtonData(
                                 icon = trackerIcon,
                                 text =
-                                    if (isTracked)
-                                        UiText.StringResource(R.string._tracked, trackServiceCount)
+                                    if (isTracked) UiText.StringResource(R.string.tracked)
                                     else UiText.StringResource(R.string.tracking),
                                 isChecked = isTracked,
                                 onClick = trackingClick,

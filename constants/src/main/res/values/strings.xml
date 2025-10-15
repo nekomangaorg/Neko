@@ -1393,7 +1393,6 @@
 
 
     <!-- Manga Details-->
-    <string name="_tracked">%1$s Tracked</string>
     <string name="artwork">Artwork</string>
     <string name="similar_work">Similar Work</string>
     <string name="is_merged">Merged</string>

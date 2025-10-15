@@ -98,38 +98,27 @@ class MangaDetailController(private val mangaId: Long) :
                     altTitleResetClick = { presenter.setAltTitle(null) },
                 ),
             generatePalette = this::setPalette,
-            toggleFavorite = { /*presenter::toggleFavorite*/ },
+            toggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
             trackActions =
                 TrackActions(
                     statusChange = { statusIndex, trackAndService ->
-                        /*
-                                                presenter.updateTrackStatus(statusIndex, trackAndService)
-                        */
+                        presenter.updateTrackStatus(statusIndex, trackAndService)
                     },
                     scoreChange = { statusIndex, trackAndService ->
-                        /*
-                                                presenter.updateTrackScore(statusIndex, trackAndService)
-                        */
+                        presenter.updateTrackScore(statusIndex, trackAndService)
                     },
                     chapterChange = { newChapterNumber, trackAndService ->
-                        /*
-                                                presenter.updateTrackChapter(newChapterNumber, trackAndService)
-                        */
+                        presenter.updateTrackChapter(newChapterNumber, trackAndService)
                     },
-                    search = { title, service -> /*presenter.searchTracker(title, service)*/ },
+                    search = { title, service -> presenter.searchTracker(title, service) },
                     searchItemClick = { trackAndService ->
-                        /*
-                                                presenter.registerTracking(trackAndService)
-                        */
+                        presenter.registerTracking(trackAndService)
                     },
                     remove = { alsoRemoveFromTracker, service ->
-                        /*
-                                                presenter.removeTracking(alsoRemoveFromTracker, service)
-                        */
+                        presenter.removeTracking(alsoRemoveFromTracker, service)
                     },
-                    dateChange = { trackDateChange -> /*presenter.updateTrackDate(trackDateChange)*/
-                    },
+                    dateChange = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
                 ),
             mergeActions =
                 MergeActions(

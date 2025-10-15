@@ -18,11 +18,14 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
 import eu.kanade.tachiyomi.util.MissingChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
@@ -36,6 +39,7 @@ import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
+import java.util.Date
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentSet
@@ -81,6 +85,8 @@ import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.storage.StorageManager
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
@@ -153,11 +159,13 @@ class MangaDetailPresenter(
         initialLoad()
 
         presenterScope.launchIO {
-            combine(mangaFlow, allChapterFlow, allCategoriesFlow, mangaCategoriesFlow) {
-                    mangaItem,
-                    allChapters,
-                    allCategories,
-                    mangaCategories ->
+            combine(
+                    mangaFlow,
+                    allChapterFlow,
+                    allCategoriesFlow,
+                    mangaCategoriesFlow,
+                    tracksFlow,
+                ) { mangaItem, allChapters, allCategories, mangaCategories, tracks ->
                     val artwork = createCurrentArtwork(mangaItem)
 
                     val alternativeArtwork =
@@ -176,6 +184,20 @@ class MangaDetailPresenter(
                             chapterInfo.missingChapters.count,
                             chapterInfo.allChapters,
                         )
+
+                    val loggedInTrackerService =
+                        trackManager.services
+                            .filter { it.value.isLogged() }
+                            .map { it.value.toTrackServiceItem() }
+                            .toPersistentList()
+
+                    val trackCount =
+                        loggedInTrackerService.count { service ->
+                            tracks.any { track ->
+                                service.id == track.trackServiceId &&
+                                    (!service.isMdList || !FollowStatus.isUnfollowed(track.status))
+                            }
+                        }
 
                     AllInfo(
                         mangaItem = mangaItem,
@@ -197,6 +219,9 @@ class MangaDetailPresenter(
                         allChapterInfo = chapterInfo,
                         artwork = artwork,
                         altArtwork = alternativeArtwork,
+                        tracks = tracks,
+                        loggedInTrackerService = loggedInTrackerService,
+                        trackServiceCount = trackCount,
                     )
                 }
                 .distinctUntilChanged()
@@ -247,6 +272,9 @@ class MangaDetailPresenter(
                             allSources = allInfo.allChapterInfo.allSources,
                             allCategories = allInfo.allCategories,
                             currentCategories = allInfo.mangaCategories,
+                            tracks = allInfo.tracks,
+                            loggedInTrackService = allInfo.loggedInTrackerService,
+                            trackServiceCount = allInfo.trackServiceCount,
                         )
                     }
 
@@ -483,7 +511,7 @@ class MangaDetailPresenter(
     val tracksFlow =
         db.getTracks(mangaId)
             .asFlow()
-            .map { tracks -> tracks.map { it.toTrackItem() } }
+            .map { tracks -> tracks.map { it.toTrackItem() }.toPersistentList() }
             .distinctUntilChanged()
 
     val allChapterFlow =
@@ -882,6 +910,103 @@ class MangaDetailPresenter(
         }
     }
 
+    /** Toggle a manga as favorite */
+    fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
+        presenterScope.launchIO {
+            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+            editManga.apply {
+                favorite = !favorite
+                date_added =
+                    when (favorite) {
+                        true -> Date().time
+                        false -> 0
+                    }
+            }
+
+            db.insertManga(editManga).executeAsBlocking()
+            // add to the default category if it exists and the user has the option set
+            if (shouldAddToDefaultCategory && mangaDetailScreenState.value.hasDefaultCategory) {
+                val defaultCategoryId = libraryPreferences.defaultCategory().get()
+                mangaDetailScreenState.value.allCategories
+                    .firstOrNull { defaultCategoryId == it.id }
+                    ?.let { updateMangaCategories(listOf(it)) }
+            }
+        }
+    }
+
+    /** Update tracker with new status */
+    fun updateTrackStatus(statusIndex: Int, trackAndService: TrackAndService) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackStatus(statusIndex, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Update tracker with new score */
+    fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackScore(scoreIndex, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Update the tracker with the new chapter information */
+    fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackAndService) {
+        presenterScope.launchIO {
+            val trackingUpdate =
+                trackingCoordinator.updateTrackChapter(newChapterNumber, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Update the tracker with the start/finished date */
+    fun updateTrackDate(trackDateChange: TrackDateChange) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackDate(trackDateChange)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Search Tracker */
+    fun searchTracker(title: String, service: TrackServiceItem) {
+        presenterScope.launchIO {
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val previouslyTracked =
+                mangaDetailScreenState.value.tracks.firstOrNull {
+                    service.id == it.trackServiceId
+                } != null
+
+            val result =
+                trackingCoordinator.searchTrackerNonFlow(title, service, dbManga, previouslyTracked)
+            _mangaDetailScreenState.update { it.copy(trackSearchResult = result) }
+        }
+    }
+
+    /** Register tracker with service */
+    fun registerTracking(trackAndService: TrackAndService, skipTrackFlowUpdate: Boolean = false) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.registerTracking(trackAndService, mangaId)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Remove a tracker with an option to remove it from the tracking service */
+    fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackServiceItem) {
+        presenterScope.launchIO {
+            val trackingUpdate =
+                trackingCoordinator.removeTracking(alsoRemoveFromTracker, service, mangaId)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /** Handle the TrackingUpdate */
+    private suspend fun handleTrackingUpdate(trackingUpdate: TrackingUpdate) {
+        if (trackingUpdate is TrackingUpdate.Error) {
+            TimberKt.e(trackingUpdate.exception) { "handle tracking update had error" }
+            _snackbarState.emit(SnackbarState(message = trackingUpdate.message))
+        }
+    }
+
     private fun mangaSortMatchesDefault(manga: Manga): Boolean {
         return (manga.sortDescending == mangaDetailsPreferences.chaptersDescAsDefault().get() &&
             manga.sorting == mangaDetailsPreferences.sortChapterOrder().get()) ||
@@ -913,6 +1038,9 @@ private data class AllInfo(
     val allChapterInfo: AllChapterInfo = AllChapterInfo(),
     val artwork: Artwork,
     val altArtwork: PersistentList<Artwork> = persistentListOf(),
+    val tracks: PersistentList<TrackItem> = persistentListOf(),
+    val loggedInTrackerService: PersistentList<TrackServiceItem> = persistentListOf(),
+    val trackServiceCount: Int = 0,
 )
 
 private data class AllChapterInfo(
