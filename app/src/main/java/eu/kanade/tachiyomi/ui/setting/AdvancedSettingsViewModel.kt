@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -109,17 +108,9 @@ class AdvancedSettingsViewModel : ViewModel() {
     fun dedupeCategories() {
         viewModelScope.launchNonCancellable {
             launchIO {
-                val tempCategories = db.getCategories().executeAsBlocking()
-
-                tempCategories.forEach {
-                    val dupe = CategoryImpl().apply { this.name = it.name }
-                    db.insertCategory(dupe).executeAsBlocking()
-                }
-
                 val categories = db.getCategories().executeAsBlocking()
 
                 val categoriesByName = categories.groupBy { it.name }
-                val allManga = db.getMangaList().executeAsBlocking()
 
                 var duplicates = 0
                 for ((_, categories) in categoriesByName) {

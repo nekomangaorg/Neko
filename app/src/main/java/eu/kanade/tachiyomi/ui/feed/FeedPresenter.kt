@@ -107,7 +107,7 @@ class FeedPresenter(
                         // empty the list before adding the first page in case it was loaded from
                         // cache
                         updatesFeedMangaList =
-                            if (newKey == 1) {
+                            if (state.offset == 0) {
                                 items.toPersistentList()
                             } else {
                                 (state.updatesFeedMangaList + items).toPersistentList()
@@ -134,12 +134,6 @@ class FeedPresenter(
                 _historyScreenPagingState.update { state -> state.copy(pageLoading = false) }
             },
             onSuccess = { hasNextPage, items, newKey ->
-                // empty the list before adding teh first
-                if (newKey == 1) {
-                    _historyScreenPagingState.update { state ->
-                        state.copy(historyFeedMangaList = persistentListOf())
-                    }
-                }
                 _historyScreenPagingState.update { state ->
                     state.copy(
                         offset = newKey,
@@ -148,7 +142,7 @@ class FeedPresenter(
                         // empty the list before adding the first page in case it was loaded from
                         // cache
                         historyFeedMangaList =
-                            if (newKey == 1) {
+                            if (state.offset == 0) {
                                 items.toPersistentList()
                             } else {
                                 (state.historyFeedMangaList + items).toPersistentList()
