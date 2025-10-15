@@ -338,7 +338,7 @@ class LibraryPresenter(
                                     isRefreshing = isRefreshing,
                                 )
                             }
-                            .filterNot { it.libraryItems.isEmpty() }
+                            .sortedBy { it.libraryItems.isEmpty() }
                             .toPersistentList()
 
                     _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }

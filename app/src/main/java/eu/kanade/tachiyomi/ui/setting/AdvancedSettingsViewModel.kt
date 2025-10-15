@@ -108,7 +108,6 @@ class AdvancedSettingsViewModel : ViewModel() {
     fun dedupeCategories() {
         viewModelScope.launchNonCancellable {
             launchIO {
-
                 val categories = db.getCategories().executeAsBlocking()
 
                 val categoriesByName = categories.groupBy { it.name }
