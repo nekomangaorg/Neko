@@ -110,7 +110,7 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.14.6"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.3"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.4"
 
 [plugins]
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibVersion" }
