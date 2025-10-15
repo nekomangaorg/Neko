@@ -81,15 +81,11 @@ class MangaDetailController(private val mangaId: Long) :
             informationActions =
                 InformationActions(
                     titleLongClick = {
-                        /*
-                                                presenter.copiedToClipboard(it)
-                        */
+                        presenter.copiedToClipboard(it)
                         copyToClipboard(context, it, R.string.title)
                     },
                     creatorCopy = {
-                        /*
-                                                presenter.copiedToClipboard(it)
-                        */
+                        presenter.copiedToClipboard(it)
                         copyToClipboard(context, it, R.string.creator)
                     },
                     creatorSearch = this::creatorClicked,
@@ -98,8 +94,8 @@ class MangaDetailController(private val mangaId: Long) :
                 DescriptionActions(
                     genreSearch = this::genreSearch,
                     genreSearchLibrary = this::genreSearchLibrary,
-                    altTitleClick = { /*presenter::setAltTitle*/ },
-                    altTitleResetClick = { /*presenter.setAltTitle(null)*/ },
+                    altTitleClick = presenter::setAltTitle,
+                    altTitleResetClick = { presenter.setAltTitle(null) },
                 ),
             generatePalette = this::setPalette,
             toggleFavorite = { /*presenter::toggleFavorite*/ },

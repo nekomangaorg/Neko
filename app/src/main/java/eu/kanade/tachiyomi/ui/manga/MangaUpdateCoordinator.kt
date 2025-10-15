@@ -15,9 +15,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.manga.MangaUtil
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -33,6 +31,7 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.toManga
+import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -89,16 +88,10 @@ class MangaUpdateCoordinator {
                 return
             }
             .onSuccess { (networkManga, artwork) ->
-                var updatedMangaItem =
-                    mangaItem.copy(
-                        author = networkManga.author ?: mangaItem.author,
-                        artist = networkManga.artist ?: mangaItem.artist,
-                        description = networkManga.description ?: mangaItem.description,
-                        genre = MangaUtil.getGenres(networkManga.genre).toPersistentList(),
-                        status = networkManga.status,
-                        coverUrl = networkManga.thumbnail_url ?: mangaItem.coverUrl,
-                        initialized = true,
-                    )
+                val currentManga = mangaItem.toManga()
+                currentManga.copyFrom(networkManga)
+
+                var updatedMangaItem = currentManga.toMangaItem()
 
                 if (
                     updatedMangaItem.userTitle.isNotEmpty() &&

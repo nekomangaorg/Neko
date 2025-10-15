@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.os.Build
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -851,6 +852,33 @@ class MangaDetailPresenter(
             val categories =
                 enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
             db.setMangaCategories(categories, listOf(dbManga))
+        }
+    }
+
+    fun copiedToClipboard(message: String) {
+        presenterScope.launchIO {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                _snackbarState.emit(
+                    SnackbarState(messageRes = R.string._copied_to_clipboard, message = message)
+                )
+            }
+        }
+    }
+
+    fun setAltTitle(title: String?) {
+        presenterScope.launchIO {
+            val previousTitle = mangaDetailScreenState.value.currentTitle
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            dbManga.user_title = title ?: dbManga.originalTitle
+            db.insertManga(dbManga).executeOnIO()
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.updated_title_to_,
+                    message = dbManga.user_title,
+                    actionLabelRes = R.string.undo,
+                    action = { setAltTitle(previousTitle) },
+                )
+            )
         }
     }
 
