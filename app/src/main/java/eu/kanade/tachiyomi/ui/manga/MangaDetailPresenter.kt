@@ -173,69 +173,81 @@ class MangaDetailPresenter(
                 ) { mangaItem, allChapters, allCategories, mangaCategories, tracks, IsMerged ->
                     val artwork = createCurrentArtwork(mangaItem)
 
-                    val alternativeArtwork =
-                        createAltArtwork(
-                            mangaItem,
-                            artwork,
-                            db.getArtwork(mangaId).executeAsBlocking(),
-                        )
+                    if (!mangaItem.initialized) {
+                        AllInfo(mangaItem = MangaItem(title = mangaItem.title), artwork = artwork)
+                    } else {
+                        val alternativeArtwork =
+                            createAltArtwork(
+                                mangaItem,
+                                artwork,
+                                db.getArtwork(mangaId).executeAsBlocking(),
+                            )
 
-                    val chapterInfo =
-                        createAllChapterInfo(mangaItem, allChapters.toPersistentList())
+                        val chapterInfo =
+                            createAllChapterInfo(mangaItem, allChapters.toPersistentList())
 
-                    val mangaStatusCompleted =
-                        isMangaStatusCompleted(
-                            mangaItem,
-                            chapterInfo.missingChapters.count,
-                            chapterInfo.allChapters,
-                        )
+                        val mangaStatusCompleted =
+                            isMangaStatusCompleted(
+                                mangaItem,
+                                chapterInfo.missingChapters.count,
+                                chapterInfo.allChapters,
+                            )
 
-                    val loggedInTrackerService =
-                        trackManager.services
-                            .filter { it.value.isLogged() }
-                            .map { it.value.toTrackServiceItem() }
-                            .toPersistentList()
+                        val loggedInTrackerService =
+                            trackManager.services
+                                .filter { it.value.isLogged() }
+                                .map { it.value.toTrackServiceItem() }
+                                .toPersistentList()
 
-                    val trackCount =
-                        loggedInTrackerService.count { service ->
-                            tracks.any { track ->
-                                service.id == track.trackServiceId &&
-                                    (!service.isMdList || !FollowStatus.isUnfollowed(track.status))
+                        val trackCount =
+                            loggedInTrackerService.count { service ->
+                                tracks.any { track ->
+                                    service.id == track.trackServiceId &&
+                                        (!service.isMdList ||
+                                            !FollowStatus.isUnfollowed(track.status))
+                                }
                             }
-                        }
 
-                    val displayFilter = getChapterDisplay(mangaItem)
-                    val sortFilter = getSortFilter(mangaItem)
-                    val sourceFilter = getChapterScanlatorFilter(mangaItem, chapterInfo.allSources)
-                    val scanlatorFilter =
-                        getChapterScanlatorFilter(
-                            mangaItem,
-                            (chapterInfo.allScanlators + chapterInfo.allUploaders).toPersistentSet(),
+                        val displayFilter = getChapterDisplay(mangaItem)
+                        val sortFilter = getSortFilter(mangaItem)
+                        val sourceFilter =
+                            getChapterScanlatorFilter(mangaItem, chapterInfo.allSources)
+                        val scanlatorFilter =
+                            getChapterScanlatorFilter(
+                                mangaItem,
+                                (chapterInfo.allScanlators + chapterInfo.allUploaders)
+                                    .toPersistentSet(),
+                            )
+                        val languageFilter =
+                            getChapterLanguageFilter(mangaItem, chapterInfo.allLanguages)
+                        val chapterFilterText =
+                            getFilterText(
+                                displayFilter,
+                                sourceFilter,
+                                scanlatorFilter,
+                                languageFilter,
+                            )
+
+                        AllInfo(
+                            mangaItem = mangaItem,
+                            isMerged = IsMerged,
+                            mangaStatusCompleted = mangaStatusCompleted,
+                            chapterDisplay = displayFilter,
+                            chapterSourceFilter = sourceFilter,
+                            chapterScanlatorFilter = scanlatorFilter,
+                            chapterLanguageFilter = languageFilter,
+                            chapterSortFilter = sortFilter,
+                            chapterFilterText = chapterFilterText,
+                            allCategories = allCategories.toPersistentList(),
+                            mangaCategories = mangaCategories.toPersistentList(),
+                            allChapterInfo = chapterInfo,
+                            artwork = artwork,
+                            altArtwork = alternativeArtwork,
+                            tracks = tracks,
+                            loggedInTrackerService = loggedInTrackerService,
+                            trackServiceCount = trackCount,
                         )
-                    val languageFilter =
-                        getChapterLanguageFilter(mangaItem, chapterInfo.allLanguages)
-                    val chapterFilterText =
-                        getFilterText(displayFilter, sourceFilter, scanlatorFilter, languageFilter)
-
-                    AllInfo(
-                        mangaItem = mangaItem,
-                        isMerged = IsMerged,
-                        mangaStatusCompleted = mangaStatusCompleted,
-                        chapterDisplay = displayFilter,
-                        chapterSourceFilter = sourceFilter,
-                        chapterScanlatorFilter = scanlatorFilter,
-                        chapterLanguageFilter = languageFilter,
-                        chapterSortFilter = sortFilter,
-                        chapterFilterText = chapterFilterText,
-                        allCategories = allCategories.toPersistentList(),
-                        mangaCategories = mangaCategories.toPersistentList(),
-                        allChapterInfo = chapterInfo,
-                        artwork = artwork,
-                        altArtwork = alternativeArtwork,
-                        tracks = tracks,
-                        loggedInTrackerService = loggedInTrackerService,
-                        trackServiceCount = trackCount,
-                    )
+                    }
                 }
                 .distinctUntilChanged()
                 .collectLatest { allInfo ->
