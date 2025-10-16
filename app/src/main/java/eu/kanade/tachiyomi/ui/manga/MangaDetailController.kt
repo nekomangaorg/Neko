@@ -15,6 +15,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -29,16 +30,20 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -131,9 +136,9 @@ class MangaDetailController(private val mangaId: Long) :
                     add = presenter::addMergedManga,
                 ),
             similarClick = {
-                /* router.pushController(
-                    SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()
-                )*/
+                router.pushController(
+                    SimilarController(presenter.getManga().uuid()).withFadeTransaction()
+                )
             },
             shareClick = { shareManga(context) },
             coverActions =
@@ -153,7 +158,7 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             chapterActions =
                 ChapterActions(
-                    mark = { _, _ -> /*presenter::markChapters*/ },
+                    mark = presenter::markChapters,
                     download = { chapterItems, downloadAction ->
                         if (
                             chapterItems.size == 1 &&
@@ -165,13 +170,11 @@ class MangaDetailController(private val mangaId: Long) :
                                 "${chapterItems[0].chapter.scanlator} not supported, try WebView"
                             )
                         } else {
-                            /*
-                                                        presenter.downloadChapters(chapterItems, downloadAction)
-                            */
+                            presenter.downloadChapters(chapterItems, downloadAction)
                         }
                     },
-                    delete = { /*presenter::deleteChapters*/ },
-                    clearRemoved = { /*presenter::clearRemovedChapters*/ },
+                    delete = presenter::deleteChapters,
+                    clearRemoved = presenter::clearRemovedChapters,
                     openNext = {
                         presenter.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
                             ?.let { openChapter(context, it.toDbChapter()) }
@@ -180,13 +183,13 @@ class MangaDetailController(private val mangaId: Long) :
                         openChapter(context, chapterItem.chapter.toDbChapter())
                     },
                     blockScanlator = { _, _ -> /*presenter::blockScanlator*/ },
-                    openComment = { chapterId -> /* presenter.openComment(context, chapterId)*/ },
+                    openComment = { chapterId -> presenter.openComment(context, chapterId) },
                     openInBrowser = { chapterItem ->
                         if (chapterItem.chapter.isUnavailable) {
                             context.toast("Chapter is not available")
                         } else {
-                            /*val url = presenter.getChapterUrl(chapterItem.chapter)
-                            context.openInBrowser(url)*/
+                            val url = presenter.getChapterUrl(chapterItem.chapter)
+                            context.openInBrowser(url)
                         }
                     },
                 ),
@@ -200,16 +203,17 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        /*if (
+        val manga = presenter.getManga()
+        if (
             chapter.scanlator != null &&
                 MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
             context.toast("${chapter.scanlator} not supported, try WebView")
-        } else if (!chapter.isAvailable(presenter.downloadManager, presenter.manga.value!!)) {
+        } else if (!chapter.isAvailable(presenter.downloadManager, manga)) {
             context.toast("Chapter is not available")
         } else {
-            startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
-        }*/
+            startActivity(ReaderActivity.newIntent(context, manga, chapter))
+        }
     }
 
     /** Generate palette from the drawable */
