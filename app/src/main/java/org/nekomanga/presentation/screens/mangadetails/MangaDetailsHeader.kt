@@ -105,28 +105,25 @@ fun MangaDetailsHeader(
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
                         themeColorState = themeColorState,
-                        titleProvider = { mangaDetailScreenState.value.currentTitle },
-                        authorProvider = { mangaDetailScreenState.value.author },
-                        artistProvider = { mangaDetailScreenState.value.artist },
-                        statsProvider = { mangaDetailScreenState.value.stats },
-                        langFlagProvider = { mangaDetailScreenState.value.langFlag },
-                        statusProvider = { mangaDetailScreenState.value.status },
-                        lastChapterProvider = {
+                        title = mangaDetailScreenState.value.currentTitle,
+                        author = mangaDetailScreenState.value.author,
+                        artist = mangaDetailScreenState.value.artist,
+                        stats = mangaDetailScreenState.value.stats,
+                        langFlag = mangaDetailScreenState.value.langFlag,
+                        status = mangaDetailScreenState.value.status,
+                        lastChapter =
                             mangaDetailScreenState.value.lastVolume to
-                                mangaDetailScreenState.value.lastChapter
-                        },
-                        isPornographicProvider = { mangaDetailScreenState.value.isPornographic },
-                        missingChaptersProvider = { mangaDetailScreenState.value.missingChapters },
-                        estimatedMissingChapterProvider = {
-                            mangaDetailScreenState.value.estimatedMissingChapters
-                        },
-                        modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
-                        isExpandedProvider = { isExpanded },
-                        showMergedIconProvider = {
+                                mangaDetailScreenState.value.lastChapter,
+                        isPornographic = mangaDetailScreenState.value.isPornographic,
+                        missingChapters = mangaDetailScreenState.value.missingChapters,
+                        estimatedMissingChapters =
+                            mangaDetailScreenState.value.estimatedMissingChapters,
+                        isExpanded = isExpanded,
+                        showMergedIcon =
                             mangaDetailScreenState.value.isMerged is
                                 MergeConstants.IsMergedManga.Yes &&
-                                !mangaDetailScreenState.value.hideButtonText
-                        },
+                                !mangaDetailScreenState.value.hideButtonText,
+                        modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
                         titleLongClick = informationActions.titleLongClick,
                         creatorCopyClick = informationActions.creatorCopy,
                         creatorSearchClick = informationActions.creatorSearch,
