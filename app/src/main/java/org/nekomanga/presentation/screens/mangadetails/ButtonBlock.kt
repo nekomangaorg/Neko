@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -78,9 +79,13 @@ fun ButtonBlock(
     if (!isInitialized) return
 
     val checkedButtonColors =
-        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.containerColor)
+        ButtonDefaults.outlinedButtonColors(
+            containerColor = themeColorState.containerColor.copy(alpha = NekoColors.halfAlpha),
+            contentColor = themeColorState.primaryColor,
+        )
     val checkedBorderStroke = BorderStroke(Size.extraExtraTiny, Color.Transparent)
-    val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
+    val uncheckedButtonColors =
+        ButtonDefaults.outlinedButtonColors(contentColor = themeColorState.primaryColor)
     val uncheckedBorderStroke =
         BorderStroke(
             Size.extraExtraTiny,
@@ -268,7 +273,6 @@ private fun ActionButton(
                     imageVector = data.icon,
                     contentDescription = null,
                     modifier = Modifier.size(Size.large),
-                    tint = themeColorState.primaryColor,
                 )
                 if (!hideText) {
                     val text = data.text.asString()
@@ -278,7 +282,7 @@ private fun ActionButton(
                             text = text,
                             style =
                                 MaterialTheme.typography.bodyLarge.copy(
-                                    color = themeColorState.primaryColor.copy(alpha = .8f),
+                                    color = LocalContentColor.current.copy(alpha = .8f),
                                     fontWeight = FontWeight.Medium,
                                 ),
                         )
