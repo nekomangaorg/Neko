@@ -62,7 +62,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInWebView
 import java.text.DateFormat
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -70,6 +69,8 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
+import org.nekomanga.presentation.components.ChapterRowData
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
@@ -180,6 +181,7 @@ fun MangaScreen(
 
                     ThemeColorState(
                         primaryColor = color,
+                        rippleColor = color.copy(alpha = NekoColors.mediumAlphaLowContrast),
                         rippleConfiguration = nekoRippleConfiguration(color),
                         textSelectionColors = dynamicTextSelectionColor(color),
                         containerColor = containerColor,
@@ -324,7 +326,6 @@ fun MangaScreen(
                                         themeColorState = themeColorState,
                                         mangaDetailScreenState = mangaDetailScreenState,
                                         chapterActions = chapterActions,
-                                        scope = scope,
                                         chapterItem = chapterItem,
                                         index = index,
                                     )
@@ -365,7 +366,6 @@ fun MangaScreen(
                                         themeColorState = themeColorState,
                                         mangaDetailScreenState = mangaDetailScreenState,
                                         chapterActions = chapterActions,
-                                        scope = scope,
                                         chapterItem = chapterItem,
                                         index = index,
                                     )
@@ -470,32 +470,38 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
     }
 }
 
+fun ChapterItem.toChapterRowData(): ChapterRowData {
+    return ChapterRowData(
+        title = chapter.name,
+        scanlator = chapter.scanlator,
+        uploader = chapter.uploader,
+        language = chapter.language,
+        chapterNumber = chapter.chapterNumber.toDouble(),
+        dateUploaded = chapter.dateUpload,
+        lastPageRead = chapter.lastPageRead,
+        pagesLeft = chapter.pagesLeft,
+        read = chapter.read,
+        bookmark = chapter.bookmark,
+        isMerged = chapter.isMergedChapter(),
+        isLocal = chapter.isLocalSource(),
+        isUnavailable = chapter.isUnavailable,
+        downloadState = downloadState,
+        downloadProgress = downloadProgress,
+    )
+}
+
 @Composable
 private fun ChapterRow(
     themeColorState: ThemeColorState,
     mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
     chapterActions: ChapterActions,
-    scope: CoroutineScope,
     chapterItem: ChapterItem,
     index: Int,
 ) {
+    val chapterRowData = chapterItem.toChapterRowData()
     ChapterRow(
         themeColor = themeColorState,
-        title = chapterItem.chapter.name,
-        scanlator = chapterItem.chapter.scanlator,
-        uploader = chapterItem.chapter.uploader,
-        language = chapterItem.chapter.language,
-        chapterNumber = chapterItem.chapter.chapterNumber.toDouble(),
-        dateUploaded = chapterItem.chapter.dateUpload,
-        lastPageRead = chapterItem.chapter.lastPageRead,
-        pagesLeft = chapterItem.chapter.pagesLeft,
-        read = chapterItem.chapter.read,
-        bookmark = chapterItem.chapter.bookmark,
-        isMerged = chapterItem.chapter.isMergedChapter(),
-        isLocal = chapterItem.chapter.isLocalSource(),
-        isUnavailable = chapterItem.chapter.isUnavailable,
-        downloadStateProvider = { chapterItem.downloadState },
-        downloadProgressProvider = { chapterItem.downloadProgress },
+        data = chapterRowData,
         shouldHideChapterTitles =
             mangaDetailScreenState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
         onClick = { chapterActions.open(chapterItem) },
@@ -659,6 +665,7 @@ private fun Details(
 
 class ThemeColorState(
     primaryColor: Color,
+    rippleColor: Color,
     rippleConfiguration: RippleConfiguration,
     textSelectionColors: TextSelectionColors,
     containerColor: Color,
@@ -671,6 +678,7 @@ class ThemeColorState(
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var containerColor by mutableStateOf(containerColor)
     var onContainerColor by mutableStateOf(onContainerColor)
+    var rippleColor by mutableStateOf(rippleColor)
     var altContainerColor by mutableStateOf(altContainerColor)
     var onAltContainerColor by mutableStateOf(onAltContainerColor)
 }
@@ -680,6 +688,8 @@ fun defaultThemeColorState(): ThemeColorState {
 
     return ThemeColorState(
         primaryColor = MaterialTheme.colorScheme.primary,
+        rippleColor =
+            MaterialTheme.colorScheme.primary.copy(alpha = NekoColors.mediumAlphaLowContrast),
         rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
