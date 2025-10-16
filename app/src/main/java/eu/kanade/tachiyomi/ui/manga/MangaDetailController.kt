@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.StringRes
@@ -31,10 +32,13 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
+import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -229,8 +233,8 @@ class MangaDetailController(private val mangaId: Long) :
     /** Share a cover with the given url */
     fun shareCover(context: Context, artwork: Artwork) {
         viewScope.launch {
-            /* val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
-            val cover = presenter.shareMangaCover(dir, artwork)
+            val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+            val cover = presenter.shareCover(dir, artwork)
             val sharableCover = cover?.getUriWithAuthority(context)
             withUIContext {
                 try {
@@ -247,9 +251,7 @@ class MangaDetailController(private val mangaId: Long) :
                 } catch (e: Exception) {
                     context.toast(e.message)
                 }
-            }*/
-
-            */
+            }
         }
     }
 
@@ -258,16 +260,13 @@ class MangaDetailController(private val mangaId: Long) :
         viewScope.launch {
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
 
-            /* val cover =
-                presenter.shareMangaCover(
-                    dir,
-                    presenter.mangaDetailScreenState.value.currentArtwork,
-                )
-            val sharableCover = cover?.getUriWithAuthority(context)*/
+            val cover =
+                presenter.shareCover(dir, presenter.mangaDetailScreenState.value.currentArtwork)
+            val manga = presenter.getManga()
+            val sharableCover = cover?.getUriWithAuthority(context)
 
-            /*withUIContext {
+            withUIContext {
                 try {
-                    val manga = presenter.manga.value!!
                     var url =
                         presenter.sourceManager.mangaDex.mangaDetailsRequest(manga).url.toString()
                     url = "$url/" + manga.getSlug()
@@ -275,7 +274,7 @@ class MangaDetailController(private val mangaId: Long) :
                         Intent(Intent.ACTION_SEND).apply {
                             type = "text/*"
                             putExtra(Intent.EXTRA_TEXT, url)
-                          putExtra(Intent.EXTRA_TITLE, manga.title)
+                            putExtra(Intent.EXTRA_TITLE, manga.title)
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                             if (cover != null) {
                                 clipData = ClipData.newRawUri(null, sharableCover)
@@ -286,8 +285,6 @@ class MangaDetailController(private val mangaId: Long) :
                     context.toast(e.message)
                 }
             }
-            */
-             */
         }
     }
 

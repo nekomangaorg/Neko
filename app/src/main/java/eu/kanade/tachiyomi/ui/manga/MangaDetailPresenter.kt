@@ -51,6 +51,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
@@ -1435,6 +1436,30 @@ class MangaDetailPresenter(
             dbManga.user_cover = null
             db.insertManga(dbManga).executeOnIO()
         }
+    }
+
+    /**
+     * share the cover that is written in the destination folder. If a url is passed in then share
+     * that one instead of the manga thumbnail url one
+     */
+    suspend fun shareCover(destDir: UniFile, artwork: Artwork): Uri? {
+        return withIOContext {
+            return@withIOContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    saveCover(destDir, artwork)
+                } catch (e: java.lang.Exception) {
+                    TimberKt.e(e) { "share manga cover exception" }
+                    null
+                }
+            } else {
+                // returns null because before Q, the share sheet can't show the cover
+                null
+            }
+        }
+    }
+
+    fun getManga(): Manga {
+        return db.getManga(mangaId).executeAsBlocking()!!
     }
 
     private fun mangaSortMatchesDefault(manga: Manga): Boolean {
