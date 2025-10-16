@@ -1357,6 +1357,16 @@ class MangaDetailPresenter(
         }
     }
 
+    /** Update the current artwork with the vibrant color */
+    fun updateMangaColor(vibrantColor: Int) {
+        presenterScope.launchIO {
+            MangaCoverMetadata.addVibrantColor(mangaId, vibrantColor)
+            _mangaDetailScreenState.update {
+                it.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
+            }
+        }
+    }
+
     /** Save the given url cover to file */
     fun saveCover(artwork: Artwork, destDir: UniFile? = null) {
         presenterScope.launchIO {

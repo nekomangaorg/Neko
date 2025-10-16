@@ -215,9 +215,7 @@ class MangaDetailController(private val mangaId: Long) :
             it ?: return@generate
             viewScope.launchUI {
                 val vibrantColor = it.getBestColor() ?: return@launchUI
-                /*
-                                presenter.updateMangaColor(vibrantColor)
-                */
+                presenter.updateMangaColor(vibrantColor)
             }
         }
     }
