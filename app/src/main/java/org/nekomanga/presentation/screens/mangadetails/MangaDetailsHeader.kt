@@ -180,11 +180,11 @@ fun MangaDetailsHeader(
                 Gap(Size.tiny)
                 DescriptionBlock(
                     windowSizeClass = windowSizeClass,
-                    titleProvider = { mangaDetailScreenState.value.currentTitle },
+                    title = mangaDetailScreenState.value.currentTitle,
                     description = mangaDetailScreenState.value.currentDescription,
-                    isInitializedProvider = { mangaDetailScreenState.value.initialized },
-                    altTitlesProvider = { mangaDetailScreenState.value.alternativeTitles },
-                    genresProvider = { mangaDetailScreenState.value.genres },
+                    isInitialized = mangaDetailScreenState.value.initialized,
+                    altTitles = mangaDetailScreenState.value.alternativeTitles,
+                    genres = mangaDetailScreenState.value.genres,
                     themeColorState = themeColorState,
                     isExpanded = isExpanded,
                     wrapAltTitles = mangaDetailScreenState.value.wrapAltTitles,

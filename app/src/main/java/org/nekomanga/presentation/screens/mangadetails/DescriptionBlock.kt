@@ -1,23 +1,29 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import android.animation.TimeInterpolator
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -33,27 +39,26 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.persistentListOf
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.R
 import org.nekomanga.presentation.Chip
@@ -61,155 +66,374 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-/** Genre, alt titles, description */
 @Composable
 fun DescriptionBlock(
     windowSizeClass: WindowSizeClass,
-    titleProvider: () -> String,
+    title: String,
     description: String,
-    isInitializedProvider: () -> Boolean,
-    altTitlesProvider: () -> PersistentList<String>,
-    genresProvider: () -> PersistentList<String>,
+    isInitialized: Boolean,
+    altTitles: PersistentList<String>,
+    genres: PersistentList<String>,
     themeColorState: ThemeColorState,
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
-    expandCollapseClick: () -> Unit = {},
-    genreSearch: (String) -> Unit = {},
-    genreSearchLibrary: (String) -> Unit = {},
-    altTitleClick: (String) -> Unit = {},
-    altTitleResetClick: () -> Unit = {},
+    expandCollapseClick: () -> Unit,
+    genreSearch: (String) -> Unit,
+    genreSearchLibrary: (String) -> Unit,
+    altTitleClick: (String) -> Unit,
+    altTitleResetClick: () -> Unit,
 ) {
-    if (!isInitializedProvider()) return
+    if (!isInitialized) return
 
-    val tagColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-            themeColorState.primaryColor,
-            16.dp,
+    val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
+    val smallDescription =
+        remember(description) { description.split("\n").take(2).joinToString("\n") }
+
+    val collapsedMarkdownState =
+        rememberMarkdownState(
+            content = smallDescription,
+            flavour = CommonMarkFlavourDescriptor(),
+            immediate = true,
+        )
+    val expandedMarkdownState =
+        rememberMarkdownState(
+            content = description,
+            flavour = CommonMarkFlavourDescriptor(),
+            immediate = true,
         )
 
-    val interactionSource = remember { MutableInteractionSource() }
-
-    val clickable =
-        Modifier.conditional(windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-            this.clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = expandCollapseClick,
+    Column(
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(horizontal = Size.medium)
+                .clickable(
+                    enabled = !isTablet,
+                    onClick = expandCollapseClick,
+                    indication = null, // No ripple effect
+                    interactionSource = remember { MutableInteractionSource() },
+                )
+    ) {
+        // Display Alt Titles and Genres first on tablet for a better layout
+        if (isExpanded && isTablet) {
+            AltTitlesAndGenres(
+                altTitles = altTitles,
+                genres = genres,
+                currentTitle = title,
+                shouldWrap = wrapAltTitles,
+                themeColorState = themeColorState,
+                altTitleClick = altTitleClick,
+                resetClick = altTitleResetClick,
+                genreSearch = genreSearch,
+                genreLibrarySearch = genreSearchLibrary,
             )
+            Gap(Size.medium)
         }
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp).then(clickable)) {
-        if (!isExpanded) {
-            val text = description.split("\n").take(2).joinToString("\n")
-            val markdownState =
-                rememberMarkdownState(
-                    content = text,
-                    flavour = CommonMarkFlavourDescriptor(),
-                    immediate = true,
-                )
+        // Animated content for the description to smoothly transition between collapsed/expanded
+        // states
+        AnimatedContent(
+            targetState = isExpanded,
+            label = "descriptionAnimation",
+            transitionSpec = {
+                // The animation for the new content entering the screen
+                val enter = fadeIn(animationSpec = tween(300))
 
-            val lineHeight =
-                with(LocalDensity.current) {
-                    MaterialTheme.typography.bodyLarge.fontSize.toDp() + Size.small
+                // The animation for the old content leaving the screen
+                val exit = fadeOut(animationSpec = tween(300))
+
+                // Combine the enter and exit transitions and animate the size change
+                (enter togetherWith exit).using(SizeTransform(clip = true))
+            },
+        ) { expanded ->
+            if (expanded) {
+                SelectionContainer {
+                    Markdown(
+                        markdownState = expandedMarkdownState,
+                        colors = nekoMarkdownColors(),
+                        typography = nekoMarkdownTypography(),
+                    )
                 }
-
-            val descriptionHeight =
-                with(LocalDensity.current) {
-                    MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3
-                }
-
-            Box {
-                Markdown(
-                    markdownState = markdownState,
-                    colors = nekoMarkdownColors(),
-                    typography = nekoMarkdownTypography(),
-                    modifier =
-                        Modifier.align(Alignment.TopStart)
-                            .fillMaxWidth()
-                            .heightIn(Size.none, descriptionHeight)
-                            .then(clickable),
-                )
-
-                Box(
-                    modifier =
-                        Modifier.height(lineHeight)
-                            .align(Alignment.BottomEnd)
-                            .width(175.dp)
-                            .then(clickable)
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors =
-                                        listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.surface.copy(alpha = .8f),
-                                            MaterialTheme.colorScheme.surface,
-                                        )
-                                )
-                            )
-                ) {
+            } else {
+                CollapsedDescription(markdownState = collapsedMarkdownState) {
                     MoreLessButton(
-                        themeColorState.primaryColor,
-                        true,
-                        Modifier.align(Alignment.TopEnd),
+                        buttonColor = themeColorState.primaryColor,
+                        isMore = true,
+                        modifier = Modifier.align(Alignment.BottomEnd),
                     )
                 }
             }
-        } else {
-            if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                AltTitles(
-                    altTitles = altTitlesProvider(),
-                    currentTitle = titleProvider(),
-                    tagColor = tagColor,
-                    themeColorState = themeColorState,
-                    altTitleClick = altTitleClick,
-                    resetClick = altTitleResetClick,
-                    shouldWrap = wrapAltTitles,
-                )
-                Gap(Size.tiny)
-                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
-                Gap(16.dp)
-            }
-            val text = description.trim()
-            val markdownState =
-                rememberMarkdownState(
-                    content = text,
-                    flavour = CommonMarkFlavourDescriptor(),
-                    immediate = true,
-                )
-            SelectionContainer {
-                Markdown(
-                    markdownState = markdownState,
-                    colors = nekoMarkdownColors(),
-                    typography = nekoMarkdownTypography(),
-                    modifier = clickable,
-                )
-            }
+        }
 
-            if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                Gap(Size.tiny)
-                AltTitles(
-                    altTitles = altTitlesProvider(),
-                    currentTitle = titleProvider(),
-                    shouldWrap = wrapAltTitles,
+        // Display Alt Titles and Genres below the description on mobile
+        if (isExpanded && !isTablet) {
+            Gap(Size.tiny)
+            AltTitlesAndGenres(
+                altTitles = altTitles,
+                genres = genres,
+                currentTitle = title,
+                shouldWrap = wrapAltTitles,
+                themeColorState = themeColorState,
+                altTitleClick = altTitleClick,
+                resetClick = altTitleResetClick,
+                genreSearch = genreSearch,
+                genreLibrarySearch = genreSearchLibrary,
+            )
+            Gap(Size.medium)
+            MoreLessButton(
+                buttonColor = themeColorState.primaryColor,
+                isMore = false,
+                modifier = Modifier.align(Alignment.End),
+            )
+        }
+    }
+}
+
+/** A container for the collapsed description that shows a "More..." button with a gradient fade. */
+@Composable
+private fun CollapsedDescription(
+    markdownState: MarkdownState,
+    moreButton: @Composable BoxScope.() -> Unit,
+) {
+
+    val lineHeight =
+        with(LocalDensity.current) {
+            MaterialTheme.typography.bodyLarge.fontSize.toDp() + Size.small
+        }
+
+    val descriptionHeight =
+        with(LocalDensity.current) { MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3 }
+
+    Box(modifier = Modifier.clipToBounds()) {
+        Markdown(
+            markdownState = markdownState,
+            colors = nekoMarkdownColors(),
+            typography = nekoMarkdownTypography(),
+            modifier = Modifier.fillMaxWidth().heightIn(Size.none, descriptionHeight),
+        )
+        // Gradient overlay to fade out the text
+        Box(
+            modifier =
+                Modifier.height(lineHeight)
+                    .align(Alignment.BottomEnd)
+                    .fillMaxWidth(.40f)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.surface.copy(alpha = .8f),
+                                    MaterialTheme.colorScheme.surface,
+                                )
+                        )
+                    )
+        )
+        moreButton()
+    }
+}
+
+/** A combined, reusable composable for displaying both Alt Titles and Genres. */
+@Composable
+private fun AltTitlesAndGenres(
+    altTitles: PersistentList<String>,
+    genres: PersistentList<String>,
+    currentTitle: String,
+    shouldWrap: Boolean,
+    themeColorState: ThemeColorState,
+    altTitleClick: (String) -> Unit,
+    resetClick: () -> Unit,
+    genreSearch: (String) -> Unit,
+    genreLibrarySearch: (String) -> Unit,
+) {
+    val tagColor =
+        MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+            themeColorState.primaryColor,
+            Size.medium,
+        )
+
+    AltTitles(
+        altTitles = altTitles,
+        currentTitle = currentTitle,
+        shouldWrap = shouldWrap,
+        tagColor = tagColor,
+        themeColorState = themeColorState,
+        altTitleClick = altTitleClick,
+        resetClick = resetClick,
+    )
+
+    Spacer(modifier = Modifier.size(Size.medium))
+
+    Genres(
+        genres = genres,
+        tagColor = tagColor,
+        themeColorState = themeColorState,
+        genreSearch = genreSearch,
+        genreLibrarySearch = genreLibrarySearch,
+    )
+}
+
+/**
+ * A unified composable for displaying Alternative Titles, switching between FlowRow and LazyRow.
+ */
+@Composable
+private fun AltTitles(
+    altTitles: PersistentList<String>,
+    currentTitle: String,
+    shouldWrap: Boolean,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    altTitleClick: (String) -> Unit,
+    resetClick: () -> Unit,
+) {
+    if (altTitles.isEmpty()) return
+
+    val isCustomTitle = altTitles.contains(currentTitle)
+
+    Column {
+        Text(
+            text = "Alt Titles:",
+            style = MaterialTheme.typography.labelLarge,
+            color =
+                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        )
+
+        val content: @Composable () -> Unit = {
+            if (isCustomTitle) {
+                TextButton(onClick = resetClick) {
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = themeColorState.primaryColor,
+                    )
+                }
+            }
+            altTitles.forEach { title ->
+                AltTitleChip(
+                    title = title,
+                    isSelected = isCustomTitle && title == currentTitle,
                     tagColor = tagColor,
-                    themeColorState = themeColorState,
-                    altTitleClick = altTitleClick,
-                    resetClick = altTitleResetClick,
-                )
-                Gap(16.dp)
-                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
-                Gap(16.dp)
-                MoreLessButton(
-                    buttonColor = themeColorState.primaryColor,
-                    isMore = false,
-                    clickable.align(Alignment.End),
+                    onClick = { altTitleClick(title) },
                 )
             }
+        }
+
+        if (shouldWrap) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                content = { content() },
+            )
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Size.tiny),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // LazyRow requires items to be emitted this way
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        content()
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A single, reusable AssistChip for an alternative title. */
+@Composable
+private fun AltTitleChip(title: String, isSelected: Boolean, tagColor: Color, onClick: () -> Unit) {
+    AssistChip(
+        onClick = { if (!isSelected) onClick() },
+        colors =
+            AssistChipDefaults.assistChipColors(
+                containerColor = tagColor,
+                labelColor =
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = NekoColors.mediumAlphaHighContrast
+                    ),
+            ),
+        border = null,
+        leadingIcon = {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint =
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = NekoColors.mediumAlphaHighContrast
+                        ),
+                )
+            }
+        },
+        label = { Text(text = title, style = MaterialTheme.typography.labelLarge) },
+    )
+}
+
+/**
+ * Displays genre tags with a shared dropdown menu for search actions. State management is
+ * simplified to track the selected genre directly.
+ */
+@Composable
+private fun Genres(
+    genres: PersistentList<String>,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    genreSearch: (String) -> Unit,
+    genreLibrarySearch: (String) -> Unit,
+) {
+    if (genres.isEmpty()) return
+
+    var selectedGenre by remember { mutableStateOf<String?>(null) }
+
+    Column {
+        Text(
+            text = "Tags:",
+            style = MaterialTheme.typography.labelLarge,
+            color =
+                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        )
+        Gap(Size.tiny)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Size.smedium, Alignment.Start),
+            verticalArrangement = Arrangement.spacedBy(Size.smedium),
+        ) {
+            genres.forEach { genre ->
+                Chip(
+                    label = genre,
+                    containerColor = tagColor,
+                    modifier = Modifier.clickable { selectedGenre = genre },
+                )
+            }
+        }
+
+        selectedGenre?.let { genre ->
+            SimpleDropdownMenu(
+                expanded = true,
+                onDismiss = { selectedGenre = null },
+                themeColorState = themeColorState,
+                dropDownItems =
+                    persistentListOf(
+                        SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
+                            genreSearch(genre)
+                            selectedGenre = null
+                        },
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.search_library)
+                        ) {
+                            genreLibrarySearch(genre)
+                            selectedGenre = null
+                        },
+                    ),
+            )
         }
     }
 }
@@ -240,256 +464,6 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
             imageVector = icon,
             contentDescription = null,
             tint = buttonColor,
-        )
-    }
-}
-
-@Composable
-private fun AltTitles(
-    altTitles: PersistentList<String>,
-    currentTitle: String,
-    shouldWrap: Boolean,
-    tagColor: Color,
-    themeColorState: ThemeColorState,
-    altTitleClick: (String) -> Unit,
-    resetClick: () -> Unit,
-) {
-    if (altTitles.isNotEmpty()) {
-        val isCustomTitle = altTitles.contains(currentTitle)
-        val onChipColor =
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = NekoColors.mediumAlphaHighContrast
-            )
-
-        Text(
-            text = "Alt Titles:",
-            style = MaterialTheme.typography.labelLarge,
-            color =
-                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        )
-        if (shouldWrap) {
-            FlowableAltTitles(
-                altTitles = altTitles,
-                currentTitle = currentTitle,
-                isCustomTitle = isCustomTitle,
-                tagColor = tagColor,
-                themeColorState = themeColorState,
-                altTitleClick = altTitleClick,
-                resetClick = resetClick,
-                onChipColor = onChipColor,
-            )
-        } else {
-            ScrollableAltTitles(
-                altTitles = altTitles,
-                currentTitle = currentTitle,
-                isCustomTitle = isCustomTitle,
-                tagColor = tagColor,
-                themeColorState = themeColorState,
-                altTitleClick = altTitleClick,
-                resetClick = resetClick,
-                onChipColor = onChipColor,
-            )
-        }
-    }
-}
-
-@Composable
-private fun FlowableAltTitles(
-    altTitles: PersistentList<String>,
-    currentTitle: String,
-    isCustomTitle: Boolean,
-    tagColor: Color,
-    themeColorState: ThemeColorState,
-    altTitleClick: (String) -> Unit,
-    resetClick: () -> Unit,
-    onChipColor: Color,
-) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.small),
-    ) {
-        if (isCustomTitle) {
-            TextButton(onClick = resetClick) {
-                Text(
-                    text = stringResource(id = R.string.reset),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = themeColorState.primaryColor,
-                )
-            }
-        }
-        altTitles.forEach { title ->
-            val currentlySelected = isCustomTitle && title == currentTitle
-            AssistChip(
-                onClick = {
-                    if (!currentlySelected) {
-                        altTitleClick(title)
-                    }
-                },
-                colors =
-                    AssistChipDefaults.assistChipColors(
-                        containerColor = tagColor,
-                        labelColor = onChipColor,
-                    ),
-                border = null,
-                leadingIcon = {
-                    if (currentlySelected) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            tint = onChipColor,
-                        )
-                    }
-                },
-                label = {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(Size.none),
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun ScrollableAltTitles(
-    altTitles: PersistentList<String>,
-    currentTitle: String,
-    isCustomTitle: Boolean,
-    tagColor: Color,
-    themeColorState: ThemeColorState,
-    altTitleClick: (String) -> Unit,
-    resetClick: () -> Unit,
-    onChipColor: Color,
-) {
-    LazyRow(
-        modifier =
-            Modifier.fillMaxWidth().layout { measurable, constraints ->
-                val placeable =
-                    measurable.measure(
-                        constraints.copy(
-                            minWidth = constraints.maxWidth + Size.medium.roundToPx(),
-                            maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
-                        )
-                    )
-                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-            },
-        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (isCustomTitle) {
-            item {
-                TextButton(onClick = resetClick) {
-                    Text(
-                        text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = themeColorState.primaryColor,
-                    )
-                }
-            }
-        }
-
-        items(altTitles) { title ->
-            val currentlySelected = isCustomTitle && title == currentTitle
-
-            AssistChip(
-                onClick = {
-                    if (!currentlySelected) {
-                        altTitleClick(title)
-                    }
-                },
-                colors =
-                    AssistChipDefaults.assistChipColors(
-                        containerColor = tagColor,
-                        labelColor = onChipColor,
-                    ),
-                border = null,
-                leadingIcon = {
-                    if (currentlySelected) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            tint = onChipColor,
-                        )
-                    }
-                },
-                label = {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(Size.none),
-                    )
-                },
-            )
-        }
-        item { Gap(Size.tiny) }
-    }
-}
-
-@Composable
-private fun ColumnScope.Genres(
-    genres: PersistentList<String>,
-    tagColor: Color,
-    themeColorState: ThemeColorState,
-    genreSearch: (String) -> Unit,
-    genreLibrarySearch: (String) -> Unit,
-) {
-    if (genres.isEmpty()) return
-
-    Text(
-        text = "Tags:",
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-    )
-    Gap(Size.tiny)
-    FlowRow(
-        modifier =
-            Modifier.layout { measurable, constraints ->
-                val placeable =
-                    measurable.measure(
-                        constraints.copy(
-                            minWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                            maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                        )
-                    )
-                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-            },
-        horizontalArrangement = Arrangement.spacedBy(Size.smedium, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(Size.smedium),
-    ) {
-        var genreExpanded by remember { mutableStateOf(false) }
-        var genrePosition by remember { mutableIntStateOf(0) }
-
-        genres.forEachIndexed { index, genre ->
-            Chip(
-                label = genre,
-                containerColor = tagColor,
-                modifier =
-                    Modifier.clickable {
-                        genrePosition = index
-                        genreExpanded = !genreExpanded
-                    },
-            )
-        }
-        SimpleDropdownMenu(
-            expanded = genreExpanded,
-            onDismiss = { genreExpanded = false },
-            themeColorState = themeColorState,
-            dropDownItems =
-                listOf(
-                        SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
-                            genreExpanded = false
-                            genreSearch(genres[genrePosition])
-                        },
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.search_library)
-                        ) {
-                            genreExpanded = false
-                            genreLibrarySearch(genres[genrePosition])
-                        },
-                    )
-                    .toPersistentList(),
         )
     }
 }
