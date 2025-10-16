@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,39 +58,17 @@ import me.saket.swipe.SwipeAction
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-/**
- * Data class holding all the necessary information for a chapter row. Using a data class simplifies
- * the function signature and improves maintainability.
- */
-@Immutable
-data class ChapterRowData(
-    val title: String,
-    val scanlator: String,
-    val uploader: String,
-    val language: String?,
-    val chapterNumber: Double,
-    val dateUploaded: Long,
-    val lastPageRead: Int,
-    val pagesLeft: Int,
-    val read: Boolean,
-    val bookmark: Boolean,
-    val isMerged: Boolean,
-    val isLocal: Boolean,
-    val isUnavailable: Boolean,
-    val downloadState: Download.State,
-    val downloadProgress: Int,
-)
-
 @Composable
 fun ChapterRow(
     themeColor: ThemeColorState,
-    data: ChapterRowData,
+    chapterItem: ChapterItem,
     shouldHideChapterTitles: Boolean = false,
     onClick: () -> Unit,
     onBookmark: () -> Unit,
@@ -104,10 +81,11 @@ fun ChapterRow(
 ) {
     CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
         val (readIcon, readTextRes) =
-            if (data.read) Icons.Default.VisibilityOff to R.string.mark_as_unread
+            if (chapterItem.chapter.read) Icons.Default.VisibilityOff to R.string.mark_as_unread
             else Icons.Default.Visibility to R.string.mark_as_read
         val (bookmarkIcon, bookmarkTextRes) =
-            if (data.bookmark) Icons.Default.BookmarkRemove to R.string.remove_bookmark
+            if (chapterItem.chapter.bookmark)
+                Icons.Default.BookmarkRemove to R.string.remove_bookmark
             else Icons.Default.BookmarkAdd to R.string.add_bookmark
 
         val swipeActionBackgroundColor =
@@ -149,7 +127,7 @@ fun ChapterRow(
             ChapterRowContent(
                 themeColorState = themeColor,
                 shouldHideChapterTitles = shouldHideChapterTitles,
-                data = data,
+                chapterItem = chapterItem,
                 onClick = onClick,
                 onWebView = onWebView,
                 onComment = onComment,
@@ -165,7 +143,7 @@ fun ChapterRow(
 private fun ChapterRowContent(
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
-    data: ChapterRowData,
+    chapterItem: ChapterItem,
     onClick: () -> Unit,
     onWebView: () -> Unit,
     onComment: () -> Unit,
@@ -181,23 +159,30 @@ private fun ChapterRowContent(
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     val textColor =
-        remember(data.read) {
-            if (data.read) onSurfaceColor.copy(alpha = NekoColors.disabledAlphaLowContrast)
+        remember(chapterItem.chapter.read) {
+            if (chapterItem.chapter.read)
+                onSurfaceColor.copy(alpha = NekoColors.disabledAlphaLowContrast)
             else onSurfaceColor
         }
     val secondaryTextColor =
-        remember(data.read) {
-            if (data.read) onSurfaceColor.copy(alpha = NekoColors.disabledAlphaLowContrast)
+        remember(chapterItem.chapter.read) {
+            if (chapterItem.chapter.read)
+                onSurfaceColor.copy(alpha = NekoColors.disabledAlphaLowContrast)
             else onSurfaceColor.copy(alpha = NekoColors.mediumAlphaLowContrast)
         }
 
     val dropdownItems =
-        remember(data.isLocal, data.isMerged, data.scanlator, data.uploader) {
+        remember(
+            chapterItem.chapter.isLocalSource(),
+            chapterItem.chapter.isMergedChapter(),
+            chapterItem.chapter.scanlator,
+            chapterItem.chapter.uploader,
+        ) {
             buildChapterDropdownItems(
-                isLocal = data.isLocal,
-                isMerged = data.isMerged,
-                scanlator = data.scanlator,
-                uploader = data.uploader,
+                isLocal = chapterItem.chapter.isLocalSource(),
+                isMerged = chapterItem.chapter.isMergedChapter(),
+                scanlator = chapterItem.chapter.scanlator,
+                uploader = chapterItem.chapter.uploader,
                 onWebView = onWebView,
                 onComment = onComment,
                 markPrevious = markPrevious,
@@ -235,57 +220,69 @@ private fun ChapterRowContent(
         Column(modifier = Modifier.weight(1f)) {
             ChapterTitle(
                 shouldHideChapterTitles = shouldHideChapterTitles,
-                title = data.title,
-                chapterNumber = data.chapterNumber,
-                isBookmarked = data.bookmark,
+                title = chapterItem.chapter.chapterTitle,
+                chapterNumber = chapterItem.chapter.chapterNumber.toDouble(),
+                isBookmarked = chapterItem.chapter.bookmark,
                 textColor = textColor,
                 themeColor = themeColorState.primaryColor,
             )
 
             val subtitleText =
                 remember(
-                    data.dateUploaded,
-                    data.read,
-                    data.lastPageRead,
-                    data.pagesLeft,
-                    data.scanlator,
-                    data.uploader,
-                    data.isMerged,
+                    chapterItem.chapter.dateUpload,
+                    chapterItem.chapter.read,
+                    chapterItem.chapter.lastPageRead,
+                    chapterItem.chapter.pagesLeft,
+                    chapterItem.chapter.scanlator,
+                    chapterItem.chapter.uploader,
+                    chapterItem.chapter.isMergedChapter(),
                 ) {
                     val statuses = mutableListOf<String>()
-                    ChapterUtil.relativeDate(data.dateUploaded)?.let { statuses.add(it) }
-                    if (!data.read && data.lastPageRead > 0) {
-                        if (data.pagesLeft > 0) {
+                    ChapterUtil.relativeDate(chapterItem.chapter.dateUpload)?.let {
+                        statuses.add(it)
+                    }
+                    if (!chapterItem.chapter.read && chapterItem.chapter.lastPageRead > 0) {
+                        if (chapterItem.chapter.pagesLeft > 0) {
                             statuses.add(
                                 context.resources.getQuantityString(
                                     R.plurals.pages_left,
-                                    data.pagesLeft,
-                                    data.pagesLeft,
+                                    chapterItem.chapter.pagesLeft,
+                                    chapterItem.chapter.pagesLeft,
                                 )
                             )
                         } else {
-                            statuses.add(context.getString(R.string.page_, data.lastPageRead + 1))
+                            statuses.add(
+                                context.getString(
+                                    R.string.page_,
+                                    chapterItem.chapter.lastPageRead + 1,
+                                )
+                            )
                         }
                     }
-                    if (data.scanlator.isNotBlank()) {
-                        if (data.scanlator == Constants.NO_GROUP) statuses.add(data.uploader)
-                        statuses.add(data.scanlator)
-                        if (data.isMerged && data.uploader.isNotBlank()) statuses.add(data.uploader)
+                    if (chapterItem.chapter.scanlator.isNotBlank()) {
+                        if (chapterItem.chapter.scanlator == Constants.NO_GROUP)
+                            statuses.add(chapterItem.chapter.uploader)
+                        statuses.add(chapterItem.chapter.scanlator)
+                        if (
+                            chapterItem.chapter.isMergedChapter() &&
+                                chapterItem.chapter.uploader.isNotBlank()
+                        )
+                            statuses.add(chapterItem.chapter.uploader)
                     }
                     statuses.joinToString(Constants.SEPARATOR)
                 }
 
             ChapterSubtitle(
                 subtitleText = subtitleText,
-                language = data.language,
+                language = chapterItem.chapter.language,
                 textColor = secondaryTextColor,
             )
         }
         ChapterDownloadIndicator(
-            isUnavailable = data.isUnavailable,
-            scanlator = data.scanlator,
-            downloadState = data.downloadState,
-            downloadProgress = data.downloadProgress,
+            isUnavailable = chapterItem.chapter.isUnavailable,
+            scanlator = chapterItem.chapter.scanlator,
+            downloadState = chapterItem.downloadState,
+            downloadProgress = chapterItem.downloadProgress,
             onDownload = onDownload,
             themeColorState = themeColorState,
         )

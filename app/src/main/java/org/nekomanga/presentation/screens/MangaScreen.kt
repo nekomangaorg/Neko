@@ -69,7 +69,6 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
-import org.nekomanga.presentation.components.ChapterRowData
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -470,26 +469,6 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
     }
 }
 
-fun ChapterItem.toChapterRowData(): ChapterRowData {
-    return ChapterRowData(
-        title = chapter.name,
-        scanlator = chapter.scanlator,
-        uploader = chapter.uploader,
-        language = chapter.language,
-        chapterNumber = chapter.chapterNumber.toDouble(),
-        dateUploaded = chapter.dateUpload,
-        lastPageRead = chapter.lastPageRead,
-        pagesLeft = chapter.pagesLeft,
-        read = chapter.read,
-        bookmark = chapter.bookmark,
-        isMerged = chapter.isMergedChapter(),
-        isLocal = chapter.isLocalSource(),
-        isUnavailable = chapter.isUnavailable,
-        downloadState = downloadState,
-        downloadProgress = downloadProgress,
-    )
-}
-
 @Composable
 private fun ChapterRow(
     themeColorState: ThemeColorState,
@@ -498,10 +477,9 @@ private fun ChapterRow(
     chapterItem: ChapterItem,
     index: Int,
 ) {
-    val chapterRowData = chapterItem.toChapterRowData()
     ChapterRow(
         themeColor = themeColorState,
-        data = chapterRowData,
+        chapterItem = chapterItem,
         shouldHideChapterTitles =
             mangaDetailScreenState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
         onClick = { chapterActions.open(chapterItem) },
