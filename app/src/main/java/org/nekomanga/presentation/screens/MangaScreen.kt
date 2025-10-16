@@ -638,23 +638,22 @@ private fun Details(
     val quickReadClickProvider = remember(chapterActions) { { chapterActions.openNext() } }
 
     MangaDetailsHeader(
-        mangaDetailScreenState = detailsState.mangaDetailScreenState,
-        isSearching = detailsState.mangaDetailScreenState.value.isSearching,
+        mangaDetailScreenState = detailsState.mangaDetailScreenState.value,
         windowSizeClass = detailsState.windowSizeClass,
         informationActions = informationActions,
         themeColorState = detailsState.themeColorState,
         generatePalette = generatePalette,
         isLoggedIntoTrackers = isLoggedIntoTrackers,
         toggleFavorite = toggleFavoriteProvider,
-        moveCategories = moveCategoriesProvider,
-        trackingClick = trackingClickProvider,
-        similarClick = similarClick,
-        artworkClick = artworkClickProvider,
-        mergeClick = mergeClickProvider,
-        linksClick = linksClickProvider,
-        shareClick = shareClick,
+        onCategoriesClick = moveCategoriesProvider,
+        onTrackingClick = trackingClickProvider,
+        onSimilarClick = similarClick,
+        onArtworkClick = artworkClickProvider,
+        onMergeClick = mergeClickProvider,
+        onLinksClick = linksClickProvider,
+        onShareClick = shareClick,
         descriptionActions = descriptionActions,
-        quickReadClick = quickReadClickProvider,
+        onQuickReadClick = quickReadClickProvider,
     )
 }
 

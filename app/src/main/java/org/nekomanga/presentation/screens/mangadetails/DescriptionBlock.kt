@@ -56,6 +56,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.MarkdownState
 import com.mikepenz.markdown.model.rememberMarkdownState
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -82,10 +83,7 @@ fun DescriptionBlock(
     wrapAltTitles: Boolean,
     isExpanded: Boolean,
     expandCollapseClick: () -> Unit,
-    genreSearch: (String) -> Unit,
-    genreSearchLibrary: (String) -> Unit,
-    altTitleClick: (String) -> Unit,
-    altTitleResetClick: () -> Unit,
+    descriptionActions: MangaConstants.DescriptionActions,
 ) {
     if (!isInitialized) return
 
@@ -126,10 +124,10 @@ fun DescriptionBlock(
                 currentTitle = title,
                 shouldWrap = wrapAltTitles,
                 themeColorState = themeColorState,
-                altTitleClick = altTitleClick,
-                resetClick = altTitleResetClick,
-                genreSearch = genreSearch,
-                genreLibrarySearch = genreSearchLibrary,
+                altTitleClick = { descriptionActions::altTitleClick },
+                resetClick = { descriptionActions::altTitleResetClick },
+                genreSearch = { descriptionActions::genreSearch },
+                genreLibrarySearch = { descriptionActions::genreSearchLibrary },
             )
             Gap(Size.medium)
         }
@@ -178,10 +176,10 @@ fun DescriptionBlock(
                 currentTitle = title,
                 shouldWrap = wrapAltTitles,
                 themeColorState = themeColorState,
-                altTitleClick = altTitleClick,
-                resetClick = altTitleResetClick,
-                genreSearch = genreSearch,
-                genreLibrarySearch = genreSearchLibrary,
+                altTitleClick = { descriptionActions::altTitleClick },
+                resetClick = { descriptionActions::altTitleResetClick },
+                genreSearch = { descriptionActions::genreSearch },
+                genreLibrarySearch = { descriptionActions::genreSearchLibrary },
             )
             Gap(Size.medium)
             MoreLessButton(

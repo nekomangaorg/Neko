@@ -9,10 +9,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.ButtonDefaults
@@ -24,9 +25,9 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,48 +45,51 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaDetailsHeader(
-    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
+    mangaDetailScreenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackers: Boolean,
-    isSearching: Boolean,
     themeColorState: ThemeColorState,
-    generatePalette: (Drawable) -> Unit = {},
-    toggleFavorite: () -> Unit = {},
-    moveCategories: () -> Unit = {},
-    trackingClick: () -> Unit = {},
-    artworkClick: () -> Unit = {},
-    similarClick: () -> Unit = {},
-    mergeClick: () -> Unit = {},
-    linksClick: () -> Unit = {},
-    shareClick: () -> Unit = {},
+    generatePalette: (Drawable) -> Unit,
+    toggleFavorite: () -> Unit,
+    onCategoriesClick: () -> Unit,
+    onTrackingClick: () -> Unit,
+    onArtworkClick: () -> Unit,
+    onSimilarClick: () -> Unit,
+    onMergeClick: () -> Unit,
+    onLinksClick: () -> Unit,
+    onShareClick: () -> Unit,
     descriptionActions: DescriptionActions,
     informationActions: InformationActions,
-    quickReadClick: () -> Unit = {},
+    onQuickReadClick: () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        var manuallyExpanded by
-            rememberSaveable(mangaDetailScreenState.value.inLibrary) {
-                mutableStateOf(!mangaDetailScreenState.value.inLibrary)
+        var isDescriptionManuallyExpanded by
+            rememberSaveable(mangaDetailScreenState.inLibrary) {
+                mutableStateOf(!mangaDetailScreenState.inLibrary)
             }
 
-        val isExpanded =
-            windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded || manuallyExpanded
+        val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+        val isDescriptionExpanded = isTablet || isDescriptionManuallyExpanded
 
+        // 2. Memoized Calculation: Avoid recalculating backdrop height on every recomposition.
+        val screenHeight = LocalConfiguration.current.screenHeightDp
         val backdropHeight =
-            when (isSearching) {
-                true -> (LocalConfiguration.current.screenHeightDp / 4).dp
-                false -> {
-                    when (mangaDetailScreenState.value.backdropSize) {
-                        MangaConstants.BackdropSize.Small ->
-                            (LocalConfiguration.current.screenHeightDp / 2.8).dp
-                        MangaConstants.BackdropSize.Default ->
-                            (LocalConfiguration.current.screenHeightDp / 2.1).dp
-                        MangaConstants.BackdropSize.Large ->
-                            (LocalConfiguration.current.screenHeightDp / 1.2).dp
-                    }
+            remember(
+                mangaDetailScreenState.isSearching,
+                mangaDetailScreenState.backdropSize,
+                screenHeight,
+            ) {
+                when {
+                    mangaDetailScreenState.isSearching -> (screenHeight / 4).dp
+                    else ->
+                        when (mangaDetailScreenState.backdropSize) {
+                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
+                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
+                            MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
+                        }
                 }
             }
 
@@ -93,112 +97,109 @@ fun MangaDetailsHeader(
             Box {
                 BackDrop(
                     themeColorState = themeColorState,
-                    artwork = mangaDetailScreenState.value.currentArtwork,
-                    showBackdrop = mangaDetailScreenState.value.themeBasedOffCovers,
+                    artwork = mangaDetailScreenState.currentArtwork,
+                    showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
                     modifier =
                         Modifier.animateContentSize()
                             .fillMaxWidth()
-                            .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
+                            .requiredHeightIn(min = 250.dp, max = maxOf(250.dp, backdropHeight)),
                     generatePalette = generatePalette,
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
                         themeColorState = themeColorState,
-                        title = mangaDetailScreenState.value.currentTitle,
-                        author = mangaDetailScreenState.value.author,
-                        artist = mangaDetailScreenState.value.artist,
-                        stats = mangaDetailScreenState.value.stats,
-                        langFlag = mangaDetailScreenState.value.langFlag,
-                        status = mangaDetailScreenState.value.status,
+                        title = mangaDetailScreenState.currentTitle,
+                        author = mangaDetailScreenState.author,
+                        artist = mangaDetailScreenState.artist,
+                        stats = mangaDetailScreenState.stats,
+                        langFlag = mangaDetailScreenState.langFlag,
+                        status = mangaDetailScreenState.status,
                         lastChapter =
-                            mangaDetailScreenState.value.lastVolume to
-                                mangaDetailScreenState.value.lastChapter,
-                        isPornographic = mangaDetailScreenState.value.isPornographic,
-                        missingChapters = mangaDetailScreenState.value.missingChapters,
-                        estimatedMissingChapters =
-                            mangaDetailScreenState.value.estimatedMissingChapters,
-                        isExpanded = isExpanded,
+                            mangaDetailScreenState.lastVolume to mangaDetailScreenState.lastChapter,
+                        isPornographic = mangaDetailScreenState.isPornographic,
+                        missingChapters = mangaDetailScreenState.missingChapters,
+                        estimatedMissingChapters = mangaDetailScreenState.estimatedMissingChapters,
+                        isExpanded = isDescriptionExpanded,
                         showMergedIcon =
-                            mangaDetailScreenState.value.isMerged is
-                                MergeConstants.IsMergedManga.Yes &&
-                                !mangaDetailScreenState.value.hideButtonText,
+                            mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes &&
+                                !mangaDetailScreenState.hideButtonText,
                         modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
                         titleLongClick = informationActions.titleLongClick,
                         creatorCopyClick = informationActions.creatorCopy,
                         creatorSearchClick = informationActions.creatorSearch,
                     )
+
                     AnimatedVisibility(
-                        visible = !isSearching,
+                        visible = !mangaDetailScreenState.isSearching,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically(),
                     ) {
-                        Column {
-                            Gap(height = 16.dp)
+                        Column(modifier = Modifier.padding(bottom = Size.medium)) {
+                            Gap(Size.medium)
                             ButtonBlock(
-                                hideButtonText = mangaDetailScreenState.value.hideButtonText,
-                                isInitialized = mangaDetailScreenState.value.initialized,
+                                hideButtonText = mangaDetailScreenState.hideButtonText,
+                                isInitialized = mangaDetailScreenState.initialized,
                                 isMerged =
-                                    mangaDetailScreenState.value.isMerged
+                                    mangaDetailScreenState.isMerged
                                         is MergeConstants.IsMergedManga.Yes,
-                                inLibrary = mangaDetailScreenState.value.inLibrary,
+                                inLibrary = mangaDetailScreenState.inLibrary,
                                 loggedIntoTrackers = isLoggedIntoTrackers,
-                                trackServiceCount = mangaDetailScreenState.value.trackServiceCount,
+                                trackServiceCount = mangaDetailScreenState.trackServiceCount,
                                 themeColorState = themeColorState,
                                 toggleFavorite = toggleFavorite,
-                                trackingClick = trackingClick,
-                                artworkClick = artworkClick,
-                                similarClick = similarClick,
-                                mergeClick = mergeClick,
-                                linksClick = linksClick,
-                                shareClick = shareClick,
-                                moveCategories = moveCategories,
+                                trackingClick = onTrackingClick,
+                                artworkClick = onArtworkClick,
+                                similarClick = onSimilarClick,
+                                mergeClick = onMergeClick,
+                                linksClick = onLinksClick,
+                                shareClick = onShareClick,
+                                moveCategories = onCategoriesClick,
                             )
-                            Gap(height = 16.dp)
                         }
                     }
                 }
             }
-        }
-        AnimatedVisibility(
-            visible = !isSearching,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
-        ) {
-            Column {
-                if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                    QuickReadButton(
-                        quickReadText =
-                            mangaDetailScreenState.value.nextUnreadChapter.text.asString(),
+
+            AnimatedVisibility(
+                visible = !mangaDetailScreenState.isSearching,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                Column {
+                    if (isTablet) {
+                        QuickReadButton(
+                            quickReadText =
+                                mangaDetailScreenState.nextUnreadChapter.text.asString(),
+                            themeColorState = themeColorState,
+                            onClick = onQuickReadClick,
+                        )
+                        Gap(Size.tiny)
+                    }
+                    DescriptionBlock(
+                        windowSizeClass = windowSizeClass,
+                        title = mangaDetailScreenState.currentTitle,
+                        description = mangaDetailScreenState.currentDescription,
+                        isInitialized = mangaDetailScreenState.initialized,
+                        altTitles = mangaDetailScreenState.alternativeTitles,
+                        genres = mangaDetailScreenState.genres,
                         themeColorState = themeColorState,
-                        quickReadClick = quickReadClick,
+                        isExpanded = isDescriptionExpanded,
+                        wrapAltTitles = mangaDetailScreenState.wrapAltTitles,
+                        expandCollapseClick = {
+                            isDescriptionManuallyExpanded = !isDescriptionManuallyExpanded
+                        },
+                        descriptionActions = descriptionActions,
                     )
-                }
-                Gap(Size.tiny)
-                DescriptionBlock(
-                    windowSizeClass = windowSizeClass,
-                    title = mangaDetailScreenState.value.currentTitle,
-                    description = mangaDetailScreenState.value.currentDescription,
-                    isInitialized = mangaDetailScreenState.value.initialized,
-                    altTitles = mangaDetailScreenState.value.alternativeTitles,
-                    genres = mangaDetailScreenState.value.genres,
-                    themeColorState = themeColorState,
-                    isExpanded = isExpanded,
-                    wrapAltTitles = mangaDetailScreenState.value.wrapAltTitles,
-                    expandCollapseClick = { manuallyExpanded = !manuallyExpanded },
-                    genreSearch = descriptionActions.genreSearch,
-                    genreSearchLibrary = descriptionActions.genreSearchLibrary,
-                    altTitleClick = descriptionActions.altTitleClick,
-                    altTitleResetClick = descriptionActions.altTitleResetClick,
-                )
-                if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                    QuickReadButton(
-                        quickReadText =
-                            mangaDetailScreenState.value.nextUnreadChapter.text.asString(),
-                        themeColorState = themeColorState,
-                        quickReadClick = quickReadClick,
-                    )
-                    Gap(Size.tiny)
+                    if (!isTablet) {
+                        QuickReadButton(
+                            quickReadText =
+                                mangaDetailScreenState.nextUnreadChapter.text.asString(),
+                            themeColorState = themeColorState,
+                            onClick = onQuickReadClick,
+                        )
+                        Gap(Size.tiny)
+                    }
                 }
             }
         }
@@ -206,21 +207,21 @@ fun MangaDetailsHeader(
 }
 
 @Composable
-private fun ColumnScope.QuickReadButton(
+private fun QuickReadButton(
     quickReadText: String,
     themeColorState: ThemeColorState,
-    quickReadClick: () -> Unit,
+    onClick: () -> Unit,
 ) {
     if (quickReadText.isNotBlank()) {
-        Gap(Size.tiny)
+        Spacer(modifier = Modifier.size(Size.tiny))
         CompositionLocalProvider(
             LocalRippleConfiguration provides
                 nekoRippleConfiguration(themeColorState.containerColor)
         ) {
             ElevatedButton(
-                onClick = quickReadClick,
-                shapes = ButtonDefaults.shapes(),
-                modifier = Modifier.fillMaxWidth().padding(Size.small),
+                onClick = onClick,
+                shape = ButtonDefaults.shape,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 colors =
                     ButtonDefaults.elevatedButtonColors(
                         containerColor = themeColorState.primaryColor
