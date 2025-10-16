@@ -135,9 +135,9 @@ class MangaDetailController(private val mangaId: Long) :
             coverActions =
                 CoverActions(
                     share = this::shareCover,
-                    set = { /*presenter::setCover*/ },
-                    save = { /*presenter::saveCover*/ },
-                    reset = { /*presenter::resetCover*/ },
+                    set = presenter::setCover,
+                    save = presenter::saveCover,
+                    reset = presenter::resetCover,
                 ),
             chapterFilterActions =
                 ChapterFilterActions(

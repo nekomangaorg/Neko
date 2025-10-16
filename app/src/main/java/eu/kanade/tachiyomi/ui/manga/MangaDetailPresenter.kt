@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.runCatching
+import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
@@ -12,6 +14,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -41,10 +44,13 @@ import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
@@ -100,6 +106,7 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.util.system.mapAsync
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -1347,6 +1354,76 @@ class MangaDetailPresenter(
                 }
             }
             db.updateChapterFlags(manga).executeOnIO()
+        }
+    }
+
+    /** Save the given url cover to file */
+    fun saveCover(artwork: Artwork, destDir: UniFile? = null) {
+        presenterScope.launchIO {
+            try {
+                val directory = destDir ?: storageManager.getCoverDirectory()!!
+
+                val destinationUri = saveCover(directory, artwork)
+                launchUI {
+                    view?.applicationContext?.let { context ->
+                        DiskUtil.scanMedia(context, destinationUri)
+                        view?.applicationContext?.toast(R.string.cover_saved)
+                    }
+                }
+            } catch (e: Exception) {
+                TimberKt.e(e) { "error saving cover" }
+                launchUI { view?.applicationContext?.toast("Error saving cover") }
+            }
+        }
+    }
+
+    /** Save Cover to directory, if given a url save that specific cover */
+    private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
+        val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+        val cover =
+            when (artwork.url.isBlank() || dbManga.thumbnail_url == artwork.url) {
+                true ->
+                    coverCache.getCustomCoverFile(dbManga).takeIf { it.exists() }
+                        ?: coverCache.getCoverFile(dbManga.thumbnail_url, dbManga.favorite)
+                false -> coverCache.getCoverFile(artwork.url)
+            }
+
+        val type = ImageUtil.findImageType(cover.inputStream()) ?: throw Exception("Not an image")
+
+        // Build destination file.
+        val fileNameNoExtension =
+            listOfNotNull(dbManga.title, artwork.volume.ifEmpty { null }, dbManga.uuid())
+                .joinToString("-")
+
+        val filename = DiskUtil.buildValidFilename("$fileNameNoExtension.${type.extension}")
+
+        val destFile = directory.createFile(filename)!!
+
+        cover.inputStream().use { input ->
+            destFile.openOutputStream().use { output -> input.copyTo(output) }
+        }
+        return destFile.uri
+    }
+
+    /** Set custom cover */
+    fun setCover(artwork: Artwork) {
+        presenterScope.launchIO {
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            coverCache.setCustomCoverToCache(dbManga, artwork.url)
+            MangaCoverMetadata.remove(mangaId)
+            dbManga.user_cover = artwork.url
+            db.insertManga(dbManga).executeOnIO()
+        }
+    }
+
+    /** Reset cover */
+    fun resetCover() {
+        presenterScope.launchIO {
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            coverCache.deleteCustomCover(dbManga)
+            MangaCoverMetadata.remove(mangaId)
+            dbManga.user_cover = null
+            db.insertManga(dbManga).executeOnIO()
         }
     }
 
