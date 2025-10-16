@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.injectLazy
 
 // This class just holds some injects.  If a settings screen requires
 class AdvancedSettingsViewModel : ViewModel() {
     val preferences: PreferencesHelper by injectLazy()
+
+    val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
     val networkPreference: NetworkPreferences by injectLazy()
     val networkHelper: NetworkHelper by injectLazy()
 
@@ -84,6 +87,7 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     fun clearDatabase(keepRead: Boolean) {
         viewModelScope.launchUI {
+            mangaDetailsPreferences.coverVibrantColors().delete()
             if (keepRead) {
                 db.deleteAllMangaNotInLibraryAndNotRead().executeAsBlocking()
             } else {

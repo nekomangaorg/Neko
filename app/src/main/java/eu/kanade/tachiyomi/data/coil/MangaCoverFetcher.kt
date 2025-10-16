@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
@@ -22,7 +21,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -78,15 +76,7 @@ class MangaCoverFetcher(
 
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
-            Type.File -> {
-                setRatioAndColorsInScope(
-                    mangaId = mangaId,
-                    inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl,
-                    ogFile = File(url.substringAfter("file://")),
-                )
-                fileLoader(File(url.substringAfter("file://")))
-            }
+            Type.File -> fileLoader(File(url.substringAfter("file://")))
             null -> error("Invalid image")
         }
     }
@@ -100,12 +90,6 @@ class MangaCoverFetcher(
         if (!shouldFetchRemotely) {
             val customCoverFile by lazy { coverCache.getCustomCoverFile(mangaId) }
             if (customCoverFile.exists()) {
-                setRatioAndColorsInScope(
-                    mangaId = mangaId,
-                    inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl,
-                    ogFile = customCoverFile,
-                )
                 return fileLoader(customCoverFile)
             }
         }
@@ -114,12 +98,7 @@ class MangaCoverFetcher(
             if (!inLibrary) {
                 coverFile.setLastModified(Date().time)
             }
-            setRatioAndColorsInScope(
-                mangaId = mangaId,
-                inLibrary = inLibrary,
-                originalThumbnail = originalThumbnailUrl,
-                ogFile = coverFile,
-            )
+
             return fileLoader(coverFile)
         }
         var snapshot = readFromDiskCache()
@@ -129,21 +108,9 @@ class MangaCoverFetcher(
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, coverFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
-                    setRatioAndColorsInScope(
-                        mangaId = mangaId,
-                        inLibrary = inLibrary,
-                        originalThumbnail = originalThumbnailUrl,
-                        ogFile = snapshotCoverCache,
-                    )
                     return fileLoader(snapshotCoverCache)
                 }
 
-                // Read from snapshot
-                setRatioAndColorsInScope(
-                    mangaId = mangaId,
-                    inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl,
-                )
                 return SourceFetchResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -157,11 +124,7 @@ class MangaCoverFetcher(
             try {
                 // Read from cover cache after library manga cover updated
                 val responseCoverCache = writeResponseToCoverCache(response, coverFile)
-                setRatioAndColorsInScope(
-                    mangaId = mangaId,
-                    inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl,
-                )
+
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
@@ -304,24 +267,6 @@ class MangaCoverFetcher(
             diskCacheKey = diskCacheKey,
             closeable = this,
         )
-    }
-
-    private fun setRatioAndColorsInScope(
-        mangaId: Long,
-        originalThumbnail: String,
-        inLibrary: Boolean,
-        ogFile: File? = null,
-        force: Boolean = false,
-    ) {
-        fileScope.launch {
-            MangaCoverMetadata.setRatioAndColors(
-                mangaId,
-                originalThumbnail,
-                inLibrary,
-                ogFile,
-                force,
-            )
-        }
     }
 
     /**
