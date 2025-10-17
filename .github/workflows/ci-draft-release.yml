@@ -41,7 +41,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle and Enable Caching
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.3
