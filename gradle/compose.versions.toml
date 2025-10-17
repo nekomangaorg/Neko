@@ -28,7 +28,7 @@ material-icons-core = { module = "androidx.compose.material:material-icons-core"
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 collapsing-topbar = "io.github.flaringapp:ComposeCollapsingTopBar:1.2.0"
 compose-webview = "io.github.kevinnzou:compose-webview:0.33.6"
-grid-layout = "com.cheonjaeung.compose.grid:grid:2.4.0"
+grid-layout = "com.cheonjaeung.compose.grid:grid:2.5.0"
 
 material-motion = "io.github.fornewid:material-motion-compose-core:1.2.1"
 
