@@ -147,7 +147,6 @@ fun FilterBrowseSheet(
             themeColor = themeColorState,
             maxSheetHeightPercentage = .9f,
             bottomPaddingAroundContent = 0.dp,
-            topPaddingAroundContent = 0.dp,
         ) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 

@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -89,10 +87,7 @@ fun ArtworkSheet(
                 Triple(screenHeight * 0.7f, thumbSize, thumbSize / 2f)
             }
 
-        Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(.9f).navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             if (alternativeArtwork.isEmpty() || currentImage == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
