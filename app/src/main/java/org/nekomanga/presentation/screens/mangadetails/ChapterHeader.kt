@@ -11,8 +11,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,32 +35,34 @@ fun ChapterHeader(
     filterText: String,
     onClick: () -> Unit = {},
 ) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = Size.small, vertical = Size.smedium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ChapterText(numberOfChapters)
-        Spacer(Modifier.weight(1f))
+    CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = Size.small, vertical = Size.smedium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ChapterText(numberOfChapters)
+            Spacer(Modifier.weight(1f))
 
-        if (filterText.isNotBlank()) {
-            Text(
-                text = filterText,
-                color =
-                    MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.mediumAlphaLowContrast
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.requiredWidthIn(max = 200.dp).padding(end = Size.small),
-                textAlign = TextAlign.End,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (filterText.isNotBlank()) {
+                Text(
+                    text = filterText,
+                    color =
+                        MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = NekoColors.mediumAlphaLowContrast
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.requiredWidthIn(max = 200.dp).padding(end = Size.small),
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            FilterIcon(themeColor.primaryColor)
         }
-
-        FilterIcon(themeColor.primaryColor)
     }
 }
 
