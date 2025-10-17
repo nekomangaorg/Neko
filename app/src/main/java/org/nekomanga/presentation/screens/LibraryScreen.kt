@@ -96,7 +96,13 @@ fun LibraryScreen(
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
     /** Close the bottom sheet on back if its open */
-    BackHandler(enabled = currentBottomSheet != null) { currentBottomSheet = null }
+    BackHandler(enabled = currentBottomSheet != null || selectionMode) {
+        if (currentBottomSheet != null) {
+            currentBottomSheet == null
+        } else {
+            libraryScreenActions.clearSelectedManga()
+        }
+    }
 
     LaunchedEffect(sheetState) {
         snapshotFlow { sheetState.isVisible }
