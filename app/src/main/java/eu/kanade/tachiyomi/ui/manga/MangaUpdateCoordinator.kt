@@ -188,7 +188,10 @@ class MangaUpdateCoordinator {
                     source
                         .fetchChapters(mergeManga.url)
                         .onFailure {
-                            TimberKt.e { "Failed to fetch from ${source.name}: ${it.message()}" }
+                            val msg = "Failed to fetch from ${source.name}: ${it.message()}"
+                            send(MangaResult.Error(text = msg))
+
+                            TimberKt.e { msg }
                             mergedSourceError = true
                         }
                         .getOrElse { emptyList() }
