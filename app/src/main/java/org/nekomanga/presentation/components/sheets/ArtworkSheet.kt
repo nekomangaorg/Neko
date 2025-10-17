@@ -83,8 +83,7 @@ fun ArtworkSheet(
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
         val (imageHeight, thumbnailSize, gradientHeight) =
             remember(screenHeight) {
-                val thumbSize = screenHeight * 0.12f
-                Triple(screenHeight * 0.7f, thumbSize, thumbSize / 2f)
+                Triple(screenHeight * 0.7f, Size.squareCoverLarge, Size.squareCoverLarge / 2f)
             }
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
@@ -111,8 +110,10 @@ fun ArtworkSheet(
                     }
                 Box(
                     modifier =
-                        Modifier.padding(horizontal = Size.small)
-                            .heightIn(imageHeight / 2, imageHeight)
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = Size.small)
+                            .heightIn(imageHeight / 2, imageHeight),
+                    contentAlignment = Alignment.Center,
                 ) {
                     AsyncImage(
                         model = mainImageRequest,
@@ -121,10 +122,7 @@ fun ArtworkSheet(
                     )
                 }
 
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
+                Column(verticalArrangement = Arrangement.Bottom) {
                     Gap(Size.tiny)
                     ActionButtons(
                         inLibrary = inLibrary,
@@ -137,6 +135,7 @@ fun ArtworkSheet(
                     if (alternativeArtwork.size > 1) {
                         Gap(Size.small)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
+                            item { Gap(Size.tiny) }
                             items(alternativeArtwork, key = { it.url }) { artwork ->
                                 ArtworkThumbnail(
                                     artwork = artwork,
@@ -146,6 +145,7 @@ fun ArtworkSheet(
                                     onClick = { currentImage = artwork },
                                 )
                             }
+                            item { Gap(Size.tiny) }
                         }
                     }
                     Gap(Size.small)

@@ -180,10 +180,9 @@ fun MangaScreen(
         }
     }
 
-    if (currentBottomSheet != null) {
-
+    if (sheetState.isVisible) {
         ModalBottomSheet(
-            onDismissRequest = { currentBottomSheet = null },
+            onDismissRequest = { scope.launch { sheetState.hide() } },
             sheetState = sheetState,
             // shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd =
             // Shapes.sheetRadius),
