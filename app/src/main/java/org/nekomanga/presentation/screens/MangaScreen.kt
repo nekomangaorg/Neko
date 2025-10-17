@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -25,7 +26,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +52,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInWebView
 import java.text.DateFormat
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -67,6 +68,8 @@ import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
@@ -326,48 +329,65 @@ private fun LazyListScope.chapterList(
 
     itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapterItem
         ->
-        ChapterRow(
-            themeColor = themeColorState,
-            chapterItem = chapterItem,
-            shouldHideChapterTitles =
-                screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
-            onClick = { chapterActions.open(chapterItem) },
-            onBookmark = {
-                chapterActions.mark(
-                    listOf(chapterItem),
-                    if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
-                    else ChapterMarkActions.Bookmark(true),
-                )
-            },
-            onRead = {
-                chapterActions.mark(
-                    listOf(chapterItem),
-                    if (chapterItem.chapter.read) ChapterMarkActions.Unread(true)
-                    else ChapterMarkActions.Read(true),
-                )
-            },
-            onWebView = { chapterActions.openInBrowser(chapterItem) },
-            onComment = { chapterActions.openComment(chapterItem.chapter.mangaDexChapterId) },
-            onDownload = { downloadAction ->
-                chapterActions.download(listOf(chapterItem), downloadAction)
-            },
-            markPrevious = { read ->
-                val chaptersToMark = screenState.activeChapters.subList(0, index)
-                val altChapters =
-                    if (index == screenState.activeChapters.lastIndex) emptyList()
-                    else
-                        screenState.activeChapters.slice(
-                            index + 1..screenState.activeChapters.lastIndex
-                        )
-                val action =
-                    if (read) ChapterMarkActions.PreviousRead(true, altChapters)
-                    else ChapterMarkActions.PreviousUnread(true, altChapters)
-                chapterActions.mark(chaptersToMark, action)
-            },
-            blockScanlator = { blockType, blocked ->
-                chapterActions.blockScanlator(blockType, blocked)
-            },
-        )
+        val listCardType =
+            when {
+                index == 0 && chapters.size > 1 -> ListCardType.Top
+                index == chapters.size - 1 && chapters.size > 1 -> ListCardType.Bottom
+
+                chapters.size == 1 -> ListCardType.Single
+                else -> ListCardType.Center
+            }
+        ExpressiveListCard(
+            modifier = Modifier.padding(horizontal = Size.small),
+            listCardType = listCardType,
+            themeColorState = themeColorState,
+        ) {
+            ChapterRow(
+                themeColor = themeColorState,
+                chapterItem = chapterItem,
+                shouldHideChapterTitles =
+                    screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
+                onClick = { chapterActions.open(chapterItem) },
+                onBookmark = {
+                    chapterActions.mark(
+                        listOf(chapterItem),
+                        if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
+                        else ChapterMarkActions.Bookmark(true),
+                    )
+                },
+                onRead = {
+                    chapterActions.mark(
+                        listOf(chapterItem),
+                        if (chapterItem.chapter.read) ChapterMarkActions.Unread(true)
+                        else ChapterMarkActions.Read(true),
+                    )
+                },
+                onWebView = { chapterActions.openInBrowser(chapterItem) },
+                onComment = { chapterActions.openComment(chapterItem.chapter.mangaDexChapterId) },
+                onDownload = { downloadAction ->
+                    chapterActions.download(listOf(chapterItem), downloadAction)
+                },
+                markPrevious = { read ->
+                    val chaptersToMark = screenState.activeChapters.subList(0, index)
+                    val altChapters =
+                        if (index == screenState.activeChapters.lastIndex) emptyList()
+                        else
+                            screenState.activeChapters.slice(
+                                index + 1..screenState.activeChapters.lastIndex
+                            )
+                    val action =
+                        if (read) ChapterMarkActions.PreviousRead(true, altChapters)
+                        else ChapterMarkActions.PreviousUnread(true, altChapters)
+                    chapterActions.mark(chaptersToMark, action)
+                },
+                blockScanlator = { blockType, blocked ->
+                    chapterActions.blockScanlator(blockType, blocked)
+                },
+            )
+        }
+        if (listCardType != ListCardType.Bottom) {
+            Gap(Size.tiny)
+        }
     }
 }
 
@@ -526,61 +546,4 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
         true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
         false -> buttonColor
     }
-}
-
-@Composable
-private fun ChapterRow(
-    themeColorState: ThemeColorState,
-    mangaDetailScreenState: State<MangaConstants.MangaDetailScreenState>,
-    chapterActions: ChapterActions,
-    chapterItem: ChapterItem,
-    index: Int,
-) {
-    ChapterRow(
-        themeColor = themeColorState,
-        chapterItem = chapterItem,
-        shouldHideChapterTitles =
-            mangaDetailScreenState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
-        onClick = { chapterActions.open(chapterItem) },
-        onBookmark = {
-            chapterActions.mark(
-                listOf(chapterItem),
-                if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
-                else ChapterMarkActions.Bookmark(true),
-            )
-        },
-        onRead = {
-            chapterActions.mark(
-                listOf(chapterItem),
-                when (chapterItem.chapter.read) {
-                    true -> ChapterMarkActions.Unread(true)
-                    false -> ChapterMarkActions.Read(true)
-                },
-            )
-        },
-        onWebView = { chapterActions.openInBrowser(chapterItem) },
-        onComment = { chapterActions.openComment(chapterItem.chapter.mangaDexChapterId) },
-        onDownload = { downloadAction ->
-            chapterActions.download(listOf(chapterItem), downloadAction)
-        },
-        markPrevious = { read ->
-            val chaptersToMark = mangaDetailScreenState.value.activeChapters.subList(0, index)
-            val lastIndex = mangaDetailScreenState.value.activeChapters.lastIndex
-            val altChapters =
-                if (index == lastIndex) {
-                    emptyList()
-                } else {
-                    mangaDetailScreenState.value.activeChapters.slice(
-                        IntRange(index + 1, lastIndex)
-                    )
-                }
-            val action =
-                when (read) {
-                    true -> ChapterMarkActions.PreviousRead(true, altChapters)
-                    false -> ChapterMarkActions.PreviousUnread(true, altChapters)
-                }
-            chapterActions.mark(chaptersToMark, action)
-        },
-        blockScanlator = { blockType, blocked -> chapterActions.blockScanlator(blockType, blocked) },
-    )
 }

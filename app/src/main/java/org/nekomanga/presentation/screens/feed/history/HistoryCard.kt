@@ -237,7 +237,7 @@ private fun HistoryRow(
         FeedCover(
             artwork = artwork,
             outlined = outlineCovers,
-            coverSize = Size.squareHistoryCover,
+            coverSize = Size.squareCoverMedium,
             onClick = mangaClick,
         )
         ChapterInfo(

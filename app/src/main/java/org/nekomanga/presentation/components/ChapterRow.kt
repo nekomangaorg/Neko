@@ -62,6 +62,7 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.theme.Size
 
@@ -202,10 +203,9 @@ private fun ChapterRowContent(
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .background(
-                    if (isDropdownExpanded) themeColorState.rippleColor.copy(alpha = 0.2f)
-                    else MaterialTheme.colorScheme.surface
-                )
+                .conditional(isDropdownExpanded) {
+                    background(themeColorState.rippleColor.copy(alpha = 0.2f))
+                }
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = {

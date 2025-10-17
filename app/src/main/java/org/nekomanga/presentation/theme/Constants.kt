@@ -24,5 +24,6 @@ object Size {
 
     val appBarHeight = 64.dp
     val navBarSize = 68.dp
-    val squareHistoryCover = 72.dp
+    val squareCoverMedium = 72.dp
+    val squareCoverLarge = 128.dp
 }
