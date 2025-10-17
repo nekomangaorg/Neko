@@ -56,7 +56,7 @@ import com.zedlabs.pastelplaceholder.Pastel
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 

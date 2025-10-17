@@ -17,8 +17,8 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 
 @Composable
 fun AppBarActions(

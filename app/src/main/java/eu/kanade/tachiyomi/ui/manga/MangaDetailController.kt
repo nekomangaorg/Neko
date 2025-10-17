@@ -75,7 +75,7 @@ class MangaDetailController(private val mangaId: Long) :
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val context = LocalContext.current
         MangaScreen(
-            mangaDetailScreenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle(),
+            screenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle().value,
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
             onRefresh = presenter::onRefresh,
@@ -107,7 +107,7 @@ class MangaDetailController(private val mangaId: Long) :
                     altTitleResetClick = { presenter.setAltTitle(null) },
                 ),
             generatePalette = this::setPalette,
-            toggleFavorite = presenter::toggleFavorite,
+            onToggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
             trackActions =
                 TrackActions(
@@ -135,12 +135,12 @@ class MangaDetailController(private val mangaId: Long) :
                     search = presenter::searchMergedManga,
                     add = presenter::addMergedManga,
                 ),
-            similarClick = {
+            onSimilarClick = {
                 router.pushController(
                     SimilarController(presenter.getManga().uuid()).withFadeTransaction()
                 )
             },
-            shareClick = { shareManga(context) },
+            onShareClick = { shareManga(context) },
             coverActions =
                 CoverActions(
                     share = this::shareCover,

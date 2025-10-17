@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

@@ -49,7 +49,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.screens.feed.FeedChapterTitleLine
 import org.nekomanga.presentation.screens.feed.FeedCover
 import org.nekomanga.presentation.screens.feed.getReadTextColor

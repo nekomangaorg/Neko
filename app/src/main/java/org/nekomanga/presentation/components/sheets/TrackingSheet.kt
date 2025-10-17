@@ -53,8 +53,8 @@ import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingChapterDialog
 import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 

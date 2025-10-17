@@ -61,8 +61,8 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

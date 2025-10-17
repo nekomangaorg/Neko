@@ -54,7 +54,7 @@ import org.nekomanga.presentation.components.icons.Numeric2BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric3BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric4BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.SourceMergeIcon
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 /** Block of buttons for the actions on the backdrop screen */

@@ -11,7 +11,7 @@ import androidx.compose.ui.text.TextStyle
 import kotlinx.collections.immutable.PersistentList
 import me.saket.cascade.CascadeColumnScope
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun SimpleDropdownMenu(

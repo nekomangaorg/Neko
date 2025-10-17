@@ -30,7 +30,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

@@ -40,7 +40,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.nekoRippleConfiguration
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

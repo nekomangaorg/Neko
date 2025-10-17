@@ -76,8 +76,8 @@ import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

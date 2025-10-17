@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.nekomanga.R
 import org.nekomanga.presentation.components.CheckboxRow
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun RemoveTrackingDialog(

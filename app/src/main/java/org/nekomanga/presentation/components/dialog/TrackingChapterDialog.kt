@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.presentation.components.ExpressivePicker
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun TrackingChapterDialog(

@@ -9,13 +9,13 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun MangaDetailsAppBarActions(
     chapterActions: MangaConstants.ChapterActions,
     themeColorState: ThemeColorState,
-    chaptersProvider: () -> PersistentList<ChapterItem>,
+    chapters: PersistentList<ChapterItem>,
 ) {
     AppBarActions(
         themeColorState = themeColorState,
@@ -88,19 +88,13 @@ fun MangaDetailsAppBarActions(
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.read),
                                 onClick = {
-                                    chapterActions.mark(
-                                        chaptersProvider(),
-                                        ChapterMarkActions.Read(true),
-                                    )
+                                    chapterActions.mark(chapters, ChapterMarkActions.Read(true))
                                 },
                             ),
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.unread),
                                 onClick = {
-                                    chapterActions.mark(
-                                        chaptersProvider(),
-                                        ChapterMarkActions.Unread(true),
-                                    )
+                                    chapterActions.mark(chapters, ChapterMarkActions.Unread(true))
                                 },
                             ),
                         ),

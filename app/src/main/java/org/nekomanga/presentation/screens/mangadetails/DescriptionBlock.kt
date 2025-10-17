@@ -67,8 +67,8 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

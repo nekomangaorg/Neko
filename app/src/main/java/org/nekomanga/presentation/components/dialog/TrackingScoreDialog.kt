@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ExpressivePicker
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun TrackingScoreDialog(
