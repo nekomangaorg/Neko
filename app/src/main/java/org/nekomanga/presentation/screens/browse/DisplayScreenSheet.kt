@@ -47,7 +47,6 @@ fun DisplayScreenSheet(
                 addingToLibrary = currentScreen.addingToLibrary,
                 categories = categories,
                 cancelClick = closeSheet,
-                bottomContentPadding = contentPadding.calculateBottomPadding(),
                 addNewCategory = addNewCategory,
                 confirmClicked = currentScreen.setCategories,
             )

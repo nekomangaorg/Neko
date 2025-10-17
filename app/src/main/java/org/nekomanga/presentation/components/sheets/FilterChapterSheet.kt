@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
@@ -50,46 +47,25 @@ fun FilterChapterSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .8
-
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
-            ) {
-                item {
-                    Sort(themeColorState = themeColorState, sortFilter, changeSort) {
-                        setAsGlobal(MangaConstants.SetGlobal.Sort)
-                    }
-                }
-                item {
-                    Filter(themeColorState = themeColorState, filter, changeFilter) {
-                        setAsGlobal(MangaConstants.SetGlobal.Filter)
-                    }
-                }
-                item {
-                    Scanlator(
-                        themeColorState = themeColorState,
-                        sourceFilter,
-                        true,
-                        changeScanlatorFilter,
-                    )
-                }
-                item {
-                    Scanlator(
-                        themeColorState = themeColorState,
-                        scanlatorFilter,
-                        false,
-                        changeScanlatorFilter,
-                    )
-                }
-                item {
-                    Language(
-                        themeColorState = themeColorState,
-                        languageFilter,
-                        changeLanguageFilter,
-                    )
-                }
+            Sort(themeColorState = themeColorState, sortFilter, changeSort) {
+                setAsGlobal(MangaConstants.SetGlobal.Sort)
             }
+
+            Filter(themeColorState = themeColorState, filter, changeFilter) {
+                setAsGlobal(MangaConstants.SetGlobal.Filter)
+            }
+
+            Scanlator(themeColorState = themeColorState, sourceFilter, true, changeScanlatorFilter)
+
+            Scanlator(
+                themeColorState = themeColorState,
+                scanlatorFilter,
+                false,
+                changeScanlatorFilter,
+            )
+
+            Language(themeColorState = themeColorState, languageFilter, changeLanguageFilter)
         }
     }
 }

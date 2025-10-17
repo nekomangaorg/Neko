@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import jp.wasabeef.gap.Gap
@@ -46,7 +45,6 @@ fun EditCategorySheet(
     categories: PersistentList<CategoryItem>,
     mangaCategories: PersistentList<CategoryItem> = persistentListOf(),
     themeColorState: ThemeColorState = defaultThemeColorState(),
-    bottomContentPadding: Dp = 16.dp,
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,
     confirmClicked: (List<CategoryItem>) -> Unit,
@@ -68,11 +66,7 @@ fun EditCategorySheet(
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
-        BaseSheet(
-            themeColor = themeColorState,
-            maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding,
-        ) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             if (showAddCategoryDialog) {
                 AddEditCategoryDialog(
                     themeColorState = themeColorState,

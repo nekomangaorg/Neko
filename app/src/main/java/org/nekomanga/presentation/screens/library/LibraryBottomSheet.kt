@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.library
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
@@ -26,7 +25,6 @@ fun LibraryBottomSheet(
     libraryScreenState: LibraryScreenState,
     librarySheetActions: LibrarySheetActions,
     currentScreen: LibraryBottomSheetScreen,
-    contentPadding: PaddingValues,
     closeSheet: () -> Unit,
 ) {
 
@@ -41,7 +39,6 @@ fun LibraryBottomSheet(
                     )
                     closeSheet()
                 },
-                bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
         is LibraryBottomSheetScreen.GroupBySheet ->
             GroupBySheet(
@@ -51,7 +48,6 @@ fun LibraryBottomSheet(
                     librarySheetActions.groupByClick(it)
                     closeSheet()
                 },
-                bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
         is LibraryBottomSheetScreen.DisplayOptionsSheet ->
             DisplayOptionsSheet(
@@ -71,7 +67,6 @@ fun LibraryBottomSheet(
                 horizontalCategoriesToggled = { librarySheetActions.horizontalCategoriesToggled() },
                 showLibraryButtonBarEnabled = libraryScreenState.showLibraryButtonBar,
                 showLibraryButtonBarToggled = { librarySheetActions.showLibraryButtonBarToggled() },
-                bottomContentPadding = contentPadding.calculateBottomPadding(),
             )
         is LibraryBottomSheetScreen.CategorySheet -> {
 
@@ -86,7 +81,6 @@ fun LibraryBottomSheet(
 
             EditCategorySheet(
                 addingToLibrary = false,
-                bottomContentPadding = contentPadding.calculateBottomPadding(),
                 categories = libraryScreenState.userCategories,
                 mangaCategories = mangaCategories,
                 cancelClick = { closeSheet() },

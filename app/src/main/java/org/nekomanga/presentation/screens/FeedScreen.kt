@@ -2,8 +2,6 @@ package org.nekomanga.presentation.screens
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,17 +12,15 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -64,7 +60,6 @@ import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedPage
-import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -86,12 +81,7 @@ fun FeedScreen(
     aboutClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState =
-        rememberModalBottomSheetState(
-            initialValue = ModalBottomSheetValue.Hidden,
-            skipHalfExpanded = true,
-            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
-        )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
@@ -128,291 +118,285 @@ fun FeedScreen(
                 this.blur(Size.medium).clickable(enabled = false) {}
             }
     ) {
-        ModalBottomSheetLayout(
-            sheetState = sheetState,
-            sheetShape = RoundedCornerShape(Shapes.sheetRadius),
-            sheetContent = {
-                Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                    FeedBottomSheet(
-                        contentPadding = navBarPadding,
-                        feedScreenType = feedScreenState.value.feedScreenType,
-                        downloadScreenVisible = downloadScreenVisible,
-                        downloadOnlyOnWifi = feedScreenState.value.downloadOnlyOnWifi,
-                        historyGrouping = historyPagingScreenState.value.historyGrouping,
-                        sortByFetched = updatesPagingScreenState.value.updatesSortedByFetch,
-                        outlineCovers = feedScreenState.value.outlineCovers,
-                        outlineCards = feedScreenState.value.outlineCards,
-                        swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
-                        groupUpdateChapters = feedScreenState.value.groupUpdateChapters,
-                        groupHistoryClick = { feedHistoryGroup ->
-                            feedSettingActions.groupHistoryClick(feedHistoryGroup)
-                        },
-                        clearHistoryClick = { showClearHistoryDialog = true },
-                        clearDownloadsClick = { showClearDownloadsDialog = true },
-                        sortClick = { feedSettingActions.switchUploadsSortOrder() },
-                        outlineCoversClick = { feedSettingActions.outlineCoversClick() },
-                        outlineCardsClick = { feedSettingActions.outlineCardsClick() },
-                        toggleDownloadOnWifi = { feedSettingActions.toggleDownloadOnlyOnWifi() },
-                        toggleGroupUpdateChapters = {
-                            feedSettingActions.toggleGroupUpdateChapters()
-                        },
-                        toggleSwipeRefresh = { feedSettingActions.toggleSwipeRefresh() },
-                    )
-                }
-            },
+        if (sheetState.isVisible) {
+            ModalBottomSheet(
+                sheetState = sheetState,
+                onDismissRequest = { scope.launch { sheetState.hide() } },
+                content = {
+                    Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
+                        FeedBottomSheet(
+                            feedScreenType = feedScreenState.value.feedScreenType,
+                            downloadScreenVisible = downloadScreenVisible,
+                            downloadOnlyOnWifi = feedScreenState.value.downloadOnlyOnWifi,
+                            historyGrouping = historyPagingScreenState.value.historyGrouping,
+                            sortByFetched = updatesPagingScreenState.value.updatesSortedByFetch,
+                            outlineCovers = feedScreenState.value.outlineCovers,
+                            outlineCards = feedScreenState.value.outlineCards,
+                            swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
+                            groupUpdateChapters = feedScreenState.value.groupUpdateChapters,
+                            groupHistoryClick = { feedHistoryGroup ->
+                                feedSettingActions.groupHistoryClick(feedHistoryGroup)
+                            },
+                            clearHistoryClick = { showClearHistoryDialog = true },
+                            clearDownloadsClick = { showClearDownloadsDialog = true },
+                            sortClick = { feedSettingActions.switchUploadsSortOrder() },
+                            outlineCoversClick = { feedSettingActions.outlineCoversClick() },
+                            outlineCardsClick = { feedSettingActions.outlineCardsClick() },
+                            toggleDownloadOnWifi = {
+                                feedSettingActions.toggleDownloadOnlyOnWifi()
+                            },
+                            toggleGroupUpdateChapters = {
+                                feedSettingActions.toggleGroupUpdateChapters()
+                            },
+                            toggleSwipeRefresh = { feedSettingActions.toggleSwipeRefresh() },
+                        )
+                    }
+                },
+            )
+        }
+        PullRefresh(
+            enabled = feedScreenState.value.swipeRefreshEnabled,
+            isRefreshing = feedScreenState.value.isRefreshing,
+            onRefresh = { feedScreenActions.updateLibrary(true) },
         ) {
-            PullRefresh(
-                enabled = feedScreenState.value.swipeRefreshEnabled,
-                isRefreshing = feedScreenState.value.isRefreshing,
-                onRefresh = { feedScreenActions.updateLibrary(true) },
-            ) {
-                NekoScaffold(
-                    type =
-                        if (
-                            feedScreenState.value.showingDownloads ||
-                                feedScreenType == FeedScreenType.Summary
-                        )
-                            NekoScaffoldType.Title
-                        else NekoScaffoldType.SearchOutline,
-                    title =
-                        if (feedScreenType == FeedScreenType.Summary)
-                            stringResource(R.string.summary)
-                        else "",
-                    searchPlaceHolder = searchHint,
-                    incognitoMode = feedScreenState.value.incognitoMode,
-                    isRoot = true,
-                    onSearch = feedScreenActions.search,
-                    actions = {
-                        AppBarActions(
-                            actions =
-                                if (
-                                    feedScreenState.value.feedScreenType != FeedScreenType.Summary
-                                ) {
-                                    listOf(
-                                        AppBar.Action(
-                                            title = UiText.StringResource(R.string.settings),
-                                            icon = Icons.Outlined.Tune,
-                                            onClick = { scope.launch { sheetState.show() } },
-                                        )
+            NekoScaffold(
+                type =
+                    if (
+                        feedScreenState.value.showingDownloads ||
+                            feedScreenType == FeedScreenType.Summary
+                    )
+                        NekoScaffoldType.Title
+                    else NekoScaffoldType.SearchOutline,
+                title =
+                    if (feedScreenType == FeedScreenType.Summary) stringResource(R.string.summary)
+                    else "",
+                searchPlaceHolder = searchHint,
+                incognitoMode = feedScreenState.value.incognitoMode,
+                isRoot = true,
+                onSearch = feedScreenActions.search,
+                actions = {
+                    AppBarActions(
+                        actions =
+                            if (feedScreenState.value.feedScreenType != FeedScreenType.Summary) {
+                                listOf(
+                                    AppBar.Action(
+                                        title = UiText.StringResource(R.string.settings),
+                                        icon = Icons.Outlined.Tune,
+                                        onClick = { scope.launch { sheetState.show() } },
                                     )
+                                )
+                            } else {
+                                listOf()
+                            } +
+                                listOf(
+                                    AppBar.MainDropdown(
+                                        incognitoMode = feedScreenState.value.incognitoMode,
+                                        incognitoModeClick = incognitoClick,
+                                        settingsClick = settingsClick,
+                                        statsClick = statsClick,
+                                        aboutClick = aboutClick,
+                                        helpClick = helpClick,
+                                        menuShowing = { visible -> mainDropdownShowing = visible },
+                                    )
+                                )
+                    )
+                },
+                content = { incomingContentPadding ->
+                    val recyclerContentPadding =
+                        PaddingValues(
+                            top = incomingContentPadding.calculateTopPadding(),
+                            bottom =
+                                if (actualSideNav) {
+                                    Size.navBarSize
                                 } else {
-                                    listOf()
+                                    Size.navBarSize
                                 } +
-                                    listOf(
-                                        AppBar.MainDropdown(
-                                            incognitoMode = feedScreenState.value.incognitoMode,
-                                            incognitoModeClick = incognitoClick,
-                                            settingsClick = settingsClick,
-                                            statsClick = statsClick,
-                                            aboutClick = aboutClick,
-                                            helpClick = helpClick,
-                                            menuShowing = { visible ->
-                                                mainDropdownShowing = visible
-                                            },
-                                        )
-                                    )
+                                    WindowInsets.navigationBars
+                                        .asPaddingValues()
+                                        .calculateBottomPadding(),
                         )
-                    },
-                    content = { incomingContentPadding ->
-                        val recyclerContentPadding =
-                            PaddingValues(
-                                top = incomingContentPadding.calculateTopPadding(),
-                                bottom =
-                                    if (actualSideNav) {
-                                        Size.navBarSize
-                                    } else {
-                                        Size.navBarSize
-                                    } +
-                                        WindowInsets.navigationBars
-                                            .asPaddingValues()
-                                            .calculateBottomPadding(),
-                            )
 
-                        Box(
-                            modifier =
-                                Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                                    .fillMaxSize()
+                    Box(
+                        modifier =
+                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
+                                .fillMaxSize()
+                    ) {
+                        if (
+                            (feedScreenState.value.feedScreenType == FeedScreenType.History &&
+                                historyPagingScreenState.value.pageLoading &&
+                                historyPagingScreenState.value.offset == 0) ||
+                                (feedScreenState.value.feedScreenType == FeedScreenType.Updates &&
+                                    updatesPagingScreenState.value.pageLoading &&
+                                    updatesPagingScreenState.value.offset == 0)
                         ) {
-                            if (
-                                (feedScreenState.value.feedScreenType == FeedScreenType.History &&
-                                    historyPagingScreenState.value.pageLoading &&
-                                    historyPagingScreenState.value.offset == 0) ||
-                                    (feedScreenState.value.feedScreenType ==
-                                        FeedScreenType.Updates &&
-                                        updatesPagingScreenState.value.pageLoading &&
-                                        updatesPagingScreenState.value.offset == 0)
-                            ) {
-                                ContainedLoadingIndicator(
-                                    modifier = Modifier.align(Alignment.Center)
+                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+
+                        val (feedManga, hasMoreResults) =
+                            when (feedScreenType) {
+                                FeedScreenType.Summary -> {
+                                    if (
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
+                                            false
+                                    } else {
+                                        historyPagingScreenState.value.historyFeedMangaList to
+                                            historyPagingScreenState.value.hasMoreResults
+                                    }
+                                }
+
+                                FeedScreenType.History -> {
+                                    if (
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
+                                            false
+                                    } else {
+                                        historyPagingScreenState.value.historyFeedMangaList to
+                                            historyPagingScreenState.value.hasMoreResults
+                                    }
+                                }
+
+                                FeedScreenType.Updates -> {
+                                    if (
+                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList
+                                            .isNotEmpty()
+                                    ) {
+                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList to
+                                            false
+                                    } else {
+                                        updatesPagingScreenState.value.updatesFeedMangaList to
+                                            updatesPagingScreenState.value.hasMoreResults
+                                    }
+                                }
+                            }
+
+                        if (
+                            feedScreenState.value.showingDownloads &&
+                                feedScreenState.value.downloads.isEmpty()
+                        ) {
+                            feedScreenActions.toggleShowingDownloads()
+                        }
+
+                        when (downloadScreenVisible) {
+                            true ->
+                                DownloadScreen(
+                                    contentPadding = recyclerContentPadding,
+                                    downloads = feedScreenState.value.downloads,
+                                    downloaderStatus = feedScreenState.value.downloaderStatus,
+                                    downloadScreenActions = downloadScreenActions,
+                                )
+
+                            false -> {
+                                FeedPage(
+                                    contentPadding = recyclerContentPadding,
+                                    summaryScreenPagingState = summaryScreenPagingState,
+                                    feedMangaList = feedManga,
+                                    hasMoreResults = hasMoreResults,
+                                    loadingResults =
+                                        if (
+                                            feedScreenState.value.feedScreenType ==
+                                                FeedScreenType.History
+                                        )
+                                            historyPagingScreenState.value.pageLoading
+                                        else updatesPagingScreenState.value.pageLoading,
+                                    groupedBySeries = feedScreenState.value.groupUpdateChapters,
+                                    feedScreenType = feedScreenState.value.feedScreenType,
+                                    historyGrouping =
+                                        historyPagingScreenState.value.historyGrouping,
+                                    outlineCovers = feedScreenState.value.outlineCovers,
+                                    outlineCards = feedScreenState.value.outlineCards,
+                                    useVividColorHeaders =
+                                        feedScreenState.value.useVividColorHeaders,
+                                    updatesFetchSort =
+                                        updatesPagingScreenState.value.updatesSortedByFetch,
+                                    feedScreenActions = feedScreenActions,
+                                    loadNextPage = loadNextPage,
+                                )
+                            }
+                        }
+
+                        if (!feedScreenState.value.firstLoad) {
+                            val buttonItems = remember {
+                                listOf(
+                                    FeedScreenType.Summary,
+                                    FeedScreenType.History,
+                                    FeedScreenType.Updates,
                                 )
                             }
 
-                            val (feedManga, hasMoreResults) =
-                                when (feedScreenType) {
-                                    FeedScreenType.Summary -> {
-                                        if (
-                                            historyPagingScreenState.value
-                                                .searchHistoryFeedMangaList
-                                                .isNotEmpty()
-                                        ) {
-                                            historyPagingScreenState.value
-                                                .searchHistoryFeedMangaList to false
-                                        } else {
-                                            historyPagingScreenState.value.historyFeedMangaList to
-                                                historyPagingScreenState.value.hasMoreResults
-                                        }
-                                    }
-
-                                    FeedScreenType.History -> {
-                                        if (
-                                            historyPagingScreenState.value
-                                                .searchHistoryFeedMangaList
-                                                .isNotEmpty()
-                                        ) {
-                                            historyPagingScreenState.value
-                                                .searchHistoryFeedMangaList to false
-                                        } else {
-                                            historyPagingScreenState.value.historyFeedMangaList to
-                                                historyPagingScreenState.value.hasMoreResults
-                                        }
-                                    }
-
-                                    FeedScreenType.Updates -> {
-                                        if (
-                                            updatesPagingScreenState.value
-                                                .searchUpdatesFeedMangaList
-                                                .isNotEmpty()
-                                        ) {
-                                            updatesPagingScreenState.value
-                                                .searchUpdatesFeedMangaList to false
-                                        } else {
-                                            updatesPagingScreenState.value.updatesFeedMangaList to
-                                                updatesPagingScreenState.value.hasMoreResults
-                                        }
-                                    }
+                            val downloadButton = "downloads"
+                            val items: List<Any> =
+                                if (feedScreenState.value.downloads.isNotEmpty()) {
+                                    buttonItems + downloadButton
+                                } else {
+                                    buttonItems
                                 }
 
-                            if (
-                                feedScreenState.value.showingDownloads &&
-                                    feedScreenState.value.downloads.isEmpty()
-                            ) {
-                                feedScreenActions.toggleShowingDownloads()
-                            }
-
-                            when (downloadScreenVisible) {
-                                true ->
-                                    DownloadScreen(
-                                        contentPadding = recyclerContentPadding,
-                                        downloads = feedScreenState.value.downloads,
-                                        downloaderStatus = feedScreenState.value.downloaderStatus,
-                                        downloadScreenActions = downloadScreenActions,
-                                    )
-
-                                false -> {
-                                    FeedPage(
-                                        contentPadding = recyclerContentPadding,
-                                        summaryScreenPagingState = summaryScreenPagingState,
-                                        feedMangaList = feedManga,
-                                        hasMoreResults = hasMoreResults,
-                                        loadingResults =
-                                            if (
-                                                feedScreenState.value.feedScreenType ==
-                                                    FeedScreenType.History
-                                            )
-                                                historyPagingScreenState.value.pageLoading
-                                            else updatesPagingScreenState.value.pageLoading,
-                                        groupedBySeries = feedScreenState.value.groupUpdateChapters,
-                                        feedScreenType = feedScreenState.value.feedScreenType,
-                                        historyGrouping =
-                                            historyPagingScreenState.value.historyGrouping,
-                                        outlineCovers = feedScreenState.value.outlineCovers,
-                                        outlineCards = feedScreenState.value.outlineCards,
-                                        useVividColorHeaders =
-                                            feedScreenState.value.useVividColorHeaders,
-                                        updatesFetchSort =
-                                            updatesPagingScreenState.value.updatesSortedByFetch,
-                                        feedScreenActions = feedScreenActions,
-                                        loadNextPage = loadNextPage,
-                                    )
-                                }
-                            }
-
-                            if (!feedScreenState.value.firstLoad) {
-                                val buttonItems = remember {
-                                    listOf(
-                                        FeedScreenType.Summary,
-                                        FeedScreenType.History,
-                                        FeedScreenType.Updates,
-                                    )
+                            val selectedItem: Any =
+                                when (feedScreenState.value.showingDownloads) {
+                                    true -> downloadButton
+                                    false -> feedScreenType
                                 }
 
-                                val downloadButton = "downloads"
-                                val items: List<Any> =
-                                    if (feedScreenState.value.downloads.isNotEmpty()) {
-                                        buttonItems + downloadButton
-                                    } else {
-                                        buttonItems
-                                    }
-
-                                val selectedItem: Any =
-                                    when (feedScreenState.value.showingDownloads) {
-                                        true -> downloadButton
-                                        false -> feedScreenType
-                                    }
-
-                                ButtonGroup(
-                                    modifier =
-                                        Modifier.align(Alignment.BottomCenter)
-                                            .padding(horizontal = Size.tiny),
-                                    items = items,
-                                    selectedItem = selectedItem,
-                                    onItemClick = { item ->
-                                        scope.launch { sheetState.hide() }
-                                        if (item is FeedScreenType) {
-                                            if (feedScreenState.value.showingDownloads) {
-                                                feedScreenActions.toggleShowingDownloads()
-                                            }
-                                            if (feedScreenType != item) {
-                                                feedScreenActions.switchViewType(item)
-                                            }
-                                        } else {
+                            ButtonGroup(
+                                modifier =
+                                    Modifier.align(Alignment.BottomCenter)
+                                        .padding(horizontal = Size.tiny),
+                                items = items,
+                                selectedItem = selectedItem,
+                                onItemClick = { item ->
+                                    scope.launch { sheetState.hide() }
+                                    if (item is FeedScreenType) {
+                                        if (feedScreenState.value.showingDownloads) {
                                             feedScreenActions.toggleShowingDownloads()
                                         }
-                                    },
-                                ) { item ->
-                                    when (item) {
-                                        is FeedScreenType -> {
-                                            val name =
-                                                when (item) {
-                                                    FeedScreenType.History ->
-                                                        stringResource(R.string.history)
-                                                    FeedScreenType.Updates ->
-                                                        stringResource(R.string.updates)
-                                                    FeedScreenType.Summary ->
-                                                        stringResource(R.string.summary)
-                                                }
-                                            Text(
-                                                text = name,
-                                                style =
-                                                    MaterialTheme.typography.labelLarge.copy(
-                                                        fontWeight = FontWeight.Medium
-                                                    ),
-                                            )
+                                        if (feedScreenType != item) {
+                                            feedScreenActions.switchViewType(item)
                                         }
-                                        else -> {
-                                            Icon(
-                                                imageVector = Icons.Default.Downloading,
-                                                contentDescription =
-                                                    stringResource(id = R.string.downloads),
-                                            )
-                                        }
+                                    } else {
+                                        feedScreenActions.toggleShowingDownloads()
+                                    }
+                                },
+                            ) { item ->
+                                when (item) {
+                                    is FeedScreenType -> {
+                                        val name =
+                                            when (item) {
+                                                FeedScreenType.History ->
+                                                    stringResource(R.string.history)
+
+                                                FeedScreenType.Updates ->
+                                                    stringResource(R.string.updates)
+
+                                                FeedScreenType.Summary ->
+                                                    stringResource(R.string.summary)
+                                            }
+                                        Text(
+                                            text = name,
+                                            style =
+                                                MaterialTheme.typography.labelLarge.copy(
+                                                    fontWeight = FontWeight.Medium
+                                                ),
+                                        )
+                                    }
+
+                                    else -> {
+                                        Icon(
+                                            imageVector = Icons.Default.Downloading,
+                                            contentDescription =
+                                                stringResource(id = R.string.downloads),
+                                        )
                                     }
                                 }
                             }
                         }
-                    },
-                )
-            }
+                    }
+                },
+            )
         }
         // this is needed for Android SDK where blur isn't available
         if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {

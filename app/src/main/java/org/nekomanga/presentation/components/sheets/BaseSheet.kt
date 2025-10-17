@@ -25,7 +25,7 @@ fun BaseSheet(
     themeColor: ThemeColorState,
     maxSheetHeightPercentage: Float = .7f,
     minSheetHeightPercentage: Float = 0f,
-    bottomPaddingAroundContent: Dp = Size.medium,
+    bottomPaddingAroundContent: Dp = Size.mediumLarge,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     CompositionLocalProvider(

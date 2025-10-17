@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.feed
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import jp.wasabeef.gap.Gap
@@ -39,7 +37,6 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedBottomSheet(
-    contentPadding: PaddingValues,
     feedScreenType: FeedScreenType,
     downloadScreenVisible: Boolean,
     downloadOnlyOnWifi: Boolean,
@@ -61,13 +58,7 @@ fun FeedBottomSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
 
-    BaseSheet(
-        themeColor = themeColorState,
-        maxSheetHeightPercentage = .6f,
-        bottomPaddingAroundContent = contentPadding.calculateBottomPadding(),
-    ) {
-        Gap(16.dp)
-
+    BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .6f) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             verticalArrangement = Arrangement.spacedBy(Size.small),

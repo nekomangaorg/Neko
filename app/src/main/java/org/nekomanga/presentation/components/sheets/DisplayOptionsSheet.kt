@@ -24,14 +24,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.system.isLandscape
 import jp.wasabeef.gap.Gap
@@ -62,18 +60,11 @@ fun DisplayOptionsSheet(
     showLibraryButtonBarEnabled: Boolean,
     showLibraryButtonBarToggled: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
-    bottomContentPadding: Dp = Size.medium,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp
-
-        BaseSheet(
-            themeColor = themeColorState,
-            maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding,
-        ) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(Size.small)

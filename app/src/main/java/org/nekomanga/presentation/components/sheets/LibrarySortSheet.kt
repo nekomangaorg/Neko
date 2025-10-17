@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
@@ -34,18 +33,13 @@ fun LibrarySortSheet(
     currentLibrarySort: LibrarySort,
     librarySortClicked: (LibrarySort) -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
-    bottomContentPadding: Dp = Size.medium,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
 
-        BaseSheet(
-            themeColor = themeColorState,
-            maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding,
-        ) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(Size.medium)
