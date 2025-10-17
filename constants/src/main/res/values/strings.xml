@@ -1394,6 +1394,7 @@
 
     <!-- Manga Details-->
     <string name="artwork">Artwork</string>
+    <string name="no_artwork_found">"No artwork found, try refreshing the manga."</string>
     <string name="similar_work">Similar Work</string>
     <string name="is_merged">Merged</string>
     <string name="is_not_merged">Merge</string>

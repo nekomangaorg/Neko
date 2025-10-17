@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 
@@ -30,7 +29,6 @@ fun BaseSheet(
     minSheetHeightPercentage: Float = 0f,
     topPaddingAroundContent: Dp = 16.dp,
     bottomPaddingAroundContent: Dp = 16.dp,
-    showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     CompositionLocalProvider(
@@ -50,10 +48,6 @@ fun BaseSheet(
             Column(
                 modifier = Modifier.navigationBarsPadding().imePadding().verticalScroll(scrollState)
             ) {
-                if (showHandle) {
-                    sheetHandle()
-                }
-
                 Gap(topPaddingAroundContent)
                 content()
                 Gap(bottomPaddingAroundContent)
