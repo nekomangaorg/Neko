@@ -33,8 +33,8 @@ import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.sheets.BaseSheet
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

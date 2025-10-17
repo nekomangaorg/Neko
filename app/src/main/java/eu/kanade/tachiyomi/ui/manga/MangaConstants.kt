@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
-import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
@@ -19,6 +18,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
+import org.nekomanga.presentation.components.UiText
 
 object MangaConstants {
 
@@ -43,7 +43,7 @@ object MangaConstants {
         val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
         val hasDefaultCategory: Boolean = false,
         val hideButtonText: Boolean = false,
-        val extraLargeBackdrop: Boolean = false,
+        val backdropSize: BackdropSize = BackdropSize.Default,
         val forcePortrait: Boolean = false,
         val incognitoMode: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
@@ -67,8 +67,8 @@ object MangaConstants {
         val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
         val isPornographic: Boolean = false,
         val langFlag: String? = null,
-        val missingChapters: String? = null,
-        val estimatedMissingChapters: String? = null,
+        val missingChapters: String = "",
+        val estimatedMissingChapters: String = "",
         val originalTitle: String = "",
         val stats: Stats? = null,
         val status: Int = 0,
@@ -84,8 +84,7 @@ object MangaConstants {
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
     data class NextUnreadChapter(
-        @param:StringRes val id: Int? = null,
-        val text: String = "",
+        val text: UiText = UiText.String(""),
         val simpleChapter: SimpleChapter? = null,
     )
 
@@ -98,11 +97,13 @@ object MangaConstants {
 
     data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption>)
+    data class ScanlatorFilter(
+        val scanlators: PersistentList<ScanlatorOption> = persistentListOf()
+    )
 
     data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
-    data class LanguageFilter(val languages: PersistentList<LanguageOption>)
+    data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
 
     data class LanguageOption(val name: String, val disabled: Boolean = false)
 
@@ -231,5 +232,11 @@ object MangaConstants {
     enum class BlockType {
         Group,
         Uploader,
+    }
+
+    enum class BackdropSize {
+        Small,
+        Default,
+        Large,
     }
 }

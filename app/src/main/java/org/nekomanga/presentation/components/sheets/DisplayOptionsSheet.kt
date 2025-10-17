@@ -38,9 +38,9 @@ import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.functions.numberOfColumns
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 
 @Composable
 fun RemovedChaptersDialog(

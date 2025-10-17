@@ -75,7 +75,7 @@ class MangaDetailController(private val mangaId: Long) :
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val context = LocalContext.current
         MangaScreen(
-            mangaDetailScreenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle(),
+            screenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle().value,
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
             onRefresh = presenter::onRefresh,
@@ -107,7 +107,7 @@ class MangaDetailController(private val mangaId: Long) :
                     altTitleResetClick = { presenter.setAltTitle(null) },
                 ),
             generatePalette = this::setPalette,
-            toggleFavorite = presenter::toggleFavorite,
+            onToggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
             trackActions =
                 TrackActions(
@@ -135,12 +135,12 @@ class MangaDetailController(private val mangaId: Long) :
                     search = presenter::searchMergedManga,
                     add = presenter::addMergedManga,
                 ),
-            similarClick = {
+            onSimilarClick = {
                 router.pushController(
-                    SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()
+                    SimilarController(presenter.getManga().uuid()).withFadeTransaction()
                 )
             },
-            shareClick = { shareManga(context) },
+            onShareClick = { shareManga(context) },
             coverActions =
                 CoverActions(
                     share = this::shareCover,
@@ -182,7 +182,7 @@ class MangaDetailController(private val mangaId: Long) :
                     open = { chapterItem ->
                         openChapter(context, chapterItem.chapter.toDbChapter())
                     },
-                    blockScanlator = presenter::blockScanlator,
+                    blockScanlator = { _, _ -> /*presenter::blockScanlator*/ },
                     openComment = { chapterId -> presenter.openComment(context, chapterId) },
                     openInBrowser = { chapterItem ->
                         if (chapterItem.chapter.isUnavailable) {
@@ -203,15 +203,16 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
+        val manga = presenter.getManga()
         if (
             chapter.scanlator != null &&
                 MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
         ) {
             context.toast("${chapter.scanlator} not supported, try WebView")
-        } else if (!chapter.isAvailable(presenter.downloadManager, presenter.manga.value!!)) {
+        } else if (!chapter.isAvailable(presenter.downloadManager, manga)) {
             context.toast("Chapter is not available")
         } else {
-            startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
+            startActivity(ReaderActivity.newIntent(context, manga, chapter))
         }
     }
 
@@ -237,7 +238,7 @@ class MangaDetailController(private val mangaId: Long) :
     fun shareCover(context: Context, artwork: Artwork) {
         viewScope.launch {
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
-            val cover = presenter.shareMangaCover(dir, artwork)
+            val cover = presenter.shareCover(dir, artwork)
             val sharableCover = cover?.getUriWithAuthority(context)
             withUIContext {
                 try {
@@ -264,15 +265,12 @@ class MangaDetailController(private val mangaId: Long) :
             val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
 
             val cover =
-                presenter.shareMangaCover(
-                    dir,
-                    presenter.mangaDetailScreenState.value.currentArtwork,
-                )
+                presenter.shareCover(dir, presenter.mangaDetailScreenState.value.currentArtwork)
+            val manga = presenter.getManga()
             val sharableCover = cover?.getUriWithAuthority(context)
 
             withUIContext {
                 try {
-                    val manga = presenter.manga.value!!
                     var url =
                         presenter.sourceManager.mangaDex.mangaDetailsRequest(manga).url.toString()
                     url = "$url/" + manga.getSlug()

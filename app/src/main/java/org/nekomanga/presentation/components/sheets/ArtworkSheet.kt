@@ -7,14 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,9 +22,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,7 +55,7 @@ import com.zedlabs.pastelplaceholder.Pastel
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -74,104 +73,78 @@ fun ArtworkSheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
-        if (alternativeArtwork.isEmpty()) {
-            BaseSheet(themeColor = themeColorState) {
-                Text(
-                    text = "Please swipe refresh to pull latest artwork",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-        } else {
-            var currentImage by remember {
+        var currentImage by
+            remember(alternativeArtwork) {
                 mutableStateOf(
-                    alternativeArtwork.firstOrNull { it.active } ?: alternativeArtwork.first()
+                    alternativeArtwork.firstOrNull { it.active } ?: alternativeArtwork.firstOrNull()
                 )
             }
 
-            val screenHeight = LocalConfiguration.current.screenHeightDp
-            val thumbnailSize = (screenHeight * .12f).dp
-            val imageHeight = screenHeight * .7f
-            val gradientHeight = (thumbnailSize / 2f)
+        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+        val (imageHeight, thumbnailSize, gradientHeight) =
+            remember(screenHeight) {
+                val thumbSize = screenHeight * 0.12f
+                Triple(screenHeight * 0.7f, thumbSize, thumbSize / 2f)
+            }
 
-            Column(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .fillMaxHeight(.95f)
-                        .background(MaterialTheme.colorScheme.surface)
-                        .statusBarsPadding()
-                        .navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(currentImage).build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.height(imageHeight.dp).padding(horizontal = Size.small),
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(Size.tiny),
-                    Arrangement.spacedBy(Size.tiny),
-                ) {
-                    ArtworkButton(
-                        text = stringResource(id = R.string.save),
-                        color = themeColorState.primaryColor,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        saveClick(currentImage)
-                    }
-                    if (inLibrary) {
-                        ArtworkButton(
-                            text = stringResource(id = R.string.set),
-                            color = themeColorState.primaryColor,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            setClick(currentImage)
-                        }
-                        ArtworkButton(
-                            text = stringResource(id = R.string.reset),
-                            color = themeColorState.primaryColor,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            resetClick()
-                        }
-                    }
-                    ArtworkButton(
-                        text = stringResource(id = R.string.share),
-                        color = themeColorState.primaryColor,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        shareClick(currentImage)
-                    }
-                }
-                if (currentImage.description.isNotBlank()) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+            if (alternativeArtwork.isEmpty() || currentImage == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = currentImage.description,
-                        modifier = Modifier.padding(horizontal = Size.small),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelMedium,
+                        text = stringResource(R.string.no_artwork_found),
+                        textAlign = TextAlign.Center,
                     )
                 }
-                Gap(Size.small)
-                if (alternativeArtwork.size > 1) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom),
-                    ) {
+            } else {
+                val context = LocalContext.current
+
+                Text(
+                    text = currentImage!!.description,
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+
+                val mainImageRequest =
+                    remember(currentImage) {
+                        ImageRequest.Builder(context).data(currentImage).build()
+                    }
+                Box(
+                    modifier =
+                        Modifier.padding(horizontal = Size.small)
+                            .heightIn(imageHeight / 2, imageHeight)
+                ) {
+                    AsyncImage(
+                        model = mainImageRequest,
+                        contentDescription = stringResource(R.string.artwork),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Bottom,
+                ) {
+                    Gap(Size.tiny)
+                    ActionButtons(
+                        inLibrary = inLibrary,
+                        themeColorState = themeColorState,
+                        onSave = { currentImage?.let(saveClick) },
+                        onSet = { currentImage?.let(setClick) },
+                        onReset = resetClick,
+                        onShare = { currentImage?.let(shareClick) },
+                    )
+                    if (alternativeArtwork.size > 1) {
+                        Gap(Size.small)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
-                            items(alternativeArtwork) { artwork ->
-                                Box {
-                                    Thumbnail(artwork = artwork, thumbnailSize = thumbnailSize) {
-                                        currentImage = artwork
-                                    }
-                                    if (artwork.active) {
-                                        ActiveIndicator(themeColorState)
-                                    }
-                                    if (artwork.volume.isNotBlank()) {
-                                        VolumeSection(thumbnailSize, gradientHeight, artwork)
-                                    }
-                                }
+                            items(alternativeArtwork, key = { it.url }) { artwork ->
+                                ArtworkThumbnail(
+                                    artwork = artwork,
+                                    themeColorState = themeColorState,
+                                    thumbnailSize = thumbnailSize,
+                                    gradientHeight = gradientHeight,
+                                    onClick = { currentImage = artwork },
+                                )
                             }
                         }
                     }
@@ -183,45 +156,106 @@ fun ArtworkSheet(
 }
 
 @Composable
-private fun ArtworkButton(text: String, color: Color, modifier: Modifier, onClick: () -> Unit) {
-    FilledIconButton(
-        onClick = onClick,
-        shape = RoundedCornerShape(35),
-        modifier = modifier,
-        colors = IconButtonDefaults.filledIconButtonColors(containerColor = color),
+private fun ActionButtons(
+    inLibrary: Boolean,
+    themeColorState: ThemeColorState,
+    onSave: () -> Unit,
+    onSet: () -> Unit,
+    onReset: () -> Unit,
+    onShare: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.tiny),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
-        Text(text = text, color = MaterialTheme.colorScheme.surface)
+        ArtworkButton(
+            text = stringResource(id = R.string.save),
+            color = themeColorState.primaryColor,
+            modifier = Modifier.weight(1f),
+            onClick = onSave,
+        )
+        if (inLibrary) {
+            ArtworkButton(
+                text = stringResource(id = R.string.set),
+                color = themeColorState.primaryColor,
+                modifier = Modifier.weight(1f),
+                onClick = onSet,
+            )
+            ArtworkButton(
+                text = stringResource(id = R.string.reset),
+                color = themeColorState.primaryColor,
+                modifier = Modifier.weight(1f),
+                onClick = onReset,
+            )
+        }
+        ArtworkButton(
+            text = stringResource(id = R.string.share),
+            color = themeColorState.primaryColor,
+            modifier = Modifier.weight(1f),
+            onClick = onShare,
+        )
     }
 }
 
-/** Thumbnail for the artwork sheet */
 @Composable
-private fun Thumbnail(artwork: Artwork, thumbnailSize: Dp, thumbnailClicked: () -> Unit) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
-        placeholder = ColorPainter(colorResource(Pastel.getColorLight())),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier =
-            Modifier.size(thumbnailSize).clip(RoundedCornerShape(Shapes.coverRadius)).clickable {
-                thumbnailClicked()
-            },
-    )
+private fun ArtworkButton(text: String, color: Color, modifier: Modifier, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        shapes = ButtonDefaults.shapes(),
+        modifier = modifier,
+        colors =
+            ButtonDefaults.filledTonalButtonColors(
+                containerColor = color,
+                contentColor = MaterialTheme.colorScheme.surface,
+            ),
+    ) {
+        Text(text = text)
+    }
 }
 
 @Composable
-private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwork: Artwork) {
+private fun ArtworkThumbnail(
+    artwork: Artwork,
+    themeColorState: ThemeColorState,
+    thumbnailSize: Dp,
+    gradientHeight: Dp,
+    onClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    val request = remember(artwork) { ImageRequest.Builder(context).data(artwork).build() }
     Box(
         modifier =
-            Modifier.align(Alignment.BottomStart)
+            Modifier.size(thumbnailSize)
+                .clip(RoundedCornerShape(Shapes.coverRadius))
+                .clickable(onClick = onClick)
+    ) {
+        AsyncImage(
+            model = request,
+            placeholder = ColorPainter(colorResource(Pastel.getColorLight())),
+            contentDescription = stringResource(id = R.string.artwork),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.aspectRatio(1f / 1f),
+        )
+        if (artwork.active) {
+            ActiveIndicator(themeColorState = themeColorState)
+        }
+        if (artwork.volume.isNotBlank()) {
+            VolumeLabel(
+                volume = artwork.volume,
+                thumbnailSize = thumbnailSize,
+                gradientHeight = gradientHeight,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.VolumeLabel(volume: String, thumbnailSize: Dp, gradientHeight: Dp) {
+    Box(
+        modifier =
+            Modifier.align(Alignment.BottomCenter)
                 .width(thumbnailSize)
                 .height(gradientHeight)
-                .clip(
-                    RoundedCornerShape(
-                        bottomStart = Shapes.coverRadius,
-                        bottomEnd = Shapes.coverRadius,
-                    )
-                )
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface)
@@ -229,10 +263,8 @@ private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwor
                 )
     )
     Text(
-        text = artwork.volume,
-        textAlign = TextAlign.Center,
-        modifier =
-            Modifier.align(Alignment.BottomCenter).padding(bottom = Size.tiny).fillMaxWidth(),
+        text = volume,
+        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = Size.tiny),
         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.surface,
     )

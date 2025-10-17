@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,16 +17,19 @@ import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,103 +50,54 @@ import org.nekomanga.presentation.components.NoRippleText
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun InformationBlock(
     themeColorState: ThemeColorState,
-    titleProvider: () -> String,
-    authorProvider: () -> String,
-    artistProvider: () -> String,
-    statsProvider: () -> Stats?,
-    langFlagProvider: () -> String?,
-    statusProvider: () -> Int,
-    lastChapterProvider: () -> Pair<Int?, Int?>,
-    isPornographicProvider: () -> Boolean,
-    missingChaptersProvider: () -> String?,
-    estimatedMissingChapterProvider: () -> String?,
+    // 1. API Simplified: Pass values directly instead of lambda providers.
+    title: String,
+    author: String,
+    artist: String,
+    stats: Stats?,
+    langFlag: String?,
+    status: Int,
+    lastChapter: Pair<Int?, Int?>,
+    isPornographic: Boolean,
+    missingChapters: String?,
+    estimatedMissingChapters: String?,
+    isExpanded: Boolean,
+    showMergedIcon: Boolean,
     modifier: Modifier = Modifier,
-    isExpandedProvider: () -> Boolean,
-    showMergedIconProvider: () -> Boolean,
     titleLongClick: (String) -> Unit = {},
     creatorCopyClick: (String) -> Unit = {},
     creatorSearchClick: (String) -> Unit = {},
 ) {
+
+    val context = LocalContext.current
+
     val highAlpha =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
     val mediumAlpha =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
-    Column(modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small)) {
-        if (!titleProvider().isNullOrEmpty()) {
-            NoRippleText(
-                text = titleProvider(),
-                maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,
-                onLongClick = titleLongClick,
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Medium),
-                color = highAlpha,
-            )
+    val creatorText =
+        remember(author, artist) {
+            if (author.trim() == artist.trim()) {
+                author.trim()
+            } else {
+                listOfNotNull(
+                        author.trim().takeIf { it.isNotBlank() },
+                        artist.trim().takeIf { it.isNotBlank() },
+                    )
+                    .joinToString(Constants.SEPARATOR)
+            }
         }
 
-        if (authorProvider().isNotEmpty() || artistProvider().isNotEmpty()) {
-            val creator =
-                when (authorProvider() == artistProvider()) {
-                    true -> authorProvider().trim()
-                    false -> {
-                        listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(Constants.SEPARATOR)
-                    }
-                }
-
-            Gap(Size.tiny)
-
-            var creatorExpanded by remember { mutableStateOf(false) }
-            NoRippleText(
-                text = creator,
-                onClick = { creatorExpanded = !creatorExpanded },
-                maxLines = if (isExpandedProvider()) 5 else 2,
-                style = MaterialTheme.typography.bodyLarge,
-                color = mediumAlpha,
-            )
-            val creators = creator.split(Constants.SEPARATOR).map { it.trim() }
-            SimpleDropdownMenu(
-                expanded = creatorExpanded,
-                onDismiss = { creatorExpanded = false },
-                themeColorState = themeColorState,
-                dropDownItems =
-                    creators
-                        .map { individualCreator ->
-                            SimpleDropDownItem.Parent(
-                                text = UiText.String(individualCreator),
-                                children =
-                                    listOf(
-                                        SimpleDropDownItem.Action(
-                                            text = UiText.StringResource(R.string.copy)
-                                        ) {
-                                            creatorExpanded = false
-                                            creatorCopyClick(individualCreator)
-                                        },
-                                        SimpleDropDownItem.Action(
-                                            text = UiText.StringResource(R.string.search)
-                                        ) {
-                                            creatorExpanded = false
-                                            creatorSearchClick(individualCreator)
-                                        },
-                                    ),
-                            )
-                        }
-                        .toPersistentList(),
-            )
-        }
-        val (volume, chapter) = lastChapterProvider()
-        val status = statusProvider()
-
-        if (status != 0 || volume != null || chapter != null) {
-            Gap(Size.tiny)
-
+    val statusText =
+        remember(status, lastChapter) {
             val statusLine = mutableListOf<String>()
-
             if (status != 0) {
                 val statusRes =
                     when (status) {
@@ -154,160 +109,210 @@ fun InformationBlock(
                         SManga.CANCELLED -> R.string.cancelled
                         else -> R.string.unknown
                     }
-                statusLine.add(stringResource(id = statusRes))
+                statusLine.add(context.getString(statusRes))
             }
+
+            val (volume, chapter) = lastChapter
             if (volume != null || chapter != null) {
-                val last =
-                    if (chapter != null) {
-                        "Chapter"
-                    } else {
-                        "Volume"
-                    }
+                val last = if (chapter != null) "Chapter" else "Volume"
                 val lastText =
-                    "Final ${last}: " +
+                    "Final $last: " +
                         listOfNotNull(volume?.let { "Vol.$it" }, chapter?.let { "Ch.$it" })
                             .joinToString()
                 statusLine.add(lastText)
             }
+            statusLine.joinToString(Constants.SEPARATOR)
+        }
 
+    Column(modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small)) {
+        if (title.isNotEmpty()) {
             NoRippleText(
-                text = statusLine.joinToString(Constants.SEPARATOR),
+                text = title,
+                maxLines = if (isExpanded) Int.MAX_VALUE else 4,
+                onLongClick = { titleLongClick(title) },
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Medium),
+                color = highAlpha,
+            )
+        }
+
+        if (creatorText.isNotEmpty()) {
+            var creatorExpanded by remember { mutableStateOf(false) }
+            Gap(Size.tiny)
+            NoRippleText(
+                text = creatorText,
+                onClick = { creatorExpanded = !creatorExpanded },
+                maxLines = if (isExpanded) 5 else 2,
+                style = MaterialTheme.typography.bodyLarge,
+                color = mediumAlpha,
+            )
+            CreatorDropdown(
+                expanded = creatorExpanded,
+                onDismiss = { creatorExpanded = false },
+                themeColorState = themeColorState,
+                creatorText = creatorText,
+                onCopy = { creator ->
+                    creatorExpanded = false
+                    creatorCopyClick(creator)
+                },
+                onSearch = { creator ->
+                    creatorExpanded = false
+                    creatorSearchClick(creator)
+                },
+            )
+        }
+
+        if (statusText.isNotEmpty()) {
+            Gap(Size.tiny)
+            NoRippleText(
+                text = statusText,
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
         }
-        if (statsProvider() != null || langFlagProvider() != null) {
-            Gap(Size.tiny)
-        }
+
+        // Stats are grouped into a FlowRow for responsiveness.
         FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = Size.tiny),
+            horizontalArrangement = Arrangement.spacedBy(Size.small),
+            verticalArrangement = Arrangement.spacedBy(Size.tiny),
         ) {
-            if (langFlagProvider() != null) {
-                val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
-                if (flag != null) {
-                    Image(
-                        painter =
-                            rememberDrawablePainter(
-                                drawable =
-                                    AppCompatResources.getDrawable(LocalContext.current, flag)
-                            ),
-                        modifier = Modifier.height(Size.large).clip(RoundedCornerShape(Size.tiny)),
-                        contentDescription = "flag",
-                    )
-                }
-            }
+            langFlag?.let { LanguageFlag(langFlag = it) }
 
-            if (isPornographicProvider()) {
-                Gap(Size.small)
-                Image(
+            if (isPornographic) {
+                Icon(
                     imageVector = Icons.Outlined._18UpRating,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(Color.Red),
+                    contentDescription = "Pornographic content",
+                    tint = Color.Red,
                 )
             }
 
-            statsProvider()?.let { stats ->
-                stats.rating?.let { rating ->
-                    val formattedRating =
-                        ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
-
-                    Gap(Size.tiny)
-                    Image(
-                        imageVector = Icons.Filled.HotelClass,
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha),
-                    )
-                    Gap(Size.tiny)
-                    NoRippleText(
+            stats?.let {
+                val numberFormat = remember { NumberFormat.getNumberInstance(Locale.US) }
+                it.rating.toDoubleOrNull()?.let { rating ->
+                    val formattedRating = ((rating * 100).roundToInt() / 100.0).toString()
+                    StatItem(
                         text = formattedRating,
-                        style = MaterialTheme.typography.bodyLarge,
+                        icon = Icons.Filled.HotelClass,
                         color = mediumAlpha,
                     )
                 }
-
-                stats.follows?.let { unformattedNumberOfUsers ->
-                    val numberOfUsers =
-                        runCatching {
-                                NumberFormat.getNumberInstance(Locale.US)
-                                    .format(unformattedNumberOfUsers.toInt())
-                            }
-                            .getOrDefault(0)
-                            .toString()
-
-                    Gap(Size.tiny)
-                    Image(
-                        imageVector = Icons.Filled.Bookmarks,
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha),
-                    )
-                    Gap(Size.tiny)
-                    NoRippleText(
-                        text = numberOfUsers,
-                        style = MaterialTheme.typography.bodyLarge,
+                it.follows.toIntOrNull()?.let { follows ->
+                    StatItem(
+                        text = numberFormat.format(follows),
+                        icon = Icons.Filled.Bookmarks,
                         color = mediumAlpha,
                     )
                 }
-
-                if (stats.threadId != null) {
-
-                    val numberOfComments =
-                        runCatching {
-                                NumberFormat.getNumberInstance(Locale.US)
-                                    .format(stats.repliesCount?.toInt())
-                            }
-                            .getOrDefault(0)
-                            .toString()
-
-                    Gap(Size.tiny)
-                    Image(
-                        imageVector = Icons.AutoMirrored.Filled.Comment,
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha),
-                    )
-                    Gap(Size.tiny)
-                    NoRippleText(
-                        text = numberOfComments,
-                        style = MaterialTheme.typography.bodyLarge,
+                it.repliesCount.toIntOrNull()?.let { replies ->
+                    StatItem(
+                        text = numberFormat.format(replies),
+                        icon = Icons.AutoMirrored.Filled.Comment,
                         color = mediumAlpha,
                     )
                 }
             }
 
-            if (showMergedIconProvider()) {
-                Gap(Size.tiny)
-                com.mikepenz.iconics.compose.Image(
-                    asset = CommunityMaterial.Icon.cmd_check_decagram,
-                    colorFilter = ColorFilter.tint(mediumAlpha),
-                )
+            if (showMergedIcon) {
+                StatItem(text = "", color = mediumAlpha) {
+                    com.mikepenz.iconics.compose.Image(
+                        asset = CommunityMaterial.Icon.cmd_check_decagram,
+                        colorFilter = ColorFilter.tint(mediumAlpha),
+                    )
+                }
             }
         }
 
-        var showEstimatedMissingChapters by remember { mutableStateOf(false) }
-
-        missingChaptersProvider()?.let { numberOfMissingChapters ->
+        if (!missingChapters.isNullOrBlank()) {
+            var showEstimatedMissingChapters by remember { mutableStateOf(false) }
             Gap(Size.tiny)
             NoRippleText(
-                text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters),
+                text = stringResource(id = R.string.missing_chapters, missingChapters),
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
                 onClick = { showEstimatedMissingChapters = !showEstimatedMissingChapters },
             )
-        }
-
-        AnimatedVisibility(visible = showEstimatedMissingChapters) {
-            estimatedMissingChapterProvider()?.let { estimates ->
-                Column {
-                    Gap(Size.tiny)
-                    NoRippleText(
-                        text = estimates,
-                        maxLines = 4,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = mediumAlpha,
-                    )
-                }
+            AnimatedVisibility(
+                visible = showEstimatedMissingChapters && !estimatedMissingChapters.isNullOrBlank()
+            ) {
+                NoRippleText(
+                    modifier = Modifier.padding(top = Size.tiny),
+                    text = estimatedMissingChapters!!,
+                    maxLines = 4,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = mediumAlpha,
+                )
             }
         }
     }
+}
+
+// 3. Reusable Components: `StatItem` reduces code duplication significantly.
+@Composable
+private fun StatItem(text: String, color: Color, icon: @Composable () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        icon()
+        if (text.isNotBlank()) {
+            Gap(Size.tiny)
+            NoRippleText(text = text, style = MaterialTheme.typography.bodyLarge, color = color)
+        }
+    }
+}
+
+// Overloaded version for standard Material Icons
+@Composable
+private fun StatItem(text: String, icon: ImageVector, color: Color) {
+    StatItem(text = text, color = color) {
+        Icon(imageVector = icon, contentDescription = null, tint = color)
+    }
+}
+
+@Composable
+private fun LanguageFlag(langFlag: String) {
+    val context = LocalContext.current
+    val flag = remember(langFlag) { MdLang.fromIsoCode(langFlag.lowercase(Locale.US))?.iconResId }
+    if (flag != null) {
+        Image(
+            painter =
+                rememberDrawablePainter(drawable = AppCompatResources.getDrawable(context, flag)),
+            modifier = Modifier.height(Size.large).clip(RoundedCornerShape(Size.tiny)),
+            contentDescription = "Language flag",
+        )
+    }
+}
+
+@Composable
+private fun CreatorDropdown(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    themeColorState: ThemeColorState,
+    creatorText: String,
+    onCopy: (String) -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    val creators =
+        remember(creatorText) { creatorText.split(Constants.SEPARATOR).map { it.trim() } }
+    SimpleDropdownMenu(
+        expanded = expanded,
+        onDismiss = onDismiss,
+        themeColorState = themeColorState,
+        dropDownItems =
+            creators
+                .map { individualCreator ->
+                    SimpleDropDownItem.Parent(
+                        text = UiText.String(individualCreator),
+                        children =
+                            listOf(
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.copy),
+                                    onClick = { onCopy(individualCreator) },
+                                ),
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.search),
+                                    onClick = { onSearch(individualCreator) },
+                                ),
+                            ),
+                    )
+                }
+                .toPersistentList(),
+    )
 }

@@ -8,7 +8,6 @@ import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -49,7 +48,6 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.feed.FeedController
@@ -437,18 +435,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         when (val controller = router.backstack.lastOrNull()?.controller) {
-            is MangaDetailController -> {
-                val url =
-                    try {
-                        (source as HttpSource)
-                            .mangaDetailsRequest(controller.presenter.manga.value!!)
-                            .url
-                            .toString()
-                    } catch (e: Exception) {
-                        return
-                    }
-                outContent.webUri = Uri.parse(url)
-            }
+        /*  is MangaDetailController -> {
+            val url =
+                try {
+                    (source as HttpSource)
+                        .mangaDetailsRequest(controller.presenter.manga.value!!)
+                        .url
+                        .toString()
+                } catch (e: Exception) {
+                    return
+                }
+            outContent.webUri = Uri.parse(url)
+        }*/
         }
     }
 

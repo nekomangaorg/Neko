@@ -50,7 +50,7 @@ import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

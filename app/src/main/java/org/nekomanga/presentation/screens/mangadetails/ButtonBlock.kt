@@ -3,17 +3,15 @@ package org.nekomanga.presentation.screens.mangadetails
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountTree
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.OpenInBrowser
@@ -22,84 +20,193 @@ import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import com.mikepenz.iconics.compose.Image
-import com.mikepenz.iconics.typeface.IIcon
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.icons.AccountTreeIcon
+import org.nekomanga.presentation.components.icons.ArtTrackIcon
+import org.nekomanga.presentation.components.icons.CheckDecagramIcon
+import org.nekomanga.presentation.components.icons.Numeric0BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.Numeric1BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.Numeric2BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.Numeric3BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.Numeric4BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.SourceMergeIcon
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 /** Block of buttons for the actions on the backdrop screen */
 @Composable
 fun ButtonBlock(
-    hideButtonTextProvider: () -> Boolean,
-    isInitializedProvider: () -> Boolean,
-    isMergedProvider: () -> Boolean,
-    inLibraryProvider: () -> Boolean,
-    loggedIntoTrackersProvider: () -> Boolean,
-    trackServiceCountProvider: () -> Int,
+    hideButtonText: Boolean,
+    isInitialized: Boolean,
+    isMerged: Boolean,
+    inLibrary: Boolean,
+    loggedIntoTrackers: Boolean,
+    trackServiceCount: Int,
     themeColorState: ThemeColorState,
-    toggleFavorite: () -> Unit = {},
-    trackingClick: () -> Unit = {},
-    artworkClick: () -> Unit = {},
-    similarClick: () -> Unit = {},
-    mergeClick: () -> Unit = {},
-    linksClick: () -> Unit = {},
-    shareClick: () -> Unit = {},
-    moveCategories: () -> Unit = {},
+    toggleFavorite: () -> Unit,
+    trackingClick: () -> Unit,
+    artworkClick: () -> Unit,
+    similarClick: () -> Unit,
+    mergeClick: () -> Unit,
+    linksClick: () -> Unit,
+    shareClick: () -> Unit,
+    moveCategories: () -> Unit,
 ) {
-    if (!isInitializedProvider()) {
-        return
-    }
-
-    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
+    if (!isInitialized) return
 
     val checkedButtonColors =
-        ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.containerColor)
+        ButtonDefaults.outlinedButtonColors(
+            containerColor = themeColorState.containerColor.copy(alpha = NekoColors.halfAlpha),
+            contentColor = themeColorState.primaryColor,
+        )
     val checkedBorderStroke = BorderStroke(Size.extraExtraTiny, Color.Transparent)
-
-    val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
+    val uncheckedButtonColors =
+        ButtonDefaults.outlinedButtonColors(contentColor = themeColorState.primaryColor)
     val uncheckedBorderStroke =
         BorderStroke(
             Size.extraExtraTiny,
             themeColorState.containerColor.copy(alpha = NekoColors.mediumAlphaHighContrast),
         )
-    val (padding, iconicsPadding, buttonModifier) =
-        when (hideButtonTextProvider()) {
-            true ->
-                Triple(PaddingValues(Size.none), PaddingValues(Size.none), Modifier.size(Size.huge))
-            false ->
-                Triple(
-                    PaddingValues(horizontal = 12.dp, vertical = Size.small),
-                    PaddingValues(horizontal = 12.dp, vertical = Size.tiny),
-                    Modifier.height(Size.huge),
-                )
+
+    val (padding, buttonModifier) =
+        remember(hideButtonText) {
+            if (hideButtonText) {
+                PaddingValues(Size.none) to Modifier.size(Size.huge)
+            } else {
+                PaddingValues(horizontal = Size.smedium, vertical = Size.small) to
+                    Modifier.height(Size.huge)
+            }
         }
 
+    val actionButtons =
+        remember(inLibrary, isMerged, trackServiceCount, loggedIntoTrackers) {
+            persistentListOf<ActionButtonData>()
+                .builder()
+                .apply {
+                    // Favorite Button
+                    add(
+                        ActionButtonData(
+                            icon =
+                                if (inLibrary) Icons.Filled.Favorite
+                                else Icons.Filled.FavoriteBorder,
+                            text = UiText.String(""),
+                            isChecked = inLibrary,
+                            onClick = toggleFavorite,
+                            dropdownItems =
+                                if (inLibrary) {
+                                    persistentListOf(
+                                        SimpleDropDownItem.Action(
+                                            text =
+                                                UiText.StringResource(R.string.remove_from_library),
+                                            onClick = toggleFavorite,
+                                        ),
+                                        SimpleDropDownItem.Action(
+                                            text = UiText.StringResource(R.string.edit_categories),
+                                            onClick = moveCategories,
+                                        ),
+                                    )
+                                } else {
+                                    null
+                                },
+                        )
+                    )
+
+                    // Tracking Button (conditionally added)
+                    if (loggedIntoTrackers) {
+                        val isTracked = trackServiceCount > 0
+                        val trackerIcon =
+                            when {
+                                isTracked ->
+                                    when (trackServiceCount) {
+                                        1 -> Numeric1BoxOutlineIcon
+                                        2 -> Numeric2BoxOutlineIcon
+                                        3 -> Numeric3BoxOutlineIcon
+                                        4 -> Numeric4BoxOutlineIcon
+                                        else -> Numeric0BoxOutlineIcon
+                                    }
+                                else -> Icons.Filled.Sync
+                            }
+                        add(
+                            ActionButtonData(
+                                icon = trackerIcon,
+                                text =
+                                    if (isTracked) UiText.StringResource(R.string.tracked)
+                                    else UiText.StringResource(R.string.tracking),
+                                isChecked = isTracked,
+                                onClick = trackingClick,
+                            )
+                        )
+                    }
+
+                    // Other buttons
+                    add(
+                        ActionButtonData(
+                            icon = ArtTrackIcon,
+                            text = UiText.StringResource(R.string.artwork),
+                            onClick = artworkClick,
+                        )
+                    )
+                    add(
+                        ActionButtonData(
+                            icon = AccountTreeIcon,
+                            text = UiText.StringResource(R.string.similar_work),
+                            onClick = similarClick,
+                        )
+                    )
+                    add(
+                        ActionButtonData(
+                            icon = if (isMerged) CheckDecagramIcon else SourceMergeIcon,
+                            text =
+                                UiText.StringResource(
+                                    if (isMerged) R.string.is_merged else R.string.is_not_merged
+                                ),
+                            isChecked = isMerged,
+                            onClick = mergeClick,
+                        )
+                    )
+                    add(
+                        ActionButtonData(
+                            icon = Icons.Filled.OpenInBrowser,
+                            text = UiText.StringResource(R.string.links),
+                            onClick = linksClick,
+                        )
+                    )
+                    add(
+                        ActionButtonData(
+                            icon = Icons.Filled.Share,
+                            text = UiText.StringResource(R.string.share),
+                            onClick = shareClick,
+                        )
+                    )
+                }
+                .build()
+        }
+
+    // The UI is rendered by iterating over the data list.
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -108,277 +215,111 @@ fun ButtonBlock(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
-        val favConfig =
-            when (inLibraryProvider()) {
-                true ->
-                    ButtonConfig(
-                        icon = Icons.Filled.Favorite,
-                        buttonColors = checkedButtonColors,
-                        borderStroke = checkedBorderStroke,
-                        text = stringResource(R.string.in_library),
-                    )
-                false ->
-                    ButtonConfig(
-                        icon = Icons.Filled.FavoriteBorder,
-                        buttonColors = uncheckedButtonColors,
-                        borderStroke = uncheckedBorderStroke,
-                        text = stringResource(R.string.add_to_library),
-                    )
+        actionButtons.forEach { data ->
+            // Use a key for performance and state correctness in loops
+            key(data.text) {
+                ActionButton(
+                    data = data,
+                    modifier = buttonModifier,
+                    contentPadding = padding,
+                    colors = if (data.isChecked) checkedButtonColors else uncheckedButtonColors,
+                    border = if (data.isChecked) checkedBorderStroke else uncheckedBorderStroke,
+                    hideText = hideButtonText,
+                    themeColorState = themeColorState,
+                )
             }
+        }
+    }
+}
 
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            colors = favConfig.buttonColors,
-            modifier = Modifier.size(Size.huge),
-            onClick = {
-                if (!inLibraryProvider()) {
-                    toggleFavorite()
-                } else {
-                    favoriteExpanded = true
+/** A generic, reusable composable that renders a single button based on ActionButtonData. */
+@Composable
+private fun ActionButton(
+    data: ActionButtonData,
+    modifier: Modifier,
+    contentPadding: PaddingValues,
+    colors: ButtonColors,
+    border: BorderStroke,
+    hideText: Boolean,
+    themeColorState: ThemeColorState,
+) {
+    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
+
+    val finalOnClick = {
+        if (data.dropdownItems == null) {
+            data.onClick()
+        } else {
+            // For favorite button, a normal click opens the dropdown when in library
+            if (!data.isChecked) {
+                data.onClick()
+            } else {
+                favoriteExpanded = true
+            }
+        }
+    }
+
+    OutlinedButton(
+        onClick = finalOnClick,
+        modifier = if (data.dropdownItems != null) Modifier.size(Size.huge) else modifier,
+        shapes = ButtonDefaults.shapes(),
+        colors = colors,
+        border = border,
+        contentPadding =
+            if (data.dropdownItems != null) PaddingValues(Size.none) else contentPadding,
+    ) {
+        Box {
+            Row {
+                Icon(
+                    imageVector = data.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(Size.large),
+                )
+                if (!hideText) {
+                    val text = data.text.asString()
+                    if (text.isNotEmpty()) {
+                        Gap(Size.tiny)
+                        Text(
+                            text = text,
+                            style =
+                                MaterialTheme.typography.bodyLarge.copy(
+                                    color = LocalContentColor.current.copy(alpha = .8f),
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                        )
+                    }
                 }
-            },
-            border = favConfig.borderStroke,
-            contentPadding = PaddingValues(Size.none),
-        ) {
-            Icon(
-                imageVector = favConfig.icon!!,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = themeColorState.primaryColor,
-            )
+            }
+        }
+
+        if (data.dropdownItems != null) {
             SimpleDropdownMenu(
                 expanded = favoriteExpanded,
                 themeColorState = themeColorState,
                 onDismiss = { favoriteExpanded = false },
                 dropDownItems =
-                    persistentListOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.remove_from_library),
-                            onClick = {
-                                toggleFavorite()
-                                favoriteExpanded = false
-                            },
-                        ),
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.edit_categories),
-                            onClick = {
-                                moveCategories()
-                                favoriteExpanded = false
-                            },
-                        ),
-                    ),
-            )
-        }
-
-        if (loggedIntoTrackersProvider()) {
-
-            val trackerConfig =
-                when {
-                    trackServiceCountProvider() > 0 ->
-                        ButtonConfig(
-                            icon = Icons.Filled.Check,
-                            buttonColors = checkedButtonColors,
-                            borderStroke = checkedBorderStroke,
-                            text = stringResource(R.string._tracked, trackServiceCountProvider()),
-                        )
-                    else ->
-                        ButtonConfig(
-                            icon = Icons.Filled.Sync,
-                            buttonColors = uncheckedButtonColors,
-                            borderStroke = uncheckedBorderStroke,
-                            text = stringResource(R.string.tracking),
-                        )
-                }
-
-            OutlinedButton(
-                onClick = trackingClick,
-                modifier = buttonModifier,
-                shapes = ButtonDefaults.shapes(),
-                colors = trackerConfig.buttonColors,
-                border = trackerConfig.borderStroke,
-                contentPadding = padding,
-            ) {
-                if (trackServiceCountProvider() > 0 && hideButtonTextProvider()) {
-                    val icon =
-                        when (trackServiceCountProvider()) {
-                            1 -> CommunityMaterial.Icon3.cmd_numeric_1_box_outline
-                            2 -> CommunityMaterial.Icon3.cmd_numeric_2_box_outline
-                            3 -> CommunityMaterial.Icon3.cmd_numeric_3_box_outline
-                            4 -> CommunityMaterial.Icon3.cmd_numeric_4_box_outline
-                            else -> CommunityMaterial.Icon3.cmd_traffic_cone
+                    data.dropdownItems
+                        .map {
+                            if (it is SimpleDropDownItem.Action) {
+                                it.copy(
+                                    onClick = {
+                                        it.onClick()
+                                        favoriteExpanded = false
+                                    }
+                                )
+                            } else {
+                                it
+                            }
                         }
-                    IconicsButtonContent(
-                        iIcon = icon,
-                        color = themeColorState.primaryColor,
-                        hideText = hideButtonTextProvider(),
-                        text = "",
-                        iconicsSize = 28.dp,
-                    )
-                } else {
-                    ButtonContent(
-                        trackerConfig.icon!!,
-                        color = themeColorState.primaryColor,
-                        hideText = hideButtonTextProvider(),
-                        text = trackerConfig.text,
-                    )
-                }
-            }
-        }
-
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            onClick = artworkClick,
-            modifier = buttonModifier,
-            border = uncheckedBorderStroke,
-            contentPadding = iconicsPadding,
-        ) {
-            IconicsButtonContent(
-                iIcon = MaterialDesignDx.Icon.gmf_art_track,
-                color = themeColorState.primaryColor,
-                hideText = hideButtonTextProvider(),
-                text = stringResource(id = R.string.artwork),
-                iconicsSize = 32.dp,
-            )
-        }
-
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            onClick = similarClick,
-            modifier = buttonModifier,
-            border = uncheckedBorderStroke,
-            contentPadding = padding,
-        ) {
-            ButtonContent(
-                Icons.Filled.AccountTree,
-                color = themeColorState.primaryColor,
-                hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.similar_work),
-            )
-        }
-
-        val mergeConfig =
-            when (isMergedProvider()) {
-                true ->
-                    ButtonConfig(
-                        iIcon = CommunityMaterial.Icon.cmd_check_decagram,
-                        buttonColors = checkedButtonColors,
-                        borderStroke = checkedBorderStroke,
-                        text = stringResource(R.string.is_merged),
-                    )
-                false ->
-                    ButtonConfig(
-                        iIcon = CommunityMaterial.Icon3.cmd_source_merge,
-                        buttonColors = uncheckedButtonColors,
-                        borderStroke = uncheckedBorderStroke,
-                        text = stringResource(R.string.is_not_merged),
-                    )
-            }
-
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            onClick = mergeClick,
-            modifier = buttonModifier,
-            colors = mergeConfig.buttonColors,
-            border = mergeConfig.borderStroke,
-            contentPadding = iconicsPadding,
-        ) {
-            IconicsButtonContent(
-                iIcon = mergeConfig.iIcon!!,
-                color = themeColorState.primaryColor,
-                hideText = hideButtonTextProvider(),
-                text = mergeConfig.text,
-                iconicsSize = 28.dp,
-            )
-        }
-
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            onClick = linksClick,
-            modifier = buttonModifier,
-            border = uncheckedBorderStroke,
-            contentPadding = padding,
-        ) {
-            ButtonContent(
-                icon = Icons.Filled.OpenInBrowser,
-                color = themeColorState.primaryColor,
-                hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.links),
-            )
-        }
-
-        OutlinedButton(
-            shapes = ButtonDefaults.shapes(),
-            onClick = shareClick,
-            modifier = buttonModifier,
-            border = uncheckedBorderStroke,
-            contentPadding = padding,
-        ) {
-            ButtonContent(
-                icon = Icons.Filled.Share,
-                color = themeColorState.primaryColor,
-                hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.share),
+                        .toPersistentList(),
             )
         }
     }
 }
 
-@Composable
-private fun RowScope.IconicsButtonContent(
-    iIcon: IIcon,
-    color: Color = MaterialTheme.colorScheme.primary,
-    text: String,
-    hideText: Boolean,
-    iconicsSize: Dp = 24.dp,
-) {
-    Image(
-        asset = iIcon,
-        contentDescription = null,
-        modifier = Modifier.size(iconicsSize),
-        colorFilter = ColorFilter.tint(color = color),
-    )
-    if (!hideText) {
-        ButtonText(text = text, color = color)
-    }
-}
-
-@Composable
-private fun RowScope.ButtonContent(
-    icon: ImageVector,
-    text: String,
-    hideText: Boolean,
-    color: Color = MaterialTheme.colorScheme.primary,
-) {
-    Icon(
-        imageVector = icon,
-        contentDescription = null,
-        modifier = Modifier.size(24.dp),
-        tint = color,
-    )
-    if (!hideText) {
-        ButtonText(text = text, color = color)
-    }
-}
-
-@Composable
-private fun RowScope.ButtonText(text: String, color: Color) {
-    if (text.isNotEmpty()) {
-        Gap(Size.tiny)
-        Text(
-            text = text,
-            style =
-                MaterialTheme.typography.bodyLarge.copy(
-                    color = color.copy(alpha = .8f),
-                    fontWeight = FontWeight.Medium,
-                ),
-        )
-    }
-}
-
-private data class ButtonConfig(
-    val icon: ImageVector? = null,
-    val iIcon: IIcon? = null,
-    val buttonColors: ButtonColors,
-    val borderStroke: BorderStroke,
-    val text: String,
+private data class ActionButtonData(
+    val icon: ImageVector,
+    val text: UiText,
+    val onClick: () -> Unit,
+    val isChecked: Boolean = false,
+    val dropdownItems: ImmutableList<SimpleDropDownItem>? = null,
 )

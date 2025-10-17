@@ -133,7 +133,7 @@ private fun NewlyAddedRow(
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
             defaultDisableColor = chapterItem.chapter.read,
-            onDownload = downloadClick,
+            onClick = downloadClick,
         )
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun NoRippleText(
     text: String,
+    modifier: Modifier = Modifier,
     maxLines: Int = Integer.MAX_VALUE,
     color: Color = LocalTextStyle.current.color,
     style: TextStyle = LocalTextStyle.current,
@@ -28,7 +29,8 @@ fun NoRippleText(
     Text(
         text = text,
         modifier =
-            Modifier.indication(indication = null, interactionSource = noRippleInteraction)
+            modifier
+                .indication(indication = null, interactionSource = noRippleInteraction)
                 .combinedClickable(
                     interactionSource = noRippleInteraction,
                     indication = null,

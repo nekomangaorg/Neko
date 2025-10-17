@@ -15,7 +15,7 @@ import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Immutable

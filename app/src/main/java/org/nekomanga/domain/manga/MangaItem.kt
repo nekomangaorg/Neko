@@ -2,50 +2,55 @@ package org.nekomanga.domain.manga
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.manga.MangaUtil
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 data class MangaItem(
-    val id: Long?,
-    val source: Long,
-    val url: String,
-    val title: String,
-    val artist: String,
-    val author: String,
-    val description: String,
-    val genre: String,
-    val status: Int,
-    val thumbnail_url: String,
-    val favorite: Boolean,
-    val last_update: Long,
-    val next_update: Long,
-    val initialized: Boolean,
-    val viewer_flags: Int,
-    val chapter_flags: Int,
-    val date_added: Long,
-    val follow_status: FollowStatus?,
-    val lang_flag: String,
-    val anilist_id: String,
-    val kitsu_id: String,
-    val my_anime_list_id: String,
-    val manga_updates_id: String,
-    val anime_planet_id: String,
-    val other_urls: String,
-    val filtered_scanlators: String,
-    val filtered_language: String,
-    val missing_chapters: String,
-    val rating: String,
-    val users: String,
-    val merge_manga_url: String,
-    val merge_manga_image_url: String,
-    val last_volume_number: Int?,
-    val last_chapter_number: Int?,
-    val alt_titles: String,
-    val user_cover: String,
-    val user_title: String,
-    val replies_count: String,
-    val thread_id: String,
-    val ogTitle: String,
+    val id: Long = 0L,
+    val source: Long = 0L,
+    val url: String = "",
+    val title: String = "",
+    val artist: String = "",
+    val author: String = "",
+    val description: String = "",
+    val contentRating: String = "",
+    val genre: PersistentList<String> = persistentListOf(),
+    val status: Int = 0,
+    val coverUrl: String = "",
+    val favorite: Boolean = false,
+    val lastUpdate: Long = 0L,
+    val nextUpdate: Long = 0L,
+    val initialized: Boolean = false,
+    val viewerFlags: Int = 0,
+    val chapterFlags: Int = 0,
+    val dateAdded: Long = 0L,
+    val followStatus: FollowStatus? = null,
+    val langFlag: String = "",
+    val anilistId: String = "",
+    val kitsuId: String = "",
+    val myAnimeListId: String = "",
+    val mangaUpdatesId: String = "",
+    val animePlanetId: String = "",
+    val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
+    val filteredScanlators: PersistentList<String> = persistentListOf(),
+    val filteredLanguage: PersistentList<String> = persistentListOf(),
+    val missingChapters: String = "",
+    val rating: String = "",
+    val users: String = "",
+    val lastVolumeNumber: Int? = null,
+    val lastChapterNumber: Int? = null,
+    val altTitles: PersistentList<String> = persistentListOf(),
+    val userCover: String = "",
+    val userTitle: String = "",
+    val repliesCount: String = "",
+    val threadId: String = "",
+    val ogTitle: String = "",
 )
 
 fun MangaItem.toManga(): Manga {
@@ -57,86 +62,91 @@ fun MangaItem.toManga(): Manga {
     manga.artist = this.artist.takeIf { it.isNotBlank() }
     manga.author = this.author.takeIf { it.isNotBlank() }
     manga.description = this.description.takeIf { it.isNotBlank() }
-    manga.genre = this.genre.takeIf { it.isNotBlank() }
+    manga.genre = MangaUtil.genresToString(genre, this.contentRating)
     manga.status = this.status
-    manga.thumbnail_url = this.thumbnail_url.takeIf { it.isNotBlank() }
+    manga.thumbnail_url = this.coverUrl.takeIf { it.isNotBlank() }
     manga.favorite = this.favorite
-    manga.last_update = this.last_update
-    manga.next_update = this.next_update
+    manga.last_update = this.lastUpdate
+    manga.next_update = this.nextUpdate
     manga.initialized = this.initialized
-    manga.viewer_flags = this.viewer_flags
-    manga.chapter_flags = this.chapter_flags
-    manga.date_added = this.date_added
-    manga.follow_status = this.follow_status
-    manga.lang_flag = this.lang_flag.takeIf { it.isNotBlank() }
-    manga.anilist_id = this.anilist_id.takeIf { it.isNotBlank() }
-    manga.kitsu_id = this.kitsu_id.takeIf { it.isNotBlank() }
-    manga.my_anime_list_id = this.my_anime_list_id.takeIf { it.isNotBlank() }
-    manga.manga_updates_id = this.manga_updates_id.takeIf { it.isNotBlank() }
-    manga.anime_planet_id = this.anime_planet_id.takeIf { it.isNotBlank() }
-    manga.other_urls = this.other_urls.takeIf { it.isNotBlank() }
-    manga.filtered_scanlators = this.filtered_scanlators.takeIf { it.isNotBlank() }
-    manga.filtered_language = this.filtered_language.takeIf { it.isNotBlank() }
-    manga.missing_chapters = this.missing_chapters.takeIf { it.isNotBlank() }
+    manga.viewer_flags = this.viewerFlags
+    manga.chapter_flags = this.chapterFlags
+    manga.date_added = this.dateAdded
+    manga.follow_status = this.followStatus
+    manga.lang_flag = this.langFlag.takeIf { it.isNotBlank() }
+    manga.anilist_id = this.anilistId.takeIf { it.isNotBlank() }
+    manga.kitsu_id = this.kitsuId.takeIf { it.isNotBlank() }
+    manga.my_anime_list_id = this.myAnimeListId.takeIf { it.isNotBlank() }
+    manga.manga_updates_id = this.mangaUpdatesId.takeIf { it.isNotBlank() }
+    manga.anime_planet_id = this.animePlanetId.takeIf { it.isNotBlank() }
+    manga.other_urls = MangaUtil.externalLinksToOtherString(this.externalLinks)
+    manga.filtered_scanlators = ChapterUtil.getScanlatorString(this.filteredScanlators.toSet())
+    manga.filtered_language = ChapterUtil.getLanguageString(this.filteredLanguage.toSet())
+    manga.missing_chapters = this.missingChapters.takeIf { it.isNotBlank() }
     manga.rating = this.rating.takeIf { it.isNotBlank() }
     manga.users = this.users.takeIf { it.isNotBlank() }
-    manga.merge_manga_url = this.merge_manga_url.takeIf { it.isNotBlank() }
-    manga.merge_manga_image_url = this.merge_manga_image_url.takeIf { it.isNotBlank() }
-    manga.last_volume_number = this.last_volume_number
-    manga.last_chapter_number = this.last_chapter_number
-    manga.alt_titles = this.alt_titles.takeIf { it.isNotBlank() }
-    manga.user_cover = this.user_cover.takeIf { it.isNotBlank() }
-    manga.user_title = this.user_title.takeIf { it.isNotBlank() }
-    manga.replies_count = this.replies_count.takeIf { it.isNotBlank() }
-    manga.thread_id = this.thread_id.takeIf { it.isNotBlank() }
+    manga.last_volume_number = this.lastVolumeNumber
+    manga.last_chapter_number = this.lastChapterNumber
+    manga.alt_titles = MangaUtil.altTitlesToString(this.altTitles)
+    manga.user_cover = this.userCover.takeIf { it.isNotBlank() }
+    manga.user_title = this.userTitle.takeIf { it.isNotBlank() }
+    manga.replies_count = this.repliesCount.takeIf { it.isNotBlank() }
+    manga.thread_id = this.threadId.takeIf { it.isNotBlank() }
     return manga
 }
 
 fun Manga.toMangaItem(): MangaItem {
     return MangaItem(
-        id = this.id,
+        id = this.id!!,
         source = this.source,
         url = this.url,
         title = this.title,
         artist = this.artist ?: "",
         author = this.author ?: "",
         description = this.description ?: "",
-        genre = this.genre ?: "",
+        contentRating = MangaUtil.getContentRating(MangaUtil.getGenres(this.genre)),
+        genre = MangaUtil.getGenres(this.genre, true).toPersistentList(),
         status = this.status,
-        thumbnail_url = this.thumbnail_url ?: "",
+        coverUrl = this.thumbnail_url ?: "",
         favorite = this.favorite,
-        last_update = this.last_update,
-        next_update = this.next_update,
+        lastUpdate = this.last_update,
+        nextUpdate = this.next_update,
         initialized = this.initialized,
-        viewer_flags = this.viewer_flags,
-        chapter_flags = this.chapter_flags,
-        date_added = this.date_added,
-        follow_status = this.follow_status,
-        lang_flag = this.lang_flag ?: "",
-        anilist_id = this.anilist_id ?: "",
-        kitsu_id = this.kitsu_id ?: "",
-        my_anime_list_id = this.my_anime_list_id ?: "",
-        manga_updates_id = this.manga_updates_id ?: "",
-        anime_planet_id = this.anime_planet_id ?: "",
-        other_urls = this.other_urls ?: "",
-        filtered_scanlators = this.filtered_scanlators ?: "",
-        filtered_language = this.filtered_language ?: "",
-        missing_chapters = this.missing_chapters ?: "",
+        viewerFlags = this.viewer_flags,
+        chapterFlags = this.chapter_flags,
+        dateAdded = this.date_added,
+        followStatus = this.follow_status,
+        langFlag = this.lang_flag ?: "",
+        anilistId = this.anilist_id ?: "",
+        kitsuId = this.kitsu_id ?: "",
+        myAnimeListId = this.my_anime_list_id ?: "",
+        mangaUpdatesId = this.manga_updates_id ?: "",
+        animePlanetId = this.anime_planet_id ?: "",
+        externalLinks = this.getExternalLinks().toPersistentList(),
+        filteredScanlators = ChapterUtil.getScanlators(this.filtered_scanlators).toPersistentList(),
+        filteredLanguage = ChapterUtil.getLanguages(this.filtered_language).toPersistentList(),
+        missingChapters = this.missing_chapters ?: "",
         rating = this.rating ?: "",
         users = this.users ?: "",
-        merge_manga_url = this.merge_manga_url ?: "",
-        merge_manga_image_url = this.merge_manga_image_url ?: "",
-        last_volume_number = this.last_volume_number,
-        last_chapter_number = this.last_chapter_number,
-        alt_titles = this.alt_titles ?: "",
-        user_cover = this.user_cover ?: "",
-        user_title = this.user_title ?: "",
-        replies_count = this.replies_count ?: "",
-        thread_id = this.thread_id ?: "",
+        lastVolumeNumber = this.last_volume_number,
+        lastChapterNumber = this.last_chapter_number,
+        altTitles = this.getAltTitles().toPersistentList(),
+        userCover = this.user_cover ?: "",
+        userTitle = this.user_title ?: "",
+        repliesCount = this.replies_count ?: "",
+        threadId = this.thread_id ?: "",
         ogTitle = this.originalTitle,
     )
 }
 
 fun MangaItem.uuid(): String {
     return MdUtil.getMangaUUID(this.url)
+}
+
+fun MangaItem.getDescription(): String {
+    return when {
+        description.isNotEmpty() -> description
+        !initialized -> ""
+        else -> "No description"
+    }
 }

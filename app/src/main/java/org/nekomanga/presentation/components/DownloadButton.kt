@@ -45,8 +45,8 @@ import org.nekomanga.R
 import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 private const val iconSize = 20
@@ -59,7 +59,7 @@ fun DownloadButton(
     downloadState: Download.State,
     downloadProgress: Int,
     defaultDisableColor: Boolean = false,
-    onDownload: (MangaConstants.DownloadAction) -> Unit,
+    onClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         var showChapterDropdown by remember { mutableStateOf(false) }
@@ -90,7 +90,7 @@ fun DownloadButton(
                 onClick = {
                     when (downloadState) {
                         Download.State.NOT_DOWNLOADED ->
-                            onDownload(MangaConstants.DownloadAction.Download)
+                            onClick(MangaConstants.DownloadAction.Download)
                         else -> showChapterDropdown = true
                     }
                 },
@@ -137,7 +137,7 @@ fun DownloadButton(
                                 text = UiText.StringResource(R.string.remove),
                                 onClick = {
                                     scope.launchDelayed {
-                                        onDownload(MangaConstants.DownloadAction.Remove)
+                                        onClick(MangaConstants.DownloadAction.Remove)
                                     }
                                 },
                             )
@@ -149,7 +149,7 @@ fun DownloadButton(
                                 text = UiText.StringResource(R.string.start_downloading_now),
                                 onClick = {
                                     scope.launchDelayed {
-                                        onDownload(MangaConstants.DownloadAction.ImmediateDownload)
+                                        onClick(MangaConstants.DownloadAction.ImmediateDownload)
                                     }
                                 },
                             ),
@@ -157,7 +157,7 @@ fun DownloadButton(
                                 text = UiText.StringResource(R.string.cancel),
                                 onClick = {
                                     scope.launchDelayed {
-                                        onDownload(MangaConstants.DownloadAction.Cancel)
+                                        onClick(MangaConstants.DownloadAction.Cancel)
                                     }
                                 },
                             ),

@@ -36,8 +36,8 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
-import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
