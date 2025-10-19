@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,6 +84,19 @@ fun FeedScreen(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showBottomSheet) {
+        if (showBottomSheet) {
+            sheetState.show()
+        } else {
+            sheetState.hide()
+        }
+    }
+
+    /** Close the bottom sheet on back if its open */
+    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
+
     var mainDropdownShowing by remember { mutableStateOf(false) }
 
     val feedScreenType = feedScreenState.value.feedScreenType
@@ -93,9 +107,6 @@ fun FeedScreen(
             FeedScreenType.Updates -> stringResource(R.string.search_updates)
             else -> ""
         }
-
-    /** Close the bottom sheet on back if its open */
-    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
     // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
     val actualSideNav = legacySideNav
@@ -118,10 +129,10 @@ fun FeedScreen(
                 this.blur(Size.medium).clickable(enabled = false) {}
             }
     ) {
-        if (sheetState.isVisible) {
+        if (showBottomSheet) {
             ModalBottomSheet(
                 sheetState = sheetState,
-                onDismissRequest = { scope.launch { sheetState.hide() } },
+                onDismissRequest = { showBottomSheet = false },
                 content = {
                     Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                         FeedBottomSheet(
@@ -182,7 +193,7 @@ fun FeedScreen(
                                     AppBar.Action(
                                         title = UiText.StringResource(R.string.settings),
                                         icon = Icons.Outlined.Tune,
-                                        onClick = { scope.launch { sheetState.show() } },
+                                        onClick = { showBottomSheet = true },
                                     )
                                 )
                             } else {

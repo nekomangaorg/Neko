@@ -29,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -98,14 +97,14 @@ fun BrowseScreen(
 
     val browseScreenType = browseScreenState.value.screenType
 
-    LaunchedEffect(sheetState) {
-        snapshotFlow { sheetState.isVisible }
-            .collect { isVisible ->
-                if (!isVisible) {
-                    currentBottomSheet = null
-                }
-            }
+    LaunchedEffect(currentBottomSheet) {
+        if (currentBottomSheet != null) {
+            sheetState.show()
+        } else {
+            sheetState.hide()
+        }
     }
+
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
@@ -113,12 +112,7 @@ fun BrowseScreen(
     val actualSideNav = legacySideNav
     val navBarPadding = rememberNavBarPadding(actualSideNav, browseScreenState.value.isDeepLink)
 
-    val openSheet: (BrowseBottomSheetScreen) -> Unit = {
-        scope.launch {
-            currentBottomSheet = it
-            sheetState.show()
-        }
-    }
+    val openSheet: (BrowseBottomSheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
     Box(
         modifier =
@@ -129,7 +123,7 @@ fun BrowseScreen(
         if (currentBottomSheet != null) {
             ModalBottomSheet(
                 sheetState = sheetState,
-                onDismissRequest = { scope.launch { sheetState.hide() } },
+                onDismissRequest = { currentBottomSheet = null },
                 content = {
                     Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                         currentBottomSheet?.let { currentSheet ->
@@ -137,7 +131,12 @@ fun BrowseScreen(
                                 currentScreen = currentSheet,
                                 browseScreenState = browseScreenState,
                                 addNewCategory = addNewCategory,
-                                closeSheet = { scope.launch { sheetState.hide() } },
+                                closeSheet = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        currentBottomSheet = null
+                                    }
+                                },
                                 filterActions = filterActions,
                             )
                         }

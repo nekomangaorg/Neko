@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,21 +70,24 @@ fun DisplayScreen(
 
     var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
 
-    /** Close the bottom sheet on back if its open */
-    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
-
-    val openSheet: (DisplaySheetScreen) -> Unit = {
-        scope.launch {
-            currentBottomSheet = it
+    LaunchedEffect(currentBottomSheet) {
+        if (currentBottomSheet != null) {
             sheetState.show()
+        } else {
+            sheetState.hide()
         }
     }
 
-    if (sheetState.isVisible) {
+    /** Close the bottom sheet on back if its open */
+    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
+
+    val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
+
+    if (currentBottomSheet != null) {
 
         ModalBottomSheet(
             sheetState = sheetState,
-            onDismissRequest = { scope.launch { sheetState.hide() } },
+            onDismissRequest = { currentBottomSheet = null },
             content = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     currentBottomSheet?.let { currentSheet ->
@@ -94,7 +98,7 @@ fun DisplayScreen(
                                 WindowInsets.navigationBars
                                     .only(WindowInsetsSides.Bottom)
                                     .asPaddingValues(),
-                            closeSheet = { scope.launch { sheetState.hide() } },
+                            closeSheet = { currentBottomSheet = null },
                             categories = displayScreenState.value.categories,
                             isList = displayScreenState.value.isList,
                             libraryEntryVisibility = displayScreenState.value.libraryEntryVisibility,

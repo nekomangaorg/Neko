@@ -28,7 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -95,6 +94,14 @@ fun LibraryScreen(
 
     var currentBottomSheet: LibraryBottomSheetScreen? by remember { mutableStateOf(null) }
 
+    LaunchedEffect(currentBottomSheet) {
+        if (currentBottomSheet != null) {
+            sheetState.show()
+        } else {
+            sheetState.hide()
+        }
+    }
+
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = currentBottomSheet != null || selectionMode) {
         if (currentBottomSheet != null) {
@@ -102,15 +109,6 @@ fun LibraryScreen(
         } else {
             libraryScreenActions.clearSelectedManga()
         }
-    }
-
-    LaunchedEffect(sheetState) {
-        snapshotFlow { sheetState.isVisible }
-            .collect { isVisible ->
-                if (!isVisible) {
-                    currentBottomSheet = null
-                }
-            }
     }
 
     // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
@@ -124,12 +122,7 @@ fun LibraryScreen(
         }
     }
 
-    val openSheet: (LibraryBottomSheetScreen) -> Unit = {
-        scope.launch {
-            currentBottomSheet = it
-            sheetState.show()
-        }
-    }
+    val openSheet: (LibraryBottomSheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
     Box(
         modifier =
@@ -151,7 +144,7 @@ fun LibraryScreen(
                                 libraryScreenState = libraryScreenState.value,
                                 librarySheetActions = librarySheetActions,
                                 currentScreen = currentSheet,
-                                closeSheet = { scope.launch { sheetState.hide() } },
+                                closeSheet = { scope.launch { currentBottomSheet = null } },
                             )
                         }
                     }

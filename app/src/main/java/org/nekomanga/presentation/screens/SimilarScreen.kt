@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,19 +61,23 @@ fun SimilarScreen(
 
     var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
 
+    LaunchedEffect(currentBottomSheet) {
+        if (currentBottomSheet != null) {
+            sheetState.show()
+        } else {
+            sheetState.hide()
+        }
+    }
+
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
-    val openSheet: (DisplaySheetScreen) -> Unit = {
-        scope.launch {
-            currentBottomSheet = it
-            sheetState.show()
-        }
-    }
-    if (sheetState.isVisible) {
+    val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
+
+    if (currentBottomSheet != null) {
         ModalBottomSheet(
             sheetState = sheetState,
-            onDismissRequest = { scope.launch { sheetState.hide() } },
+            onDismissRequest = { currentBottomSheet = null },
             content = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     currentBottomSheet?.let { currentSheet ->
@@ -83,7 +88,7 @@ fun SimilarScreen(
                                 WindowInsets.navigationBars
                                     .only(WindowInsetsSides.Bottom)
                                     .asPaddingValues(),
-                            closeSheet = { scope.launch { sheetState.hide() } },
+                            closeSheet = { currentBottomSheet = null },
                             categories = similarScreenState.value.categories,
                             isList = similarScreenState.value.isList,
                             libraryEntryVisibility = similarScreenState.value.libraryEntryVisibility,

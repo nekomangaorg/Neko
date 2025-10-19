@@ -31,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -146,13 +145,12 @@ fun MangaScreen(
 
     var currentBottomSheet by remember { mutableStateOf<DetailsBottomSheetScreen?>(null) }
 
-    LaunchedEffect(sheetState) {
-        snapshotFlow { sheetState.isVisible }
-            .collect { isVisible ->
-                if (!isVisible) {
-                    currentBottomSheet = null
-                }
-            }
+    LaunchedEffect(currentBottomSheet) {
+        if (currentBottomSheet != null) {
+            sheetState.show()
+        } else {
+            sheetState.hide()
+        }
     }
 
     BackHandler(enabled = currentBottomSheet != null) { currentBottomSheet = null }
@@ -174,15 +172,12 @@ fun MangaScreen(
     }
 
     fun openSheet(sheet: DetailsBottomSheetScreen) {
-        scope.launch {
-            currentBottomSheet = sheet
-            sheetState.show()
-        }
+        scope.launch { currentBottomSheet = sheet }
     }
 
-    if (sheetState.isVisible) {
+    if (currentBottomSheet != null) {
         ModalBottomSheet(
-            onDismissRequest = { scope.launch { sheetState.hide() } },
+            onDismissRequest = { scope.launch { currentBottomSheet = null } },
             sheetState = sheetState,
             // shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd =
             // Shapes.sheetRadius),
@@ -198,15 +193,7 @@ fun MangaScreen(
                     mergeActions = mergeActions,
                     chapterFilterActions = chapterFilterActions,
                     openInWebView = { url, title -> context.openInWebView(url, title) },
-                    onNavigate = { newSheet ->
-                        scope.launch {
-                            if (newSheet == null) {
-                                scope.launch { sheetState.hide() }
-                            } else {
-                                currentBottomSheet = newSheet
-                            }
-                        }
-                    },
+                    onNavigate = { newSheet -> scope.launch { currentBottomSheet = newSheet } },
                 )
             },
         )
