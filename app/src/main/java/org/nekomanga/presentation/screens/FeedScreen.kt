@@ -51,7 +51,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
@@ -176,8 +176,8 @@ fun FeedScreen(
                         feedScreenState.value.showingDownloads ||
                             feedScreenType == FeedScreenType.Summary
                     )
-                        NekoScaffoldType.Title
-                    else NekoScaffoldType.SearchOutline,
+                        NekoTopAppBarType.Title
+                    else NekoTopAppBarType.SearchOutline,
                 title =
                     if (feedScreenType == FeedScreenType.Summary) stringResource(R.string.summary)
                     else "",

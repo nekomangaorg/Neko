@@ -37,7 +37,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -99,7 +99,7 @@ fun SimilarScreen(
         )
     }
     NekoScaffold(
-        type = NekoScaffoldType.Title,
+        type = NekoTopAppBarType.Title,
         onNavigationIconClicked = onBackPress,
         incognitoMode = similarScreenState.value.incognitoMode,
         title = stringResource(id = R.string.similar),

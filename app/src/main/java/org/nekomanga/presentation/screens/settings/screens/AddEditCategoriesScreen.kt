@@ -37,7 +37,7 @@ import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.theme.Size
@@ -121,7 +121,7 @@ internal class AddEditCategoriesScreen(
         }
 
         NekoScaffold(
-            type = NekoScaffoldType.Title,
+            type = NekoTopAppBarType.Title,
             onNavigationIconClicked = onNavigationIconClick,
             title = stringResource(R.string.edit_categories),
             content = { contentPadding ->

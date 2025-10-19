@@ -52,7 +52,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.extensions.conditional
@@ -118,7 +118,7 @@ fun BrowseScreen(
         modifier =
             Modifier.fillMaxSize().conditional(mainDropdownShowing) {
                 this.blur(16.dp).clickable(enabled = false) {}
-            }
+            },
     ) {
         if (currentBottomSheet != null) {
             ModalBottomSheet(
@@ -145,7 +145,7 @@ fun BrowseScreen(
             )
         }
         NekoScaffold(
-            type = NekoScaffoldType.Title,
+            type = NekoTopAppBarType.Title,
             onNavigationIconClicked = onBackPress,
             title = browseScreenState.value.title.asString(),
             incognitoMode = browseScreenState.value.incognitoMode,
@@ -167,11 +167,11 @@ fun BrowseScreen(
                                                 switchDisplayClick = switchDisplayClick,
                                                 libraryEntryVisibilityClick =
                                                     libraryEntryVisibilityClick,
-                                            )
+                                            ),
                                         )
                                     }
                                 },
-                            )
+                            ),
                         ) +
                             if (browseScreenState.value.isDeepLink) {
                                 emptyList()
@@ -185,9 +185,9 @@ fun BrowseScreen(
                                         aboutClick = aboutClick,
                                         helpClick = helpClick,
                                         menuShowing = { visible -> mainDropdownShowing = visible },
-                                    )
+                                    ),
                                 )
-                            }
+                            },
                 )
             },
             content = { incomingContentPadding ->
@@ -215,8 +215,8 @@ fun BrowseScreen(
                                     setCategories = { selectedCategories ->
                                         scope.launch { sheetState.hide() }
                                         toggleFavorite(displayManga.mangaId, selectedCategories)
-                                    }
-                                )
+                                    },
+                                ),
                             )
                         }
                     } else {
@@ -227,7 +227,7 @@ fun BrowseScreen(
                 Box(
                     modifier =
                         Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                            .fillMaxSize()
+                            .fillMaxSize(),
                 ) {
                     if (browseScreenState.value.initialLoading) {
                         ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
@@ -239,7 +239,7 @@ fun BrowseScreen(
                                     Action(
                                         text = UiText.StringResource(R.string.retry),
                                         onClick = retryClick,
-                                    )
+                                    ),
                                 ),
                             contentPadding = recyclerContentPadding,
                         )
@@ -258,7 +258,6 @@ fun BrowseScreen(
                                         onLongClick = ::mangaLongClick,
                                         contentPadding = recyclerContentPadding,
                                     )
-
                                 BrowseScreenType.Follows -> {
                                     BrowseFollowsPage(
                                         displayMangaHolder =
@@ -273,7 +272,6 @@ fun BrowseScreen(
                                         onLongClick = ::mangaLongClick,
                                     )
                                 }
-
                                 BrowseScreenType.Other -> {
                                     BrowseOtherPage(
                                         results = browseScreenState.value.otherResults,
@@ -281,7 +279,6 @@ fun BrowseScreen(
                                         onClick = otherClick,
                                     )
                                 }
-
                                 BrowseScreenType.Filter -> {
                                     BrowseFilterPage(
                                         displayMangaHolder =
@@ -299,7 +296,6 @@ fun BrowseScreen(
                                         loadNextPage = loadNextPage,
                                     )
                                 }
-
                                 BrowseScreenType.None -> Unit
                             }
                         }
@@ -368,7 +364,7 @@ fun BrowseScreen(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
+                    .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
         ) {}
     }
 }

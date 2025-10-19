@@ -62,7 +62,7 @@ import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
@@ -199,7 +199,7 @@ fun MangaScreen(
         )
     }
     NekoScaffold(
-        type = NekoScaffoldType.Search,
+        type = NekoTopAppBarType.Search,
         onNavigationIconClicked = onBackPressed,
         themeColorState = themeColorState,
         searchPlaceHolder = stringResource(id = R.string.search_chapters),

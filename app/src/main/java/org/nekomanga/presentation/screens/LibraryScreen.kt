@@ -46,7 +46,7 @@ import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
@@ -157,8 +157,8 @@ fun LibraryScreen(
         ) {
             NekoScaffold(
                 type =
-                    if (selectionMode) NekoScaffoldType.TitleAndSubtitle
-                    else NekoScaffoldType.SearchOutlineWithActions,
+                    if (selectionMode) NekoTopAppBarType.TitleAndSubtitle
+                    else NekoTopAppBarType.SearchOutlineWithActions,
                 title =
                     if (selectionMode) "Selected: ${libraryScreenState.value.selectedItems.size}"
                     else "",

@@ -3,7 +3,7 @@ package org.nekomanga.presentation.screens.settings
 import androidx.compose.runtime.Composable
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 
 @Composable
 internal fun PreferenceScaffold(
@@ -13,7 +13,7 @@ internal fun PreferenceScaffold(
     itemsProvider: @Composable () -> PersistentList<Preference>,
 ) {
     NekoScaffold(
-        type = NekoScaffoldType.Title,
+        type = NekoTopAppBarType.Title,
         onNavigationIconClicked = onNavigationIconClicked,
         incognitoMode = incognitoMode,
         title = title,

@@ -48,7 +48,7 @@ import org.nekomanga.constants.Constants.DISCORD_URL
 import org.nekomanga.constants.Constants.PRIVACY_POLICY_URL
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -74,7 +74,7 @@ fun AboutScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     NekoScaffold(
-        type = NekoScaffoldType.Title,
+        type = NekoTopAppBarType.Title,
         onNavigationIconClicked = onBackPressed,
         title = stringResource(id = R.string.about),
         snackBarHost = snackbarHost(snackbarHostState),

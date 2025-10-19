@@ -46,7 +46,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
@@ -109,7 +109,7 @@ fun DisplayScreen(
         )
     }
     NekoScaffold(
-        type = NekoScaffoldType.Title,
+        type = NekoTopAppBarType.Title,
         onNavigationIconClicked = onBackPress,
         incognitoMode = displayScreenState.value.incognitoMode,
         title =
@@ -131,12 +131,12 @@ fun DisplayScreen(
                                             switchDisplayClick = switchDisplayClick,
                                             libraryEntryVisibilityClick =
                                                 libraryEntryVisibilityClick,
-                                        )
+                                        ),
                                     )
                                 }
                             },
-                        )
-                    )
+                        ),
+                    ),
             )
         },
         content = { incomingContentPadding ->
@@ -160,8 +160,8 @@ fun DisplayScreen(
                                 setCategories = { selectedCategories ->
                                     scope.launch { sheetState.hide() }
                                     toggleFavorite(displayManga.mangaId, selectedCategories)
-                                }
-                            )
+                                },
+                            ),
                         )
                     }
                 } else {
@@ -182,7 +182,7 @@ fun DisplayScreen(
                                 Action(
                                     text = UiText.StringResource(R.string.retry),
                                     onClick = retryClick,
-                                )
+                                ),
                             )
                         else persistentListOf(),
                     contentPadding = incomingContentPadding,

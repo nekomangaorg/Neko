@@ -10,14 +10,14 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.theme.Size
 
 class LicensesController : BasicComposeController() {
     @Composable
     override fun ScreenContent() {
         NekoScaffold(
-            type = NekoScaffoldType.Title,
+            type = NekoTopAppBarType.Title,
             onNavigationIconClicked = router::handleBack,
             title = stringResource(id = R.string.open_source_licenses),
             content = { contentPadding ->

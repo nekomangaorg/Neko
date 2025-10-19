@@ -16,7 +16,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.stats.DetailedStats
@@ -72,7 +72,7 @@ fun StatsScreen(
         }
 
     NekoScaffold(
-        type = NekoScaffoldType.Title,
+        type = NekoTopAppBarType.Title,
         onNavigationIconClicked = onBackPressed,
         title = stringResource(id = titleText),
         actions = {

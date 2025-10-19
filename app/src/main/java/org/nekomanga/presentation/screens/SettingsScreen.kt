@@ -32,7 +32,7 @@ import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AdvancedSettingsScreen
@@ -70,12 +70,11 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
             entryProvider {
                 entry<Screens.Settings.Main> {
                     NekoScaffold(
-                        type = NekoScaffoldType.SearchOutlineDummy,
+                        type = NekoTopAppBarType.SearchOutlineDummy,
                         incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                         onNavigationIconClicked = onBackPressed,
                         title = stringResource(R.string.settings),
                         searchPlaceHolder = stringResource(R.string.search_settings),
-                        searchNavigationEnabled = true,
                         onSearchEnabled = { backStack.add(Screens.Settings.Search) },
                         content = { contentPadding ->
                             SettingsMainScreen(

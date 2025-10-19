@@ -31,7 +31,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.UiText
 import tachiyomi.core.util.system.setDefaultSettings
 
@@ -54,7 +54,7 @@ fun WebViewScreen(
     val navigator = rememberWebViewNavigator()
 
     NekoScaffold(
-        type = NekoScaffoldType.TitleAndSubtitle,
+        type = NekoTopAppBarType.TitleAndSubtitle,
         onNavigationIconClicked = onClose,
         title = title,
         subtitle = currentUrl,

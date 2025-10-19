@@ -29,7 +29,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.NekoTopAppBarType
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.screens.Screens
@@ -64,7 +64,7 @@ fun SettingsSearchScreen(
     var searchText: String? by remember { mutableStateOf("") }
 
     NekoScaffold(
-        type = NekoScaffoldType.SearchOutline,
+        type = NekoTopAppBarType.SearchOutline,
         incognitoMode = incognitoMode,
         focusRequester = focusRequester,
         onNavigationIconClicked = onNavigationIconClicked,
