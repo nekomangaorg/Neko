@@ -279,7 +279,8 @@ class Suwayomi : MergedServerSource() {
             var chapterNumber = previous.first!!.toLong()
             if (!previous.second) chapterNumber += 1
             val chtxt = "Ch.$chapterNumber"
-            val name = listOf(chtxt, "-", rawName).joinToString(" ")
+            val title = removeEndTag(rawName)
+            val name = listOf(chtxt, "-", title).joinToString(" ")
             edgeCases.remove("season")
             return Name.Sanitized(
                 name,
@@ -333,7 +334,7 @@ class Suwayomi : MergedServerSource() {
                         true -> ")"
                         false -> " "
                     }
-                title = title.replace(prefix, "").trimStart()
+                title = title.replaceFirst(prefix, "").trimStart()
                 vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
                 title = title.substringAfter(delimiter).trimStart()
                 if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
@@ -358,11 +359,7 @@ class Suwayomi : MergedServerSource() {
             return Name.NotSane
         }
 
-        if (Regex("\\[end].*", RegexOption.IGNORE_CASE).matches(title)) {
-            title = title.substringAfter("]").trimStart()
-        } else if (Regex(".*\\[end]", RegexOption.IGNORE_CASE).matches(title)) {
-            title = title.substringBefore("[").trimEnd()
-        }
+        title = removeEndTag(title)
         title = title.trimStart(':', '-').trimStart()
         if (title.isNotEmpty()) {
             chapterName.add("-")
@@ -370,6 +367,20 @@ class Suwayomi : MergedServerSource() {
         }
 
         return Name.Sanitized(chapterName.joinToString(" "), vol, chapter, chtxt, title)
+    }
+
+    fun removeEndTag(title: String): String {
+        var title = title
+        if (Regex("\\[end].*", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringAfter("]").trimStart()
+        } else if (Regex(".*\\[end]", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringBefore("[").trimEnd()
+        } else if (Regex("\\(end\\).*", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringAfter(")").trimStart()
+        } else if (Regex(".*\\(end\\)", RegexOption.IGNORE_CASE).matches(title)) {
+            title = title.substringBefore("(").trimEnd()
+        }
+        return title
     }
 
     // If this mutation fails due to the source, server-side, fetchChapters == null
