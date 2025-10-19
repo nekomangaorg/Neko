@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -234,7 +235,7 @@ private fun DownloadToComplete(
             targetState = AnimationState.MIDDLE
         }
     }
-    val transition = updateTransition(transitionState, label = "download-complete")
+    val transition = rememberTransition(transitionState, label = "download-complete")
     val animationSpec = tween<Float>(durationMillis = 500)
 
     val rotation by
