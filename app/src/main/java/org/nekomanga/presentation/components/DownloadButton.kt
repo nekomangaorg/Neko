@@ -14,8 +14,12 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -356,15 +360,32 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
     val disabledColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
 
-    Background(color = Color.Transparent, modifier = modifier) {
-        CircularProgressIndicator(
-            progress = { animatedProgress },
-            modifier = Modifier.size(Size.large),
-            color = buttonColor,
-            trackColor = buttonColor.copy(alpha = .4f),
-            strokeWidth = borderSize.dp,
+    val iconColor by
+        animateColorAsState(
+            targetValue =
+                if (animatedProgress < 0.4f) {
+                    disabledColor
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            label = "iconColor",
         )
-        DownloadIcon(color = disabledColor, icon = iconPainter)
+
+    Background(
+        color = buttonColor.copy(alpha = .4f),
+        borderStroke = BorderStroke(borderSize.dp, buttonColor),
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth().fillMaxHeight(animatedProgress).background(buttonColor),
+            )
+        }
+        DownloadIcon(color = iconColor, icon = iconPainter)
     }
 }
 
