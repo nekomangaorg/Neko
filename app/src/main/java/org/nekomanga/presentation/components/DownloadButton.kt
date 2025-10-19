@@ -14,6 +14,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
@@ -74,24 +76,16 @@ fun DownloadButton(
         var showChapterDropdown by remember { mutableStateOf(false) }
 
         var downloadComplete by remember { mutableStateOf(false) }
-        var wasDownloading by remember { mutableStateOf(false) }
+        var previousDownloadState by remember { mutableStateOf(downloadState) }
 
         LaunchedEffect(downloadState) {
-            when (downloadState) {
-                // this reset download complete in case you remove the chapter and want to
-                // redownload it
-                Download.State.NOT_DOWNLOADED -> downloadComplete = false
-                // this signals its downloading, so a future downloaded state triggers the animation
-                Download.State.DOWNLOADING -> wasDownloading = true
-                Download.State.DOWNLOADED -> {
-                    // this will run the animation for the check
-                    if (wasDownloading) {
-                        downloadComplete = true
-                        wasDownloading = false
-                    }
-                }
-                else -> Unit
+            if (previousDownloadState == Download.State.DOWNLOADING &&
+                downloadState == Download.State.DOWNLOADED) {
+                downloadComplete = true
+            } else if (downloadState == Download.State.NOT_DOWNLOADED) {
+                downloadComplete = false
             }
+            previousDownloadState = downloadState
         }
 
         val downloadButtonModifier =
@@ -318,7 +312,7 @@ private fun Queued(modifier: Modifier) {
     val disabledColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
     val infinitePulse = rememberInfiniteTransition(label = "queuedPulse")
-    val (initialState, finalState) = 0f to NekoColors.disabledAlphaLowContrast
+    val (initialState, finalState) = NekoColors.disabledAlphaLowContrast to NekoColors.disabledAlphaHighContrast
 
     val alpha =
         infinitePulse.animateFloat(
@@ -332,12 +326,11 @@ private fun Queued(modifier: Modifier) {
             label = "queuedAlpha",
         )
 
-    Background(color = Color.Transparent, modifier = modifier) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(Size.large),
-            color = disabledColor,
-            strokeWidth = borderSize.dp,
-        )
+    Background(
+        color = Color.Transparent,
+        borderStroke = BorderStroke(width = borderSize.dp, color = disabledColor.copy(alpha = alpha.value)),
+        modifier = modifier,
+    ) {
         DownloadIcon(
             color = disabledColor,
             icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward),
@@ -355,6 +348,26 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             label = "downloadingProgress",
         )
 
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite")
+    val waveOffset by
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 2000, easing = EaseInOutCirc),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "waveOffset",
+        )
+
+    val rotation by
+        animateFloatAsState(
+            targetValue = animatedProgress * 360,
+            animationSpec = tween(750),
+            label = "rotation",
+        )
+
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
     val disabledColor =
@@ -363,27 +376,43 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
     val iconColor by
         animateColorAsState(
             targetValue =
-                if (animatedProgress < 0.4f) {
-                    disabledColor
-                } else {
-                    MaterialTheme.colorScheme.surface
-                },
+            if (animatedProgress < 0.4f) {
+                disabledColor
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
             label = "iconColor",
         )
 
     Background(
         color = buttonColor.copy(alpha = .4f),
         borderStroke = BorderStroke(borderSize.dp, buttonColor),
-        modifier = modifier,
+        modifier = modifier.rotate(rotation),
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            Box(
-                modifier =
-                    Modifier.fillMaxWidth().fillMaxHeight(animatedProgress).background(buttonColor),
-            )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+            val fillHeight = height * (1 - animatedProgress)
+
+            val path = Path()
+            path.moveTo(0f, fillHeight)
+
+            val amplitude = height * 0.1f // Adjust for wave height
+            val frequency = 2 * Math.PI / width // Adjust for wave frequency
+
+            for (x in 0..width.toInt()) {
+                val y =
+                    fillHeight +
+                        amplitude *
+                        kotlin.math.sin((x * frequency + waveOffset * 2 * Math.PI)).toFloat()
+                path.lineTo(x.toFloat(), y)
+            }
+
+            path.lineTo(width, height)
+            path.lineTo(0f, height)
+            path.close()
+
+            drawPath(path = path, color = buttonColor)
         }
         DownloadIcon(color = iconColor, icon = iconPainter)
     }
