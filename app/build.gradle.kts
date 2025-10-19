@@ -107,7 +107,6 @@ dependencies {
     implementation(libs.bundles.ok)
     implementation(libs.tokenbucket)
     implementation(libs.timber)
-    implementation(libs.rx.java)
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
@@ -118,7 +117,6 @@ dependencies {
     implementation(libs.bundles.google)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
-    implementation(libs.bundles.rx)
     implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10

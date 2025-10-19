@@ -23,7 +23,6 @@ import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import org.nekomanga.logging.TimberKt
-import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
 /** Implementation of a [BaseViewer] to display pages with a [RecyclerView]. */
@@ -53,9 +52,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
     /** Configuration used by this viewer, like allow taps, or crop image borders. */
     val config = WebtoonConfig(scope)
-
-    /** Subscriptions to keep while this viewer is used. */
-    val subscriptions = CompositeSubscription()
 
     init {
         recycler.setBackgroundColor(Color.BLACK)
@@ -162,7 +158,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     override fun destroy() {
         super.destroy()
         scope.cancel()
-        subscriptions.unsubscribe()
 
         // Clear activity references
         recycler.adapter = null
