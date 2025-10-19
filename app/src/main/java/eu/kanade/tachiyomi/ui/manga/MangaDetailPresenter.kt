@@ -1707,18 +1707,50 @@ class MangaDetailPresenter(
 
     private fun updateDownloadState(download: Download) {
         presenterScope.launchIO {
-            val currentChapters = mangaDetailScreenState.value.activeChapters
-            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
-            if (index >= 0) {
-                val updateChapter =
-                    mangaDetailScreenState.value.activeChapters[index].copy(
-                        downloadState = download.status,
-                        downloadProgress = download.progress,
-                    )
-                _mangaDetailScreenState.update {
-                    it.copy(activeChapters = it.activeChapters.set(index, updateChapter))
-                }
+            _mangaDetailScreenState.update { state ->
+                state.copy(
+                    allChapters =
+                        updateChapterListForDownloadState(
+                            chapterId = download.chapterItem.id,
+                            downloadStatus = download.status,
+                            downloadProgress = download.progress,
+                            chapters = state.allChapters,
+                        ),
+                    activeChapters =
+                        updateChapterListForDownloadState(
+                            chapterId = download.chapterItem.id,
+                            downloadStatus = download.status,
+                            downloadProgress = download.progress,
+                            chapters = state.activeChapters,
+                        ),
+                    searchChapters =
+                        updateChapterListForDownloadState(
+                            chapterId = download.chapterItem.id,
+                            downloadStatus = download.status,
+                            downloadProgress = download.progress,
+                            chapters = state.searchChapters,
+                        ),
+                )
             }
+        }
+    }
+
+    fun updateChapterListForDownloadState(
+        chapterId: Long,
+        downloadStatus: Download.State,
+        downloadProgress: Int,
+        chapters: PersistentList<ChapterItem>,
+    ): PersistentList<ChapterItem> {
+        val index = chapters.indexOfFirst { it.chapter.id == chapterId }
+        return if (index >= 0) {
+            val updatedChapter =
+                chapters[index].copy(
+                    downloadState = downloadStatus,
+                    downloadProgress = downloadProgress,
+                )
+            chapters.set(index, updatedChapter)
+        } else {
+            chapters
         }
     }
 
