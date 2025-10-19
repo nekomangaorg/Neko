@@ -52,7 +52,6 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import me.saket.swipe.SwipeAction
 import org.nekomanga.R
@@ -388,28 +387,6 @@ private fun ChapterDownloadIndicator(
                 contentDescription = stringResource(id = R.string.unavailable),
                 modifier = Modifier.padding(Size.smedium).size(Size.large),
                 tint = themeColorState.primaryColor,
-            )
-        }
-        isDownloaded -> {
-            var showRemoveDropdown by remember { mutableStateOf(false) }
-            DownloadButton(
-                themeColorState = themeColorState,
-                modifier = Modifier,
-                downloadState = downloadState,
-                downloadProgress = downloadProgress,
-                onClick = { showRemoveDropdown = true },
-            )
-            SimpleDropdownMenu(
-                themeColorState = themeColorState,
-                expanded = showRemoveDropdown,
-                onDismiss = { showRemoveDropdown = false },
-                dropDownItems =
-                    persistentListOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.remove),
-                            onClick = { onDownload(MangaConstants.DownloadAction.Remove) },
-                        )
-                    ),
             )
         }
         else -> {
