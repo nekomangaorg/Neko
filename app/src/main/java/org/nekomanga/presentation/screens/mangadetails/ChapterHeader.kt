@@ -35,33 +35,35 @@ fun ChapterHeader(
     filterText: String,
     onClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = Size.small, vertical = Size.smedium),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ChapterText(numberOfChapters)
-            Spacer(Modifier.weight(1f))
+    if (numberOfChapters > 0 || filterText.isNotBlank()) {
+        CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .clickable(onClick = onClick)
+                        .padding(horizontal = Size.small, vertical = Size.smedium),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ChapterText(numberOfChapters)
+                Spacer(Modifier.weight(1f))
 
-            if (filterText.isNotBlank()) {
-                Text(
-                    text = filterText,
-                    color =
-                        MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = NekoColors.mediumAlphaLowContrast
-                        ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.requiredWidthIn(max = 200.dp).padding(end = Size.small),
-                    textAlign = TextAlign.End,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (filterText.isNotBlank()) {
+                    Text(
+                        text = filterText,
+                        color =
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.mediumAlphaLowContrast
+                            ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.requiredWidthIn(max = 200.dp).padding(end = Size.small),
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                FilterIcon(themeColor.primaryColor)
             }
-
-            FilterIcon(themeColor.primaryColor)
         }
     }
 }
