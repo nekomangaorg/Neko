@@ -427,6 +427,7 @@ class MangaDetailPresenter(
                             db.deleteChapters(localDbChapters).executeAsBlocking()
                         }
                     }
+                    updateRemovedDownload(chapterItems)
                 }
                 if (canUndo) {
                     _snackbarState.emit(
@@ -1751,6 +1752,38 @@ class MangaDetailPresenter(
             chapters.set(index, updatedChapter)
         } else {
             chapters
+        }
+    }
+
+    private fun updateRemovedDownload(chapterItems: List<ChapterItem>) {
+        presenterScope.launchIO {
+            chapterItems.forEach { chapterItem ->
+                _mangaDetailScreenState.update { state ->
+                    state.copy(
+                        allChapters =
+                            updateChapterListForDownloadState(
+                                chapterId = chapterItem.chapter.id,
+                                downloadStatus = Download.State.NOT_DOWNLOADED,
+                                downloadProgress = 0,
+                                chapters = state.allChapters,
+                            ),
+                        activeChapters =
+                            updateChapterListForDownloadState(
+                                chapterId = chapterItem.chapter.id,
+                                downloadStatus = Download.State.NOT_DOWNLOADED,
+                                downloadProgress = 0,
+                                chapters = state.activeChapters,
+                            ),
+                        searchChapters =
+                            updateChapterListForDownloadState(
+                                chapterId = chapterItem.chapter.id,
+                                downloadStatus = Download.State.NOT_DOWNLOADED,
+                                downloadProgress = 0,
+                                chapters = state.searchChapters,
+                            ),
+                    )
+                }
+            }
         }
     }
 
