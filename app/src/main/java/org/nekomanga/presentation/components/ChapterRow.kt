@@ -325,9 +325,11 @@ private fun ChapterTitle(
 }
 
 @Composable
-private fun ChapterSubtitle(subtitleText: String, language: String?, textColor: Color) {
+private fun ChapterSubtitle(subtitleText: String, language: String, textColor: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        language?.let { LanguageIcon(language = it, textColor = textColor) }
+        if (language.isNotBlank()) {
+            LanguageIcon(language = language, textColor = textColor)
+        }
         Text(
             text = subtitleText,
             style =
