@@ -182,7 +182,7 @@ class MangaDetailController(private val mangaId: Long) :
                     open = { chapterItem ->
                         openChapter(context, chapterItem.chapter.toDbChapter())
                     },
-                    blockScanlator = { _, _ -> /*presenter::blockScanlator*/ },
+                    blockScanlator = presenter::blockScanlator,
                     openComment = { chapterId -> presenter.openComment(context, chapterId) },
                     openInBrowser = { chapterItem ->
                         if (chapterItem.chapter.isUnavailable) {

@@ -1730,6 +1730,60 @@ class MangaDetailPresenter(
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
     }
 
+    fun blockScanlator(blockType: MangaConstants.BlockType, name: String) {
+        presenterScope.launchIO {
+            when (blockType) {
+                MangaConstants.BlockType.Group -> {
+                    val scanlatorGroupImpl = db.getScanlatorGroupByName(name).executeAsBlocking()
+                    if (scanlatorGroupImpl == null) {
+                        launchIO { mangaUpdateCoordinator.updateGroup(name) }
+                    }
+                    val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
+                    blockedGroups.add(name)
+                    mangaDexPreferences.blockedGroups().set(blockedGroups)
+                }
+                MangaConstants.BlockType.Uploader -> {
+                    val uploaderImpl = db.getUploaderByName(name).executeAsBlocking()
+                    if (uploaderImpl == null) {
+                        launchIO { mangaUpdateCoordinator.updateUploader(name) }
+                    }
+                    val blockedUploaders =
+                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                    blockedUploaders.add(name)
+                    mangaDexPreferences.blockedUploaders().set(blockedUploaders)
+                }
+            }
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.globally_blocked_group_,
+                    message = name,
+                    actionLabelRes = R.string.undo,
+                    action = {
+                        presenterScope.launchIO {
+                            when (blockType) {
+                                MangaConstants.BlockType.Group -> {
+                                    db.deleteScanlatorGroup(name).executeOnIO()
+                                    val allBlockedGroups =
+                                        mangaDexPreferences.blockedGroups().get().toMutableSet()
+                                    allBlockedGroups.remove(name)
+                                    mangaDexPreferences.blockedGroups().set(allBlockedGroups)
+                                }
+
+                                MangaConstants.BlockType.Uploader -> {
+                                    db.deleteUploader(name).executeOnIO()
+                                    val allBlockedUploaders =
+                                        mangaDexPreferences.blockedUploaders().get().toMutableSet()
+                                    allBlockedUploaders.remove(name)
+                                    mangaDexPreferences.blockedUploaders().set(allBlockedUploaders)
+                                }
+                            }
+                        }
+                    },
+                )
+            )
+        }
+    }
+
     private fun mangaSortMatchesDefault(manga: Manga): Boolean {
         return (manga.sortDescending == mangaDetailsPreferences.chaptersDescAsDefault().get() &&
             manga.sorting == mangaDetailsPreferences.sortChapterOrder().get()) ||
