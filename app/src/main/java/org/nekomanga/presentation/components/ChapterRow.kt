@@ -220,7 +220,7 @@ private fun ChapterRowContent(
         Column(modifier = Modifier.weight(1f)) {
             ChapterTitle(
                 shouldHideChapterTitles = shouldHideChapterTitles,
-                title = chapterItem.chapter.chapterTitle,
+                title = chapterItem.chapter.name,
                 chapterNumber = chapterItem.chapter.chapterNumber.toDouble(),
                 isBookmarked = chapterItem.chapter.bookmark,
                 textColor = textColor,
