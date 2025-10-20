@@ -2,7 +2,8 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -27,12 +27,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
@@ -46,6 +46,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun MangaDetailsHeader(
     mangaDetailScreenState: MangaConstants.MangaDetailScreenState,
+    backdropHeight: Dp,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackers: Boolean,
     themeColorState: ThemeColorState,
@@ -74,39 +75,25 @@ fun MangaDetailsHeader(
         val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
         val isDescriptionExpanded = isTablet || isDescriptionManuallyExpanded
 
-        // 2. Memoized Calculation: Avoid recalculating backdrop height on every recomposition.
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        val backdropHeight =
-            remember(
-                mangaDetailScreenState.isSearching,
-                mangaDetailScreenState.backdropSize,
-                screenHeight,
-            ) {
-                when {
-                    mangaDetailScreenState.isSearching -> (screenHeight / 4).dp
-                    else ->
-                        when (mangaDetailScreenState.backdropSize) {
-                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                            MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
-                        }
-                }
-            }
+        val alpha: Float by
+            animateFloatAsState(
+                targetValue = if (mangaDetailScreenState.initialized) 1f else 0f,
+                animationSpec = tween(durationMillis = 600, delayMillis = 200),
+            )
 
         Column {
             Box {
-                BackDrop(
+                AnimatedBackdropContainer(
+                    backdropHeight = backdropHeight,
                     themeColorState = themeColorState,
                     artwork = mangaDetailScreenState.currentArtwork,
                     showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
-                    modifier =
-                        Modifier.animateContentSize()
-                            .fillMaxWidth()
-                            .requiredHeightIn(min = 250.dp, max = maxOf(250.dp, backdropHeight)),
+                    initialized = mangaDetailScreenState.initialized,
                     generatePalette = generatePalette,
                 )
-
-                Column(modifier = Modifier.align(Alignment.BottomStart)) {
+                Column(
+                    modifier = Modifier.align(Alignment.BottomStart).graphicsLayer(alpha = alpha)
+                ) {
                     InformationBlock(
                         themeColorState = themeColorState,
                         title = mangaDetailScreenState.currentTitle,
@@ -160,9 +147,8 @@ fun MangaDetailsHeader(
                     }
                 }
             }
-
             AnimatedVisibility(
-                visible = !mangaDetailScreenState.isSearching,
+                visible = mangaDetailScreenState.initialized && !mangaDetailScreenState.isSearching,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
