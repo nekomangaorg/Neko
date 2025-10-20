@@ -237,7 +237,7 @@ private fun DownloadToComplete(modifier: Modifier, color: Color, onAnimationComp
         MutableTransitionState(AnimationState.START).apply { targetState = AnimationState.MIDDLE }
     }
     val transition = rememberTransition(transitionState, label = "download-complete")
-    val animationSpec = tween<Float>(durationMillis = 500)
+    val animationSpec = tween<Float>(durationMillis = 200)
 
     val rotation by
         transition.animateFloat(label = "rotation", transitionSpec = { animationSpec }) {
@@ -270,7 +270,7 @@ private fun DownloadToComplete(modifier: Modifier, color: Color, onAnimationComp
 
     LaunchedEffect(transition.currentState) {
         if (transition.currentState == AnimationState.MIDDLE) {
-            delay(2000)
+            delay(1000)
             transitionState.targetState = AnimationState.END
         } else if (
             transition.currentState == AnimationState.END &&
