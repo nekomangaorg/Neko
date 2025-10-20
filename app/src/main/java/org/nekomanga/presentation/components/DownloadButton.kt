@@ -22,9 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -156,9 +153,20 @@ fun DownloadButton(
                         )
                     )
                 }
-                Download.State.QUEUE,
-                Download.State.DOWNLOADING,
                 Download.State.ERROR -> {
+                    persistentListOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.cancel),
+                            onClick = {
+                                scope.launchDelayed {
+                                    onClick(MangaConstants.DownloadAction.Cancel)
+                                }
+                            },
+                        )
+                    )
+                }
+                Download.State.QUEUE,
+                Download.State.DOWNLOADING -> {
                     persistentListOf(
                         SimpleDropDownItem.Action(
                             text = UiText.StringResource(R.string.start_downloading_now),
@@ -530,11 +538,7 @@ private fun DownloadButtonPreview() {
                 downloadProgress = 0,
                 onClick = {},
             )
-            DownloadButton(
-                downloadState = Download.State.QUEUE,
-                downloadProgress = 0,
-                onClick = {},
-            )
+            DownloadButton(downloadState = Download.State.QUEUE, downloadProgress = 0, onClick = {})
             DownloadButton(
                 downloadState = Download.State.DOWNLOADING,
                 downloadProgress = 35,
@@ -545,11 +549,7 @@ private fun DownloadButtonPreview() {
                 downloadProgress = 100,
                 onClick = {},
             )
-            DownloadButton(
-                downloadState = Download.State.ERROR,
-                downloadProgress = 0,
-                onClick = {},
-            )
+            DownloadButton(downloadState = Download.State.ERROR, downloadProgress = 0, onClick = {})
         }
     }
 }
