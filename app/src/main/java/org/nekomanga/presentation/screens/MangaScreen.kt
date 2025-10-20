@@ -74,6 +74,7 @@ import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
+import org.nekomanga.presentation.screens.mangadetails.BackDrop
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -103,6 +104,7 @@ fun MangaScreen(
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
 ) {
+
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -142,6 +144,17 @@ fun MangaScreen(
                 defaultColorState
             }
         }
+
+    if (!screenState.initialized) {
+        BackDrop(
+            themeColorState = themeColorState,
+            artwork = screenState.currentArtwork,
+            showBackdrop = screenState.themeBasedOffCovers,
+            modifier = Modifier.fillMaxSize(),
+            generatePalette = generatePalette,
+        )
+        return
+    }
 
     var currentBottomSheet by remember { mutableStateOf<DetailsBottomSheetScreen?>(null) }
 
