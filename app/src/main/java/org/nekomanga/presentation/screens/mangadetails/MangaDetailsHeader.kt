@@ -2,7 +2,8 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -27,12 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -76,70 +75,74 @@ fun MangaDetailsHeader(
         val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
         val isDescriptionExpanded = isTablet || isDescriptionManuallyExpanded
 
+        val alpha: Float by
+            animateFloatAsState(
+                targetValue = if (mangaDetailScreenState.initialized) 1f else 0f,
+                animationSpec = tween(durationMillis = 600, delayMillis = 200),
+            )
+
         Column {
             Box {
-                BackDrop(
+                AnimatedBackdropContainer(
+                    backdropHeight = backdropHeight,
                     themeColorState = themeColorState,
                     artwork = mangaDetailScreenState.currentArtwork,
                     showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
-                    modifier = Modifier.fillMaxWidth().height(backdropHeight),
+                    initialized = mangaDetailScreenState.initialized,
                     generatePalette = generatePalette,
                 )
-                AnimatedVisibility(visible = mangaDetailScreenState.initialized) {
-                    Column(modifier = Modifier.align(Alignment.BottomStart)) {
-                        InformationBlock(
-                            themeColorState = themeColorState,
-                            title = mangaDetailScreenState.currentTitle,
-                            author = mangaDetailScreenState.author,
-                            artist = mangaDetailScreenState.artist,
-                            stats = mangaDetailScreenState.stats,
-                            langFlag = mangaDetailScreenState.langFlag,
-                            status = mangaDetailScreenState.status,
-                            lastChapter =
-                                mangaDetailScreenState.lastVolume to
-                                    mangaDetailScreenState.lastChapter,
-                            isPornographic = mangaDetailScreenState.isPornographic,
-                            missingChapters = mangaDetailScreenState.missingChapters,
-                            estimatedMissingChapters =
-                                mangaDetailScreenState.estimatedMissingChapters,
-                            isExpanded = isDescriptionExpanded,
-                            showMergedIcon =
-                                mangaDetailScreenState.isMerged is
-                                    MergeConstants.IsMergedManga.Yes &&
-                                    !mangaDetailScreenState.hideButtonText,
-                            modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
-                            titleLongClick = informationActions.titleLongClick,
-                            creatorCopyClick = informationActions.creatorCopy,
-                            creatorSearchClick = informationActions.creatorSearch,
-                        )
+                Column(
+                    modifier = Modifier.align(Alignment.BottomStart).graphicsLayer(alpha = alpha)
+                ) {
+                    InformationBlock(
+                        themeColorState = themeColorState,
+                        title = mangaDetailScreenState.currentTitle,
+                        author = mangaDetailScreenState.author,
+                        artist = mangaDetailScreenState.artist,
+                        stats = mangaDetailScreenState.stats,
+                        langFlag = mangaDetailScreenState.langFlag,
+                        status = mangaDetailScreenState.status,
+                        lastChapter =
+                            mangaDetailScreenState.lastVolume to mangaDetailScreenState.lastChapter,
+                        isPornographic = mangaDetailScreenState.isPornographic,
+                        missingChapters = mangaDetailScreenState.missingChapters,
+                        estimatedMissingChapters = mangaDetailScreenState.estimatedMissingChapters,
+                        isExpanded = isDescriptionExpanded,
+                        showMergedIcon =
+                            mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes &&
+                                !mangaDetailScreenState.hideButtonText,
+                        modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
+                        titleLongClick = informationActions.titleLongClick,
+                        creatorCopyClick = informationActions.creatorCopy,
+                        creatorSearchClick = informationActions.creatorSearch,
+                    )
 
-                        AnimatedVisibility(
-                            visible = !mangaDetailScreenState.isSearching,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically(),
-                        ) {
-                            Column(modifier = Modifier.padding(bottom = Size.medium)) {
-                                Gap(Size.medium)
-                                ButtonBlock(
-                                    hideButtonText = mangaDetailScreenState.hideButtonText,
-                                    isInitialized = mangaDetailScreenState.initialized,
-                                    isMerged =
-                                        mangaDetailScreenState.isMerged is
-                                            MergeConstants.IsMergedManga.Yes,
-                                    inLibrary = mangaDetailScreenState.inLibrary,
-                                    loggedIntoTrackers = isLoggedIntoTrackers,
-                                    trackServiceCount = mangaDetailScreenState.trackServiceCount,
-                                    themeColorState = themeColorState,
-                                    toggleFavorite = toggleFavorite,
-                                    trackingClick = onTrackingClick,
-                                    artworkClick = onArtworkClick,
-                                    similarClick = onSimilarClick,
-                                    mergeClick = onMergeClick,
-                                    linksClick = onLinksClick,
-                                    shareClick = onShareClick,
-                                    moveCategories = onCategoriesClick,
-                                )
-                            }
+                    AnimatedVisibility(
+                        visible = !mangaDetailScreenState.isSearching,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                    ) {
+                        Column(modifier = Modifier.padding(bottom = Size.medium)) {
+                            Gap(Size.medium)
+                            ButtonBlock(
+                                hideButtonText = mangaDetailScreenState.hideButtonText,
+                                isInitialized = mangaDetailScreenState.initialized,
+                                isMerged =
+                                    mangaDetailScreenState.isMerged
+                                        is MergeConstants.IsMergedManga.Yes,
+                                inLibrary = mangaDetailScreenState.inLibrary,
+                                loggedIntoTrackers = isLoggedIntoTrackers,
+                                trackServiceCount = mangaDetailScreenState.trackServiceCount,
+                                themeColorState = themeColorState,
+                                toggleFavorite = toggleFavorite,
+                                trackingClick = onTrackingClick,
+                                artworkClick = onArtworkClick,
+                                similarClick = onSimilarClick,
+                                mergeClick = onMergeClick,
+                                linksClick = onLinksClick,
+                                shareClick = onShareClick,
+                                moveCategories = onCategoriesClick,
+                            )
                         }
                     }
                 }

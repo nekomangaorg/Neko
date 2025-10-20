@@ -37,10 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -264,7 +265,7 @@ fun MangaScreen(
                                     MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
                                     MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
                                 }
-                        },
+                        }
                 )
 
             if (isTablet) {
@@ -398,8 +399,6 @@ private fun LazyListScope.chapterList(
     }
 }
 
-import androidx.compose.ui.unit.Dp
-
 @Composable
 private fun VerticalLayout(
     incomingPadding: PaddingValues,
@@ -454,10 +453,11 @@ private fun VerticalLayout(
                     if (screenState.isSearching) screenState.searchChapters
                     else screenState.activeChapters,
                 screenState = screenState,
-            themeColorState = themeColorState,
-            chapterActions = chapterActions,
-            onOpenSheet = onOpenSheet,
-        )
+                themeColorState = themeColorState,
+                chapterActions = chapterActions,
+                onOpenSheet = onOpenSheet,
+            )
+        }
     }
 }
 
@@ -533,10 +533,11 @@ private fun SideBySideLayout(
                         if (screenState.isSearching) screenState.searchChapters
                         else screenState.activeChapters,
                     screenState = screenState,
-                themeColorState = themeColorState,
-                chapterActions = chapterActions,
-                onOpenSheet = onOpenSheet,
-            )
+                    themeColorState = themeColorState,
+                    chapterActions = chapterActions,
+                    onOpenSheet = onOpenSheet,
+                )
+            }
         }
     }
 }
