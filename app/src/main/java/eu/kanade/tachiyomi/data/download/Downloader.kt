@@ -307,11 +307,10 @@ class Downloader(
 
         val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
         if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
+            val errorMessage = context.getString(R.string.couldnt_download_low_space)
+            download.errorMessage = errorMessage
             download.status = Download.State.ERROR
-            notifier.onError(
-                context.getString(R.string.couldnt_download_low_space),
-                download.chapterItem.name,
-            )
+            notifier.onError(errorMessage, download.chapterItem.name)
             return
         }
 
@@ -384,6 +383,7 @@ class Downloader(
             if (error is CancellationException) throw error
             // If the page list threw, it will resume here
             TimberKt.e(error)
+            download.errorMessage = error.message
             download.status = Download.State.ERROR
             notifier.onError(error.message, download.chapterItem.name, download.mangaItem.title)
         }

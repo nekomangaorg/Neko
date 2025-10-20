@@ -31,6 +31,8 @@ data class Download(
 
     var pages: List<Page>? = null
 
+    var errorMessage: String? = null
+
     val totalProgress: Int
         get() = pages?.sumOf(Page::progress) ?: 0
 
