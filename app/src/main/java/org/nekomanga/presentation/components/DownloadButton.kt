@@ -42,7 +42,6 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
-import org.nekomanga.presentation.components.theme.Shapes
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -433,8 +432,8 @@ private fun Background(
 
     Box(modifier = Modifier.size(Size.ExtraLarge + 4.dp), contentAlignment = Alignment.Center) {
         Surface(
-            modifier = modifier.clip(Shapes.Sunny).size(Size.ExtraLarge),
-            shape = Shapes.Sunny,
+            modifier = modifier.clip(MaterialTheme.shapes.extraLarge).size(Size.ExtraLarge),
+            shape = MaterialTheme.shapes.extraLarge,
             border =
                 if (!filled) {
                     androidx.compose.foundation.BorderStroke(
