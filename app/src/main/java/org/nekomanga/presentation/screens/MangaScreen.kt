@@ -2,39 +2,7 @@ package org.nekomanga.presentation.screens
 
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -49,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -112,7 +79,7 @@ import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.screens.mangadetails.BackDrop
+import org.nekomanga.presentation.screens.mangadetails.AnimatedBackdropContainer
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -274,19 +241,17 @@ fun MangaScreen(
         },
     ) { incomingPaddingValues ->
         Box {
-            BackDrop(
+            AnimatedBackdropContainer(
                 themeColorState = themeColorState,
                 artwork = screenState.currentArtwork,
                 showBackdrop = screenState.themeBasedOffCovers,
-                modifier =
-                    Modifier.animateContentSize(animationSpec = tween(1200))
-                        .fillMaxWidth()
-                        .requiredHeightIn(min = 250.dp, max = maxOf(250.dp, backdropHeight)),
+                initialized = screenState.initialized,
+                backdropHeight = backdropHeight,
                 generatePalette = generatePalette,
             )
             AnimatedVisibility(
                 visible = screenState.initialized,
-                enter = fadeIn(animationSpec = tween(1200)),
+                enter = fadeIn(animationSpec = tween(1200, delayMillis = 1200)),
             ) {
                 PullRefresh(
                     isRefreshing = screenState.isRefreshing,
@@ -298,74 +263,78 @@ fun MangaScreen(
                             !screenState.forcePortrait
 
                     val onToggleFavoriteAction =
-                remember(
-                    screenState.inLibrary,
-                    screenState.allCategories,
-                    screenState.hasDefaultCategory,
-                ) {
-                    {
-                        if (!screenState.inLibrary && screenState.allCategories.isNotEmpty()) {
-                            if (screenState.hasDefaultCategory) {
-                                onToggleFavorite(true)
-                            } else {
-                                openSheet(
-                                    DetailsBottomSheetScreen.CategoriesSheet(
-                                        addingToLibrary = true,
-                                        setCategories = categoryActions.set,
-                                        addToLibraryClick = { onToggleFavorite(false) },
-                                    )
-                                )
+                        remember(
+                            screenState.inLibrary,
+                            screenState.allCategories,
+                            screenState.hasDefaultCategory,
+                        ) {
+                            {
+                                if (
+                                    !screenState.inLibrary && screenState.allCategories.isNotEmpty()
+                                ) {
+                                    if (screenState.hasDefaultCategory) {
+                                        onToggleFavorite(true)
+                                    } else {
+                                        openSheet(
+                                            DetailsBottomSheetScreen.CategoriesSheet(
+                                                addingToLibrary = true,
+                                                setCategories = categoryActions.set,
+                                                addToLibraryClick = { onToggleFavorite(false) },
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    onToggleFavorite(false)
+                                }
                             }
-                        } else {
-                            onToggleFavorite(false)
                         }
+
+                    if (isTablet) {
+                        SideBySideLayout(
+                            incomingPadding = incomingPaddingValues,
+                            screenState = screenState,
+                            windowSizeClass = windowSizeClass,
+                            themeColorState = themeColorState,
+                            chapterActions = chapterActions,
+                            informationActions = informationActions,
+                            descriptionActions = descriptionActions,
+                            onSimilarClick = onSimilarClick,
+                            onShareClick = onShareClick,
+                            onToggleFavorite = onToggleFavoriteAction,
+                            generatePalette = generatePalette,
+                            onOpenSheet = ::openSheet,
+                            categoryActions = categoryActions,
+                        )
+                    } else {
+                        VerticalLayout(
+                            incomingPadding = incomingPaddingValues,
+                            screenState = screenState,
+                            windowSizeClass = windowSizeClass,
+                            themeColorState = themeColorState,
+                            chapterActions = chapterActions,
+                            informationActions = informationActions,
+                            descriptionActions = descriptionActions,
+                            onSimilarClick = onSimilarClick,
+                            onShareClick = onShareClick,
+                            onToggleFavorite = onToggleFavoriteAction,
+                            generatePalette = generatePalette,
+                            onOpenSheet = ::openSheet,
+                            categoryActions = categoryActions,
+                        )
+                    }
+
+                    if (screenState.removedChapters.isNotEmpty()) {
+                        RemovedChaptersDialog(
+                            themeColorState = themeColorState,
+                            chapters = screenState.removedChapters,
+                            onConfirm = {
+                                chapterActions.delete(screenState.removedChapters)
+                                chapterActions.clearRemoved()
+                            },
+                            onDismiss = { chapterActions.clearRemoved() },
+                        )
                     }
                 }
-
-            if (isTablet) {
-                SideBySideLayout(
-                    incomingPadding = incomingPaddingValues,
-                    screenState = screenState,
-                    windowSizeClass = windowSizeClass,
-                    themeColorState = themeColorState,
-                    chapterActions = chapterActions,
-                    informationActions = informationActions,
-                    descriptionActions = descriptionActions,
-                    onSimilarClick = onSimilarClick,
-                    onShareClick = onShareClick,
-                    onToggleFavorite = onToggleFavoriteAction,
-                    generatePalette = generatePalette,
-                    onOpenSheet = ::openSheet,
-                    categoryActions = categoryActions,
-                )
-            } else {
-                VerticalLayout(
-                    incomingPadding = incomingPaddingValues,
-                    screenState = screenState,
-                    windowSizeClass = windowSizeClass,
-                    themeColorState = themeColorState,
-                    chapterActions = chapterActions,
-                    informationActions = informationActions,
-                    descriptionActions = descriptionActions,
-                    onSimilarClick = onSimilarClick,
-                    onShareClick = onShareClick,
-                    onToggleFavorite = onToggleFavoriteAction,
-                    generatePalette = generatePalette,
-                    onOpenSheet = ::openSheet,
-                    categoryActions = categoryActions,
-                )
-            }
-
-            if (screenState.removedChapters.isNotEmpty()) {
-                RemovedChaptersDialog(
-                    themeColorState = themeColorState,
-                    chapters = screenState.removedChapters,
-                    onConfirm = {
-                        chapterActions.delete(screenState.removedChapters)
-                        chapterActions.clearRemoved()
-                    },
-                    onDismiss = { chapterActions.clearRemoved() },
-                )
             }
         }
     }

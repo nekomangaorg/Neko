@@ -2,17 +2,14 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -30,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -129,8 +125,7 @@ fun MangaDetailsHeader(
                             hideButtonText = mangaDetailScreenState.hideButtonText,
                             isInitialized = mangaDetailScreenState.initialized,
                             isMerged =
-                                mangaDetailScreenState.isMerged
-                                    is MergeConstants.IsMergedManga.Yes,
+                                mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes,
                             inLibrary = mangaDetailScreenState.inLibrary,
                             loggedIntoTrackers = isLoggedIntoTrackers,
                             trackServiceCount = mangaDetailScreenState.trackServiceCount,
