@@ -75,6 +75,7 @@ fun DownloadButton(
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         var showChapterDropdown by remember { mutableStateOf(false) }
+        var isDraining by remember { mutableStateOf(false) }
 
         var downloadComplete by remember { mutableStateOf(false) }
         var previousDownloadState by remember { mutableStateOf(downloadState) }
@@ -101,27 +102,37 @@ fun DownloadButton(
                 onLongClick = {},
             )
 
-        when (downloadState) {
-            Download.State.ERROR ->
+        when {
+            isDraining -> {
+                Draining(
+                    buttonColor = themeColorState.primaryColor,
+                    modifier = downloadButtonModifier,
+                    onAnimationEnd = {
+                        isDraining = false
+                        onClick(MangaConstants.DownloadAction.Remove)
+                    },
+                )
+            }
+            downloadState == Download.State.ERROR ->
                 NotDownloaded(
                     buttonColor = MaterialTheme.colorScheme.error,
                     modifier = downloadButtonModifier,
                 )
-            Download.State.NOT_DOWNLOADED ->
+            downloadState == Download.State.NOT_DOWNLOADED ->
                 NotDownloaded(
                     buttonColor = themeColorState.primaryColor,
                     modifier = downloadButtonModifier,
                     defaultDisableColor = defaultDisableColor,
                 )
-            Download.State.QUEUE -> Queued(modifier = downloadButtonModifier)
-            Download.State.DOWNLOADED ->
+            downloadState == Download.State.QUEUE -> Queued(modifier = downloadButtonModifier)
+            downloadState == Download.State.DOWNLOADED ->
                 Downloaded(
                     buttonColor = themeColorState.primaryColor,
                     downloadComplete = downloadComplete,
                     modifier = downloadButtonModifier,
                     onAnimationComplete = { downloadComplete = false },
                 )
-            Download.State.DOWNLOADING ->
+            downloadState == Download.State.DOWNLOADING ->
                 Downloading(
                     buttonColor = themeColorState.primaryColor,
                     modifier = downloadButtonModifier,
@@ -136,9 +147,7 @@ fun DownloadButton(
                     persistentListOf(
                         SimpleDropDownItem.Action(
                             text = UiText.StringResource(R.string.remove),
-                            onClick = {
-                                scope.launchDelayed { onClick(MangaConstants.DownloadAction.Remove) }
-                            },
+                            onClick = { isDraining = true },
                         ),
                     )
                 }
@@ -307,6 +316,88 @@ private enum class AnimationState {
     START,
     MIDDLE,
     END,
+}
+
+@Composable
+private fun Draining(
+    buttonColor: Color,
+    modifier: Modifier,
+    onAnimationEnd: () -> Unit,
+) {
+    var progress by remember { mutableStateOf(1f) }
+
+    val animatedProgress by
+        animateFloatAsState(
+            targetValue = progress,
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+            label = "downloadingProgress",
+            finishedListener = { onAnimationEnd() },
+        )
+
+    LaunchedEffect(key1 = Unit) {
+        progress = 0f
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite")
+    val waveOffset by
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(durationMillis = 2000, easing = EaseInOutCirc),
+                    repeatMode = RepeatMode.Restart,
+                ),
+            label = "waveOffset",
+        )
+
+    val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
+
+    val iconColor by
+        animateColorAsState(
+            targetValue =
+                if (animatedProgress < 0.4f) {
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.disabledAlphaLowContrast
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            label = "iconColor",
+        )
+
+    Background(
+        color = buttonColor.copy(alpha = .4f),
+        borderStroke = BorderStroke(borderSize.dp, buttonColor),
+        modifier = modifier,
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+            val fillHeight = height * (1 - animatedProgress)
+
+            val path = Path()
+            path.moveTo(0f, fillHeight)
+
+            val amplitude = height * 0.1f // Adjust for wave height
+            val frequency = 2 * Math.PI / width // Adjust for wave frequency
+
+            for (x in 0..width.toInt()) {
+                val y =
+                    fillHeight +
+                        amplitude *
+                            kotlin.math.sin((x * frequency + waveOffset * 2 * Math.PI)).toFloat()
+                path.lineTo(x.toFloat(), y)
+            }
+
+            path.lineTo(width, height)
+            path.lineTo(0f, height)
+            path.close()
+
+            drawPath(path = path, color = buttonColor)
+        }
+        DownloadIcon(color = iconColor, icon = iconPainter)
+    }
 }
 
 @Composable
