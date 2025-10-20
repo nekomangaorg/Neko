@@ -49,7 +49,6 @@ fun MangaDetailsHeader(
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackers: Boolean,
     themeColorState: ThemeColorState,
-    generatePalette: (Drawable) -> Unit,
     toggleFavorite: () -> Unit,
     onCategoriesClick: () -> Unit,
     onTrackingClick: () -> Unit,
@@ -94,22 +93,10 @@ fun MangaDetailsHeader(
             }
 
         Column {
-            Box {
-                BackDrop(
+            Column(modifier = Modifier.align(Alignment.BottomStart)) {
+                InformationBlock(
                     themeColorState = themeColorState,
-                    artwork = mangaDetailScreenState.currentArtwork,
-                    showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
-                    modifier =
-                        Modifier.animateContentSize()
-                            .fillMaxWidth()
-                            .requiredHeightIn(min = 250.dp, max = maxOf(250.dp, backdropHeight)),
-                    generatePalette = generatePalette,
-                )
-
-                Column(modifier = Modifier.align(Alignment.BottomStart)) {
-                    InformationBlock(
-                        themeColorState = themeColorState,
-                        title = mangaDetailScreenState.currentTitle,
+                    title = mangaDetailScreenState.currentTitle,
                         author = mangaDetailScreenState.author,
                         artist = mangaDetailScreenState.artist,
                         stats = mangaDetailScreenState.stats,
