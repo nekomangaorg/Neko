@@ -33,13 +33,11 @@ fun ExternalLinksSheet(
     onLinkClick: (String, String) -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {

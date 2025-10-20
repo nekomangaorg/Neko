@@ -213,7 +213,7 @@ private fun QuickReadButton(
     onClick: () -> Unit,
 ) {
     if (quickReadText.isNotBlank()) {
-        Spacer(modifier = Modifier.size(Size.tiny))
+        Spacer(modifier = Modifier.size(Size.medium))
         CompositionLocalProvider(
             LocalRippleConfiguration provides
                 nekoRippleConfiguration(themeColorState.containerColor)
