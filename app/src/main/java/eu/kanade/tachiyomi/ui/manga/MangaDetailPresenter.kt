@@ -1753,6 +1753,9 @@ class MangaDetailPresenter(
 
     private fun updateDownloadState(download: Download) {
         presenterScope.launchIO {
+            if (download.status == Download.State.ERROR && download.errorMessage != null) {
+                _snackbarState.emit(SnackbarState(message = download.errorMessage))
+            }
             _mangaDetailScreenState.update { state ->
                 state.copy(
                     allChapters =
