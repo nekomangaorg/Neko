@@ -169,6 +169,11 @@ class MangaDetailPresenter(
             transform(t1.first, t1.second, t1.third, t2.first, t2.second, t2.third)
         }
 
+    override fun onResume() {
+        super.onResume()
+        observeDownloads()
+    }
+
     override fun onCreate() {
         super.onCreate()
         presenterScope.launchIO {
@@ -322,6 +327,8 @@ class MangaDetailPresenter(
                             trackServiceCount = allInfo.trackServiceCount,
                         )
                     }
+
+                    syncChaptersReadStatus()
 
                     val chapterCountChanged =
                         allInfo.mangaItem.missingChapters !=
@@ -1685,6 +1692,44 @@ class MangaDetailPresenter(
                     }
                 }
             }
+        }
+    }
+
+    private fun syncChaptersReadStatus() {
+        presenterScope.launchIO {
+            if (
+                !mangaDexPreferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline()
+            ) {
+                return@launchIO
+            }
+
+            runCatching {
+                    val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+                    statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
+                        val chaptersToMarkRead =
+                            mangaDetailScreenState.value.allChapters
+                                .asSequence()
+                                .filter { !it.chapter.isMergedChapter() }
+                                .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
+                                .toList()
+                        if (chaptersToMarkRead.isNotEmpty()) {
+                            markChapters(
+                                chaptersToMarkRead,
+                                ChapterMarkActions.Read(),
+                                skipSync = true,
+                            )
+                        }
+                    }
+                }
+                .onFailure {
+                    TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
+                    presenterScope.launchIO {
+                        delay(3000)
+                        _snackbarState.emit(
+                            SnackbarState("Error trying to mark chapters read from MangaDex $it")
+                        )
+                    }
+                }
         }
     }
 
