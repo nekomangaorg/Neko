@@ -2,7 +2,7 @@ package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,25 +33,44 @@ fun ExternalLinksSheet(
     onLinkClick: (String, String) -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleConfiguration provides themeColorState.rippleConfiguration
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
     ) {
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
-                horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Size.small),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
-                externalLinks.forEach { LinkCard(externalLink = it, onLinkClick = onLinkClick) }
+                externalLinks.chunked(2).forEach {
+                    Row(
+                        modifier = if (it.size == 1) Modifier else Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    ) {
+                        it.forEach { externalLink ->
+                            LinkCard(
+                                modifier = if (it.size > 1) Modifier.weight(1f) else Modifier,
+                                externalLink = externalLink,
+                                onLinkClick = onLinkClick,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -> Unit) {
+private fun LinkCard(
+    modifier: Modifier = Modifier,
+    externalLink: ExternalLink,
+    onLinkClick: (String, String) -> Unit,
+) {
     OutlinedCard(
         onClick = { onLinkClick(externalLink.getUrl(), externalLink.name) },
-        modifier = Modifier.height(Size.huge),
+        modifier = modifier.height(Size.huge),
         colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.logoColor)),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxHeight()) {
