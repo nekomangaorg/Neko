@@ -47,13 +47,13 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.icons.AccountTreeIcon
 import org.nekomanga.presentation.components.icons.ArtTrackIcon
-import org.nekomanga.presentation.components.icons.CheckDecagramIcon
+import org.nekomanga.presentation.components.icons.MergeCheckIcon
+import org.nekomanga.presentation.components.icons.MergeIcon
 import org.nekomanga.presentation.components.icons.Numeric0BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric1BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric2BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric3BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric4BoxOutlineIcon
-import org.nekomanga.presentation.components.icons.SourceMergeIcon
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -179,7 +179,7 @@ fun ButtonBlock(
                     )
                     add(
                         ActionButtonData(
-                            icon = if (isMerged) CheckDecagramIcon else SourceMergeIcon,
+                            icon = if (isMerged) MergeCheckIcon else MergeIcon,
                             text =
                                 UiText.StringResource(
                                     if (isMerged) R.string.is_merged else R.string.is_not_merged

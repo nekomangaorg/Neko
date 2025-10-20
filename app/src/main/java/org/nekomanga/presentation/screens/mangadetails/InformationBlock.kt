@@ -28,13 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.text.NumberFormat
@@ -50,6 +48,7 @@ import org.nekomanga.presentation.components.NoRippleText
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.components.icons.MergeCheckIcon
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -213,12 +212,7 @@ fun InformationBlock(
             }
 
             if (showMergedIcon) {
-                StatItem(text = "", color = mediumAlpha) {
-                    com.mikepenz.iconics.compose.Image(
-                        asset = CommunityMaterial.Icon.cmd_check_decagram,
-                        colorFilter = ColorFilter.tint(mediumAlpha),
-                    )
-                }
+                StatItem(text = "", icon = MergeCheckIcon, color = mediumAlpha)
             }
         }
 
