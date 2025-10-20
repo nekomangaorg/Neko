@@ -70,7 +70,7 @@ fun TrackingSearchSheet(
 
     var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
-    BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+    BaseSheet(themeColor = themeColorState) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
 

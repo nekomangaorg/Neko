@@ -47,7 +47,7 @@ fun FilterChapterSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+        BaseSheet(themeColor = themeColorState) {
             Sort(themeColorState = themeColorState, sortFilter, changeSort) {
                 setAsGlobal(MangaConstants.SetGlobal.Sort)
             }

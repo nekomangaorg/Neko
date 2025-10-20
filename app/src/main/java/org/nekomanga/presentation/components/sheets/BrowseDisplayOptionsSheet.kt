@@ -42,11 +42,7 @@ fun BrowseDisplayOptionsSheet(
     ) {
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .9
 
-        BaseSheet(
-            themeColor = themeColorState,
-            maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding,
-        ) {
+        BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = bottomContentPadding) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(Size.small)

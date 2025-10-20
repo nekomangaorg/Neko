@@ -119,7 +119,7 @@ fun MergeSheet(
         }
         is IsMergedManga.No -> {
             var mergeType: MergeType? by remember { mutableStateOf(null) }
-            BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+            BaseSheet(themeColor = themeColorState) {
                 when (mergeType == null) {
                     true -> {
                         Row(

@@ -64,7 +64,7 @@ fun DisplayOptionsSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+        BaseSheet(themeColor = themeColorState) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(Size.small)

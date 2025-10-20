@@ -39,7 +39,7 @@ fun LibrarySortSheet(
     ) {
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
 
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+        BaseSheet(themeColor = themeColorState) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(Size.medium)

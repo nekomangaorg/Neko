@@ -143,11 +143,7 @@ fun FilterBrowseSheet(
 
         var queryText by remember { mutableStateOf(filters.query.text) }
 
-        BaseSheet(
-            themeColor = themeColorState,
-            maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = 0.dp,
-        ) {
+        BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = 0.dp) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(16.dp)

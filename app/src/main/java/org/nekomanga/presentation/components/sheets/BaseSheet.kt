@@ -23,7 +23,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun BaseSheet(
     themeColor: ThemeColorState,
-    maxSheetHeightPercentage: Float = .7f,
+    maxSheetHeightPercentage: Float = .8f,
     minSheetHeightPercentage: Float = 0f,
     bottomPaddingAroundContent: Dp = Size.mediumLarge,
     content: @Composable ColumnScope.() -> Unit,

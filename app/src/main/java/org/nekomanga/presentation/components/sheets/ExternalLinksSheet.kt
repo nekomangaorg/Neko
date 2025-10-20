@@ -35,7 +35,7 @@ fun ExternalLinksSheet(
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+        BaseSheet(themeColor = themeColorState) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 horizontalAlignment = Alignment.CenterHorizontally,
