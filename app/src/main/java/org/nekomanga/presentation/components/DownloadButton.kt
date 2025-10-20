@@ -243,8 +243,8 @@ private fun DownloadToComplete(modifier: Modifier, color: Color, onAnimationComp
         transition.animateFloat(label = "rotation", transitionSpec = { animationSpec }) {
             when (it) {
                 AnimationState.START -> 0f
-                AnimationState.MIDDLE -> 360f
-                AnimationState.END -> 0f
+                AnimationState.MIDDLE -> 180f
+                AnimationState.END -> 360f
             }
         }
     val checkAlpha by
@@ -334,6 +334,13 @@ private fun Draining(buttonColor: Color, modifier: Modifier, onAnimationEnd: () 
             label = "iconColor",
         )
 
+    val alpha by
+        animateFloatAsState(
+            targetValue = if (progress == 0f) 1f else 0f,
+            animationSpec = tween(durationMillis = 500, delayMillis = 250),
+            label = "alpha",
+        )
+
     Background(
         color = buttonColor.copy(alpha = .4f),
         borderStroke = BorderStroke(borderSize.dp, buttonColor),
@@ -364,7 +371,7 @@ private fun Draining(buttonColor: Color, modifier: Modifier, onAnimationEnd: () 
 
             drawPath(path = path, color = buttonColor)
         }
-        DownloadIcon(color = iconColor, icon = iconPainter)
+        DownloadIcon(color = iconColor, icon = iconPainter, alpha = alpha)
     }
 }
 
@@ -423,22 +430,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             label = "waveOffset",
         )
 
-    val rotation by
-        infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 360f,
-            animationSpec =
-                infiniteRepeatable(
-                    animation = tween(durationMillis = 3000, easing = EaseInOutCirc),
-                    repeatMode = RepeatMode.Restart,
-                ),
-            label = "rotation",
-        )
-
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
-
-    val disabledColor =
-        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
 
     val iconColor by
         animateColorAsState(
@@ -453,10 +445,17 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             label = "iconColor",
         )
 
+    val alpha by
+        animateFloatAsState(
+            targetValue = if (animatedProgress == 1f) 1f else 0f,
+            animationSpec = tween(durationMillis = 500, delayMillis = 250),
+            label = "alpha",
+        )
+
     Background(
         color = buttonColor.copy(alpha = .4f),
         borderStroke = BorderStroke(borderSize.dp, buttonColor),
-        modifier = modifier.rotate(rotation),
+        modifier = modifier,
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
@@ -483,7 +482,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
 
             drawPath(path = path, color = buttonColor)
         }
-        DownloadIcon(color = iconColor, icon = iconPainter)
+        DownloadIcon(color = iconColor, icon = iconPainter, alpha = alpha)
     }
 }
 
