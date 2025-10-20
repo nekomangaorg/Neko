@@ -130,45 +130,46 @@ fun DownloadButton(
         }
 
         val scope = rememberCoroutineScope()
+        val dropDownItems =
+            when (downloadState) {
+                Download.State.DOWNLOADED -> {
+                    persistentListOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.remove),
+                            onClick = {
+                                scope.launchDelayed { onClick(MangaConstants.DownloadAction.Remove) }
+                            },
+                        ),
+                    )
+                }
+                Download.State.QUEUE,
+                Download.State.DOWNLOADING,
+                Download.State.ERROR, -> {
+                    persistentListOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.start_downloading_now),
+                            onClick = {
+                                scope.launchDelayed {
+                                    onClick(MangaConstants.DownloadAction.ImmediateDownload)
+                                }
+                            },
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.cancel),
+                            onClick = {
+                                scope.launchDelayed { onClick(MangaConstants.DownloadAction.Cancel) }
+                            },
+                        ),
+                    )
+                }
+                Download.State.NOT_DOWNLOADED -> persistentListOf()
+            }
+
         SimpleDropdownMenu(
             expanded = showChapterDropdown,
             themeColorState = themeColorState,
             onDismiss = { showChapterDropdown = false },
-            dropDownItems =
-                when (downloadState) {
-                    Download.State.DOWNLOADED -> {
-                        persistentListOf(
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.remove),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onClick(MangaConstants.DownloadAction.Remove)
-                                    }
-                                },
-                            )
-                        )
-                    }
-                    else -> {
-                        persistentListOf(
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.start_downloading_now),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onClick(MangaConstants.DownloadAction.ImmediateDownload)
-                                    }
-                                },
-                            ),
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.cancel),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onClick(MangaConstants.DownloadAction.Cancel)
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                },
+            dropDownItems = dropDownItems,
         )
     }
 }
@@ -321,7 +322,7 @@ private fun Queued(modifier: Modifier) {
             targetValue = finalState,
             animationSpec =
                 infiniteRepeatable(
-                    tween(1000, easing = EaseInOutCirc),
+                    tween(500, easing = EaseInOutCirc),
                     repeatMode = RepeatMode.Reverse,
                 ),
             label = "queuedAlpha",
@@ -363,9 +364,14 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
         )
 
     val rotation by
-        animateFloatAsState(
-            targetValue = animatedProgress * 360,
-            animationSpec = tween(750),
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(durationMillis = 1000, easing = EaseInOutCirc),
+                    repeatMode = RepeatMode.Restart,
+                ),
             label = "rotation",
         )
 
@@ -377,11 +383,11 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
     val iconColor by
         animateColorAsState(
             targetValue =
-            if (animatedProgress < 0.4f) {
-                disabledColor
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
+                if (animatedProgress < 0.4f) {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
             label = "iconColor",
         )
 
