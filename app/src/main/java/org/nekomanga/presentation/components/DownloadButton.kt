@@ -405,7 +405,7 @@ private fun Queued(modifier: Modifier) {
     val disabledColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
     val infinitePulse = rememberInfiniteTransition(label = "queuedPulse")
-    val (initialState, finalState) = NekoColors.disabledAlphaLowContrast to NekoColors.disabledAlphaHighContrast
+    val (initialState, finalState) = NekoColors.veryLowContrast to NekoColors.highAlphaLowContrast
 
     val alpha =
         infinitePulse.animateFloat(
@@ -460,7 +460,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             targetValue = 360f,
             animationSpec =
                 infiniteRepeatable(
-                    animation = tween(durationMillis = 1000, easing = EaseInOutCirc),
+                    animation = tween(durationMillis = 3000, easing = EaseInOutCirc),
                     repeatMode = RepeatMode.Restart,
                 ),
             label = "rotation",
