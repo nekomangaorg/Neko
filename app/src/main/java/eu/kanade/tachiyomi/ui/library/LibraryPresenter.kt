@@ -315,7 +315,6 @@ class LibraryPresenter(
                                 val sortedMangaList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
-                                        .sortedWith(comparator)
                                         .mapAsync { item ->
                                             item.copy(
                                                 downloadCount =
@@ -325,6 +324,7 @@ class LibraryPresenter(
                                                     trackMap[item.displayManga.mangaId]?.size ?: 0,
                                             )
                                         }
+                                        .sortedWith(comparator)
                                         .applyFilters(libraryFilters, trackMap)
                                         .toPersistentList()
 
