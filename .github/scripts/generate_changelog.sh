@@ -20,8 +20,8 @@ OUTPUT=$(curl -H "Accept: application/vnd.github.v3+json" \
     def get_sort_priority:
       get_normalized_line as $line |
       if ($line | startswith("feat")) then 0
-      elif ($line | startswith("fix")) then 1
-      elif ($line | startswith("perf")) then 2
+      elif ($line | startswith("perf")) then 1
+      elif ($line | startswith("fix")) then 2
       elif ($line | startswith("ref")) then 3
       elif ($line | startswith("chore")) then 4
       else 5 # For "anything else"
