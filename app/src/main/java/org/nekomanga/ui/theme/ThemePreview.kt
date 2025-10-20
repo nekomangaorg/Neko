@@ -31,7 +31,7 @@ private fun NekoThemePreview(theme: Themes, isDark: Boolean, content: @Composabl
 
 @Composable
 fun ThemedPreviews(content: @Composable (theme: Themes) -> Unit) {
-    val themes = Themes.values()
+    val themes = Themes.entries.toTypedArray()
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         for (theme in themes) {

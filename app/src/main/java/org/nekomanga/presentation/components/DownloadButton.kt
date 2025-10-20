@@ -13,18 +13,24 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,8 +45,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -53,6 +61,8 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 private const val iconSize = 20
 private const val borderSize = 2.0
@@ -109,7 +119,7 @@ fun DownloadButton(
                 )
             }
             downloadState == Download.State.ERROR ->
-                NotDownloaded(
+                NotDownloadedError(
                     buttonColor = MaterialTheme.colorScheme.error,
                     modifier = downloadButtonModifier,
                 )
@@ -205,6 +215,19 @@ private fun NotDownloaded(
             alpha = alpha,
             icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward),
         )
+    }
+}
+
+@Composable
+private fun NotDownloadedError(buttonColor: Color, modifier: Modifier) {
+
+    Background(
+        color = Color.Transparent,
+        borderStroke = BorderStroke(borderSize.dp, buttonColor),
+        shape = MaterialShapes.Triangle.toShape(),
+        modifier = modifier,
+    ) {
+        Text(text = "!", color = buttonColor, fontWeight = FontWeight.Black)
     }
 }
 
@@ -477,24 +500,56 @@ private fun DownloadIcon(
 @Composable
 private fun Background(
     color: Color,
-    borderStroke: BorderStroke? = null,
     modifier: Modifier = Modifier,
+    borderStroke: BorderStroke? = null,
+    shape: Shape = MaterialShapes.Sunny.toShape(),
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier =
-            Modifier.clip(MaterialShapes.Sunny.toShape())
-                .size(Size.extraLarge + 4.dp)
-                .then(modifier),
+        modifier = Modifier.clip(shape).size(Size.extraLarge + 4.dp).then(modifier),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
             modifier = Modifier.size(Size.extraLarge),
-            shape = MaterialShapes.Sunny.toShape(),
+            shape = shape,
             border = borderStroke,
             color = color,
         ) {
             Box(contentAlignment = Alignment.Center) { content() }
+        }
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun DownloadButtonPreview() {
+    ThemedPreviews {
+        Row(horizontalArrangement = Arrangement.spacedBy(Size.small)) {
+            DownloadButton(
+                downloadState = Download.State.NOT_DOWNLOADED,
+                downloadProgress = 0,
+                onClick = {},
+            )
+            DownloadButton(
+                downloadState = Download.State.QUEUE,
+                downloadProgress = 0,
+                onClick = {},
+            )
+            DownloadButton(
+                downloadState = Download.State.DOWNLOADING,
+                downloadProgress = 35,
+                onClick = {},
+            )
+            DownloadButton(
+                downloadState = Download.State.DOWNLOADED,
+                downloadProgress = 100,
+                onClick = {},
+            )
+            DownloadButton(
+                downloadState = Download.State.ERROR,
+                downloadProgress = 0,
+                onClick = {},
+            )
         }
     }
 }
