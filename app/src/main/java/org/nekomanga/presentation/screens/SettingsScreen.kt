@@ -280,9 +280,21 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             clearAllManga = vm::clearAllManga,
                             clearAllTrackers = vm::clearAllTrackers,
                             clearAllCategories = vm::clearAllCategories,
-                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            viewLibraryUpdateErrors = {
+                                backStack.add(Screens.Settings.LibraryUpdateErrors)
+                            },
                         )
                         .Content()
+                }
+
+                entry<Screens.Settings.LibraryUpdateErrors> {
+                    LibraryUpdateErrorsScreen(
+                        onNavigationIconClick = { backStack.removeLastOrNull() },
+                        preferencesHelper = settingsVm.preferences,
+                    )
                 }
             },
     )

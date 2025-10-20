@@ -22,7 +22,8 @@ internal class DebugSettingsScreen(
     val clearAllManga: () -> Unit,
     val clearAllCategories: () -> Unit,
     val clearAllTrackers: () -> Unit,
-    onNavigationIconClick: () -> Unit,
+    val onNavigationIconClick: () -> Unit,
+    val viewLibraryUpdateErrors: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.advanced
@@ -61,6 +62,10 @@ internal class DebugSettingsScreen(
             Preference.PreferenceItem.TextPreference(
                 title = "Clear all trackers",
                 onClick = clearAllTrackers,
+            ),
+            Preference.PreferenceItem.TextPreference(
+                title = "View library update errors",
+                onClick = viewLibraryUpdateErrors,
             ),
         )
     }

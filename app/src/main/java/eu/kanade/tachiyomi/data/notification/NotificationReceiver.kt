@@ -669,13 +669,20 @@ class NotificationReceiver : BroadcastReceiver() {
          */
         internal fun openErrorOrSkippedLogPendingActivity(
             context: Context,
-            uri: Uri?,
+            uri: Any?,
         ): PendingIntent {
             val intent =
-                Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    setDataAndType(uri, "text/plain")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                if (uri is String) {
+                    Intent(context, MainActivity::class.java).apply {
+                        action = MainActivity.SHORTCUT_DEBUG
+                    }
+                } else {
+                    Intent().apply {
+                        action = Intent.ACTION_VIEW
+                        setDataAndType(uri as Uri, "text/plain")
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    }
                 }
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         }

@@ -52,15 +52,12 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
-import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
-import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -145,7 +142,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val notifier = LibraryUpdateNotifier(context)
 
     override suspend fun doWork(): Result {
-
+        preferences.libraryUpdateErrors().delete()
         if (WORK_NAME_AUTO in tags) {
             if (
                 DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
@@ -751,8 +748,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     Notifications.Channel.Library.Skipped,
                 )
         ) {
-            val skippedFile = writeErrorFile(skippedUpdates, "skipped").getUriCompat(context)
-            notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
+            val errors = skippedUpdates.map { (manga, error) -> "! ${error}\n   - ${manga.title}" }
+            preferences.libraryUpdateErrors().set(errors.toSet())
+            notifier.showUpdateSkippedNotification(skippedUpdates.size)
         }
         if (
             failedUpdates.isNotEmpty() &&
@@ -761,11 +759,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     Notifications.Channel.Library.Error,
                 )
         ) {
-            val errorFile = writeErrorFile(failedUpdates)
-            notifier.showUpdateErrorNotification(
-                failedUpdates.map { it.key.title },
-                errorFile.getUriCompat(context),
-            )
+            val errors = failedUpdates.map { (manga, error) -> "! ${error}\n   - ${manga.title}" }
+            preferences.libraryUpdateErrors().set(errors.toSet())
+            notifier.showUpdateErrorNotification(failedUpdates.size)
         }
         failedUpdates.clear()
         skippedUpdates.clear()
@@ -777,30 +773,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, chapters, false)
-    }
-
-    /** Writes basic file of update errors to cache dir. */
-    private fun writeErrorFile(errors: Map<Manga, String?>, fileName: String = "errors"): File {
-        try {
-            if (errors.isNotEmpty()) {
-                val file = context.createFileInCacheDir("neko_update_$fileName.txt")
-                file.bufferedWriter().use { out ->
-                    // Error file format:
-                    // ! Error
-                    //   # Source
-                    //     - Manga
-                    errors.toList().groupBy({ it.second }, { it.first }).forEach {
-                        (error, mangaList) ->
-                        out.write("! ${error}\n")
-                        mangaList.forEach { out.write("    - ${it.title}\n") }
-                    }
-                }
-                return file
-            }
-        } catch (e: Exception) {
-            // Empty
-        }
-        return File("")
     }
 
     private fun addMangaToQueue(manga: List<LibraryManga>) {

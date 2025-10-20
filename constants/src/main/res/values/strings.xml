@@ -867,6 +867,7 @@
     <string name="details_page">Details page</string>
     <string name="force_portrait_details">Single pane view</string>
     <string name="force_portrait_details_description">On wide devices, force the view to be a single pane instead of double pane.</string>
+    <string name="library_update_errors">Library update errors</string>
     <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
     <string name="wrap_alt_titles">Wrap the alternative titles, default is horizontal scrollable</string>
     <string name="expanded_toolbar">Expanded toolbar</string>
@@ -1336,6 +1337,7 @@
     <string name="stop">Stop</string>
     <string name="tag">Tag</string>
     <string name="tap_to_see_details">Tap to see details</string>
+    <string name="tap_to_see_details_in_debug">Tap to see details in debug settings</string>
     <string name="top">Top</string>
     <string name="undo">Undo</string>
     <string name="unknown_error">Unknown error</string>

@@ -35,5 +35,7 @@ object Screens {
         @Serializable data object Security : NavKey
 
         @Serializable data object Advanced : NavKey
+
+        @Serializable data object LibraryUpdateErrors : NavKey
     }
 }

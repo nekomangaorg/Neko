@@ -210,4 +210,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)
     }
+
+    fun libraryUpdateErrors() = this.preferenceStore.getStringSet(Keys.libraryUpdateErrors)
 }

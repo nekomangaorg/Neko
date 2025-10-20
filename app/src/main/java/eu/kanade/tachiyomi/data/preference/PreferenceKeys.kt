@@ -65,4 +65,6 @@ object PreferenceKeys {
     const val autoAddTracker = "auto_add_tracker"
 
     const val thumbnailQuality = "mangadex_thumbnail_quality"
+
+    const val libraryUpdateErrors = "library_update_errors"
 }

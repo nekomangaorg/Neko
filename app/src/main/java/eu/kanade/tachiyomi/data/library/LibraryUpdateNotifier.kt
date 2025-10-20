@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -90,35 +89,24 @@ class LibraryUpdateNotifier(private val context: Context) {
     /**
      * Shows notification containing update entries that failed with action to open full log.
      *
-     * @param errors List of entry titles that failed to update.
-     * @param uri Uri for error log file containing all titles that failed.
+     * @param errorCount Number of entries that failed to update.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
-        if (errors.isEmpty()) {
+    fun showUpdateErrorNotification(errorCount: Int) {
+        if (errorCount == 0) {
             return
         }
-
-        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
-
+        val pendingIntent =
+            NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, "LibraryUpdate")
         context.notificationManager.notify(
             Notifications.Id.Library.Error,
             context
                 .notificationBuilder(Notifications.Channel.Library.Error) {
                     setContentTitle(
-                        context.getString(R.string.notification_update_error, errors.size)
+                        context.getString(R.string.notification_update_error, errorCount)
                     )
-                    setContentText(context.getString(R.string.tap_to_see_details))
-                    setStyle(
-                        NotificationCompat.BigTextStyle()
-                            .bigText(errors.joinToString("\n") { it.chop(TITLE_MAX_LEN) })
-                    )
+                    setContentText(context.getString(R.string.tap_to_see_details_in_debug))
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
-                    addAction(
-                        R.drawable.ic_help_24dp,
-                        context.getString(R.string.open_log),
-                        pendingIntent,
-                    )
                 }
                 .build(),
         )
@@ -128,35 +116,25 @@ class LibraryUpdateNotifier(private val context: Context) {
      * Shows notification containing update entries that were skipped with actions to open full log
      * and learn more.
      *
-     * @param skips List of entry titles that were skipped.
-     * @param uri Uri for error log file containing all titles that were skipped.
+     * @param skippedCount number of entries that were skipped.
      */
-    fun showUpdateSkippedNotification(skips: List<String>, uri: Uri) {
-        if (skips.isEmpty()) {
+    fun showUpdateSkippedNotification(skippedCount: Int) {
+        if (skippedCount == 0) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
-
+        val pendingIntent =
+            NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, "LibraryUpdate")
         context.notificationManager.notify(
             Notifications.Id.Library.Skipped,
             context
                 .notificationBuilder(Notifications.Channel.Library.Skipped) {
                     setContentTitle(
-                        context.getString(R.string.notification_update_skipped, skips.size)
+                        context.getString(R.string.notification_update_skipped, skippedCount)
                     )
-                    setContentText(context.getString(R.string.tap_to_see_details))
-                    setStyle(
-                        NotificationCompat.BigTextStyle()
-                            .bigText(skips.joinToString("\n") { it.chop(TITLE_MAX_LEN) })
-                    )
+                    setContentText(context.getString(R.string.tap_to_see_details_in_debug))
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
-                    addAction(
-                        R.drawable.ic_help_24dp,
-                        context.getString(R.string.open_log),
-                        pendingIntent,
-                    )
                 }
                 .build(),
         )
