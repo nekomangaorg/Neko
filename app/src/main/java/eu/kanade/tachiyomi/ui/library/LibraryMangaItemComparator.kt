@@ -50,6 +50,7 @@ fun libraryMangaItemComparator(
                 compareBy { lastFetchMap[it.displayManga.mangaId] ?: lastFetchMap.size }
 
             LibrarySort.Rating -> compareByDescending { it.rating }
+            LibrarySort.Downloads -> compareByDescending { it.downloadCount }
         }
     return when (categorySort) {
         LibrarySort.DragAndDrop -> primaryComparator // No secondary sort for drag and drop
