@@ -2,14 +2,17 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -27,8 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
@@ -42,6 +47,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun MangaDetailsHeader(
     mangaDetailScreenState: MangaConstants.MangaDetailScreenState,
+    backdropHeight: Dp,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackers: Boolean,
     themeColorState: ThemeColorState,
@@ -70,81 +76,76 @@ fun MangaDetailsHeader(
         val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
         val isDescriptionExpanded = isTablet || isDescriptionManuallyExpanded
 
-        // 2. Memoized Calculation: Avoid recalculating backdrop height on every recomposition.
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        val backdropHeight =
-            remember(
-                mangaDetailScreenState.isSearching,
-                mangaDetailScreenState.backdropSize,
-                screenHeight,
-            ) {
-                when {
-                    mangaDetailScreenState.isSearching -> (screenHeight / 4).dp
-                    else ->
-                        when (mangaDetailScreenState.backdropSize) {
-                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                            MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
-                        }
-                }
-            }
-
         Column {
-            Column(modifier = Modifier.padding(bottom = Size.medium)) {
-                InformationBlock(
+            Box {
+                BackDrop(
                     themeColorState = themeColorState,
-                    title = mangaDetailScreenState.currentTitle,
-                    author = mangaDetailScreenState.author,
-                    artist = mangaDetailScreenState.artist,
-                    stats = mangaDetailScreenState.stats,
-                    langFlag = mangaDetailScreenState.langFlag,
-                    status = mangaDetailScreenState.status,
-                    lastChapter =
-                        mangaDetailScreenState.lastVolume to mangaDetailScreenState.lastChapter,
-                    isPornographic = mangaDetailScreenState.isPornographic,
-                    missingChapters = mangaDetailScreenState.missingChapters,
-                    estimatedMissingChapters = mangaDetailScreenState.estimatedMissingChapters,
-                    isExpanded = isDescriptionExpanded,
-                    showMergedIcon =
-                        mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes &&
-                            !mangaDetailScreenState.hideButtonText,
-                    modifier = Modifier.statusBarsPadding().padding(top = 120.dp),
-                    titleLongClick = informationActions.titleLongClick,
-                    creatorCopyClick = informationActions.creatorCopy,
-                    creatorSearchClick = informationActions.creatorSearch,
+                    artwork = mangaDetailScreenState.currentArtwork,
+                    showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
+                    modifier = Modifier.fillMaxWidth().height(backdropHeight),
+                    generatePalette = generatePalette,
                 )
-
-                AnimatedVisibility(
-                    visible = !mangaDetailScreenState.isSearching,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically(),
-                ) {
-                    Column(modifier = Modifier.padding(bottom = Size.medium)) {
-                        Gap(Size.medium)
-                        ButtonBlock(
-                            hideButtonText = mangaDetailScreenState.hideButtonText,
-                            isInitialized = mangaDetailScreenState.initialized,
-                            isMerged =
-                                mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes,
-                            inLibrary = mangaDetailScreenState.inLibrary,
-                            loggedIntoTrackers = isLoggedIntoTrackers,
-                            trackServiceCount = mangaDetailScreenState.trackServiceCount,
+                AnimatedVisibility(visible = mangaDetailScreenState.initialized) {
+                    Column(modifier = Modifier.align(Alignment.BottomStart)) {
+                        InformationBlock(
                             themeColorState = themeColorState,
-                            toggleFavorite = toggleFavorite,
-                            trackingClick = onTrackingClick,
-                            artworkClick = onArtworkClick,
-                            similarClick = onSimilarClick,
-                            mergeClick = onMergeClick,
-                            linksClick = onLinksClick,
-                            shareClick = onShareClick,
-                            moveCategories = onCategoriesClick,
+                            title = mangaDetailScreenState.currentTitle,
+                            author = mangaDetailScreenState.author,
+                            artist = mangaDetailScreenState.artist,
+                            stats = mangaDetailScreenState.stats,
+                            langFlag = mangaDetailScreenState.langFlag,
+                            status = mangaDetailScreenState.status,
+                            lastChapter =
+                                mangaDetailScreenState.lastVolume to
+                                    mangaDetailScreenState.lastChapter,
+                            isPornographic = mangaDetailScreenState.isPornographic,
+                            missingChapters = mangaDetailScreenState.missingChapters,
+                            estimatedMissingChapters =
+                                mangaDetailScreenState.estimatedMissingChapters,
+                            isExpanded = isDescriptionExpanded,
+                            showMergedIcon =
+                                mangaDetailScreenState.isMerged is
+                                    MergeConstants.IsMergedManga.Yes &&
+                                    !mangaDetailScreenState.hideButtonText,
+                            modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
+                            titleLongClick = informationActions.titleLongClick,
+                            creatorCopyClick = informationActions.creatorCopy,
+                            creatorSearchClick = informationActions.creatorSearch,
                         )
+
+                        AnimatedVisibility(
+                            visible = !mangaDetailScreenState.isSearching,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            Column(modifier = Modifier.padding(bottom = Size.medium)) {
+                                Gap(Size.medium)
+                                ButtonBlock(
+                                    hideButtonText = mangaDetailScreenState.hideButtonText,
+                                    isInitialized = mangaDetailScreenState.initialized,
+                                    isMerged =
+                                        mangaDetailScreenState.isMerged is
+                                            MergeConstants.IsMergedManga.Yes,
+                                    inLibrary = mangaDetailScreenState.inLibrary,
+                                    loggedIntoTrackers = isLoggedIntoTrackers,
+                                    trackServiceCount = mangaDetailScreenState.trackServiceCount,
+                                    themeColorState = themeColorState,
+                                    toggleFavorite = toggleFavorite,
+                                    trackingClick = onTrackingClick,
+                                    artworkClick = onArtworkClick,
+                                    similarClick = onSimilarClick,
+                                    mergeClick = onMergeClick,
+                                    linksClick = onLinksClick,
+                                    shareClick = onShareClick,
+                                    moveCategories = onCategoriesClick,
+                                )
+                            }
+                        }
                     }
                 }
             }
-
             AnimatedVisibility(
-                visible = !mangaDetailScreenState.isSearching,
+                visible = mangaDetailScreenState.initialized && !mangaDetailScreenState.isSearching,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {

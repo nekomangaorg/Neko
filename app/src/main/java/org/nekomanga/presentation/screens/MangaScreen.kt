@@ -2,9 +2,7 @@ package org.nekomanga.presentation.screens
 
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -39,8 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
@@ -79,7 +77,6 @@ import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.screens.mangadetails.AnimatedBackdropContainer
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -146,26 +143,6 @@ fun MangaScreen(
                 )
             } else {
                 defaultColorState
-            }
-        }
-
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val backdropHeight =
-        remember(
-            screenState.isSearching,
-            screenState.backdropSize,
-            screenState.initialized,
-            screenHeight,
-        ) {
-            when {
-                !screenState.initialized -> screenHeight.dp
-                screenState.isSearching -> (screenHeight / 4).dp
-                else ->
-                    when (screenState.backdropSize) {
-                        MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                        MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                        MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
-                    }
             }
         }
 
@@ -240,101 +217,102 @@ fun MangaScreen(
             )
         },
     ) { incomingPaddingValues ->
-        Box {
-            AnimatedBackdropContainer(
-                themeColorState = themeColorState,
-                artwork = screenState.currentArtwork,
-                showBackdrop = screenState.themeBasedOffCovers,
-                initialized = screenState.initialized,
-                backdropHeight = backdropHeight,
-                generatePalette = generatePalette,
-            )
-            AnimatedVisibility(
-                visible = screenState.initialized,
-                enter = fadeIn(animationSpec = tween(1200, delayMillis = 1200)),
-            ) {
-                PullRefresh(
-                    isRefreshing = screenState.isRefreshing,
-                    onRefresh = onRefresh,
-                    trackColor = themeColorState.primaryColor,
+        PullRefresh(
+            isRefreshing = screenState.isRefreshing,
+            onRefresh = onRefresh,
+            trackColor = themeColorState.primaryColor,
+        ) {
+            val isTablet =
+                windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
+                    !screenState.forcePortrait
+
+            val onToggleFavoriteAction =
+                remember(
+                    screenState.inLibrary,
+                    screenState.allCategories,
+                    screenState.hasDefaultCategory,
                 ) {
-                    val isTablet =
-                        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-                            !screenState.forcePortrait
-
-                    val onToggleFavoriteAction =
-                        remember(
-                            screenState.inLibrary,
-                            screenState.allCategories,
-                            screenState.hasDefaultCategory,
-                        ) {
-                            {
-                                if (
-                                    !screenState.inLibrary && screenState.allCategories.isNotEmpty()
-                                ) {
-                                    if (screenState.hasDefaultCategory) {
-                                        onToggleFavorite(true)
-                                    } else {
-                                        openSheet(
-                                            DetailsBottomSheetScreen.CategoriesSheet(
-                                                addingToLibrary = true,
-                                                setCategories = categoryActions.set,
-                                                addToLibraryClick = { onToggleFavorite(false) },
-                                            )
-                                        )
-                                    }
-                                } else {
-                                    onToggleFavorite(false)
-                                }
+                    {
+                        if (!screenState.inLibrary && screenState.allCategories.isNotEmpty()) {
+                            if (screenState.hasDefaultCategory) {
+                                onToggleFavorite(true)
+                            } else {
+                                openSheet(
+                                    DetailsBottomSheetScreen.CategoriesSheet(
+                                        addingToLibrary = true,
+                                        setCategories = categoryActions.set,
+                                        addToLibraryClick = { onToggleFavorite(false) },
+                                    )
+                                )
                             }
+                        } else {
+                            onToggleFavorite(false)
                         }
-
-                    if (isTablet) {
-                        SideBySideLayout(
-                            incomingPadding = incomingPaddingValues,
-                            screenState = screenState,
-                            windowSizeClass = windowSizeClass,
-                            themeColorState = themeColorState,
-                            chapterActions = chapterActions,
-                            informationActions = informationActions,
-                            descriptionActions = descriptionActions,
-                            onSimilarClick = onSimilarClick,
-                            onShareClick = onShareClick,
-                            onToggleFavorite = onToggleFavoriteAction,
-                            generatePalette = generatePalette,
-                            onOpenSheet = ::openSheet,
-                            categoryActions = categoryActions,
-                        )
-                    } else {
-                        VerticalLayout(
-                            incomingPadding = incomingPaddingValues,
-                            screenState = screenState,
-                            windowSizeClass = windowSizeClass,
-                            themeColorState = themeColorState,
-                            chapterActions = chapterActions,
-                            informationActions = informationActions,
-                            descriptionActions = descriptionActions,
-                            onSimilarClick = onSimilarClick,
-                            onShareClick = onShareClick,
-                            onToggleFavorite = onToggleFavoriteAction,
-                            generatePalette = generatePalette,
-                            onOpenSheet = ::openSheet,
-                            categoryActions = categoryActions,
-                        )
-                    }
-
-                    if (screenState.removedChapters.isNotEmpty()) {
-                        RemovedChaptersDialog(
-                            themeColorState = themeColorState,
-                            chapters = screenState.removedChapters,
-                            onConfirm = {
-                                chapterActions.delete(screenState.removedChapters)
-                                chapterActions.clearRemoved()
-                            },
-                            onDismiss = { chapterActions.clearRemoved() },
-                        )
                     }
                 }
+
+            val screenHeight = LocalConfiguration.current.screenHeightDp
+            val backdropHeight by
+                animateDpAsState(
+                    targetValue =
+                        when {
+                            !screenState.initialized -> screenHeight.dp
+                            screenState.isSearching -> (screenHeight / 4).dp
+                            else ->
+                                when (screenState.backdropSize) {
+                                    MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
+                                    MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
+                                    MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
+                                }
+                        },
+                )
+
+            if (isTablet) {
+                SideBySideLayout(
+                    incomingPadding = incomingPaddingValues,
+                    backdropHeight = backdropHeight,
+                    screenState = screenState,
+                    windowSizeClass = windowSizeClass,
+                    themeColorState = themeColorState,
+                    chapterActions = chapterActions,
+                    informationActions = informationActions,
+                    descriptionActions = descriptionActions,
+                    onSimilarClick = onSimilarClick,
+                    onShareClick = onShareClick,
+                    onToggleFavorite = onToggleFavoriteAction,
+                    generatePalette = generatePalette,
+                    onOpenSheet = ::openSheet,
+                    categoryActions = categoryActions,
+                )
+            } else {
+                VerticalLayout(
+                    incomingPadding = incomingPaddingValues,
+                    backdropHeight = backdropHeight,
+                    screenState = screenState,
+                    windowSizeClass = windowSizeClass,
+                    themeColorState = themeColorState,
+                    chapterActions = chapterActions,
+                    informationActions = informationActions,
+                    descriptionActions = descriptionActions,
+                    onSimilarClick = onSimilarClick,
+                    onShareClick = onShareClick,
+                    onToggleFavorite = onToggleFavoriteAction,
+                    generatePalette = generatePalette,
+                    onOpenSheet = ::openSheet,
+                    categoryActions = categoryActions,
+                )
+            }
+
+            if (screenState.removedChapters.isNotEmpty()) {
+                RemovedChaptersDialog(
+                    themeColorState = themeColorState,
+                    chapters = screenState.removedChapters,
+                    onConfirm = {
+                        chapterActions.delete(screenState.removedChapters)
+                        chapterActions.clearRemoved()
+                    },
+                    onDismiss = { chapterActions.clearRemoved() },
+                )
             }
         }
     }
@@ -420,9 +398,12 @@ private fun LazyListScope.chapterList(
     }
 }
 
+import androidx.compose.ui.unit.Dp
+
 @Composable
 private fun VerticalLayout(
     incomingPadding: PaddingValues,
+    backdropHeight: Dp,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     themeColorState: ThemeColorState,
@@ -443,6 +424,7 @@ private fun VerticalLayout(
         item(key = "header") {
             MangaDetailsHeader(
                 mangaDetailScreenState = screenState,
+                backdropHeight = backdropHeight,
                 windowSizeClass = windowSizeClass,
                 isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
                 themeColorState = themeColorState,
@@ -466,11 +448,12 @@ private fun VerticalLayout(
                 onQuickReadClick = { chapterActions.openNext() },
             )
         }
-        chapterList(
-            chapters =
-                if (screenState.isSearching) screenState.searchChapters
-                else screenState.activeChapters,
-            screenState = screenState,
+        if (screenState.initialized) {
+            chapterList(
+                chapters =
+                    if (screenState.isSearching) screenState.searchChapters
+                    else screenState.activeChapters,
+                screenState = screenState,
             themeColorState = themeColorState,
             chapterActions = chapterActions,
             onOpenSheet = onOpenSheet,
@@ -481,6 +464,7 @@ private fun VerticalLayout(
 @Composable
 private fun SideBySideLayout(
     incomingPadding: PaddingValues,
+    backdropHeight: Dp,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     themeColorState: ThemeColorState,
@@ -510,6 +494,7 @@ private fun SideBySideLayout(
             item(key = "header") {
                 MangaDetailsHeader(
                     mangaDetailScreenState = screenState,
+                    backdropHeight = backdropHeight,
                     windowSizeClass = windowSizeClass,
                     isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
                     themeColorState = themeColorState,
@@ -542,11 +527,12 @@ private fun SideBySideLayout(
                 Modifier.align(Alignment.TopEnd).fillMaxWidth(.5f).fillMaxHeight().clipToBounds(),
             contentPadding = chapterContentPadding,
         ) {
-            chapterList(
-                chapters =
-                    if (screenState.isSearching) screenState.searchChapters
-                    else screenState.activeChapters,
-                screenState = screenState,
+            if (screenState.initialized) {
+                chapterList(
+                    chapters =
+                        if (screenState.isSearching) screenState.searchChapters
+                        else screenState.activeChapters,
+                    screenState = screenState,
                 themeColorState = themeColorState,
                 chapterActions = chapterActions,
                 onOpenSheet = onOpenSheet,
