@@ -2,93 +2,22 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.toLibraryManga
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.presentation.screens.LibraryScreen
 
 class LibraryController : BaseComposeController<LibraryPresenter>() {
     override val presenter = LibraryPresenter()
 
-    @Composable
-    override fun ScreenContent() {
-        val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-
-        val context = LocalContext.current
-
-        LibraryScreen(
-            libraryScreenState = presenter.libraryScreenState.collectAsState(),
-            libraryScreenActions =
-                LibraryScreenActions(
-                    mangaClick = ::openManga,
-                    mangaLongClick = presenter::libraryItemLongClick,
-                    selectAllLibraryMangaItems = presenter::selectAllLibraryMangaItems,
-                    deleteSelectedLibraryMangaItems = presenter::deleteSelectedLibraryMangaItems,
-                    clearSelectedManga = presenter::clearSelectedManga,
-                    search = presenter::search,
-                    searchMangaDex = ::searchMangaDex,
-                    updateLibrary = { updateLibrary(context) },
-                    collapseExpandAllCategories = presenter::collapseExpandAllCategories,
-                    clearActiveFilters = presenter::clearActiveFilters,
-                    filterToggled = presenter::filterToggled,
-                    downloadChapters = presenter::downloadChapters,
-                    shareManga = { shareManga(context) },
-                    markMangaChapters = presenter::markChapters,
-                    syncMangaToDex = presenter::syncMangaToDex,
-                    mangaStartReadingClick = { mangaId ->
-                        presenter.openNextUnread(
-                            mangaId,
-                            { manga, chapter ->
-                                startActivity(ReaderActivity.newIntent(context, manga, chapter))
-                            },
-                        )
-                    },
-                ),
-            librarySheetActions =
-                LibrarySheetActions(
-                    groupByClick = presenter::groupByClick,
-                    categoryItemLibrarySortClick = presenter::categoryItemLibrarySortClick,
-                    libraryDisplayModeClick = presenter::libraryDisplayModeClick,
-                    rawColumnCountChanged = presenter::rawColumnCountChanged,
-                    outlineCoversToggled = presenter::outlineCoversToggled,
-                    downloadBadgesToggled = presenter::downloadBadgesToggled,
-                    unreadBadgesToggled = presenter::unreadBadgesToggled,
-                    startReadingButtonToggled = presenter::startReadingButtonToggled,
-                    horizontalCategoriesToggled = presenter::horizontalCategoriesToggled,
-                    showLibraryButtonBarToggled = presenter::showLibraryButtonBarToggled,
-                    editCategories = presenter::editCategories,
-                    addNewCategory = presenter::addNewCategory,
-                ),
-            libraryCategoryActions =
-                LibraryCategoryActions(
-                    categoryItemClick = presenter::categoryItemClick,
-                    categoryAscendingClick = presenter::categoryAscendingClick,
-                    categoryRefreshClick = { category -> updateCategory(category, context) },
-                ),
-            windowSizeClass = windowSizeClass,
-            incognitoClick = presenter::toggleIncognitoMode,
-            settingsClick = {},
-            statsClick = {},
-            aboutClick = {},
-            helpClick = {
-                (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
-            },
-        )
-    }
+    @Composable override fun ScreenContent() {}
 
     private fun openManga(mangaId: Long) {
         viewScope.launchUI {

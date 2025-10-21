@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -41,7 +40,7 @@ import org.nekomanga.presentation.theme.Size
 fun LibraryButtonBar(
     modifier: Modifier = Modifier,
     libraryScreenActions: LibraryScreenActions,
-    libraryScreenState: State<LibraryScreenState>,
+    libraryScreenState: LibraryScreenState,
     showCollapseAll: Boolean,
     groupByClick: () -> Unit,
 ) {
@@ -67,8 +66,7 @@ fun LibraryButtonBar(
                 ) {
                     Icon(
                         imageVector =
-                            if (libraryScreenState.value.allCollapsed) ExpandAllIcon
-                            else CollapseAllIcon,
+                            if (libraryScreenState.allCollapsed) ExpandAllIcon else CollapseAllIcon,
                         contentDescription = null,
                     )
                 }
@@ -85,7 +83,7 @@ fun LibraryButtonBar(
                 Text(text = stringResource(R.string.group_library_by))
             }
         }
-        AnimatedVisibility(libraryScreenState.value.hasActiveFilters) {
+        AnimatedVisibility(libraryScreenState.hasActiveFilters) {
             FilledIconButton(onClick = libraryScreenActions.clearActiveFilters) {
                 Icon(imageVector = Icons.Default.Clear, contentDescription = null)
             }
@@ -111,50 +109,50 @@ fun LibraryButtonBar(
         val mergedToggleList = listOf(FilterMerged.Merged, FilterMerged.NotMerged)
         val trackedToggleList = listOf(FilterTracked.Tracked, FilterTracked.NotTracked)
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterUnread,
+            libraryScreenState.libraryFilters.filterUnread,
             unreadToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterDownloaded,
+            libraryScreenState.libraryFilters.filterDownloaded,
             downloadToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterCompleted,
+            libraryScreenState.libraryFilters.filterCompleted,
             completedToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterMangaType,
+            libraryScreenState.libraryFilters.filterMangaType,
             mangaTypeToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterBookmarked,
+            libraryScreenState.libraryFilters.filterBookmarked,
             bookmarkToggleList,
             libraryScreenActions.filterToggled,
         )
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterMissingChapters,
+            libraryScreenState.libraryFilters.filterMissingChapters,
             missingToggleList,
             libraryScreenActions.filterToggled,
         )
-        if (libraryScreenState.value.showUnavailableFilter) {
+        if (libraryScreenState.showUnavailableFilter) {
             ConnectedToggleButtons(
-                libraryScreenState.value.libraryFilters.filterUnavailable,
+                libraryScreenState.libraryFilters.filterUnavailable,
                 unavailableToggleList,
                 libraryScreenActions.filterToggled,
             )
         }
         ConnectedToggleButtons(
-            libraryScreenState.value.libraryFilters.filterMerged,
+            libraryScreenState.libraryFilters.filterMerged,
             mergedToggleList,
             libraryScreenActions.filterToggled,
         )
-        if (libraryScreenState.value.trackMap.isNotEmpty()) {
+        if (libraryScreenState.trackMap.isNotEmpty()) {
             ConnectedToggleButtons(
-                libraryScreenState.value.libraryFilters.filterTracked,
+                libraryScreenState.libraryFilters.filterTracked,
                 trackedToggleList,
                 libraryScreenActions.filterToggled,
             )

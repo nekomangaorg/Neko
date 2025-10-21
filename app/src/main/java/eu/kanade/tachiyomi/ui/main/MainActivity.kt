@@ -5,8 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -16,21 +20,27 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -45,6 +55,8 @@ import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
+import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.LibraryScreen
 import org.nekomanga.presentation.screens.Screens
 
@@ -62,6 +74,16 @@ class MainActivity : ComponentActivity() {
 
         setComposeContent {
             val context = LocalContext.current
+
+            var screenBars by remember { mutableStateOf(ScreenBars()) }
+
+            val updateScreenBars: (ScreenBars) -> Unit = { newBars -> screenBars = newBars }
+
+            var pullRefreshState by remember { mutableStateOf(PullRefreshState()) }
+            val updateRefreshScreenBars: (PullRefreshState) -> Unit = { newPullRefreshState ->
+                pullRefreshState = newPullRefreshState
+            }
+
             // TODO load the correct one in future
             val backStack = rememberNavBackStack(Screens.Library)
 
@@ -92,109 +114,171 @@ class MainActivity : ComponentActivity() {
                     ),
                 )
 
-            val showNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
-
-            Box(
-                modifier =
-                    Modifier.fillMaxSize().padding(start = if (showNavigationRail) 80.dp else 0.dp)
+            val showNavigationRail =
+                remember(windowSizeClass.widthSizeClass) {
+                    windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+                }
+            CompositionLocalProvider(
+                LocalBarUpdater provides updateScreenBars,
+                LocalPullRefreshState provides updateRefreshScreenBars,
             ) {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    entryDecorators =
-                        listOf(
-                            rememberSaveableStateHolderNavEntryDecorator(),
-                            rememberViewModelStoreNavEntryDecorator(),
-                        ),
-                    entryProvider =
-                        entryProvider {
-                            entry<Screens.Library> {
-                                val vm: LibraryViewModel = viewModel()
-
-                                LibraryScreen(
-                                    libraryScreenState = vm.libraryScreenState.collectAsState(),
-                                    libraryScreenActions =
-                                        LibraryScreenActions(
-                                            mangaClick = { /*::openManga*/ },
-                                            mangaLongClick = vm::libraryItemLongClick,
-                                            selectAllLibraryMangaItems =
-                                                vm::selectAllLibraryMangaItems,
-                                            deleteSelectedLibraryMangaItems =
-                                                vm::deleteSelectedLibraryMangaItems,
-                                            clearSelectedManga = vm::clearSelectedManga,
-                                            search = vm::search,
-                                            searchMangaDex = { /* ::searchMangaDex,*/ },
-                                            updateLibrary = { /*updateLibrary(context)*/ },
-                                            collapseExpandAllCategories =
-                                                vm::collapseExpandAllCategories,
-                                            clearActiveFilters = vm::clearActiveFilters,
-                                            filterToggled = vm::filterToggled,
-                                            downloadChapters = vm::downloadChapters,
-                                            shareManga = { /* shareManga(context)*/ },
-                                            markMangaChapters = vm::markChapters,
-                                            syncMangaToDex = vm::syncMangaToDex,
-                                            mangaStartReadingClick = { mangaId ->
-                                                vm.openNextUnread(
-                                                    mangaId,
-                                                    { manga, chapter ->
-                                                        startActivity(
-                                                            ReaderActivity.newIntent(
-                                                                context,
-                                                                manga,
-                                                                chapter,
-                                                            )
-                                                        )
-                                                    },
-                                                )
-                                            },
-                                        ),
-                                    librarySheetActions =
-                                        LibrarySheetActions(
-                                            groupByClick = vm::groupByClick,
-                                            categoryItemLibrarySortClick =
-                                                vm::categoryItemLibrarySortClick,
-                                            libraryDisplayModeClick = vm::libraryDisplayModeClick,
-                                            rawColumnCountChanged = vm::rawColumnCountChanged,
-                                            outlineCoversToggled = vm::outlineCoversToggled,
-                                            downloadBadgesToggled = vm::downloadBadgesToggled,
-                                            unreadBadgesToggled = vm::unreadBadgesToggled,
-                                            startReadingButtonToggled =
-                                                vm::startReadingButtonToggled,
-                                            horizontalCategoriesToggled =
-                                                vm::horizontalCategoriesToggled,
-                                            showLibraryButtonBarToggled =
-                                                vm::showLibraryButtonBarToggled,
-                                            editCategories = vm::editCategories,
-                                            addNewCategory = vm::addNewCategory,
-                                        ),
-                                    libraryCategoryActions =
-                                        LibraryCategoryActions(
-                                            categoryItemClick = vm::categoryItemClick,
-                                            categoryAscendingClick = vm::categoryAscendingClick,
-                                            categoryRefreshClick = { /*category -> updateCategory(category, context)*/
-                                            },
-                                        ),
-                                    windowSizeClass = windowSizeClass,
-                                    settingsClick = {},
-                                    incognitoClick = {},
-                                    statsClick = {},
-                                    aboutClick = {},
-                                    helpClick = {},
+                val nestedScroll = screenBars.scrollBehavior?.nestedScrollConnection
+                PullRefresh(
+                    enabled = pullRefreshState.enabled,
+                    isRefreshing = pullRefreshState.isRefreshing,
+                    onRefresh = pullRefreshState.onRefresh,
+                ) {
+                    Scaffold(
+                        modifier =
+                            Modifier.conditional(nestedScroll != null) {
+                                this.nestedScroll(nestedScroll!!)
+                            },
+                        topBar = { screenBars.topBar?.invoke() },
+                        bottomBar = {
+                            if (!showNavigationRail && backStack.size == 1) {
+                                BottomBar(
+                                    items = navItems,
+                                    selectedItemIndex = selectedItemIndex,
+                                    onNavigate = { screen, index ->
+                                        selectedItemIndex = index
+                                        backStack.clear()
+                                        backStack.add(screen)
+                                    },
                                 )
                             }
                         },
-                )
-            }
-            if (showNavigationRail) {
-                NavigationSideBar(
-                    items = navItems,
-                    selectedItemIndex = selectedItemIndex,
-                    onNavigate = { screen, index ->
-                        selectedItemIndex = index
-                        backStack.clear()
-                        backStack.add(screen)
-                    },
-                )
+                    ) { innerPadding ->
+                        val updatedInnerPadding =
+                            remember(showNavigationRail) {
+                                when (showNavigationRail) {
+                                    true ->
+                                        PaddingValues(
+                                            start =
+                                                innerPadding.calculateStartPadding(
+                                                    LayoutDirection.Ltr
+                                                ),
+                                            top = innerPadding.calculateTopPadding(),
+                                            end =
+                                                innerPadding.calculateEndPadding(
+                                                    LayoutDirection.Ltr
+                                                ),
+                                            bottom = innerPadding.calculateBottomPadding(),
+                                        )
+
+                                    false -> innerPadding
+                                }
+                            }
+
+                        Box(modifier = Modifier.fillMaxSize().padding(updatedInnerPadding)) {
+                            NavDisplay(
+                                backStack = backStack,
+                                onBack = { backStack.removeLastOrNull() },
+                                entryDecorators =
+                                    listOf(
+                                        rememberSaveableStateHolderNavEntryDecorator(),
+                                        rememberViewModelStoreNavEntryDecorator(),
+                                    ),
+                                entryProvider =
+                                    entryProvider {
+                                        entry<Screens.Library> {
+                                            val vm: LibraryViewModel = viewModel()
+
+                                            LibraryScreen(
+                                                libraryViewModel = vm,
+                                                incomingContentPadding = innerPadding,
+                                                libraryScreenActions =
+                                                    LibraryScreenActions(
+                                                        mangaClick = { /*::openManga*/ },
+                                                        mangaLongClick = vm::libraryItemLongClick,
+                                                        selectAllLibraryMangaItems =
+                                                            vm::selectAllLibraryMangaItems,
+                                                        deleteSelectedLibraryMangaItems =
+                                                            vm::deleteSelectedLibraryMangaItems,
+                                                        clearSelectedManga = vm::clearSelectedManga,
+                                                        search = vm::search,
+                                                        searchMangaDex = { /* ::searchMangaDex,*/ },
+                                                        updateLibrary = { /*updateLibrary(context)*/
+                                                        },
+                                                        collapseExpandAllCategories =
+                                                            vm::collapseExpandAllCategories,
+                                                        clearActiveFilters = vm::clearActiveFilters,
+                                                        filterToggled = vm::filterToggled,
+                                                        downloadChapters = vm::downloadChapters,
+                                                        shareManga = { /* shareManga(context)*/ },
+                                                        markMangaChapters = vm::markChapters,
+                                                        syncMangaToDex = vm::syncMangaToDex,
+                                                        mangaStartReadingClick = { mangaId ->
+                                                            vm.openNextUnread(
+                                                                mangaId,
+                                                                { manga, chapter ->
+                                                                    startActivity(
+                                                                        ReaderActivity.newIntent(
+                                                                            context,
+                                                                            manga,
+                                                                            chapter,
+                                                                        )
+                                                                    )
+                                                                },
+                                                            )
+                                                        },
+                                                    ),
+                                                librarySheetActions =
+                                                    LibrarySheetActions(
+                                                        groupByClick = vm::groupByClick,
+                                                        categoryItemLibrarySortClick =
+                                                            vm::categoryItemLibrarySortClick,
+                                                        libraryDisplayModeClick =
+                                                            vm::libraryDisplayModeClick,
+                                                        rawColumnCountChanged =
+                                                            vm::rawColumnCountChanged,
+                                                        outlineCoversToggled =
+                                                            vm::outlineCoversToggled,
+                                                        downloadBadgesToggled =
+                                                            vm::downloadBadgesToggled,
+                                                        unreadBadgesToggled =
+                                                            vm::unreadBadgesToggled,
+                                                        startReadingButtonToggled =
+                                                            vm::startReadingButtonToggled,
+                                                        horizontalCategoriesToggled =
+                                                            vm::horizontalCategoriesToggled,
+                                                        showLibraryButtonBarToggled =
+                                                            vm::showLibraryButtonBarToggled,
+                                                        editCategories = vm::editCategories,
+                                                        addNewCategory = vm::addNewCategory,
+                                                    ),
+                                                libraryCategoryActions =
+                                                    LibraryCategoryActions(
+                                                        categoryItemClick = vm::categoryItemClick,
+                                                        categoryAscendingClick =
+                                                            vm::categoryAscendingClick,
+                                                        categoryRefreshClick = { /*category -> updateCategory(category, context)*/
+                                                        },
+                                                    ),
+                                                windowSizeClass = windowSizeClass,
+                                                settingsClick = {},
+                                                incognitoClick = {},
+                                                statsClick = {},
+                                                aboutClick = {},
+                                                helpClick = {},
+                                            )
+                                        }
+                                    },
+                            )
+                        }
+                    }
+
+                    if (showNavigationRail && backStack.size == 1) {
+                        NavigationSideBar(
+                            items = navItems,
+                            selectedItemIndex = selectedItemIndex,
+                            onNavigate = { screen, index ->
+                                selectedItemIndex = index
+                                backStack.clear()
+                                backStack.add(screen)
+                            },
+                        )
+                    }
+                }
             }
         }
     }
@@ -228,6 +312,35 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun BottomBar(
+    items: List<NavigationItem>,
+    selectedItemIndex: Int,
+    onNavigate: (NavKey, Int) -> Unit,
+) {
+
+    NavigationBar(
+        modifier = Modifier.fillMaxWidth(),
+        content = {
+            items.forEachIndexed { index, item ->
+                NavigationBarItem(
+                    selected = selectedItemIndex == index,
+                    onClick = { onNavigate(item.screen, index) },
+                    icon = {
+                        Icon(
+                            imageVector =
+                                if (selectedItemIndex == index) item.selectedIcon
+                                else item.unselectedIcon,
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text(text = item.title) },
+                )
+            }
+        },
+    )
+}
+
+@Composable
 fun NavigationSideBar(
     items: List<NavigationItem>,
     selectedItemIndex: Int,
@@ -238,7 +351,7 @@ fun NavigationSideBar(
         content = {
             items.forEachIndexed { index, item ->
                 NavigationRailItem(
-                    selectedItemIndex == index,
+                    selected = selectedItemIndex == index,
                     onClick = { onNavigate(item.screen, index) },
                     icon = {
                         Icon(
