@@ -385,7 +385,7 @@ private fun ChapterDownloadIndicator(
             Icon(
                 imageVector = Icons.Outlined.Lock,
                 contentDescription = stringResource(id = R.string.unavailable),
-                modifier = Modifier.padding(Size.smedium).size(Size.large),
+                modifier = Modifier.padding(Size.extraTiny).size(Size.extraLarge),
                 tint = themeColorState.primaryColor,
             )
         }
