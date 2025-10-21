@@ -1,3 +1,4 @@
+/*
 package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
@@ -241,3 +242,4 @@ class SearchActivity : MainActivity() {
             Intent(context, SearchActivity::class.java).apply { action = SHORTCUT_READER_SETTINGS }
     }
 }
+*/

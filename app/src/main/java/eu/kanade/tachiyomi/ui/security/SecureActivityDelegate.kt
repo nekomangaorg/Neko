@@ -6,7 +6,6 @@ import android.os.Build
 import android.view.Window
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
-import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import java.util.Date
 import org.nekomanga.core.security.SecurityPreferences
@@ -50,7 +49,7 @@ object SecureActivityDelegate {
         ) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
-                intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
+                // intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
                 activity.startActivity(intent)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)

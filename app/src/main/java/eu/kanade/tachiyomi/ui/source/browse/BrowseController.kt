@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
-import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,10 +21,6 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
-
-        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
-            (this.activity as? MainActivity)?.backCallback?.invoke()
-        }
 
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
@@ -54,9 +49,9 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             changeScreenType = presenter::changeScreenType,
             randomClick = presenter::randomManga,
             incognitoClick = presenter::toggleIncognitoMode,
-            settingsClick = { (this.activity as? MainActivity)?.showSettings() },
-            statsClick = { (this.activity as? MainActivity)?.showStats() },
-            aboutClick = { (this.activity as? MainActivity)?.showAbout() },
+            settingsClick = {},
+            statsClick = {},
+            aboutClick = {},
             helpClick = {
                 (this.activity as? MainActivity)?.openInBrowser(
                     "https://tachiyomi.org/docs/guides/troubleshooting/"

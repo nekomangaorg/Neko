@@ -38,29 +38,17 @@ import me.saket.cascade.CascadePopupMenu
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.NekoTheme
 
-
 inline fun ComponentActivity.setComposeContent(
     parent: CompositionContext? = null,
     crossinline content: @Composable () -> Unit,
 ) {
-    setContent(parent) {
-        NekoTheme {
-                content()
-            }
-        }
-    }
-
-fun ComposeView.setComposeContent(
-    content: @Composable () -> Unit,
-) {
-    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-    setContent {
-        NekoTheme {
-                content()
-            }
-    }
+    setContent(parent) { NekoTheme { content() } }
 }
 
+fun ComposeView.setComposeContent(content: @Composable () -> Unit) {
+    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+    setContent { NekoTheme { content() } }
+}
 
 /**
  * Shows a snackbar in this view.

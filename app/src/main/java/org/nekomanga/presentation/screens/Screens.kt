@@ -6,11 +6,14 @@ import kotlinx.serialization.Serializable
 object Screens {
 
     @Serializable data object Library : NavKey
-    @Serializable data object Feed : NavKey
-    @Serializable data object Browse : NavKey
-    @Serializable data object Manga : NavKey
-    @Serializable data object Display : NavKey
 
+    @Serializable data object Feed : NavKey
+
+    @Serializable data object Browse : NavKey
+
+    @Serializable data object Manga : NavKey
+
+    @Serializable data object Display : NavKey
 
     object Settings {
         @Serializable data object Main : NavKey

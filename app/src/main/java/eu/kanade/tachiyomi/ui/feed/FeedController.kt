@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.feed
 import android.app.Activity
 import android.content.Context
 import android.view.View
-import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,10 +28,6 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         val context = LocalContext.current
-
-        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
-            (this.activity as? MainActivity)?.backCallback?.invoke()
-        }
 
         FeedScreen(
             feedScreenState = presenter.feedScreenState.collectAsState(),
@@ -92,9 +87,9 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     moveSeriesClick = presenter::moveDownloadSeries,
                     cancelSeriesClick = presenter::cancelDownloadSeries,
                 ),
-            settingsClick = { (this.activity as? MainActivity)?.showSettings() },
-            statsClick = { (this.activity as? MainActivity)?.showStats() },
-            aboutClick = { (this.activity as? MainActivity)?.showAbout() },
+            settingsClick = {},
+            statsClick = {},
+            aboutClick = {},
             helpClick = {
                 (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
             },

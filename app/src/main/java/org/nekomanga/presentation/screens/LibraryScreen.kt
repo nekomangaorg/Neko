@@ -238,11 +238,7 @@ fun LibraryScreen(
                         PaddingValues(
                             top = incomingContentPadding.calculateTopPadding(),
                             bottom =
-                                if (actualSideNav) {
-                                    Size.navBarSize
-                                } else {
-                                    Size.navBarSize
-                                } +
+                                Size.navBarSize +
                                     WindowInsets.navigationBars
                                         .asPaddingValues()
                                         .calculateBottomPadding(),

@@ -19,9 +19,6 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.feed.FeedController
-import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
@@ -33,7 +30,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
-import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -303,7 +299,7 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
-        val position = router.backstackSize - backstackNumber
+        /* val position = router.backstackSize - backstackNumber
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
@@ -325,7 +321,8 @@ class MangaDetailController(private val mangaId: Long) :
                     getBrowseController(backstackNumber - 1)
                 }
             }
-        }
+        }*/
+        return null
     }
 
     /** Navigate back to library when a tag is long clicked and search there */
@@ -334,7 +331,7 @@ class MangaDetailController(private val mangaId: Long) :
             return
         }
 
-        when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+        /* when (val previousController = router.backstack[router.backstackSize - 2].controller) {
             is LibraryController -> {
                 router.handleBack()
                 previousController.search(text)
@@ -349,7 +346,7 @@ class MangaDetailController(private val mangaId: Long) :
                     router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
                 controller.search(text)
             }
-        }
+        }*/
     }
 
     companion object {

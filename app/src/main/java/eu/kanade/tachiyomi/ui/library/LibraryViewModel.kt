@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -49,7 +50,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
@@ -123,66 +124,185 @@ class LibraryViewModel() : ViewModel() {
         }
 
     /** Save the current list to speed up loading later */
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onCleared() {
+        super.onCleared()
         lastLibraryCategoryItems = _libraryScreenState.value.items
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        presenterScope.launchIO {
+    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
+        db.getLibraryMangaList()
+            .asFlow()
+            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
+            .distinctUntilChanged()
+            .conflate()
+
+    val categoryListFlow: Flow<List<CategoryItem>> =
+        combine(
+                libraryPreferences.sortingMode().changes(),
+                libraryPreferences.sortAscending().changes(),
+                db.getCategories().asFlow(),
+            ) { sortingMode, sortAscending, dbCategories ->
+                val librarySort = LibrarySort.valueOf(sortingMode)
+                val defaultCategory = Category.createSystemCategory().toCategoryItem()
+                val updatedDefaultCategory =
+                    defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
+                (listOf(updatedDefaultCategory) +
+                        dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
+                    .sortedBy { it.order }
+            }
+            .distinctUntilChanged()
+
+    val trackMapFlow: Flow<Map<Long, List<String>>> =
+        db.getAllTracks()
+            .asFlow()
+            .mapNotNull { tracks ->
+                tracks
+                    .mapNotNull { track ->
+                        val trackService = loggedServices.firstOrNull { it.id == track.sync_id }
+                        if (trackService == null) {
+                            return@mapNotNull null
+                        }
+                        track.manga_id to trackService.getGlobalStatus(track.status)
+                    }
+                    .groupBy({ it.first }, { it.second })
+            }
+            .distinctUntilChanged()
+
+    val lastReadMangaFlow =
+        db.getLastReadManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val lastFetchMangaFlow =
+        db.getLastFetchedManga()
+            .asFlow()
+            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+            .conflate()
+
+    val filteredMangaListFlow =
+        combine(
+                libraryMangaListFlow,
+                libraryScreenState
+                    .map { it.searchQuery }
+                    .distinctUntilChanged()
+                    .debounce(SEARCH_DEBOUNCE_MILLIS),
+            ) { mangaList, searchQuery ->
+                if (searchQuery.isNullOrBlank()) {
+                    mangaList
+                } else {
+                    mangaList.filter { libraryMangaItem -> libraryMangaItem.matches(searchQuery) }
+                }
+            }
+            .conflate()
+
+    @Suppress("UNCHECKED_CAST")
+    val libraryViewFlow: Flow<LibraryViewPreferences> =
+        combine(
+                libraryPreferences.collapsedCategories().changes(),
+                libraryPreferences.collapsedDynamicCategories().changes(),
+                libraryPreferences.sortingMode().changes(),
+                libraryPreferences.sortAscending().changes(),
+                libraryPreferences.groupBy().changes(),
+                libraryPreferences.showDownloadBadge().changes(),
+            ) {
+                val librarySort = LibrarySort.valueOf(it[2] as Int)
+
+                LibraryViewPreferences(
+                    collapsedCategories = it[0] as Set<String>,
+                    collapsedDynamicCategories = it[1] as Set<String>,
+                    sortingMode = librarySort,
+                    sortAscending = it[3] as Boolean,
+                    groupBy = it[4] as LibraryGroup,
+                    showDownloadBadges = it[5] as Boolean,
+                )
+            }
+            .distinctUntilChanged()
+
+    val filterPreferencesFlow: Flow<LibraryFilters> =
+        combine(
+            libraryPreferences.filterBookmarked().changes(),
+            libraryPreferences.filterCompleted().changes(),
+            libraryPreferences.filterDownloaded().changes(),
+            libraryPreferences.filterMangaType().changes(),
+            libraryPreferences.filterMerged().changes(),
+            libraryPreferences.filterMissingChapters().changes(),
+            libraryPreferences.filterTracked().changes(),
+            libraryPreferences.filterUnavailable().changes(),
+            libraryPreferences.filterUnread().changes(),
+        ) {
+            LibraryFilters(
+                filterBookmarked = it[0] as FilterBookmarked,
+                filterCompleted = it[1] as FilterCompleted,
+                filterDownloaded = it[2] as FilterDownloaded,
+                filterMangaType = it[3] as FilterMangaType,
+                filterMerged = it[4] as FilterMerged,
+                filterMissingChapters = it[5] as FilterMissingChapters,
+                filterTracked = it[6] as FilterTracked,
+                filterUnavailable = it[7] as FilterUnavailable,
+                filterUnread = it[8] as FilterUnread,
+            )
+        }
+
+    init {
+        viewModelScope.launchIO {
             if (lastLibraryCategoryItems == null) {
                 _libraryScreenState.update { it.copy(isFirstLoad = true) }
                 // inital fast load
-                val mangaList = libraryMangaListFlow.first()
-                val categoryList = categoryListFlow.first()
-                val libraryViewPreferences = libraryViewFlow.first()
+                val mangaList = libraryMangaListFlow.firstOrNull()
+                val categoryList = categoryListFlow.firstOrNull()
+                val libraryViewPreferences = libraryViewFlow.firstOrNull()
 
-                val collapsedCategorySet =
-                    libraryViewPreferences.collapsedCategories
-                        .mapNotNull { it.toIntOrNull() }
-                        .toSet()
+                if (mangaList != null && categoryList != null && libraryViewPreferences != null) {
 
-                val unsortedLibraryCategoryItems =
-                    when (libraryViewPreferences.groupBy) {
-                        LibraryGroup.ByCategory -> {
-                            groupByCategory(mangaList, categoryList, collapsedCategorySet)
+                    val collapsedCategorySet =
+                        libraryViewPreferences.collapsedCategories
+                            .mapNotNull { it.toIntOrNull() }
+                            .toSet()
+
+                    val unsortedLibraryCategoryItems =
+                        when (libraryViewPreferences.groupBy) {
+                            LibraryGroup.ByCategory -> {
+                                groupByCategory(mangaList, categoryList, collapsedCategorySet)
+                            }
+
+                            LibraryGroup.ByAuthor,
+                            LibraryGroup.ByContent,
+                            LibraryGroup.ByLanguage,
+                            LibraryGroup.ByStatus,
+                            LibraryGroup.ByTag -> {
+                                groupByDynamic(
+                                    libraryMangaList = mangaList,
+                                    collapsedDynamicCategorySet =
+                                        libraryViewPreferences.collapsedDynamicCategories,
+                                    currentLibraryGroup = libraryViewPreferences.groupBy,
+                                    sortOrder = libraryViewPreferences.sortingMode,
+                                    sortAscending = libraryViewPreferences.sortAscending,
+                                    loggedInTrackStatus = emptyMap(),
+                                )
+                            }
+                            // by track status requires an extra network call, so we will just show
+                            // ungrouped for the fast path
+                            LibraryGroup.ByTrackStatus -> {
+                                groupByUngrouped(
+                                    mangaList,
+                                    libraryViewPreferences.sortingMode,
+                                    libraryViewPreferences.sortAscending,
+                                )
+                            }
+
+                            LibraryGroup.Ungrouped -> {
+                                groupByUngrouped(
+                                    mangaList,
+                                    libraryViewPreferences.sortingMode,
+                                    libraryViewPreferences.sortAscending,
+                                )
+                            }
                         }
-                        LibraryGroup.ByAuthor,
-                        LibraryGroup.ByContent,
-                        LibraryGroup.ByLanguage,
-                        LibraryGroup.ByStatus,
-                        LibraryGroup.ByTag -> {
-                            groupByDynamic(
-                                libraryMangaList = mangaList,
-                                collapsedDynamicCategorySet =
-                                    libraryViewPreferences.collapsedDynamicCategories,
-                                currentLibraryGroup = libraryViewPreferences.groupBy,
-                                sortOrder = libraryViewPreferences.sortingMode,
-                                sortAscending = libraryViewPreferences.sortAscending,
-                                loggedInTrackStatus = emptyMap(),
-                            )
-                        }
-                        // by track status requires an extra network call, so we will just show
-                        // ungrouped for the fast path
-                        LibraryGroup.ByTrackStatus -> {
-                            groupByUngrouped(
-                                mangaList,
-                                libraryViewPreferences.sortingMode,
-                                libraryViewPreferences.sortAscending,
-                            )
-                        }
-                        LibraryGroup.Ungrouped -> {
-                            groupByUngrouped(
-                                mangaList,
-                                libraryViewPreferences.sortingMode,
-                                libraryViewPreferences.sortAscending,
-                            )
-                        }
+
+                    _libraryScreenState.update {
+                        it.copy(items = unsortedLibraryCategoryItems.toPersistentList())
                     }
-
-                _libraryScreenState.update {
-                    it.copy(items = unsortedLibraryCategoryItems.toPersistentList())
                 }
             } else {
                 lastLibraryCategoryItems?.let { items ->
@@ -202,7 +322,7 @@ class LibraryViewModel() : ViewModel() {
         observeLibraryUpdates()
         preferenceUpdates()
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val groupItems =
                 mutableListOf(
                     LibraryGroup.ByCategory,
@@ -221,7 +341,7 @@ class LibraryViewModel() : ViewModel() {
             _libraryScreenState.update { it.copy(groupByOptions = groupItems.toPersistentList()) }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             combine(
                     filteredMangaListFlow,
                     categoryListFlow,
@@ -371,83 +491,16 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        db.getLibraryMangaList()
-            .asFlow()
-            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
-            .distinctUntilChanged()
-            .conflate()
-
-    val categoryListFlow: Flow<List<CategoryItem>> =
-        combine(
-                libraryPreferences.sortingMode().changes(),
-                libraryPreferences.sortAscending().changes(),
-                db.getCategories().asFlow(),
-            ) { sortingMode, sortAscending, dbCategories ->
-                val librarySort = LibrarySort.valueOf(sortingMode)
-                val defaultCategory = Category.createSystemCategory().toCategoryItem()
-                val updatedDefaultCategory =
-                    defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
-                (listOf(updatedDefaultCategory) +
-                        dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
-                    .sortedBy { it.order }
-            }
-            .distinctUntilChanged()
-
-    val trackMapFlow: Flow<Map<Long, List<String>>> =
-        db.getAllTracks()
-            .asFlow()
-            .mapNotNull { tracks ->
-                tracks
-                    .mapNotNull { track ->
-                        val trackService = loggedServices.firstOrNull { it.id == track.sync_id }
-                        if (trackService == null) {
-                            return@mapNotNull null
-                        }
-                        track.manga_id to trackService.getGlobalStatus(track.status)
-                    }
-                    .groupBy({ it.first }, { it.second })
-            }
-            .distinctUntilChanged()
-
-    val lastReadMangaFlow =
-        db.getLastReadManga()
-            .asFlow()
-            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
-            .conflate()
-
-    val lastFetchMangaFlow =
-        db.getLastFetchedManga()
-            .asFlow()
-            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
-            .conflate()
-
-    val filteredMangaListFlow =
-        combine(
-                libraryMangaListFlow,
-                libraryScreenState
-                    .map { it.searchQuery }
-                    .distinctUntilChanged()
-                    .debounce(SEARCH_DEBOUNCE_MILLIS),
-            ) { mangaList, searchQuery ->
-                if (searchQuery.isNullOrBlank()) {
-                    mangaList
-                } else {
-                    mangaList.filter { libraryMangaItem -> libraryMangaItem.matches(searchQuery) }
-                }
-            }
-            .conflate()
-
     fun preferenceUpdates() {
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
                 enabled ->
                 _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences
                 .showStartReadingButton()
                 .changes()
@@ -457,7 +510,7 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             mangadexPreferences
                 .includeUnavailableChapters()
                 .changes()
@@ -467,35 +520,35 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
                 enabled ->
                 _libraryScreenState.update { it.copy(incognitoMode = enabled) }
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
                 enabled ->
                 _libraryScreenState.update { it.copy(outlineCovers = enabled) }
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences.showDownloadBadge().changes().distinctUntilChanged().collectLatest {
                 enabled ->
                 _libraryScreenState.update { it.copy(showDownloadBadges = enabled) }
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences.showUnreadBadge().changes().distinctUntilChanged().collectLatest {
                 enabled ->
                 _libraryScreenState.update { it.copy(showUnreadBadges = enabled) }
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences
                 .libraryHorizontalCategories()
                 .changes()
@@ -505,7 +558,7 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences
                 .showLibraryButtonBar()
                 .changes()
@@ -515,7 +568,7 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             combine(
                     libraryPreferences.gridSize().changes(),
                     libraryPreferences.layout().changes(),
@@ -530,54 +583,6 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
     }
-
-    @Suppress("UNCHECKED_CAST")
-    val libraryViewFlow: Flow<LibraryViewPreferences> =
-        combine(
-                libraryPreferences.collapsedCategories().changes(),
-                libraryPreferences.collapsedDynamicCategories().changes(),
-                libraryPreferences.sortingMode().changes(),
-                libraryPreferences.sortAscending().changes(),
-                libraryPreferences.groupBy().changes(),
-                libraryPreferences.showDownloadBadge().changes(),
-            ) {
-                val librarySort = LibrarySort.valueOf(it[2] as Int)
-
-                LibraryViewPreferences(
-                    collapsedCategories = it[0] as Set<String>,
-                    collapsedDynamicCategories = it[1] as Set<String>,
-                    sortingMode = librarySort,
-                    sortAscending = it[3] as Boolean,
-                    groupBy = it[4] as LibraryGroup,
-                    showDownloadBadges = it[5] as Boolean,
-                )
-            }
-            .distinctUntilChanged()
-
-    val filterPreferencesFlow: Flow<LibraryFilters> =
-        combine(
-            libraryPreferences.filterBookmarked().changes(),
-            libraryPreferences.filterCompleted().changes(),
-            libraryPreferences.filterDownloaded().changes(),
-            libraryPreferences.filterMangaType().changes(),
-            libraryPreferences.filterMerged().changes(),
-            libraryPreferences.filterMissingChapters().changes(),
-            libraryPreferences.filterTracked().changes(),
-            libraryPreferences.filterUnavailable().changes(),
-            libraryPreferences.filterUnread().changes(),
-        ) {
-            LibraryFilters(
-                filterBookmarked = it[0] as FilterBookmarked,
-                filterCompleted = it[1] as FilterCompleted,
-                filterDownloaded = it[2] as FilterDownloaded,
-                filterMangaType = it[3] as FilterMangaType,
-                filterMerged = it[4] as FilterMerged,
-                filterMissingChapters = it[5] as FilterMissingChapters,
-                filterTracked = it[6] as FilterTracked,
-                filterUnavailable = it[7] as FilterUnavailable,
-                filterUnread = it[8] as FilterUnread,
-            )
-        }
 
     private suspend fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
@@ -613,7 +618,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun categoryItemClick(category: CategoryItem) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             when (category.isDynamic) {
                 true -> {
                     val collapsedDynamicCategorySet =
@@ -652,43 +657,43 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun groupByClick(groupBy: LibraryGroup) {
-        presenterScope.launchIO { libraryPreferences.groupBy().set(groupBy) }
+        viewModelScope.launchIO { libraryPreferences.groupBy().set(groupBy) }
     }
 
     fun libraryDisplayModeClick(libraryDisplayMode: LibraryDisplayMode) {
-        presenterScope.launchIO { libraryPreferences.layout().set(libraryDisplayMode) }
+        viewModelScope.launchIO { libraryPreferences.layout().set(libraryDisplayMode) }
     }
 
     fun rawColumnCountChanged(updatedColumnCount: Float) {
-        presenterScope.launchIO { libraryPreferences.gridSize().set(updatedColumnCount) }
+        viewModelScope.launchIO { libraryPreferences.gridSize().set(updatedColumnCount) }
     }
 
     fun outlineCoversToggled() {
-        presenterScope.launchIO { libraryPreferences.outlineOnCovers().toggle() }
+        viewModelScope.launchIO { libraryPreferences.outlineOnCovers().toggle() }
     }
 
     fun downloadBadgesToggled() {
-        presenterScope.launchIO { libraryPreferences.showDownloadBadge().toggle() }
+        viewModelScope.launchIO { libraryPreferences.showDownloadBadge().toggle() }
     }
 
     fun unreadBadgesToggled() {
-        presenterScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
+        viewModelScope.launchIO { libraryPreferences.showUnreadBadge().toggle() }
     }
 
     fun startReadingButtonToggled() {
-        presenterScope.launchIO { libraryPreferences.showStartReadingButton().toggle() }
+        viewModelScope.launchIO { libraryPreferences.showStartReadingButton().toggle() }
     }
 
     fun horizontalCategoriesToggled() {
-        presenterScope.launchIO { libraryPreferences.libraryHorizontalCategories().toggle() }
+        viewModelScope.launchIO { libraryPreferences.libraryHorizontalCategories().toggle() }
     }
 
     fun showLibraryButtonBarToggled() {
-        presenterScope.launchIO { libraryPreferences.showLibraryButtonBar().toggle() }
+        viewModelScope.launchIO { libraryPreferences.showLibraryButtonBar().toggle() }
     }
 
     fun clearActiveFilters() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             libraryPreferences.filterUnread().delete()
             libraryPreferences.filterDownloaded().delete()
             libraryPreferences.filterCompleted().delete()
@@ -702,7 +707,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun filterToggled(filter: LibraryFilterType) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             when (filter) {
                 is FilterBookmarked -> libraryPreferences.filterBookmarked().set(filter)
                 is FilterCompleted -> libraryPreferences.filterCompleted().set(filter)
@@ -719,7 +724,7 @@ class LibraryViewModel() : ViewModel() {
 
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order =
                 (_libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
@@ -728,7 +733,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun editCategories(mangaList: List<DisplayManga>, categories: List<CategoryItem>) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val dbCategories = categories.map { it.toDbCategory() }
 
             mangaList.mapAsync { manga ->
@@ -745,7 +750,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun categoryAscendingClick(category: CategoryItem) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             if (category.isDynamic || category.isSystemCategory) {
                 libraryPreferences.sortAscending().set(!category.isAscending)
             } else {
@@ -756,7 +761,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             if (category.isDynamic || category.isSystemCategory) {
                 libraryPreferences.sortingMode().set(librarySort.mainValue)
             } else {
@@ -879,7 +884,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun observeLibraryUpdates() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             workManager
                 .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
                 .map { list -> list.any { !it.state.isFinished } }
@@ -891,7 +896,7 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             filterPreferencesFlow.distinctUntilChanged().collectLatest { libraryFilters ->
                 _libraryScreenState.update {
                     it.copy(
@@ -902,7 +907,7 @@ class LibraryViewModel() : ViewModel() {
             }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             downloadManager
                 .statusFlow()
                 .catch { error -> TimberKt.e(error) }
@@ -913,11 +918,11 @@ class LibraryViewModel() : ViewModel() {
                 }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
         }
 
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
                 _mangaRefreshingState.update { it + mangaId }
             }
@@ -925,7 +930,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun updateDownloadBadges(mangaId: Long) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val manga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
             val downloadCount = downloadManager.getDownloadCount(manga)
             _libraryScreenState.update { state ->
@@ -952,7 +957,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun collapseExpandAllCategories() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val updatedAllCollapsed = !_libraryScreenState.value.allCollapsed
             val categoryItems = _libraryScreenState.value.items.map { it.categoryItem }
             if (categoryItems.isEmpty()) {
@@ -988,7 +993,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun toggleIncognitoMode() {
-        presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }
+        viewModelScope.launchIO { securityPreferences.incognitoMode().toggle() }
     }
 
     fun search(searchQuery: String?) {
@@ -997,7 +1002,7 @@ class LibraryViewModel() : ViewModel() {
 
     /** sync selected manga to mangadex follows */
     fun syncMangaToDex() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val mangaIds =
                 _libraryScreenState.value.selectedItems
                     .map { it.displayManga.mangaId }
@@ -1009,7 +1014,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             var currentSelected = _libraryScreenState.value.selectedItems.toList()
             currentSelected =
                 if (libraryMangaItems.all { it in currentSelected }) {
@@ -1025,7 +1030,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun deleteSelectedLibraryMangaItems() {
-        presenterScope.launchNonCancellable {
+        viewModelScope.launchNonCancellable {
             val currentSelected = _libraryScreenState.value.selectedItems.toList()
             clearSelectedManga()
             currentSelected.mapAsync { libraryMangaItem ->
@@ -1039,7 +1044,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val index =
                 _libraryScreenState.value.selectedItems.indexOfFirst {
                     it.displayManga.mangaId == libraryMangaItem.displayManga.mangaId
@@ -1063,7 +1068,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun markChapters(markAction: ChapterMarkActions) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val selectedItems = _libraryScreenState.value.selectedItems
             _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
@@ -1080,7 +1085,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun downloadChapters(downloadAction: DownloadAction) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val displayMangaList = _libraryScreenState.value.selectedItems.map { it.displayManga }
             clearSelectedManga()
             if (
@@ -1131,7 +1136,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun openNextUnread(mangaId: Long, openChapter: (Manga, Chapter) -> Unit) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
@@ -1148,7 +1153,7 @@ class LibraryViewModel() : ViewModel() {
                 .map { selected -> selected.url }
                 .distinct()
                 .joinToString("\n")
-        presenterScope.launchIO { clearSelectedManga() }
+        viewModelScope.launchIO { clearSelectedManga() }
         return urls
     }
 

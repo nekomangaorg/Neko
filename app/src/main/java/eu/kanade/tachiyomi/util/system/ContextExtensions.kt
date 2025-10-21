@@ -39,7 +39,6 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
@@ -249,7 +248,7 @@ fun Context.prepareSideNavContext(): Context {
 }
 
 fun Context.withOriginalWidth(): Context {
-    val width = (this as? MainActivity)?.ogWidth ?: resources.configuration.screenWidthDp
+    val width = resources.configuration.screenWidthDp
     val configuration = resources.configuration
     val overrideConf = Configuration()
     overrideConf.setTo(configuration)

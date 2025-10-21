@@ -1,176 +1,106 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.Animator
-import android.animation.AnimatorInflater
-import android.annotation.SuppressLint
-import android.app.Dialog
-import android.app.assist.AssistContent
-import android.content.Context
-import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.IdRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.filled.AccessTimeFilled
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.ColorUtils
-import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.bluelinelabs.conductor.Conductor
-import com.bluelinelabs.conductor.Controller
-import com.bluelinelabs.conductor.ControllerChangeHandler
-import com.bluelinelabs.conductor.Router
-import com.google.android.material.navigation.NavigationBarView
-import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
-import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
-import eu.kanade.tachiyomi.data.updater.AppUpdateResult
-import eu.kanade.tachiyomi.data.updater.RELEASE_URL
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
-import eu.kanade.tachiyomi.ui.feed.FeedController
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.manga.MangaDetailController
-import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
-import eu.kanade.tachiyomi.ui.more.about.AboutController
-import eu.kanade.tachiyomi.ui.more.stats.StatsController
-import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.setting.SettingsController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseController
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.hasSideNavBar
-import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
-import eu.kanade.tachiyomi.util.system.isBottomTappable
-import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.prepareSideNavContext
-import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
-import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.canStillGoBack
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
-import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import eu.kanade.tachiyomi.util.view.withFadeInTransaction
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlin.math.min
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.nekomanga.BuildConfig
-import org.nekomanga.R
-import org.nekomanga.databinding.MainActivityBinding
-import org.nekomanga.logging.TimberKt
+import org.nekomanga.core.R
 import org.nekomanga.presentation.screens.LibraryScreen
 import org.nekomanga.presentation.screens.Screens
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
-@SuppressLint("ResourceType")
-open class MainActivity : ComponentActivity {
-
-    protected lateinit var router: Router
-
-    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
-
-    private var pulseAnimator: Animator? = null
-
-    private val downloadManager: DownloadManager by injectLazy()
-    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
-    private val hideBottomNav
-        get() = router.backstackSize > 1
-
-    private val updateChecker by lazy { AppUpdateChecker() }
-    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
-    private var overflowDialog: Dialog? = null
-    var ogWidth: Int = Int.MAX_VALUE
-
-
-    private lateinit var viewModel: MainViewModel
-
-    override fun attachBaseContext(newBase: Context?) {
-        ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
-        super.attachBaseContext(newBase?.prepareSideNavContext())
-    }
-
-    var backPressedCallback: OnBackPressedCallback? = null
-    val backCallback = {
-        pressingBack()
-        reEnableBackPressedCallBack()
-    }
-
-
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Force the 3-button navigation bar to be transparent
-            // See: https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
+            // See:
+            // https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
             window.isNavigationBarContrastEnforced = false
         }
 
-
         setComposeContent {
             val context = LocalContext.current
-            //TODO load the correct one in future
+            // TODO load the correct one in future
             val backStack = rememberNavBackStack(Screens.Library)
 
-            //TODO status bar colors and navigation bar colors
+            var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
+            // TODO status bar colors and navigation bar colors
 
             val windowSizeClass = calculateWindowSizeClass(this)
-            Box(modifier = Modifier.fillMaxSize()) {
+            val navItems =
+                listOf(
+                    NavigationItem(
+                        screen = Screens.Library,
+                        title = stringResource(R.string.library),
+                        unselectedIcon = Icons.AutoMirrored.Outlined.LibraryBooks,
+                        selectedIcon = Icons.AutoMirrored.Filled.LibraryBooks,
+                    ),
+                    NavigationItem(
+                        screen = Screens.Feed,
+                        title = stringResource(R.string.feed),
+                        unselectedIcon = Icons.Outlined.AccessTime,
+                        selectedIcon = Icons.Filled.AccessTimeFilled,
+                    ),
+                    NavigationItem(
+                        screen = Screens.Browse,
+                        title = stringResource(R.string.browse),
+                        unselectedIcon = Icons.Outlined.Explore,
+                        selectedIcon = Icons.Filled.Explore,
+                    ),
+                )
 
+            val showNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+
+            Box(
+                modifier =
+                    Modifier.fillMaxSize().padding(start = if (showNavigationRail) 80.dp else 0.dp)
+            ) {
                 NavDisplay(
                     backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
                     entryDecorators =
                         listOf(
                             rememberSaveableStateHolderNavEntryDecorator(),
@@ -187,17 +117,20 @@ open class MainActivity : ComponentActivity {
                                         LibraryScreenActions(
                                             mangaClick = { /*::openManga*/ },
                                             mangaLongClick = vm::libraryItemLongClick,
-                                            selectAllLibraryMangaItems = vm::selectAllLibraryMangaItems,
-                                            deleteSelectedLibraryMangaItems = vm::deleteSelectedLibraryMangaItems,
+                                            selectAllLibraryMangaItems =
+                                                vm::selectAllLibraryMangaItems,
+                                            deleteSelectedLibraryMangaItems =
+                                                vm::deleteSelectedLibraryMangaItems,
                                             clearSelectedManga = vm::clearSelectedManga,
                                             search = vm::search,
-                                            searchMangaDex = {/* ::searchMangaDex,*/ },
+                                            searchMangaDex = { /* ::searchMangaDex,*/ },
                                             updateLibrary = { /*updateLibrary(context)*/ },
-                                            collapseExpandAllCategories = vm::collapseExpandAllCategories,
+                                            collapseExpandAllCategories =
+                                                vm::collapseExpandAllCategories,
                                             clearActiveFilters = vm::clearActiveFilters,
                                             filterToggled = vm::filterToggled,
                                             downloadChapters = vm::downloadChapters,
-                                            shareManga = {/* shareManga(context)*/ },
+                                            shareManga = { /* shareManga(context)*/ },
                                             markMangaChapters = vm::markChapters,
                                             syncMangaToDex = vm::syncMangaToDex,
                                             mangaStartReadingClick = { mangaId ->
@@ -208,7 +141,7 @@ open class MainActivity : ComponentActivity {
                                                             ReaderActivity.newIntent(
                                                                 context,
                                                                 manga,
-                                                                chapter
+                                                                chapter,
                                                             )
                                                         )
                                                     },
@@ -218,15 +151,19 @@ open class MainActivity : ComponentActivity {
                                     librarySheetActions =
                                         LibrarySheetActions(
                                             groupByClick = vm::groupByClick,
-                                            categoryItemLibrarySortClick = vm::categoryItemLibrarySortClick,
+                                            categoryItemLibrarySortClick =
+                                                vm::categoryItemLibrarySortClick,
                                             libraryDisplayModeClick = vm::libraryDisplayModeClick,
                                             rawColumnCountChanged = vm::rawColumnCountChanged,
                                             outlineCoversToggled = vm::outlineCoversToggled,
                                             downloadBadgesToggled = vm::downloadBadgesToggled,
                                             unreadBadgesToggled = vm::unreadBadgesToggled,
-                                            startReadingButtonToggled = vm::startReadingButtonToggled,
-                                            horizontalCategoriesToggled = vm::horizontalCategoriesToggled,
-                                            showLibraryButtonBarToggled = vm::showLibraryButtonBarToggled,
+                                            startReadingButtonToggled =
+                                                vm::startReadingButtonToggled,
+                                            horizontalCategoriesToggled =
+                                                vm::horizontalCategoriesToggled,
+                                            showLibraryButtonBarToggled =
+                                                vm::showLibraryButtonBarToggled,
                                             editCategories = vm::editCategories,
                                             addNewCategory = vm::addNewCategory,
                                         ),
@@ -234,540 +171,37 @@ open class MainActivity : ComponentActivity {
                                         LibraryCategoryActions(
                                             categoryItemClick = vm::categoryItemClick,
                                             categoryAscendingClick = vm::categoryAscendingClick,
-                                            categoryRefreshClick = { /*category -> updateCategory(category, context)*/ },
+                                            categoryRefreshClick = { /*category -> updateCategory(category, context)*/
+                                            },
                                         ),
                                     windowSizeClass = windowSizeClass,
-                                    settingsClick = { },
+                                    settingsClick = {},
                                     incognitoClick = {},
-                                    statsClick = { },
-                                    aboutClick = { },
-                                    helpClick = { },
+                                    statsClick = {},
+                                    aboutClick = {},
+                                    helpClick = {},
                                 )
                             }
-                        }
+                        },
                 )
             }
-
-        }
-
-
-    }
-    fun oldOnCreate(savedInstanceState: Bundle?){
-        // Set up shared element transition and disable overlay so views don't show above system
-        // bars
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.sharedElementsUseOverlay = false
-
-        super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this, MainViewModelFactory())[MainViewModel::class.java]
-
-        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
-
-        // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
-        if (!isTaskRoot && this !is SearchActivity) {
-            finish()
-            return
-        }
-        binding = MainActivityBinding.inflate(layoutInflater)
-
-        setContentView(binding.root)
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-        }
-
-        nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
-            if (!LibraryUpdateJob.isRunning(this)) {
-                LibraryUpdateJob.startNow(this)
-            }
-            true
-        }
-
-        val container: ViewGroup = binding.controllerContainer
-
-        val content: ViewGroup = binding.mainContent
-        downloadManager.isDownloaderRunning.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
-        lifecycleScope.launchIO { downloadManager.deletePendingChapters() }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        setNavBarColor(content.rootWindowInsetsCompat)
-        nav.isVisible = false
-        content.doOnApplyWindowInsetsCompat { v, insets, _ ->
-            setNavBarColor(insets)
-            val systemInsets = insets.ignoredSystemInsets
-            val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
-            contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = systemInsets.left
-                rightMargin = systemInsets.right
-            }
-            // Consume any horizontal insets and pad all content in. There's not much we can do
-            // with horizontal insets
-            v.updatePadding(left = systemInsets.left, right = systemInsets.right)
-            binding.bottomNav?.updatePadding(bottom = systemInsets.bottom)
-            binding.sideNav?.updatePadding(
-                left = 0,
-                right = 0,
-                bottom = systemInsets.bottom,
-                top = systemInsets.top,
-            )
-            binding.bottomView?.isVisible = systemInsets.bottom > 0
-            binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
-                height = systemInsets.bottom
-            }
-        }
-        // Set this as nav view will try to set its own insets and they're hilariously bad
-        ViewCompat.setOnApplyWindowInsetsListener(nav) { _, insets -> insets }
-
-        router = Conductor.attachRouter(this, container, savedInstanceState)
-
-        if (router.hasRootController()) {
-            nav.selectedItemId =
-                when (router.backstack.firstOrNull()?.controller) {
-                    is FeedController -> R.id.nav_feed
-                    is BrowseController -> R.id.nav_browse
-                    is LibraryController -> R.id.nav_feed
-                    else -> R.id.nav_library
-                }
-        }
-
-        nav.setOnItemSelectedListener { item ->
-            val id = item.itemId
-            val currentRoot = router.backstack.firstOrNull()
-            if (currentRoot?.tag()?.toIntOrNull() != id) {
-                setRoot(
-                    when (id) {
-                        R.id.nav_library -> LibraryController()
-                        R.id.nav_feed -> FeedController() // FeedController()
-                        else -> BrowseController()
+            if (showNavigationRail) {
+                NavigationSideBar(
+                    items = navItems,
+                    selectedItemIndex = selectedItemIndex,
+                    onNavigate = { screen, index ->
+                        selectedItemIndex = index
+                        backStack.clear()
+                        backStack.add(screen)
                     },
-                    id,
                 )
             }
-            true
-        }
-
-        if (!router.hasRootController()) {
-            // Set start screen
-            if (!handleIntentAction(intent)) {
-                goToStartingTab()
-                if (!preferences.hasShownOnboarding().get()) {
-                    router.pushController(OnboardingController().withFadeInTransaction())
-                }
-            }
-        }
-
-        nav.isVisible = !hideBottomNav
-        /*
-                updateControllersWithSideNavChanges()
-        */
-        binding.bottomView?.visibility =
-            if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
-        nav.alpha = if (hideBottomNav) 0f else 1f
-        router.addChangeListener(
-            object : ControllerChangeHandler.ControllerChangeListener {
-                override fun onChangeStarted(
-                    to: Controller?,
-                    from: Controller?,
-                    isPush: Boolean,
-                    container: ViewGroup,
-                    handler: ControllerChangeHandler,
-                ) {
-                    syncActivityViewWithController(to, from, isPush)
-                }
-
-                override fun onChangeCompleted(
-                    to: Controller?,
-                    from: Controller?,
-                    isPush: Boolean,
-                    container: ViewGroup,
-                    handler: ControllerChangeHandler,
-                ) {
-                    nav.translationY = 0f
-                    if (router.backstackSize == 1) {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
-                            window?.setSoftInputMode(
-                                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-                            )
-                        }
-                    } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                        @Suppress("DEPRECATION")
-                        window?.setSoftInputMode(
-                            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                        )
-                    }
-                }
-            }
-        )
-
-        syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
-
-        if (savedInstanceState == null && this !is SearchActivity) {
-            // Reset Incognito Mode on relaunch
-            securityPreferences.incognitoMode().set(false)
-
-            // Show changelog if needed
-            if (Migrations.upgrade(preferences)) {
-                if (!BuildConfig.DEBUG) {
-                    content.post { whatsNewSheet().show() }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                WorkManager.getInstance(this@MainActivity)
-                    .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                    .map { workInfoList -> workInfoList.any { it.state == WorkInfo.State.RUNNING } }
-                    .collect { running ->
-                        if (running) {
-                            startIconPulse(binding)
-                        } else {
-                            stopIconPulse(binding)
-                        }
-                    }
-            }
-        }
-
-        preferences
-            .sideNavIconAlignment()
-            .changes()
-            .onEach {
-                binding.sideNav?.menuGravity =
-                    when (it) {
-                        1 -> Gravity.CENTER
-                        2 -> Gravity.BOTTOM
-                        else -> Gravity.TOP
-                    }
-            }
-            .launchIn(lifecycleScope)
-    }
-
-    fun reEnableBackPressedCallBack() {
-        val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
-        backPressedCallback?.isEnabled =
-            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
-    }
-
-    private fun setNavBarColor(insets: WindowInsetsCompat?) {
-        if (insets == null) return
-        window.navigationBarColor =
-            when {
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
-                    // basically if in landscape on a phone
-                    // For lollipop, draw opaque nav bar
-                    when {
-                        insets.hasSideNavBar() -> Color.BLACK
-                        isInNightMode() ->
-                            ColorUtils.setAlphaComponent(
-                                getResourceColor(R.attr.colorSurfaceContainer),
-                                179,
-                            )
-                        else -> Color.argb(179, 0, 0, 0)
-                    }
-                }
-                // if the android q+ device has gesture nav, transparent nav bar
-                // this is here in case some crazy with a notch uses landscape
-                insets.isBottomTappable() -> {
-                    getColor(android.R.color.transparent)
-                }
-                // if in landscape with 2/3 button mode, fully opaque nav bar
-                insets.hasSideNavBar() -> {
-                    getResourceColor(R.attr.colorSurfaceContainer)
-                }
-                // if in portrait with 2/3 button mode, translucent nav bar
-                else -> {
-                    ColorUtils.setAlphaComponent(
-                        getResourceColor(R.attr.colorSurfaceContainer),
-                        179,
-                    )
-                }
-            }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        checkForAppUpdates()
-        reEnableBackPressedCallBack()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setStartingTab()
-        saveExtras()
-    }
-
-    fun saveExtras() {
-        mangaShortcutManager.updateShortcuts()
-        MangaCoverMetadata.savePrefs()
-    }
-
-    private fun checkForAppUpdates() {
-        if (isUpdaterEnabled) {
-            lifecycleScope.launchIO {
-                try {
-                    val result = updateChecker.checkForUpdate(this@MainActivity)
-                    if (result is AppUpdateResult.NewUpdate) {
-                        val body = result.release.info
-                        val url = result.release.downloadLink
-
-                        // Create confirmation window
-                        withContext(Dispatchers.Main) {
-                            AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                            NewUpdateDialogController(body, url).showDialog(router)
-                        }
-                    }
-                } catch (error: Exception) {
-                    TimberKt.e(error) { "Error checking for app update" }
-                }
-            }
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
-        if (!handleIntentAction(intent)) {
-            super.onNewIntent(intent)
-        }
-    }
-
-    protected open fun handleIntentAction(intent: Intent): Boolean {
-        val notificationId = intent.getIntExtra("notificationId", -1)
-        if (notificationId > -1) {
-            NotificationReceiver.dismissNotification(
-                applicationContext,
-                notificationId,
-                intent.getIntExtra("groupId", 0),
-            )
-        }
-        when (intent.action) {
-            SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
-            SHORTCUT_BROWSE -> nav.selectedItemId = R.id.nav_browse
-            SHORTCUT_MANGA -> {
-                val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                router.pushController(MangaDetailController(extras).withFadeTransaction())
-            }
-            SHORTCUT_UPDATE_NOTES -> {
-                val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                if (router.backstack.lastOrNull()?.controller !is NewUpdateDialogController) {
-                    NewUpdateDialogController(extras).showDialog(router)
-                }
-            }
-            else -> return false
-        }
-        return true
-    }
-
-    override fun onProvideAssistContent(outContent: AssistContent) {
-        super.onProvideAssistContent(outContent)
-        when (val controller = router.backstack.lastOrNull()?.controller) {
-        /*  is MangaDetailController -> {
-            val url =
-                try {
-                    (source as HttpSource)
-                        .mangaDetailsRequest(controller.presenter.manga.value!!)
-                        .url
-                        .toString()
-                } catch (e: Exception) {
-                    return
-                }
-            outContent.webUri = Uri.parse(url)
-        }*/
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        overflowDialog?.dismiss()
-        overflowDialog = null
-    }
-
-    private fun pressingBack() {
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ViewCompat.getRootWindowInsets(window.decorView)
-                    ?.isVisible(WindowInsetsCompat.Type.ime()) == true
-        ) {
-            WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
-        } else {
-            backPress()
-        }
-    }
-
-    override fun finish() {
-        if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
-            setStartingTab()
-        }
-        if (this !is SearchActivity) {
-            SecureActivityDelegate.locked = true
-        }
-        saveExtras()
-        super.finish()
-    }
-
-    protected open fun backPress() {
-        val controller = router.backstack.lastOrNull()?.controller
-        if (
-            if (router.backstackSize == 1) controller?.handleBack() != true
-            else !router.handleBack()
-        ) {
-            if (shouldGoToStartingTab()) {
-                goToStartingTab()
-            }
-        }
-    }
-
-    fun shouldGoToStartingTab(): Boolean {
-        return preferences.backReturnsToStart().get() &&
-            this !is SearchActivity &&
-            startingTab() != nav.selectedItemId
-    }
-
-    protected val nav: NavigationBarView
-        get() = binding.bottomNav ?: binding.sideNav!!
-
-    private fun setStartingTab() {
-        if (this is SearchActivity || !isBindingInitialized) return
-        if (nav.selectedItemId != R.id.nav_browse && preferences.startingTab().get() >= 0) {
-            preferences
-                .startingTab()
-                .set(
-                    when (nav.selectedItemId) {
-                        R.id.nav_library -> 0
-                        else -> 1
-                    }
-                )
-        }
-    }
-
-    @IdRes
-    private fun startingTab(): Int {
-        return when (preferences.startingTab().get()) {
-            0,
-            -1 -> R.id.nav_library
-            1,
-            -2 -> R.id.nav_feed
-            -3 -> R.id.nav_browse
-            else -> R.id.nav_library
-        }
-    }
-
-    private fun goToStartingTab() {
-        nav.selectedItemId = startingTab()
-    }
-
-    fun goToTab(@IdRes id: Int) {
-        nav.selectedItemId = id
-    }
-
-    private fun setRoot(controller: Controller, id: Int) {
-        router.setRoot(controller.withFadeInTransaction().tag(id.toString()))
-    }
-
-    fun showSettings() {
-        router.pushController(SettingsController().withFadeTransaction())
-    }
-
-    fun showAbout() {
-        router.pushController(AboutController().withFadeTransaction())
-    }
-
-    fun showStats() {
-        router.pushController(StatsController().withFadeTransaction())
-    }
-
-    protected open fun syncActivityViewWithController(
-        to: Controller?,
-        from: Controller? = null,
-        isPush: Boolean = false,
-    ) {
-
-        reEnableBackPressedCallBack()
-        nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
-        nav.isVisible = !hideBottomNav
-        nav.alpha = 1f
-    }
-
+    // TODO remove the below functions
     fun isSideNavigation(): Boolean {
-        return binding.bottomNav == null
-    }
-
-    private fun downloadStatusChanged(downloading: Boolean) {
-        lifecycleScope.launchUI {
-            val hasQueue = downloading || downloadManager.queueState.value.isNotEmpty()
-
-            if (hasQueue) {
-                nav.getOrCreateBadge(R.id.nav_feed).apply {
-                    backgroundColor = this@MainActivity.getResourceColor(R.attr.colorSecondary)
-                }
-            } else {
-                nav.removeBadge(R.id.nav_feed)
-            }
-        }
-    }
-
-    private fun whatsNewSheet() =
-        MaterialMenuSheet(
-            this,
-            listOf(
-                MaterialMenuSheet.MenuSheetItem(
-                    0,
-                    textRes = R.string.whats_new_this_release,
-                    drawable = R.drawable.ic_new_releases_24dp,
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    1,
-                    textRes = R.string.close,
-                    drawable = R.drawable.ic_close_24dp,
-                ),
-            ),
-            title = getString(R.string.updated_to_, BuildConfig.VERSION_NAME),
-            showDivider = true,
-            selectedId = 0,
-            onMenuItemClicked = { _, item ->
-                if (item == 0) {
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, RELEASE_URL.toUri())
-                        startActivity(intent)
-                    } catch (e: Throwable) {
-                        toast(e.message)
-                    }
-                }
-                true
-            },
-        )
-
-    private fun startIconPulse(binding: MainActivityBinding) {
-        val iconView = getIconItemView(binding)
-        iconView ?: return
-        // If animation is not already running, start it
-        if (pulseAnimator == null || !pulseAnimator!!.isRunning) {
-            pulseAnimator =
-                AnimatorInflater.loadAnimator(this, R.animator.pulse_animator).apply {
-                    setTarget(iconView)
-                    start()
-                }
-        }
-    }
-
-    private fun stopIconPulse(binding: MainActivityBinding) {
-        pulseAnimator?.cancel()
-        val iconView = getIconItemView(binding)
-        iconView ?: return
-        iconView.scaleX = 1.0f
-        iconView.scaleY = 1.0f
-    }
-
-    private fun getIconItemView(binding: MainActivityBinding): View? {
-        val itemContainerView =
-            binding.bottomNav?.findViewById<View>(R.id.nav_library)
-                ?: binding.sideNav?.findViewById<View>(R.id.nav_library)
-        itemContainerView ?: return null
-        return itemContainerView.findViewById(
-            com.google.android.material.R.id.navigation_bar_item_icon_view
-        )
+        return false
     }
 
     companion object {
@@ -791,4 +225,32 @@ open class MainActivity : ComponentActivity {
 
         var chapterIdToExitTo = 0L
     }
+}
+
+@Composable
+fun NavigationSideBar(
+    items: List<NavigationItem>,
+    selectedItemIndex: Int,
+    onNavigate: (NavKey, Int) -> Unit,
+) {
+    NavigationRail(
+        modifier = Modifier.fillMaxHeight(),
+        content = {
+            items.forEachIndexed { index, item ->
+                NavigationRailItem(
+                    selectedItemIndex == index,
+                    onClick = { onNavigate(item.screen, index) },
+                    icon = {
+                        Icon(
+                            imageVector =
+                                if (selectedItemIndex == index) item.selectedIcon
+                                else item.unselectedIcon,
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text(text = item.title) },
+                )
+            }
+        },
+    )
 }

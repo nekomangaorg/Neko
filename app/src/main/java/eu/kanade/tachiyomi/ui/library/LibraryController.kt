@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,13 +27,8 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         val context = LocalContext.current
-
-        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
-            (this.activity as? MainActivity)?.backCallback?.invoke()
-        }
 
         LibraryScreen(
             libraryScreenState = presenter.libraryScreenState.collectAsState(),
@@ -87,9 +81,9 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
                 ),
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
-            settingsClick = { (this.activity as? MainActivity)?.showSettings() },
-            statsClick = { (this.activity as? MainActivity)?.showStats() },
-            aboutClick = { (this.activity as? MainActivity)?.showAbout() },
+            settingsClick = {},
+            statsClick = {},
+            aboutClick = {},
             helpClick = {
                 (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
             },

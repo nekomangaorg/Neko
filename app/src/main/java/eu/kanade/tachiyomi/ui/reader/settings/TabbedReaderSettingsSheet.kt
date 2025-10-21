@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.tabs.TabLayout
-import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.collapse
@@ -75,8 +74,8 @@ class TabbedReaderSettingsSheet(
             ContextCompat.getDrawable(context, R.drawable.ic_outline_settings_24dp)
         )
         binding.menu.setOnClickListener {
-            val intent = SearchActivity.openReaderSettings(readerActivity)
-            readerActivity.startActivity(intent)
+            //  val intent = SearchActivity.openReaderSettings(readerActivity)
+            //  readerActivity.startActivity(intent)
             dismiss()
         }
 
