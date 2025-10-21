@@ -328,7 +328,10 @@ class MangaDetailPresenter(
                         )
                     }
 
-                    syncChaptersReadStatus()
+                    if (_mangaDetailScreenState.value.firstLoad) {
+                        syncChaptersReadStatus()
+                        _mangaDetailScreenState.update { it.copy(firstLoad = false) }
+                    }
 
                     val chapterCountChanged =
                         allInfo.mangaItem.missingChapters !=
@@ -380,6 +383,10 @@ class MangaDetailPresenter(
                             _snackbarState.emit(
                                 SnackbarState(message = result.text, messageRes = result.id)
                             )
+                        }
+
+                        is MangaResult.Success -> {
+                            syncChaptersReadStatus()
                         }
 
                         is MangaResult.ChaptersRemoved -> {
