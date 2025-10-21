@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import android.os.Parcelable
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.parcelize.Parcelize
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
@@ -10,11 +12,10 @@ import org.nekomanga.domain.manga.DisplayManga
 
 data class DisplayScreenState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val incognitoMode: Boolean = false,
-    val title: String = "",
     val titleRes: Int? = null,
-    val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
-    val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
+    val filteredDisplayManga: ImmutableMap<Int, PersistentList<DisplayManga>> = persistentMapOf(),
     val error: String? = null,
     val endReached: Boolean = false,
     val page: Int = 1,
@@ -42,4 +43,6 @@ sealed interface DisplayScreenType : Parcelable {
         DisplayScreenType
 
     @Parcelize data class List(val title: String, val listUUID: String) : DisplayScreenType
+
+    @Parcelize data class Similar(val mangaId: String) : DisplayScreenType
 }

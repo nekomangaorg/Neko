@@ -8,16 +8,14 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,26 +27,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
-import kotlinx.collections.immutable.persistentListOf
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.MangaGrid
-import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.functions.numberOfColumns
+import org.nekomanga.presentation.screens.browse.DisplayScreenContent
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
 import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
 import org.nekomanga.presentation.theme.Size
@@ -56,19 +49,31 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun DisplayScreen(
     displayScreenState: State<DisplayScreenState>,
+    displayScreenType: DisplayScreenType,
     switchDisplayClick: () -> Unit,
-    libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
+    onRefresh: () -> Unit,
+    libraryEntryVisibilityClick: (Int) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) { onRefresh() }
+    }
+
+    LaunchedEffect(displayScreenState.value.isRefreshing) {
+        if (!displayScreenState.value.isRefreshing) {
+            pullToRefreshState.endRefresh()
+        }
+    }
 
     LaunchedEffect(currentBottomSheet) {
         if (currentBottomSheet != null) {
@@ -84,7 +89,6 @@ fun DisplayScreen(
     val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
     if (currentBottomSheet != null) {
-
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { currentBottomSheet = null },
@@ -109,13 +113,24 @@ fun DisplayScreen(
         )
     }
     NekoScaffold(
-        type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPress,
         incognitoMode = displayScreenState.value.incognitoMode,
         title =
-            if (displayScreenState.value.titleRes != null)
-                stringResource(id = displayScreenState.value.titleRes!!)
-            else displayScreenState.value.title,
+            when (displayScreenType) {
+                is DisplayScreenType.List -> displayScreenType.title
+                is DisplayScreenType.Similar -> stringResource(id = R.string.similar)
+                else -> {
+                    stringResource(
+                        when (displayScreenType) {
+                            is DisplayScreenType.FeedUpdates -> R.string.feed_updates
+                            is DisplayScreenType.LatestChapters -> R.string.latest
+                            is DisplayScreenType.PopularNewTitles -> R.string.popular_new_titles
+                            is DisplayScreenType.RecentlyAdded -> R.string.recently_added
+                            else -> R.string.missing
+                        }
+                    )
+                }
+            },
         actions = {
             AppBarActions(
                 actions =
@@ -150,87 +165,57 @@ fun DisplayScreen(
                     top = incomingContentPadding.calculateTopPadding(),
                 )
 
-            val haptic = LocalHapticFeedback.current
-            fun mangaLongClick(displayManga: DisplayManga) {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
-                    scope.launch {
-                        openSheet(
-                            DisplaySheetScreen.CategoriesSheet(
-                                setCategories = { selectedCategories ->
-                                    scope.launch { sheetState.hide() }
-                                    toggleFavorite(displayManga.mangaId, selectedCategories)
-                                }
-                            )
-                        )
-                    }
+            Box(
+                modifier =
+                    Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection).fillMaxSize()
+            ) {
+                if (
+                    (displayScreenState.value.isLoading || displayScreenState.value.isRefreshing) &&
+                        displayScreenState.value.filteredDisplayManga.isEmpty()
+                ) {
+                    ContainedLoadingIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                    )
                 } else {
-                    toggleFavorite(displayManga.mangaId, emptyList())
-                }
-            }
-
-            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            } else if (displayScreenState.value.error != null) {
-                EmptyScreen(
-                    message = UiText.String(displayScreenState.value.error!!),
-                    actions =
-                        if (displayScreenState.value.page == 1)
-                            persistentListOf(
-                                Action(
-                                    text = UiText.StringResource(R.string.retry),
-                                    onClick = retryClick,
+                    val haptic = LocalHapticFeedback.current
+                    fun mangaLongClick(displayManga: DisplayManga) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (!displayManga.inLibrary && displayScreenState.value.promptForCategories
+                        ) {
+                            scope.launch {
+                                openSheet(
+                                    DisplaySheetScreen.CategoriesSheet(
+                                        setCategories = { selectedCategories ->
+                                            scope.launch { sheetState.hide() }
+                                            toggleFavorite(displayManga.mangaId, selectedCategories)
+                                        }
+                                    )
                                 )
-                            )
-                        else persistentListOf(),
-                    contentPadding = incomingContentPadding,
-                )
-            } else {
-                if (displayScreenState.value.isList) {
-                    MangaList(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                } else {
-                    MangaGrid(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns =
-                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
-                        isComfortable = displayScreenState.value.isComfortableGrid,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                }
-                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
-                    Box(Modifier.fillMaxSize()) {
-                        val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
-                        val stroke =
-                            remember(strokeWidth) {
-                                Stroke(width = strokeWidth, cap = StrokeCap.Round)
                             }
-                        LinearWavyProgressIndicator(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .align(Alignment.TopStart)
-                                    .statusBarsPadding(),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
-                            stroke = stroke,
-                            trackStroke = stroke,
-                        )
+                        } else {
+                            toggleFavorite(displayManga.mangaId, emptyList())
+                        }
                     }
+
+                    DisplayScreenContent(
+                        displayScreenType = displayScreenType,
+                        groupedManga = displayScreenState.value.filteredDisplayManga,
+                        isList = displayScreenState.value.isList,
+                        isComfortable = displayScreenState.value.isComfortableGrid,
+                        rawColumns = displayScreenState.value.rawColumnCount,
+                        shouldOutlineCover = displayScreenState.value.outlineCovers,
+                        contentPadding = contentPadding,
+                        mangaClick = openManga,
+                        mangaLongClick = ::mangaLongClick,
+                        loadNextPage = loadNextPage,
+                        endReached = displayScreenState.value.endReached,
+                    )
                 }
+
+                PullToRefreshContainer(
+                    state = pullToRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         },
     )

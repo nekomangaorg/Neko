@@ -31,9 +31,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -137,7 +137,8 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             onSimilarClick = {
                 router.pushController(
-                    SimilarController(presenter.getManga().uuid()).withFadeTransaction()
+                    DisplayController(DisplayScreenType.Similar(presenter.getManga().uuid()))
+                        .withFadeTransaction()
                 )
             },
             onShareClick = { shareManga(context) },
@@ -308,8 +309,7 @@ class MangaDetailController(private val mangaId: Long) :
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
             is FeedController,
-            is DisplayController,
-            is SimilarController -> {
+            is DisplayController -> {
                 router.popToRoot()
                 (activity as? MainActivity)?.goToTab(R.id.nav_browse)
                 router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController

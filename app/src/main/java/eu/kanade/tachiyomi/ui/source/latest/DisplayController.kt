@@ -11,10 +11,11 @@ import org.nekomanga.presentation.screens.DisplayScreen
 
 class DisplayController(private val displayScreenType: DisplayScreenType) :
     BaseComposeController<DisplayPresenter>(
-        Bundle().apply { putParcelable(Display_Type, displayScreenType) }
+        Bundle().apply { putParcelable(DISPLAY_TYPE, displayScreenType) }
     ) {
 
-    constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(Display_Type)!!)
+    @Suppress("Unused")
+    constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(DISPLAY_TYPE)!!)
 
     override var presenter = DisplayPresenter(displayScreenType)
 
@@ -22,8 +23,8 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
     override fun ScreenContent() {
         DisplayScreen(
             displayScreenState = presenter.displayScreenState.collectAsStateWithLifecycle(),
+            displayScreenType = presenter.displayScreenType,
             switchDisplayClick = presenter::switchDisplayMode,
-            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
             onBackPress = router::handleBack,
             openManga = { mangaId: Long ->
                 router.pushController(MangaDetailController(mangaId).withFadeTransaction())
@@ -32,6 +33,8 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
             retryClick = presenter::loadNextItems,
+            onRefresh = presenter::refresh,
+            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
         )
     }
 
@@ -41,6 +44,6 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
     }
 
     companion object {
-        const val Display_Type = "displayType"
+        const val DISPLAY_TYPE = "displayType"
     }
 }

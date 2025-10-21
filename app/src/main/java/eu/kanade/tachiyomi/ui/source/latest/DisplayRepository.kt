@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
+import androidx.annotation.StringRes
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -7,24 +8,32 @@ import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class DisplayRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     private val db: DatabaseHelper = Injekt.get(),
-    private val preferenceHelper: PreferencesHelper = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
+    private val similarHandler: SimilarHandler by injectLazy()
 
     suspend fun getPage(
         page: Int,
@@ -36,6 +45,119 @@ class DisplayRepository(
             is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
             is DisplayScreenType.PopularNewTitles -> getPopularNewTitles(page)
             is DisplayScreenType.FeedUpdates -> getFeedUpdatesPage(page)
+            is DisplayScreenType.Similar ->
+                throw IllegalStateException("This should not be called")
+        }
+    }
+
+    suspend fun fetchSimilar(
+        dexId: String,
+        forceRefresh: Boolean = false,
+    ): List<SimilarMangaGroup> {
+        return withContext(Dispatchers.IO) {
+            val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
+            val actualRefresh =
+                when (similarDbEntry == null) {
+                    true -> true
+                    false -> forceRefresh
+                }
+
+            val related = async {
+                kotlin
+                    .runCatching {
+                        logTimeTaken(" Related Rec:") {
+                            createGroup(
+                                R.string.related_type,
+                                similarHandler.fetchRelated(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get related" } }
+                    .getOrNull()
+            }
+
+            val recommended = async {
+                kotlin
+                    .runCatching {
+                        logTimeTaken(" Recommended Rec:") {
+                            createGroup(
+                                R.string.recommended_type,
+                                similarHandler.fetchRecommended(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get recommended" } }
+                    .getOrNull()
+            }
+
+            val similar = async {
+                runCatching {
+                        logTimeTaken("Similar Recs:") {
+                            createGroup(
+                                R.string.similar_type,
+                                similarHandler.fetchSimilar(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get similar" } }
+                    .getOrNull()
+            }
+
+            val mu = async {
+                runCatching {
+                        logTimeTaken("MU Recs:") {
+                            createGroup(
+                                R.string.manga_updates,
+                                similarHandler.fetchSimilarExternalMUManga(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get MU recs" } }
+                    .getOrNull()
+            }
+
+            val anilist = async {
+                runCatching {
+                        logTimeTaken("Anilist Recs:") {
+                            createGroup(
+                                R.string.anilist,
+                                similarHandler.fetchAnilist(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get anilist recs" } }
+                    .getOrNull()
+            }
+
+            val mal = async {
+                runCatching {
+                        logTimeTaken("Mal Recs:") {
+                            createGroup(
+                                R.string.myanimelist,
+                                similarHandler.fetchSimilarExternalMalManga(dexId, actualRefresh),
+                            )
+                        }
+                    }
+                    .onFailure { TimberKt.e(it) { "Failed to get mal recs" } }
+                    .getOrNull()
+            }
+
+            listOfNotNull(
+                related.await(),
+                recommended.await(),
+                similar.await(),
+                mu.await(),
+                anilist.await(),
+                mal.await(),
+            )
+        }
+    }
+
+    private fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
+        return if (manga.isEmpty()) {
+            null
+        } else {
+            SimilarMangaGroup(id, manga.map { it.toDisplayManga(db, mangaDex.id) })
         }
     }
 
@@ -186,3 +308,5 @@ class DisplayRepository(
             )
     }
 }
+
+data class SimilarMangaGroup(@param:StringRes val type: Int, val manga: List<DisplayManga>)
