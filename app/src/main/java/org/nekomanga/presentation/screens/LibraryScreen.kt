@@ -56,6 +56,78 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
+    windowSizeClass: WindowSizeClass,
+    incomingContentPadding: PaddingValues = PaddingValues(),
+) {
+
+    LibraryWrapper(
+        libraryViewModel = libraryViewModel,
+        incomingContentPadding = incomingContentPadding,
+        libraryScreenActions =
+            LibraryScreenActions(
+                mangaClick = { /*::openManga*/ },
+                mangaLongClick = libraryViewModel::libraryItemLongClick,
+                selectAllLibraryMangaItems = libraryViewModel::selectAllLibraryMangaItems,
+                deleteSelectedLibraryMangaItems = libraryViewModel::deleteSelectedLibraryMangaItems,
+                clearSelectedManga = libraryViewModel::clearSelectedManga,
+                search = libraryViewModel::search,
+                searchMangaDex = { /* ::searchMangaDex,*/ },
+                updateLibrary = { /*updateLibrary(context)*/ },
+                collapseExpandAllCategories = libraryViewModel::collapseExpandAllCategories,
+                clearActiveFilters = libraryViewModel::clearActiveFilters,
+                filterToggled = libraryViewModel::filterToggled,
+                downloadChapters = libraryViewModel::downloadChapters,
+                shareManga = { /* shareManga(context)*/ },
+                markMangaChapters = libraryViewModel::markChapters,
+                syncMangaToDex = libraryViewModel::syncMangaToDex,
+                mangaStartReadingClick = { mangaId ->
+                    libraryViewModel.openNextUnread(
+                        mangaId,
+                        { manga, chapter ->
+                            /*startActivity(
+                                ReaderActivity.newIntent(
+                                    context,
+                                    manga,
+                                    chapter,
+                                )
+                            )*/
+                        },
+                    )
+                },
+            ),
+        librarySheetActions =
+            LibrarySheetActions(
+                groupByClick = libraryViewModel::groupByClick,
+                categoryItemLibrarySortClick = libraryViewModel::categoryItemLibrarySortClick,
+                libraryDisplayModeClick = libraryViewModel::libraryDisplayModeClick,
+                rawColumnCountChanged = libraryViewModel::rawColumnCountChanged,
+                outlineCoversToggled = libraryViewModel::outlineCoversToggled,
+                downloadBadgesToggled = libraryViewModel::downloadBadgesToggled,
+                unreadBadgesToggled = libraryViewModel::unreadBadgesToggled,
+                startReadingButtonToggled = libraryViewModel::startReadingButtonToggled,
+                horizontalCategoriesToggled = libraryViewModel::horizontalCategoriesToggled,
+                showLibraryButtonBarToggled = libraryViewModel::showLibraryButtonBarToggled,
+                editCategories = libraryViewModel::editCategories,
+                addNewCategory = libraryViewModel::addNewCategory,
+            ),
+        libraryCategoryActions =
+            LibraryCategoryActions(
+                categoryItemClick = libraryViewModel::categoryItemClick,
+                categoryAscendingClick = libraryViewModel::categoryAscendingClick,
+                categoryRefreshClick = { /*category -> updateCategory(category, context)*/ },
+            ),
+        windowSizeClass = windowSizeClass,
+        settingsClick = {},
+        incognitoClick = {},
+        statsClick = {},
+        aboutClick = {},
+        helpClick = {},
+    )
+}
+
+@Composable
+private fun LibraryWrapper(
+    libraryViewModel: LibraryViewModel,
     libraryScreenActions: LibraryScreenActions,
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,

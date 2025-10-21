@@ -48,11 +48,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
-import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
-import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
 import org.nekomanga.presentation.components.PullRefresh
@@ -181,85 +177,11 @@ class MainActivity : ComponentActivity() {
                                 entryProvider =
                                     entryProvider {
                                         entry<Screens.Library> {
-                                            val vm: LibraryViewModel = viewModel()
-
+                                            val libraryViewModel: LibraryViewModel = viewModel()
                                             LibraryScreen(
-                                                libraryViewModel = vm,
-                                                incomingContentPadding = innerPadding,
-                                                libraryScreenActions =
-                                                    LibraryScreenActions(
-                                                        mangaClick = { /*::openManga*/ },
-                                                        mangaLongClick = vm::libraryItemLongClick,
-                                                        selectAllLibraryMangaItems =
-                                                            vm::selectAllLibraryMangaItems,
-                                                        deleteSelectedLibraryMangaItems =
-                                                            vm::deleteSelectedLibraryMangaItems,
-                                                        clearSelectedManga = vm::clearSelectedManga,
-                                                        search = vm::search,
-                                                        searchMangaDex = { /* ::searchMangaDex,*/ },
-                                                        updateLibrary = { /*updateLibrary(context)*/
-                                                        },
-                                                        collapseExpandAllCategories =
-                                                            vm::collapseExpandAllCategories,
-                                                        clearActiveFilters = vm::clearActiveFilters,
-                                                        filterToggled = vm::filterToggled,
-                                                        downloadChapters = vm::downloadChapters,
-                                                        shareManga = { /* shareManga(context)*/ },
-                                                        markMangaChapters = vm::markChapters,
-                                                        syncMangaToDex = vm::syncMangaToDex,
-                                                        mangaStartReadingClick = { mangaId ->
-                                                            vm.openNextUnread(
-                                                                mangaId,
-                                                                { manga, chapter ->
-                                                                    startActivity(
-                                                                        ReaderActivity.newIntent(
-                                                                            context,
-                                                                            manga,
-                                                                            chapter,
-                                                                        )
-                                                                    )
-                                                                },
-                                                            )
-                                                        },
-                                                    ),
-                                                librarySheetActions =
-                                                    LibrarySheetActions(
-                                                        groupByClick = vm::groupByClick,
-                                                        categoryItemLibrarySortClick =
-                                                            vm::categoryItemLibrarySortClick,
-                                                        libraryDisplayModeClick =
-                                                            vm::libraryDisplayModeClick,
-                                                        rawColumnCountChanged =
-                                                            vm::rawColumnCountChanged,
-                                                        outlineCoversToggled =
-                                                            vm::outlineCoversToggled,
-                                                        downloadBadgesToggled =
-                                                            vm::downloadBadgesToggled,
-                                                        unreadBadgesToggled =
-                                                            vm::unreadBadgesToggled,
-                                                        startReadingButtonToggled =
-                                                            vm::startReadingButtonToggled,
-                                                        horizontalCategoriesToggled =
-                                                            vm::horizontalCategoriesToggled,
-                                                        showLibraryButtonBarToggled =
-                                                            vm::showLibraryButtonBarToggled,
-                                                        editCategories = vm::editCategories,
-                                                        addNewCategory = vm::addNewCategory,
-                                                    ),
-                                                libraryCategoryActions =
-                                                    LibraryCategoryActions(
-                                                        categoryItemClick = vm::categoryItemClick,
-                                                        categoryAscendingClick =
-                                                            vm::categoryAscendingClick,
-                                                        categoryRefreshClick = { /*category -> updateCategory(category, context)*/
-                                                        },
-                                                    ),
+                                                libraryViewModel = libraryViewModel,
                                                 windowSizeClass = windowSizeClass,
-                                                settingsClick = {},
-                                                incognitoClick = {},
-                                                statsClick = {},
-                                                aboutClick = {},
-                                                helpClick = {},
+                                                incomingContentPadding = innerPadding,
                                             )
                                         }
                                     },
