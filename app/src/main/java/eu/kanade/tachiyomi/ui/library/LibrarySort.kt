@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,7 +41,8 @@ enum class LibrarySort(
         R.string.category,
         R.drawable.ic_label_outline_24dp,
     ),
-    Rating(8, R.string.rating, R.drawable.ic_poll_24dp);
+    Rating(8, R.string.rating, R.drawable.ic_poll_24dp),
+    Downloads(9, R.string.downloads, R.drawable.ic_file_download_24dp);
 
     val categoryValue: Char
         get() = if (this == DragAndDrop) 'D' else 'a' + catValue * 2
@@ -65,6 +67,7 @@ enum class LibrarySort(
             DateFetched -> Icons.Outlined.CalendarMonth
             DragAndDrop -> Icons.Outlined.SwapVert
             Rating -> Icons.Default.BarChart
+            Downloads -> Icons.Outlined.FileDownload
         }
     }
 
