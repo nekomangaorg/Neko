@@ -15,9 +15,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.IdRes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -31,6 +39,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.bluelinelabs.conductor.Conductor
@@ -49,14 +63,18 @@ import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
-import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.feed.FeedController
+import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
+import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
+import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.about.AboutController
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
@@ -75,6 +93,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.canStillGoBack
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getItemView
+import eu.kanade.tachiyomi.util.view.setComposeContent
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlin.math.min
@@ -88,12 +107,14 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.databinding.MainActivityBinding
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.LibraryScreen
+import org.nekomanga.presentation.screens.Screens
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("ResourceType")
-open class MainActivity : BaseActivity<MainActivityBinding>() {
+open class MainActivity : ComponentActivity {
 
     protected lateinit var router: Router
 
@@ -111,6 +132,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     private var overflowDialog: Dialog? = null
     var ogWidth: Int = Int.MAX_VALUE
 
+
     private lateinit var viewModel: MainViewModel
 
     override fun attachBaseContext(newBase: Context?) {
@@ -124,7 +146,113 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         reEnableBackPressedCallBack()
     }
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Force the 3-button navigation bar to be transparent
+            // See: https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
+            window.isNavigationBarContrastEnforced = false
+        }
+
+
+        setComposeContent {
+            val context = LocalContext.current
+            //TODO load the correct one in future
+            val backStack = rememberNavBackStack(Screens.Library)
+
+            //TODO status bar colors and navigation bar colors
+
+
+            val windowSizeClass = calculateWindowSizeClass(this)
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                NavDisplay(
+                    backStack = backStack,
+                    entryDecorators =
+                        listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
+                    entryProvider =
+                        entryProvider {
+                            entry<Screens.Library> {
+                                val vm: LibraryViewModel = viewModel()
+
+                                LibraryScreen(
+                                    libraryScreenState = vm.libraryScreenState.collectAsState(),
+                                    libraryScreenActions =
+                                        LibraryScreenActions(
+                                            mangaClick = { /*::openManga*/ },
+                                            mangaLongClick = vm::libraryItemLongClick,
+                                            selectAllLibraryMangaItems = vm::selectAllLibraryMangaItems,
+                                            deleteSelectedLibraryMangaItems = vm::deleteSelectedLibraryMangaItems,
+                                            clearSelectedManga = vm::clearSelectedManga,
+                                            search = vm::search,
+                                            searchMangaDex = {/* ::searchMangaDex,*/ },
+                                            updateLibrary = { /*updateLibrary(context)*/ },
+                                            collapseExpandAllCategories = vm::collapseExpandAllCategories,
+                                            clearActiveFilters = vm::clearActiveFilters,
+                                            filterToggled = vm::filterToggled,
+                                            downloadChapters = vm::downloadChapters,
+                                            shareManga = {/* shareManga(context)*/ },
+                                            markMangaChapters = vm::markChapters,
+                                            syncMangaToDex = vm::syncMangaToDex,
+                                            mangaStartReadingClick = { mangaId ->
+                                                vm.openNextUnread(
+                                                    mangaId,
+                                                    { manga, chapter ->
+                                                        startActivity(
+                                                            ReaderActivity.newIntent(
+                                                                context,
+                                                                manga,
+                                                                chapter
+                                                            )
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                        ),
+                                    librarySheetActions =
+                                        LibrarySheetActions(
+                                            groupByClick = vm::groupByClick,
+                                            categoryItemLibrarySortClick = vm::categoryItemLibrarySortClick,
+                                            libraryDisplayModeClick = vm::libraryDisplayModeClick,
+                                            rawColumnCountChanged = vm::rawColumnCountChanged,
+                                            outlineCoversToggled = vm::outlineCoversToggled,
+                                            downloadBadgesToggled = vm::downloadBadgesToggled,
+                                            unreadBadgesToggled = vm::unreadBadgesToggled,
+                                            startReadingButtonToggled = vm::startReadingButtonToggled,
+                                            horizontalCategoriesToggled = vm::horizontalCategoriesToggled,
+                                            showLibraryButtonBarToggled = vm::showLibraryButtonBarToggled,
+                                            editCategories = vm::editCategories,
+                                            addNewCategory = vm::addNewCategory,
+                                        ),
+                                    libraryCategoryActions =
+                                        LibraryCategoryActions(
+                                            categoryItemClick = vm::categoryItemClick,
+                                            categoryAscendingClick = vm::categoryAscendingClick,
+                                            categoryRefreshClick = { /*category -> updateCategory(category, context)*/ },
+                                        ),
+                                    windowSizeClass = windowSizeClass,
+                                    settingsClick = { },
+                                    incognitoClick = {},
+                                    statsClick = { },
+                                    aboutClick = { },
+                                    helpClick = { },
+                                )
+                            }
+                        }
+                )
+            }
+
+        }
+
+
+    }
+    fun oldOnCreate(savedInstanceState: Bundle?){
         // Set up shared element transition and disable overlay so views don't show above system
         // bars
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)

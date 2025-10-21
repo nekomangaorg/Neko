@@ -87,7 +87,6 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
                 ),
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
-            legacySideNav = isSideNav,
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },

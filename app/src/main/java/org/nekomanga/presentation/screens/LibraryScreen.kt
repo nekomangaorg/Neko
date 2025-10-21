@@ -51,6 +51,7 @@ import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
+import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.LibraryAppBarActions
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
@@ -67,7 +68,6 @@ fun LibraryScreen(
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
     windowSizeClass: WindowSizeClass,
-    legacySideNav: Boolean,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
     statsClick: () -> Unit,
@@ -111,9 +111,8 @@ fun LibraryScreen(
         }
     }
 
-    // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
-    val actualSideNav = legacySideNav
-    val navBarPadding = rememberNavBarPadding(actualSideNav)
+    val sideNav = rememberSideBarVisible(windowSizeClass, libraryScreenState.value.sideNavMode)
+    val navBarPadding = rememberNavBarPadding(sideNav)
 
     // set the current sheet to null when bottom sheet is closed
     LaunchedEffect(key1 = sheetState.isVisible) {
