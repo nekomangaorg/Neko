@@ -53,11 +53,14 @@ fun PreferenceScreen(
                 is Preference.PreferenceGroup -> {
                     if (!preference.enabled) return@fastForEachIndexed
 
-                    item { Column { PreferenceGroupHeader(title = preference.title) } }
-                    items(preference.preferenceItems) { item ->
-                        PreferenceItem(item = item, highlightKey = highlightKey)
+                    item(key = preference.title) {
+                        Column { PreferenceGroupHeader(title = preference.title) }
                     }
-                    item {
+                    items(
+                        items = preference.preferenceItems,
+                        key = { item -> item.title },
+                    ) { item -> PreferenceItem(item = item, highlightKey = highlightKey) }
+                    item(key = "spacer-$i") {
                         if (i < items.lastIndex) {
                             Spacer(modifier = Modifier.height(12.dp))
                         }
@@ -66,7 +69,9 @@ fun PreferenceScreen(
 
                 // Create Preference Item
                 is PreferenceItem<*> ->
-                    item { PreferenceItem(item = preference, highlightKey = highlightKey) }
+                    item(key = preference.title) {
+                        PreferenceItem(item = preference, highlightKey = highlightKey)
+                    }
             }
         }
     }

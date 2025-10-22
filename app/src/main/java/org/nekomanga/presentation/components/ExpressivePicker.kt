@@ -117,7 +117,10 @@ fun <T> ExpressivePicker(
             // Top Spacers to center the first item visually
             items(visibleItemsCount / 2) { Spacer(Modifier.height(itemHeight)) }
 
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(
+                items = items,
+                key = { index, item -> "$index-${item.hashCode()}" },
+            ) { index, item ->
                 // Note: centerIndexTarget is calculated here based on current scroll state
                 val centerIndexTarget = listState.firstVisibleItemIndex + (visibleItemsCount / 2)
                 val distanceToCenter = abs(index - centerIndexTarget + (visibleItemsCount / 2))

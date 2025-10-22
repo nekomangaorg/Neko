@@ -53,7 +53,10 @@ fun LibrarySortSheet(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
             ) {
-                items(LibrarySort.filteredEntries()) { librarySort ->
+                items(
+                    items = LibrarySort.filteredEntries(),
+                    key = { librarySort -> librarySort.stringRes() },
+                ) { librarySort ->
                     val textColor =
                         if (currentLibrarySort == librarySort)
                             MaterialTheme.colorScheme.onSurface.copy(

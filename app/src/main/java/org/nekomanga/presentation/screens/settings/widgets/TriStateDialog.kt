@@ -76,7 +76,10 @@ fun <T> TriStateListDialog(
                 Box {
                     val listState = rememberLazyListState()
                     LazyColumn(state = listState) {
-                        itemsIndexed(items = items) { index, item ->
+                        itemsIndexed(
+                            items = items,
+                            key = { index, item -> "$index-${item.hashCode()}" },
+                        ) { index, item ->
                             val state = selected[index]
                             Row(
                                 modifier =

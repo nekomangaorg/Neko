@@ -151,7 +151,10 @@ private fun SearchResult(
                     contentPadding = contentPadding,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    items(items = it) { item ->
+                    items(
+                        items = it,
+                        key = { item -> item.searchTerm.title },
+                    ) { item ->
                         TextPreferenceWidget(
                             title = item.searchTerm.title,
                             subtitle = item.searchTerm.subtitle,
