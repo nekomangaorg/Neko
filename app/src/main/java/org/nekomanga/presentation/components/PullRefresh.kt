@@ -2,6 +2,7 @@ package org.nekomanga.presentation.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -16,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,12 +32,17 @@ fun PullRefresh(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     trackColor: Color = MaterialTheme.colorScheme.secondary,
+    blurBackground: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val state = rememberPullToRefreshState()
 
     if (enabled) {
         PullToRefreshBox(
+            modifier =
+                Modifier.conditional(blurBackground) {
+                    this.blur(Size.medium).clickable(enabled = false) {}
+                },
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = state,
@@ -50,7 +58,14 @@ fun PullRefresh(
             content()
         }
     } else {
-        Box { content() }
+        Box(
+            modifier =
+                Modifier.conditional(blurBackground) {
+                    this.blur(Size.medium).clickable(enabled = false) {}
+                }
+        ) {
+            content()
+        }
     }
 }
 

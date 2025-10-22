@@ -51,6 +51,7 @@ import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
+import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.LibraryScreen
@@ -70,6 +71,19 @@ class MainActivity : ComponentActivity() {
 
         setComposeContent {
             val context = LocalContext.current
+
+            var mainDropdownShowing by remember { mutableStateOf(false) }
+
+            val mainDropDown =
+                AppBar.MainDropdown(
+                    incognitoMode = false, /*libraryScreenState.value.incognitoMode*/
+                    incognitoModeClick = {},
+                    settingsClick = {},
+                    statsClick = {},
+                    aboutClick = {},
+                    helpClick = {},
+                    menuShowing = { visible -> mainDropdownShowing = visible },
+                )
 
             var screenBars by remember { mutableStateOf(ScreenBars()) }
 
@@ -123,6 +137,7 @@ class MainActivity : ComponentActivity() {
                     enabled = pullRefreshState.enabled,
                     isRefreshing = pullRefreshState.isRefreshing,
                     onRefresh = pullRefreshState.onRefresh,
+                    blurBackground = mainDropdownShowing,
                 ) {
                     Scaffold(
                         modifier =
@@ -180,6 +195,7 @@ class MainActivity : ComponentActivity() {
                                             val libraryViewModel: LibraryViewModel = viewModel()
                                             LibraryScreen(
                                                 libraryViewModel = libraryViewModel,
+                                                mainDropDown = mainDropDown,
                                                 windowSizeClass = windowSizeClass,
                                                 incomingContentPadding = innerPadding,
                                             )

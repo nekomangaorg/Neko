@@ -42,6 +42,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
@@ -57,6 +58,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
+    mainDropDown: AppBar.MainDropdown,
     windowSizeClass: WindowSizeClass,
     incomingContentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -64,6 +66,7 @@ fun LibraryScreen(
     LibraryWrapper(
         libraryViewModel = libraryViewModel,
         incomingContentPadding = incomingContentPadding,
+        mainDropDown = mainDropDown,
         libraryScreenActions =
             LibraryScreenActions(
                 mangaClick = { /*::openManga*/ },
@@ -129,6 +132,7 @@ fun LibraryScreen(
 @Composable
 private fun LibraryWrapper(
     libraryViewModel: LibraryViewModel,
+    mainDropDown: AppBar.MainDropdown,
     libraryScreenActions: LibraryScreenActions,
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
@@ -228,8 +232,14 @@ private fun LibraryWrapper(
                     topBar = {
                         LibraryScreenTopBar(
                             scrollBehavior = scrollBehavior,
+                            mainDropDown = mainDropDown,
                             libraryScreenState = libraryScreenState,
                             libraryScreenActions = libraryScreenActions,
+                            displayOptionsClick = {
+                                scope.launch {
+                                    openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet)
+                                }
+                            },
                             groupByClick = {
                                 scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
                             },
