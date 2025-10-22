@@ -15,10 +15,22 @@ fun <T> LazyListScope.gridItems(
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
     modifier: Modifier = Modifier,
     itemModifier: Modifier = Modifier,
+    key: ((item: T) -> Any)? = null,
     itemContent: @Composable BoxScope.(T) -> Unit,
 ) {
     val rows = if (items.isEmpty()) 0 else 1 + (items.count() - 1) / columns
-    items(rows) { rowIndex ->
+
+    val rowKey: ((Int) -> Any)? =
+        if (key != null) {
+            { rowIndex -> key(items[rowIndex * columns]) }
+        } else {
+            null
+        }
+
+    items(
+        count = rows,
+        key = rowKey,
+    ) { rowIndex ->
         Row(horizontalArrangement = horizontalArrangement, modifier = modifier) {
             for (columnIndex in 0 until columns) {
                 val itemIndex = rowIndex * columns + columnIndex

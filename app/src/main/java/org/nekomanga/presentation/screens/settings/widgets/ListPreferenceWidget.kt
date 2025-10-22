@@ -58,7 +58,7 @@ fun <T> ListPreferenceWidget(
                     LazyColumn(state = state) {
                         entries.forEach { current ->
                             val isSelected = value == current.key
-                            item {
+                            item(key = current.key) {
                                 DialogRow(
                                     label = current.value,
                                     isSelected = isSelected,

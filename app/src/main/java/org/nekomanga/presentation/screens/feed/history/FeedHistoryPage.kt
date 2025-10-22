@@ -54,7 +54,7 @@ fun FeedHistoryPage(
             if (dateString.isNotEmpty() && timeSpan != dateString) {
                 timeSpan = dateString
 
-                item {
+                item(key = "header-$dateString") {
                     Text(
                         text = dateString,
                         color = MaterialTheme.colorScheme.primary,
@@ -63,10 +63,10 @@ fun FeedHistoryPage(
                     )
                 }
             } else {
-                item { Gap(Size.small) }
+                item(key = "gap-$index") { Gap(Size.small) }
             }
 
-            item {
+            item(key = feedManga.mangaId) {
                 LaunchedEffect(scrollState, loadingResults) {
                     if (
                         index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults

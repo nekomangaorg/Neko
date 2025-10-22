@@ -47,7 +47,7 @@ fun MultiSelectListPreferenceWidget(
             text = {
                 LazyColumn {
                     preference.entries.forEach { current ->
-                        item {
+                        item(key = current.key) {
                             val isSelected = selected.contains(current.key)
                             CheckboxRow(
                                 modifier = Modifier.fillMaxWidth(),

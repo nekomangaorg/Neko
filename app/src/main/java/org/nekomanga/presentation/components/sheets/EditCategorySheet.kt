@@ -106,7 +106,10 @@ fun EditCategorySheet(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
             ) {
-                items(categories) { category: CategoryItem ->
+                items(
+                    items = categories,
+                    key = { category -> category.id },
+                ) { category: CategoryItem ->
                     var state by remember {
                         mutableStateOf(enabledCategories.contains(category.id))
                     }

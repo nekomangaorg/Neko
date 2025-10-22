@@ -67,7 +67,10 @@ fun FeedSummaryPage(
             item { NoResults() }
         } else {
 
-            itemsIndexed(continueReadingFeedMangaList) { index, feedManga ->
+            itemsIndexed(
+                items = continueReadingFeedMangaList,
+                key = { _, manga -> "continue-${manga.mangaId}" },
+            ) { index, feedManga ->
                 val listCardType =
                     when {
                         index == 0 && continueReadingFeedMangaList.size > 1 -> ListCardType.Top
@@ -116,7 +119,10 @@ fun FeedSummaryPage(
         if (!updatingUpdates && updatesFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
-            itemsIndexed(updatesFeedMangaList) { index, feedManga ->
+            itemsIndexed(
+                items = updatesFeedMangaList,
+                key = { _, manga -> "updates-${manga.mangaId}" },
+            ) { index, feedManga ->
                 val listCardType =
                     when {
                         index == 0 && updatesFeedMangaList.size > 1 -> ListCardType.Top
@@ -161,7 +167,10 @@ fun FeedSummaryPage(
         if (!updatingNewlyAdded && newlyAddedFeedMangaList.isEmpty()) {
             item { NoResults() }
         } else {
-            itemsIndexed(newlyAddedFeedMangaList) { index, feedManga ->
+            itemsIndexed(
+                items = newlyAddedFeedMangaList,
+                key = { _, manga -> "newly-${manga.mangaId}" },
+            ) { index, feedManga ->
                 val listCardType =
                     when {
                         index == 0 && newlyAddedFeedMangaList.size > 1 -> ListCardType.Top

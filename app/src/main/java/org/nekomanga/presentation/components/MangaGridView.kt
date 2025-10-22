@@ -61,6 +61,7 @@ fun MangaGridWithHeader(
                     columns = columns,
                     modifier = Modifier.padding(horizontal = Size.small),
                     horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    key = { manga -> manga.mangaId },
                 ) { displayManga ->
                     MangaGridItem(
                         displayManga = displayManga,
