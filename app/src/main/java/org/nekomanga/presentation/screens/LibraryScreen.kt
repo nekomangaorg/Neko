@@ -243,6 +243,14 @@ private fun LibraryWrapper(
                             groupByClick = {
                                 scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
                             },
+                            editCategoryClick = {
+                                scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
+                            },
+                            removeFromLibraryClick = { deleteMangaConfirmation = true },
+                            markActionClick = { markAction -> markActionConfirmation = markAction },
+                            removeActionClick = { removeAction ->
+                                removeActionConfirmation = removeAction
+                            },
                         )
                     },
                     scrollBehavior = scrollBehavior,
