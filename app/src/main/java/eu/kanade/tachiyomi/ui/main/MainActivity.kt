@@ -71,6 +71,9 @@ class MainActivity : ComponentActivity() {
         setComposeContent {
             val context = LocalContext.current
 
+            val libraryViewModel: LibraryViewModel = viewModel()
+            val feedViewModel: FeedViewModel = viewModel()
+
             var mainDropdownShowing by remember { mutableStateOf(false) }
 
             val mainDropDown =
@@ -184,7 +187,6 @@ class MainActivity : ComponentActivity() {
                                     entryProvider =
                                         entryProvider {
                                             entry<Screens.Library> {
-                                                val libraryViewModel: LibraryViewModel = viewModel()
                                                 LibraryScreen(
                                                     libraryViewModel = libraryViewModel,
                                                     mainDropDown = mainDropDown,
@@ -199,7 +201,6 @@ class MainActivity : ComponentActivity() {
                                                 )
                                             }
                                             entry<Screens.Feed> {
-                                                val feedViewModel: FeedViewModel = viewModel()
                                                 FeedScreen(
                                                     feedViewModel = feedViewModel,
                                                     mainDropDown = mainDropDown,

@@ -35,10 +35,10 @@ fun TitleTopAppBar(
     onColor: Color,
     title: String = "",
     subtitle: String = "",
-    navigationIconLabel: String,
-    navigationIcon: ImageVector,
+    navigationIconLabel: String = "",
+    navigationIcon: ImageVector? = null,
     incognitoMode: Boolean,
-    onNavigationIconClicked: () -> Unit,
+    onNavigationIconClicked: () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
@@ -70,12 +70,13 @@ fun TitleTopAppBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                ToolTipButton(
-                    toolTipLabel = navigationIconLabel,
-                    icon = navigationIcon,
-                    onClick = onNavigationIconClicked,
-                    enabledTint = onColor,
-                )
+                if (navigationIcon != null)
+                    ToolTipButton(
+                        toolTipLabel = navigationIconLabel,
+                        icon = navigationIcon,
+                        onClick = onNavigationIconClicked,
+                        enabledTint = onColor,
+                    )
                 if (incognitoMode) {
                     Gap(Size.smedium)
                     Image(

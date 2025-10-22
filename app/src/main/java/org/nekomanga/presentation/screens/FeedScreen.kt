@@ -58,6 +58,7 @@ import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedPage
+import org.nekomanga.presentation.screens.feed.FeedScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -75,6 +76,7 @@ fun FeedScreen(
         historyScreenFlow = feedViewModel.historyScreenPagingState,
         summaryScreenFlow = feedViewModel.summaryScreenPagingState,
         windowSizeClass = windowSizeClass,
+        mainDropDown = mainDropDown,
         loadNextPage = feedViewModel::loadNextPage,
         feedSettingActions =
             FeedSettingActions(
@@ -139,6 +141,7 @@ private fun FeedWrapper(
     historyScreenFlow: StateFlow<HistoryScreenPagingState>,
     summaryScreenFlow: StateFlow<SummaryScreenPagingState>,
     windowSizeClass: WindowSizeClass,
+    mainDropDown: AppBar.MainDropdown,
     loadNextPage: () -> Unit,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
@@ -230,28 +233,13 @@ private fun FeedWrapper(
             updateTopBar(
                 ScreenBars(
                     topBar = {
-                        /*LibraryScreenTopBar(
+                        FeedScreenTopBar(
                             scrollBehavior = scrollBehavior,
                             mainDropDown = mainDropDown,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            displayOptionsClick = {
-                                scope.launch {
-                                    openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet)
-                                }
-                            },
-                            groupByClick = {
-                                scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
-                            },
-                            editCategoryClick = {
-                                scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
-                            },
-                            removeFromLibraryClick = { deleteMangaConfirmation = true },
-                            markActionClick = { markAction -> markActionConfirmation = markAction },
-                            removeActionClick = { removeAction ->
-                                removeActionConfirmation = removeAction
-                            },
-                        )*/
+                            feedScreenState = feedScreenState,
+                            feedScreenActions = feedScreenActions,
+                            openSheetClick = { showBottomSheet = true },
+                        )
                     },
                     scrollBehavior = scrollBehavior,
                 )
@@ -273,68 +261,8 @@ private fun FeedWrapper(
             )
             onDispose { updateRefreshState(PullRefreshState()) }
         }
-        /*PullRefresh(
-            enabled = feedScreenState.swipeRefreshEnabled,
-            isRefreshing = feedScreenState.isRefreshing,
-            onRefresh = { feedScreenActions.updateLibrary(true) },
-        ) {
-            NekoScaffold(
-                type =
-                    if (
-                        feedScreenState.showingDownloads ||
-                            feedScreenType == FeedScreenType.Summary
-                    )
-                        NekoScaffoldType.Title
-                    else NekoScaffoldType.SearchOutline,
-                title =
-                    if (feedScreenType == FeedScreenType.Summary) stringResource(R.string.summary)
-                    else "",
-                searchPlaceHolder = searchHint,
-                incognitoMode = feedScreenState.incognitoMode,
-                isRoot = true,
-                onSearch = feedScreenActions.search,
-                actions = {
-                    AppBarActions(
-                        actions =
-                            if (feedScreenState.feedScreenType != FeedScreenType.Summary) {
-                                listOf(
-                                    AppBar.Action(
-                                        title = UiText.StringResource(R.string.settings),
-                                        icon = Icons.Outlined.Tune,
-                                        onClick = { showBottomSheet = true },
-                                    )
-                                )
-                            } else {
-                                listOf()
-                            } +
-                                listOf(
-                                    AppBar.MainDropdown(
-                                        incognitoMode = feedScreenState.incognitoMode,
-                                        incognitoModeClick = incognitoClick,
-                                        settingsClick = settingsClick,
-                                        statsClick = statsClick,
-                                        aboutClick = aboutClick,
-                                        helpClick = helpClick,
-                                        menuShowing = { visible -> mainDropdownShowing = visible },
-                                    )
-                                )
-                    )
-                },
-                content = { incomingContentPadding ->*/
+
         val recyclerContentPadding = PaddingValues()
-        /*val recyclerContentPadding =
-        PaddingValues(
-            top = incomingContentPadding.calculateTopPadding(),
-            bottom =
-                if (actualSideNav) {
-                    Size.navBarSize
-                } else {
-                    Size.navBarSize
-                } +
-                    WindowInsets.navigationBars
-                        .asPaddingValues()
-                        .calculateBottomPadding(),
-        )*/
 
         Box(modifier = Modifier.fillMaxSize()) {
             if (
