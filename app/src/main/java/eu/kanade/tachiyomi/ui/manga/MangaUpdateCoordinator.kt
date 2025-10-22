@@ -55,7 +55,7 @@ class MangaUpdateCoordinator {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
-    suspend fun update(mangaItem: MangaItem, isMerging: Boolean) =
+    fun update(mangaItem: MangaItem, isMerging: Boolean) =
         channelFlow {
                 if (!sourceManager.mangaDex.checkIfUp()) {
                     send(MangaResult.Error(R.string.site_down))

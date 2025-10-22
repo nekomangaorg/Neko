@@ -170,7 +170,11 @@ fun MangaScreen(
                         duration = state.snackbarDuration,
                         withDismissAction = true,
                     )
-                if (result == SnackbarResult.ActionPerformed) state.action?.invoke()
+                when (result) {
+                    SnackbarResult.ActionPerformed -> state.action?.invoke()
+                    SnackbarResult.Dismissed -> state.dismissAction?.invoke()
+                    else -> Unit
+                }
             }
         }
     }

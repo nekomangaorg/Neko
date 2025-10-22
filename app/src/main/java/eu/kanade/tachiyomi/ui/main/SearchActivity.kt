@@ -12,6 +12,7 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -20,6 +21,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.math.BigInteger
@@ -34,6 +36,7 @@ class SearchActivity : MainActivity() {
     var backToMain = false
 
     private val mappings: MangaMappings by injectLazy()
+    private val downloadManager: DownloadManager by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -187,8 +190,10 @@ class SearchActivity : MainActivity() {
                         val db = Injekt.get<DatabaseHelper>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
                         db.getManga(mangaId).executeAsBlocking()?.let { manga ->
+                            val availableChapters =
+                                chapters.filter { it.isAvailable(downloadManager, manga) }
                             val nextUnreadChapter =
-                                ChapterSort(manga).getNextUnreadChapter(chapters, false)
+                                ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
                             if (nextUnreadChapter != null) {
                                 val activity =
                                     ReaderActivity.newIntent(this, manga, nextUnreadChapter)

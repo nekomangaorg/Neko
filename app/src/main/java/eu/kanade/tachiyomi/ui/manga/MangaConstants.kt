@@ -25,6 +25,7 @@ object MangaConstants {
     data class MangaDetailScreenState(
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
+        val firstLoad: Boolean = true,
         val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
         val searchChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allCategories: PersistentList<CategoryItem> = persistentListOf(),
