@@ -46,10 +46,11 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.library.HorizontalCategoriesPage
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
-import org.nekomanga.presentation.screens.library.LibraryPage
 import org.nekomanga.presentation.screens.library.LibraryScreenTopBar
+import org.nekomanga.presentation.screens.library.VerticalCategoriesPage
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -338,7 +339,6 @@ private fun LibraryWrapper(
         )*/
 
         Box(modifier = Modifier.fillMaxSize()) {
-
             LibraryDialogs(
                 deleteMangaConfirmation = deleteMangaConfirmation,
                 markActionConfirmation = markActionConfirmation,
@@ -409,7 +409,7 @@ private fun LibraryWrapper(
 @Composable
 private fun EmptyLibrary(
     libraryScreenState: eu.kanade.tachiyomi.ui.library.LibraryScreenState,
-    searchMangaDex: (String) -> Unit
+    searchMangaDex: (String) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (libraryScreenState.isFirstLoad) {
@@ -422,20 +422,14 @@ private fun EmptyLibrary(
                     persistentListOf(
                         Action(
                             text = (UiText.StringResource(R.string.search_globally)),
-                            onClick = {
-                                searchMangaDex(
-                                    libraryScreenState.searchQuery!!
-                                )
-                            },
+                            onClick = { searchMangaDex(libraryScreenState.searchQuery!!) },
                         )
                     ),
             )
         } else {
             EmptyScreen(
                 message =
-                    UiText.StringResource(
-                        resourceId = R.string.library_is_empty_add_from_browse
-                    )
+                    UiText.StringResource(resourceId = R.string.library_is_empty_add_from_browse)
             )
         }
     }
