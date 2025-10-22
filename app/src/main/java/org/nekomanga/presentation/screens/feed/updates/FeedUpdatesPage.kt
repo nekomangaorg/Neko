@@ -141,7 +141,7 @@ private fun Grouped(
                             false -> R.string.updated_
                         }
 
-                    item {
+                    item(key = dateString) {
                         Text(
                             text = stringResource(id = prefix, dateString),
                             color = headerColor,
@@ -173,7 +173,7 @@ private fun Grouped(
                 // 6. Pagination Logic (needs the global index)
                 val globalIndex = groupedBySeries.indexOf(feedManga)
 
-                item {
+                item(key = feedManga.mangaId) {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             globalIndex >= groupedBySeries.size - 5 &&
@@ -247,7 +247,7 @@ private fun Ungrouped(
                         false -> R.string.updated_
                     }
 
-                item {
+                item(key = dateString) {
                     Text(
                         text = stringResource(id = prefix, dateString),
                         color = headerColor,
@@ -276,7 +276,7 @@ private fun Ungrouped(
                 val globalIndex =
                     feedUpdatesMangaList.indexOf(feedManga) // Used for pagination only
 
-                item {
+                item(key = chapterItem.chapter.id) {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             globalIndex >= feedUpdatesMangaList.size - 5 &&
