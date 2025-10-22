@@ -171,8 +171,10 @@ fun HorizontalCategoriesPage(
                                     top = Size.small,
                                 ),
                         ) {
-                            items(items = item.libraryItems, key = { it.displayManga.mangaId }) {
-                                libraryItem ->
+                            items(
+                                items = item.libraryItems,
+                                key = { "${item.categoryItem.name}-${it.displayManga.mangaId}" },
+                            ) { libraryItem ->
                                 MangaGridItem(
                                     displayManga = libraryItem.displayManga,
                                     showUnreadBadge = libraryScreenState.showUnreadBadges,
@@ -263,7 +265,9 @@ fun HorizontalCategoriesPage(
                         ) {
                             itemsIndexed(
                                 items = item.libraryItems,
-                                key = { _, libraryItem -> libraryItem.displayManga.mangaId },
+                                key = { _, libraryItem ->
+                                    "${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                },
                             ) { index, libraryItem ->
                                 ListItem(
                                     index = index,
