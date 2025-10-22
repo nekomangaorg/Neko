@@ -5,9 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -48,12 +45,14 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.FeedScreen
 import org.nekomanga.presentation.screens.LibraryScreen
 import org.nekomanga.presentation.screens.Screens
 
@@ -139,93 +138,85 @@ class MainActivity : ComponentActivity() {
                     onRefresh = pullRefreshState.onRefresh,
                     blurBackground = mainDropdownShowing,
                 ) {
-                    Scaffold(
-                        modifier =
-                            Modifier.conditional(nestedScroll != null) {
-                                this.nestedScroll(nestedScroll!!)
-                            },
-                        topBar = { screenBars.topBar?.invoke() },
-                        bottomBar = {
-                            if (!showNavigationRail && backStack.size == 1) {
-                                BottomBar(
-                                    items = navItems,
-                                    selectedItemIndex = selectedItemIndex,
-                                    onNavigate = { screen, index ->
-                                        selectedItemIndex = index
-                                        backStack.clear()
-                                        backStack.add(screen)
-                                    },
-                                )
-                            }
-                        },
-                    ) { innerPadding ->
-                        val updatedInnerPadding =
-                            remember(showNavigationRail) {
-                                when (showNavigationRail) {
-                                    true ->
-                                        PaddingValues(
-                                            start =
-                                                innerPadding.calculateStartPadding(
-                                                    LayoutDirection.Ltr
-                                                ),
-                                            top = innerPadding.calculateTopPadding(),
-                                            end =
-                                                innerPadding.calculateEndPadding(
-                                                    LayoutDirection.Ltr
-                                                ),
-                                            bottom = innerPadding.calculateBottomPadding(),
-                                        )
-
-                                    false -> innerPadding
-                                }
-                            }
-
-                        Box(modifier = Modifier.fillMaxSize().padding(updatedInnerPadding)) {
-                            NavDisplay(
-                                backStack = backStack,
-                                onBack = { backStack.removeLastOrNull() },
-                                entryDecorators =
-                                    listOf(
-                                        rememberSaveableStateHolderNavEntryDecorator(),
-                                        rememberViewModelStoreNavEntryDecorator(),
-                                    ),
-                                entryProvider =
-                                    entryProvider {
-                                        entry<Screens.Library> {
-                                            val libraryViewModel: LibraryViewModel = viewModel()
-                                            LibraryScreen(
-                                                libraryViewModel = libraryViewModel,
-                                                mainDropDown = mainDropDown,
-                                                openManga = { mangaId ->
-                                                    backStack.add(Screens.Manga(mangaId))
-                                                },
-                                                searchMangaDex = { title ->
-                                                    backStack.clear()
-                                                    backStack.add(Screens.Browse(title))
-                                                },
-                                                windowSizeClass = windowSizeClass,
-                                                incomingContentPadding = innerPadding,
-                                            )
-                                        }
-                                        /*entry<Screens.Manga>{ mangaId ->
-                                            MangaScreen() { }
-
-                                        }*/
-                                    },
+                    Row(Modifier.fillMaxSize()) {
+                        if (showNavigationRail && backStack.size == 1) {
+                            NavigationSideBar(
+                                items = navItems,
+                                selectedItemIndex = selectedItemIndex,
+                                onNavigate = { screen, index ->
+                                    selectedItemIndex = index
+                                    backStack.clear()
+                                    backStack.add(screen)
+                                },
                             )
                         }
-                    }
-
-                    if (showNavigationRail && backStack.size == 1) {
-                        NavigationSideBar(
-                            items = navItems,
-                            selectedItemIndex = selectedItemIndex,
-                            onNavigate = { screen, index ->
-                                selectedItemIndex = index
-                                backStack.clear()
-                                backStack.add(screen)
+                        Scaffold(
+                            modifier =
+                                Modifier.fillMaxHeight().weight(1f).conditional(
+                                    nestedScroll != null
+                                ) {
+                                    this.nestedScroll(nestedScroll!!)
+                                },
+                            topBar = { screenBars.topBar?.invoke() },
+                            bottomBar = {
+                                if (!showNavigationRail && backStack.size == 1) {
+                                    BottomBar(
+                                        items = navItems,
+                                        selectedItemIndex = selectedItemIndex,
+                                        onNavigate = { screen, index ->
+                                            selectedItemIndex = index
+                                            backStack.clear()
+                                            backStack.add(screen)
+                                        },
+                                    )
+                                }
                             },
-                        )
+                        ) { innerPadding ->
+                            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                                NavDisplay(
+                                    backStack = backStack,
+                                    onBack = { backStack.removeLastOrNull() },
+                                    entryDecorators =
+                                        listOf(
+                                            rememberSaveableStateHolderNavEntryDecorator(),
+                                            rememberViewModelStoreNavEntryDecorator(),
+                                        ),
+                                    entryProvider =
+                                        entryProvider {
+                                            entry<Screens.Library> {
+                                                val libraryViewModel: LibraryViewModel = viewModel()
+                                                LibraryScreen(
+                                                    libraryViewModel = libraryViewModel,
+                                                    mainDropDown = mainDropDown,
+                                                    openManga = { mangaId ->
+                                                        backStack.add(Screens.Manga(mangaId))
+                                                    },
+                                                    searchMangaDex = { title ->
+                                                        backStack.clear()
+                                                        backStack.add(Screens.Browse(title))
+                                                    },
+                                                    windowSizeClass = windowSizeClass,
+                                                )
+                                            }
+                                            entry<Screens.Feed> {
+                                                val feedViewModel: FeedViewModel = viewModel()
+                                                FeedScreen(
+                                                    feedViewModel = feedViewModel,
+                                                    mainDropDown = mainDropDown,
+                                                    openManga = { mangaId ->
+                                                        backStack.add(Screens.Manga(mangaId))
+                                                    },
+                                                    windowSizeClass = windowSizeClass,
+                                                )
+                                            }
+                                            /*entry<Screens.Manga>{ mangaId ->
+                                                MangaScreen() { }
+
+                                            }*/
+                                        },
+                                )
+                            }
+                        }
                     }
                 }
             }
