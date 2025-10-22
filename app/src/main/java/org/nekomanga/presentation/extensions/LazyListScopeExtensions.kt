@@ -27,10 +27,7 @@ fun <T> LazyListScope.gridItems(
             null
         }
 
-    items(
-        count = rows,
-        key = rowKey,
-    ) { rowIndex ->
+    items(count = rows, key = rowKey) { rowIndex ->
         Row(horizontalArrangement = horizontalArrangement, modifier = modifier) {
             for (columnIndex in 0 until columns) {
                 val itemIndex = rowIndex * columns + columnIndex

@@ -56,10 +56,10 @@ fun PreferenceScreen(
                     item(key = preference.title) {
                         Column { PreferenceGroupHeader(title = preference.title) }
                     }
-                    items(
-                        items = preference.preferenceItems,
-                        key = { item -> item.title },
-                    ) { item -> PreferenceItem(item = item, highlightKey = highlightKey) }
+                    items(items = preference.preferenceItems, key = { item -> item.title }) { item
+                        ->
+                        PreferenceItem(item = item, highlightKey = highlightKey)
+                    }
                     item(key = "spacer-$i") {
                         if (i < items.lastIndex) {
                             Spacer(modifier = Modifier.height(12.dp))

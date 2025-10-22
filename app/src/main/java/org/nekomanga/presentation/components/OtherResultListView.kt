@@ -33,10 +33,7 @@ fun ResultList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
-        items(
-            items = results,
-            key = { result -> result.uuid },
-        ) { displayResult ->
+        items(items = results, key = { result -> result.uuid }) { displayResult ->
             ResultRow(displayResult = displayResult, onClick = { onClick(displayResult.uuid) })
         }
     }

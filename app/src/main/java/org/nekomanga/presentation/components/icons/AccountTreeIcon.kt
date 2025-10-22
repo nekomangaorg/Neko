@@ -8,25 +8,26 @@ import androidx.compose.ui.unit.dp
 
 val AccountTreeIcon: ImageVector
     get() {
-        if (_Account_tree != null) return _Account_tree!!
-
-        _Account_tree =
+        if (_IconName != null) {
+            return _IconName!!
+        }
+        _IconName =
             ImageVector.Builder(
-                    name = "Account_tree",
-                    defaultWidth = 24.dp,
-                    defaultHeight = 24.dp,
+                    name = "AccountTree",
+                    defaultWidth = 960.dp,
+                    defaultHeight = 960.dp,
                     viewportWidth = 960f,
                     viewportHeight = 960f,
                 )
                 .apply {
-                    path(fill = SolidColor(Color(0xFF000000))) {
+                    path(fill = SolidColor(Color.Black)) {
                         moveTo(600f, 840f)
                         verticalLineToRelative(-120f)
-                        horizontalLineTo(440f)
+                        lineTo(440f, 720f)
                         verticalLineToRelative(-400f)
                         horizontalLineToRelative(-80f)
                         verticalLineToRelative(120f)
-                        horizontalLineTo(80f)
+                        lineTo(80f, 440f)
                         verticalLineToRelative(-320f)
                         horizontalLineToRelative(280f)
                         verticalLineToRelative(120f)
@@ -34,7 +35,7 @@ val AccountTreeIcon: ImageVector
                         verticalLineToRelative(-120f)
                         horizontalLineToRelative(280f)
                         verticalLineToRelative(320f)
-                        horizontalLineTo(600f)
+                        lineTo(600f, 440f)
                         verticalLineToRelative(-120f)
                         horizontalLineToRelative(-80f)
                         verticalLineToRelative(320f)
@@ -42,36 +43,31 @@ val AccountTreeIcon: ImageVector
                         verticalLineToRelative(-120f)
                         horizontalLineToRelative(280f)
                         verticalLineToRelative(320f)
+                        lineTo(600f, 840f)
                         close()
-                        moveTo(160f, 200f)
-                        verticalLineToRelative(160f)
-                        close()
-                        moveToRelative(520f, 400f)
-                        verticalLineToRelative(160f)
-                        close()
-                        moveToRelative(0f, -400f)
-                        verticalLineToRelative(160f)
-                        close()
-                        moveToRelative(0f, 160f)
+                        moveTo(680f, 360f)
                         horizontalLineToRelative(120f)
                         verticalLineToRelative(-160f)
-                        horizontalLineTo(680f)
+                        lineTo(680f, 200f)
+                        verticalLineToRelative(160f)
                         close()
-                        moveToRelative(0f, 400f)
+                        moveTo(680f, 760f)
                         horizontalLineToRelative(120f)
                         verticalLineToRelative(-160f)
-                        horizontalLineTo(680f)
+                        lineTo(680f, 600f)
+                        verticalLineToRelative(160f)
                         close()
                         moveTo(160f, 360f)
                         horizontalLineToRelative(120f)
                         verticalLineToRelative(-160f)
-                        horizontalLineTo(160f)
+                        lineTo(160f, 200f)
+                        verticalLineToRelative(160f)
                         close()
                     }
                 }
                 .build()
 
-        return _Account_tree!!
+        return _IconName!!
     }
 
-private var _Account_tree: ImageVector? = null
+@Suppress("ObjectPropertyName") private var _IconName: ImageVector? = null
