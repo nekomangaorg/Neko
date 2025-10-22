@@ -46,10 +46,11 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.library.HorizontalCategoriesPage
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
-import org.nekomanga.presentation.screens.library.LibraryPage
 import org.nekomanga.presentation.screens.library.LibraryScreenTopBar
+import org.nekomanga.presentation.screens.library.VerticalCategoriesPage
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -338,93 +339,59 @@ private fun LibraryWrapper(
         )*/
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (deleteMangaConfirmation) {
-                ConfirmationDialog(
-                    title = stringResource(R.string.remove),
-                    body = stringResource(R.string.remove_from_library_question),
-                    confirmButton = stringResource(R.string.remove),
-                    onDismiss = { deleteMangaConfirmation = !deleteMangaConfirmation },
-                    onConfirm = { libraryScreenActions.deleteSelectedLibraryMangaItems() },
-                )
-            }
-            if (markActionConfirmation != null) {
-                val (title, body) =
-                    when (markActionConfirmation is ChapterMarkActions.Read) {
-                        true -> R.string.mark_all_as_read to R.string.mark_all_chapters_as_read
-
-                        false -> R.string.mark_all_as_unread to R.string.mark_all_chapters_as_unread
-                    }
-                ConfirmationDialog(
-                    title = stringResource(title),
-                    body = stringResource(body),
-                    confirmButton = stringResource(R.string.mark),
-                    onDismiss = { markActionConfirmation = null },
-                    onConfirm = { libraryScreenActions.markMangaChapters(markActionConfirmation!!) },
-                )
-            }
-            if (removeActionConfirmation != null) {
-                val (title, body) =
-                    when (removeActionConfirmation is MangaConstants.DownloadAction.RemoveAll) {
-                        true -> R.string.remove_downloads to R.string.remove_all_downloads
-
-                        false -> R.string.remove_downloads to R.string.remove_all_read_downloads
-                    }
-                ConfirmationDialog(
-                    title = stringResource(title),
-                    body = stringResource(body),
-                    confirmButton = stringResource(R.string.remove),
-                    onDismiss = { removeActionConfirmation = null },
-                    onConfirm = {
-                        libraryScreenActions.downloadChapters(removeActionConfirmation!!)
-                    },
-                )
-            }
+            LibraryDialogs(
+                deleteMangaConfirmation = deleteMangaConfirmation,
+                markActionConfirmation = markActionConfirmation,
+                removeActionConfirmation = removeActionConfirmation,
+                onDeleteDismiss = { deleteMangaConfirmation = !deleteMangaConfirmation },
+                onDeleteConfirm = { libraryScreenActions.deleteSelectedLibraryMangaItems() },
+                onMarkDismiss = { markActionConfirmation = null },
+                onMarkConfirm = {
+                    libraryScreenActions.markMangaChapters(markActionConfirmation!!)
+                },
+                onRemoveDismiss = { removeActionConfirmation = null },
+                onRemoveConfirm = {
+                    libraryScreenActions.downloadChapters(removeActionConfirmation!!)
+                },
+            )
 
             if (libraryScreenState.items.isEmpty()) {
-
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (libraryScreenState.isFirstLoad) {
-                        ContainedLoadingIndicator()
-                    } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
-
-                        EmptyScreen(
-                            message = UiText.StringResource(resourceId = R.string.no_results_found),
-                            actions =
-                                persistentListOf(
-                                    Action(
-                                        text = (UiText.StringResource(R.string.search_globally)),
-                                        onClick = {
-                                            libraryScreenActions.searchMangaDex(
-                                                libraryScreenState.searchQuery!!
-                                            )
-                                        },
-                                    )
-                                ),
-                        )
-                    } else {
-                        EmptyScreen(
-                            message =
-                                UiText.StringResource(
-                                    resourceId = R.string.library_is_empty_add_from_browse
-                                )
-                        )
-                    }
-                }
-            } else {
-                LibraryPage(
-                    contentPadding = recyclerContentPadding,
+                EmptyLibrary(
                     libraryScreenState = libraryScreenState,
-                    libraryScreenActions = libraryScreenActions,
-                    libraryCategoryActions = libraryCategoryActions,
-                    selectionMode = selectionMode,
-                    categorySortClick = { categoryItem ->
-                        scope.launch {
-                            openSheet(
-                                LibraryBottomSheetScreen.SortSheet(categoryItem = categoryItem)
-                            )
-                        }
-                    },
+                    searchMangaDex = libraryScreenActions.searchMangaDex,
                 )
+            } else {
+                if (libraryScreenState.horizontalCategories) {
+                    HorizontalCategoriesPage(
+                        contentPadding = recyclerContentPadding,
+                        selectionMode = selectionMode,
+                        libraryScreenState = libraryScreenState,
+                        libraryScreenActions = libraryScreenActions,
+                        libraryCategoryActions = libraryCategoryActions,
+                        categorySortClick = { categoryItem ->
+                            scope.launch {
+                                openSheet(
+                                    LibraryBottomSheetScreen.SortSheet(categoryItem = categoryItem)
+                                )
+                            }
+                        },
+                    )
+                } else {
+                    VerticalCategoriesPage(
+                        contentPadding = recyclerContentPadding,
+                        selectionMode = selectionMode,
+                        libraryScreenState = libraryScreenState,
+                        libraryScreenActions = libraryScreenActions,
+                        libraryCategoryActions = libraryCategoryActions,
+                        categorySortClick = { categoryItem ->
+                            scope.launch {
+                                openSheet(
+                                    LibraryBottomSheetScreen.SortSheet(categoryItem = categoryItem)
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
 
@@ -436,5 +403,87 @@ private fun LibraryWrapper(
                         .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
             )
         }
+    }
+}
+
+@Composable
+private fun EmptyLibrary(
+    libraryScreenState: eu.kanade.tachiyomi.ui.library.LibraryScreenState,
+    searchMangaDex: (String) -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (libraryScreenState.isFirstLoad) {
+            ContainedLoadingIndicator()
+        } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
+
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.no_results_found),
+                actions =
+                    persistentListOf(
+                        Action(
+                            text = (UiText.StringResource(R.string.search_globally)),
+                            onClick = { searchMangaDex(libraryScreenState.searchQuery!!) },
+                        )
+                    ),
+            )
+        } else {
+            EmptyScreen(
+                message =
+                    UiText.StringResource(resourceId = R.string.library_is_empty_add_from_browse)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LibraryDialogs(
+    deleteMangaConfirmation: Boolean,
+    markActionConfirmation: ChapterMarkActions?,
+    removeActionConfirmation: MangaConstants.DownloadAction?,
+    onDeleteDismiss: () -> Unit,
+    onDeleteConfirm: () -> Unit,
+    onMarkDismiss: () -> Unit,
+    onMarkConfirm: () -> Unit,
+    onRemoveDismiss: () -> Unit,
+    onRemoveConfirm: () -> Unit,
+) {
+    if (deleteMangaConfirmation) {
+        ConfirmationDialog(
+            title = stringResource(R.string.remove),
+            body = stringResource(R.string.remove_from_library_question),
+            confirmButton = stringResource(R.string.remove),
+            onDismiss = onDeleteDismiss,
+            onConfirm = onDeleteConfirm,
+        )
+    }
+    if (markActionConfirmation != null) {
+        val (title, body) =
+            when (markActionConfirmation is ChapterMarkActions.Read) {
+                true -> R.string.mark_all_as_read to R.string.mark_all_chapters_as_read
+
+                false -> R.string.mark_all_as_unread to R.string.mark_all_chapters_as_unread
+            }
+        ConfirmationDialog(
+            title = stringResource(title),
+            body = stringResource(body),
+            confirmButton = stringResource(R.string.mark),
+            onDismiss = onMarkDismiss,
+            onConfirm = onMarkConfirm,
+        )
+    }
+    if (removeActionConfirmation != null) {
+        val (title, body) =
+            when (removeActionConfirmation is MangaConstants.DownloadAction.RemoveAll) {
+                true -> R.string.remove_downloads to R.string.remove_all_downloads
+
+                false -> R.string.remove_downloads to R.string.remove_all_read_downloads
+            }
+        ConfirmationDialog(
+            title = stringResource(title),
+            body = stringResource(body),
+            confirmButton = stringResource(R.string.remove),
+            onDismiss = onRemoveDismiss,
+            onConfirm = onRemoveConfirm,
+        )
     }
 }
