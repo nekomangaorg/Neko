@@ -50,20 +50,24 @@ class ChapterSort(
             when (manga.chapterOrder(mangaDetailsPreferences)) {
                 Manga.CHAPTER_SORTING_SOURCE ->
                     when (sortDescending) {
-                        true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
-                        false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+                        true -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+                        false -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
                     }
                 Manga.CHAPTER_SORTING_SMART ->
                     when (sortDescending) {
-                        true -> { c1, c2 -> c1.smart_order.compareTo(c2.smart_order) }
-                        false -> { c1, c2 -> c2.smart_order.compareTo(c1.smart_order) }
+                        true -> { c1, c2 -> c2.smart_order.compareTo(c1.smart_order) }
+                        false -> { c1, c2 -> c1.smart_order.compareTo(c2.smart_order) }
                     }
                 Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                     when (sortDescending) {
                         true -> { c1, c2 -> c2.date_upload.compareTo(c1.date_upload) }
                         false -> { c1, c2 -> c1.date_upload.compareTo(c2.date_upload) }
                     }
-                else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
+                else ->
+                    when (sortDescending) {
+                        true -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+                        false -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
+                    }
             }
         return Comparator(sortFunction)
     }
