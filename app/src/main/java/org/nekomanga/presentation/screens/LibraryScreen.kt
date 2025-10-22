@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
+import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
@@ -39,6 +40,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.toDbCategory
@@ -61,12 +63,10 @@ fun LibraryScreen(
     openManga: (Long) -> Unit,
     searchMangaDex: (String) -> Unit,
     windowSizeClass: WindowSizeClass,
-    incomingContentPadding: PaddingValues = PaddingValues(),
 ) {
     val context = LocalContext.current
     LibraryWrapper(
-        libraryViewModel = libraryViewModel,
-        incomingContentPadding = incomingContentPadding,
+        libraryStateFlow = libraryViewModel.libraryScreenState,
         mainDropDown = mainDropDown,
         libraryScreenActions =
             LibraryScreenActions(
@@ -152,16 +152,15 @@ fun LibraryScreen(
 
 @Composable
 private fun LibraryWrapper(
-    libraryViewModel: LibraryViewModel,
+    libraryStateFlow: StateFlow<LibraryScreenState>,
     mainDropDown: AppBar.MainDropdown,
     libraryScreenActions: LibraryScreenActions,
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
     windowSizeClass: WindowSizeClass,
-    incomingContentPadding: PaddingValues = PaddingValues(),
 ) {
 
-    val libraryScreenState by libraryViewModel.libraryScreenState.collectAsState()
+    val libraryScreenState by libraryStateFlow.collectAsState()
 
     val updateTopBar = LocalBarUpdater.current
     val updateRefreshState = LocalPullRefreshState.current
@@ -280,10 +279,6 @@ private fun LibraryWrapper(
         }
 
         val recyclerContentPadding = PaddingValues()
-        /* PaddingValues(
-            top = incomingContentPadding.calculateTopPadding(),
-            bottom = incomingContentPadding.calculateBottomPadding(),
-        )*/
 
         Box(modifier = Modifier.fillMaxSize()) {
             LibraryDialogs(

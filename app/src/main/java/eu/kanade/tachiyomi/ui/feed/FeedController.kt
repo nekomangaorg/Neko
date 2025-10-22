@@ -5,7 +5,6 @@ import android.content.Context
 import android.view.View
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -13,11 +12,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import org.nekomanga.constants.MdConstants
-import org.nekomanga.presentation.screens.FeedScreen
 
 class FeedController : BaseComposeController<FeedPresenter>() {
     override val presenter = FeedPresenter()
@@ -28,8 +23,9 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         val context = LocalContext.current
+    }
 
-        FeedScreen(
+    /*FeedScreen(
             feedScreenState = presenter.feedScreenState.collectAsState(),
             updatesPagingScreenState = presenter.updatesScreenPagingState.collectAsState(),
             historyPagingScreenState = presenter.historyScreenPagingState.collectAsState(),
@@ -94,7 +90,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                 (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/")
             },
         )
-    }
+    }*/
 
     private fun openManga(mangaId: Long) {
         viewScope.launchUI {
