@@ -1,9 +1,12 @@
 package org.nekomanga.presentation.components
 
+import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +69,13 @@ fun PullRefresh(
         ) {
             content()
         }
+    }
+    if (blurBackground && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
+        )
     }
 }
 

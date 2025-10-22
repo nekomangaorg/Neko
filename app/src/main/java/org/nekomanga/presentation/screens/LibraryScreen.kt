@@ -1,9 +1,6 @@
 package org.nekomanga.presentation.screens
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -26,8 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -43,10 +38,8 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
-import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.library.HorizontalCategoriesPage
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
@@ -121,11 +114,6 @@ fun LibraryScreen(
                 categoryRefreshClick = { /*category -> updateCategory(category, context)*/ },
             ),
         windowSizeClass = windowSizeClass,
-        settingsClick = {},
-        incognitoClick = {},
-        statsClick = {},
-        aboutClick = {},
-        helpClick = {},
     )
 }
 
@@ -138,11 +126,6 @@ private fun LibraryWrapper(
     libraryCategoryActions: LibraryCategoryActions,
     windowSizeClass: WindowSizeClass,
     incomingContentPadding: PaddingValues = PaddingValues(),
-    incognitoClick: () -> Unit,
-    settingsClick: () -> Unit,
-    statsClick: () -> Unit,
-    helpClick: () -> Unit,
-    aboutClick: () -> Unit,
 ) {
 
     val libraryScreenState by libraryViewModel.libraryScreenState.collectAsState()
@@ -152,8 +135,6 @@ private fun LibraryWrapper(
 
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    var mainDropdownShowing by remember { mutableStateOf(false) }
 
     var selectionMode by
         remember(libraryScreenState.selectedItems) {
@@ -196,12 +177,7 @@ private fun LibraryWrapper(
 
     val openSheet: (LibraryBottomSheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
-    Box(
-        modifier =
-            Modifier.fillMaxSize().conditional(mainDropdownShowing) {
-                this.blur(Size.medium).clickable(enabled = false) {}
-            }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (currentBottomSheet != null) {
 
             ModalBottomSheet(
@@ -270,86 +246,6 @@ private fun LibraryWrapper(
             onDispose { updateRefreshState(PullRefreshState()) }
         }
 
-        /* NekoScaffold(
-        type =
-            if (selectionMode) NekoScaffoldType.TitleAndSubtitle
-            else NekoScaffoldType.SearchOutlineWithActions,
-        title =
-            if (selectionMode) "Selected: ${libraryScreenState.selectedItems.size}"
-            else "",
-        searchPlaceHolder = stringResource(R.string.search_library),
-        searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
-        incognitoMode = libraryScreenState.incognitoMode,
-        isRoot = true,
-        onNavigationIconClicked = {
-            if (selectionMode) {
-                libraryScreenActions.clearSelectedManga()
-            }
-        },
-        onSearch = libraryScreenActions.search,
-        altAppBarColor = selectionMode,
-        actions = {
-            if (selectionMode) {
-                LibraryAppBarActions(
-                    downloadChapters = libraryScreenActions.downloadChapters,
-                    removeDownloads = { removeAction ->
-                        removeActionConfirmation = removeAction
-                    },
-                    shareManga = libraryScreenActions.shareManga,
-                    syncMangaToDexClick = libraryScreenActions.syncMangaToDex,
-                    editCategoryClick = {
-                        scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
-                    },
-                    markChapterClick = { markAction ->
-                        markActionConfirmation = markAction
-                    },
-                    removeFromLibraryClick = { deleteMangaConfirmation = true },
-                )
-            } else {
-                AppBarActions(
-                    actions =
-                        listOf(
-                            AppBar.Action(
-                                title = UiText.StringResource(R.string.settings),
-                                icon = Icons.Outlined.Tune,
-                                onClick = {
-                                    scope.launch {
-                                        openSheet(
-                                            LibraryBottomSheetScreen.DisplayOptionsSheet
-                                        )
-                                    }
-                                },
-                            ),
-                            AppBar.MainDropdown(
-                                incognitoMode = libraryScreenState.incognitoMode,
-                                incognitoModeClick = incognitoClick,
-                                settingsClick = settingsClick,
-                                statsClick = statsClick,
-                                aboutClick = aboutClick,
-                                helpClick = helpClick,
-                                menuShowing = { visible -> mainDropdownShowing = visible },
-                            ),
-                        )
-                )
-            }
-        },
-        underHeaderActions = {
-            AnimatedVisibility(
-                !selectionMode && libraryScreenState.showLibraryButtonBar
-            ) {
-                LibraryButtonBar(
-                    libraryScreenActions = libraryScreenActions,
-                    libraryScreenState = libraryScreenState,
-                    showCollapseAll =
-                        libraryScreenState.items.size > 1 &&
-                            !libraryScreenState.horizontalCategories,
-                    groupByClick = {
-                        scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
-                    },
-                )
-            }
-        },
-        content = { incomingContentPadding ->*/
         val recyclerContentPadding = PaddingValues()
         /* PaddingValues(
             top = incomingContentPadding.calculateTopPadding(),
@@ -411,15 +307,6 @@ private fun LibraryWrapper(
                     )
                 }
             }
-        }
-
-        // this is needed for Android SDK where blur isn't available
-        if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
-            )
         }
     }
 }
