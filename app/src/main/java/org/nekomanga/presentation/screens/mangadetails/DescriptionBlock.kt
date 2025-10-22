@@ -124,10 +124,10 @@ fun DescriptionBlock(
                 currentTitle = title,
                 shouldWrap = wrapAltTitles,
                 themeColorState = themeColorState,
-                altTitleClick = { descriptionActions::altTitleClick },
-                resetClick = { descriptionActions::altTitleResetClick },
-                genreSearch = { descriptionActions::genreSearch },
-                genreLibrarySearch = { descriptionActions::genreSearchLibrary },
+                altTitleClick = descriptionActions.altTitleClick,
+                resetClick = descriptionActions.altTitleResetClick,
+                genreSearch = descriptionActions.genreSearch,
+                genreLibrarySearch = descriptionActions.genreSearchLibrary,
             )
             Gap(Size.medium)
         }
@@ -176,10 +176,10 @@ fun DescriptionBlock(
                 currentTitle = title,
                 shouldWrap = wrapAltTitles,
                 themeColorState = themeColorState,
-                altTitleClick = { descriptionActions::altTitleClick },
-                resetClick = { descriptionActions::altTitleResetClick },
-                genreSearch = { descriptionActions::genreSearch },
-                genreLibrarySearch = { descriptionActions::genreSearchLibrary },
+                altTitleClick = descriptionActions.altTitleClick,
+                resetClick = descriptionActions.altTitleResetClick,
+                genreSearch = descriptionActions.genreSearch,
+                genreLibrarySearch = descriptionActions.genreSearchLibrary,
             )
             Gap(Size.medium)
             MoreLessButton(
