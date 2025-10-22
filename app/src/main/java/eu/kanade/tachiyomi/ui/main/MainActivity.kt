@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
                         selectedIcon = Icons.Filled.AccessTimeFilled,
                     ),
                     NavigationItem(
-                        screen = Screens.Browse,
+                        screen = Screens.Browse(),
                         title = stringResource(R.string.browse),
                         unselectedIcon = Icons.Outlined.Explore,
                         selectedIcon = Icons.Filled.Explore,
@@ -196,10 +196,21 @@ class MainActivity : ComponentActivity() {
                                             LibraryScreen(
                                                 libraryViewModel = libraryViewModel,
                                                 mainDropDown = mainDropDown,
+                                                openManga = { mangaId ->
+                                                    backStack.add(Screens.Manga(mangaId))
+                                                },
+                                                searchMangaDex = { title ->
+                                                    backStack.clear()
+                                                    backStack.add(Screens.Browse(title))
+                                                },
                                                 windowSizeClass = windowSizeClass,
                                                 incomingContentPadding = innerPadding,
                                             )
                                         }
+                                        /*entry<Screens.Manga>{ mangaId ->
+                                            MangaScreen() { }
+
+                                        }*/
                                     },
                             )
                         }

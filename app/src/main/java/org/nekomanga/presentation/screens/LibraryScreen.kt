@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +24,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
@@ -33,9 +36,12 @@ import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.PullRefreshState
 import eu.kanade.tachiyomi.ui.main.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.UiText
@@ -52,42 +58,53 @@ import org.nekomanga.presentation.theme.Size
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
     mainDropDown: AppBar.MainDropdown,
+    openManga: (Long) -> Unit,
+    searchMangaDex: (String) -> Unit,
     windowSizeClass: WindowSizeClass,
     incomingContentPadding: PaddingValues = PaddingValues(),
 ) {
-
+    val context = LocalContext.current
     LibraryWrapper(
         libraryViewModel = libraryViewModel,
         incomingContentPadding = incomingContentPadding,
         mainDropDown = mainDropDown,
         libraryScreenActions =
             LibraryScreenActions(
-                mangaClick = { /*::openManga*/ },
+                mangaClick = openManga,
                 mangaLongClick = libraryViewModel::libraryItemLongClick,
                 selectAllLibraryMangaItems = libraryViewModel::selectAllLibraryMangaItems,
                 deleteSelectedLibraryMangaItems = libraryViewModel::deleteSelectedLibraryMangaItems,
                 clearSelectedManga = libraryViewModel::clearSelectedManga,
                 search = libraryViewModel::search,
-                searchMangaDex = { /* ::searchMangaDex,*/ },
-                updateLibrary = { /*updateLibrary(context)*/ },
+                searchMangaDex = searchMangaDex,
+                updateLibrary = {
+                    if (!LibraryUpdateJob.isRunning(context)) {
+                        LibraryUpdateJob.startNow(context)
+                    }
+                },
                 collapseExpandAllCategories = libraryViewModel::collapseExpandAllCategories,
                 clearActiveFilters = libraryViewModel::clearActiveFilters,
                 filterToggled = libraryViewModel::filterToggled,
                 downloadChapters = libraryViewModel::downloadChapters,
-                shareManga = { /* shareManga(context)*/ },
+                shareManga = {
+                    val urls = libraryViewModel.getSelectedMangaUrls()
+                    if (urls.isEmpty()) return@LibraryScreenActions
+                    val intent =
+                        Intent(Intent.ACTION_SEND).apply {
+                            type = "text/*"
+                            putExtra(Intent.EXTRA_TEXT, urls)
+                        }
+                    context.startActivity(
+                        Intent.createChooser(intent, context.getString(R.string.share))
+                    )
+                },
                 markMangaChapters = libraryViewModel::markChapters,
                 syncMangaToDex = libraryViewModel::syncMangaToDex,
                 mangaStartReadingClick = { mangaId ->
                     libraryViewModel.openNextUnread(
                         mangaId,
                         { manga, chapter ->
-                            /*startActivity(
-                                ReaderActivity.newIntent(
-                                    context,
-                                    manga,
-                                    chapter,
-                                )
-                            )*/
+                            context.startActivity(ReaderActivity.newIntent(context, manga, chapter))
                         },
                     )
                 },
@@ -111,7 +128,23 @@ fun LibraryScreen(
             LibraryCategoryActions(
                 categoryItemClick = libraryViewModel::categoryItemClick,
                 categoryAscendingClick = libraryViewModel::categoryAscendingClick,
-                categoryRefreshClick = { /*category -> updateCategory(category, context)*/ },
+                categoryRefreshClick = { categoryItem ->
+                    LibraryUpdateJob.startNow(
+                        context = context,
+                        categoryItem.toDbCategory(),
+                        mangaToUse =
+                            if (categoryItem.isDynamic) {
+                                val libraryItems =
+                                    libraryViewModel.libraryScreenState.value.items
+                                        .firstOrNull { it.categoryItem.id == categoryItem.id }
+                                        ?.libraryItems
+                                        ?.map { it.toLibraryManga() }
+                                libraryItems
+                            } else {
+                                null
+                            },
+                    )
+                },
             ),
         windowSizeClass = windowSizeClass,
     )
