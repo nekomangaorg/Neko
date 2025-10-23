@@ -35,33 +35,30 @@ class ChapterItemSort(
 
     fun <T : ChapterItem> sortComparator(manga: Manga, ignoreAsc: Boolean = false): Comparator<T> {
         val sortDescending = !ignoreAsc && manga.sortDescending(mangaDetailsPreferences)
-        val sortFunction: (T, T) -> Int =
-            when (manga.chapterOrder(mangaDetailsPreferences)) {
-                Manga.CHAPTER_SORTING_SOURCE ->
-                    when (sortDescending) {
-                        true -> { c1, c2 ->
-                                c1.chapter.sourceOrder.compareTo(c2.chapter.sourceOrder)
-                            }
-                        false -> { c1, c2 ->
-                                c2.chapter.sourceOrder.compareTo(c1.chapter.sourceOrder)
-                            }
-                    }
-                Manga.CHAPTER_SORTING_SMART ->
-                    when (sortDescending) {
-                        true -> { c1, c2 -> c1.chapter.smartOrder.compareTo(c2.chapter.smartOrder) }
-                        false -> { c1, c2 ->
-                                c2.chapter.smartOrder.compareTo(c1.chapter.smartOrder)
-                            }
-                    }
-                Manga.CHAPTER_SORTING_UPLOAD_DATE ->
-                    when (sortDescending) {
-                        true -> { c1, c2 -> c2.chapter.dateUpload.compareTo(c1.chapter.dateUpload) }
-                        false -> { c1, c2 ->
-                                c1.chapter.dateUpload.compareTo(c2.chapter.dateUpload)
-                            }
-                    }
-                else -> { c1, c2 -> c1.chapter.sourceOrder.compareTo(c2.chapter.sourceOrder) }
-            }
-        return Comparator(sortFunction)
+        val sourceOrderAsc = compareBy<T> { it.chapter.sourceOrder }
+        // smart order numbers are flipped so this adjusts them to match the same as the other sort
+        // types
+        val smartOrderDesc = compareBy<T> { it.chapter.smartOrder }
+        val uploadDateAsc = compareBy<T> { it.chapter.dateUpload }
+
+        val sourceOrderDesc = sourceOrderAsc.reversed()
+        val smartOrderAsc = smartOrderDesc.reversed()
+        val uploadDateDesc = uploadDateAsc.reversed()
+
+        // Build the final comparator
+        return when (manga.chapterOrder(mangaDetailsPreferences)) {
+            Manga.CHAPTER_SORTING_SOURCE -> if (sortDescending) sourceOrderAsc else sourceOrderDesc
+
+            Manga.CHAPTER_SORTING_SMART -> if (sortDescending) smartOrderAsc else smartOrderDesc
+
+            Manga.CHAPTER_SORTING_UPLOAD_DATE ->
+                if (sortDescending) {
+                    uploadDateDesc.thenComparing(smartOrderAsc)
+                } else {
+                    uploadDateAsc.thenComparing(smartOrderDesc)
+                }
+
+            else -> if (sortDescending) sourceOrderAsc else sourceOrderDesc
+        }
     }
 }
