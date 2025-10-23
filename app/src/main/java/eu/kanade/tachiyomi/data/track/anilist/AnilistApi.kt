@@ -314,7 +314,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             |deleted
             |
             |}
-            |}"""
+            |}
+            """
                 .trimMargin()
 
         fun updateInLibraryQuery() =

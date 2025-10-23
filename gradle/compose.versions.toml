@@ -1,8 +1,8 @@
 [versions]
 accompanist_version = "0.36.0"
-compose_version = "1.9.3"
-compose_material3_version = "1.5.0-alpha03"
-navigation3 = "1.0.0-alpha11"
+compose_version = "1.9.4"
+compose_material3_version = "1.5.0-alpha07"
+navigation3 = "1.0.0-beta01"
 lifecycleViewmodel = "1.0.0-alpha04"
 markdown_version = "0.37.0"
 reorderable = "3.0.0"
@@ -23,7 +23,7 @@ lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.9.4"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
-material = { module = "androidx.compose.material:material", version = "1.9.3" }
+material = { module = "androidx.compose.material:material", version = "1.9.4" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core",  version = "1.7.8" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 collapsing-topbar = "io.github.flaringapp:ComposeCollapsingTopBar:1.2.0"

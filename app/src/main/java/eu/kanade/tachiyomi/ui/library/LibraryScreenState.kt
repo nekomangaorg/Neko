@@ -26,6 +26,7 @@ import org.nekomanga.presentation.components.UiText
 
 data class LibraryScreenState(
     val searchQuery: String? = null,
+    val initialSearch: String = "",
     val libraryDisplayMode: LibraryDisplayMode = LibraryDisplayMode.ComfortableGrid,
     val hasActiveFilters: Boolean = false,
     val useVividColorHeaders: Boolean = true,

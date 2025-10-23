@@ -90,6 +90,7 @@ fun NekoScaffold(
     navigationIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     searchNavigationEnabled: Boolean = false,
+    inputSearchText: String = "",
     onSearch: (String?) -> Unit = {},
     onSearchEnabled: () -> Unit = {},
     onSearchDisabled: () -> Unit = {},
@@ -152,6 +153,7 @@ fun NekoScaffold(
                     NekoScaffoldType.SearchOutline ->
                         SearchOutlineTopAppBar(
                             onSearchText = onSearch,
+                            inputSearchText = inputSearchText,
                             searchPlaceHolder = searchPlaceHolder,
                             color = color,
                             navigationEnabled = searchNavigationEnabled,
@@ -183,6 +185,7 @@ fun NekoScaffold(
                             onSearchText = onSearch,
                             searchPlaceHolder = searchPlaceHolder,
                             searchPlaceHolderAlt = searchPlaceHolderAlt,
+                            inputSearchText = inputSearchText,
                             color = color,
                             navigationEnabled = searchNavigationEnabled,
                             navigationIconLabel = navigationIconLabel,
@@ -270,6 +273,7 @@ private fun TitleAndSubtitleTopAppBar(
 @Composable
 fun SearchOutlineTopAppBar(
     onSearchText: (String?) -> Unit,
+    inputSearchText: String,
     searchPlaceHolder: String,
     color: Color,
     navigationEnabled: Boolean,
@@ -284,6 +288,14 @@ fun SearchOutlineTopAppBar(
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(inputSearchText) {
+        if (inputSearchText.isNotEmpty() && searchText != inputSearchText) {
+            searchText = inputSearchText
+            searchEnabled = true
+        }
+    }
+
     val focusManager = LocalFocusManager.current
 
     FlexibleTopBar(
@@ -304,10 +316,6 @@ fun SearchOutlineTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = searchText,
@@ -392,6 +400,7 @@ fun SearchOutlineWithActionsTopAppBar(
     onSearchText: (String?) -> Unit,
     searchPlaceHolder: String,
     searchPlaceHolderAlt: String,
+    inputSearchText: String,
     color: Color,
     navigationEnabled: Boolean,
     navigationIconLabel: String,
@@ -406,6 +415,13 @@ fun SearchOutlineWithActionsTopAppBar(
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(inputSearchText) {
+        if (inputSearchText.isNotEmpty() && searchText != inputSearchText) {
+            searchText = inputSearchText
+            searchEnabled = true
+        }
+    }
 
     val focusManager = LocalFocusManager.current
     FlexibleTopBar(
@@ -425,10 +441,6 @@ fun SearchOutlineWithActionsTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = searchText,
