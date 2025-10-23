@@ -229,8 +229,8 @@ private fun FeedWrapper(
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        DisposableEffect(Unit) {
-            updateTopBar(
+        val screenBars =
+            remember {
                 ScreenBars(
                     topBar = {
                         FeedScreenTopBar(
@@ -243,8 +243,11 @@ private fun FeedWrapper(
                     },
                     scrollBehavior = scrollBehavior,
                 )
-            )
-            onDispose { updateTopBar(ScreenBars()) }
+            }
+
+        DisposableEffect(Unit) {
+            updateTopBar(screenBars)
+            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
         }
 
         DisposableEffect(
