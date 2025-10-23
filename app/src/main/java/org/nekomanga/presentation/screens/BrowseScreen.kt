@@ -14,9 +14,12 @@ import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +36,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.ScreenBars
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
@@ -55,6 +62,7 @@ import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.screens.browse.BrowseOtherPage
+import org.nekomanga.presentation.screens.browse.BrowseScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -114,6 +122,9 @@ private fun BrowseWrapper(
 
     val browseScreenState by browseScreenFlow.collectAsState()
 
+    val updateTopBar = LocalBarUpdater.current
+    val updateRefreshState = LocalPullRefreshState.current
+
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -166,53 +177,42 @@ private fun BrowseWrapper(
                 },
             )
         }
-        /*  NekoScaffold(
-        type = NekoScaffoldType.Title,
-        onNavigationIconClicked = onBackPress,
-        title = browseScreenState.title.asString(),
-        incognitoMode = browseScreenState.incognitoMode,
-        isRoot = true,
-        actions = {
-            AppBarActions(
-                actions =
-                    listOf(
-                        AppBar.Action(
-                            title = UiText.StringResource(R.string.settings),
-                            icon = Icons.Outlined.Tune,
-                            onClick = {
-                                scope.launch {
-                                    openSheet(
-                                        BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
-                                            showIsList =
-                                                browseScreenType != BrowseScreenType.Homepage &&
-                                                    browseScreenType != BrowseScreenType.Other,
-                                            switchDisplayClick = switchDisplayClick,
-                                            libraryEntryVisibilityClick =
-                                                libraryEntryVisibilityClick,
-                                        )
+
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+        val screenBars = remember {
+            ScreenBars(
+                topBar = {
+                    BrowseScreenTopBar(
+                        browseScreenState = browseScreenState,
+                        scrollBehavior = scrollBehavior,
+                        mainDropDown = mainDropDown,
+                        openSheetClick = {
+                            scope.launch {
+                                openSheet(
+                                    BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
+                                        switchDisplayClick = switchDisplayClick,
+                                        libraryEntryVisibilityClick = libraryEntryVisibilityClick,
                                     )
-                                }
-                            },
-                        )
-                    ) +
-                        if (browseScreenState.isDeepLink) {
-                            emptyList()
-                        } else {
-                            listOf(
-                                AppBar.MainDropdown(
-                                    incognitoMode = browseScreenState.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
                                 )
-                            )
-                        }
+                            }
+                        },
+                    )
+                },
+                scrollBehavior = scrollBehavior,
             )
-        },
-        content = { incomingContentPadding ->*/
+        }
+
+        DisposableEffect(Unit) {
+            updateTopBar(screenBars)
+            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
+        }
+
+        DisposableEffect(Unit) {
+            updateRefreshState(PullRefreshState(enabled = false))
+            onDispose { updateRefreshState(PullRefreshState()) }
+        }
+
         val recyclerContentPadding = PaddingValues()
 
         val haptic = LocalHapticFeedback.current

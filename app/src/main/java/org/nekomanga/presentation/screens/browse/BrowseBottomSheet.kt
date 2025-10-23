@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.browse
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
+import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.BrowseDisplayOptionsSheet
@@ -19,7 +20,6 @@ sealed class BrowseBottomSheetScreen {
     data class FilterSheet(val nothing: String = "") : BrowseBottomSheetScreen()
 
     data class BrowseDisplayOptionsSheet(
-        val showIsList: Boolean,
         val switchDisplayClick: () -> Unit,
         val libraryEntryVisibilityClick: (Int) -> Unit,
     ) : BrowseBottomSheetScreen()
@@ -37,8 +37,11 @@ fun BrowseBottomSheet(
 
     when (currentScreen) {
         is BrowseBottomSheetScreen.BrowseDisplayOptionsSheet -> {
+
             BrowseDisplayOptionsSheet(
-                showIsList = currentScreen.showIsList,
+                showIsList =
+                    browseScreenState.screenType != BrowseScreenType.Homepage &&
+                        browseScreenState.screenType != BrowseScreenType.Other,
                 isList = browseScreenState.isList,
                 switchDisplayClick = currentScreen.switchDisplayClick,
                 currentLibraryEntryVisibility = browseScreenState.libraryEntryVisibility,

@@ -170,13 +170,6 @@ private fun FeedWrapper(
 
     val feedScreenType = feedScreenState.feedScreenType
 
-    val searchHint =
-        when (feedScreenType) {
-            FeedScreenType.History -> stringResource(R.string.search_history)
-            FeedScreenType.Updates -> stringResource(R.string.search_updates)
-            else -> ""
-        }
-
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showClearDownloadsDialog by remember { mutableStateOf(false) }
 

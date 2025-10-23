@@ -44,7 +44,7 @@ fun FeedScreenTopBar(
                     stringResource(R.string.summary)
                 else "",
             incognitoMode = feedScreenState.incognitoMode,
-            actions = { listOf(mainDropDown) },
+            actions = { AppBarActions(actions = listOf(mainDropDown)) },
             scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState()),
         )
     } else {
