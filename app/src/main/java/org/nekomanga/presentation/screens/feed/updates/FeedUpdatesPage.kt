@@ -173,7 +173,7 @@ private fun Grouped(
                 // 6. Pagination Logic (needs the global index)
                 val globalIndex = groupedBySeries.indexOf(feedManga)
 
-                item(key = feedManga.mangaId) {
+                item(key = "${groupIndex}-${feedManga.mangaId}-${latestChapter.chapter.id}") {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             globalIndex >= groupedBySeries.size - 5 &&
@@ -276,7 +276,7 @@ private fun Ungrouped(
                 val globalIndex =
                     feedUpdatesMangaList.indexOf(feedManga) // Used for pagination only
 
-                item(key = chapterItem.chapter.id) {
+                item(key = "${dateString}-${feedManga.mangaId}-${chapterItem.chapter.id}") {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             globalIndex >= feedUpdatesMangaList.size - 5 &&
