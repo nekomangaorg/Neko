@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -53,7 +52,6 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.ButtonGroup
-import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedScreenContent
 import org.nekomanga.presentation.screens.feed.FeedScreenDialogs
@@ -228,21 +226,20 @@ private fun FeedWrapper(
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val screenBars =
-            remember {
-                ScreenBars(
-                    topBar = {
-                        FeedScreenTopBar(
-                            scrollBehavior = scrollBehavior,
-                            mainDropDown = mainDropDown,
-                            feedScreenState = feedScreenState,
-                            feedScreenActions = feedScreenActions,
-                            openSheetClick = { showBottomSheet = true },
-                        )
-                    },
-                    scrollBehavior = scrollBehavior,
-                )
-            }
+        val screenBars = remember {
+            ScreenBars(
+                topBar = {
+                    FeedScreenTopBar(
+                        scrollBehavior = scrollBehavior,
+                        mainDropDown = mainDropDown,
+                        feedScreenState = feedScreenState,
+                        feedScreenActions = feedScreenActions,
+                        openSheetClick = { showBottomSheet = true },
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        }
 
         DisposableEffect(Unit) {
             updateTopBar(screenBars)

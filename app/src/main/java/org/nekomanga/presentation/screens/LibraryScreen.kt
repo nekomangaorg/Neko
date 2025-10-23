@@ -234,36 +234,33 @@ private fun LibraryWrapper(
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val screenBars =
-            remember {
-                ScreenBars(
-                    topBar = {
-                        LibraryScreenTopBar(
-                            scrollBehavior = scrollBehavior,
-                            mainDropDown = mainDropDown,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            displayOptionsClick = {
-                                scope.launch {
-                                    openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet)
-                                }
-                            },
-                            groupByClick = {
-                                scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
-                            },
-                            editCategoryClick = {
-                                scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
-                            },
-                            removeFromLibraryClick = { deleteMangaConfirmation = true },
-                            markActionClick = { markAction -> markActionConfirmation = markAction },
-                            removeActionClick = { removeAction ->
-                                removeActionConfirmation = removeAction
-                            },
-                        )
-                    },
-                    scrollBehavior = scrollBehavior,
-                )
-            }
+        val screenBars = remember {
+            ScreenBars(
+                topBar = {
+                    LibraryScreenTopBar(
+                        scrollBehavior = scrollBehavior,
+                        mainDropDown = mainDropDown,
+                        libraryScreenState = libraryScreenState,
+                        libraryScreenActions = libraryScreenActions,
+                        displayOptionsClick = {
+                            scope.launch { openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet) }
+                        },
+                        groupByClick = {
+                            scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
+                        },
+                        editCategoryClick = {
+                            scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
+                        },
+                        removeFromLibraryClick = { deleteMangaConfirmation = true },
+                        markActionClick = { markAction -> markActionConfirmation = markAction },
+                        removeActionClick = { removeAction ->
+                            removeActionConfirmation = removeAction
+                        },
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        }
         DisposableEffect(Unit) {
             updateTopBar(screenBars)
             onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
