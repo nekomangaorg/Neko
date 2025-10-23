@@ -590,7 +590,7 @@ class MangaDetailPresenter(
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
-                            .filter { !it.chapter.read && it.isNotDownloaded }
+                            .filter { !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable }
                             .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
@@ -599,7 +599,7 @@ class MangaDetailPresenter(
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
-                            .filter { !it.chapter.read && !it.isDownloaded }
+                            .filter { !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable }
                             .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
