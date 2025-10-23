@@ -21,6 +21,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +51,7 @@ fun SearchOutlineTopAppBar(
     onSearch: (String?) -> Unit = {},
     searchPlaceHolder: String = "",
     searchPlaceHolderAlt: String = "",
+    initialSearch: String = "",
     color: Color,
     navigationEnabled: Boolean = false,
     navigationIconLabel: String? = null,
@@ -65,6 +67,13 @@ fun SearchOutlineTopAppBar(
 
     var searchText by rememberSaveable { mutableStateOf("") }
     var searchEnabled by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(initialSearch) {
+        if (initialSearch.isNotEmpty() && searchText != initialSearch) {
+            searchText = initialSearch
+            searchEnabled = true
+        }
+    }
 
     val focusManager = LocalFocusManager.current
     FlexibleTopBar(
@@ -84,10 +93,6 @@ fun SearchOutlineTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = searchText,

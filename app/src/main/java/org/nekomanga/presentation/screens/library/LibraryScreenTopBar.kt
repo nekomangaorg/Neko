@@ -73,6 +73,7 @@ fun LibraryScreenTopBar(
             searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
             color = color,
             incognitoMode = libraryScreenState.incognitoMode,
+            initialSearch = libraryScreenState.initialSearch,
             actions = {
                 AppBarActions(
                     actions =

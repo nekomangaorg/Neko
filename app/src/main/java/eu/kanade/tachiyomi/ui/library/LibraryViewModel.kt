@@ -188,6 +188,7 @@ class LibraryViewModel() : ViewModel() {
                     .distinctUntilChanged()
                     .debounce(SEARCH_DEBOUNCE_MILLIS),
             ) { mangaList, searchQuery ->
+                _libraryScreenState.update { it.copy(initialSearch = "") }
                 if (searchQuery.isNullOrBlank()) {
                     mangaList
                 } else {
@@ -998,6 +999,12 @@ class LibraryViewModel() : ViewModel() {
 
     fun search(searchQuery: String?) {
         _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
+    }
+
+    fun deepLinkSearch(searchQuery: String) {
+        _libraryScreenState.update {
+            it.copy(searchQuery = searchQuery, initialSearch = searchQuery)
+        }
     }
 
     /** sync selected manga to mangadex follows */

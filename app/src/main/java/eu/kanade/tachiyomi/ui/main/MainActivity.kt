@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
             }
 
             // TODO load the correct one in future
-            val backStack = rememberNavBackStack(Screens.Library)
+            val backStack = rememberNavBackStack(Screens.Library())
 
             var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
             val navItems =
                 listOf(
                     NavigationItem(
-                        screen = Screens.Library,
+                        screen = Screens.Library(),
                         title = stringResource(R.string.library),
                         unselectedIcon = Icons.AutoMirrored.Outlined.LibraryBooks,
                         selectedIcon = Icons.AutoMirrored.Filled.LibraryBooks,
@@ -186,7 +186,12 @@ class MainActivity : ComponentActivity() {
                                         ),
                                     entryProvider =
                                         entryProvider {
-                                            entry<Screens.Library> {
+                                            entry<Screens.Library> { screen ->
+                                                if (screen.initialSearch.isNotEmpty()) {
+                                                    libraryViewModel.deepLinkSearch(
+                                                        screen.initialSearch
+                                                    )
+                                                }
                                                 LibraryScreen(
                                                     libraryViewModel = libraryViewModel,
                                                     mainDropDown = mainDropDown,
