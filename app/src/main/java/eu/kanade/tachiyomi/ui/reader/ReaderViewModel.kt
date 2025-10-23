@@ -150,7 +150,7 @@ class ReaderViewModel(
             chapterFilter.filterChaptersForReader(
                 dbChapters,
                 manga,
-                chapterSort.sortComparator(false),
+                chapterSort.sortComparator(true),
                 selectedChapter,
             )
         chaptersForReader.map(::ReaderChapter)
