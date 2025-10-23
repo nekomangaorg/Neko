@@ -107,6 +107,10 @@ class LibraryController : BaseComposeController<LibraryPresenter>() {
         presenter.search(searchQuery)
     }
 
+    fun deepLinkSearch(searchQuery: String) {
+        presenter.initialSearch(searchQuery)
+    }
+
     private fun updateCategory(category: CategoryItem, context: Context) {
         LibraryUpdateJob.startNow(
             context = context,

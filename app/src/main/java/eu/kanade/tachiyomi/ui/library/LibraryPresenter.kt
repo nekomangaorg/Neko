@@ -431,6 +431,8 @@ class LibraryPresenter(
                     .distinctUntilChanged()
                     .debounce(SEARCH_DEBOUNCE_MILLIS),
             ) { mangaList, searchQuery ->
+                _libraryScreenState.update { it.copy(initialSearch = "") }
+
                 if (searchQuery.isNullOrBlank()) {
                     mangaList
                 } else {
@@ -990,6 +992,12 @@ class LibraryPresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launchIO { securityPreferences.incognitoMode().toggle() }
+    }
+
+    fun initialSearch(searchQuery: String) {
+        _libraryScreenState.update {
+            it.copy(searchQuery = searchQuery, initialSearch = searchQuery)
+        }
     }
 
     fun search(searchQuery: String?) {
