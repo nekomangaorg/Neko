@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
@@ -41,19 +38,18 @@ fun FeedHistoryPage(
     val scrollState = rememberLazyListState()
 
     val now = Date().time
-    var timeSpan by remember { mutableStateOf("") }
+    val groupedManga =
+        feedHistoryMangaList.groupBy {
+            getDateString(it.chapters.first().chapter.lastRead, now, historyGrouping)
+        }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = scrollState,
         contentPadding = contentPadding,
     ) {
-        feedHistoryMangaList.forEachIndexed { index, feedManga ->
-            val dateString =
-                getDateString(feedManga.chapters.first().chapter.lastRead, now, historyGrouping)
-            if (dateString.isNotEmpty() && timeSpan != dateString) {
-                timeSpan = dateString
-
+        groupedManga.forEach { (dateString, mangaListForDate) ->
+            if (dateString.isNotEmpty()) {
                 item(key = "header-$dateString") {
                     Text(
                         text = dateString,
@@ -62,11 +58,12 @@ fun FeedHistoryPage(
                         modifier = Modifier.fillMaxWidth().padding(Size.small),
                     )
                 }
-            } else {
-                item(key = "gap-$index") { Gap(Size.small) }
             }
 
-            item(key = feedManga.mangaId) {
+            itemsIndexed(
+                items = mangaListForDate,
+                key = { _, feedManga -> feedManga.mangaId },
+            ) { index, feedManga ->
                 LaunchedEffect(scrollState, loadingResults) {
                     if (
                         index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults

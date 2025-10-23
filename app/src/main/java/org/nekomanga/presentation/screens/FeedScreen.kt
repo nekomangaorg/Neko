@@ -52,10 +52,10 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.screens.download.DownloadScreen
+import org.nekomanga.presentation.screens.feed.FeedBottomBar
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedPage
 import org.nekomanga.presentation.screens.feed.FeedScreenTopBar
