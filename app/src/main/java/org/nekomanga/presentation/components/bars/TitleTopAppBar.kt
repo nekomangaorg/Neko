@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.zIndex
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -32,7 +33,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun TitleTopAppBar(
     color: Color,
-    onColor: Color,
+    onColor: Color = LocalContentColor.current,
     title: String = "",
     subtitle: String = "",
     navigationIconLabel: String = "",
@@ -51,13 +52,22 @@ fun TitleTopAppBar(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
         ) {
             Column(modifier = Modifier.fillMaxWidth(.8f).align(Alignment.Center)) {
-                if (title.isNotEmpty()) {
+                if (title.isEmpty() && subtitle.isEmpty()) {
+                    // Do nothing
+                } else if (subtitle.isEmpty()) {
+                    // center the text
+                    AutoSizeText(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge.copy(color = onColor),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
                     AutoSizeText(
                         text = title,
                         style = MaterialTheme.typography.titleLarge.copy(color = onColor),
                     )
-                }
-                if (subtitle.isNotEmpty()) {
+
                     AutoSizeText(
                         text = subtitle,
                         style = MaterialTheme.typography.titleMedium.copy(color = onColor),

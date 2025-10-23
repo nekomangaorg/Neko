@@ -39,7 +39,6 @@ fun FeedScreenTopBar(
     if (titleOnlyAppBar) {
         TitleTopAppBar(
             color = color,
-            onColor = onColor,
             title =
                 if (feedScreenState.feedScreenType == FeedScreenType.Summary)
                     stringResource(R.string.summary)
