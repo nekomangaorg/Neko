@@ -40,53 +40,51 @@ fun LibrarySortSheet(
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
 
         BaseSheet(themeColor = themeColorState) {
-            val paddingModifier = Modifier.padding(horizontal = Size.small)
+            item {
+                val paddingModifier = Modifier.padding(horizontal = Size.small)
+                Gap(Size.medium)
+                Text(
+                    modifier = paddingModifier.fillMaxWidth(),
+                    text = stringResource(R.string.sort_by),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Gap(Size.medium)
+            }
 
-            Gap(Size.medium)
-            Text(
-                modifier = paddingModifier.fillMaxWidth(),
-                text = stringResource(R.string.sort_by),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-            Gap(Size.medium)
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
-            ) {
-                items(
-                    items = LibrarySort.filteredEntries(),
-                    key = { librarySort -> librarySort.stringRes() },
-                ) { librarySort ->
-                    val textColor =
-                        if (currentLibrarySort == librarySort)
-                            MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.disabledAlphaHighContrast
-                            )
-                        else MaterialTheme.colorScheme.onSurface
+            items(
+                items = LibrarySort.filteredEntries(),
+                key = { librarySort -> librarySort.stringRes() },
+            ) { librarySort ->
+                val textColor =
+                    if (currentLibrarySort == librarySort)
+                        MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = NekoColors.disabledAlphaHighContrast
+                        )
+                    else MaterialTheme.colorScheme.onSurface
 
-                    Row(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clickable(
-                                    enabled = librarySort != currentLibrarySort,
-                                    onClick = { librarySortClicked(librarySort) },
-                                )
-                                .padding(horizontal = Size.small, vertical = Size.smedium),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = librarySort.composeIcon(),
-                            contentDescription = null,
-                            tint = textColor,
-                            modifier = Modifier.size(Size.large),
+                Row(
+                    modifier =
+                    Modifier.fillMaxWidth()
+                        .clickable(
+                            enabled = librarySort != currentLibrarySort,
+                            onClick = { librarySortClicked(librarySort) },
                         )
-                        Gap(Size.medium)
-                        Text(
-                            text = stringResource(librarySort.stringRes()),
-                            color = textColor,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
+                        .padding(horizontal = Size.small, vertical = Size.smedium),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = librarySort.composeIcon(),
+                        contentDescription = null,
+                        tint = textColor,
+                        modifier = Modifier.size(Size.large),
+                    )
+                    Gap(Size.medium)
+                    Text(
+                        text = stringResource(librarySort.stringRes()),
+                        color = textColor,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
             }
         }

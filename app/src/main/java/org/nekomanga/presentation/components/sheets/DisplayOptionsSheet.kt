@@ -65,141 +65,143 @@ fun DisplayOptionsSheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         BaseSheet(themeColor = themeColorState) {
-            val paddingModifier = Modifier.padding(horizontal = Size.small)
+            item {
+                val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(Size.small)
-            Text(
-                modifier = paddingModifier.fillMaxWidth(),
-                text = stringResource(R.string.display_options),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-            Gap(Size.large)
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(Size.medium),
-            ) {
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                    horizontalArrangement = Arrangement.Center,
+                Gap(Size.small)
+                Text(
+                    modifier = paddingModifier.fillMaxWidth(),
+                    text = stringResource(R.string.display_options),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Gap(Size.large)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(Size.medium),
                 ) {
-                    LibraryDisplayMode.entries().forEachIndexed { index, libraryDisplayMode ->
-                        ToggleButton(
-                            modifier =
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        LibraryDisplayMode.entries().forEachIndexed { index, libraryDisplayMode ->
+                            ToggleButton(
+                                modifier =
                                 Modifier.weight(if (index == 1) 1.25f else 1f).semantics {
                                     role = Role.RadioButton
                                 },
-                            checked = libraryDisplayMode == currentLibraryDisplayMode,
-                            onCheckedChange = { libraryDisplayModeClick(libraryDisplayMode) },
-                            shapes =
+                                checked = libraryDisplayMode == currentLibraryDisplayMode,
+                                onCheckedChange = { libraryDisplayModeClick(libraryDisplayMode) },
+                                shapes =
                                 when (index) {
                                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                                     LibraryDisplayMode.entries().lastIndex ->
                                         ButtonGroupDefaults.connectedTrailingButtonShapes()
                                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                                 },
-                        ) {
-                            Text(libraryDisplayMode.toUiText().asString())
+                            ) {
+                                Text(libraryDisplayMode.toUiText().asString())
+                            }
+                            Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
                         }
-                        Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
-                    }
-                }
-
-                if (currentLibraryDisplayMode != LibraryDisplayMode.List) {
-                    var sliderPosition by rememberSaveable {
-                        mutableFloatStateOf(((rawColumnCount + .5f) * 2f).roundToInt().toFloat())
                     }
 
-                    Column(modifier = Modifier.padding(horizontal = Size.medium)) {
-                        val context = LocalContext.current
-                        val isPortrait = !context.isLandscape()
-                        val numberOfColumns =
-                            numberOfColumns(rawValue = sliderPosition, forText = true)
-                        val numberOfColumnsAlt =
-                            numberOfColumns(
-                                rawValue = sliderPosition,
-                                forText = true,
-                                useHeight = true,
-                            )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text =
+                    if (currentLibraryDisplayMode != LibraryDisplayMode.List) {
+                        var sliderPosition by rememberSaveable {
+                            mutableFloatStateOf(((rawColumnCount + .5f) * 2f).roundToInt().toFloat())
+                        }
+
+                        Column(modifier = Modifier.padding(horizontal = Size.medium)) {
+                            val context = LocalContext.current
+                            val isPortrait = !context.isLandscape()
+                            val numberOfColumns =
+                                numberOfColumns(rawValue = sliderPosition, forText = true)
+                            val numberOfColumnsAlt =
+                                numberOfColumns(
+                                    rawValue = sliderPosition,
+                                    forText = true,
+                                    useHeight = true,
+                                )
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                text =
                                 "Grid size: Portrait: ${if (isPortrait) numberOfColumns else numberOfColumnsAlt} ${Constants.SEPARATOR} Landscape: ${if (isPortrait) numberOfColumnsAlt else numberOfColumns}",
-                        )
-                        Gap(Size.tiny)
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Slider(
-                                modifier = Modifier.weight(1f),
-                                value = sliderPosition,
-                                onValueChange = { sliderPosition = it },
-                                onValueChangeFinished = {
-                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                },
-                                steps = 8,
-                                valueRange = 0f..7f,
                             )
                             Gap(Size.tiny)
-                            TextButton(
-                                onClick = {
-                                    sliderPosition = 3f
-                                    rawColumnCountChanged((sliderPosition / 2f) - .5f)
-                                },
-                                shapes = ButtonDefaults.shapes(),
-                            ) {
-                                Text(stringResource(R.string.reset))
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Slider(
+                                    modifier = Modifier.weight(1f),
+                                    value = sliderPosition,
+                                    onValueChange = { sliderPosition = it },
+                                    onValueChangeFinished = {
+                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                    },
+                                    steps = 8,
+                                    valueRange = 0f..7f,
+                                )
+                                Gap(Size.tiny)
+                                TextButton(
+                                    onClick = {
+                                        sliderPosition = 3f
+                                        rawColumnCountChanged((sliderPosition / 2f) - .5f)
+                                    },
+                                    shapes = ButtonDefaults.shapes(),
+                                ) {
+                                    Text(stringResource(R.string.reset))
+                                }
                             }
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable(onClick = outlineCoversToggled),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Gap(Size.small)
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(id = R.string.show_outline_around_covers),
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable(onClick = outlineCoversToggled),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Gap(Size.small)
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = stringResource(id = R.string.show_outline_around_covers),
+                        )
+                        Switch(
+                            checked = outlineCoversEnabled,
+                            onCheckedChange = { outlineCoversToggled() },
+                        )
+                        Gap(Size.small)
+                    }
+
+                    HorizontalDivider()
+
+                    ToggleRow(
+                        enabled = unreadBadgesEnabled,
+                        onClick = unreadBadgesToggled,
+                        text = stringResource(id = R.string.unread_badge),
                     )
-                    Switch(
-                        checked = outlineCoversEnabled,
-                        onCheckedChange = { outlineCoversToggled() },
+
+                    ToggleRow(
+                        enabled = downloadBadgesEnabled,
+                        onClick = downloadBadgesToggled,
+                        text = stringResource(R.string.download_badge),
                     )
-                    Gap(Size.small)
+
+                    ToggleRow(
+                        enabled = showStartReadingButtonEnabled,
+                        onClick = startReadingButtonToggled,
+                        text = stringResource(R.string.show_start_reading_button),
+                    )
+                    HorizontalDivider()
+                    ToggleRow(
+                        enabled = showLibraryButtonBarEnabled,
+                        onClick = showLibraryButtonBarToggled,
+                        text = stringResource(R.string.show_library_action_bar),
+                    )
+
+                    ToggleRow(
+                        enabled = horizontalCategoriesEnabled,
+                        onClick = horizontalCategoriesToggled,
+                        text = stringResource(R.string.horizontal_categories),
+                    )
                 }
-
-                HorizontalDivider()
-
-                ToggleRow(
-                    enabled = unreadBadgesEnabled,
-                    onClick = unreadBadgesToggled,
-                    text = stringResource(id = R.string.unread_badge),
-                )
-
-                ToggleRow(
-                    enabled = downloadBadgesEnabled,
-                    onClick = downloadBadgesToggled,
-                    text = stringResource(R.string.download_badge),
-                )
-
-                ToggleRow(
-                    enabled = showStartReadingButtonEnabled,
-                    onClick = startReadingButtonToggled,
-                    text = stringResource(R.string.show_start_reading_button),
-                )
-                HorizontalDivider()
-                ToggleRow(
-                    enabled = showLibraryButtonBarEnabled,
-                    onClick = showLibraryButtonBarToggled,
-                    text = stringResource(R.string.show_library_action_bar),
-                )
-
-                ToggleRow(
-                    enabled = horizontalCategoriesEnabled,
-                    onClick = horizontalCategoriesToggled,
-                    text = stringResource(R.string.horizontal_categories),
-                )
             }
         }
     }

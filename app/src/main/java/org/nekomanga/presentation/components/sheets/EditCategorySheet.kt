@@ -103,39 +103,35 @@ fun EditCategorySheet(
             Gap(16.dp)
             Divider()
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
-            ) {
-                items(items = categories, key = { category -> category.id }) {
-                    category: CategoryItem ->
-                    var state by remember {
-                        mutableStateOf(enabledCategories.contains(category.id))
-                    }
-                    CheckboxRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        checkedState = state,
-                        checkedChange = { newState ->
-                            state = newState
-                            if (state) {
-                                enabledCategories[category.id] = category
-                            } else {
-                                enabledCategories.remove(category.id)
-                            }
-                            acceptText.value =
-                                calculateText(
-                                    context,
-                                    mangaCategories,
-                                    enabledCategories,
-                                    addingToLibrary,
-                                )
-                        },
-                        rowText = category.name,
-                        themeColorState = themeColorState,
-                    )
+            items(items = categories, key = { category -> category.id }) {
+                category: CategoryItem ->
+                var state by remember {
+                    mutableStateOf(enabledCategories.contains(category.id))
                 }
+                CheckboxRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    checkedState = state,
+                    checkedChange = { newState ->
+                        state = newState
+                        if (state) {
+                            enabledCategories[category.id] = category
+                        } else {
+                            enabledCategories.remove(category.id)
+                        }
+                        acceptText.value =
+                            calculateText(
+                                context,
+                                mangaCategories,
+                                enabledCategories,
+                                addingToLibrary,
+                            )
+                    },
+                    rowText = category.name,
+                    themeColorState = themeColorState,
+                )
             }
 
-            Divider()
+            item { Divider() }
             Gap(Size.tiny)
             Row(
                 modifier = paddingModifier.fillMaxWidth(),

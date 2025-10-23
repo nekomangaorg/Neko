@@ -35,28 +35,30 @@ fun GroupBySheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = bottomContentPadding) {
-            val paddingModifier = Modifier.padding(horizontal = Size.small)
+            item {
+                val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(Size.medium)
-            Text(
-                modifier = paddingModifier.fillMaxWidth(),
-                text = stringResource(R.string.sort_by),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-            Gap(Size.medium)
-            groupByOptions.forEach { groupBy ->
+                Gap(Size.medium)
+                Text(
+                    modifier = paddingModifier.fillMaxWidth(),
+                    text = stringResource(R.string.sort_by),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Gap(Size.medium)
+            }
+            items(groupByOptions) { groupBy ->
                 val textColor =
                     if (currentGroupBy == groupBy) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface
 
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .conditional(currentGroupBy != groupBy) {
-                                this.clickable(onClick = { groupByClick(groupBy) })
-                            }
-                            .padding(Size.small),
+                    Modifier.fillMaxWidth()
+                        .conditional(currentGroupBy != groupBy) {
+                            this.clickable(onClick = { groupByClick(groupBy) })
+                        }
+                        .padding(Size.small),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(imageVector = groupBy.icon, contentDescription = null, tint = textColor)

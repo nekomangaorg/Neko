@@ -36,22 +36,24 @@ fun ExternalLinksSheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         BaseSheet(themeColor = themeColorState) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Size.small),
-            ) {
-                externalLinks.chunked(2).forEach {
-                    Row(
-                        modifier = if (it.size == 1) Modifier else Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Size.small),
-                    ) {
-                        it.forEach { externalLink ->
-                            LinkCard(
-                                modifier = if (it.size > 1) Modifier.weight(1f) else Modifier,
-                                externalLink = externalLink,
-                                onLinkClick = onLinkClick,
-                            )
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Size.small),
+                ) {
+                    externalLinks.chunked(2).forEach {
+                        Row(
+                            modifier = if (it.size == 1) Modifier else Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Size.small),
+                        ) {
+                            it.forEach { externalLink ->
+                                LinkCard(
+                                    modifier = if (it.size > 1) Modifier.weight(1f) else Modifier,
+                                    externalLink = externalLink,
+                                    onLinkClick = onLinkClick,
+                                )
+                            }
                         }
                     }
                 }

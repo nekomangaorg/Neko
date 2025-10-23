@@ -87,68 +87,70 @@ fun ArtworkSheet(
             }
 
         BaseSheet(themeColor = themeColorState) {
-            if (alternativeArtwork.isEmpty() || currentImage == null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.no_artwork_found),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            } else {
-                val context = LocalContext.current
-
-                Text(
-                    text = currentImage!!.description,
-                    modifier = Modifier.padding(horizontal = Size.small),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelLarge,
-                )
-
-                val mainImageRequest =
-                    remember(currentImage) {
-                        ImageRequest.Builder(context).data(currentImage).build()
+            item {
+                if (alternativeArtwork.isEmpty() || currentImage == null) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.no_artwork_found),
+                            textAlign = TextAlign.Center,
+                        )
                     }
-                Box(
-                    modifier =
+                } else {
+                    val context = LocalContext.current
+
+                    Text(
+                        text = currentImage!!.description,
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+
+                    val mainImageRequest =
+                        remember(currentImage) {
+                            ImageRequest.Builder(context).data(currentImage).build()
+                        }
+                    Box(
+                        modifier =
                         Modifier.fillMaxWidth()
                             .padding(horizontal = Size.small)
                             .heightIn(imageHeight / 2, imageHeight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AsyncImage(
-                        model = mainImageRequest,
-                        contentDescription = stringResource(R.string.artwork),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-
-                Column(verticalArrangement = Arrangement.Bottom) {
-                    Gap(Size.tiny)
-                    ActionButtons(
-                        inLibrary = inLibrary,
-                        themeColorState = themeColorState,
-                        onSave = { currentImage?.let(saveClick) },
-                        onSet = { currentImage?.let(setClick) },
-                        onReset = resetClick,
-                        onShare = { currentImage?.let(shareClick) },
-                    )
-                    if (alternativeArtwork.size > 1) {
-                        Gap(Size.small)
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
-                            item { Gap(Size.tiny) }
-                            items(alternativeArtwork, key = { it.url }) { artwork ->
-                                ArtworkThumbnail(
-                                    artwork = artwork,
-                                    themeColorState = themeColorState,
-                                    thumbnailSize = thumbnailSize,
-                                    gradientHeight = gradientHeight,
-                                    onClick = { currentImage = artwork },
-                                )
-                            }
-                            item { Gap(Size.tiny) }
-                        }
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            model = mainImageRequest,
+                            contentDescription = stringResource(R.string.artwork),
+                            contentScale = ContentScale.Fit,
+                        )
                     }
-                    Gap(Size.small)
+
+                    Column(verticalArrangement = Arrangement.Bottom) {
+                        Gap(Size.tiny)
+                        ActionButtons(
+                            inLibrary = inLibrary,
+                            themeColorState = themeColorState,
+                            onSave = { currentImage?.let(saveClick) },
+                            onSet = { currentImage?.let(setClick) },
+                            onReset = resetClick,
+                            onShare = { currentImage?.let(shareClick) },
+                        )
+                        if (alternativeArtwork.size > 1) {
+                            Gap(Size.small)
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
+                                item { Gap(Size.tiny) }
+                                items(alternativeArtwork, key = { it.url }) { artwork ->
+                                    ArtworkThumbnail(
+                                        artwork = artwork,
+                                        themeColorState = themeColorState,
+                                        thumbnailSize = thumbnailSize,
+                                        gradientHeight = gradientHeight,
+                                        onClick = { currentImage = artwork },
+                                    )
+                                }
+                                item { Gap(Size.tiny) }
+                            }
+                        }
+                        Gap(Size.small)
+                    }
                 }
             }
         }

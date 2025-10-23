@@ -71,75 +71,78 @@ fun TrackingSearchSheet(
     var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
     BaseSheet(themeColor = themeColorState) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Header(stringResource(id = R.string.select_an_entry), cancelClick)
+        item {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
-            when (trackSearchResult) {
-                is TrackSearchResult.Success -> {
-                    Column(
-                        modifier =
-                            Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Gap(Size.tiny)
-                        if (
-                            alreadySelectedTrack == null &&
-                                trackSearchResult.hasMatchingId &&
-                                trackSearchResult.trackSearchResult.size == 1
+                when (trackSearchResult) {
+                    is TrackSearchResult.Success -> {
+                        Column(
+                            modifier =
+                            Modifier.fillMaxWidth()
+                                .requiredHeightIn(Size.none, maxLazyHeight.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            trackSearchItemClick(trackSearchResult.trackSearchResult.first())
-                        }
-
-                        trackSearchResult.trackSearchResult.forEach { item: TrackSearchItem ->
-                            TrackSearchItem(
-                                themeColorState = themeColorState,
-                                trackSearch = item,
-                                alreadySelectedTrack = alreadySelectedTrack,
-                                openInBrowser = openInBrowser,
-                                trackSearchItemClick = {
-                                    if (alreadySelectedTrack == null) {
-                                        trackSearchItemClick(it)
-                                    } else {
-                                        trackSearchItem = item
-                                    }
-                                },
-                            )
-
-                            if (trackSearchItem != null) {
-                                TrackingSwitchDialog(
-                                    themeColorState = themeColorState,
-                                    name = stringResource(id = service.nameRes),
-                                    oldName = alreadySelectedTrack?.title ?: "",
-                                    newName = trackSearchItem!!.trackItem.title,
-                                    onConfirm = { alsoRemoveFromTracker, isReplacing ->
-                                        trackingRemoved(alsoRemoveFromTracker, service)
-                                        if (isReplacing) {
-                                            trackSearchItemClick(trackSearchItem!!)
-                                        }
-                                        cancelClick()
-                                    },
-                                    onDismiss = { trackSearchItem = null },
-                                )
+                            Gap(Size.tiny)
+                            if (
+                                alreadySelectedTrack == null &&
+                                    trackSearchResult.hasMatchingId &&
+                                    trackSearchResult.trackSearchResult.size == 1
+                            ) {
+                                trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                             }
-                        }
 
-                        Gap(Size.tiny)
+                            trackSearchResult.trackSearchResult.forEach { item: TrackSearchItem ->
+                                TrackSearchItem(
+                                    themeColorState = themeColorState,
+                                    trackSearch = item,
+                                    alreadySelectedTrack = alreadySelectedTrack,
+                                    openInBrowser = openInBrowser,
+                                    trackSearchItemClick = {
+                                        if (alreadySelectedTrack == null) {
+                                            trackSearchItemClick(it)
+                                        } else {
+                                            trackSearchItem = item
+                                        }
+                                    },
+                                )
+
+                                if (trackSearchItem != null) {
+                                    TrackingSwitchDialog(
+                                        themeColorState = themeColorState,
+                                        name = stringResource(id = service.nameRes),
+                                        oldName = alreadySelectedTrack?.title ?: "",
+                                        newName = trackSearchItem!!.trackItem.title,
+                                        onConfirm = { alsoRemoveFromTracker, isReplacing ->
+                                            trackingRemoved(alsoRemoveFromTracker, service)
+                                            if (isReplacing) {
+                                                trackSearchItemClick(trackSearchItem!!)
+                                            }
+                                            cancelClick()
+                                        },
+                                        onDismiss = { trackSearchItem = null },
+                                    )
+                                }
+                            }
+
+                            Gap(Size.tiny)
+                        }
                     }
+                    else ->
+                        CenteredBox(
+                            themeColorState = themeColorState,
+                            trackSearchResult = trackSearchResult,
+                        )
                 }
-                else ->
-                    CenteredBox(
-                        themeColorState = themeColorState,
-                        trackSearchResult = trackSearchResult,
-                    )
+                var searchText by remember { mutableStateOf(title) }
+                SearchFooter(
+                    themeColorState = themeColorState,
+                    labelText = stringResource(id = R.string.title),
+                    title = searchText,
+                    textChanged = { searchText = it },
+                    search = searchTracker,
+                )
             }
-            var searchText by remember { mutableStateOf(title) }
-            SearchFooter(
-                themeColorState = themeColorState,
-                labelText = stringResource(id = R.string.title),
-                title = searchText,
-                textChanged = { searchText = it },
-                search = searchTracker,
-            )
         }
     }
 }

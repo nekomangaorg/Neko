@@ -144,78 +144,80 @@ fun FilterBrowseSheet(
         var queryText by remember { mutableStateOf(filters.query.text) }
 
         BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = 0.dp) {
-            val paddingModifier = Modifier.padding(horizontal = Size.small)
+            item {
+                val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(16.dp)
+                Gap(16.dp)
 
-            val titleRes =
-                when (filters.queryMode) {
-                    QueryType.Title -> {
-                        R.string.title
-                    }
-                    QueryType.Author -> {
-                        R.string.author
-                    }
-                    QueryType.Group -> {
-                        R.string.scanlator_group
-                    }
-                    QueryType.List -> {
-                        R.string.list_id
-                    }
-                }
-            val items = remember {
-                listOf(QueryType.Title, QueryType.Author, QueryType.Group, QueryType.List)
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(Size.tiny),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                ButtonGroup(
-                    items = items,
-                    selectedItem = filters.queryMode,
-                    onItemClick = {
-                        queryText = ""
-                        filterChanged(Filter.Query("", it))
-                    },
-                ) { item ->
-                    val name =
-                        when (item) {
-                            QueryType.Title -> stringResource(id = R.string.title)
-                            QueryType.Author -> stringResource(id = R.string.author)
-                            QueryType.Group -> stringResource(id = R.string.scanlator_group)
-                            QueryType.List -> stringResource(id = R.string.list_id)
+                val titleRes =
+                    when (filters.queryMode) {
+                        QueryType.Title -> {
+                            R.string.title
                         }
-                    Text(
-                        text = name,
-                        fontWeight = FontWeight.Medium,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                        QueryType.Author -> {
+                            R.string.author
+                        }
+                        QueryType.Group -> {
+                            R.string.scanlator_group
+                        }
+                        QueryType.List -> {
+                            R.string.list_id
+                        }
+                    }
+                val items = remember {
+                    listOf(QueryType.Title, QueryType.Author, QueryType.Group, QueryType.List)
                 }
-            }
-
-            val isError =
-                remember(filters.query.text) {
-                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
-                        false
-                    } else {
-                        !filters.query.text.isUUID()
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(Size.tiny),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    ButtonGroup(
+                        items = items,
+                        selectedItem = filters.queryMode,
+                        onItemClick = {
+                            queryText = ""
+                            filterChanged(Filter.Query("", it))
+                        },
+                    ) { item ->
+                        val name =
+                            when (item) {
+                                QueryType.Title -> stringResource(id = R.string.title)
+                                QueryType.Author -> stringResource(id = R.string.author)
+                                QueryType.Group -> stringResource(id = R.string.scanlator_group)
+                                QueryType.List -> stringResource(id = R.string.list_id)
+                            }
+                        Text(
+                            text = name,
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
                     }
                 }
 
-            SearchFooter(
-                themeColorState = themeColorState,
-                labelText = stringResource(id = titleRes),
-                showDivider = false,
-                title = queryText,
-                isError = isError,
-                textChanged = { text: String ->
-                    queryText = text
-                    filterChanged(filters.query.copy(text = text))
-                },
-                search = { filterClick() },
-            )
+                val isError =
+                    remember(filters.query.text) {
+                        if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
+                            false
+                        } else {
+                            !filters.query.text.isUUID()
+                        }
+                    }
 
-            FilterRow(
+                SearchFooter(
+                    themeColorState = themeColorState,
+                    labelText = stringResource(id = titleRes),
+                    showDivider = false,
+                    title = queryText,
+                    isError = isError,
+                    textChanged = { text: String ->
+                        queryText = text
+                        filterChanged(filters.query.copy(text = text))
+                    },
+                    search = { filterClick() },
+                )
+            }
+
+                FilterRow(
                 items = filters.originalLanguage.toPersistentList(),
                 expanded = originalLanguageExpanded,
                 disabled = disabled,
@@ -228,8 +230,10 @@ fun FilterBrowseSheet(
                 selected = { originalLanguage -> originalLanguage.state },
                 name = { originalLanguage -> originalLanguage.language.prettyPrint },
             )
+            }
 
             if (filters.contentRatingVisible) {
+                item {
                 FilterRow(
                     items = filters.contentRatings.toPersistentList(),
                     expanded = contentRatingExpanded,
@@ -246,7 +250,9 @@ fun FilterBrowseSheet(
                     nameRes = { rating -> rating.rating.nameRes },
                 )
             }
+            }
 
+            item {
             FilterRow(
                 items = filters.publicationDemographics.toPersistentList(),
                 expanded = publicationDemographicExpanded,
@@ -260,7 +266,8 @@ fun FilterBrowseSheet(
                 selected = { demo -> demo.state },
                 nameRes = { demo -> demo.demographic.nameRes },
             )
-
+            }
+            item {
             FilterRow(
                 items = filters.statuses.toPersistentList(),
                 expanded = statusExpanded,
@@ -272,7 +279,8 @@ fun FilterBrowseSheet(
                 selected = { status -> status.state },
                 nameRes = { status -> status.status.statusRes },
             )
-
+            }
+            item {
             FilterRow(
                 items = filters.sort.toPersistentList(),
                 expanded = sortExpanded,
@@ -284,7 +292,9 @@ fun FilterBrowseSheet(
                 selected = { sort -> sort.state },
                 name = { sort -> sort.sort.displayName },
             )
+            }
 
+            item {
             FilterTriStateRow(
                 items = filters.tags.toPersistentList(),
                 expanded = tagExpanded,
@@ -296,7 +306,9 @@ fun FilterBrowseSheet(
                 selected = { tag -> tag.state },
                 name = { tag -> tag.tag.prettyPrint },
             )
+            }
 
+            item {
             OtherRow(
                 isExpanded = otherExpanded,
                 disabled = disabled,
@@ -312,9 +324,11 @@ fun FilterBrowseSheet(
                 filterChanged = filterChanged,
                 filterClick = filterClick,
             )
-
+            }
+            item {
             Gap(Size.tiny)
-
+            }
+            item {
             SavedFilters(
                 visible = savedFilters.isNotEmpty(),
                 savedFilters = savedFilters,
@@ -323,11 +337,13 @@ fun FilterBrowseSheet(
                 deleteFilterClick = deleteFilterClick,
                 filterDefaultClick = filterDefaultClick,
             )
-
+            }
+            item {
             Gap(Size.small)
-
+            }
+            item {
             Row(
-                modifier = paddingModifier.fillMaxWidth(),
+                    modifier = Modifier.padding(horizontal = Size.small).fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
@@ -392,7 +408,8 @@ fun FilterBrowseSheet(
                     )
                 }
             }
-
+            }
+            item {
             Gap(bottomContentPadding + Size.small)
         }
     }

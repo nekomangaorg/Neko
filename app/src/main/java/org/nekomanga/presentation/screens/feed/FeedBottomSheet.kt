@@ -59,36 +59,42 @@ fun FeedBottomSheet(
 ) {
 
     BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .6f) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-            verticalArrangement = Arrangement.spacedBy(Size.small),
-        ) {
-            when {
-                downloadScreenVisible ->
-                    DownloadsContent(clearDownloadsClick, downloadOnlyOnWifi, toggleDownloadOnWifi)
-                feedScreenType == FeedScreenType.History ->
-                    HistoryContent(
-                        historyGrouping = historyGrouping,
-                        outlineCovers = outlineCovers,
-                        outlineCards = outlineCards,
-                        outlineCoversClick = outlineCoversClick,
-                        outlineCardsClick = outlineCardsClick,
-                        groupHistoryClick = groupHistoryClick,
-                        clearHistoryClick = clearHistoryClick,
-                        swipeRefreshEnabled = swipeRefreshEnabled,
-                        toggleSwipeRefresh = toggleSwipeRefresh,
-                    )
-                feedScreenType == FeedScreenType.Updates ->
-                    UploadsContent(
-                        fetchSort = sortByFetched,
-                        outlineCovers = outlineCovers,
-                        sortClick = sortClick,
-                        groupUpdateChapters = groupUpdateChapters,
-                        toggleGroupUpdateChapters = toggleGroupUpdateChapters,
-                        outlineCoversClick = outlineCoversClick,
-                        swipeRefreshEnabled = swipeRefreshEnabled,
-                        toggleSwipeRefresh = toggleSwipeRefresh,
-                    )
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                verticalArrangement = Arrangement.spacedBy(Size.small),
+            ) {
+                when {
+                    downloadScreenVisible ->
+                        DownloadsContent(
+                            clearDownloadsClick,
+                            downloadOnlyOnWifi,
+                            toggleDownloadOnWifi
+                        )
+                    feedScreenType == FeedScreenType.History ->
+                        HistoryContent(
+                            historyGrouping = historyGrouping,
+                            outlineCovers = outlineCovers,
+                            outlineCards = outlineCards,
+                            outlineCoversClick = outlineCoversClick,
+                            outlineCardsClick = outlineCardsClick,
+                            groupHistoryClick = groupHistoryClick,
+                            clearHistoryClick = clearHistoryClick,
+                            swipeRefreshEnabled = swipeRefreshEnabled,
+                            toggleSwipeRefresh = toggleSwipeRefresh,
+                        )
+                    feedScreenType == FeedScreenType.Updates ->
+                        UploadsContent(
+                            fetchSort = sortByFetched,
+                            outlineCovers = outlineCovers,
+                            sortClick = sortClick,
+                            groupUpdateChapters = groupUpdateChapters,
+                            toggleGroupUpdateChapters = toggleGroupUpdateChapters,
+                            outlineCoversClick = outlineCoversClick,
+                            swipeRefreshEnabled = swipeRefreshEnabled,
+                            toggleSwipeRefresh = toggleSwipeRefresh,
+                        )
+                }
             }
         }
     }

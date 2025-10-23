@@ -1,14 +1,13 @@
 package org.nekomanga.presentation.components.sheets
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,7 +25,7 @@ fun BaseSheet(
     maxSheetHeightPercentage: Float = .8f,
     minSheetHeightPercentage: Float = 0f,
     bottomPaddingAroundContent: Dp = Size.mediumLarge,
-    content: @Composable ColumnScope.() -> Unit,
+    content: LazyListScope.() -> Unit,
 ) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides themeColor.rippleConfiguration,
@@ -36,18 +35,17 @@ fun BaseSheet(
         val maxSheetHeight = screenHeight * maxSheetHeightPercentage
         val minSheetHeight = screenHeight * minSheetHeightPercentage
 
-        val scrollState = rememberScrollState()
-
-        Column(
+        LazyColumn(
             modifier =
-                Modifier.navigationBarsPadding()
-                    .imePadding()
-                    .fillMaxWidth()
-                    .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp)
-                    .verticalScroll(scrollState)
+            Modifier.navigationBarsPadding()
+                .imePadding()
+                .fillMaxWidth()
+                .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
         ) {
             content()
-            Gap(bottomPaddingAroundContent)
+            item {
+                Gap(bottomPaddingAroundContent)
+            }
         }
     }
 }

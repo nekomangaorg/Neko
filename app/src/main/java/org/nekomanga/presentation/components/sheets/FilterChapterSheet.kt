@@ -48,24 +48,35 @@ fun FilterChapterSheet(
         LocalRippleConfiguration provides themeColorState.rippleConfiguration
     ) {
         BaseSheet(themeColor = themeColorState) {
-            Sort(themeColorState = themeColorState, sortFilter, changeSort) {
-                setAsGlobal(MangaConstants.SetGlobal.Sort)
+            item {
+                Sort(themeColorState = themeColorState, sortFilter, changeSort) {
+                    setAsGlobal(MangaConstants.SetGlobal.Sort)
+                }
             }
-
-            Filter(themeColorState = themeColorState, filter, changeFilter) {
-                setAsGlobal(MangaConstants.SetGlobal.Filter)
+            item {
+                Filter(themeColorState = themeColorState, filter, changeFilter) {
+                    setAsGlobal(MangaConstants.SetGlobal.Filter)
+                }
             }
-
-            Scanlator(themeColorState = themeColorState, sourceFilter, true, changeScanlatorFilter)
-
-            Scanlator(
-                themeColorState = themeColorState,
-                scanlatorFilter,
-                false,
-                changeScanlatorFilter,
-            )
-
-            Language(themeColorState = themeColorState, languageFilter, changeLanguageFilter)
+            item {
+                Scanlator(
+                    themeColorState = themeColorState,
+                    sourceFilter,
+                    true,
+                    changeScanlatorFilter
+                )
+            }
+            item {
+                Scanlator(
+                    themeColorState = themeColorState,
+                    scanlatorFilter,
+                    false,
+                    changeScanlatorFilter,
+                )
+            }
+            item {
+                Language(themeColorState = themeColorState, languageFilter, changeLanguageFilter)
+            }
         }
     }
 }

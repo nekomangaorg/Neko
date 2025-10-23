@@ -83,38 +83,40 @@ fun MergeSheet(
     when (isMergedManga) {
         is IsMergedManga.Yes -> {
             BaseSheet(themeColor = themeColorState) {
-                val text = MergeType.getMergeTypeName(isMergedManga.mergeType)
+                item {
+                    val text = MergeType.getMergeTypeName(isMergedManga.mergeType)
 
-                Gap(Size.small)
-                Text(
-                    text = stringResource(id = R.string.merge_source_, text),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                )
-
-                Gap(Size.tiny)
-
-                TextButton(
-                    onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+                    Gap(Size.small)
                     Text(
-                        text = stringResource(id = R.string.open_merged_in_webview),
-                        color = themeColorState.primaryColor,
+                        text = stringResource(id = R.string.merge_source_, text),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
                     )
+
+                    Gap(Size.tiny)
+
+                    TextButton(
+                        onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.open_merged_in_webview),
+                            color = themeColorState.primaryColor,
+                        )
+                    }
+                    Gap(Size.tiny)
+                    TextButton(
+                        onClick = { removeMergeSource(isMergedManga.mergeType) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.remove_merged_source),
+                            color = themeColorState.primaryColor,
+                        )
+                    }
+                    Gap(Size.tiny)
                 }
-                Gap(Size.tiny)
-                TextButton(
-                    onClick = { removeMergeSource(isMergedManga.mergeType) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.remove_merged_source),
-                        color = themeColorState.primaryColor,
-                    )
-                }
-                Gap(Size.tiny)
             }
         }
         is IsMergedManga.No -> {
@@ -122,47 +124,104 @@ fun MergeSheet(
             BaseSheet(themeColor = themeColorState) {
                 when (mergeType == null) {
                     true -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            validMergeTypes.forEach { validMergeType ->
-                                val id =
-                                    when (validMergeType) {
-                                        MergeType.Komga -> R.drawable.ic_komga_logo
-                                        MergeType.MangaLife -> R.drawable.ic_mangalife_logo
-                                        MergeType.Suwayomi -> R.drawable.ic_suwayomi_logo
-                                        MergeType.Toonily -> R.drawable.ic_toonily
-                                        MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
-                                        MergeType.Comick -> R.drawable.ic_comick_logo
-                                    }
-                                MergeLogo(
-                                    id = id,
-                                    onClick = { mergeType = validMergeType },
-                                    title = validMergeType.name,
-                                )
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                validMergeTypes.forEach { validMergeType ->
+                                    val id =
+                                        when (validMergeType) {
+                                            MergeType.Komga -> R.drawable.ic_komga_logo
+                                            MergeType.MangaLife -> R.drawable.ic_mangalife_logo
+                                            MergeType.Suwayomi -> R.drawable.ic_suwayomi_logo
+                                            MergeType.Toonily -> R.drawable.ic_toonily
+                                            MergeType.WeebCentral ->
+                                                R.drawable.ic_weebcentral_logo
+                                            MergeType.Comick -> R.drawable.ic_comick_logo
+                                        }
+                                    MergeLogo(
+                                        id = id,
+                                        onClick = { mergeType = validMergeType },
+                                        title = validMergeType.name,
+                                    )
+                                }
                             }
                         }
                     }
                     false -> {
-                        LaunchedEffect(key1 = mergeType) { search(title, mergeType!!) }
-                        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
+                        item {
+                            LaunchedEffect(key1 = mergeType) { search(title, mergeType!!) }
 
-                        var searchTitle by remember { mutableStateOf(title) }
+                            var searchTitle by remember { mutableStateOf(title) }
 
-                        Header(stringResource(id = R.string.select_an_entry), cancelClick)
-                        Box(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .requiredHeightIn(Size.none, maxLazyHeight.dp)
-                        ) {
-                            if (mergeSearchResults is MergeSearchResult.Success) {
-                                SuccessResults(
-                                    mergeMangaList = mergeSearchResults.mergeMangaList,
-                                    mergeType = mergeType!!,
-                                    mergeMangaClick = mergeMangaClick,
-                                )
+                            Header(stringResource(id = R.string.select_an_entry), cancelClick)
+                        }
+                        if (mergeSearchResults is MergeSearchResult.Success) {
+                            items(
+                                mergeSearchResults.mergeMangaList,
+                                key = { item -> item.hashCode() }
+                            ) { item ->
+                                Box(
+                                    modifier =
+                                    Modifier.aspectRatio(3f / 4f)
+                                        .fillMaxWidth(.25f)
+                                        .clip(RoundedCornerShape(Shapes.coverRadius))
+                                        .clickable { mergeMangaClick(item) }
+                                ) {
+                                    AsyncImage(
+                                        model =
+                                        ImageRequest.Builder(LocalContext.current)
+                                            .data(
+                                                MergeArtwork(
+                                                    url = item.coverUrl,
+                                                    mergeType = mergeType!!
+                                                )
+                                            )
+                                            .crossfade(true)
+                                            .build(),
+                                        placeholder =
+                                        ColorPainter(colorResource(Pastel.getColorLight())),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    Column(
+                                        Modifier.fillMaxWidth()
+                                            .align(Alignment.BottomStart)
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    colors =
+                                                    listOf(
+                                                        Color.Transparent,
+                                                        Color.Black.copy(alpha = .95f)
+                                                    )
+                                                ),
+                                                shape =
+                                                RoundedCornerShape(
+                                                    bottomStart = Shapes.coverRadius,
+                                                    bottomEnd = Shapes.coverRadius,
+                                                ),
+                                            )
+                                            .padding(top = 6.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Text(
+                                            text = item.title,
+                                            modifier = Modifier.padding(Size.tiny),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = Color.White,
+                                            style =
+                                            MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                        )
+                                    }
+                                }
                             }
+                        }
+                        item {
                             NonSuccessResultsAndChips(
                                 themeColorState = themeColorState,
                                 searchResults = mergeSearchResults,
@@ -175,13 +234,15 @@ fun MergeSheet(
                             )
                         }
 
-                        SearchFooter(
-                            themeColorState = themeColorState,
-                            labelText = stringResource(id = R.string.title),
-                            title = searchTitle,
-                            textChanged = { searchTitle = it },
-                            search = { search(it, mergeType!!) },
-                        )
+                        item {
+                            SearchFooter(
+                                themeColorState = themeColorState,
+                                labelText = stringResource(id = R.string.title),
+                                title = searchTitle,
+                                textChanged = { searchTitle = it },
+                                search = { search(it, mergeType!!) },
+                            )
+                        }
                     }
                 }
             }

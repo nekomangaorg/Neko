@@ -43,100 +43,98 @@ fun BrowseDisplayOptionsSheet(
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .9
 
         BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = bottomContentPadding) {
-            val paddingModifier = Modifier.padding(horizontal = Size.small)
+            item {
+                val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(Size.small)
-            Text(
-                modifier = paddingModifier.fillMaxWidth(),
-                text = stringResource(R.string.display_options),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-            Gap(Size.large)
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
-                verticalArrangement = Arrangement.spacedBy(Size.medium),
-            ) {
-                if (showIsList) {
-                    item {
-                        Text(
-                            text = stringResource(R.string.display_as),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                        )
-                    }
-                    item {
-                        Row(
-                            Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            ToggleButton(
-                                checked = isList,
-                                onCheckedChange = { switchDisplayClick() },
-                                shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
-                            ) {
-                                Text(stringResource(R.string.list))
-                            }
-                            Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
-                            ToggleButton(
-                                checked = !isList,
-                                onCheckedChange = { switchDisplayClick() },
-                                shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
-                            ) {
-                                Text(stringResource(R.string.grid))
-                            }
-                        }
-                    }
-                }
+                Gap(Size.small)
+                Text(
+                    modifier = paddingModifier.fillMaxWidth(),
+                    text = stringResource(R.string.display_options),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Gap(Size.large)
+            }
+
+            if (showIsList) {
                 item {
                     Text(
-                        text = stringResource(R.string.filter_results),
+                        text = stringResource(R.string.display_as),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
                     )
                 }
-
                 item {
                     Row(
                         Modifier.fillMaxWidth().padding(horizontal = Size.medium),
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         ToggleButton(
-                            checked =
-                                currentLibraryEntryVisibility ==
-                                    LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY,
-                            onCheckedChange = {
-                                libraryEntryVisibilityClick(
-                                    LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY
-                                )
-                            },
+                            checked = isList,
+                            onCheckedChange = { switchDisplayClick() },
                             shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
                         ) {
-                            Text(stringResource(R.string.hide_library_manga))
+                            Text(stringResource(R.string.list))
                         }
                         Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
                         ToggleButton(
-                            checked =
-                                currentLibraryEntryVisibility == LibraryEntryVisibility.SHOW_ALL,
-                            onCheckedChange = {
-                                libraryEntryVisibilityClick(LibraryEntryVisibility.SHOW_ALL)
-                            },
-                            shapes = ButtonGroupDefaults.connectedMiddleButtonShapes(),
-                        ) {
-                            Text(stringResource(R.string.show_all_manga))
-                        }
-                        Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
-                        ToggleButton(
-                            checked =
-                                currentLibraryEntryVisibility ==
-                                    LibraryEntryVisibility.SHOW_IN_LIBRARY,
-                            onCheckedChange = {
-                                libraryEntryVisibilityClick(LibraryEntryVisibility.SHOW_IN_LIBRARY)
-                            },
+                            checked = !isList,
+                            onCheckedChange = { switchDisplayClick() },
                             shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
                         ) {
-                            Text(stringResource(R.string.show_library_manga))
+                            Text(stringResource(R.string.grid))
                         }
+                    }
+                }
+            }
+            item {
+                Text(
+                    text = stringResource(R.string.filter_results),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                )
+            }
+
+            item {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    ToggleButton(
+                        checked =
+                        currentLibraryEntryVisibility ==
+                            LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY,
+                        onCheckedChange = {
+                            libraryEntryVisibilityClick(
+                                LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY
+                            )
+                        },
+                        shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
+                    ) {
+                        Text(stringResource(R.string.hide_library_manga))
+                    }
+                    Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
+                    ToggleButton(
+                        checked =
+                        currentLibraryEntryVisibility == LibraryEntryVisibility.SHOW_ALL,
+                        onCheckedChange = {
+                            libraryEntryVisibilityClick(LibraryEntryVisibility.SHOW_ALL)
+                        },
+                        shapes = ButtonGroupDefaults.connectedMiddleButtonShapes(),
+                    ) {
+                        Text(stringResource(R.string.show_all_manga))
+                    }
+                    Gap(ButtonGroupDefaults.ConnectedSpaceBetween)
+                    ToggleButton(
+                        checked =
+                        currentLibraryEntryVisibility ==
+                            LibraryEntryVisibility.SHOW_IN_LIBRARY,
+                        onCheckedChange = {
+                            libraryEntryVisibilityClick(LibraryEntryVisibility.SHOW_IN_LIBRARY)
+                        },
+                        shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
+                    ) {
+                        Text(stringResource(R.string.show_library_manga))
                     }
                 }
             }

@@ -143,52 +143,53 @@ fun TrackingSheet(
                 ),
             )
         }
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(Size.small),
+            ) {
+                servicesProvider().forEach { service ->
+                    val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(Size.small),
-        ) {
-            servicesProvider().forEach { service ->
-                val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
-
-                val trackAndService =
-                    when (track != null) {
-                        true -> TrackAndService(track, service)
-                        false -> null
-                    }
-                TrackingServiceItem(
-                    themeColor = themeColor,
-                    inLibrary = inLibrary,
-                    service = service,
-                    trackAndService = trackAndService,
-                    dateFormat = dateFormat,
-                    onLogoClick = onLogoClick,
-                    onSearchTrackClick = { clickTracked ->
-                        onSearchTrackClick(service, clickTracked)
-                    },
-                    onRemoveTrackClick = {
-                        trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
-                    },
-                    statusClick = {
-                        trackAndService?.run { statusDialog = ShowDialog(trackAndService) }
-                    },
-                    scoreClick = {
-                        trackAndService?.run { scoreDialog = ShowDialog(trackAndService) }
-                    },
-                    chapterClick = {
-                        trackAndService?.run { chapterTrackDialog = ShowDialog(trackAndService) }
-                    },
-                    startDateClick = {
-                        trackAndService?.run {
-                            calendarStartTrackDialog = ShowDialog(trackAndService)
+                    val trackAndService =
+                        when (track != null) {
+                            true -> TrackAndService(track, service)
+                            false -> null
                         }
-                    },
-                    finishDateClick = {
-                        trackAndService?.run {
-                            calendarFinishedTrackDialog = ShowDialog(trackAndService)
-                        }
-                    },
-                )
+                    TrackingServiceItem(
+                        themeColor = themeColor,
+                        inLibrary = inLibrary,
+                        service = service,
+                        trackAndService = trackAndService,
+                        dateFormat = dateFormat,
+                        onLogoClick = onLogoClick,
+                        onSearchTrackClick = { clickTracked ->
+                            onSearchTrackClick(service, clickTracked)
+                        },
+                        onRemoveTrackClick = {
+                            trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
+                        },
+                        statusClick = {
+                            trackAndService?.run { statusDialog = ShowDialog(trackAndService) }
+                        },
+                        scoreClick = {
+                            trackAndService?.run { scoreDialog = ShowDialog(trackAndService) }
+                        },
+                        chapterClick = {
+                            trackAndService?.run { chapterTrackDialog = ShowDialog(trackAndService) }
+                        },
+                        startDateClick = {
+                            trackAndService?.run {
+                                calendarStartTrackDialog = ShowDialog(trackAndService)
+                            }
+                        },
+                        finishDateClick = {
+                            trackAndService?.run {
+                                calendarFinishedTrackDialog = ShowDialog(trackAndService)
+                            }
+                        },
+                    )
+                }
             }
         }
     }
