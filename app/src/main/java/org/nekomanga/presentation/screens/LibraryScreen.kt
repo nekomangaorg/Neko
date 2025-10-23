@@ -234,8 +234,8 @@ private fun LibraryWrapper(
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        DisposableEffect(Unit) {
-            updateTopBar(
+        val screenBars =
+            remember {
                 ScreenBars(
                     topBar = {
                         LibraryScreenTopBar(
@@ -263,8 +263,10 @@ private fun LibraryWrapper(
                     },
                     scrollBehavior = scrollBehavior,
                 )
-            )
-            onDispose { updateTopBar(ScreenBars()) }
+            }
+        DisposableEffect(Unit) {
+            updateTopBar(screenBars)
+            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
         }
 
         DisposableEffect(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
