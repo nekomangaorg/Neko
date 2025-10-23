@@ -208,10 +208,8 @@ private fun BrowseWrapper(
             onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
         }
 
-        DisposableEffect(Unit) {
-            updateRefreshState(PullRefreshState(enabled = false))
-            onDispose { updateRefreshState(PullRefreshState()) }
-        }
+        LaunchedEffect(Unit) { updateRefreshState(PullRefreshState(enabled = false)) }
+        DisposableEffect(Unit) { onDispose { updateRefreshState(PullRefreshState()) } }
 
         val recyclerContentPadding = PaddingValues()
 
