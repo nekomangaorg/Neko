@@ -56,8 +56,10 @@ fun PreferenceScreen(
                     item(key = preference.title) {
                         Column { PreferenceGroupHeader(title = preference.title) }
                     }
-                    items(items = preference.preferenceItems, key = { item -> item.title }) { item
-                        ->
+                    items(
+                        items = preference.preferenceItems,
+                        key = { item -> "${preference.title}-${item.title}" },
+                    ) { item ->
                         PreferenceItem(item = item, highlightKey = highlightKey)
                     }
                     item(key = "spacer-$i") {

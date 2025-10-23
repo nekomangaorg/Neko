@@ -76,8 +76,8 @@ fun VerticalCategoriesPage(
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        libraryScreenState.items.forEach { item ->
-            item(item.categoryItem.name) {
+        libraryScreenState.items.forEachIndexed { index, item ->
+            item(key = "$index-${item.categoryItem.name}-${item.categoryItem.id}") {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
                     useVividColorHeaders = libraryScreenState.useVividColorHeaders,
