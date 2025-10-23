@@ -162,6 +162,7 @@ fun LibraryScreen(
                 title =
                     if (selectionMode) "Selected: ${libraryScreenState.value.selectedItems.size}"
                     else "",
+                inputSearchText = libraryScreenState.value.initialSearch,
                 searchPlaceHolder = stringResource(R.string.search_library),
                 searchPlaceHolderAlt = stringResource(R.string.library_search_hint),
                 incognitoMode = libraryScreenState.value.incognitoMode,

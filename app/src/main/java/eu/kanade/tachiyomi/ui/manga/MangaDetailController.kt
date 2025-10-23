@@ -337,7 +337,7 @@ class MangaDetailController(private val mangaId: Long) :
         when (val previousController = router.backstack[router.backstackSize - 2].controller) {
             is LibraryController -> {
                 router.handleBack()
-                previousController.search(text)
+                previousController.deepLinkSearch(text)
             }
             is BrowseController,
             is FeedController,
@@ -347,7 +347,7 @@ class MangaDetailController(private val mangaId: Long) :
                 (activity as? MainActivity)?.goToTab(R.id.nav_library)
                 val controller =
                     router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
-                controller.search(text)
+                controller.deepLinkSearch(text)
             }
         }
     }
