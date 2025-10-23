@@ -53,11 +53,10 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.ButtonGroup
-import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
-import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
-import org.nekomanga.presentation.screens.feed.FeedPage
+import org.nekomanga.presentation.screens.feed.FeedScreenContent
+import org.nekomanga.presentation.screens.feed.FeedScreenDialogs
 import org.nekomanga.presentation.screens.feed.FeedScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
@@ -268,82 +267,17 @@ private fun FeedWrapper(
         val recyclerContentPadding = PaddingValues()
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (
-                (feedScreenState.feedScreenType == FeedScreenType.History &&
-                    historyPagingScreenState.pageLoading &&
-                    historyPagingScreenState.offset == 0) ||
-                    (feedScreenState.feedScreenType == FeedScreenType.Updates &&
-                        updatesPagingScreenState.pageLoading &&
-                        updatesPagingScreenState.offset == 0)
-            ) {
-                ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-
-            val (feedManga, hasMoreResults) =
-                when (feedScreenType) {
-                    FeedScreenType.Summary -> {
-                        if (historyPagingScreenState.searchHistoryFeedMangaList.isNotEmpty()) {
-                            historyPagingScreenState.searchHistoryFeedMangaList to false
-                        } else {
-                            historyPagingScreenState.historyFeedMangaList to
-                                historyPagingScreenState.hasMoreResults
-                        }
-                    }
-
-                    FeedScreenType.History -> {
-                        if (historyPagingScreenState.searchHistoryFeedMangaList.isNotEmpty()) {
-                            historyPagingScreenState.searchHistoryFeedMangaList to false
-                        } else {
-                            historyPagingScreenState.historyFeedMangaList to
-                                historyPagingScreenState.hasMoreResults
-                        }
-                    }
-
-                    FeedScreenType.Updates -> {
-                        if (updatesPagingScreenState.searchUpdatesFeedMangaList.isNotEmpty()) {
-                            updatesPagingScreenState.searchUpdatesFeedMangaList to false
-                        } else {
-                            updatesPagingScreenState.updatesFeedMangaList to
-                                updatesPagingScreenState.hasMoreResults
-                        }
-                    }
-                }
-
-            if (feedScreenState.showingDownloads && feedScreenState.downloads.isEmpty()) {
-                feedScreenActions.toggleShowingDownloads()
-            }
-
-            when (downloadScreenVisible) {
-                true ->
-                    DownloadScreen(
-                        contentPadding = recyclerContentPadding,
-                        downloads = feedScreenState.downloads,
-                        downloaderStatus = feedScreenState.downloaderStatus,
-                        downloadScreenActions = downloadScreenActions,
-                    )
-
-                false -> {
-                    FeedPage(
-                        contentPadding = recyclerContentPadding,
-                        summaryScreenPagingState = summaryScreenPagingState,
-                        feedMangaList = feedManga,
-                        hasMoreResults = hasMoreResults,
-                        loadingResults =
-                            if (feedScreenState.feedScreenType == FeedScreenType.History)
-                                historyPagingScreenState.pageLoading
-                            else updatesPagingScreenState.pageLoading,
-                        groupedBySeries = feedScreenState.groupUpdateChapters,
-                        feedScreenType = feedScreenState.feedScreenType,
-                        historyGrouping = historyPagingScreenState.historyGrouping,
-                        outlineCovers = feedScreenState.outlineCovers,
-                        outlineCards = feedScreenState.outlineCards,
-                        useVividColorHeaders = feedScreenState.useVividColorHeaders,
-                        updatesFetchSort = updatesPagingScreenState.updatesSortedByFetch,
-                        feedScreenActions = feedScreenActions,
-                        loadNextPage = loadNextPage,
-                    )
-                }
-            }
+            FeedScreenContent(
+                downloadScreenVisible = downloadScreenVisible,
+                contentPadding = recyclerContentPadding,
+                feedScreenState = feedScreenState,
+                summaryScreenPagingState = summaryScreenPagingState,
+                historyPagingScreenState = historyPagingScreenState,
+                updatesPagingScreenState = updatesPagingScreenState,
+                downloadScreenActions = downloadScreenActions,
+                feedScreenActions = feedScreenActions,
+                loadNextPage = loadNextPage,
+            )
 
             if (!feedScreenState.firstLoad) {
                 val buttonItems = remember {
@@ -414,23 +348,14 @@ private fun FeedWrapper(
         }
     }
 
-    if (showClearHistoryDialog) {
-        ConfirmationDialog(
-            title = stringResource(R.string.clear_history_confirmation_1),
-            body = stringResource(R.string.clear_history_confirmation_2),
-            confirmButton = stringResource(id = R.string.clear),
-            onDismiss = { showClearHistoryDialog = false },
-            onConfirm = { feedSettingActions.clearHistoryClick() },
-        )
-    }
-
-    if (showClearDownloadsDialog) {
-        ClearDownloadQueueDialog(
-            onDismiss = { showClearDownloadsDialog = false },
-            onConfirm = {
-                feedSettingActions.clearDownloadQueueClick()
-                scope.launch { sheetState.hide() }
-            },
-        )
-    }
+    FeedScreenDialogs(
+        showClearHistoryDialog = showClearHistoryDialog,
+        showClearDownloadsDialog = showClearDownloadsDialog,
+        onClearHistoryDismiss = { showClearHistoryDialog = false },
+        onClearHistoryConfirm = { feedSettingActions.clearHistoryClick() },
+        onClearDownloadsDismiss = { showClearDownloadsDialog = false },
+        onClearDownloadsConfirm = { feedSettingActions.clearDownloadQueueClick() },
+        scope = scope,
+        sheetStateHide = { sheetState.hide() },
+    )
 }
