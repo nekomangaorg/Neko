@@ -303,7 +303,6 @@ class MangaDetailController(private val mangaId: Long) :
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
-            is FeedController,
             is DisplayController,
             is SimilarController -> {
                 router.popToRoot()
