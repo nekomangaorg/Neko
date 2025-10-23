@@ -47,11 +47,13 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
+import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.BrowseScreen
 import org.nekomanga.presentation.screens.FeedScreen
 import org.nekomanga.presentation.screens.LibraryScreen
 import org.nekomanga.presentation.screens.Screens
@@ -70,9 +72,6 @@ class MainActivity : ComponentActivity() {
 
         setComposeContent {
             val context = LocalContext.current
-
-            val libraryViewModel: LibraryViewModel = viewModel()
-            val feedViewModel: FeedViewModel = viewModel()
 
             var mainDropdownShowing by remember { mutableStateOf(false) }
 
@@ -187,6 +186,7 @@ class MainActivity : ComponentActivity() {
                                     entryProvider =
                                         entryProvider {
                                             entry<Screens.Library> { screen ->
+                                                val libraryViewModel: LibraryViewModel = viewModel()
                                                 if (screen.initialSearch.isNotEmpty()) {
                                                     libraryViewModel.deepLinkSearch(
                                                         screen.initialSearch
@@ -206,6 +206,8 @@ class MainActivity : ComponentActivity() {
                                                 )
                                             }
                                             entry<Screens.Feed> {
+                                                val feedViewModel: FeedViewModel = viewModel()
+
                                                 FeedScreen(
                                                     feedViewModel = feedViewModel,
                                                     mainDropDown = mainDropDown,
@@ -215,7 +217,23 @@ class MainActivity : ComponentActivity() {
                                                     windowSizeClass = windowSizeClass,
                                                 )
                                             }
-                                            /*entry<Screens.Manga>{ mangaId ->
+                                            entry<Screens.Browse> { screen ->
+                                                val browseViewModel: BrowseViewModel = viewModel()
+                                                if (screen.initialSearch.isNotEmpty()) {
+                                                    browseViewModel.deepLinkQuery(
+                                                        screen.initialSearch
+                                                    )
+                                                }
+                                                BrowseScreen(
+                                                    browseViewModel = browseViewModel,
+                                                    mainDropDown = mainDropDown,
+                                                    openManga = { mangaId ->
+                                                        backStack.add(Screens.Manga(mangaId))
+                                                    },
+                                                    windowSizeClass = windowSizeClass,
+                                                )
+                                            }
+                                            /* entry<Screens.Manga>{ mangaId ->
                                                 MangaScreen() { }
 
                                             }*/

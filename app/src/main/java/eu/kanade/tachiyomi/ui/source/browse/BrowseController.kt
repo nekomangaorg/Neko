@@ -3,16 +3,13 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.view.View
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import org.nekomanga.presentation.screens.BrowseScreen
 
 class BrowseController(incomingQuery: String = "") : BaseComposeController<BrowsePresenter>() {
     override val presenter = BrowsePresenter(incomingQuery)
@@ -22,7 +19,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
-        BrowseScreen(
+        /*BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
             libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
@@ -57,7 +54,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
                     "https://tachiyomi.org/docs/guides/troubleshooting/"
                 )
             },
-        )
+        )*/
     }
 
     fun searchByTag(tag: String) {

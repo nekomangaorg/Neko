@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.browse
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
@@ -29,7 +28,7 @@ sealed class BrowseBottomSheetScreen {
 @Composable
 fun BrowseBottomSheet(
     currentScreen: BrowseBottomSheetScreen,
-    browseScreenState: State<BrowseScreenState>,
+    browseScreenState: BrowseScreenState,
     addNewCategory: (String) -> Unit,
     filterActions: FilterActions,
     closeSheet: () -> Unit,
@@ -40,25 +39,25 @@ fun BrowseBottomSheet(
         is BrowseBottomSheetScreen.BrowseDisplayOptionsSheet -> {
             BrowseDisplayOptionsSheet(
                 showIsList = currentScreen.showIsList,
-                isList = browseScreenState.value.isList,
+                isList = browseScreenState.isList,
                 switchDisplayClick = currentScreen.switchDisplayClick,
-                currentLibraryEntryVisibility = browseScreenState.value.libraryEntryVisibility,
+                currentLibraryEntryVisibility = browseScreenState.libraryEntryVisibility,
                 libraryEntryVisibilityClick = currentScreen.libraryEntryVisibilityClick,
             )
         }
         is BrowseBottomSheetScreen.CategoriesSheet ->
             EditCategorySheet(
                 addingToLibrary = currentScreen.addingToLibrary,
-                categories = browseScreenState.value.categories,
+                categories = browseScreenState.categories,
                 cancelClick = closeSheet,
                 addNewCategory = addNewCategory,
                 confirmClicked = currentScreen.setCategories,
             )
         is BrowseBottomSheetScreen.FilterSheet ->
             FilterBrowseSheet(
-                filters = browseScreenState.value.filters,
-                savedFilters = browseScreenState.value.savedFilters,
-                defaultContentRatings = browseScreenState.value.defaultContentRatings,
+                filters = browseScreenState.filters,
+                savedFilters = browseScreenState.savedFilters,
+                defaultContentRatings = browseScreenState.defaultContentRatings,
                 filterClick = {
                     keyboardController?.hide()
                     closeSheet()
