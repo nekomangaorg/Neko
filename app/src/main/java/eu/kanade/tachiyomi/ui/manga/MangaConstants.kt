@@ -98,9 +98,7 @@ object MangaConstants {
 
     data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    data class ScanlatorFilter(
-        val scanlators: PersistentList<ScanlatorOption> = persistentListOf()
-    )
+    data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
 
     data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 

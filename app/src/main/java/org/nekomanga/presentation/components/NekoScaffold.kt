@@ -316,10 +316,6 @@ fun SearchOutlineTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = searchText,
@@ -445,10 +441,6 @@ fun SearchOutlineWithActionsTopAppBar(
                         .focusRequester(focusRequester),
                 expanded = false,
                 onExpandedChange = {},
-                colors =
-                    SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = searchText,
