@@ -34,31 +34,28 @@ class ChapterItemSort(
     }
 
     fun <T : ChapterItem> sortComparator(manga: Manga, ignoreAsc: Boolean = false): Comparator<T> {
-        val sortDescending = !ignoreAsc && manga.sortDescending(mangaDetailsPreferences)
-        val sourceOrderAsc = compareBy<T> { it.chapter.sourceOrder }
-        // smart order numbers are flipped so this adjusts them to match the same as the other sort
-        // types
-        val smartOrderDesc = compareBy<T> { it.chapter.smartOrder }
-        val uploadDateAsc = compareBy<T> { it.chapter.dateUpload }
+        val sortDescending = ignoreAsc || manga.sortDescending(mangaDetailsPreferences)
+        // source order is desc by default
+        val sourceOrderDesc = compareBy<T> { it.chapter.sourceOrder }
+        val sourceOrderAsc = sourceOrderDesc.reversed()
 
-        val sourceOrderDesc = sourceOrderAsc.reversed()
-        val smartOrderAsc = smartOrderDesc.reversed()
+        // smart order and upload date sort by asc by default
+        val smartOrderAsc = compareBy<T> { it.chapter.smartOrder }
+        val smartOrderDesc = smartOrderAsc.reversed()
+
+        val uploadDateAsc = compareBy<T> { it.chapter.dateUpload }
         val uploadDateDesc = uploadDateAsc.reversed()
 
         // Build the final comparator
         return when (manga.chapterOrder(mangaDetailsPreferences)) {
-            Manga.CHAPTER_SORTING_SOURCE -> if (sortDescending) sourceOrderAsc else sourceOrderDesc
-
-            Manga.CHAPTER_SORTING_SMART -> if (sortDescending) smartOrderAsc else smartOrderDesc
-
+            Manga.CHAPTER_SORTING_SMART -> if (sortDescending) smartOrderDesc else smartOrderAsc
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                 if (sortDescending) {
-                    uploadDateDesc.thenComparing(smartOrderAsc)
+                    uploadDateDesc.thenComparing(smartOrderDesc)
                 } else {
-                    uploadDateAsc.thenComparing(smartOrderDesc)
+                    uploadDateAsc.thenComparing(smartOrderAsc)
                 }
-
-            else -> if (sortDescending) sourceOrderAsc else sourceOrderDesc
+            else -> if (sortDescending) sourceOrderDesc else sourceOrderAsc
         }
     }
 }
