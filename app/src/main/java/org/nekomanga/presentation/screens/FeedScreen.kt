@@ -155,6 +155,8 @@ private fun FeedWrapper(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val pullRefreshState = remember { PullRefreshState() }
+
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(showBottomSheet) {
@@ -245,13 +247,13 @@ private fun FeedWrapper(
             feedScreenActions.updateLibrary,
         ) {
             updateRefreshState(
-                PullRefreshState(
+                pullRefreshState.copy(
                     enabled = feedScreenState.swipeRefreshEnabled,
                     isRefreshing = feedScreenState.isRefreshing,
                     onRefresh = { feedScreenActions.updateLibrary(true) },
-                )
+                ),
             )
-            onDispose { updateRefreshState(PullRefreshState()) }
+            onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }
 
         val recyclerContentPadding = PaddingValues()

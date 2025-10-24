@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.ui.main
 
 import androidx.compose.runtime.compositionLocalOf
+import java.util.UUID
 
 data class PullRefreshState(
-    val enabled: Boolean = true,
+    val id: UUID = UUID.randomUUID(),
+    val enabled: Boolean = false,
     val isRefreshing: Boolean = false,
-    val onRefresh: () -> Unit = {},
+    val onRefresh: (() -> Unit)? = null,
 )
 
 val LocalPullRefreshState =
