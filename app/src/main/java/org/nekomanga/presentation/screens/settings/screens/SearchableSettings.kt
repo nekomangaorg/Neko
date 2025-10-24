@@ -8,7 +8,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.ScreenBars
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.presentation.screens.settings.Preference
@@ -27,7 +26,6 @@ internal abstract class SearchableSettings(
     @Composable
     fun Content() {
         val updateTopBar = LocalBarUpdater.current
-        val updateRefreshState = LocalPullRefreshState.current
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 

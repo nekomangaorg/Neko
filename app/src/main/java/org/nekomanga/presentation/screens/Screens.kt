@@ -38,8 +38,6 @@ object Screens {
 
         @Serializable data object Downloads : NavKey
 
-        @Serializable data object Search : NavKey
-
         @Serializable data object Tracking : NavKey
 
         @Serializable data object Security : NavKey
