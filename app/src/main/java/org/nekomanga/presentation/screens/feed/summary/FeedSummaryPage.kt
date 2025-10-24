@@ -208,7 +208,7 @@ fun FeedSummaryPage(
 @Composable
 private fun SummaryHeader(text: String, isRefreshing: Boolean, color: Color) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.small),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium, vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
