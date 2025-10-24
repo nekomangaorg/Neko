@@ -474,10 +474,10 @@ class MangaDetailPresenter(
                         markAction is ChapterMarkActions.PreviousUnread
                 ) {
                     when (manga.sortDescending(mangaDetailsPreferences)) {
-                        true ->
+                        true -> chapterItems
+                        false ->
                             (markAction as? ChapterMarkActions.PreviousRead)?.altChapters
                                 ?: (markAction as ChapterMarkActions.PreviousUnread).altChapters
-                        false -> chapterItems
                     }
                 } else {
                     chapterItems
@@ -590,7 +590,9 @@ class MangaDetailPresenter(
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
-                            .filter { !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable }
+                            .filter {
+                                !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable
+                            }
                             .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
@@ -599,7 +601,9 @@ class MangaDetailPresenter(
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
-                            .filter { !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable }
+                            .filter {
+                                !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable
+                            }
                             .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
