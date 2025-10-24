@@ -54,7 +54,7 @@ fun SearchOutlineTopAppBar(
     initialSearch: String = "",
     color: Color,
     navigationEnabled: Boolean = false,
-    navigationIconLabel: String? = null,
+    navigationIconLabel: String = "",
     navigationIcon: ImageVector? = null,
     incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit = {},
@@ -114,9 +114,9 @@ fun SearchOutlineTopAppBar(
                         },
                         leadingIcon = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (navigationEnabled) {
+                                if (navigationEnabled && navigationIconLabel.isNotEmpty()) {
                                     ToolTipButton(
-                                        toolTipLabel = navigationIconLabel!!,
+                                        toolTipLabel = navigationIconLabel,
                                         icon = navigationIcon,
                                         onClick = onNavigationIconClicked,
                                     )

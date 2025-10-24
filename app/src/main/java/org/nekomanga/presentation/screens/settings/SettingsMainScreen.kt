@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,9 +60,11 @@ import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun SettingsMainScreen(onNavigateClick: (NavKey) -> Unit, incognitoMode: Boolean) {
-
-    val searchEnabled = rememberSaveable { mutableStateOf(false) }
+fun SettingsMainScreen(
+    onNavigateClick: (NavKey) -> Unit,
+    onNavigationIconClick: () -> Unit,
+    incognitoMode: Boolean,
+) {
 
     val updateTopBar = LocalBarUpdater.current
 
@@ -78,6 +79,7 @@ fun SettingsMainScreen(onNavigateClick: (NavKey) -> Unit, incognitoMode: Boolean
                     onSearch = { searchText = it ?: "" },
                     incognitoMode = incognitoMode,
                     scrollBehavior = scrollBehavior,
+                    onNavigationIconClick = onNavigationIconClick,
                 )
             },
             scrollBehavior = scrollBehavior,

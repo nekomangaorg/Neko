@@ -274,7 +274,7 @@ private fun LibraryWrapper(
                     enabled = true,
                     isRefreshing = libraryScreenState.isRefreshing,
                     onRefresh = libraryScreenActions.updateLibrary,
-                ),
+                )
             )
             onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }

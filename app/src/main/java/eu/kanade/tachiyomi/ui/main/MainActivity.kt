@@ -103,7 +103,10 @@ class MainActivity : ComponentActivity() {
 
             var pullRefreshState by remember { mutableStateOf(PullRefreshState()) }
             val updateRefreshScreenBars: (PullRefreshState) -> Unit = { newPullRefreshState ->
-                if (newPullRefreshState.id == pullRefreshState.id && newPullRefreshState.onRefresh == null) {
+                if (
+                    newPullRefreshState.id == pullRefreshState.id &&
+                        newPullRefreshState.onRefresh == null
+                ) {
                     // This is a screen being disposed, only clear if it is the current screen
                     pullRefreshState = PullRefreshState()
                 } else if (newPullRefreshState.onRefresh != null) {

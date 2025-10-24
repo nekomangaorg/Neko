@@ -251,7 +251,7 @@ private fun FeedWrapper(
                     enabled = feedScreenState.swipeRefreshEnabled,
                     isRefreshing = feedScreenState.isRefreshing,
                     onRefresh = { feedScreenActions.updateLibrary(true) },
-                ),
+                )
             )
             onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }
