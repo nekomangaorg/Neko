@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                 AppBar.MainDropdown(
                     incognitoMode = false, /*libraryScreenState.value.incognitoMode*/
                     incognitoModeClick = {},
-                    settingsClick = {},
+                    settingsClick = { backStack.add(Screens.Settings.Main) },
                     statsClick = {},
                     aboutClick = {},
                     helpClick = {},
@@ -238,6 +238,15 @@ class MainActivity : ComponentActivity() {
                                                         backStack.add(Screens.Manga(mangaId))
                                                     },
                                                     windowSizeClass = windowSizeClass,
+                                                )
+                                            }
+                                            entry<Screens.Settings.Main> {
+                                                SettingsScreen(
+                                                    windowSizeClass = windowSizeClass,
+                                                    onBackPressed = {
+                                                        backStack.removeLastOrNull()
+                                                    },
+                                                    deepLink = null,
                                                 )
                                             }
                                             /* entry<Screens.Manga>{ mangaId ->
