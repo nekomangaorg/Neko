@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -153,7 +153,9 @@ private fun SearchResult(
                 ) {
                     itemsIndexed(
                         items = it,
-                        key = { index, item -> "$index-${item.searchTerm.title}-${item.searchTerm.subtitle}" },
+                        key = { index, item ->
+                            "$index-${item.searchTerm.title}-${item.searchTerm.subtitle}"
+                        },
                     ) { index, item ->
                         TextPreferenceWidget(
                             title = item.searchTerm.title,
