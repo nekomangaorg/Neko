@@ -40,7 +40,7 @@ fun TitleTopAppBar(
     navigationIcon: ImageVector? = null,
     incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit = {},
-    actions: @Composable (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit) = {},
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     FlexibleTopBar(
