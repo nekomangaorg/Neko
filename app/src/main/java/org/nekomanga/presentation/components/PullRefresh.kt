@@ -33,14 +33,14 @@ import org.nekomanga.presentation.theme.Size
 fun PullRefresh(
     enabled: Boolean = true,
     isRefreshing: Boolean,
-    onRefresh: () -> Unit,
+    onRefresh: (() -> Unit)?,
     trackColor: Color = MaterialTheme.colorScheme.secondary,
     blurBackground: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val state = rememberPullToRefreshState()
 
-    if (enabled) {
+    if (enabled && onRefresh != null) {
         PullToRefreshBox(
             modifier =
                 Modifier.conditional(blurBackground) {

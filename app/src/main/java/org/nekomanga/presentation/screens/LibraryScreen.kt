@@ -168,6 +168,8 @@ private fun LibraryWrapper(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val pullRefreshState = remember { PullRefreshState() }
+
     var selectionMode by
         remember(libraryScreenState.selectedItems) {
             mutableStateOf(libraryScreenState.selectedItems.isNotEmpty())
@@ -268,13 +270,13 @@ private fun LibraryWrapper(
 
         DisposableEffect(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
             updateRefreshState(
-                PullRefreshState(
+                pullRefreshState.copy(
                     enabled = true,
                     isRefreshing = libraryScreenState.isRefreshing,
                     onRefresh = libraryScreenActions.updateLibrary,
-                )
+                ),
             )
-            onDispose { updateRefreshState(PullRefreshState()) }
+            onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }
 
         val recyclerContentPadding = PaddingValues()

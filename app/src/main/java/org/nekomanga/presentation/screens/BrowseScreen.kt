@@ -128,6 +128,8 @@ private fun BrowseWrapper(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val pullRefreshState = remember { PullRefreshState() }
+
     var currentBottomSheet: BrowseBottomSheetScreen? by remember { mutableStateOf(null) }
 
     var mainDropdownShowing by remember { mutableStateOf(false) }
@@ -208,8 +210,8 @@ private fun BrowseWrapper(
             onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
         }
 
-        LaunchedEffect(Unit) { updateRefreshState(PullRefreshState(enabled = false)) }
-        DisposableEffect(Unit) { onDispose { updateRefreshState(PullRefreshState()) } }
+        LaunchedEffect(Unit) { updateRefreshState(pullRefreshState.copy(enabled = false, onRefresh = {})) }
+        DisposableEffect(Unit) { onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) } }
 
         val recyclerContentPadding = PaddingValues()
 
