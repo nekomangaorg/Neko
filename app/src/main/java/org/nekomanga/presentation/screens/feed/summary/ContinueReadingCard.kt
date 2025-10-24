@@ -1,16 +1,22 @@
 package org.nekomanga.presentation.screens.feed.summary
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
@@ -61,6 +71,7 @@ fun ContinueReadingCard(
                 .clickable { chapterClick(chapterItem.chapter.id) }
                 .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Gap(Size.small)
         FeedCover(
@@ -70,7 +81,7 @@ fun ContinueReadingCard(
             shoulderOverlayCover = chapterItem.chapter.read,
             onClick = mangaClick,
         )
-        Column(modifier = Modifier.padding(horizontal = Size.small).weight(3f)) {
+        Column(modifier = Modifier.padding(horizontal = Size.small).weight(1f)) {
             Text(
                 text = feedManga.mangaTitle,
                 style = MaterialTheme.typography.bodyLarge,
@@ -96,11 +107,21 @@ fun ContinueReadingCard(
         }
         var dropdown by remember { mutableStateOf(false) }
 
-        IconButton(onClick = { dropdown = !dropdown }) {
+        val buttonColor =
+            MaterialTheme.colorScheme.primary.copy(alpha = NekoColors.highAlphaLowContrast)
+
+        DeleteBackground(
+            color = Color.Transparent,
+            modifier = Modifier.clickable { dropdown = !dropdown },
+            borderStroke = BorderStroke(0.dp, Color.Transparent),
+            shape = MaterialShapes.Circle.toShape(),
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = .8f),
+                modifier = Modifier.size(Size.large),
+                tint =
+                    MaterialTheme.colorScheme.primary.copy(alpha = NekoColors.highAlphaLowContrast),
             )
             if (dropdown) {
                 SimpleDropdownMenu(
@@ -129,6 +150,29 @@ fun ContinueReadingCard(
                             .toPersistentList(),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun DeleteBackground(
+    color: Color,
+    modifier: Modifier = Modifier,
+    borderStroke: BorderStroke? = null,
+    shape: Shape = MaterialShapes.Sunny.toShape(),
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier.clip(shape).size(Size.extraLarge + 4.dp).then(modifier),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            modifier = Modifier.size(Size.extraLarge),
+            shape = shape,
+            border = borderStroke,
+            color = color,
+        ) {
+            Box(contentAlignment = Alignment.Center) { content() }
         }
     }
 }
