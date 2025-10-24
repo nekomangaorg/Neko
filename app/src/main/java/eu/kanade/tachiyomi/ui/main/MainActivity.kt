@@ -57,6 +57,7 @@ import org.nekomanga.presentation.screens.BrowseScreen
 import org.nekomanga.presentation.screens.FeedScreen
 import org.nekomanga.presentation.screens.LibraryScreen
 import org.nekomanga.presentation.screens.Screens
+import org.nekomanga.presentation.screens.SettingsScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -73,13 +74,16 @@ class MainActivity : ComponentActivity() {
         setComposeContent {
             val context = LocalContext.current
 
+            // TODO load the correct one in future
+            val backStack = rememberNavBackStack(Screens.Library())
+
             var mainDropdownShowing by remember { mutableStateOf(false) }
 
             val mainDropDown =
                 AppBar.MainDropdown(
                     incognitoMode = false, /*libraryScreenState.value.incognitoMode*/
                     incognitoModeClick = {},
-                    settingsClick = {},
+                    settingsClick = { backStack.add(Screens.Settings.Main) },
                     statsClick = {},
                     aboutClick = {},
                     helpClick = {},
@@ -101,9 +105,6 @@ class MainActivity : ComponentActivity() {
             val updateRefreshScreenBars: (PullRefreshState) -> Unit = { newPullRefreshState ->
                 pullRefreshState = newPullRefreshState
             }
-
-            // TODO load the correct one in future
-            val backStack = rememberNavBackStack(Screens.Library())
 
             var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -238,6 +239,15 @@ class MainActivity : ComponentActivity() {
                                                         backStack.add(Screens.Manga(mangaId))
                                                     },
                                                     windowSizeClass = windowSizeClass,
+                                                )
+                                            }
+                                            entry<Screens.Settings.Main> {
+                                                SettingsScreen(
+                                                    windowSizeClass = windowSizeClass,
+                                                    onBackPressed = {
+                                                        backStack.removeLastOrNull()
+                                                    },
+                                                    deepLink = null,
                                                 )
                                             }
                                             /* entry<Screens.Manga>{ mangaId ->
