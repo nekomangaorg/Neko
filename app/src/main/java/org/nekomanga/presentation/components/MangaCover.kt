@@ -47,7 +47,16 @@ enum class MangaCover(val ratio: Float) {
             }
 
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
+            model =
+                ImageRequest.Builder(LocalContext.current)
+                    .data(artwork)
+                    .memoryCacheKey(
+                        "${artwork.mangaId}-${artwork.url}",
+                    )
+                    .diskCacheKey(
+                        "${artwork.mangaId}-${artwork.url}",
+                    )
+                    .build(),
             placeholder = ColorPainter(colorResource(color)),
             contentDescription = contentDescription,
             alpha = alpha,
