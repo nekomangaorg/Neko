@@ -143,7 +143,7 @@ class MangaDetailPresenter(
 
     private val _mangaDetailScreenState =
         MutableStateFlow(
-            MangaConstants.MangaDetailScreenState(currentArtwork = Artwork(mangaId = mangaId))
+            MangaConstants.MangaDetailScreenState(currentArtwork = createInitialCurrentArtwork())
         )
 
     val mangaDetailScreenState: StateFlow<MangaConstants.MangaDetailScreenState> =
@@ -878,6 +878,16 @@ class MangaDetailPresenter(
             allUploaders = allChapterUploaders,
             allSources = allSources.toPersistentSet(),
             allLanguages = allLanguages,
+        )
+    }
+
+    private fun createInitialCurrentArtwork(): Artwork {
+        val manga = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+        return Artwork(
+            url = manga.userCover,
+            inLibrary = manga.favorite,
+            originalArtwork = manga.coverUrl,
+            mangaId = mangaId,
         )
     }
 
