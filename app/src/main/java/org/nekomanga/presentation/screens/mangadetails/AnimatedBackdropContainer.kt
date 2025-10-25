@@ -5,7 +5,7 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,7 +35,7 @@ fun AnimatedBackdropContainer(
             label = "BoxHeightAnimation",
             transitionSpec = {
                 if (this.targetState < this.initialState) {
-                    tween(durationMillis = 3000, delayMillis = 3000)
+                    tween(durationMillis = 2000, delayMillis = 2000)
                 } else {
                     tween(durationMillis = 1)
                 }
@@ -54,7 +54,7 @@ fun AnimatedBackdropContainer(
         modifier =
             Modifier.fillMaxWidth()
                 // Use the animatedHeight Dp value here
-                .requiredHeightIn(min = 250.dp, max = maxOf(250.dp, animatedHeight)),
+                .height(animatedHeight),
         generatePalette = generatePalette,
     )
 }
