@@ -66,7 +66,7 @@ fun FeedHistoryPage(
                 item(key = "gap-$index") { Gap(Size.small) }
             }
 
-            item(key = feedManga.mangaId) {
+            item(key = "$index-${feedManga.mangaId}") {
                 LaunchedEffect(scrollState, loadingResults) {
                     if (
                         index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults

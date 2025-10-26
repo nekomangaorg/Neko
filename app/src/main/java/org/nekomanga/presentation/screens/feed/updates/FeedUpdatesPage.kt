@@ -276,7 +276,9 @@ private fun Ungrouped(
                 val globalIndex =
                     feedUpdatesMangaList.indexOf(feedManga) // Used for pagination only
 
-                item(key = "${dateString}-${feedManga.mangaId}-${chapterItem.chapter.id}") {
+                item(
+                    key = "$dateString-$chapterIndex-${feedManga.mangaId}-${chapterItem.chapter.id}"
+                ) {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             globalIndex >= feedUpdatesMangaList.size - 5 &&

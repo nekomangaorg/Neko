@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -112,12 +111,12 @@ fun VerticalCategoriesPage(
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
-                        items(
+                        itemsIndexed(
                             items = item.libraryItems.chunked(columns),
-                            key = { row ->
-                                "${item.categoryItem.name}-${row.joinToString { it.displayManga.mangaId.toString() }}"
+                            key = { gridIndex, row ->
+                                "$index-${item.categoryItem.name}-$gridIndex-${row.joinToString { it.displayManga.mangaId.toString() }}"
                             },
-                        ) { rowItems ->
+                        ) { gridIndex, rowItems ->
                             RowGrid(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
@@ -136,7 +135,7 @@ fun VerticalCategoriesPage(
                         itemsIndexed(
                             item.libraryItems,
                             key = { _, libraryItem ->
-                                "${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
                             },
                         ) { index, libraryItem ->
                             ListItem(

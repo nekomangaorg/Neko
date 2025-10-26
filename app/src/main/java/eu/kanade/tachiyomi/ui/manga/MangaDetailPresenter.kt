@@ -1690,13 +1690,15 @@ class MangaDetailPresenter(
                 .map { autoAddTrackerId ->
                     async {
                         val trackService =
-                            loggedInTrackerService.firstOrNull { it.id == autoAddTrackerId }?: return@async // Not logged in to this service, skip
+                            loggedInTrackerService.firstOrNull { it.id == autoAddTrackerId }
+                                ?: return@async // Not logged in to this service, skip
 
-                        if (trackService.id in existingTrackIds) return@async // Already tracked, skip
-
+                        if (trackService.id in existingTrackIds)
+                            return@async // Already tracked, skip
 
                         // Check if the manga has a remote ID for this service
-                       trackManager.getIdFromManga(trackService, manga) ?: return@async // No ID found, skip
+                        trackManager.getIdFromManga(trackService, manga)
+                            ?: return@async // No ID found, skip
 
                         // --- 4. Perform the search and register the track ---
 
