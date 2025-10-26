@@ -86,7 +86,7 @@ fun ArtworkSheet(
                 Triple(screenHeight * 0.7f, Size.squareCoverLarge, Size.squareCoverLarge / 2f)
             }
 
-        BaseSheet(themeColor = themeColorState) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             if (alternativeArtwork.isEmpty() || currentImage == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(

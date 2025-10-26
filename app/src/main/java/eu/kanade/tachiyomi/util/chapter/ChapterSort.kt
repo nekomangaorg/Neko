@@ -45,30 +45,33 @@ class ChapterSort(
         return chapters.sortedWith(sortComparator(true)).find { !it.read }
     }
 
-    fun <T : Chapter> sortComparator(ignoreAsc: Boolean = false): Comparator<T> {
-        val sortDescending = ignoreAsc || manga.sortDescending(mangaDetailsPreferences)
+    fun <T : Chapter> sortComparator(forceAscending: Boolean = false): Comparator<T> {
 
-        // source order is desc by default
-        val sourceOrderDesc = compareBy<T> { it.source_order }
-        val sourceOrderAsc = sourceOrderDesc.reversed()
-
-        // smart order and upload date sort by asc by default
-        val smartOrderAsc = compareBy<T> { it.smart_order }
-        val smartOrderDesc = smartOrderAsc.reversed()
-
-        val uploadDateAsc = compareBy<T> { it.date_upload }
-        val uploadDateDesc = uploadDateAsc.reversed()
-
-        // Build the final comparator
+        val sortAsc =
+            if (forceAscending) {
+                true
+            } else {
+                manga.sortDescending(mangaDetailsPreferences) // this really is Asc
+            }
         return when (manga.chapterOrder(mangaDetailsPreferences)) {
-            Manga.CHAPTER_SORTING_SMART -> if (sortDescending) smartOrderDesc else smartOrderAsc
-            Manga.CHAPTER_SORTING_UPLOAD_DATE ->
-                if (sortDescending) {
-                    uploadDateDesc.thenComparing(smartOrderDesc)
-                } else {
-                    uploadDateAsc.thenComparing(smartOrderAsc)
+            Manga.CHAPTER_SORTING_SOURCE ->
+                when (sortAsc) {
+                    true -> compareBy { it.source_order }
+                    false -> compareByDescending { it.source_order }
                 }
-            else -> if (sortDescending) sourceOrderDesc else sourceOrderAsc
+            Manga.CHAPTER_SORTING_SMART ->
+                when (sortAsc) {
+                    true -> compareByDescending { it.smart_order }
+                    false -> compareBy { it.smart_order }
+                }
+            Manga.CHAPTER_SORTING_UPLOAD_DATE ->
+                when (sortAsc) {
+                    true -> compareBy<T> { it.date_upload }.thenByDescending { it.smart_order }
+                    false -> compareByDescending<T> { it.date_upload }.thenBy { it.smart_order }
+                }
+            else -> {
+                compareBy { it.source_order }
+            }
         }
     }
 }

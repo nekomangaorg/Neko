@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -171,10 +171,12 @@ fun HorizontalCategoriesPage(
                                     top = Size.small,
                                 ),
                         ) {
-                            items(
+                            itemsIndexed(
                                 items = item.libraryItems,
-                                key = { "${item.categoryItem.name}-${it.displayManga.mangaId}" },
-                            ) { libraryItem ->
+                                key = { index, libraryItem ->
+                                    "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                },
+                            ) { index, libraryItem ->
                                 MangaGridItem(
                                     displayManga = libraryItem.displayManga,
                                     showUnreadBadge = libraryScreenState.showUnreadBadges,
@@ -265,8 +267,8 @@ fun HorizontalCategoriesPage(
                         ) {
                             itemsIndexed(
                                 items = item.libraryItems,
-                                key = { _, libraryItem ->
-                                    "${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                key = { index, libraryItem ->
+                                    "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
                                 },
                             ) { index, libraryItem ->
                                 ListItem(
