@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -76,12 +78,12 @@ fun TrackingSearchSheet(
 
             when (trackSearchResult) {
                 is TrackSearchResult.Success -> {
-                    Column(
+                    LazyColumn(
                         modifier =
                             Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Gap(Size.tiny)
+                        item { Gap(Size.tiny) }
                         if (
                             alreadySelectedTrack == null &&
                                 trackSearchResult.hasMatchingId &&
@@ -90,7 +92,7 @@ fun TrackingSearchSheet(
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                         }
 
-                        trackSearchResult.trackSearchResult.forEach { item: TrackSearchItem ->
+                        items(trackSearchResult.trackSearchResult) { item: TrackSearchItem ->
                             TrackSearchItem(
                                 themeColorState = themeColorState,
                                 trackSearch = item,
@@ -123,7 +125,7 @@ fun TrackingSearchSheet(
                             }
                         }
 
-                        Gap(Size.tiny)
+                        item { Gap(Size.tiny) }
                     }
                 }
                 else ->
