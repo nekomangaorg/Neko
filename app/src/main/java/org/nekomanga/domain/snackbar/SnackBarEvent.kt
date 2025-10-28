@@ -9,6 +9,7 @@ data class SnackbarState(
     @param:StringRes val messageRes: Int? = null,
     @param:StringRes val fieldRes: Int? = null,
     @param:StringRes val prefixRes: Int? = null,
+    val snackBarColor: SnackbarColor? = null,
     val actionLabel: String? = null,
     val snackbarDuration: SnackbarDuration = SnackbarDuration.Short,
     @param:StringRes val actionLabelRes: Int? = null,

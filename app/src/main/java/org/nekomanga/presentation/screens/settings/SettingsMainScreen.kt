@@ -32,8 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.ScreenBars
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf

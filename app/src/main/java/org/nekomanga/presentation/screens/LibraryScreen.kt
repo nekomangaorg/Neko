@@ -32,10 +32,10 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.ScreenBars
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.toLibraryManga

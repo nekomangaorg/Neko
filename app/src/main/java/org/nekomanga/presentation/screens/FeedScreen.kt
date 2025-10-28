@@ -40,10 +40,10 @@ import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
-import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.ScreenBars
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.StateFlow

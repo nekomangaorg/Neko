@@ -36,10 +36,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.ScreenBars
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel

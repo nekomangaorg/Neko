@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
+import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
@@ -157,6 +158,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(ChapterUseCases())
 
         addSingleton(FeedRepository())
+
+        addSingleton(AppSnackbarManager())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

@@ -25,15 +25,19 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -49,12 +53,19 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import kotlinx.coroutines.launch
 import org.nekomanga.core.R
+import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.BrowseScreen
 import org.nekomanga.presentation.screens.FeedScreen
@@ -64,6 +75,8 @@ import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.SettingsScreen
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +93,15 @@ class MainActivity : ComponentActivity() {
 
             // TODO load the correct one in future
             val backStack = rememberNavBackStack(Screens.Library())
+
+            val snackbarHostState = remember { SnackbarHostState() }
+            var currentSnackbarColor by remember { mutableStateOf<SnackbarColor?>(null) }
+
+            LaunchedEffect(snackbarHostState.currentSnackbarData) {
+                if (snackbarHostState.currentSnackbarData == null) {
+                    currentSnackbarColor = null
+                }
+            }
 
             var mainDropdownShowing by remember { mutableStateOf(false) }
 
@@ -153,6 +175,26 @@ class MainActivity : ComponentActivity() {
                 LocalBarUpdater provides updateScreenBars,
                 LocalPullRefreshState provides updateRefreshScreenBars,
             ) {
+                val scope = rememberCoroutineScope()
+                ObserveAsEvents(viewModel.appSnackbarManager.events, snackbarHostState) { event ->
+                    scope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        currentSnackbarColor = event.snackBarColor
+                        val result =
+                            snackbarHostState.showSnackbar(
+                                message = event.getFormattedMessage(context),
+                                actionLabel = event.getFormattedActionLabel(context),
+                                duration = event.snackbarDuration,
+                                withDismissAction = true,
+                            )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> event.action?.invoke()
+                            SnackbarResult.Dismissed -> event.dismissAction?.invoke()
+                            else -> Unit
+                        }
+                    }
+                }
+
                 val nestedScroll = screenBars.scrollBehavior?.nestedScrollConnection
                 PullRefresh(
                     enabled = pullRefreshState.enabled,
@@ -181,6 +223,7 @@ class MainActivity : ComponentActivity() {
                                     this.nestedScroll(nestedScroll!!)
                                 },
                             topBar = { screenBars.topBar?.invoke() },
+                            snackbarHost = snackbarHost(snackbarHostState, currentSnackbarColor),
                             bottomBar = {
                                 if (!showNavigationRail && backStack.size == 1) {
                                     BottomBar(

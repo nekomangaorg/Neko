@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
@@ -72,11 +73,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -87,6 +85,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
@@ -109,6 +108,7 @@ import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.track.TrackItem
@@ -140,6 +140,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
+
+    val appSnackbarManager: AppSnackbarManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val sourceManager: SourceManager = Injekt.get()
     private val loginHelper: MangaDexLoginHelper = Injekt.get()
@@ -157,9 +159,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     val mangaDetailScreenState: StateFlow<MangaConstants.MangaDetailScreenState> =
         _mangaDetailScreenState.asStateFlow()
-
-    private val _snackbarState = MutableSharedFlow<SnackbarState>()
-    val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
 
     private val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
@@ -470,7 +469,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         TimberKt.d { "On Refresh called" }
         viewModelScope.launchIO {
             if (!isOnline()) {
-                _snackbarState.emit(SnackbarState(messageRes = R.string.no_network_connection))
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        messageRes = R.string.no_network_connection,
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    )
+                )
                 return@launchIO
             }
 
@@ -481,12 +485,25 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             mangaUpdateCoordinator
                 .update(mangaItem = mangaItem, isMerging = isMerging)
                 .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
-                .catch { e -> e.message?.let { _snackbarState.emit(SnackbarState(message = it)) } }
+                .catch { e ->
+                    e.message?.let {
+                        appSnackbarManager.showSnackbar(
+                            SnackbarState(
+                                message = it,
+                                snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            )
+                        )
+                    }
+                }
                 .collect { result ->
                     when (result) {
                         is MangaResult.Error -> {
-                            _snackbarState.emit(
-                                SnackbarState(message = result.text, messageRes = result.id)
+                            appSnackbarManager.showSnackbar(
+                                SnackbarState(
+                                    message = result.text,
+                                    messageRes = result.id,
+                                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                                )
                             )
                         }
 
@@ -556,19 +573,25 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     updateRemovedDownload(chapterItems)
                 }
                 if (canUndo) {
-                    _snackbarState.emit(
+                    appSnackbarManager.showSnackbar(
                         SnackbarState(
                             messageRes = R.string.deleted_downloads,
                             actionLabelRes = R.string.undo,
                             action = {},
                             dismissAction = { delete() },
+                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                         )
                     )
                 } else {
                     delete()
                 }
             } else {
-                _snackbarState.emit(SnackbarState(messageRes = R.string.no_chapters_to_delete))
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        messageRes = R.string.no_chapters_to_delete,
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    )
+                )
             }
         }
     }
@@ -634,9 +657,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                         "Failed to update track chapter marked as read"
                                     }
                                     viewModelScope.launchIO {
-                                        _snackbarState.emit(
+                                        appSnackbarManager.showSnackbar(
                                             SnackbarState(
-                                                "Error trying to update tracked chapter marked as read ${it.message}"
+                                                "Error trying to update tracked chapter marked as read ${it.message}",
+                                                snackBarColor =
+                                                    _mangaDetailScreenState.value.snackbarColor,
                                             )
                                         )
                                     }
@@ -653,7 +678,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
 
             if (markAction.canUndo) {
-                _snackbarState.emit(
+                appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = nameRes,
                         actionLabelRes = R.string.undo,
@@ -665,6 +690,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
                         },
                         dismissAction = { viewModelScope.launchIO { finalizeChapters() } },
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                     )
                 )
             } else {
@@ -745,11 +771,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun addToLibrarySnack() {
         viewModelScope.launchIO {
             if (!_mangaDetailScreenState.value.inLibrary) {
-                _snackbarState.emit(
+                appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = R.string.add_to_library,
                         actionLabelRes = R.string.add,
                         action = { toggleFavorite(true) },
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                     )
                 )
             }
@@ -790,11 +817,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                         "Error refreshing tracker: ${service.nameRes()}"
                                     }
                                     delay(3000)
-                                    _snackbarState.emit(
+                                    appSnackbarManager.showSnackbar(
                                         SnackbarState(
                                             message = it.message,
                                             fieldRes = service.nameRes(),
                                             messageRes = R.string.error_refreshing_,
+                                            snackBarColor =
+                                                _mangaDetailScreenState.value.snackbarColor,
                                         )
                                     )
                                 }
@@ -1210,8 +1239,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun copiedToClipboard(message: String) {
         viewModelScope.launchIO {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                _snackbarState.emit(
-                    SnackbarState(messageRes = R.string._copied_to_clipboard, message = message)
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        messageRes = R.string._copied_to_clipboard,
+                        message = message,
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    )
                 )
             }
         }
@@ -1223,12 +1256,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             dbManga.user_title = title ?: dbManga.originalTitle
             db.insertManga(dbManga).executeOnIO()
-            _snackbarState.emit(
+            appSnackbarManager.showSnackbar(
                 SnackbarState(
                     messageRes = R.string.updated_title_to_,
                     message = dbManga.user_title,
                     actionLabelRes = R.string.undo,
                     action = { setAltTitle(previousTitle) },
+                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                 )
             )
         }
@@ -1327,7 +1361,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private suspend fun handleTrackingUpdate(trackingUpdate: TrackingUpdate) {
         if (trackingUpdate is TrackingUpdate.Error) {
             TimberKt.e(trackingUpdate.exception) { "handle tracking update had error" }
-            _snackbarState.emit(SnackbarState(message = trackingUpdate.message))
+            appSnackbarManager.showSnackbar(
+                SnackbarState(
+                    message = trackingUpdate.message,
+                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                )
+            )
         }
     }
 
@@ -1676,8 +1715,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             if (!isOnline()) {
                 launchUI {
-                    _snackbarState.emit(
-                        SnackbarState(message = "No network connection, cannot autolink tracker")
+                    appSnackbarManager.showSnackbar(
+                        SnackbarState(
+                            message = "No network connection, cannot autolink tracker",
+                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        )
                     )
                 }
                 return@launchIO
@@ -1735,11 +1777,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             is TrackingConstants.TrackSearchResult.Error -> {
                                 // Show a specific error for *this* tracker
                                 launchUI {
-                                    _snackbarState.emit(
+                                    appSnackbarManager.showSnackbar(
                                         SnackbarState(
                                             prefixRes = trackResult.trackerNameRes,
                                             message =
                                                 " error trying to autolink tracking. ${trackResult.errorMessage}",
+                                            snackBarColor =
+                                                _mangaDetailScreenState.value.snackbarColor,
                                         )
                                     )
                                 }
@@ -1846,8 +1890,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             when (!isOnline()) {
                 true ->
-                    _snackbarState.emit(
-                        SnackbarState(message = "No network connection, cannot open comments")
+                    appSnackbarManager.showSnackbar(
+                        SnackbarState(
+                            message = "No network connection, cannot open comments",
+                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        )
                     )
                 false -> {
                     _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
@@ -1858,7 +1905,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             .getOrElse { null }
                     _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
                     if (threadId == null) {
-                        _snackbarState.emit(
+                        appSnackbarManager.showSnackbar(
                             SnackbarState(messageRes = R.string.comments_unavailable)
                         )
                     } else {
@@ -1899,8 +1946,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
                     viewModelScope.launchIO {
                         delay(3000)
-                        _snackbarState.emit(
-                            SnackbarState("Error trying to mark chapters read from MangaDex $it")
+                        appSnackbarManager.showSnackbar(
+                            SnackbarState(
+                                "Error trying to mark chapters read from MangaDex $it",
+                                snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            )
                         )
                     }
                 }
@@ -1928,7 +1978,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun updateDownloadState(download: Download) {
         viewModelScope.launchIO {
             if (download.status == Download.State.ERROR && download.errorMessage != null) {
-                _snackbarState.emit(SnackbarState(message = download.errorMessage))
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        message = download.errorMessage,
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    )
+                )
             }
             _mangaDetailScreenState.update { state ->
                 state.copy(
@@ -2040,7 +2095,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     mangaDexPreferences.blockedUploaders().set(blockedUploaders)
                 }
             }
-            _snackbarState.emit(
+            appSnackbarManager.showSnackbar(
                 SnackbarState(
                     messageRes = R.string.globally_blocked_group_,
                     message = name,
@@ -2066,8 +2121,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
                         }
                     },
+                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                 )
             )
+        }
+    }
+
+    fun updateSnackbarColor(snackbarColor: SnackbarColor) {
+        viewModelScope.launch {
+            _mangaDetailScreenState.update { it.copy(snackbarColor = snackbarColor) }
         }
     }
 

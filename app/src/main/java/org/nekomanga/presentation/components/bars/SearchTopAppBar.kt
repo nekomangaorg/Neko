@@ -52,15 +52,16 @@ import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun SearchTopAppBar(onSearchText: (String?) -> Unit,
-                    searchPlaceHolder: String,
-                    color: Color,
-                    navigationIconLabel: String,
-                    navigationIcon: ImageVector,
-                    incognitoMode: Boolean = false,
-                    onNavigationIconClicked: () -> Unit,
-                    actions: @Composable (RowScope.() -> Unit),
-                    scrollBehavior: TopAppBarScrollBehavior,
+fun SearchTopAppBar(
+    onSearchText: (String?) -> Unit,
+    searchPlaceHolder: String,
+    color: Color,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    incognitoMode: Boolean = false,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var showTextField by rememberSaveable { mutableStateOf(false) }

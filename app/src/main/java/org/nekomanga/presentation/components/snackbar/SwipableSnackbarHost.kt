@@ -1,81 +1,48 @@
 package org.nekomanga.presentation.components.snackbar
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.offset
-import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material.swipeable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-
-enum class SwipeDirection {
-    Left,
-    Initial,
-    Right,
-}
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun SwipeableSnackbarHost(
     hostState: SnackbarHostState,
-    snackbar: @Composable (SnackbarData, Modifier) -> Unit = { data, _ -> Snackbar(data) },
+    modifier: Modifier = Modifier,
+    snackbar: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 ) {
-    if (hostState.currentSnackbarData == null) {
-        return
-    }
 
-    var size by remember { mutableStateOf(Size.Zero) }
-    val swipeableState = rememberSwipeableState(SwipeDirection.Initial)
-    val width =
-        remember(size) {
-            if (size.width == 0f) {
-                1f
-            } else {
-                size.width
-            }
-        }
-    if (swipeableState.isAnimationRunning) {
-        DisposableEffect(Unit) {
-            onDispose {
-                when (swipeableState.currentValue) {
-                    SwipeDirection.Right,
-                    SwipeDirection.Left -> {
-                        hostState.currentSnackbarData?.dismiss()
-                    }
-                    else -> {
-                        return@onDispose
-                    }
+    SnackbarHost(
+        hostState = hostState,
+        modifier = modifier,
+        snackbar = { snackbarData ->
+            val dismissState = rememberSwipeToDismissBoxState()
+
+            LaunchedEffect(dismissState.currentValue) {
+                if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                    hostState.currentSnackbarData?.dismiss()
                 }
             }
-        }
-    }
-    val offset = with(LocalDensity.current) { swipeableState.offset.value.toDp() }
-    SnackbarHost(
-        hostState,
-        snackbar = { snackbarData -> snackbar(snackbarData, Modifier.offset(x = offset)) },
-        modifier =
-            Modifier.onSizeChanged { size = Size(it.width.toFloat(), it.height.toFloat()) }
-                .swipeable(
-                    state = swipeableState,
-                    anchors =
-                        mapOf(
-                            -width to SwipeDirection.Left,
-                            0f to SwipeDirection.Initial,
-                            width to SwipeDirection.Right,
-                        ),
-                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                    orientation = Orientation.Horizontal,
-                ),
+
+            // We must reset the dismiss state when a new snackbar appears
+            LaunchedEffect(snackbarData) { dismissState.reset() }
+
+            SwipeToDismissBox(
+                state = dismissState,
+                modifier = Modifier.padding(horizontal = Size.medium),
+                backgroundContent = {},
+                content = { snackbar(snackbarData) },
+                enableDismissFromStartToEnd = true,
+                enableDismissFromEndToStart = true,
+            )
+        },
     )
 }

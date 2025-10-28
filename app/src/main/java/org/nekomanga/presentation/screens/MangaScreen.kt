@@ -25,8 +25,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -56,10 +54,10 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.palette.graphics.Palette
-import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.ScreenBars
+import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -84,13 +82,12 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
-import org.nekomanga.domain.snackbar.SnackbarState
+import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.VerticalDivider
@@ -120,10 +117,10 @@ fun MangaScreen(
     val scope = rememberCoroutineScope()
     MangaScreenWrapper(
         screenState = mangaViewModel.mangaDetailScreenState.collectAsStateWithLifecycle().value,
-        snackbar = mangaViewModel.snackBarState,
         windowSizeClass = windowSizeClass,
         onRefresh = mangaViewModel::onRefresh,
         onSearch = mangaViewModel::onSearch,
+        updateSnackbarColor = mangaViewModel::updateSnackbarColor,
         categoryActions =
             CategoryActions(
                 set = { enabledCategories ->
@@ -366,10 +363,10 @@ fun MangaScreen(
 private fun MangaScreenWrapper(
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
-    snackbar: SharedFlow<SnackbarState>,
     onRefresh: () -> Unit,
     onSearch: (String?) -> Unit,
     generatePalette: (Drawable) -> Unit,
+    updateSnackbarColor: (SnackbarColor) -> Unit,
     onToggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
     dateFormat: DateFormat,
@@ -386,7 +383,6 @@ private fun MangaScreenWrapper(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -398,7 +394,6 @@ private fun MangaScreenWrapper(
     val updateRefreshState = LocalPullRefreshState.current
 
     val pullRefreshState = remember { PullRefreshState() }
-
 
     val themeColorState =
         remember(screenState.themeBasedOffCovers, screenState.vibrantColor, isDark) {
@@ -430,6 +425,16 @@ private fun MangaScreenWrapper(
             }
         }
 
+    LaunchedEffect(themeColorState) {
+        updateSnackbarColor(
+            SnackbarColor(
+                actionColor = themeColorState.primaryColor,
+                containerColor = themeColorState.containerColor,
+                contentColor = themeColorState.onContainerColor,
+            )
+        )
+    }
+
     var currentBottomSheet by remember { mutableStateOf<DetailsBottomSheetScreen?>(null) }
 
     LaunchedEffect(currentBottomSheet) {
@@ -441,26 +446,6 @@ private fun MangaScreenWrapper(
     }
 
     BackHandler(enabled = currentBottomSheet != null) { currentBottomSheet = null }
-
-    LaunchedEffect(snackbarHostState.currentSnackbarData) {
-        snackbar.collect { state ->
-            scope.launch {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                val result =
-                    snackbarHostState.showSnackbar(
-                        message = state.getFormattedMessage(context),
-                        actionLabel = state.getFormattedActionLabel(context),
-                        duration = state.snackbarDuration,
-                        withDismissAction = true,
-                    )
-                when (result) {
-                    SnackbarResult.ActionPerformed -> state.action?.invoke()
-                    SnackbarResult.Dismissed -> state.dismissAction?.invoke()
-                    else -> Unit
-                }
-            }
-        }
-    }
 
     fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch { currentBottomSheet = sheet }
@@ -492,13 +477,7 @@ private fun MangaScreenWrapper(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    val screenBars = remember {
-        ScreenBars(
-            topBar = {
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }
+    val screenBars = remember { ScreenBars(topBar = {}, scrollBehavior = scrollBehavior) }
     DisposableEffect(Unit) {
         updateTopBar(screenBars)
         onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
@@ -515,7 +494,7 @@ private fun MangaScreenWrapper(
         )
         onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
     }
-   /* NekoScaffold(
+    /* NekoScaffold(
         type = NekoScaffoldType.Search,
         onNavigationIconClicked = onBackPressed,
         themeColorState = themeColorState,
@@ -531,98 +510,94 @@ private fun MangaScreenWrapper(
             )
         },
     ) { */
-            val isTablet =
-                windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-                    !screenState.forcePortrait
+    val isTablet =
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
+            !screenState.forcePortrait
 
-            val onToggleFavoriteAction =
-                remember(
-                    screenState.inLibrary,
-                    screenState.allCategories,
-                    screenState.hasDefaultCategory,
-                ) {
-                    {
-                        if (!screenState.inLibrary && screenState.allCategories.isNotEmpty()) {
-                            if (screenState.hasDefaultCategory) {
-                                onToggleFavorite(true)
-                            } else {
-                                openSheet(
-                                    DetailsBottomSheetScreen.CategoriesSheet(
-                                        addingToLibrary = true,
-                                        setCategories = categoryActions.set,
-                                        addToLibraryClick = { onToggleFavorite(false) },
-                                    )
-                                )
-                            }
-                        } else {
-                            onToggleFavorite(false)
-                        }
+    val onToggleFavoriteAction =
+        remember(screenState.inLibrary, screenState.allCategories, screenState.hasDefaultCategory) {
+            {
+                if (!screenState.inLibrary && screenState.allCategories.isNotEmpty()) {
+                    if (screenState.hasDefaultCategory) {
+                        onToggleFavorite(true)
+                    } else {
+                        openSheet(
+                            DetailsBottomSheetScreen.CategoriesSheet(
+                                addingToLibrary = true,
+                                setCategories = categoryActions.set,
+                                addToLibraryClick = { onToggleFavorite(false) },
+                            )
+                        )
                     }
+                } else {
+                    onToggleFavorite(false)
                 }
+            }
+        }
 
-            val screenHeight = LocalConfiguration.current.screenHeightDp
-            val backdropHeight by
-                animateDpAsState(
-                    targetValue =
-                        when {
-                            !screenState.initialized -> screenHeight.dp
-                            screenState.isSearching -> (screenHeight / 4).dp
-                            else ->
-                                when (screenState.backdropSize) {
-                                    MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                                    MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                                    MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
-                                }
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val backdropHeight by
+        animateDpAsState(
+            targetValue =
+                when {
+                    !screenState.initialized -> screenHeight.dp
+                    screenState.isSearching -> (screenHeight / 4).dp
+                    else ->
+                        when (screenState.backdropSize) {
+                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
+                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
+                            MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
                         }
-                )
+                }
+        )
 
-            if (isTablet) {
-                SideBySideLayout(
-                    incomingPadding = PaddingValues(),
-                    backdropHeight = backdropHeight,
-                    screenState = screenState,
-                    windowSizeClass = windowSizeClass,
-                    themeColorState = themeColorState,
-                    chapterActions = chapterActions,
-                    informationActions = informationActions,
-                    descriptionActions = descriptionActions,
-                    onSimilarClick = onSimilarClick,
-                    onShareClick = onShareClick,
-                    onToggleFavorite = onToggleFavoriteAction,
-                    generatePalette = generatePalette,
-                    onOpenSheet = ::openSheet,
-                    categoryActions = categoryActions,
-                )
-            } else {
-                VerticalLayout(
-                    incomingPadding = PaddingValues(),
-                    backdropHeight = backdropHeight,
-                    screenState = screenState,
-                    windowSizeClass = windowSizeClass,
-                    themeColorState = themeColorState,
-                    chapterActions = chapterActions,
-                    informationActions = informationActions,
-                    descriptionActions = descriptionActions,
-                    onSimilarClick = onSimilarClick,
-                    onShareClick = onShareClick,
-                    onToggleFavorite = onToggleFavoriteAction,
-                    generatePalette = generatePalette,
-                    onOpenSheet = ::openSheet,
-                    categoryActions = categoryActions,
-                )
-            }
+    if (isTablet) {
+        SideBySideLayout(
+            incomingPadding = PaddingValues(),
+            backdropHeight = backdropHeight,
+            screenState = screenState,
+            windowSizeClass = windowSizeClass,
+            themeColorState = themeColorState,
+            chapterActions = chapterActions,
+            informationActions = informationActions,
+            descriptionActions = descriptionActions,
+            onSimilarClick = onSimilarClick,
+            onShareClick = onShareClick,
+            onToggleFavorite = onToggleFavoriteAction,
+            generatePalette = generatePalette,
+            onOpenSheet = ::openSheet,
+            categoryActions = categoryActions,
+        )
+    } else {
+        VerticalLayout(
+            incomingPadding = PaddingValues(),
+            backdropHeight = backdropHeight,
+            screenState = screenState,
+            windowSizeClass = windowSizeClass,
+            themeColorState = themeColorState,
+            chapterActions = chapterActions,
+            informationActions = informationActions,
+            descriptionActions = descriptionActions,
+            onSimilarClick = onSimilarClick,
+            onShareClick = onShareClick,
+            onToggleFavorite = onToggleFavoriteAction,
+            generatePalette = generatePalette,
+            onOpenSheet = ::openSheet,
+            categoryActions = categoryActions,
+        )
+    }
 
-            if (screenState.removedChapters.isNotEmpty()) {
-                RemovedChaptersDialog(
-                    themeColorState = themeColorState,
-                    chapters = screenState.removedChapters,
-                    onConfirm = {
-                        chapterActions.delete(screenState.removedChapters)
-                        chapterActions.clearRemoved()
-                    },
-                    onDismiss = { chapterActions.clearRemoved() },
-                )
-            }
+    if (screenState.removedChapters.isNotEmpty()) {
+        RemovedChaptersDialog(
+            themeColorState = themeColorState,
+            chapters = screenState.removedChapters,
+            onConfirm = {
+                chapterActions.delete(screenState.removedChapters)
+                chapterActions.clearRemoved()
+            },
+            onDismiss = { chapterActions.clearRemoved() },
+        )
+    }
     /*    }
     }*/
 }

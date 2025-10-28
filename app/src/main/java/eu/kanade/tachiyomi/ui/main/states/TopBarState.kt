@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.main
+package eu.kanade.tachiyomi.ui.main.states
 
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
