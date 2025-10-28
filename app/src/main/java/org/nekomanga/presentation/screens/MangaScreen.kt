@@ -496,7 +496,7 @@ private fun MangaScreenWrapper(
         onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
     }
 
-    DisposableEffect(screenState.isRefreshing, onRefresh) {
+    DisposableEffect(screenState.isRefreshing, onRefresh, themeColorState) {
         updateRefreshState(
             pullRefreshState.copy(
                 enabled = true,
