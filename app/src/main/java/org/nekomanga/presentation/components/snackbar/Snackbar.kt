@@ -12,38 +12,32 @@ import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun snackbarHost(
-    snackbarHostState: SnackbarHostState,
-    snackBarColor: SnackbarColor? = null,
-): @Composable () -> Unit {
-    return {
-        SwipeableSnackbarHost(snackbarHostState) { data ->
-            Snackbar(
-                dismissAction = {},
-                action = {
-                    data.visuals.actionLabel?.let {
-                        TextButton(onClick = { data.performAction() }) {
-                            Text(
-                                text = data.visuals.actionLabel!!,
-                                color =
-                                    snackBarColor?.actionColor
-                                        ?: MaterialTheme.colorScheme.onSurface,
-                                style =
-                                    MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                            )
-                        }
+fun NekoSnackbarHost(snackbarHostState: SnackbarHostState, snackBarColor: SnackbarColor? = null) {
+    SwipeableSnackbarHost(snackbarHostState) { data ->
+        Snackbar(
+            dismissAction = {},
+            action = {
+                data.visuals.actionLabel?.let {
+                    TextButton(onClick = { data.performAction() }) {
+                        Text(
+                            text = data.visuals.actionLabel!!,
+                            color =
+                                snackBarColor?.actionColor ?: MaterialTheme.colorScheme.onSurface,
+                            style =
+                                MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                        )
                     }
-                },
-                dismissActionContentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor =
-                    snackBarColor?.containerColor
-                        ?: MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
-                contentColor = snackBarColor?.contentColor ?: MaterialTheme.colorScheme.onSurface,
-            ) {
-                Text(text = data.visuals.message)
-            }
+                }
+            },
+            dismissActionContentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor =
+                snackBarColor?.containerColor
+                    ?: MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
+            contentColor = snackBarColor?.contentColor ?: MaterialTheme.colorScheme.onSurface,
+        ) {
+            Text(text = data.visuals.message)
         }
     }
 }

@@ -53,7 +53,7 @@ import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
-import org.nekomanga.presentation.components.snackbar.snackbarHost
+import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
 
@@ -77,7 +77,7 @@ fun AboutScreen(
         type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPressed,
         title = stringResource(id = R.string.about),
-        snackBarHost = snackbarHost(snackbarHostState),
+        snackBarHost = { NekoSnackbarHost(snackbarHostState) },
         content = { incomingContentPadding ->
             LaunchedEffect(snackbarHostState.currentSnackbarData) {
                 snackbar.collect { state ->

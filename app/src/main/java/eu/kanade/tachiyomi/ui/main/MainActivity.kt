@@ -65,7 +65,7 @@ import org.nekomanga.core.R
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
-import org.nekomanga.presentation.components.snackbar.snackbarHost
+import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.BrowseScreen
 import org.nekomanga.presentation.screens.FeedScreen
@@ -223,7 +223,9 @@ class MainActivity : ComponentActivity() {
                                     this.nestedScroll(nestedScroll!!)
                                 },
                             topBar = { screenBars.topBar?.invoke() },
-                            snackbarHost = snackbarHost(snackbarHostState, currentSnackbarColor),
+                            snackbarHost = {
+                                NekoSnackbarHost(snackbarHostState, currentSnackbarColor)
+                            },
                             bottomBar = {
                                 if (!showNavigationRail && backStack.size == 1) {
                                     BottomBar(
@@ -307,10 +309,12 @@ class MainActivity : ComponentActivity() {
                                                 )
                                             }
                                             entry<Screens.Manga> { screen ->
-                                                val mangaViewModel: MangaViewModel by
-                                                    viewModels() {
-                                                        MangaViewModel.Factory(screen.mangaId)
-                                                    }
+                                                val mangaViewModel: MangaViewModel =
+                                                    viewModel(
+                                                        factory =
+                                                            MangaViewModel.Factory(screen.mangaId)
+                                                    )
+
                                                 MangaScreen(
                                                     mangaViewModel = mangaViewModel,
                                                     windowSizeClass = windowSizeClass,

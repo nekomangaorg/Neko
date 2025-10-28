@@ -103,6 +103,7 @@ import org.nekomanga.presentation.screens.manga.ChapterHeader
 import org.nekomanga.presentation.screens.manga.DetailsBottomSheet
 import org.nekomanga.presentation.screens.manga.DetailsBottomSheetScreen
 import org.nekomanga.presentation.screens.manga.MangaDetailsHeader
+import org.nekomanga.presentation.screens.manga.MangaScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -477,7 +478,21 @@ private fun MangaScreenWrapper(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    val screenBars = remember { ScreenBars(topBar = {}, scrollBehavior = scrollBehavior) }
+    val screenBars = remember {
+        ScreenBars(
+            topBar = {
+                MangaScreenTopBar(
+                    screenState = screenState,
+                    chapterActions = chapterActions,
+                    themeColorState = themeColorState,
+                    scrollBehavior = scrollBehavior,
+                    onNavigationIconClick = onBackPressed,
+                    onSearch = onSearch,
+                )
+            },
+            scrollBehavior = scrollBehavior,
+        )
+    }
     DisposableEffect(Unit) {
         updateTopBar(screenBars)
         onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
@@ -494,22 +509,7 @@ private fun MangaScreenWrapper(
         )
         onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
     }
-    /* NekoScaffold(
-        type = NekoScaffoldType.Search,
-        onNavigationIconClicked = onBackPressed,
-        themeColorState = themeColorState,
-        searchPlaceHolder = stringResource(id = R.string.search_chapters),
-        incognitoMode = screenState.incognitoMode,
-        onSearch = onSearch,
-        snackBarHost = snackbarHost(snackbarHostState, themeColorState.primaryColor),
-        actions = {
-            MangaDetailsAppBarActions(
-                chapterActions = chapterActions,
-                themeColorState = themeColorState,
-                chapters = screenState.activeChapters,
-            )
-        },
-    ) { */
+
     val isTablet =
         windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
             !screenState.forcePortrait
@@ -598,8 +598,6 @@ private fun MangaScreenWrapper(
             onDismiss = { chapterActions.clearRemoved() },
         )
     }
-    /*    }
-    }*/
 }
 
 private fun LazyListScope.chapterList(
