@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.SuwayomiLang.Companion.fromSuwayomiLang
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.withIOContext
+import java.text.DecimalFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -183,7 +184,7 @@ class Suwayomi : MergedServerSource() {
                         throw Exception("Invalid host name")
                     }
                     val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
-                    val chapters =
+                    var chapters =
                         customClient()
                             .newCall(
                                 POST(apiUrl, headers, fetchChaptersFormBuilder(mangaId.toLong()))
@@ -216,14 +217,22 @@ class Suwayomi : MergedServerSource() {
                                         .chapters
                                         .nodes
                                 }
-
+                    chapters = chapters.sortedBy { it.sourceOrder }
                     var previous: Pair<Float?, Boolean> = null to false
                     val chapterPairs =
                         chapters
-                            .sortedBy { it.sourceOrder }
-                            .map { chapter ->
+                            .mapIndexed { index, chapter ->
+                                chapter to chapters.getOrNull(index + 1)?.chapterNumber
+                            }
+                            .map { (chapter, next) ->
                                 val sanitized =
-                                    sanitizeName(chapter.name, chapter.chapterNumber, previous)
+                                    sanitizeName(
+                                        chapter.name,
+                                        chapter.chapterNumber,
+                                        previous,
+                                        next,
+                                    )
+                                TimberKt.d { "$sanitized" }
                                 SChapter.create().apply {
                                     if (sanitized is Name.Sanitized) {
                                         name = sanitized.name
@@ -259,18 +268,65 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    fun sanitizeName(rawName: String, chapter: Float, previous: Pair<Float?, Boolean>): Name {
+    fun sanitizeName(
+        rawName: String,
+        chapter: Float,
+        previous: Pair<Float?, Boolean>,
+        next: Float?,
+    ): Name {
+        val edgeCases =
+            mutableListOf(
+                "season",
+                "end",
+                "epilogue",
+                "original story",
+                "side story",
+                "special episode",
+                "finale",
+            )
+        val chapter =
+            if (
+                next != null &&
+                    previous.first != null &&
+                    next > previous.first!! &&
+                    next > 0 &&
+                    chapter > next
+            ) {
+                TimberKt.d { "false positive $next $chapter" }
+                // Assume that the source order is correct and the match was a false positive
+                -1f
+            } else {
+                chapter
+            }
         if (chapter < 0) {
             if (rawName.contains("prologue", true)) {
                 return Name.Sanitized("Ch.0 - $rawName", "", 0f, "Ch.0", rawName)
+            }
+            if (next != null && previous.first != null) {
+                if (next <= previous.first!! + 1) {
+                    val chnum = previous.first!! + 0.01f
+                    return Name.Sanitized(
+                        "Ch.${chnum.formatFloat()} - $rawName",
+                        "",
+                        chnum,
+                        "Ch.${chnum.formatFloat()}",
+                        rawName,
+                    )
+                } else if (previous.first == next - 2) {
+                    return Name.Sanitized(
+                        "Ch.${next - 1} - $rawName",
+                        "",
+                        next - 1,
+                        "Ch.0",
+                        rawName,
+                    )
+                }
             }
             // Source info is not sane enough, sanitizing won't work
             if (!rawName.contains("end", true)) return Name.NotSane
         }
 
         // This is for bato.to normalization
-        val edgeCases =
-            mutableListOf("season", "end", "epilogue", "side story", "special episode", "finale")
         if (
             previous.first != null &&
                 previous.first!! > chapter &&
@@ -295,16 +351,28 @@ class Suwayomi : MergedServerSource() {
         var vol = ""
         val ch =
             if (chapter == chapter.toLong().toFloat()) {
-                    chapter.toLong()
-                } else {
-                    chapter
-                }
-                .toString()
+                chapter.toLong().toString()
+            } else {
+                chapter.formatFloat()
+            }
 
         var title = rawName.replaceFirst(emojiRegex, "").trimStart()
         val chapterName = mutableListOf<String>()
         val volumePrefixes =
-            arrayOf("Volume", "Vol.", "volume", "vol.", "Season", "S", "(S", "season", "s", "(s")
+            arrayOf(
+                "Volume",
+                "Vol.",
+                "volume",
+                "vol.",
+                "Season",
+                "S",
+                "(S",
+                "[S",
+                "season",
+                "s",
+                "(s",
+                "[s",
+            )
         val chapterPrefixes =
             arrayOf(
                 "Chapter",
@@ -329,10 +397,17 @@ class Suwayomi : MergedServerSource() {
             if (title.startsWith(prefix)) {
                 if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
                 if (prefix == "Ep" && title.startsWith("Epilogue")) return@any false
+                if (
+                    prefix == "Season" &&
+                        title.contains("Announcement") &&
+                        Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)
+                )
+                    return@any false
                 val delimiter =
-                    when (prefix.startsWith('(')) {
-                        true -> ")"
-                        false -> " "
+                    when (prefix[0]) {
+                        '(' -> ")"
+                        '[' -> "]"
+                        else -> " "
                     }
                 title = title.replaceFirst(prefix, "").trimStart()
                 vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
@@ -344,18 +419,33 @@ class Suwayomi : MergedServerSource() {
         }
         val chtxt = "Ch.$ch"
         chapterName.add(chtxt)
-        if (title.startsWith(ch)) {
-            title = title.replaceFirst(ch, "").trimStart('.').trimStart()
-        } else if (
-            !chapterPrefixes.any { prefix ->
-                if (title.startsWith(prefix)) {
-                    title = title.replaceFirst(prefix, "").trimStart()
-                    title = title.trimStart('0').replaceFirst(ch, "").trimStart()
-                    return@any true
+        var matched =
+            if (title.startsWith(ch)) {
+                title = title.replaceFirst(ch, "").trimStart('.').trimStart()
+                true
+            } else {
+                chapterPrefixes.any { prefix ->
+                    if (title.startsWith(prefix)) {
+                        title = title.replaceFirst(prefix, "").trimStart()
+                        if (!title[0].isDigit()) {
+                            title = prefix + title
+                            return@any false
+                        }
+                        title = title.trimStart('0').replaceFirst(ch, "").trimStart()
+                        return@any true
+                    }
+                    false
                 }
-                false
             }
-        ) {
+        if (Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)) {
+            TimberKt.d { "match" }
+            // This is for Webtoon.com normalization
+            val note = title.substringAfterLast(")")
+            title = title.substringBeforeLast("(") + note
+            matched = true
+        }
+
+        if (!matched) {
             return Name.NotSane
         }
 
@@ -367,6 +457,14 @@ class Suwayomi : MergedServerSource() {
         }
 
         return Name.Sanitized(chapterName.joinToString(" "), vol, chapter, chtxt, title)
+    }
+
+    fun Float.formatFloat(): String {
+        val df = DecimalFormat("#.###")
+        df.minimumFractionDigits = 0
+        df.maximumFractionDigits = 3
+        df.isGroupingUsed = false
+        return df.format(this.toBigDecimal().stripTrailingZeros())
     }
 
     fun removeEndTag(title: String): String {
