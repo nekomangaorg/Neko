@@ -456,8 +456,6 @@ private fun MangaScreenWrapper(
         ModalBottomSheet(
             onDismissRequest = { scope.launch { currentBottomSheet = null } },
             sheetState = sheetState,
-            // shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd =
-            // Shapes.sheetRadius),
             content = {
                 DetailsBottomSheet(
                     currentScreen = currentBottomSheet!!,
