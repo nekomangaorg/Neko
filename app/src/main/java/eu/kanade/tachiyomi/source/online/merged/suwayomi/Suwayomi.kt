@@ -232,7 +232,6 @@ class Suwayomi : MergedServerSource() {
                                         previous,
                                         next,
                                     )
-                                TimberKt.d { "$sanitized" }
                                 SChapter.create().apply {
                                     if (sanitized is Name.Sanitized) {
                                         name = sanitized.name
@@ -292,7 +291,6 @@ class Suwayomi : MergedServerSource() {
                     next > 0 &&
                     chapter > next
             ) {
-                TimberKt.d { "false positive $next $chapter" }
                 // Assume that the source order is correct and the match was a false positive
                 -1f
             } else {
@@ -438,7 +436,6 @@ class Suwayomi : MergedServerSource() {
                 }
             }
         if (Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)) {
-            TimberKt.d { "match" }
             // This is for Webtoon.com normalization
             val note = title.substringAfterLast(")")
             title = title.substringBeforeLast("(") + note
