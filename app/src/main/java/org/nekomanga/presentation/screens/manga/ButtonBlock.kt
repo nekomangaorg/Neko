@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.mangadetails
+package org.nekomanga.presentation.screens.manga
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll

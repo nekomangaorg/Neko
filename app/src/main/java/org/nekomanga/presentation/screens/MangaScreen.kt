@@ -1,7 +1,12 @@
 package org.nekomanga.presentation.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -22,10 +27,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,11 +47,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
+import androidx.palette.graphics.Palette
+import eu.kanade.tachiyomi.ui.main.LocalBarUpdater
+import eu.kanade.tachiyomi.ui.main.LocalPullRefreshState
+import eu.kanade.tachiyomi.ui.main.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -53,40 +69,301 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.ui.manga.MangaViewModel
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.BrowseController
+import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.isAvailable
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
+import eu.kanade.tachiyomi.util.system.getBestColor
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
+import eu.kanade.tachiyomi.util.system.sharedCacheDir
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
-import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
-import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
-import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
-import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
-import org.nekomanga.presentation.screens.mangadetails.MangaDetailsAppBarActions
-import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
+import org.nekomanga.presentation.screens.manga.ChapterHeader
+import org.nekomanga.presentation.screens.manga.DetailsBottomSheet
+import org.nekomanga.presentation.screens.manga.DetailsBottomSheetScreen
+import org.nekomanga.presentation.screens.manga.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaScreen(
+    mangaViewModel: MangaViewModel,
+    windowSizeClass: WindowSizeClass,
+    onBackPressed: () -> Unit,
+    onNavigate: (NavKey) -> Unit,
+) {
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    MangaScreenWrapper(
+        screenState = mangaViewModel.mangaDetailScreenState.collectAsStateWithLifecycle().value,
+        snackbar = mangaViewModel.snackBarState,
+        windowSizeClass = windowSizeClass,
+        onRefresh = mangaViewModel::onRefresh,
+        onSearch = mangaViewModel::onSearch,
+        categoryActions =
+            CategoryActions(
+                set = { enabledCategories ->
+                    mangaViewModel.updateMangaCategories(enabledCategories)
+                },
+                addNew = { newCategory -> mangaViewModel.addNewCategory(newCategory) },
+            ),
+        informationActions =
+            InformationActions(
+                titleLongClick = {
+                    mangaViewModel.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.title)
+                },
+                creatorCopy = {
+                    mangaViewModel.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.creator)
+                },
+                creatorSearch = { text -> getBrowseController()?.searchByCreator(text) },
+            ),
+        descriptionActions =
+            DescriptionActions(
+                genreSearch = { text -> getBrowseController()?.searchByTag(text) },
+                genreSearchLibrary = { text -> /*if (router.backstackSize < 2) {
+                    return@DescriptionActions
+                }*/
+
+                    /* when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+                        is LibraryController -> {
+                            router.handleBack()
+                            previousController.deepLinkSearch(text)
+                        }
+                        is BrowseController,
+                        is FeedController,
+                        is DisplayController -> {
+                            // Manually navigate to LibraryController
+                            router.handleBack()
+                            (activity as? MainActivity)?.goToTab(R.id.nav_library)
+                            val controller =
+                                router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
+                            controller.deepLinkSearch(text)
+                        }
+                    }*/ },
+                altTitleClick = mangaViewModel::setAltTitle,
+                altTitleResetClick = { mangaViewModel.setAltTitle(null) },
+            ),
+        generatePalette = { drawable ->
+            val bitmap = drawable.toBitmap()
+            Palette.from(bitmap).generate {
+                it ?: return@generate
+                scope.launch {
+                    val vibrantColor = it.getBestColor() ?: return@launch
+                    mangaViewModel.updateMangaColor(vibrantColor)
+                }
+            }
+        },
+        onToggleFavorite = mangaViewModel::toggleFavorite,
+        dateFormat = mangaViewModel.preferences.dateFormat(),
+        trackActions =
+            TrackActions(
+                statusChange = { statusIndex, trackAndService ->
+                    mangaViewModel.updateTrackStatus(statusIndex, trackAndService)
+                },
+                scoreChange = { statusIndex, trackAndService ->
+                    mangaViewModel.updateTrackScore(statusIndex, trackAndService)
+                },
+                chapterChange = { newChapterNumber, trackAndService ->
+                    mangaViewModel.updateTrackChapter(newChapterNumber, trackAndService)
+                },
+                search = { title, service -> mangaViewModel.searchTracker(title, service) },
+                searchItemClick = { trackAndService ->
+                    mangaViewModel.registerTracking(trackAndService)
+                },
+                remove = { alsoRemoveFromTracker, service ->
+                    mangaViewModel.removeTracking(alsoRemoveFromTracker, service)
+                },
+                dateChange = { trackDateChange -> mangaViewModel.updateTrackDate(trackDateChange) },
+            ),
+        mergeActions =
+            MergeActions(
+                remove = mangaViewModel::removeMergedManga,
+                search = mangaViewModel::searchMergedManga,
+                add = mangaViewModel::addMergedManga,
+            ),
+        onSimilarClick = {
+            /* router.pushController(
+                SimilarController(mangaViewModel.getManga().uuid()).withFadeTransaction()
+            )*/
+        },
+        onShareClick = {
+            scope.launch {
+                val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+
+                val cover =
+                    mangaViewModel.shareCover(
+                        dir,
+                        mangaViewModel.mangaDetailScreenState.value.currentArtwork,
+                    )
+                val manga = mangaViewModel.getManga()
+                val sharableCover = cover?.getUriWithAuthority(context)
+
+                withUIContext {
+                    try {
+                        var url =
+                            mangaViewModel.sourceManager.mangaDex
+                                .mangaDetailsRequest(manga)
+                                .url
+                                .toString()
+                        url = "$url/" + manga.getSlug()
+                        val intent =
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/*"
+                                putExtra(Intent.EXTRA_TEXT, url)
+                                putExtra(Intent.EXTRA_TITLE, manga.title)
+                                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                if (cover != null) {
+                                    clipData = ClipData.newRawUri(null, sharableCover)
+                                }
+                            }
+                        context.startActivity(
+                            Intent.createChooser(intent, context.getString(R.string.share))
+                        )
+                    } catch (e: Exception) {
+                        context.toast(e.message)
+                    }
+                }
+            }
+        },
+        coverActions =
+            CoverActions(
+                share = { _, artwork ->
+                    scope.launch {
+                        val dir =
+                            context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+                        val cover = mangaViewModel.shareCover(dir, artwork)
+                        val sharableCover = cover?.getUriWithAuthority(context)
+                        withUIContext {
+                            try {
+                                val intent =
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        putExtra(Intent.EXTRA_STREAM, sharableCover)
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                        clipData = ClipData.newRawUri(null, sharableCover)
+                                        type = "image/*"
+                                    }
+                                context.startActivity(
+                                    Intent.createChooser(intent, context.getString(R.string.share))
+                                )
+                            } catch (e: Exception) {
+                                context.toast(e.message)
+                            }
+                        }
+                    }
+                },
+                set = mangaViewModel::setCover,
+                save = mangaViewModel::saveCover,
+                reset = mangaViewModel::resetCover,
+            ),
+        chapterFilterActions =
+            ChapterFilterActions(
+                changeSort = mangaViewModel::changeSortOption,
+                changeFilter = mangaViewModel::changeFilterOption,
+                changeScanlator = mangaViewModel::changeScanlatorOption,
+                changeLanguage = mangaViewModel::changeLanguageOption,
+                setAsGlobal = mangaViewModel::setGlobalOption,
+            ),
+        chapterActions =
+            ChapterActions(
+                mark = mangaViewModel::markChapters,
+                download = { chapterItems, downloadAction ->
+                    if (
+                        chapterItems.size == 1 &&
+                            MdConstants.UnsupportedOfficialGroupList.contains(
+                                chapterItems[0].chapter.scanlator
+                            )
+                    ) {
+                        context.toast(
+                            "${chapterItems[0].chapter.scanlator} not supported, try WebView"
+                        )
+                    } else {
+                        mangaViewModel.downloadChapters(chapterItems, downloadAction)
+                    }
+                },
+                delete = mangaViewModel::deleteChapters,
+                clearRemoved = mangaViewModel::clearRemovedChapters,
+                openNext = {
+                    mangaViewModel.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
+                        ?.let { simpleChapter ->
+                            val chapter = simpleChapter.toDbChapter()
+                            val manga = mangaViewModel.getManga()
+                            if (
+                                chapter.scanlator != null &&
+                                    MdConstants.UnsupportedOfficialGroupList.contains(
+                                        chapter.scanlator
+                                    )
+                            ) {
+                                context.toast("${chapter.scanlator} not supported, try WebView")
+                            } else if (
+                                !chapter.isAvailable(mangaViewModel.downloadManager, manga)
+                            ) {
+                                context.toast("Chapter is not available")
+                            } else {
+                                context.startActivity(
+                                    ReaderActivity.newIntent(context, manga, chapter)
+                                )
+                            }
+                        }
+                },
+                open = { chapterItem ->
+                    val chapter = chapterItem.chapter.toDbChapter()
+                    val manga = mangaViewModel.getManga()
+                    if (
+                        chapter.scanlator != null &&
+                            MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
+                    ) {
+                        context.toast("${chapter.scanlator} not supported, try WebView")
+                    } else if (!chapter.isAvailable(mangaViewModel.downloadManager, manga)) {
+                        context.toast("Chapter is not available")
+                    } else {
+                        context.startActivity(ReaderActivity.newIntent(context, manga, chapter))
+                    }
+                },
+                blockScanlator = mangaViewModel::blockScanlator,
+                openComment = { chapterId -> mangaViewModel.openComment(context, chapterId) },
+                openInBrowser = { chapterItem ->
+                    if (chapterItem.chapter.isUnavailable) {
+                        context.toast("Chapter is not available")
+                    } else {
+                        val url = mangaViewModel.getChapterUrl(chapterItem.chapter)
+                        context.openInBrowser(url)
+                    }
+                },
+            ),
+        onBackPressed = onBackPressed,
+    )
+}
+
+@Composable
+private fun MangaScreenWrapper(
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     snackbar: SharedFlow<SnackbarState>,
@@ -116,6 +393,12 @@ fun MangaScreen(
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     val defaultColorState = defaultThemeColorState()
+
+    val updateTopBar = LocalBarUpdater.current
+    val updateRefreshState = LocalPullRefreshState.current
+
+    val pullRefreshState = remember { PullRefreshState() }
+
 
     val themeColorState =
         remember(screenState.themeBasedOffCovers, screenState.vibrantColor, isDark) {
@@ -206,7 +489,33 @@ fun MangaScreen(
             },
         )
     }
-    NekoScaffold(
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+    val screenBars = remember {
+        ScreenBars(
+            topBar = {
+            },
+            scrollBehavior = scrollBehavior,
+        )
+    }
+    DisposableEffect(Unit) {
+        updateTopBar(screenBars)
+        onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
+    }
+
+    DisposableEffect(screenState.isRefreshing, onRefresh) {
+        updateRefreshState(
+            pullRefreshState.copy(
+                enabled = true,
+                isRefreshing = screenState.isRefreshing,
+                onRefresh = onRefresh,
+                trackColor = themeColorState.primaryColor,
+            )
+        )
+        onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
+    }
+   /* NekoScaffold(
         type = NekoScaffoldType.Search,
         onNavigationIconClicked = onBackPressed,
         themeColorState = themeColorState,
@@ -221,12 +530,7 @@ fun MangaScreen(
                 chapters = screenState.activeChapters,
             )
         },
-    ) { incomingPaddingValues ->
-        PullRefresh(
-            isRefreshing = screenState.isRefreshing,
-            onRefresh = onRefresh,
-            trackColor = themeColorState.primaryColor,
-        ) {
+    ) { */
             val isTablet =
                 windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
                     !screenState.forcePortrait
@@ -274,7 +578,7 @@ fun MangaScreen(
 
             if (isTablet) {
                 SideBySideLayout(
-                    incomingPadding = incomingPaddingValues,
+                    incomingPadding = PaddingValues(),
                     backdropHeight = backdropHeight,
                     screenState = screenState,
                     windowSizeClass = windowSizeClass,
@@ -291,7 +595,7 @@ fun MangaScreen(
                 )
             } else {
                 VerticalLayout(
-                    incomingPadding = incomingPaddingValues,
+                    incomingPadding = PaddingValues(),
                     backdropHeight = backdropHeight,
                     screenState = screenState,
                     windowSizeClass = windowSizeClass,
@@ -319,8 +623,8 @@ fun MangaScreen(
                     onDismiss = { chapterActions.clearRemoved() },
                 )
             }
-        }
-    }
+    /*    }
+    }*/
 }
 
 private fun LazyListScope.chapterList(
@@ -566,4 +870,36 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
         true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
         false -> buttonColor
     }
+}
+
+/** Copy the Device and App info to clipboard */
+private fun copyToClipboard(context: Context, content: String, @StringRes label: Int) {
+    val clipboard = context.getSystemService<ClipboardManager>()!!
+    clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
+}
+
+private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
+    /* val position = router.backstackSize - backstackNumber
+    if (position < 0) return null
+    return when (val previousController = router.backstack[position].controller) {
+        is LibraryController,
+        is DisplayController,
+        is SimilarController -> {
+            router.popToRoot()
+            (activity as? MainActivity)?.goToTab(R.id.nav_browse)
+            router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
+        }
+        is BrowseController -> {
+            router.popCurrentController()
+            previousController
+        }
+        else -> {
+            if (backstackNumber == 1) {
+                null
+            } else {
+                getBrowseController(backstackNumber - 1)
+            }
+        }
+    }*/
+    return null
 }

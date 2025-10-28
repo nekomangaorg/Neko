@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.mangadetails
+package org.nekomanga.presentation.screens.manga
 
 import android.animation.TimeInterpolator
 import androidx.compose.animation.AnimatedContent

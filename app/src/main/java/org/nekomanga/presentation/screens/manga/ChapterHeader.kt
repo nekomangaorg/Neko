@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.mangadetails
+package org.nekomanga.presentation.screens.manga
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.mangadetails
+package org.nekomanga.presentation.screens.manga
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.animateDp

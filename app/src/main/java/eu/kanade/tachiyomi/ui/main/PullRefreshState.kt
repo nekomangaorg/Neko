@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 import java.util.UUID
 
 data class PullRefreshState(
@@ -8,6 +9,7 @@ data class PullRefreshState(
     val enabled: Boolean = false,
     val isRefreshing: Boolean = false,
     val onRefresh: (() -> Unit)? = null,
+    val trackColor: Color? = null,
 )
 
 val LocalPullRefreshState =

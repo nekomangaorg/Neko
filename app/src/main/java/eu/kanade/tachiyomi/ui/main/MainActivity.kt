@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -47,6 +49,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
+import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import org.nekomanga.core.R
@@ -56,6 +59,7 @@ import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.BrowseScreen
 import org.nekomanga.presentation.screens.FeedScreen
 import org.nekomanga.presentation.screens.LibraryScreen
+import org.nekomanga.presentation.screens.MangaScreen
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.SettingsScreen
 
@@ -155,6 +159,7 @@ class MainActivity : ComponentActivity() {
                     isRefreshing = pullRefreshState.isRefreshing,
                     onRefresh = pullRefreshState.onRefresh,
                     blurBackground = mainDropdownShowing,
+                    trackColor = pullRefreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
                 ) {
                     Row(Modifier.fillMaxSize()) {
                         if (showNavigationRail && backStack.size == 1) {
@@ -258,10 +263,20 @@ class MainActivity : ComponentActivity() {
                                                     deepLink = null,
                                                 )
                                             }
-                                            /* entry<Screens.Manga>{ mangaId ->
-                                                MangaScreen() { }
-
-                                            }*/
+                                            entry<Screens.Manga> { screen ->
+                                                val mangaViewModel: MangaViewModel by
+                                                    viewModels() {
+                                                        MangaViewModel.Factory(screen.mangaId)
+                                                    }
+                                                MangaScreen(
+                                                    mangaViewModel = mangaViewModel,
+                                                    windowSizeClass = windowSizeClass,
+                                                    onBackPressed = {
+                                                        backStack.removeLastOrNull()
+                                                    },
+                                                    onNavigate = { screen -> backStack.add(screen) },
+                                                )
+                                            }
                                         },
                                 )
                             }

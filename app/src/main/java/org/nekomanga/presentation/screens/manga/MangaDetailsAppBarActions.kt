@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens.mangadetails
+package org.nekomanga.presentation.screens.manga
 
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants

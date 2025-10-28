@@ -12,39 +12,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
 class MangaDetailController(private val mangaId: Long) :
@@ -70,7 +56,7 @@ class MangaDetailController(private val mangaId: Long) :
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val context = LocalContext.current
-        MangaScreen(
+        /*MangaScreen(
             screenState = presenter.mangaDetailScreenState.collectAsStateWithLifecycle().value,
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
@@ -195,7 +181,7 @@ class MangaDetailController(private val mangaId: Long) :
                     false -> activity?.onBackPressed()
                 }
             },
-        )
+        )*/
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
