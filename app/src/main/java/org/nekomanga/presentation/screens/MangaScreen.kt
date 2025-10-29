@@ -112,6 +112,7 @@ fun MangaScreen(
     windowSizeClass: WindowSizeClass,
     onBackPressed: () -> Unit,
     onNavigate: (NavKey) -> Unit,
+    onSearchLibrary: (String) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -144,26 +145,7 @@ fun MangaScreen(
         descriptionActions =
             DescriptionActions(
                 genreSearch = { text -> getBrowseController()?.searchByTag(text) },
-                genreSearchLibrary = { text -> /*if (router.backstackSize < 2) {
-                    return@DescriptionActions
-                }*/
-
-                    /* when (val previousController = router.backstack[router.backstackSize - 2].controller) {
-                        is LibraryController -> {
-                            router.handleBack()
-                            previousController.deepLinkSearch(text)
-                        }
-                        is BrowseController,
-                        is FeedController,
-                        is DisplayController -> {
-                            // Manually navigate to LibraryController
-                            router.handleBack()
-                            (activity as? MainActivity)?.goToTab(R.id.nav_library)
-                            val controller =
-                                router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
-                            controller.deepLinkSearch(text)
-                        }
-                    }*/ },
+                genreSearchLibrary = onSearchLibrary,
                 altTitleClick = mangaViewModel::setAltTitle,
                 altTitleResetClick = { mangaViewModel.setAltTitle(null) },
             ),

@@ -101,6 +101,10 @@ fun MainScreen(
                             windowSizeClass = windowSizeClass,
                             onBackPressed = { backStack.removeLastOrNull() },
                             onNavigate = { screen -> backStack.add(screen) },
+                            onSearchLibrary = { tag ->
+                                backStack.clear()
+                                backStack.add(Screens.Library(initialSearch = tag))
+                            },
                         )
                     }
                     entry<Screens.Settings.Main> {
