@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
@@ -69,7 +70,7 @@ import org.nekomanga.presentation.theme.Size
 fun BrowseScreen(
     browseViewModel: BrowseViewModel,
     mainDropDown: AppBar.MainDropdown,
-    openManga: (Long) -> Unit,
+    onNavigateTo: (NavKey) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
 
@@ -79,8 +80,8 @@ fun BrowseScreen(
         switchDisplayClick = browseViewModel::switchDisplayMode,
         libraryEntryVisibilityClick = browseViewModel::switchLibraryEntryVisibility,
         windowSizeClass = windowSizeClass,
-        homeScreenTitleClick = { /*::openDisplayScreen*/ },
-        openManga = openManga,
+        homeScreenTitleClick = { type -> onNavigateTo(Screens.Display(type)) },
+        openManga = { mangaId -> onNavigateTo(Screens.Manga(mangaId)) },
         filterActions =
             FilterActions(
                 filterClick = browseViewModel::getSearchPage,

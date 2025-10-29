@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
+import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import org.nekomanga.presentation.components.AppBar
 
 @Composable
@@ -87,7 +88,7 @@ fun MainScreen(
                         BrowseScreen(
                             browseViewModel = browseViewModel,
                             mainDropDown = mainDropDown,
-                            openManga = { mangaId -> backStack.add(Screens.Manga(mangaId)) },
+                            onNavigateTo = { screen -> backStack.add(screen) },
                             windowSizeClass = windowSizeClass,
                         )
                     }
@@ -111,6 +112,18 @@ fun MainScreen(
                             },
                         )
                     }
+
+                    entry<Screens.Display> { screen ->
+                        val displayViewModel: DisplayViewModel =
+                            viewModel(factory = DisplayViewModel.Factory(screen.displayScreenType))
+
+                        DisplayScreen(
+                            viewModel = displayViewModel,
+                            onBackPressed = { backStack.removeLastOrNull() },
+                            onNavigateTo = { screen -> backStack.add(screen) },
+                        )
+                    }
+
                     entry<Screens.Settings.Main> {
                         SettingsScreen(
                             windowSizeClass = windowSizeClass,

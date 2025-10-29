@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -28,14 +30,19 @@ import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class DisplayPresenter(
-    displayScreenType: DisplayScreenType,
-    private val displayRepository: DisplayRepository = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get(),
-    private val libraryPreferences: LibraryPreferences = Injekt.get(),
-    private val securityPreferences: SecurityPreferences = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter<DisplayController>() {
+class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
+
+    class Factory(private val displayScreenType: DisplayScreenType) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return DisplayViewModel(displayScreenType) as T
+        }
+    }
+
+    private val displayRepository: DisplayRepository = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get()
+    private val libraryPreferences: LibraryPreferences = Injekt.get()
+    private val securityPreferences: SecurityPreferences = Injekt.get()
+    private val db: DatabaseHelper = Injekt.get()
 
     private val _displayScreenState =
         MutableStateFlow(
@@ -90,12 +97,10 @@ class DisplayPresenter(
             },
         )
 
-    override fun onCreate() {
-        super.onCreate()
-
+    init {
         loadNextItems()
 
-        presenterScope.launch {
+        viewModelScope.launch {
             val categories =
                 db.getCategories()
                     .executeAsBlocking()
@@ -110,12 +115,12 @@ class DisplayPresenter(
             }
         }
 
-        presenterScope.launch {
+        viewModelScope.launch {
             preferences.browseAsList().changes().collectLatest {
                 _displayScreenState.update { state -> state.copy(isList = it) }
             }
         }
-        presenterScope.launch {
+        viewModelScope.launch {
             preferences.browseDisplayMode().changes().collectLatest { visibility ->
                 _displayScreenState.update {
                     it.copy(
@@ -129,11 +134,11 @@ class DisplayPresenter(
     }
 
     fun loadNextItems() {
-        presenterScope.launch { paginator.loadNextItems() }
+        viewModelScope.launch { paginator.loadNextItems() }
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
-        presenterScope.launch {
+        viewModelScope.launch {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
                 favorite = !favorite
@@ -168,7 +173,7 @@ class DisplayPresenter(
     }
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
-        presenterScope.launch {
+        viewModelScope.launch {
             val index =
                 _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
             val tempDisplayManga =
@@ -203,7 +208,7 @@ class DisplayPresenter(
 
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order =
                 (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
@@ -229,7 +234,7 @@ class DisplayPresenter(
     }
 
     fun updateMangaForChanges() {
-        presenterScope.launch {
+        viewModelScope.launch {
             val newDisplayManga =
                 _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
             _displayScreenState.update {

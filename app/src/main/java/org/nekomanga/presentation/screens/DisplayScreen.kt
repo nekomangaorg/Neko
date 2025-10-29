@@ -21,7 +21,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +34,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
+import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -55,7 +57,28 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun DisplayScreen(
-    displayScreenState: State<DisplayScreenState>,
+    viewModel: DisplayViewModel,
+    onBackPressed: () -> Unit,
+    onNavigateTo: (NavKey) -> Unit,
+) {
+    val screenState by viewModel.displayScreenState.collectAsStateWithLifecycle()
+
+    DisplayWrapper(
+        displayScreenState = screenState,
+        switchDisplayClick = viewModel::switchDisplayMode,
+        libraryEntryVisibilityClick = viewModel::switchLibraryEntryVisibility,
+        onBackPress = onBackPressed,
+        openManga = { mangaId: Long -> onNavigateTo(Screens.Manga(mangaId)) },
+        addNewCategory = viewModel::addNewCategory,
+        toggleFavorite = viewModel::toggleFavorite,
+        loadNextPage = viewModel::loadNextItems,
+        retryClick = viewModel::loadNextItems,
+    )
+}
+
+@Composable
+private fun DisplayWrapper(
+    displayScreenState: DisplayScreenState,
     switchDisplayClick: () -> Unit,
     libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
@@ -99,9 +122,9 @@ fun DisplayScreen(
                                     .only(WindowInsetsSides.Bottom)
                                     .asPaddingValues(),
                             closeSheet = { currentBottomSheet = null },
-                            categories = displayScreenState.value.categories,
-                            isList = displayScreenState.value.isList,
-                            libraryEntryVisibility = displayScreenState.value.libraryEntryVisibility,
+                            categories = displayScreenState.categories,
+                            isList = displayScreenState.isList,
+                            libraryEntryVisibility = displayScreenState.libraryEntryVisibility,
                         )
                     }
                 }
@@ -111,11 +134,11 @@ fun DisplayScreen(
     NekoScaffold(
         type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPress,
-        incognitoMode = displayScreenState.value.incognitoMode,
+        incognitoMode = displayScreenState.incognitoMode,
         title =
-            if (displayScreenState.value.titleRes != null)
-                stringResource(id = displayScreenState.value.titleRes!!)
-            else displayScreenState.value.title,
+            if (displayScreenState.titleRes != null)
+                stringResource(id = displayScreenState.titleRes!!)
+            else displayScreenState.title,
         actions = {
             AppBarActions(
                 actions =
@@ -153,7 +176,7 @@ fun DisplayScreen(
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
+                if (!displayManga.inLibrary && displayScreenState.promptForCategories) {
                     scope.launch {
                         openSheet(
                             DisplaySheetScreen.CategoriesSheet(
@@ -169,15 +192,15 @@ fun DisplayScreen(
                 }
             }
 
-            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
+            if (displayScreenState.isLoading && displayScreenState.page == 1) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            } else if (displayScreenState.value.error != null) {
+            } else if (displayScreenState.error != null) {
                 EmptyScreen(
-                    message = UiText.String(displayScreenState.value.error!!),
+                    message = UiText.String(displayScreenState.error!!),
                     actions =
-                        if (displayScreenState.value.page == 1)
+                        if (displayScreenState.page == 1)
                             persistentListOf(
                                 Action(
                                     text = UiText.StringResource(R.string.retry),
@@ -188,31 +211,30 @@ fun DisplayScreen(
                     contentPadding = incomingContentPadding,
                 )
             } else {
-                if (displayScreenState.value.isList) {
+                if (displayScreenState.isList) {
                     MangaList(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
+                        mangaList = displayScreenState.filteredDisplayManga,
+                        shouldOutlineCover = displayScreenState.outlineCovers,
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
+                        lastPage = displayScreenState.endReached,
                         loadNextItems = loadNextPage,
                     )
                 } else {
                     MangaGrid(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns =
-                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
-                        isComfortable = displayScreenState.value.isComfortableGrid,
+                        mangaList = displayScreenState.filteredDisplayManga,
+                        shouldOutlineCover = displayScreenState.outlineCovers,
+                        columns = numberOfColumns(rawValue = displayScreenState.rawColumnCount),
+                        isComfortable = displayScreenState.isComfortableGrid,
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
+                        lastPage = displayScreenState.endReached,
                         loadNextItems = loadNextPage,
                     )
                 }
-                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
+                if (displayScreenState.isLoading && displayScreenState.page != 1) {
                     Box(Modifier.fillMaxSize()) {
                         val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
                         val stroke =

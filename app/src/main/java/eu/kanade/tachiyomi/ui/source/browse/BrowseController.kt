@@ -1,59 +1,16 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
-import eu.kanade.tachiyomi.ui.source.latest.DisplayController
-import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class BrowseController(incomingQuery: String = "") : BaseComposeController<BrowsePresenter>() {
     override val presenter = BrowsePresenter(incomingQuery)
 
-    @Composable
-    override fun ScreenContent() {
-        val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-
-        /*BrowseScreen(
-            browseScreenState = presenter.browseScreenState.collectAsState(),
-            switchDisplayClick = presenter::switchDisplayMode,
-            libraryEntryVisibilityClick = presenter::switchLibraryEntryVisibility,
-            onBackPress = router::handleBack,
-            windowSizeClass = windowSizeClass,
-            legacySideNav = isSideNav,
-            homeScreenTitleClick = ::openDisplayScreen,
-            openManga = ::openManga,
-            filterActions =
-                FilterActions(
-                    filterClick = presenter::getSearchPage,
-                    filterChanged = presenter::filterChanged,
-                    resetClick = presenter::resetFilter,
-                    saveFilterClick = presenter::saveFilter,
-                    deleteFilterClick = presenter::deleteFilter,
-                    filterDefaultClick = presenter::markFilterAsDefault,
-                    loadFilter = presenter::loadFilter,
-                ),
-            addNewCategory = presenter::addNewCategory,
-            toggleFavorite = presenter::toggleFavorite,
-            loadNextPage = presenter::loadNextItems,
-            retryClick = presenter::retry,
-            otherClick = presenter::otherClick,
-            changeScreenType = presenter::changeScreenType,
-            randomClick = presenter::randomManga,
-            incognitoClick = presenter::toggleIncognitoMode,
-            settingsClick = {},
-            statsClick = {},
-            aboutClick = {},
-            helpClick = {
-                (this.activity as? MainActivity)?.openInBrowser(
-                    "https://tachiyomi.org/docs/guides/troubleshooting/"
-                )
-            },
-        )*/
-    }
+    @Composable override fun ScreenContent() {}
 
     fun searchByTag(tag: String) {
         presenter.searchTag(tag)
@@ -61,12 +18,6 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
 
     fun searchByCreator(creator: String) {
         presenter.searchCreator(creator)
-    }
-
-    private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
-        viewScope.launchUI {
-            router.pushController(DisplayController(displayScreenType).withFadeTransaction())
-        }
     }
 
     fun openManga(mangaId: Long, wasDeepLink: Boolean = false) {

@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens
 
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import kotlinx.serialization.Serializable
 
 object Screens {
@@ -20,7 +21,7 @@ object Screens {
 
     @Serializable data class Manga(val mangaId: Long) : NavKey
 
-    @Serializable data object Display : NavKey
+    @Serializable data class Display(val displayScreenType: DisplayScreenType) : NavKey
 
     object Settings {
         @Serializable data object Main : NavKey
