@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.more.stats
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -12,7 +14,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedStatManga
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
@@ -42,13 +43,12 @@ import org.nekomanga.domain.manga.MangaType
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class StatsPresenter(
-    private val db: DatabaseHelper = Injekt.get(),
-    private val prefs: PreferencesHelper = Injekt.get(),
-    private val libraryPreferences: LibraryPreferences = Injekt.get(),
-    private val trackManager: TrackManager = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get(),
-) : BaseCoroutinePresenter<StatsController>() {
+class StatsViewModel() : ViewModel() {
+    private val db: DatabaseHelper = Injekt.get()
+    private val prefs: PreferencesHelper = Injekt.get()
+    private val libraryPreferences: LibraryPreferences = Injekt.get()
+    private val trackManager: TrackManager = Injekt.get()
+    private val downloadManager: DownloadManager = Injekt.get()
 
     private val _simpleState = MutableStateFlow(StatsConstants.SimpleState())
     val simpleState: StateFlow<StatsConstants.SimpleState> = _simpleState.asStateFlow()
@@ -56,14 +56,13 @@ class StatsPresenter(
     private val _detailState = MutableStateFlow(DetailedState())
     val detailState: StateFlow<DetailedState> = _detailState.asStateFlow()
 
-    override fun onCreate() {
-        super.onCreate()
+    init {
         getDetailState()
         getStatsState()
     }
 
     private fun getStatsState() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
                 _simpleState.value =
@@ -129,7 +128,7 @@ class StatsPresenter(
     }
 
     private fun getDetailState() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isNotEmpty()) {
                 val detailedStatMangaList =
@@ -223,7 +222,7 @@ class StatsPresenter(
     }
 
     fun switchState() {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val newState =
                 when (simpleState.value.screenState) {
                     is StatsConstants.ScreenState.Simple -> {

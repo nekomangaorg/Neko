@@ -5,13 +5,15 @@ import androidx.compose.material.icons.filled.ZoomInMap
 import androidx.compose.material.icons.filled.ZoomOutMap
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
+import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
@@ -24,8 +26,27 @@ import org.nekomanga.presentation.screens.stats.SimpleStats
 
 @Composable
 fun StatsScreen(
-    statsState: State<StatsConstants.SimpleState>,
-    detailedState: State<StatsConstants.DetailedState>,
+    statsViewModel: StatsViewModel,
+    onBackPressed: () -> Unit,
+    windowSizeClass: WindowSizeClass,
+) {
+
+    val statsState by statsViewModel.simpleState.collectAsStateWithLifecycle()
+    val detailedState by statsViewModel.detailState.collectAsStateWithLifecycle()
+
+    StatsWrapper(
+        statsState = statsState,
+        detailedState = detailedState,
+        onBackPressed = onBackPressed,
+        onSwitchClick = statsViewModel::switchState,
+        windowSizeClass = windowSizeClass,
+    )
+}
+
+@Composable
+fun StatsWrapper(
+    statsState: StatsConstants.SimpleState,
+    detailedState: StatsConstants.DetailedState,
     onBackPressed: () -> Unit,
     onSwitchClick: () -> Unit,
     windowSizeClass: WindowSizeClass,
@@ -48,13 +69,13 @@ fun StatsScreen(
     }
 
     val isSimple =
-        rememberSaveable(statsState.value.screenState) {
-            statsState.value.screenState is StatsConstants.ScreenState.Simple
+        rememberSaveable(statsState.screenState) {
+            statsState.screenState is StatsConstants.ScreenState.Simple
         }
     val hideAction =
-        rememberSaveable(statsState.value.screenState) {
-            statsState.value.screenState is StatsConstants.ScreenState.NoResults ||
-                statsState.value.screenState is Loading
+        rememberSaveable(statsState.screenState) {
+            statsState.screenState is StatsConstants.ScreenState.NoResults ||
+                statsState.screenState is Loading
         }
 
     val (actionText, titleText) =
@@ -86,11 +107,11 @@ fun StatsScreen(
         },
         content = { incomingPaddingValues ->
             if (
-                statsState.value.screenState is Loading ||
-                    (statsState.value.screenState is Detailed && detailedState.value.isLoading)
+                statsState.screenState is Loading ||
+                    (statsState.screenState is Detailed && detailedState.isLoading)
             ) {
                 LoadingScreen()
-            } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
+            } else if (statsState.screenState is StatsConstants.ScreenState.NoResults) {
                 EmptyScreen(
                     message = UiText.StringResource(resourceId = R.string.unable_to_generate_stats),
                     contentPadding = incomingPaddingValues,
@@ -98,13 +119,13 @@ fun StatsScreen(
             } else {
                 if (isSimple) {
                     SimpleStats(
-                        statsState = statsState.value,
+                        statsState = statsState,
                         contentPadding = incomingPaddingValues,
                         windowSizeClass = windowSizeClass,
                     )
                 } else {
                     DetailedStats(
-                        detailedStats = detailedState.value,
+                        detailedStats = detailedState,
                         colors = colors,
                         contentPadding = incomingPaddingValues,
                         windowSizeClass = windowSizeClass,

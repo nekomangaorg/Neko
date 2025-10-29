@@ -17,6 +17,7 @@ import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
+import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import org.nekomanga.presentation.components.AppBar
 
@@ -90,13 +91,7 @@ fun MainScreen(
                             windowSizeClass = windowSizeClass,
                         )
                     }
-                    entry<Screens.Settings.Main> {
-                        SettingsScreen(
-                            windowSizeClass = windowSizeClass,
-                            onBackPressed = { backStack.removeLastOrNull() },
-                            deepLink = null,
-                        )
-                    }
+
                     entry<Screens.Manga> { screen ->
                         val mangaViewModel: MangaViewModel =
                             viewModel(factory = MangaViewModel.Factory(screen.mangaId))
@@ -106,6 +101,22 @@ fun MainScreen(
                             windowSizeClass = windowSizeClass,
                             onBackPressed = { backStack.removeLastOrNull() },
                             onNavigate = { screen -> backStack.add(screen) },
+                        )
+                    }
+                    entry<Screens.Settings.Main> {
+                        SettingsScreen(
+                            windowSizeClass = windowSizeClass,
+                            onBackPressed = { backStack.removeLastOrNull() },
+                            deepLink = null,
+                        )
+                    }
+                    entry<Screens.Stats> {
+                        val statsViewModel: StatsViewModel = viewModel()
+
+                        StatsScreen(
+                            statsViewModel = statsViewModel,
+                            windowSizeClass = windowSizeClass,
+                            onBackPressed = { backStack.removeLastOrNull() },
                         )
                     }
                 },
