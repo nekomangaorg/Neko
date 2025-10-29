@@ -3,7 +3,6 @@ package org.nekomanga.presentation.components.dropdown
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
@@ -35,7 +34,6 @@ fun MainDropdownMenu(
     settingsClick: () -> Unit,
     statsClick: () -> Unit,
     aboutClick: () -> Unit,
-    helpClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
 
@@ -69,11 +67,6 @@ fun MainDropdownMenu(
                     title = UiText.StringResource(R.string.about),
                     icon = UiIcon.Icon(Icons.Outlined.Info),
                     onClick = aboutClick,
-                ),
-                DropdownMenuItem(
-                    title = UiText.StringResource(R.string.help),
-                    icon = UiIcon.Icon(Icons.AutoMirrored.Outlined.HelpOutline),
-                    onClick = helpClick,
                 ),
             )
         }

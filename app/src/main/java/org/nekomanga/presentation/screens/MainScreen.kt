@@ -39,7 +39,6 @@ fun MainScreen(
             settingsClick = { backStack.add(Screens.Settings.Main) },
             statsClick = { backStack.add(Screens.Stats) },
             aboutClick = { backStack.add(Screens.About) },
-            helpClick = {},
             menuShowing = onMenuShowing,
         )
 
