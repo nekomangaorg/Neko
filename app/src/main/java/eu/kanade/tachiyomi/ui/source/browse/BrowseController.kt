@@ -4,7 +4,6 @@ import android.view.View
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -17,7 +16,6 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
-        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() == true
 
         /*BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),

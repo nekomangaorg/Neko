@@ -252,11 +252,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // TODO remove the below functions
-    fun isSideNavigation(): Boolean {
-        return false
-    }
-
     companion object {
 
         // Shortcut actions
