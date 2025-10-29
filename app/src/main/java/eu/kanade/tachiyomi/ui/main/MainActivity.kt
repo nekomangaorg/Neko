@@ -5,12 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
@@ -43,36 +44,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import eu.kanade.tachiyomi.ui.feed.FeedViewModel
-import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.ScreenBars
-import eu.kanade.tachiyomi.ui.manga.MangaViewModel
-import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import kotlinx.coroutines.launch
 import org.nekomanga.core.R
 import org.nekomanga.domain.snackbar.SnackbarColor
-import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.screens.BrowseScreen
-import org.nekomanga.presentation.screens.FeedScreen
-import org.nekomanga.presentation.screens.LibraryScreen
-import org.nekomanga.presentation.screens.MangaScreen
+import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
-import org.nekomanga.presentation.screens.SettingsScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -91,6 +81,8 @@ class MainActivity : ComponentActivity() {
         setComposeContent {
             val context = LocalContext.current
 
+            val mainScreenState by viewModel.mainScreenState.collectAsStateWithLifecycle()
+
             // TODO load the correct one in future
             val backStack = rememberNavBackStack(Screens.Library())
 
@@ -104,17 +96,6 @@ class MainActivity : ComponentActivity() {
             }
 
             var mainDropdownShowing by remember { mutableStateOf(false) }
-
-            val mainDropDown =
-                AppBar.MainDropdown(
-                    incognitoMode = false, /*libraryScreenState.value.incognitoMode*/
-                    incognitoModeClick = {},
-                    settingsClick = { backStack.add(Screens.Settings.Main) },
-                    statsClick = {},
-                    aboutClick = {},
-                    helpClick = {},
-                    menuShowing = { visible -> mainDropdownShowing = visible },
-                )
 
             var screenBars by remember { mutableStateOf(ScreenBars()) }
 
@@ -240,93 +221,30 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                         ) { innerPadding ->
-                            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                                NavDisplay(
-                                    backStack = backStack,
-                                    onBack = { backStack.removeLastOrNull() },
-                                    entryDecorators =
-                                        listOf(
-                                            rememberSaveableStateHolderNavEntryDecorator(),
-                                            rememberViewModelStoreNavEntryDecorator(),
-                                        ),
-                                    entryProvider =
-                                        entryProvider {
-                                            entry<Screens.Library> { screen ->
-                                                val libraryViewModel: LibraryViewModel = viewModel()
-                                                if (screen.initialSearch.isNotEmpty()) {
-                                                    libraryViewModel.deepLinkSearch(
-                                                        screen.initialSearch
-                                                    )
-                                                }
-                                                LibraryScreen(
-                                                    libraryViewModel = libraryViewModel,
-                                                    mainDropDown = mainDropDown,
-                                                    openManga = { mangaId ->
-                                                        backStack.add(Screens.Manga(mangaId))
-                                                    },
-                                                    searchMangaDex = { title ->
-                                                        backStack.clear()
-                                                        backStack.add(Screens.Browse(title))
-                                                    },
-                                                    windowSizeClass = windowSizeClass,
-                                                )
-                                            }
-                                            entry<Screens.Feed> {
-                                                val feedViewModel: FeedViewModel = viewModel()
+                            val currentScreen = backStack.lastOrNull()
+                            val drawUnderTopBar = currentScreen is Screens.Manga
+                            val layoutDirection = LocalLayoutDirection.current
 
-                                                FeedScreen(
-                                                    feedViewModel = feedViewModel,
-                                                    mainDropDown = mainDropDown,
-                                                    openManga = { mangaId ->
-                                                        backStack.add(Screens.Manga(mangaId))
-                                                    },
-                                                    windowSizeClass = windowSizeClass,
-                                                )
-                                            }
-                                            entry<Screens.Browse> { screen ->
-                                                val browseViewModel: BrowseViewModel = viewModel()
-                                                if (screen.initialSearch.isNotEmpty()) {
-                                                    browseViewModel.deepLinkQuery(
-                                                        screen.initialSearch
-                                                    )
-                                                }
-                                                BrowseScreen(
-                                                    browseViewModel = browseViewModel,
-                                                    mainDropDown = mainDropDown,
-                                                    openManga = { mangaId ->
-                                                        backStack.add(Screens.Manga(mangaId))
-                                                    },
-                                                    windowSizeClass = windowSizeClass,
-                                                )
-                                            }
-                                            entry<Screens.Settings.Main> {
-                                                SettingsScreen(
-                                                    windowSizeClass = windowSizeClass,
-                                                    onBackPressed = {
-                                                        backStack.removeLastOrNull()
-                                                    },
-                                                    deepLink = null,
-                                                )
-                                            }
-                                            entry<Screens.Manga> { screen ->
-                                                val mangaViewModel: MangaViewModel =
-                                                    viewModel(
-                                                        factory =
-                                                            MangaViewModel.Factory(screen.mangaId)
-                                                    )
+                            val padding =
+                                if (drawUnderTopBar) {
+                                    PaddingValues(
+                                        start = innerPadding.calculateStartPadding(layoutDirection),
+                                        end = innerPadding.calculateEndPadding(layoutDirection),
+                                        bottom = innerPadding.calculateBottomPadding(),
+                                        top = 0.dp,
+                                    )
+                                } else {
+                                    innerPadding
+                                }
 
-                                                MangaScreen(
-                                                    mangaViewModel = mangaViewModel,
-                                                    windowSizeClass = windowSizeClass,
-                                                    onBackPressed = {
-                                                        backStack.removeLastOrNull()
-                                                    },
-                                                    onNavigate = { screen -> backStack.add(screen) },
-                                                )
-                                            }
-                                        },
-                                )
-                            }
+                            MainScreen(
+                                contentPadding = padding,
+                                backStack = backStack,
+                                windowSizeClass = windowSizeClass,
+                                onMenuShowing = { visible -> mainDropdownShowing = visible },
+                                incognitoMode = mainScreenState.incognitoMode,
+                                incognitoClick = viewModel::toggleIncoginito,
+                            )
                         }
                     }
                 }

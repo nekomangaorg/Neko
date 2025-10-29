@@ -9,6 +9,10 @@ object Screens {
 
     @Serializable data object Feed : NavKey
 
+    @Serializable data object Stats : NavKey
+
+    @Serializable data object About : NavKey
+
     @Serializable data class Browse(val initialSearch: String = "") : NavKey
 
     @Serializable data class Manga(val mangaId: Long) : NavKey
