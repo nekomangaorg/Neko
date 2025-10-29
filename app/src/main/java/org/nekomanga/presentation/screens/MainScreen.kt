@@ -62,9 +62,9 @@ fun MainScreen(
                             libraryViewModel = libraryViewModel,
                             mainDropDown = mainDropDown,
                             openManga = { mangaId -> backStack.add(Screens.Manga(mangaId)) },
-                            onSearchMangaDex = { title ->
+                            onSearchMangaDex = { search ->
                                 backStack.clear()
-                                backStack.add(Screens.Browse(title))
+                                backStack.add(Screens.Browse(search))
                             },
                             windowSizeClass = windowSizeClass,
                         )
@@ -81,8 +81,8 @@ fun MainScreen(
                     }
                     entry<Screens.Browse> { screen ->
                         val browseViewModel: BrowseViewModel = viewModel()
-                        if (screen.initialSearch.isNotEmpty()) {
-                            browseViewModel.deepLinkQuery(screen.initialSearch)
+                        if (screen.searchBrowse != null) {
+                            browseViewModel.deepLinkQuery(screen.searchBrowse)
                         }
                         BrowseScreen(
                             browseViewModel = browseViewModel,
@@ -104,6 +104,10 @@ fun MainScreen(
                             onSearchLibrary = { tag ->
                                 backStack.clear()
                                 backStack.add(Screens.Library(initialSearch = tag))
+                            },
+                            onSearchMangaDex = { searchBrowse ->
+                                backStack.clear()
+                                backStack.add(Screens.Browse(searchBrowse = searchBrowse))
                             },
                         )
                     }

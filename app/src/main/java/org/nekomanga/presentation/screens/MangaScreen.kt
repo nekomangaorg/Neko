@@ -70,6 +70,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
+import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -113,6 +115,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
     onNavigate: (NavKey) -> Unit,
     onSearchLibrary: (String) -> Unit,
+    onSearchMangaDex: (SearchBrowse) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -140,11 +143,15 @@ fun MangaScreen(
                     mangaViewModel.copiedToClipboard(it)
                     copyToClipboard(context, it, R.string.creator)
                 },
-                creatorSearch = { text -> getBrowseController()?.searchByCreator(text) },
+                creatorSearch = { text ->
+                    onSearchMangaDex(SearchBrowse(query = text, type = SearchType.Creator))
+                },
             ),
         descriptionActions =
             DescriptionActions(
-                genreSearch = { text -> getBrowseController()?.searchByTag(text) },
+                genreSearch = { text ->
+                    onSearchMangaDex(SearchBrowse(query = text, type = SearchType.Tag))
+                },
                 genreSearchLibrary = onSearchLibrary,
                 altTitleClick = mangaViewModel::setAltTitle,
                 altTitleResetClick = { mangaViewModel.setAltTitle(null) },

@@ -76,8 +76,49 @@ class BrowseViewModel() : ViewModel() {
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
-    fun deepLinkQuery(incomingQuery: String) {
-        _browseScreenState.update { it.copy(filters = createInitialDexFilter(incomingQuery)) }
+    fun deepLinkQuery(searchBrowse: SearchBrowse) {
+        val filters =
+            when (searchBrowse.type) {
+                SearchType.Tag -> {
+                    val blankFilter = createInitialDexFilter("")
+                    if (searchBrowse.query.startsWith("Content rating: ")) {
+                        val rating =
+                            MangaContentRating.getContentRating(
+                                searchBrowse.query.substringAfter("Content rating: ")
+                            )
+                        blankFilter.copy(
+                            contentRatings =
+                                blankFilter.contentRatings
+                                    .map {
+                                        if (it.rating == rating) it.copy(state = true)
+                                        else it.copy(state = false)
+                                    }
+                                    .toPersistentList()
+                        )
+                    } else {
+                        blankFilter.copy(
+                            tags =
+                                blankFilter.tags
+                                    .map {
+                                        if (it.tag.prettyPrint.equals(searchBrowse.query, true))
+                                            it.copy(state = ToggleableState.On)
+                                        else it
+                                    }
+                                    .toPersistentList()
+                        )
+                    }
+                }
+
+                SearchType.Title -> createInitialDexFilter(searchBrowse.query)
+                SearchType.Creator ->
+                    createInitialDexFilter("")
+                        .copy(
+                            queryMode = QueryType.Author,
+                            query = Filter.Query(searchBrowse.query, QueryType.Author),
+                        )
+            }
+        _browseScreenState.update { it.copy(filters = filters) }
+
         getSearchPage()
     }
 

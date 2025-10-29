@@ -38,6 +38,8 @@ import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +63,7 @@ fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
     mainDropDown: AppBar.MainDropdown,
     openManga: (Long) -> Unit,
-    onSearchMangaDex: (String) -> Unit,
+    onSearchMangaDex: (SearchBrowse) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
     val context = LocalContext.current
@@ -301,7 +303,7 @@ private fun LibraryWrapper(
             if (libraryScreenState.items.isEmpty()) {
                 EmptyLibrary(
                     libraryScreenState = libraryScreenState,
-                    searchMangaDex = libraryScreenActions.onSearchMangaDex,
+                    onSearchMangaDex = libraryScreenActions.onSearchMangaDex,
                 )
             } else {
                 if (libraryScreenState.horizontalCategories) {
@@ -342,8 +344,8 @@ private fun LibraryWrapper(
 
 @Composable
 private fun EmptyLibrary(
-    libraryScreenState: eu.kanade.tachiyomi.ui.library.LibraryScreenState,
-    searchMangaDex: (String) -> Unit,
+    libraryScreenState: LibraryScreenState,
+    onSearchMangaDex: (SearchBrowse) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (libraryScreenState.isFirstLoad) {
@@ -356,7 +358,14 @@ private fun EmptyLibrary(
                     persistentListOf(
                         Action(
                             text = (UiText.StringResource(R.string.search_globally)),
-                            onClick = { searchMangaDex(libraryScreenState.searchQuery!!) },
+                            onClick = {
+                                onSearchMangaDex(
+                                    SearchBrowse(
+                                        query = libraryScreenState.searchQuery,
+                                        type = SearchType.Title,
+                                    )
+                                )
+                            },
                         )
                     ),
             )
