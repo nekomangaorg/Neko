@@ -14,6 +14,8 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
         Bundle().apply { putParcelable(Display_Type, displayScreenType) }
     ) {
 
+    @Suppress("unused") constructor(mangaId: Long) : this(DisplayScreenType.Similar(mangaId))
+
     constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(Display_Type)!!)
 
     override var presenter = DisplayPresenter(displayScreenType)
@@ -31,7 +33,7 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
-            retryClick = presenter::loadNextItems,
+            onRefresh = presenter::refresh,
         )
     }
 

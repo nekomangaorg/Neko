@@ -23,13 +23,14 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class DisplayPresenter(
-    displayScreenType: DisplayScreenType,
+    private val displayScreenType: DisplayScreenType,
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
@@ -43,11 +44,7 @@ class DisplayPresenter(
                 isList = preferences.browseAsList().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
-                titleRes =
-                    (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.FeedUpdates)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
+                titleRes = displayScreenType.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
@@ -56,16 +53,18 @@ class DisplayPresenter(
         )
     val displayScreenState: StateFlow<DisplayScreenState> = _displayScreenState.asStateFlow()
 
-    private val paginator =
+    private val paginator by lazy {
         DefaultPaginator(
             initialKey = _displayScreenState.value.page,
-            onLoadUpdated = { _displayScreenState.update { state -> state.copy(isLoading = it) } },
+            onLoadUpdated = {
+                _displayScreenState.update { state -> state.copy(isPageLoading = it) }
+            },
             onRequest = { nextPage -> displayRepository.getPage(nextPage, displayScreenType) },
             getNextKey = { _displayScreenState.value.page + 1 },
             onError = { resultError ->
                 _displayScreenState.update {
                     it.copy(
-                        isLoading = false,
+                        isPageLoading = false,
                         error =
                             when (resultError) {
                                 is ResultError.Generic -> resultError.errorString
@@ -77,23 +76,47 @@ class DisplayPresenter(
             onSuccess = { hasNextPage, items, newKey ->
                 _displayScreenState.update {
                     val allDisplayManga =
-                        (_displayScreenState.value.allDisplayManga + items).distinct()
+                        (_displayScreenState.value.allDisplayManga.getOrElse(0) {
+                                persistentListOf()
+                            } + items)
+                            .distinct()
+                    val mangaMap =
+                        if (paginator.isRefreshing) {
+                            mapOf(0 to allDisplayManga.toPersistentList())
+                        } else {
+                            _displayScreenState.value.allDisplayManga.toMutableMap().apply {
+                                this[0] = allDisplayManga.toPersistentList()
+                            }
+                        }
+
                     it.copy(
-                        isLoading = false,
+                        isPageLoading = false,
                         page = newKey,
                         endReached = !hasNextPage,
-                        allDisplayManga = allDisplayManga.toPersistentList(),
+                        allDisplayManga = mangaMap.toImmutableMap(),
                         filteredDisplayManga =
-                            allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                            _displayScreenState.value.filteredDisplayManga
+                                .toMutableMap()
+                                .apply {
+                                    this[0] =
+                                        allDisplayManga
+                                            .filterVisibility(preferences)
+                                            .toPersistentList()
+                                }
+                                .toImmutableMap(),
                     )
                 }
             },
         )
+    }
 
     override fun onCreate() {
         super.onCreate()
 
-        loadNextItems()
+        when (displayScreenType) {
+            is DisplayScreenType.Similar -> getSimilarManga()
+            else -> loadNextItems()
+        }
 
         presenterScope.launch {
             val categories =
@@ -120,16 +143,60 @@ class DisplayPresenter(
                 _displayScreenState.update {
                     it.copy(
                         libraryEntryVisibility = visibility,
-                        filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                        filteredDisplayManga = it.allDisplayManga.filterVisibility(preferences),
                     )
                 }
             }
         }
     }
 
-    fun loadNextItems() {
-        presenterScope.launch { paginator.loadNextItems() }
+    fun refresh() {
+        when (displayScreenType) {
+            is DisplayScreenType.Similar -> getSimilarManga(true)
+            else -> loadNextItems(true)
+        }
+    }
+
+    private fun getSimilarManga(forceRefresh: Boolean = false) {
+        presenterScope.launch {
+            val mangaId = (displayScreenType as DisplayScreenType.Similar).mangaId
+            val manga = db.getManga(mangaId).executeAsBlocking() ?: return@launch
+            _displayScreenState.update {
+                it.copy(
+                    isRefreshing = true,
+                    allDisplayManga = persistentMapOf(),
+                    filteredDisplayManga = persistentMapOf(),
+                )
+            }
+
+            val list = displayRepository.fetchSimilar(manga.uuid(), forceRefresh)
+            val allDisplayManga =
+                list
+                    .associate { group -> group.type to group.manga.toPersistentList() }
+                    .toImmutableMap()
+            _displayScreenState.update {
+                it.copy(
+                    isRefreshing = false,
+                    allDisplayManga = allDisplayManga,
+                    filteredDisplayManga = allDisplayManga.filterVisibility(preferences),
+                )
+            }
+        }
+    }
+
+    fun loadNextItems(isRefreshing: Boolean = false) {
+        presenterScope.launch {
+            if (isRefreshing) {
+                paginator.reset()
+                _displayScreenState.update {
+                    it.copy(
+                        allDisplayManga = persistentMapOf(),
+                        filteredDisplayManga = persistentMapOf(),
+                    )
+                }
+            }
+            paginator.loadNextItems(isRefreshing)
+        }
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
@@ -169,34 +236,32 @@ class DisplayPresenter(
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         presenterScope.launch {
-            val index =
-                _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
-            val tempDisplayManga =
-                _displayScreenState.value.allDisplayManga[index].copy(inLibrary = favorite)
+            val listOfKeyIndex =
+                _displayScreenState.value.allDisplayManga.mapNotNull { entry ->
+                    val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
+                    when (tempListIndex == -1) {
+                        true -> null
+                        false -> entry.key to tempListIndex
+                    }
+                }
+
+            val tempMap = _displayScreenState.value.allDisplayManga.toMutableMap()
+
+            listOfKeyIndex.forEach { pair ->
+                val mapKey = pair.first
+                val mangaIndex = pair.second
+                val tempList = _displayScreenState.value.allDisplayManga[mapKey]!!.toMutableList()
+                val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
+                tempList[mangaIndex] = tempDisplayManga
+
+                tempMap[mapKey] = tempList.toPersistentList()
+            }
+
             _displayScreenState.update {
-                it.copy(allDisplayManga = it.allDisplayManga.set(index, tempDisplayManga))
-            }
-
-            val filteredIndex =
-                _displayScreenState.value.filteredDisplayManga.indexOfFirst {
-                    it.mangaId == mangaId
-                }
-            if (filteredIndex >= 0) {
-                _displayScreenState.update {
-                    it.copy(
-                        filteredDisplayManga =
-                            it.filteredDisplayManga.set(filteredIndex, tempDisplayManga)
-                    )
-                }
-            }
-
-            if (preferences.browseDisplayMode().get() != 0) {
-                _displayScreenState.update {
-                    it.copy(
-                        filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toPersistentList()
-                    )
-                }
+                it.copy(
+                    allDisplayManga = tempMap.toImmutableMap(),
+                    filteredDisplayManga = tempMap.toImmutableMap().filterVisibility(preferences),
+                )
             }
         }
     }
@@ -230,15 +295,61 @@ class DisplayPresenter(
 
     fun updateMangaForChanges() {
         presenterScope.launch {
+            when (displayScreenType) {
+                is DisplayScreenType.Similar -> updateCovers()
+                else -> {
+                    val newDisplayManga =
+                        _displayScreenState.value.allDisplayManga
+                            .map { entry ->
+                                Pair(entry.key, entry.value.resync(db).unique().toPersistentList())
+                            }
+                            .toMap()
+                            .toImmutableMap()
+                    _displayScreenState.update {
+                        it.copy(
+                            allDisplayManga = newDisplayManga,
+                            filteredDisplayManga = newDisplayManga.filterVisibility(preferences),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateCovers() {
+        presenterScope.launch {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
+                _displayScreenState.value.allDisplayManga
+                    .map { entry ->
+                        Pair(
+                            entry.key,
+                            entry.value
+                                .map {
+                                    val dbManga = db.getManga(it.mangaId).executeAsBlocking()!!
+                                    it.copy(
+                                        currentArtwork =
+                                            it.currentArtwork.copy(
+                                                url = dbManga.user_cover ?: "",
+                                                originalArtwork =
+                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                                            )
+                                    )
+                                }
+                                .toPersistentList(),
+                        )
+                    }
+                    .toMap()
+                    .toImmutableMap()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
-                    filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toPersistentList(),
+                    filteredDisplayManga = newDisplayManga.filterVisibility(preferences),
                 )
             }
         }
+    }
+
+    companion object {
+        const val MANGA_EXTRA = "manga"
     }
 }

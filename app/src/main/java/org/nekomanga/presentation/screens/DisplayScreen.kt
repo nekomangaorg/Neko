@@ -43,10 +43,11 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.MangaGrid
-import org.nekomanga.presentation.components.MangaList
+import org.nekomanga.presentation.components.MangaGridWithHeader
+import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
@@ -63,7 +64,7 @@ fun DisplayScreen(
     addNewCategory: (String) -> Unit,
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
-    retryClick: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -150,85 +151,99 @@ fun DisplayScreen(
                     top = incomingContentPadding.calculateTopPadding(),
                 )
 
-            val haptic = LocalHapticFeedback.current
-            fun mangaLongClick(displayManga: DisplayManga) {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
-                    scope.launch {
-                        openSheet(
-                            DisplaySheetScreen.CategoriesSheet(
-                                setCategories = { selectedCategories ->
-                                    scope.launch { sheetState.hide() }
-                                    toggleFavorite(displayManga.mangaId, selectedCategories)
-                                }
-                            )
-                        )
-                    }
-                } else {
-                    toggleFavorite(displayManga.mangaId, emptyList())
-                }
-            }
-
-            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            } else if (displayScreenState.value.error != null) {
-                EmptyScreen(
-                    message = UiText.String(displayScreenState.value.error!!),
-                    actions =
-                        if (displayScreenState.value.page == 1)
-                            persistentListOf(
-                                Action(
-                                    text = UiText.StringResource(R.string.retry),
-                                    onClick = retryClick,
+            PullRefresh(
+                isRefreshing = displayScreenState.value.isRefreshing,
+                onRefresh = onRefresh,
+            ) {
+                val haptic = LocalHapticFeedback.current
+                fun mangaLongClick(displayManga: DisplayManga) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
+                        scope.launch {
+                            openSheet(
+                                DisplaySheetScreen.CategoriesSheet(
+                                    setCategories = { selectedCategories ->
+                                        scope.launch { sheetState.hide() }
+                                        toggleFavorite(displayManga.mangaId, selectedCategories)
+                                    }
                                 )
                             )
-                        else persistentListOf(),
-                    contentPadding = incomingContentPadding,
-                )
-            } else {
-                if (displayScreenState.value.isList) {
-                    MangaList(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
+                        }
+                    } else {
+                        toggleFavorite(displayManga.mangaId, emptyList())
+                    }
+                }
+
+                if (
+                    (displayScreenState.value.isPageLoading &&
+                        displayScreenState.value.page == 1) ||
+                        (displayScreenState.value.isRefreshing)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                } else if (displayScreenState.value.error != null) {
+                    EmptyScreen(
+                        message = UiText.String(displayScreenState.value.error!!),
+                        actions =
+                            if (displayScreenState.value.page == 1) {
+                                persistentListOf(
+                                    Action(
+                                        text = UiText.StringResource(R.string.retry),
+                                        onClick = onRefresh,
+                                    )
+                                )
+                            } else {
+                                persistentListOf()
+                            },
+                        contentPadding = incomingContentPadding,
                     )
                 } else {
-                    MangaGrid(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns =
-                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
-                        isComfortable = displayScreenState.value.isComfortableGrid,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                }
-                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
-                    Box(Modifier.fillMaxSize()) {
-                        val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
-                        val stroke =
-                            remember(strokeWidth) {
-                                Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                            }
-                        LinearWavyProgressIndicator(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .align(Alignment.TopStart)
-                                    .statusBarsPadding(),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
-                            stroke = stroke,
-                            trackStroke = stroke,
+                    if (displayScreenState.value.isList) {
+                        MangaListWithHeader(
+                            groupedManga = displayScreenState.value.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
                         )
+                    } else {
+                        MangaGridWithHeader(
+                            groupedManga = displayScreenState.value.filteredDisplayManga,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            columns =
+                                numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
+                            isComfortable = displayScreenState.value.isComfortableGrid,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    }
+                    if (
+                        displayScreenState.value.isPageLoading && displayScreenState.value.page > 1
+                    ) {
+                        Box(Modifier.fillMaxSize()) {
+                            val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                            val stroke =
+                                remember(strokeWidth) {
+                                    Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                }
+                            LinearWavyProgressIndicator(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .align(Alignment.TopStart)
+                                        .statusBarsPadding(),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor =
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                stroke = stroke,
+                                trackStroke = stroke,
+                            )
+                        }
                     }
                 }
             }

@@ -276,3 +276,26 @@ fun List<DisplayManga>.filterVisibility(prefs: PreferencesHelper): List<DisplayM
         else -> this
     }
 }
+
+fun ImmutableMap<Int, PersistentList<DisplayManga>>.filterVisibility(
+    prefs: PreferencesHelper
+): ImmutableMap<Int, PersistentList<DisplayManga>> {
+    val visibilityMode = prefs.browseDisplayMode().get()
+
+    return this.mapValues { (_, displayMangaList) ->
+            displayMangaList
+                .filter { displayManga ->
+                    when (visibilityMode) {
+                        LibraryEntryVisibility.SHOW_IN_LIBRARY -> displayManga.inLibrary
+                        LibraryEntryVisibility.SHOW_NOT_IN_LIBRARY -> !displayManga.inLibrary
+                        else -> true
+                    }
+                }
+                .toPersistentList()
+        }
+        .toImmutableMap()
+}
+
+fun Manga.toDisplayManga(title: String): DisplayManga {
+    return this.toDisplayManga(displayText = title)
+}

@@ -15,7 +15,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -31,7 +30,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
@@ -137,7 +135,7 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             onSimilarClick = {
                 router.pushController(
-                    SimilarController(presenter.getManga().uuid()).withFadeTransaction()
+                    DisplayController(presenter.getManga().id!!).withFadeTransaction()
                 )
             },
             onShareClick = { shareManga(context) },
@@ -308,8 +306,7 @@ class MangaDetailController(private val mangaId: Long) :
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
             is FeedController,
-            is DisplayController,
-            is SimilarController -> {
+            is DisplayController -> {
                 router.popToRoot()
                 (activity as? MainActivity)?.goToTab(R.id.nav_browse)
                 router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
