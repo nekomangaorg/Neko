@@ -17,6 +17,7 @@ import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
+import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import org.nekomanga.presentation.components.AppBar
@@ -118,6 +119,20 @@ fun MainScreen(
                             windowSizeClass = windowSizeClass,
                             onBackPressed = { backStack.removeLastOrNull() },
                         )
+                    }
+
+                    entry<Screens.About> {
+                        val aboutView: AboutViewModel = viewModel()
+                        AboutScreen(
+                            aboutViewModel = aboutView,
+                            windowSizeClass = windowSizeClass,
+                            onBackPressed = { backStack.removeLastOrNull() },
+                            onNavigateTo = { backStack.add(Screens.License) },
+                        )
+                    }
+
+                    entry<Screens.License> {
+                        LicenseScreen(onBackPressed = { backStack.removeLastOrNull() })
                     }
                 },
         )
