@@ -119,7 +119,8 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             onSimilarClick = {
                 router.pushController(
-                    SimilarController(presenter.getManga().uuid()).withFadeTransaction()
+                    DisplayController(DisplayScreenType.Similar(presenter.getManga().uuid()))
+                        .withFadeTransaction(),
                 )
             },
             onShareClick = { shareManga(context) },

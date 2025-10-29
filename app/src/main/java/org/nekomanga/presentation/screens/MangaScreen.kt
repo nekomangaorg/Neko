@@ -206,9 +206,13 @@ fun MangaScreen(
                 add = mangaViewModel::addMergedManga,
             ),
         onSimilarClick = {
-            /* router.pushController(
-                SimilarController(mangaViewModel.getManga().uuid()).withFadeTransaction()
-            )*/
+            onNavigate(
+                NavKey(
+                    DisplayController(
+                        DisplayScreenType.Similar(mangaViewModel.getManga().uuid()),
+                    ),
+                ),
+            )
         },
         onShareClick = {
             scope.launch {

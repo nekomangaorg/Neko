@@ -36,6 +36,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -44,9 +47,12 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGrid
+import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaList
+import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
@@ -56,6 +62,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun DisplayScreen(
     displayScreenState: State<DisplayScreenState>,
+    displayScreenType: DisplayScreenType,
     switchDisplayClick: () -> Unit,
     libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
@@ -64,6 +71,7 @@ fun DisplayScreen(
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -84,7 +92,6 @@ fun DisplayScreen(
     val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
     if (currentBottomSheet != null) {
-
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { currentBottomSheet = null },
@@ -95,13 +102,14 @@ fun DisplayScreen(
                             currentScreen = currentSheet,
                             addNewCategory = addNewCategory,
                             contentPadding =
-                                WindowInsets.navigationBars
-                                    .only(WindowInsetsSides.Bottom)
-                                    .asPaddingValues(),
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues(),
                             closeSheet = { currentBottomSheet = null },
                             categories = displayScreenState.value.categories,
                             isList = displayScreenState.value.isList,
-                            libraryEntryVisibility = displayScreenState.value.libraryEntryVisibility,
+                            libraryEntryVisibility =
+                            displayScreenState.value.libraryEntryVisibility,
                         )
                     }
                 }
@@ -113,40 +121,44 @@ fun DisplayScreen(
         onNavigationIconClicked = onBackPress,
         incognitoMode = displayScreenState.value.incognitoMode,
         title =
-            if (displayScreenState.value.titleRes != null)
-                stringResource(id = displayScreenState.value.titleRes!!)
-            else displayScreenState.value.title,
+        if (displayScreenState.value.titleRes != null) {
+            stringResource(id = displayScreenState.value.titleRes!!)
+        } else if (displayScreenType is DisplayScreenType.Similar) {
+            stringResource(id = R.string.similar)
+        } else {
+            displayScreenState.value.title
+        },
         actions = {
             AppBarActions(
                 actions =
-                    listOf(
-                        AppBar.Action(
-                            title = UiText.StringResource(R.string.settings),
-                            icon = Icons.Outlined.Tune,
-                            onClick = {
-                                scope.launch {
-                                    openSheet(
-                                        DisplaySheetScreen.BrowseDisplayOptionsSheet(
-                                            showIsList = true,
-                                            switchDisplayClick = switchDisplayClick,
-                                            libraryEntryVisibilityClick =
-                                                libraryEntryVisibilityClick,
-                                        )
-                                    )
-                                }
-                            },
-                        )
-                    )
+                listOf(
+                    AppBar.Action(
+                        title = UiText.StringResource(R.string.settings),
+                        icon = Icons.Outlined.Tune,
+                        onClick = {
+                            scope.launch {
+                                openSheet(
+                                    DisplaySheetScreen.BrowseDisplayOptionsSheet(
+                                        showIsList = true,
+                                        switchDisplayClick = switchDisplayClick,
+                                        libraryEntryVisibilityClick =
+                                        libraryEntryVisibilityClick,
+                                    ),
+                                )
+                            }
+                        },
+                    ),
+                ),
             )
         },
         content = { incomingContentPadding ->
             val contentPadding =
                 PaddingValues(
                     bottom =
-                        WindowInsets.navigationBars
-                            .only(WindowInsetsSides.Bottom)
-                            .asPaddingValues()
-                            .calculateBottomPadding(),
+                    WindowInsets.navigationBars
+                        .only(WindowInsetsSides.Bottom)
+                        .asPaddingValues()
+                        .calculateBottomPadding(),
                     top = incomingContentPadding.calculateTopPadding(),
                 )
 
@@ -160,8 +172,8 @@ fun DisplayScreen(
                                 setCategories = { selectedCategories ->
                                     scope.launch { sheetState.hide() }
                                     toggleFavorite(displayManga.mangaId, selectedCategories)
-                                }
-                            )
+                                },
+                            ),
                         )
                     }
                 } else {
@@ -169,69 +181,143 @@ fun DisplayScreen(
                 }
             }
 
-            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+            if (displayScreenType is DisplayScreenType.Similar) {
+                PullRefresh(
+                    isRefreshing = displayScreenState.value.isRefreshing,
+                    onRefresh = onRefresh,
+                ) {
+                    SimilarContent(
+                        similarScreenState = displayScreenState,
+                        paddingValues = incomingContentPadding,
+                        mangaClick = openManga,
+                        mangaLongClick = ::mangaLongClick,
+                    )
                 }
-            } else if (displayScreenState.value.error != null) {
-                EmptyScreen(
-                    message = UiText.String(displayScreenState.value.error!!),
-                    actions =
-                        if (displayScreenState.value.page == 1)
+            } else {
+                if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                } else if (displayScreenState.value.error != null) {
+                    EmptyScreen(
+                        message = UiText.String(displayScreenState.value.error!!),
+                        actions =
+                        if (displayScreenState.value.page == 1) {
                             persistentListOf(
                                 Action(
                                     text = UiText.StringResource(R.string.retry),
                                     onClick = retryClick,
-                                )
+                                ),
                             )
-                        else persistentListOf(),
-                    contentPadding = incomingContentPadding,
-                )
-            } else {
-                if (displayScreenState.value.isList) {
-                    MangaList(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
+                        } else {
+                            persistentListOf()
+                        },
+                        contentPadding = incomingContentPadding,
                     )
                 } else {
-                    MangaGrid(
-                        mangaList = displayScreenState.value.filteredDisplayManga,
-                        shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns =
-                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
-                        isComfortable = displayScreenState.value.isComfortableGrid,
-                        contentPadding = contentPadding,
-                        onClick = openManga,
-                        onLongClick = ::mangaLongClick,
-                        lastPage = displayScreenState.value.endReached,
-                        loadNextItems = loadNextPage,
-                    )
-                }
-                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
-                    Box(Modifier.fillMaxSize()) {
-                        val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
-                        val stroke =
-                            remember(strokeWidth) {
-                                Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                            }
-                        LinearWavyProgressIndicator(
-                            modifier =
+                    if (displayScreenState.value.isList) {
+                        MangaList(
+                            mangaList =
+                            displayScreenState.value.filteredDisplayManga as
+                                PersistentList<DisplayManga>,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    } else {
+                        MangaGrid(
+                            mangaList =
+                            displayScreenState.value.filteredDisplayManga as
+                                PersistentList<DisplayManga>,
+                            shouldOutlineCover = displayScreenState.value.outlineCovers,
+                            columns =
+                            numberOfColumns(
+                                rawValue = displayScreenState.value.rawColumnCount,
+                            ),
+                            isComfortable = displayScreenState.value.isComfortableGrid,
+                            contentPadding = contentPadding,
+                            onClick = openManga,
+                            onLongClick = ::mangaLongClick,
+                            lastPage = displayScreenState.value.endReached,
+                            loadNextItems = loadNextPage,
+                        )
+                    }
+                    if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
+                        Box(Modifier.fillMaxSize()) {
+                            val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
+                            val stroke =
+                                remember(strokeWidth) {
+                                    Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                }
+                            LinearWavyProgressIndicator(
+                                modifier =
                                 Modifier.fillMaxWidth()
                                     .align(Alignment.TopStart)
                                     .statusBarsPadding(),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
-                            stroke = stroke,
-                            trackStroke = stroke,
-                        )
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.24f),
+                                stroke = stroke,
+                                trackStroke = stroke,
+                            )
+                        }
                     }
                 }
             }
         },
     )
+}
+
+@Composable
+private fun SimilarContent(
+    similarScreenState: State<DisplayScreenState>,
+    paddingValues: PaddingValues = PaddingValues(),
+    mangaClick: (Long) -> Unit,
+    mangaLongClick: (DisplayManga) -> Unit,
+) {
+    val filteredDisplayManga =
+        similarScreenState.value.filteredDisplayManga as
+            ImmutableMap<Int, PersistentList<DisplayManga>>
+    if (filteredDisplayManga.isEmpty()) {
+        if (similarScreenState.value.isRefreshing) {
+            Box(modifier = Modifier.fillMaxSize())
+        } else {
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.no_results_found),
+                actions = persistentListOf(),
+            )
+        }
+    } else {
+        val contentPadding =
+            PaddingValues(
+                bottom =
+                WindowInsets.navigationBars
+                    .only(WindowInsetsSides.Bottom)
+                    .asPaddingValues()
+                    .calculateBottomPadding(),
+                top = paddingValues.calculateTopPadding(),
+            )
+
+        if (similarScreenState.value.isList) {
+            MangaListWithHeader(
+                groupedManga = filteredDisplayManga,
+                shouldOutlineCover = similarScreenState.value.outlineCovers,
+                contentPadding = contentPadding,
+                onClick = mangaClick,
+                onLongClick = mangaLongClick,
+            )
+        } else {
+            MangaGridWithHeader(
+                groupedManga = filteredDisplayManga,
+                shouldOutlineCover = similarScreenState.value.outlineCovers,
+                columns = numberOfColumns(rawValue = similarScreenState.value.rawColumnCount),
+                isComfortable = similarScreenState.value.isComfortableGrid,
+                contentPadding = contentPadding,
+                onClick = mangaClick,
+                onLongClick = mangaLongClick,
+            )
+        }
+    }
 }
