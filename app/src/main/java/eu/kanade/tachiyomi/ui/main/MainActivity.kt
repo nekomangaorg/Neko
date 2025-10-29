@@ -35,11 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -86,6 +84,16 @@ class MainActivity : ComponentActivity() {
             // TODO load the correct one in future
             val backStack = rememberNavBackStack(Screens.Library())
 
+            val selectedItemIndex =
+                remember(backStack.lastOrNull()) {
+                    when (backStack.lastOrNull()) {
+                        is Screens.Library -> 0
+                        is Screens.Feed -> 1
+                        is Screens.Browse -> 2
+                        else -> -1
+                    }
+                }
+
             val snackbarHostState = remember { SnackbarHostState() }
             var currentSnackbarColor by remember { mutableStateOf<SnackbarColor?>(null) }
 
@@ -120,8 +128,6 @@ class MainActivity : ComponentActivity() {
                     pullRefreshState = newPullRefreshState
                 }
             }
-
-            var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
             // TODO status bar colors and navigation bar colors
 
@@ -189,8 +195,7 @@ class MainActivity : ComponentActivity() {
                             NavigationSideBar(
                                 items = navItems,
                                 selectedItemIndex = selectedItemIndex,
-                                onNavigate = { screen, index ->
-                                    selectedItemIndex = index
+                                onNavigate = { screen ->
                                     backStack.clear()
                                     backStack.add(screen)
                                 },
@@ -212,8 +217,7 @@ class MainActivity : ComponentActivity() {
                                     BottomBar(
                                         items = navItems,
                                         selectedItemIndex = selectedItemIndex,
-                                        onNavigate = { screen, index ->
-                                            selectedItemIndex = index
+                                        onNavigate = { screen ->
                                             backStack.clear()
                                             backStack.add(screen)
                                         },
@@ -276,11 +280,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BottomBar(
-    items: List<NavigationItem>,
-    selectedItemIndex: Int,
-    onNavigate: (NavKey, Int) -> Unit,
-) {
+fun BottomBar(items: List<NavigationItem>, selectedItemIndex: Int, onNavigate: (NavKey) -> Unit) {
 
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
@@ -288,7 +288,7 @@ fun BottomBar(
             items.forEachIndexed { index, item ->
                 NavigationBarItem(
                     selected = selectedItemIndex == index,
-                    onClick = { onNavigate(item.screen, index) },
+                    onClick = { onNavigate(item.screen) },
                     icon = {
                         Icon(
                             imageVector =
@@ -308,7 +308,7 @@ fun BottomBar(
 fun NavigationSideBar(
     items: List<NavigationItem>,
     selectedItemIndex: Int,
-    onNavigate: (NavKey, Int) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     NavigationRail(
         modifier = Modifier.fillMaxHeight(),
@@ -316,7 +316,7 @@ fun NavigationSideBar(
             items.forEachIndexed { index, item ->
                 NavigationRailItem(
                     selected = selectedItemIndex == index,
-                    onClick = { onNavigate(item.screen, index) },
+                    onClick = { onNavigate(item.screen) },
                     icon = {
                         Icon(
                             imageVector =

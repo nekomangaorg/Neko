@@ -62,7 +62,7 @@ fun MainScreen(
                             libraryViewModel = libraryViewModel,
                             mainDropDown = mainDropDown,
                             openManga = { mangaId -> backStack.add(Screens.Manga(mangaId)) },
-                            searchMangaDex = { title ->
+                            onSearchMangaDex = { title ->
                                 backStack.clear()
                                 backStack.add(Screens.Browse(title))
                             },

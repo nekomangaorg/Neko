@@ -61,7 +61,7 @@ fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
     mainDropDown: AppBar.MainDropdown,
     openManga: (Long) -> Unit,
-    searchMangaDex: (String) -> Unit,
+    onSearchMangaDex: (String) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
     val context = LocalContext.current
@@ -76,7 +76,7 @@ fun LibraryScreen(
                 deleteSelectedLibraryMangaItems = libraryViewModel::deleteSelectedLibraryMangaItems,
                 clearSelectedManga = libraryViewModel::clearSelectedManga,
                 search = libraryViewModel::search,
-                searchMangaDex = searchMangaDex,
+                onSearchMangaDex = onSearchMangaDex,
                 updateLibrary = {
                     if (!LibraryUpdateJob.isRunning(context)) {
                         LibraryUpdateJob.startNow(context)
@@ -301,7 +301,7 @@ private fun LibraryWrapper(
             if (libraryScreenState.items.isEmpty()) {
                 EmptyLibrary(
                     libraryScreenState = libraryScreenState,
-                    searchMangaDex = libraryScreenActions.searchMangaDex,
+                    searchMangaDex = libraryScreenActions.onSearchMangaDex,
                 )
             } else {
                 if (libraryScreenState.horizontalCategories) {

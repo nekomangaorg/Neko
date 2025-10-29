@@ -77,9 +77,8 @@ class BrowseViewModel() : ViewModel() {
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
     fun deepLinkQuery(incomingQuery: String) {
-        _browseScreenState.update {
-            it.copy(incomingQuery = incomingQuery, filters = createInitialDexFilter(incomingQuery))
-        }
+        _browseScreenState.update { it.copy(filters = createInitialDexFilter(incomingQuery)) }
+        getSearchPage()
     }
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
@@ -465,7 +464,7 @@ class BrowseViewModel() : ViewModel() {
                             }
                         }
                         .onSuccess { dm ->
-                            if (
+                            /*if (
                                 _browseScreenState.value.incomingQuery.isNotEmpty() &&
                                     !_browseScreenState.value.handledIncomingQuery
                             ) {
@@ -479,7 +478,7 @@ class BrowseViewModel() : ViewModel() {
                                         incomingQuery = "",
                                     )
                                 }
-                            }
+                            }*/
                             // TODO view?.openManga(dm.mangaId, true)
                         }
                 }

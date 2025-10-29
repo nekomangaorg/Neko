@@ -41,7 +41,6 @@ data class BrowseScreenState(
     val promptForCategories: Boolean = false,
     val filters: DexFilters,
     val defaultContentRatings: ImmutableSet<String>,
-    val incomingQuery: String = "",
     val handledIncomingQuery: Boolean = false,
     val firstLoad: Boolean = true,
     val savedFilters: PersistentList<BrowseFilterImpl> = persistentListOf(),

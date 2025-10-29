@@ -993,10 +993,6 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    fun toggleIncognitoMode() {
-        viewModelScope.launchIO { securityPreferences.incognitoMode().toggle() }
-    }
-
     fun search(searchQuery: String?) {
         _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
     }
