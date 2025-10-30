@@ -59,19 +59,19 @@ fun HorizontalCategoriesPage(
     libraryCategoryActions: LibraryCategoryActions,
     categorySortClick: (CategoryItem) -> Unit,
 ) {
-    val pagerState =
-        rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f) {
-            libraryScreenState.items.size
-        }
 
-    LaunchedEffect(libraryScreenState.items.size) {
-        if (
-            pagerState.currentPage >= libraryScreenState.items.size &&
-                libraryScreenState.items.isNotEmpty()
-        ) {
-            pagerState.scrollToPage(0)
+    val pageCount = libraryScreenState.items.size
+
+    val pagerState =
+        rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f) { pageCount }
+
+    LaunchedEffect(libraryScreenState.currentGroupBy) {
+        if (pagerState.currentPage != 0) {
+            pagerState.scrollToPage(0, 0f) // Snap to page 0
         }
     }
+
+    val isValidState = pagerState.currentPage < pageCount
 
     val scope = rememberCoroutineScope()
     val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
@@ -88,209 +88,220 @@ fun HorizontalCategoriesPage(
         }
 
     Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
-        SecondaryScrollableTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            modifier = Modifier.fillMaxWidth(),
-            edgePadding = Size.small,
-            divider = {},
-        ) {
-            libraryScreenState.items.forEachIndexed { index, item ->
-                val isSelected = pagerState.currentPage == index
+        if (isValidState) {
+            SecondaryScrollableTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                modifier = Modifier.fillMaxWidth(),
+                edgePadding = Size.small,
+                divider = {},
+            ) {
+                libraryScreenState.items.forEachIndexed { index, item ->
+                    val isSelected = pagerState.currentPage == index
 
-                Tab(
-                    text = {
-                        Text(
-                            item.categoryItem.name,
-                            color =
-                                if (isSelected) indicatorColor
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                    selected = isSelected,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                )
-            }
-        }
-
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().weight(1f)) { page ->
-            val item = libraryScreenState.items[page]
-
-            val allSelected by
-                remember(selectionMode, selectedIds) {
-                    mutableStateOf(
-                        item.libraryItems.isNotEmpty() &&
-                            item.libraryItems
-                                .map { it.displayManga.mangaId }
-                                .all { id -> id in selectedIds }
+                    Tab(
+                        text = {
+                            Text(
+                                item.categoryItem.name,
+                                color =
+                                    if (isSelected) indicatorColor
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        selected = isSelected,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     )
                 }
-            when (libraryScreenState.libraryDisplayMode) {
-                is LibraryDisplayMode.ComfortableGrid,
-                is LibraryDisplayMode.CompactGrid -> {
-                    Column {
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .clickable(
-                                        enabled = selectionMode,
-                                        onClick = {
-                                            libraryScreenActions.selectAllLibraryMangaItems(
-                                                item.libraryItems
+            }
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().weight(1f)) {
+                page ->
+                val item = libraryScreenState.items[page]
+
+                val allSelected by
+                    remember(selectionMode, selectedIds) {
+                        mutableStateOf(
+                            item.libraryItems.isNotEmpty() &&
+                                item.libraryItems
+                                    .map { it.displayManga.mangaId }
+                                    .all { id -> id in selectedIds }
+                        )
+                    }
+                when (libraryScreenState.libraryDisplayMode) {
+                    is LibraryDisplayMode.ComfortableGrid,
+                    is LibraryDisplayMode.CompactGrid -> {
+                        Column {
+                            Row(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .clickable(
+                                            enabled = selectionMode,
+                                            onClick = {
+                                                libraryScreenActions.selectAllLibraryMangaItems(
+                                                    item.libraryItems
+                                                )
+                                            },
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                AnimatedVisibility(selectionMode) {
+                                    Icon(
+                                        imageVector =
+                                            if (allSelected) Icons.Default.CheckCircleOutline
+                                            else Icons.Outlined.Circle,
+                                        contentDescription = null,
+                                        tint = indicatorColor,
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                CategorySortButtons(
+                                    textColor = indicatorColor,
+                                    enabled = true,
+                                    categorySortClick = { categorySortClick(item.categoryItem) },
+                                    sortString =
+                                        stringResource(
+                                            item.categoryItem.sortOrder.stringRes(
+                                                item.categoryItem.isDynamic
                                             )
-                                        },
-                                    ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            AnimatedVisibility(selectionMode) {
-                                Icon(
-                                    imageVector =
-                                        if (allSelected) Icons.Default.CheckCircleOutline
-                                        else Icons.Outlined.Circle,
-                                    contentDescription = null,
-                                    tint = indicatorColor,
+                                        ),
+                                    isAscending = item.categoryItem.isAscending,
+                                    categoryIsRefreshing = item.isRefreshing,
+                                    ascendingClick = {
+                                        libraryCategoryActions.categoryAscendingClick(
+                                            item.categoryItem
+                                        )
+                                    },
+                                    categoryRefreshClick = {
+                                        libraryCategoryActions.categoryRefreshClick(
+                                            item.categoryItem
+                                        )
+                                    },
                                 )
                             }
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            CategorySortButtons(
-                                textColor = indicatorColor,
-                                enabled = true,
-                                categorySortClick = { categorySortClick(item.categoryItem) },
-                                sortString =
-                                    stringResource(
-                                        item.categoryItem.sortOrder.stringRes(
-                                            item.categoryItem.isDynamic
-                                        )
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
+                                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                                contentPadding =
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding(),
+                                        top = Size.small,
                                     ),
-                                isAscending = item.categoryItem.isAscending,
-                                categoryIsRefreshing = item.isRefreshing,
-                                ascendingClick = {
-                                    libraryCategoryActions.categoryAscendingClick(item.categoryItem)
-                                },
-                                categoryRefreshClick = {
-                                    libraryCategoryActions.categoryRefreshClick(item.categoryItem)
-                                },
-                            )
-                        }
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(columns),
-                            modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
-                            horizontalArrangement = Arrangement.spacedBy(Size.small),
-                            contentPadding =
-                                PaddingValues(
-                                    bottom = contentPadding.calculateBottomPadding(),
-                                    top = Size.small,
-                                ),
-                        ) {
-                            itemsIndexed(
-                                items = item.libraryItems,
-                                key = { index, libraryItem ->
-                                    "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
-                                },
-                            ) { index, libraryItem ->
-                                MangaGridItem(
-                                    displayManga = libraryItem.displayManga,
-                                    showUnreadBadge = libraryScreenState.showUnreadBadges,
-                                    unreadCount = libraryItem.unreadCount,
-                                    showDownloadBadge = libraryScreenState.showDownloadBadges,
-                                    downloadCount = libraryItem.downloadCount,
-                                    shouldOutlineCover = libraryScreenState.outlineCovers,
-                                    isComfortable =
-                                        libraryScreenState.libraryDisplayMode
-                                            is LibraryDisplayMode.ComfortableGrid,
-                                    isSelected =
-                                        selectedIds.contains(libraryItem.displayManga.mangaId),
-                                    showStartReadingButton =
-                                        libraryScreenState.showStartReadingButton &&
-                                            libraryItem.unreadCount > 0,
-                                    onStartReadingClick = {
-                                        libraryScreenActions.mangaStartReadingClick(
-                                            libraryItem.displayManga.mangaId
-                                        )
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
+                                    key = { index, libraryItem ->
+                                        "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
                                     },
-                                    onClick = {
-                                        if (libraryScreenState.selectedItems.isNotEmpty()) {
-                                            libraryScreenActions.mangaLongClick(libraryItem)
-                                        } else {
-                                            libraryScreenActions.mangaClick(
+                                ) { index, libraryItem ->
+                                    MangaGridItem(
+                                        displayManga = libraryItem.displayManga,
+                                        showUnreadBadge = libraryScreenState.showUnreadBadges,
+                                        unreadCount = libraryItem.unreadCount,
+                                        showDownloadBadge = libraryScreenState.showDownloadBadges,
+                                        downloadCount = libraryItem.downloadCount,
+                                        shouldOutlineCover = libraryScreenState.outlineCovers,
+                                        isComfortable =
+                                            libraryScreenState.libraryDisplayMode
+                                                is LibraryDisplayMode.ComfortableGrid,
+                                        isSelected =
+                                            selectedIds.contains(libraryItem.displayManga.mangaId),
+                                        showStartReadingButton =
+                                            libraryScreenState.showStartReadingButton &&
+                                                libraryItem.unreadCount > 0,
+                                        onStartReadingClick = {
+                                            libraryScreenActions.mangaStartReadingClick(
                                                 libraryItem.displayManga.mangaId
                                             )
-                                        }
-                                    },
-                                    onLongClick = {
-                                        libraryScreenActions.mangaLongClick(libraryItem)
-                                    },
-                                )
+                                        },
+                                        onClick = {
+                                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                                                libraryScreenActions.mangaLongClick(libraryItem)
+                                            } else {
+                                                libraryScreenActions.mangaClick(
+                                                    libraryItem.displayManga.mangaId
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            libraryScreenActions.mangaLongClick(libraryItem)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                is LibraryDisplayMode.List -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .clickable(
-                                        enabled = selectionMode,
-                                        onClick = {
-                                            libraryScreenActions.selectAllLibraryMangaItems(
-                                                item.libraryItems
+
+                    is LibraryDisplayMode.List -> {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Row(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .clickable(
+                                            enabled = selectionMode,
+                                            onClick = {
+                                                libraryScreenActions.selectAllLibraryMangaItems(
+                                                    item.libraryItems
+                                                )
+                                            },
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Gap(Size.medium)
+                                AnimatedVisibility(selectionMode) {
+                                    Icon(
+                                        imageVector =
+                                            if (allSelected) Icons.Default.CheckCircleOutline
+                                            else Icons.Outlined.Circle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.tertiary,
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                CategorySortButtons(
+                                    enabled = true,
+                                    categorySortClick = { categorySortClick(item.categoryItem) },
+                                    sortString =
+                                        stringResource(
+                                            item.categoryItem.sortOrder.stringRes(
+                                                item.categoryItem.isDynamic
                                             )
-                                        },
-                                    ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Gap(Size.medium)
-                            AnimatedVisibility(selectionMode) {
-                                Icon(
-                                    imageVector =
-                                        if (allSelected) Icons.Default.CheckCircleOutline
-                                        else Icons.Outlined.Circle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary,
+                                        ),
+                                    isAscending = item.categoryItem.isAscending,
+                                    categoryIsRefreshing = item.isRefreshing,
+                                    ascendingClick = {
+                                        libraryCategoryActions.categoryAscendingClick(
+                                            item.categoryItem
+                                        )
+                                    },
+                                    categoryRefreshClick = {
+                                        libraryCategoryActions.categoryRefreshClick(
+                                            item.categoryItem
+                                        )
+                                    },
                                 )
                             }
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            CategorySortButtons(
-                                enabled = true,
-                                categorySortClick = { categorySortClick(item.categoryItem) },
-                                sortString =
-                                    stringResource(
-                                        item.categoryItem.sortOrder.stringRes(
-                                            item.categoryItem.isDynamic
-                                        )
-                                    ),
-                                isAscending = item.categoryItem.isAscending,
-                                categoryIsRefreshing = item.isRefreshing,
-                                ascendingClick = {
-                                    libraryCategoryActions.categoryAscendingClick(item.categoryItem)
-                                },
-                                categoryRefreshClick = {
-                                    libraryCategoryActions.categoryRefreshClick(item.categoryItem)
-                                },
-                            )
-                        }
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding =
-                                PaddingValues(bottom = contentPadding.calculateBottomPadding()),
-                        ) {
-                            itemsIndexed(
-                                items = item.libraryItems,
-                                key = { index, libraryItem ->
-                                    "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
-                                },
-                            ) { index, libraryItem ->
-                                ListItem(
-                                    index = index,
-                                    totalSize = item.libraryItems.size,
-                                    selectedIds = selectedIds,
-                                    libraryScreenState = libraryScreenState,
-                                    libraryItem = libraryItem,
-                                    libraryScreenActions = libraryScreenActions,
-                                )
-                                Gap(Size.tiny)
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
+                                    key = { index, libraryItem ->
+                                        "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                    },
+                                ) { index, libraryItem ->
+                                    ListItem(
+                                        index = index,
+                                        totalSize = item.libraryItems.size,
+                                        selectedIds = selectedIds,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryItem = libraryItem,
+                                        libraryScreenActions = libraryScreenActions,
+                                    )
+                                    Gap(Size.tiny)
+                                }
                             }
                         }
                     }
