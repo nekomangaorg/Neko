@@ -27,6 +27,7 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,16 @@ fun HorizontalCategoriesPage(
         rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f) {
             libraryScreenState.items.size
         }
+
+    LaunchedEffect(libraryScreenState.items.size) {
+        if (
+            pagerState.currentPage >= libraryScreenState.items.size &&
+                libraryScreenState.items.isNotEmpty()
+        ) {
+            pagerState.scrollToPage(0)
+        }
+    }
+
     val scope = rememberCoroutineScope()
     val columns = numberOfColumns(rawValue = libraryScreenState.rawColumnCount)
     val selectedIds =
