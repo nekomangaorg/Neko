@@ -162,13 +162,13 @@ object DiskUtil {
 
     fun cleanupDiskSpace(directory: File, context: Context, isTmpFileLookup: Boolean = false) {
         if (isTmpFileLookup) {
-            File(context.cacheDir, "").listFiles()!!.asSequence().forEach {
+            File(context.cacheDir, "").listFiles()?.asSequence()?.forEach {
                 if (it.isFile && (it.name.endsWith(TMP_FILE_SUFFIX))) {
                     it.delete()
                 }
             }
         } else {
-            directory.listFiles()!!.asSequence().forEach { it.delete() }
+            directory.listFiles()?.asSequence()?.forEach { it.delete() }
         }
     }
 

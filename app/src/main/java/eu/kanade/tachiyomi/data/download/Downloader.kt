@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -70,6 +71,7 @@ class Downloader(
     private val preferences: PreferencesHelper by injectLazy()
     private val readerPreferences: ReaderPreferences by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
+
     private val db: DatabaseHelper by injectLazy()
 
     /** Store for persisting downloads across restarts. */
@@ -256,11 +258,15 @@ class Downloader(
         val wasEmpty = queueState.value.isEmpty()
         val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()
 
+        val chapterSort = ChapterSort(manga)
+
         val chaptersToQueue =
             chapters
                 .asSequence()
                 // Filter out those already downloaded.
                 .filter { provider.chapterDirDoesNotExist(it, chapterDirFiles) }
+                //filter out unavailbe chapters
+                .filter{!it.isUnavailable}
                 // filter out scanlators that aren't supported if they are official source
                 .filter {
                     when (it.scanlator) {
@@ -268,8 +274,8 @@ class Downloader(
                         else -> !MdConstants.UnsupportedOfficialGroupList.contains(it.scanlator!!)
                     }
                 }
+                .sortedWith(chapterSort.sortComparator(true))
                 // Add chapters to queue from the start.
-                .sortedByDescending { it.source_order }
                 // Filter out those already enqueued.
                 .filter { chapter -> queueState.value.none { it.chapterItem.id == chapter.id } }
                 // Create a download for each one.
