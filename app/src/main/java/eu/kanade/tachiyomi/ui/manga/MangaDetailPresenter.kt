@@ -610,6 +610,7 @@ class MangaDetailPresenter(
                             .filter {
                                 !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable
                             }
+                            .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
