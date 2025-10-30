@@ -599,7 +599,9 @@ class MangaDetailPresenter(
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
+                        chapterItems
+                            .filter { !it.isDownloaded }
+                            .map { it.chapter.toDbChapter() },
                     )
                 }
                 is DownloadAction.DownloadNextUnread -> {
@@ -608,7 +610,6 @@ class MangaDetailPresenter(
                             .filter {
                                 !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable
                             }
-                            .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
@@ -619,7 +620,6 @@ class MangaDetailPresenter(
                             .filter {
                                 !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable
                             }
-                            .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }

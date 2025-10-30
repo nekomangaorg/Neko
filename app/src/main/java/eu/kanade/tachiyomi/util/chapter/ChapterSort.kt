@@ -59,18 +59,16 @@ class ChapterSort(
                     true -> compareBy { it.source_order }
                     false -> compareByDescending { it.source_order }
                 }
-            Manga.CHAPTER_SORTING_SMART ->
-                when (sortAsc) {
-                    true -> compareByDescending { it.smart_order }
-                    false -> compareBy { it.smart_order }
-                }
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                 when (sortAsc) {
                     true -> compareBy<T> { it.date_upload }.thenByDescending { it.smart_order }
                     false -> compareByDescending<T> { it.date_upload }.thenBy { it.smart_order }
                 }
-            else -> {
-                compareBy { it.source_order }
+            else -> { // default is smart order
+                when (sortAsc) {
+                    true -> compareByDescending { it.smart_order }
+                    false -> compareBy { it.smart_order }
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -44,17 +45,15 @@ class ChapterItemSort(
             } else {
                 manga.sortDescending(mangaDetailsPreferences) // this really is Asc
             }
+        TimberKt.d { "SortAsc :$sortAsc" }
+
         return when (manga.chapterOrder(mangaDetailsPreferences)) {
             Manga.CHAPTER_SORTING_SOURCE ->
                 when (sortAsc) {
                     true -> compareBy { it.chapter.sourceOrder }
                     false -> compareByDescending { it.chapter.sourceOrder }
                 }
-            Manga.CHAPTER_SORTING_SMART ->
-                when (sortAsc) {
-                    true -> compareByDescending { it.chapter.smartOrder }
-                    false -> compareBy { it.chapter.smartOrder }
-                }
+
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                 when (sortAsc) {
                     true ->
@@ -64,8 +63,11 @@ class ChapterItemSort(
                         compareByDescending<T> { it.chapter.dateUpload }
                             .thenBy { it.chapter.smartOrder }
                 }
-            else -> {
-                compareBy { it.chapter.sourceOrder }
+            else -> { // default is Smart Sort
+                when (sortAsc) {
+                    true -> compareByDescending { it.chapter.smartOrder }
+                    false -> compareBy { it.chapter.smartOrder }
+                }
             }
         }
     }
