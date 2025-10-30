@@ -742,7 +742,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             .filter {
                                 !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable
                             }
-                            .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
