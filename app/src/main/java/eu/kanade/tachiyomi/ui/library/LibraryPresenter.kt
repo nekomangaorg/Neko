@@ -1019,16 +1019,29 @@ class LibraryPresenter(
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         presenterScope.launchIO {
-            var currentSelected = _libraryScreenState.value.selectedItems.toList()
-            currentSelected =
-                if (libraryMangaItems.all { it in currentSelected }) {
-                    currentSelected - libraryMangaItems
-                } else {
-                    currentSelected + libraryMangaItems
-                }
+            val currentSelected = _libraryScreenState.value.selectedItems.toList()
+
+            val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
+            val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
+
+            val allSelected = selectedItemIds.containsAll(categoryItemIds)
+
+            val newSelectedItems: List<LibraryMangaItem>
+
+            if (allSelected) {
+                // Unselect all
+                newSelectedItems =
+                    currentSelected.filter { it.displayManga.mangaId !in categoryItemIds }
+            } else {
+                // Select all
+                val itemsToAdd =
+                    libraryMangaItems.filter { it.displayManga.mangaId !in selectedItemIds }
+
+                newSelectedItems = currentSelected + itemsToAdd
+            }
 
             _libraryScreenState.update {
-                it.copy(selectedItems = currentSelected.distinct().toPersistentList())
+                it.copy(selectedItems = newSelectedItems.toPersistentList())
             }
         }
     }
