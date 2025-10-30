@@ -146,6 +146,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     override suspend fun doWork(): Result {
 
+        libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
+
         if (WORK_NAME_AUTO in tags) {
             if (
                 DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
@@ -158,8 +160,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 return Result.retry()
             }
         }
-
-        libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
         tryToSetForeground()
 
@@ -890,8 +890,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     PeriodicWorkRequestBuilder<LibraryUpdateJob>(
                             interval.toLong(),
                             TimeUnit.HOURS,
-                            10,
-                            TimeUnit.MINUTES,
+                        interval.toLong()/2,
+                            TimeUnit.HOURS,
                         )
                         .addTag(TAG)
                         .addTag(WORK_NAME_AUTO)
