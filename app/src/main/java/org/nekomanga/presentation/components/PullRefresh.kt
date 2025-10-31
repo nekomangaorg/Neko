@@ -28,8 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
-import org.nekomanga.presentation.extensions.conditional
 import kotlinx.coroutines.delay
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalMaterial3Api::class)

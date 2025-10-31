@@ -1,18 +1,16 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
-import android.os.Parcelable
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.parcelize.Parcelize
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.components.UiText
 
 data class DisplayScreenState(
     val isLoading: Boolean = false,
     val incognitoMode: Boolean = false,
-    val title: String = "",
-    val titleRes: Int? = null,
+    val title: UiText = UiText.String(""),
     val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
     val filteredDisplayManga: PersistentList<DisplayManga> = persistentListOf(),
     val error: String? = null,
@@ -27,17 +25,26 @@ data class DisplayScreenState(
     val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 
-@Parcelize
-sealed interface DisplayScreenType : Parcelable {
-    @Parcelize data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
+sealed interface DisplayScreenType {
+    // All types now have a common `title` property
+    val title: UiText
 
-    @Parcelize data class FeedUpdates(val titleRes: Int = R.string.feed_updates) : DisplayScreenType
+    object LatestChapters : DisplayScreenType {
+        override val title = UiText.StringResource(R.string.latest)
+    }
 
-    @Parcelize
-    data class RecentlyAdded(val titleRes: Int = R.string.recently_added) : DisplayScreenType
+    object FeedUpdates : DisplayScreenType {
+        override val title = UiText.StringResource(R.string.feed_updates)
+    }
 
-    @Parcelize
-    data class PopularNewTitles(val titleRes: Int = R.string.popular_new_titles) : DisplayScreenType
+    object RecentlyAdded : DisplayScreenType {
+        override val title = UiText.StringResource(R.string.recently_added)
+    }
 
-    @Parcelize data class List(val title: String, val listUUID: String) : DisplayScreenType
+    object PopularNewTitles : DisplayScreenType {
+        override val title = UiText.StringResource(R.string.popular_new_titles)
+    }
+
+    // The 'List' type now just implements the interface
+    data class List(override val title: UiText.String, val listUUID: String) : DisplayScreenType
 }

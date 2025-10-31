@@ -219,7 +219,7 @@ open class MangaDex : HttpSource() {
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
-                                    displayScreenType = DisplayScreenType.PopularNewTitles(),
+                                    displayScreenType = DisplayScreenType.PopularNewTitles,
                                     sourceManga =
                                         mangaListPage.sourceManga.shuffled().toPersistentList(),
                                 )
@@ -239,7 +239,7 @@ open class MangaDex : HttpSource() {
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
-                                    displayScreenType = DisplayScreenType.FeedUpdates(),
+                                    displayScreenType = DisplayScreenType.FeedUpdates,
                                     sourceManga = mangaListPage.sourceManga,
                                 )
                             )
@@ -257,7 +257,7 @@ open class MangaDex : HttpSource() {
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
-                                    displayScreenType = DisplayScreenType.LatestChapters(),
+                                    displayScreenType = DisplayScreenType.LatestChapters,
                                     sourceManga = mangaListPage.sourceManga,
                                 )
                             )
@@ -271,7 +271,7 @@ open class MangaDex : HttpSource() {
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
-                                    displayScreenType = DisplayScreenType.RecentlyAdded(),
+                                    displayScreenType = DisplayScreenType.RecentlyAdded,
                                     sourceManga = mangaListPage.sourceManga,
                                 )
                             )

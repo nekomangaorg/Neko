@@ -24,6 +24,7 @@ import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -49,7 +50,12 @@ class ListHandler {
                     allMangaIds.isEmpty() || allMangaIds.size <= MdUtil.getMangaListOffset(page)
                 ) {
                     true ->
-                        Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
+                        Ok(
+                            ListResults(
+                                DisplayScreenType.List(UiText.String(""), listUUID),
+                                persistentListOf(),
+                            )
+                        )
                     false -> {
                         val mangaIds =
                             when (allMangaIds.size < MdConstants.Limits.manga) {
@@ -84,13 +90,11 @@ class ListHandler {
                             .search(ProxyRetrofitQueryMap(queryParameters))
                             .getOrResultError("Error trying to load manga list")
                             .andThen { mangaListDto ->
+                                val title = listDto.data.attributes.name ?: ""
                                 Ok(
                                     ListResults(
                                         displayScreenType =
-                                            DisplayScreenType.List(
-                                                listDto.data.attributes.name ?: "",
-                                                listUUID,
-                                            ),
+                                            DisplayScreenType.List(UiText.String(title), listUUID),
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }

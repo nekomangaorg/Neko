@@ -48,13 +48,8 @@ class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
         MutableStateFlow(
             DisplayScreenState(
                 isList = preferences.browseAsList().get(),
+                title = displayScreenType.title,
                 incognitoMode = securityPreferences.incognitoMode().get(),
-                title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
-                titleRes =
-                    (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.FeedUpdates)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
-                        ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
