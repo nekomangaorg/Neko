@@ -1017,7 +1017,7 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
-        presenterScope.launchIO {
+        viewModelScope.launchIO {
             val currentSelected = _libraryScreenState.value.selectedItems.toList()
 
             val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()

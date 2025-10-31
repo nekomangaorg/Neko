@@ -594,9 +594,7 @@ class MangaDetailPresenter(
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        chapterItems
-                            .filter { !it.isDownloaded }
-                            .map { it.chapter.toDbChapter() },
+                        chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
                     )
                 }
                 is DownloadAction.DownloadNextUnread -> {
