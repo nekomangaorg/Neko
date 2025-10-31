@@ -42,8 +42,7 @@ fun <T> ExpressivePicker(
     onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier,
     visibleItemsCount: Int = 5,
-    itemHeight: Dp = 48.dp, // Fixed height for items
-    selectedContainerHeight: Dp = 56.dp, // Fixed height for items
+    pickerItemHeight: Dp = 56.dp, // Fixed height for items
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     require(visibleItemsCount % 2 != 0) { "Visible items count must be an odd number" }
@@ -53,42 +52,36 @@ fun <T> ExpressivePicker(
 
     // Find the initial index based on the current value. If not found, use the first item.
     val initialIndex = remember(value, items) { items.indexOf(value).coerceAtLeast(0) }
-    val listStartIndex = initialIndex - visibleItemsCount / 2
-
     val listState =
-        rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex.coerceAtLeast(0))
+        rememberLazyListState(initialFirstVisibleItemIndex = initialIndex.coerceAtLeast(0))
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
     val leadingSpacersCount = visibleItemsCount / 2
 
-    // Internal state to track the value set by a user interaction (scroll/fling)
     var internalScrollValue by remember { mutableStateOf(value) }
 
     // 1. Update the value state when scrolling settles
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
-            val fullListCenterIndex = listState.firstVisibleItemIndex + leadingSpacersCount
-            val selectedItemIndexInList = fullListCenterIndex - leadingSpacersCount
+            val selectedItemIndexInList = listState.firstVisibleItemIndex
 
             if (selectedItemIndexInList in items.indices) {
                 val newValue = items[selectedItemIndexInList]
-                // Update both the external and internal tracking value
-                onValueChange(newValue)
-                internalScrollValue = newValue
+                if (internalScrollValue != newValue) {
+                    onValueChange(newValue)
+                    internalScrollValue = newValue
+                }
             }
         }
     }
 
     // 2. Center the picker only when the external 'value' changes AND it differs
-    //    from the value set by the last internal scroll interaction.
     LaunchedEffect(value) {
         // Only run programmatic scroll if 'value' was changed externally
         if (value != internalScrollValue) {
             val targetIndex = items.indexOf(value)
 
-            // Calculate the expected first visible index to center the target item
-            val expectedFirstVisibleIndex = targetIndex - leadingSpacersCount
-
+            val expectedFirstVisibleIndex = targetIndex
             if (
                 targetIndex != -1 &&
                     listState.firstVisibleItemIndex != expectedFirstVisibleIndex &&
@@ -96,15 +89,12 @@ fun <T> ExpressivePicker(
             ) {
                 // Animate to the new external value
                 listState.animateScrollToItem(expectedFirstVisibleIndex)
-
-                // Update internalScrollValue after scroll to prevent scroll-back
-                internalScrollValue = value
             }
         }
     }
 
     Box(
-        modifier = modifier.fillMaxWidth().height(itemHeight * visibleItemsCount),
+        modifier = modifier.fillMaxWidth().height(pickerItemHeight * visibleItemsCount),
         contentAlignment = Alignment.Center,
     ) {
         // --- Number Scrolling List ---
@@ -115,7 +105,7 @@ fun <T> ExpressivePicker(
             modifier = Modifier.fillMaxWidth(),
         ) {
             // Top Spacers to center the first item visually
-            items(visibleItemsCount / 2) { Spacer(Modifier.height(itemHeight)) }
+            items(visibleItemsCount / 2) { Spacer(Modifier.height(pickerItemHeight)) }
 
             itemsIndexed(items = items, key = { index, item -> "$index-${item.hashCode()}" }) {
                 index,
@@ -145,14 +135,14 @@ fun <T> ExpressivePicker(
 
                 // Use a single Box to contain the item and handle the selection background
                 Box(
-                    modifier = Modifier.height(selectedContainerHeight).fillMaxWidth(),
+                    modifier = Modifier.height(pickerItemHeight).fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (isSelected) {
                         if (item is String) {
                             Box(
                                 modifier =
-                                    Modifier.height(selectedContainerHeight)
+                                    Modifier.height(pickerItemHeight)
                                         .fillMaxWidth()
                                         .background(
                                             color = themeColorState.primaryColor.copy(alpha = 0.8f),
@@ -162,8 +152,8 @@ fun <T> ExpressivePicker(
                         } else {
                             Box(
                                 modifier =
-                                    Modifier.height(selectedContainerHeight)
-                                        .width(selectedContainerHeight)
+                                    Modifier.height(pickerItemHeight)
+                                        .width(pickerItemHeight)
                                         .background(
                                             color = themeColorState.primaryColor.copy(alpha = 0.8f),
                                             shape = MaterialShapes.Gem.toShape(),
@@ -183,12 +173,12 @@ fun <T> ExpressivePicker(
             }
 
             // Bottom Spacers to center the last item visually
-            items(visibleItemsCount / 2) { Spacer(Modifier.height(itemHeight)) }
+            items(visibleItemsCount / 2) { Spacer(Modifier.height(pickerItemHeight)) }
         }
 
         // --- Separator Lines (M3-style Box replacement for deprecated Divider) ---
         val lineThickness = 1.dp
-        val lineYOffset = (itemHeight * (visibleItemsCount / 2))
+        val lineYOffset = (pickerItemHeight * (visibleItemsCount / 2))
 
         // Top Line
         Box(
@@ -211,8 +201,6 @@ fun <T> ExpressivePicker(
         )
     }
 }
-
-// -------------------------------------------------------------------------------------------------
 
 @ThemePreviews
 @Composable
