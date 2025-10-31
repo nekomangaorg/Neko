@@ -265,8 +265,8 @@ class Downloader(
                 .asSequence()
                 // Filter out those already downloaded.
                 .filter { provider.chapterDirDoesNotExist(it, chapterDirFiles) }
-                //filter out unavailbe chapters
-                .filter{!it.isUnavailable}
+                // filter out unavailbe chapters
+                .filter { !it.isUnavailable }
                 // filter out scanlators that aren't supported if they are official source
                 .filter {
                     when (it.scanlator) {

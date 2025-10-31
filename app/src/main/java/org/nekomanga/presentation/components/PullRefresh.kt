@@ -12,14 +12,18 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import kotlinx.coroutines.delay
 import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,10 +74,21 @@ private fun WavyLinearIndicator(
             label = "WavyProgressAnimation",
         )
 
+    var showIndeterminateIndicator by remember { mutableStateOf(isRefreshing) }
+
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            showIndeterminateIndicator = true
+        } else {
+            delay(1000)
+            showIndeterminateIndicator = false
+        }
+    }
+
     Box(modifier = modifier.fillMaxWidth()) {
         val strokeWidth = with(LocalDensity.current) { Size.tiny.toPx() }
         val stroke = remember(strokeWidth) { Stroke(width = strokeWidth, cap = StrokeCap.Round) }
-        if (isRefreshing) {
+        if (showIndeterminateIndicator) {
             LinearWavyProgressIndicator(
                 modifier = Modifier.fillMaxWidth().align(Alignment.CenterStart),
                 color = color,
