@@ -23,6 +23,8 @@ object Screens {
 
     @Serializable data class Display(val displayScreenType: DisplayScreenType) : NavKey
 
+    @Serializable data class Similar(val mangaUUID: String) : NavKey
+
     object Settings {
         @Serializable data object Main : NavKey
 
