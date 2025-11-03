@@ -289,8 +289,7 @@ class MangaDetailController(private val mangaId: Long) :
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
             is LibraryController,
-            is DisplayController,
-            is SimilarController -> {
+            is DisplayController, -> {
                 router.popToRoot()
                 (activity as? MainActivity)?.goToTab(R.id.nav_browse)
                 router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController

@@ -126,7 +126,7 @@ fun MainScreen(
                     }
 
                     entry<Screens.Similar> { screen ->
-                        val similarViewModel: DisplayViewModel =
+                        val similarViewModel: SimilarViewModel =
                             viewModel(factory = SimilarViewModel.Factory(screen.mangaUUID))
 
                         SimilarScreen(

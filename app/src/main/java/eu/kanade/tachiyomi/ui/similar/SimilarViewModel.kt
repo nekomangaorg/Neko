@@ -33,19 +33,19 @@ import org.nekomanga.domain.manga.DisplayManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SimilarViewModel(val mangaUUID: String): ViewModel(){
+class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     class Factory(private val mangaUUID: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return SimilarViewModel(mangaUUID) as T
         }
     }
+
     private val repo: SimilarRepository = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
-
 
     private val _similarScreenState =
         MutableStateFlow(

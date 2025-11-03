@@ -54,6 +54,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.palette.graphics.Palette
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
@@ -194,11 +195,7 @@ fun MangaScreen(
                 search = mangaViewModel::searchMergedManga,
                 add = mangaViewModel::addMergedManga,
             ),
-        onSimilarClick = {
-            /* router.pushController(
-                SimilarController(mangaViewModel.getManga().uuid()).withFadeTransaction()
-            )*/
-        },
+        onSimilarClick = { onNavigate(Screens.Similar(mangaViewModel.getManga().uuid())) },
         onShareClick = {
             scope.launch {
                 val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
