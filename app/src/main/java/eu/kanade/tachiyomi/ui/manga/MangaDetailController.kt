@@ -158,6 +158,7 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             chapterActions =
                 ChapterActions(
+                    createMangaFolder = presenter::createMangaFolder,
                     mark = presenter::markChapters,
                     download = { chapterItems, downloadAction ->
                         if (

@@ -22,6 +22,10 @@ fun MangaDetailsAppBarActions(
         actions =
             listOf(
                 AppBar.OverflowAction(
+                    title = UiText.StringResource(R.string.create_manga_folder),
+                    onClick = { chapterActions.createMangaFolder() },
+                ),
+                AppBar.OverflowAction(
                     title = UiText.StringResource(R.string.download),
                     children =
                         listOf(

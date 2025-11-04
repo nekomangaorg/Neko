@@ -342,6 +342,10 @@ class DownloadManager(val context: Context) {
         return provider.getMangaDirName(manga)
     }
 
+    fun createMangaFolder(manga: Manga) {
+        provider.getMangaDir(manga)
+    }
+
     /**
      * Deletes the directories of chapters that were read or have no match
      *

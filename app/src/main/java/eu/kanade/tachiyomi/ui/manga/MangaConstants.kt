@@ -217,6 +217,7 @@ object MangaConstants {
     )
 
     class ChapterActions(
+        val createMangaFolder: () -> Unit,
         val mark: (List<ChapterItem>, ChapterMarkActions) -> Unit,
         val clearRemoved: () -> Unit,
         val download: (List<ChapterItem>, DownloadAction) -> Unit,

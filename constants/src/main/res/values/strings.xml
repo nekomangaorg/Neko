@@ -679,6 +679,7 @@
     <string name="show_all">Show All</string>
     <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
     <string name="show_downloaded_chapters">Show downloaded chapters</string>
+    <string name="create_manga_folder">Create manga folder</string>
     <string name="show_unread_chapters">Show unread chapters</string>
     <string name="show_read_chapters">Show read chapters</string>
     <string name="hide_chapter_titles">Hide chapter titles</string>
