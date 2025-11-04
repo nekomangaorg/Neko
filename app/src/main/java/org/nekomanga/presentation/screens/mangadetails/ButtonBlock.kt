@@ -54,6 +54,7 @@ import org.nekomanga.presentation.components.icons.Numeric1BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric2BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric3BoxOutlineIcon
 import org.nekomanga.presentation.components.icons.Numeric4BoxOutlineIcon
+import org.nekomanga.presentation.components.icons.Numeric5BoxOutlineIcon
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -146,6 +147,7 @@ fun ButtonBlock(
                                         2 -> Numeric2BoxOutlineIcon
                                         3 -> Numeric3BoxOutlineIcon
                                         4 -> Numeric4BoxOutlineIcon
+                                        5 -> Numeric5BoxOutlineIcon
                                         else -> Numeric0BoxOutlineIcon
                                     }
                                 else -> Icons.Filled.Sync
