@@ -26,7 +26,6 @@ import java.util.Locale
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
 import org.nekomanga.domain.details.MangaDetailsPreferences
-import tachiyomi.source.model.MangaInfo
 
 interface Manga : SManga {
 
@@ -331,19 +330,6 @@ interface Manga : SManga {
 }
 
 fun Manga.isLongStrip() = this.genre?.contains("long strip", true) ?: false
-
-fun Manga.toMangaInfo(): MangaInfo {
-    return MangaInfo(
-        artist = this.artist ?: "",
-        author = this.author ?: "",
-        cover = this.thumbnail_url ?: "",
-        description = this.description ?: "",
-        genres = this.getGenres() ?: emptyList(),
-        key = this.url,
-        status = this.status,
-        title = this.title,
-    )
-}
 
 fun Manga.uuid(): String {
     return MdUtil.getMangaUUID(this.url)
