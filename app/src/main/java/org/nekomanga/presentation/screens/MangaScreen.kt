@@ -333,6 +333,7 @@ fun MangaScreen(
                 },
                 blockScanlator = mangaViewModel::blockScanlator,
                 openComment = { chapterId -> mangaViewModel.openComment(context, chapterId) },
+                createMangaFolder = mangaViewModel::createMangaFolder,
                 openInBrowser = { chapterItem ->
                     if (chapterItem.chapter.isUnavailable) {
                         context.toast("Chapter is not available")

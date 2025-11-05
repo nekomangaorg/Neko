@@ -596,6 +596,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
+    fun createMangaFolder() {
+        viewModelScope.launchIO { downloadManager.createMangaFolder(getManga()) }
+    }
+
     fun markChapters(
         chapterItems: List<ChapterItem>,
         markAction: ChapterMarkActions,
