@@ -33,12 +33,12 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 
 internal class MangaDexSettingsScreen(
     incognitoMode: Boolean,
-    onNavigationIconClick: () -> Unit,
+    onBackPressed: () -> Unit,
     val mangaDexPreferences: MangaDexPreferences,
     val mangaDexSettingsState: MangaDexSettingsViewModel.MangaDexSettingsState,
     val deleteSavedFilters: () -> Unit,
     val logout: () -> Unit,
-) : SearchableSettings(onNavigationIconClick, incognitoMode) {
+) : SearchableSettings(onBackPressed, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.site_specific_settings
 

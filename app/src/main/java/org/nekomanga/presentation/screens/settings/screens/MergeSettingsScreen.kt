@@ -20,13 +20,13 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class MergeSettingsScreen(
     incognitoMode: Boolean,
-    onNavigationIconClick: () -> Unit,
+    onBackPressed: () -> Unit,
     val komgaState: MergeScreenState,
     val suwayomiState: MergeScreenState,
     val logout: (MergeScreenType) -> Unit,
     val login: (MergeScreenType, String, String, String) -> Unit,
     val loginEvent: SharedFlow<MergeLoginEvent>,
-) : SearchableSettings(onNavigationIconClick, incognitoMode) {
+) : SearchableSettings(onBackPressed, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.merge_source_settings
 

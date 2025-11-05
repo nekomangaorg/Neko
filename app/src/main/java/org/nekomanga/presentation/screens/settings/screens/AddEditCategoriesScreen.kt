@@ -45,7 +45,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 internal class AddEditCategoriesScreen(
-    val onNavigationIconClick: () -> Unit,
+    val onBackPressed: () -> Unit,
     val categories: PersistentList<CategoryItem>,
     val addUpdateCategory: (String, Int?) -> Unit,
     val onChangeOrder: (CategoryItem, Int) -> Unit,
@@ -122,7 +122,7 @@ internal class AddEditCategoriesScreen(
 
         NekoScaffold(
             type = NekoScaffoldType.Title,
-            onNavigationIconClicked = onNavigationIconClick,
+            onNavigationIconClicked = onBackPressed,
             title = stringResource(R.string.edit_categories),
             content = { contentPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {

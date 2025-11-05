@@ -22,8 +22,8 @@ internal class DebugSettingsScreen(
     val clearAllManga: () -> Unit,
     val clearAllCategories: () -> Unit,
     val clearAllTrackers: () -> Unit,
-    onNavigationIconClick: () -> Unit,
-) : SearchableSettings(onNavigationIconClick, incognitoMode) {
+    onBackPressed: () -> Unit,
+) : SearchableSettings(onBackPressed, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.advanced
 

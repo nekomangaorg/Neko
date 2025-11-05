@@ -61,8 +61,8 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun SettingsMainScreen(
-    onNavigateClick: (NavKey) -> Unit,
-    onNavigationIconClick: () -> Unit,
+    onNavigateTo: (NavKey) -> Unit,
+    onBackPressed: () -> Unit,
     incognitoMode: Boolean,
 ) {
 
@@ -79,7 +79,7 @@ fun SettingsMainScreen(
                     onSearch = { searchText = it ?: "" },
                     incognitoMode = incognitoMode,
                     scrollBehavior = scrollBehavior,
-                    onNavigationIconClick = onNavigationIconClick,
+                    onNavigationIconClick = onBackPressed,
                 )
             },
             scrollBehavior = scrollBehavior,
@@ -108,15 +108,15 @@ fun SettingsMainScreen(
                     SettingsScreenType.Security -> Screens.Settings.Security
                     SettingsScreenType.Tracking -> Screens.Settings.Tracking
                 }
-            onNavigateClick(route)
+            onNavigateTo(route)
         }
     } else {
-        mainContent(onNavigateClick = onNavigateClick)
+        MainContent(onNavigateClick = onNavigateTo)
     }
 }
 
 @Composable
-private fun mainContent(onNavigateClick: (NavKey) -> Unit) {
+private fun MainContent(onNavigateClick: (NavKey) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         item {
             IconItem(
