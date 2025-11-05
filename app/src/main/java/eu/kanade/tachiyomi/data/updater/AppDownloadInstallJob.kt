@@ -89,7 +89,8 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
 
             val result = withIOContext {
-                AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
+                AppUpdateChecker()
+                    .checkForUpdate(isUserPrompt = true, doExtrasAfterNewUpdate = false)
             }
             if (result is AppUpdateResult.NewUpdate) {
                 AppUpdateNotifier(context).cancel()

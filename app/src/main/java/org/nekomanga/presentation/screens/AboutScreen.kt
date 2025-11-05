@@ -97,7 +97,7 @@ private fun AboutWrapper(
     aboutScreenState: AboutScreenState,
     windowSizeClass: WindowSizeClass,
     notOnlineSnackbar: () -> Unit,
-    checkForUpdate: (Context) -> Unit,
+    checkForUpdate: () -> Unit,
     onVersionClicked: (Context) -> Unit,
     onDownloadClicked: (String) -> Unit,
     onClickLicenses: () -> Unit,
@@ -171,7 +171,7 @@ private fun AboutWrapper(
                         if (!context.isOnline()) {
                             notOnlineSnackbar()
                         } else {
-                            checkForUpdate(context)
+                            checkForUpdate()
                         }
                     },
                 )

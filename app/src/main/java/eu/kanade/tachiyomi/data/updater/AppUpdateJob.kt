@@ -20,7 +20,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
 
     override suspend fun doWork(): Result = coroutineScope {
         try {
-            AppUpdateChecker().checkForUpdate(context)
+            AppUpdateChecker().checkForUpdate()
             Result.success()
         } catch (e: Exception) {
             TimberKt.e(e) { "error checking for app update" }

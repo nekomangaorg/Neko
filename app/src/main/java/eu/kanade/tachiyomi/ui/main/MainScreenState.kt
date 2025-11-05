@@ -1,3 +1,8 @@
 package eu.kanade.tachiyomi.ui.main
 
-data class MainScreenState(val incognitoMode: Boolean = false)
+import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+
+data class MainScreenState(
+    val incognitoMode: Boolean = false,
+    val appUpdateResult: AppUpdateResult.NewUpdate? = null,
+)

@@ -54,6 +54,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
@@ -73,6 +74,7 @@ import org.nekomanga.core.R
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.PullRefresh
+import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
@@ -288,6 +290,16 @@ class MainActivity : ComponentActivity() {
                                 incognitoMode = mainScreenState.incognitoMode,
                                 incognitoClick = viewModel::toggleIncoginito,
                             )
+
+                            if (mainScreenState.appUpdateResult != null) {
+                                AppUpdateDialog(
+                                    release = mainScreenState.appUpdateResult!!.release,
+                                    onDismissRequest = { viewModel.consumeAppUpdateResult() },
+                                    onConfirm = { url ->
+                                        AppDownloadInstallJob.start(context, url, true)
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -300,6 +312,28 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         handleDeepLink(intent)
     }
+
+    override fun onPause() {
+        super.onPause()
+        //    setStartingTab()
+        saveExtras()
+    }
+
+    fun saveExtras() {
+        viewModel.saveExtras()
+    }
+
+    /*   override fun finish() {
+            if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
+                setStartingTab()
+            }
+            if (this !is SearchActivity) {
+                SecureActivityDelegate.locked = true
+            }
+            saveExtras()
+            super.finish()
+        }
+    */
 
     private fun handleDeepLink(intent: Intent?) {
         if (intent == null) {

@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
+import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +18,12 @@ import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class MainActivityViewModel : ViewModel() {
+
+    private val updateChecker by lazy { AppUpdateChecker() }
+    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     private val _deepLinkScreen = MutableStateFlow<List<NavKey>?>(null)
     val deepLinkScreen: StateFlow<List<NavKey>?> = _deepLinkScreen.asStateFlow()
@@ -26,6 +34,10 @@ class MainActivityViewModel : ViewModel() {
 
     fun consumeDeepLink() {
         _deepLinkScreen.value = null
+    }
+
+    fun consumeAppUpdateResult() {
+        _mainScreenState.update { it.copy(appUpdateResult = null) }
     }
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
@@ -41,9 +53,27 @@ class MainActivityViewModel : ViewModel() {
                 _mainScreenState.update { it.copy(incognitoMode = incognitoMode) }
             }
         }
+        viewModelScope.launchIO {
+            val update =
+                runCatching { updateChecker.checkForUpdate() }
+                    .getOrElse { error ->
+                        AppUpdateResult.CantCheckForUpdate(error.message ?: "Error")
+                    }
+
+            if (update is AppUpdateResult.NewUpdate) {
+                _mainScreenState.update { it.copy(appUpdateResult = update) }
+            }
+        }
     }
 
     fun toggleIncoginito() {
         viewModelScope.launch { securityPreferences.incognitoMode().toggle() }
+    }
+
+    fun saveExtras() {
+        viewModelScope.launch {
+            mangaShortcutManager.updateShortcuts()
+            MangaCoverMetadata.savePrefs()
+        }
     }
 }

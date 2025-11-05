@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.more.about
 
-import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,7 +57,7 @@ class AboutViewModel : ViewModel() {
     }
 
     /** Checks version and shows a user prompt if an update is available. */
-    fun checkForUpdate(context: Context) {
+    fun checkForUpdate() {
         viewModelScope.launch {
             if (aboutScreenState.value.checkingForUpdates) return@launch
 
@@ -69,7 +68,7 @@ class AboutViewModel : ViewModel() {
             )
 
             val update =
-                runCatching { updateChecker.checkForUpdate(context, true) }
+                runCatching { updateChecker.checkForUpdate(isUserPrompt = true) }
                     .getOrElse { error ->
                         AppUpdateResult.CantCheckForUpdate(error.message ?: "Error")
                     }

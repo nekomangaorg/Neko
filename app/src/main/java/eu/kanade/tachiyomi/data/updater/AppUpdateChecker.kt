@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.updater
 
+import android.app.Application
 import android.content.Context
 import android.os.Build
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -13,6 +14,8 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.GET
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class AppUpdateChecker {
@@ -21,13 +24,15 @@ class AppUpdateChecker {
     private val preferences: PreferencesHelper by injectLazy()
     private val json: Json by injectLazy()
 
+    private val context: Context by lazy { Injekt.get<Application>().applicationContext }
+
     suspend fun checkForUpdate(
-        context: Context,
         isUserPrompt: Boolean = false,
         doExtrasAfterNewUpdate: Boolean = true,
     ): AppUpdateResult {
+        if(!BuildConfig.INCLUDE_UPDATER) return AppUpdateResult.NoNewUpdate
         // Limit checks to once a day at most
-        if (
+         if (
             !isUserPrompt &&
                 Date().time < preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)
         ) {

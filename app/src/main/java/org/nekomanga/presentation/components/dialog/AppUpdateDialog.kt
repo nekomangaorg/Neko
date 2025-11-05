@@ -24,7 +24,7 @@ fun AppUpdateDialog(
     onDismissRequest: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
-    val body = release.info.substringBeforeLast("| Variant | SHA-256")
+    val body = release.info.substringBeforeLast("Downloads & Checksums")
     val url = release.downloadLink
     AlertDialog(
         title = { Text(text = stringResource(id = R.string.new_version_available)) },
