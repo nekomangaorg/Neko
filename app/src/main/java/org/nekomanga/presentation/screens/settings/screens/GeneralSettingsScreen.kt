@@ -33,6 +33,9 @@ internal class GeneralSettingsScreen(
                         -2 to stringResource(R.string.feed),
                         -3 to stringResource(R.string.browse),
                     ),
+                subtitleProvider = { value, options ->
+                    options[value] ?: stringResource(R.string.last_used_library_recents)
+                },
             ),
             Preference.PreferenceItem.ListPreference(
                 pref = preferencesHelper.dateFormatPreference(),
