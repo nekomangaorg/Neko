@@ -18,7 +18,6 @@ import org.nekomanga.presentation.components.UiText
 
 data class BrowseScreenState(
     val initialLoading: Boolean = true,
-    val isDeepLink: Boolean = false,
     val useVividColorHeaders: Boolean = true,
     val title: UiText = UiText.StringResource(R.string.browse),
     val hideFooterButton: Boolean = false,
@@ -41,7 +40,6 @@ data class BrowseScreenState(
     val promptForCategories: Boolean = false,
     val filters: DexFilters,
     val defaultContentRatings: ImmutableSet<String>,
-    val handledIncomingQuery: Boolean = false,
     val firstLoad: Boolean = true,
     val savedFilters: PersistentList<BrowseFilterImpl> = persistentListOf(),
     val categories: PersistentList<CategoryItem> = persistentListOf(),

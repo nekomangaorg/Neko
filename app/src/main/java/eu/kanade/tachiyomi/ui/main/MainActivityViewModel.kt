@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,18 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MainActivityViewModel : ViewModel() {
+
+    private val _deepLinkScreen = MutableStateFlow<NavKey?>(null)
+    val deepLinkScreen: StateFlow<NavKey?> = _deepLinkScreen.asStateFlow()
+
+    fun setDeepLink(screen: NavKey) {
+        _deepLinkScreen.value = screen
+    }
+
+    fun consumeDeepLink() {
+        _deepLinkScreen.value = null
+    }
+
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()

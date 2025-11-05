@@ -70,7 +70,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.getSlug
@@ -834,30 +833,4 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
 private fun copyToClipboard(context: Context, content: String, @StringRes label: Int) {
     val clipboard = context.getSystemService<ClipboardManager>()!!
     clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
-}
-
-private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
-    /* val position = router.backstackSize - backstackNumber
-    if (position < 0) return null
-    return when (val previousController = router.backstack[position].controller) {
-        is LibraryController,
-        is DisplayController,
-        is SimilarController -> {
-            router.popToRoot()
-            (activity as? MainActivity)?.goToTab(R.id.nav_browse)
-            router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
-        }
-        is BrowseController -> {
-            router.popCurrentController()
-            previousController
-        }
-        else -> {
-            if (backstackNumber == 1) {
-                null
-            } else {
-                getBrowseController(backstackNumber - 1)
-            }
-        }
-    }*/
-    return null
 }

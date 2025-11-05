@@ -74,6 +74,15 @@ fun BrowseScreen(
     windowSizeClass: WindowSizeClass,
 ) {
 
+    val deepLinkManga by browseViewModel.deepLinkMangaFlow.collectAsState()
+
+    LaunchedEffect(deepLinkManga) {
+        deepLinkManga?.let { mangaId ->
+            browseViewModel.onDeepLinkMangaHandled()
+            onNavigateTo(Screens.Manga(mangaId))
+        }
+    }
+
     BrowseWrapper(
         browseScreenFlow = browseViewModel.browseScreenState,
         mainDropDown = mainDropDown,

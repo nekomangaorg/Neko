@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -273,41 +272,6 @@ class MangaDetailController(private val mangaId: Long) :
                 }
             }
         }
-    }
-
-    /** Search by author on browse screen */
-    private fun creatorClicked(text: String) {
-        getBrowseController()?.searchByCreator(text)
-    }
-
-    /** Search by tag on browse screen */
-    private fun genreSearch(text: String) {
-        getBrowseController()?.searchByTag(text)
-    }
-
-    private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
-        /* val position = router.backstackSize - backstackNumber
-        if (position < 0) return null
-        return when (val previousController = router.backstack[position].controller) {
-            is LibraryController,
-            is DisplayController, -> {
-                router.popToRoot()
-                (activity as? MainActivity)?.goToTab(R.id.nav_browse)
-                router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
-            }
-            is BrowseController -> {
-                router.popCurrentController()
-                previousController
-            }
-            else -> {
-                if (backstackNumber == 1) {
-                    null
-                } else {
-                    getBrowseController(backstackNumber - 1)
-                }
-            }
-        }*/
-        return null
     }
 
     /** Navigate back to library when a tag is long clicked and search there */

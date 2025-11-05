@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
-import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -47,6 +46,7 @@ import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -76,7 +76,11 @@ class BrowseViewModel() : ViewModel() {
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
+    private val _deepLinkManga = MutableStateFlow<Long?>(null)
+    val deepLinkMangaFlow = _deepLinkManga.asStateFlow()
+
     fun deepLinkQuery(searchBrowse: SearchBrowse) {
+        TimberKt.tag("DeepLink").d("Creating filter for ${searchBrowse.query}")
         val filters =
             when (searchBrowse.type) {
                 SearchType.Tag -> {
@@ -117,6 +121,7 @@ class BrowseViewModel() : ViewModel() {
                             query = Filter.Query(searchBrowse.query, QueryType.Author),
                         )
             }
+
         _browseScreenState.update { it.copy(filters = filters) }
 
         getSearchPage()
@@ -372,6 +377,12 @@ class BrowseViewModel() : ViewModel() {
             val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
             val uuid = DeepLinkType.removePrefix(currentQuery, deepLinkType)
 
+            TimberKt.tag("DeepLink").d("DeepLinkType: $deepLinkType")
+
+            if (deepLinkType != DeepLinkType.None) {
+                _browseScreenState.update { it.copy(filters = createInitialDexFilter("")) }
+            }
+
             when (deepLinkType) {
                 DeepLinkType.None -> {
                     _browseScreenState.update {
@@ -483,7 +494,6 @@ class BrowseViewModel() : ViewModel() {
                 DeepLinkType.Error -> {
                     _browseScreenState.update {
                         it.copy(
-                            isDeepLink = true,
                             title = UiText.String(""),
                             initialLoading = false,
                             error = UiText.String(uuid),
@@ -491,9 +501,6 @@ class BrowseViewModel() : ViewModel() {
                     }
                 }
                 DeepLinkType.Manga -> {
-                    _browseScreenState.update {
-                        it.copy(isDeepLink = true, title = UiText.String(""))
-                    }
                     browseRepository
                         .getDeepLinkManga(uuid)
                         .onFailure {
@@ -504,28 +511,11 @@ class BrowseViewModel() : ViewModel() {
                                 )
                             }
                         }
-                        .onSuccess { dm ->
-                            /*if (
-                                _browseScreenState.value.incomingQuery.isNotEmpty() &&
-                                    !_browseScreenState.value.handledIncomingQuery
-                            ) {
-                                _browseScreenState.update {
-                                    it.copy(
-                                        filters =
-                                            it.filters.copy(
-                                                query = Filter.Query("", QueryType.Title)
-                                            ),
-                                        handledIncomingQuery = true,
-                                        incomingQuery = "",
-                                    )
-                                }
-                            }*/
-                            // TODO view?.openManga(dm.mangaId, true)
-                        }
+                        .onSuccess { displayManga -> _deepLinkManga.value = displayManga.mangaId }
                 }
                 DeepLinkType.List -> {
                     _browseScreenState.update {
-                        it.copy(isDeepLink = true, title = UiText.StringResource(R.string.list))
+                        it.copy(title = UiText.StringResource(R.string.list))
                     }
                     val searchFilters =
                         createInitialDexFilter("")
@@ -534,9 +524,7 @@ class BrowseViewModel() : ViewModel() {
                                 query = Filter.Query(text = uuid, type = QueryType.List),
                             )
                     _browseScreenState.update { it.copy(filters = searchFilters) }
-                    if (!_browseScreenState.value.handledIncomingQuery) {
-                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
-                    }
+
                     browseRepository
                         .getList(uuid)
                         .onFailure {
@@ -568,29 +556,22 @@ class BrowseViewModel() : ViewModel() {
                 }
                 DeepLinkType.Author -> {
                     _browseScreenState.update {
-                        it.copy(isDeepLink = true, title = UiText.StringResource(R.string.author))
+                        it.copy(title = UiText.StringResource(R.string.author))
                     }
                     val searchFilters =
                         createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid = uuid))
                     _browseScreenState.update { it.copy(filters = searchFilters) }
-                    if (!_browseScreenState.value.handledIncomingQuery) {
-                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
-                    }
+
                     paginator.loadNextItems()
                 }
                 DeepLinkType.Group -> {
                     _browseScreenState.update {
-                        it.copy(
-                            isDeepLink = true,
-                            title = UiText.StringResource(R.string.scanlator_group),
-                        )
+                        it.copy(title = UiText.StringResource(R.string.scanlator_group))
                     }
                     val searchFilters =
                         createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid = uuid))
                     _browseScreenState.update { it.copy(filters = searchFilters) }
-                    if (!_browseScreenState.value.handledIncomingQuery) {
-                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
-                    }
+
                     paginator.loadNextItems()
                 }
             }
@@ -617,8 +598,8 @@ class BrowseViewModel() : ViewModel() {
         }
     }
 
-    fun toggleIncognitoMode() {
-        viewModelScope.launch { securityPreferences.incognitoMode().toggle() }
+    fun onDeepLinkMangaHandled() {
+        _deepLinkManga.value = null
     }
 
     fun randomManga() {
@@ -633,7 +614,7 @@ class BrowseViewModel() : ViewModel() {
                 }
                 .onSuccess { displayManga ->
                     _browseScreenState.update { it.copy(initialLoading = false) }
-                    // TODO view?.openManga(displayManga.mangaId)
+                    _deepLinkManga.value = displayManga.mangaId
                 }
         }
     }

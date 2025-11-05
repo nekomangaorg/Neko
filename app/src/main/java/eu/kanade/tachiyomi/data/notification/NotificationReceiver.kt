@@ -23,8 +23,8 @@ import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
@@ -594,7 +594,7 @@ class NotificationReceiver : BroadcastReceiver() {
         ): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java)
-                    .setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
+                    .setAction(DeepLinks.Actions.UpdateNotes)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .putExtra(NewUpdateDialogController.BODY_KEY, notes)
                     .putExtra(NewUpdateDialogController.URL_KEY, downloadLink)
@@ -619,11 +619,11 @@ class NotificationReceiver : BroadcastReceiver() {
         ): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java)
-                    .setAction(MainActivity.SHORTCUT_MANGA)
+                    .setAction(DeepLinks.Actions.Manga)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .putExtra(MangaDetailController.MANGA_EXTRA, manga.id)
-                    .putExtra("notificationId", manga.id.hashCode())
-                    .putExtra("groupId", groupId)
+                    .putExtra(DeepLinks.Extras.MangaId, manga.id)
+                    .putExtra(DeepLinks.Extras.NotificationId, manga.id.hashCode())
+                    .putExtra(DeepLinks.Extras.GroupId, groupId)
             return PendingIntent.getActivity(
                 context,
                 manga.id.hashCode(),

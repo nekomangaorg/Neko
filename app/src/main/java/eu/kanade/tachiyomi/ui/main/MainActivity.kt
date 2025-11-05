@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.app.SearchManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -48,19 +50,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.ScreenBars
+import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.browse.SearchType
+import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import java.math.BigInteger
 import kotlinx.coroutines.launch
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
 import org.nekomanga.domain.snackbar.SnackbarColor
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
+import uy.kohesive.injekt.injectLazy
 
 class MainActivity : ComponentActivity() {
 
@@ -76,21 +86,30 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
-        val startingScreen = when(viewModel.preferences.startingTab().get()){
-            1,
-            -2 -> Screens.Feed
-            -3 -> Screens.Browse()
-            else -> Screens.Library()
-        }
-
+        val startingScreen =
+            when (viewModel.preferences.startingTab().get()) {
+                1,
+                -2 -> Screens.Feed
+                -3 -> Screens.Browse()
+                else -> Screens.Library()
+            }
 
         setComposeContent {
             val context = LocalContext.current
 
             val mainScreenState by viewModel.mainScreenState.collectAsStateWithLifecycle()
 
-
             val backStack = rememberNavBackStack(startingScreen)
+
+            val deepLink by viewModel.deepLinkScreen.collectAsStateWithLifecycle()
+
+            LaunchedEffect(deepLink) {
+                if (deepLink != null) {
+                    backStack.clear()
+                    backStack.add(deepLink!!)
+                    viewModel.consumeDeepLink()
+                }
+            }
 
             val selectedItemIndex =
                 remember(backStack.lastOrNull()) {
@@ -262,28 +281,175 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        handleDeepLink(intent)
     }
 
     companion object {
-
-        // Shortcut actions
-        const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
-        const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
-        const val SHORTCUT_RECENTLY_READ = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
-        const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
-        const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
-        const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
-        const val SHORTCUT_MANGA_BACK = "eu.kanade.tachiyomi.SHOW_MANGA_BACK"
-        const val SHORTCUT_UPDATE_NOTES = "eu.kanade.tachiyomi.SHOW_UPDATE_NOTES"
-        const val SHORTCUT_SOURCE = "eu.kanade.tachiyomi.SHOW_SOURCE"
-        const val SHORTCUT_READER_SETTINGS = "eu.kanade.tachiyomi.READER_SETTINGS"
-        const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
-
-        const val INTENT_SEARCH = "neko.SEARCH"
-        const val INTENT_SEARCH_QUERY = "query"
-        const val INTENT_SEARCH_FILTER = "filter"
-
         var chapterIdToExitTo = 0L
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        if (intent == null) {
+            return
+        }
+
+        var deepLinkScreen: NavKey? = null
+
+        // clear the notification
+        val notificationId = intent.getIntExtra(DeepLinks.Extras.NotificationId, -1)
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                applicationContext,
+                notificationId,
+                intent.getIntExtra(DeepLinks.Extras.GroupId, 0),
+            )
+        }
+        when (intent.action) {
+            Intent.ACTION_SEARCH,
+            Intent.ACTION_SEND,
+            "com.google.android.gms.actions.SEARCH_ACTION" -> {
+                TimberKt.tag("DeepLink").d("Action Search Intent")
+                // If the intent match the "standard" Android search intent
+                // or the Google-specific search intent (triggered by saying or typing "search
+                // *query* on *Tachiyomi*" in Google Search/Google Assistant)
+
+                // Get the search query provided in extras, and if not null, perform a global search
+                // with it.
+                val query =
+                    intent.getStringExtra(SearchManager.QUERY)
+                        ?: intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (query != null && query.isNotEmpty()) {
+                    deepLinkScreen =
+                        Screens.Browse(
+                            searchBrowse = SearchBrowse(type = SearchType.Title, query = query)
+                        )
+                } else {
+                    finish()
+                }
+            }
+            DeepLinks.Intents.Search -> {
+                val host = intent.data?.host
+                val pathSegments = intent.data?.pathSegments
+                if (host != null && pathSegments != null && pathSegments.size > 1) {
+                    val path = pathSegments[0]
+                    val id = pathSegments[1]
+                    if (id != null && id.isNotEmpty()) {
+
+                        val mappings: MangaMappings by injectLazy()
+
+                        val query =
+                            when {
+                                host.contains("anilist", true) -> {
+                                    val dexId = mappings.getMangadexUUID(id, "al")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for AniList ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                host.contains("myanimelist", true) -> {
+                                    val dexId = mappings.getMangadexUUID(id, "mal")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                host.contains("mangaupdates", true) -> {
+                                    val base = BigInteger(id, 36)
+                                    val muID = base.toString(10)
+                                    val dexId = mappings.getMangadexUUID(muID, "mu_new")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                path.equals("GROUP", true) -> {
+                                    MdConstants.DeepLinkPrefix.group + id
+                                }
+                                path.equals("AUTHOR", true) -> {
+                                    MdConstants.DeepLinkPrefix.author + id
+                                }
+                                path.equals("LIST", true) -> {
+                                    MdConstants.DeepLinkPrefix.list + id
+                                }
+                                else -> {
+                                    MdConstants.DeepLinkPrefix.manga + id
+                                }
+                            }
+                        deepLinkScreen =
+                            Screens.Browse(SearchBrowse(type = SearchType.Title, query = query))
+                    }
+                }
+            }
+        /*SHORTCUT_MANGA,
+        SHORTCUT_MANGA_BACK -> {
+            val extras = intent.extras ?: return false
+            if (
+                intent.action == SHORTCUT_MANGA_BACK &&
+                preferences.openChapterInShortcuts().get()
+            ) {
+                val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
+                if (mangaId != 0L) {
+                    val db = Injekt.get<DatabaseHelper>()
+                    val chapters = db.getChapters(mangaId).executeAsBlocking()
+                    db.getManga(mangaId).executeAsBlocking()?.let { manga ->
+                        val availableChapters =
+                            chapters.filter { it.isAvailable(downloadManager, manga) }
+                        val nextUnreadChapter =
+                            ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
+                        if (nextUnreadChapter != null) {
+                            val activity =
+                                ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                            startActivity(activity)
+                            finish()
+                            return true
+                        }
+                    }
+                }
+            }
+            if (intent.action == SHORTCUT_MANGA_BACK) {
+                SecureActivityDelegate.promptLockIfNeeded(this, true)
+            }
+            router.replaceTopController(
+                RouterTransaction.with(MangaDetailController(extras))
+                    .pushChangeHandler(SimpleSwapChangeHandler())
+                    .popChangeHandler(FadeChangeHandler())
+            )
+        }
+        SHORTCUT_SOURCE -> {
+            val extras = intent.extras ?: return false
+            SecureActivityDelegate.promptLockIfNeeded(this, true)
+            router.replaceTopController(
+                RouterTransaction.with(BrowseController())
+                    .pushChangeHandler(SimpleSwapChangeHandler())
+                    .popChangeHandler(FadeChangeHandler())
+            )
+        }
+        SHORTCUT_READER_SETTINGS -> {
+            val settingsController = SettingsController()
+            settingsController.presenter.deepLink = Screens.Settings.Reader
+            router.replaceTopController(
+                RouterTransaction.with(settingsController)
+                    .pushChangeHandler(SimpleSwapChangeHandler())
+                    .popChangeHandler(FadeChangeHandler())
+            )
+        }*/
+        }
+        if (deepLinkScreen != null) {
+            viewModel.setDeepLink(deepLinkScreen)
+        }
+        setIntent(null)
     }
 }
 
