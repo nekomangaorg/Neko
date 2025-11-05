@@ -136,51 +136,14 @@ class LibraryPresenter(
                 _libraryScreenState.update { it.copy(isFirstLoad = true) }
                 // inital fast load
                 val mangaList = libraryMangaListFlow.first()
-                val categoryList = categoryListFlow.first()
                 val libraryViewPreferences = libraryViewFlow.first()
 
-                val collapsedCategorySet =
-                    libraryViewPreferences.collapsedCategories
-                        .mapNotNull { it.toIntOrNull() }
-                        .toSet()
-
                 val unsortedLibraryCategoryItems =
-                    when (libraryViewPreferences.groupBy) {
-                        LibraryGroup.ByCategory -> {
-                            groupByCategory(mangaList, categoryList, collapsedCategorySet)
-                        }
-                        LibraryGroup.ByAuthor,
-                        LibraryGroup.ByContent,
-                        LibraryGroup.ByLanguage,
-                        LibraryGroup.ByStatus,
-                        LibraryGroup.ByTag -> {
-                            groupByDynamic(
-                                libraryMangaList = mangaList,
-                                collapsedDynamicCategorySet =
-                                    libraryViewPreferences.collapsedDynamicCategories,
-                                currentLibraryGroup = libraryViewPreferences.groupBy,
-                                sortOrder = libraryViewPreferences.sortingMode,
-                                sortAscending = libraryViewPreferences.sortAscending,
-                                loggedInTrackStatus = emptyMap(),
-                            )
-                        }
-                        // by track status requires an extra network call, so we will just show
-                        // ungrouped for the fast path
-                        LibraryGroup.ByTrackStatus -> {
-                            groupByUngrouped(
-                                mangaList,
-                                libraryViewPreferences.sortingMode,
-                                libraryViewPreferences.sortAscending,
-                            )
-                        }
-                        LibraryGroup.Ungrouped -> {
-                            groupByUngrouped(
-                                mangaList,
-                                libraryViewPreferences.sortingMode,
-                                libraryViewPreferences.sortAscending,
-                            )
-                        }
-                    }
+                    groupByUngrouped(
+                        mangaList,
+                        libraryViewPreferences.sortingMode,
+                        libraryViewPreferences.sortAscending,
+                    )
 
                 _libraryScreenState.update {
                     it.copy(items = unsortedLibraryCategoryItems.toPersistentList())
