@@ -76,13 +76,21 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
+        val startingScreen = when(viewModel.preferences.startingTab().get()){
+            1,
+            -2 -> Screens.Feed
+            -3 -> Screens.Browse()
+            else -> Screens.Library()
+        }
+
+
         setComposeContent {
             val context = LocalContext.current
 
             val mainScreenState by viewModel.mainScreenState.collectAsStateWithLifecycle()
 
-            // TODO load the correct one in future
-            val backStack = rememberNavBackStack(Screens.Library())
+
+            val backStack = rememberNavBackStack(startingScreen)
 
             val selectedItemIndex =
                 remember(backStack.lastOrNull()) {

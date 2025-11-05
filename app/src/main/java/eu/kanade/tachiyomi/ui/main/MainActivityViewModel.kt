@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import uy.kohesive.injekt.api.get
 class MainActivityViewModel : ViewModel() {
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 
     private val _mainScreenState = MutableStateFlow(MainScreenState())
     val mainScreenState: StateFlow<MainScreenState> = _mainScreenState.asStateFlow()
