@@ -471,6 +471,10 @@ class MangaDetailPresenter(
         }
     }
 
+    fun createMangaFolder() {
+        presenterScope.launchIO { downloadManager.createMangaFolder(getManga()) }
+    }
+
     fun markChapters(
         chapterItems: List<ChapterItem>,
         markAction: ChapterMarkActions,

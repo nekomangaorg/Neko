@@ -122,17 +122,13 @@ interface SManga : Serializable {
             other_urls = other.other_urls
         }
 
-        if (other.last_volume_number != null) {
-            last_volume_number = other.last_volume_number
-        }
-
-        if (other.last_chapter_number != null) {
-            last_chapter_number = other.last_chapter_number
-        }
-
         if (other.alt_titles != null) {
             alt_titles = other.alt_titles
         }
+
+        last_volume_number = other.last_volume_number
+
+        last_chapter_number = other.last_chapter_number
 
         missing_chapters = other.missing_chapters
 

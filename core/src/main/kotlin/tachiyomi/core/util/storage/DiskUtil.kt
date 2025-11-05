@@ -145,6 +145,7 @@ object DiskUtil {
             '\\',
             '|',
             '~',
+            ',',
             0x7f.toChar() -> false
             else -> true
         }

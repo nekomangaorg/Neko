@@ -94,12 +94,12 @@ open class MangaImpl : Manga {
     override var thread_id: String? = null
 
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl && other.title.isNotBlank() && other.title != title) {
-            val oldTitle = title
-            title = other.title
+        if (other is MangaImpl && other.ogTitle.isNotBlank() && other.ogTitle != ogTitle) {
+            val oldTitle = ogTitle
+            ogTitle = other.ogTitle
             val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
-            provider.renameMangaFolder(oldTitle, title)
+            provider.renameMangaFolder(oldTitle, ogTitle)
         }
         super.copyFrom(other)
     }

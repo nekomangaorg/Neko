@@ -4,7 +4,7 @@ compose_version = "1.9.4"
 compose_material3_version = "1.5.0-alpha07"
 navigation3 = "1.0.0-beta01"
 lifecycleViewmodel = "1.0.0-alpha04"
-markdown_version = "0.37.0"
+markdown_version = "0.38.1"
 reorderable = "3.0.0"
 
 [libraries]
@@ -28,7 +28,7 @@ material-icons-core = { module = "androidx.compose.material:material-icons-core"
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 collapsing-topbar = "io.github.flaringapp:ComposeCollapsingTopBar:1.2.0"
 compose-webview = "io.github.kevinnzou:compose-webview:0.33.6"
-grid-layout = "com.cheonjaeung.compose.grid:grid:2.5.0"
+grid-layout = "com.cheonjaeung.compose.grid:grid:2.5.2"
 
 material-motion = "io.github.fornewid:material-motion-compose-core:1.2.1"
 
