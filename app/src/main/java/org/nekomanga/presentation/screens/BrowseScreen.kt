@@ -227,7 +227,7 @@ private fun BrowseWrapper(
             onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }
 
-        val recyclerContentPadding = PaddingValues()
+        val recyclerContentPadding = PaddingValues(bottom = Size.huge)
 
         val haptic = LocalHapticFeedback.current
         fun mangaLongClick(displayManga: DisplayManga) {

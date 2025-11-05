@@ -11,6 +11,8 @@ object Screens {
 
     @Serializable data object Feed : NavKey
 
+    @Serializable data object Splash : NavKey
+
     @Serializable data object Stats : NavKey
 
     @Serializable data object About : NavKey

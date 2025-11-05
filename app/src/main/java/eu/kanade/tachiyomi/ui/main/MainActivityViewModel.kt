@@ -17,11 +17,11 @@ import uy.kohesive.injekt.api.get
 
 class MainActivityViewModel : ViewModel() {
 
-    private val _deepLinkScreen = MutableStateFlow<NavKey?>(null)
-    val deepLinkScreen: StateFlow<NavKey?> = _deepLinkScreen.asStateFlow()
+    private val _deepLinkScreen = MutableStateFlow<List<NavKey>?>(null)
+    val deepLinkScreen: StateFlow<List<NavKey>?> = _deepLinkScreen.asStateFlow()
 
-    fun setDeepLink(screen: NavKey) {
-        _deepLinkScreen.value = screen
+    fun setDeepLink(screens: List<NavKey>) {
+        _deepLinkScreen.value = screens
     }
 
     fun consumeDeepLink() {

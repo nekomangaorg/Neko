@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -50,13 +51,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
 import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.ScreenBars
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.ui.source.browse.SearchType
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import java.math.BigInteger
@@ -70,6 +77,8 @@ import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MainActivity : ComponentActivity() {
@@ -94,6 +103,8 @@ class MainActivity : ComponentActivity() {
                 else -> Screens.Library()
             }
 
+        handleDeepLink(intent)
+
         setComposeContent {
             val context = LocalContext.current
 
@@ -106,7 +117,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(deepLink) {
                 if (deepLink != null) {
                     backStack.clear()
-                    backStack.add(deepLink!!)
+                    deepLink!!.forEach { screen -> backStack.add(screen) }
                     viewModel.consumeDeepLink()
                 }
             }
@@ -270,6 +281,7 @@ class MainActivity : ComponentActivity() {
 
                             MainScreen(
                                 contentPadding = padding,
+                                startingScreen = startingScreen,
                                 backStack = backStack,
                                 windowSizeClass = windowSizeClass,
                                 onMenuShowing = { visible -> mainDropdownShowing = visible },
@@ -281,11 +293,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        handleDeepLink(intent)
-    }
-
-    companion object {
-        var chapterIdToExitTo = 0L
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -299,7 +306,7 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        var deepLinkScreen: NavKey? = null
+        var deepLinkScreens: List<NavKey>? = null
 
         // clear the notification
         val notificationId = intent.getIntExtra(DeepLinks.Extras.NotificationId, -1)
@@ -325,9 +332,11 @@ class MainActivity : ComponentActivity() {
                     intent.getStringExtra(SearchManager.QUERY)
                         ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
-                    deepLinkScreen =
-                        Screens.Browse(
-                            searchBrowse = SearchBrowse(type = SearchType.Title, query = query)
+                    deepLinkScreens =
+                        listOf(
+                            Screens.Browse(
+                                searchBrowse = SearchBrowse(type = SearchType.Title, query = query)
+                            )
                         )
                 } else {
                     finish()
@@ -387,55 +396,48 @@ class MainActivity : ComponentActivity() {
                                     MdConstants.DeepLinkPrefix.manga + id
                                 }
                             }
-                        deepLinkScreen =
-                            Screens.Browse(SearchBrowse(type = SearchType.Title, query = query))
+                        deepLinkScreens =
+                            listOf(
+                                Screens.Browse(SearchBrowse(type = SearchType.Title, query = query))
+                            )
                     }
                 }
             }
-        /*SHORTCUT_MANGA,
-        SHORTCUT_MANGA_BACK -> {
-            val extras = intent.extras ?: return false
-            if (
-                intent.action == SHORTCUT_MANGA_BACK &&
-                preferences.openChapterInShortcuts().get()
-            ) {
-                val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
-                if (mangaId != 0L) {
-                    val db = Injekt.get<DatabaseHelper>()
-                    val chapters = db.getChapters(mangaId).executeAsBlocking()
-                    db.getManga(mangaId).executeAsBlocking()?.let { manga ->
-                        val availableChapters =
-                            chapters.filter { it.isAvailable(downloadManager, manga) }
-                        val nextUnreadChapter =
-                            ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
-                        if (nextUnreadChapter != null) {
-                            val activity =
-                                ReaderActivity.newIntent(this, manga, nextUnreadChapter)
-                            startActivity(activity)
-                            finish()
-                            return true
+            DeepLinks.Actions.Manga,
+            DeepLinks.Actions.MangaBack -> {
+                val extras = intent.extras ?: return
+                val mangaId = extras.getLong(DeepLinks.Extras.MangaId)
+
+                if (
+                    intent.action == DeepLinks.Actions.MangaBack &&
+                        viewModel.preferences.openChapterInShortcuts().get()
+                ) {
+                    val mangaId = extras.getLong(DeepLinks.Extras.MangaId)
+                    if (mangaId != 0L) {
+                        val db = Injekt.get<DatabaseHelper>()
+                        val downloadManager = Injekt.get<DownloadManager>()
+                        val chapters = db.getChapters(mangaId).executeAsBlocking()
+                        db.getManga(mangaId).executeAsBlocking()?.let { manga ->
+                            val availableChapters =
+                                chapters.filter { it.isAvailable(downloadManager, manga) }
+                            val nextUnreadChapter =
+                                ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
+                            if (nextUnreadChapter != null) {
+                                val activity =
+                                    ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                                startActivity(activity)
+                                finish()
+                            }
                         }
                     }
                 }
+                if (intent.action == DeepLinks.Actions.MangaBack) {
+                    SecureActivityDelegate.promptLockIfNeeded(this, true)
+                }
+                deepLinkScreens = listOf(Screens.Library(), Screens.Manga(mangaId))
             }
-            if (intent.action == SHORTCUT_MANGA_BACK) {
-                SecureActivityDelegate.promptLockIfNeeded(this, true)
-            }
-            router.replaceTopController(
-                RouterTransaction.with(MangaDetailController(extras))
-                    .pushChangeHandler(SimpleSwapChangeHandler())
-                    .popChangeHandler(FadeChangeHandler())
-            )
-        }
-        SHORTCUT_SOURCE -> {
-            val extras = intent.extras ?: return false
-            SecureActivityDelegate.promptLockIfNeeded(this, true)
-            router.replaceTopController(
-                RouterTransaction.with(BrowseController())
-                    .pushChangeHandler(SimpleSwapChangeHandler())
-                    .popChangeHandler(FadeChangeHandler())
-            )
-        }
+        /*
+
         SHORTCUT_READER_SETTINGS -> {
             val settingsController = SettingsController()
             settingsController.presenter.deepLink = Screens.Settings.Reader
@@ -446,10 +448,26 @@ class MainActivity : ComponentActivity() {
             )
         }*/
         }
-        if (deepLinkScreen != null) {
-            viewModel.setDeepLink(deepLinkScreen)
+        if (deepLinkScreens != null) {
+            viewModel.setDeepLink(deepLinkScreens)
         }
         setIntent(null)
+    }
+
+    companion object {
+        var chapterIdToExitTo = 0L
+
+        fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) =
+            Intent(context, MainActivity::class.java).apply {
+                action =
+                    if (canReturnToMain) DeepLinks.Actions.MangaBack else DeepLinks.Actions.Manga
+                putExtra(DeepLinks.Extras.MangaId, id)
+            }
+
+        fun openReaderSettings(context: Context) =
+            Intent(context, MainActivity::class.java).apply {
+                action = DeepLinks.Actions.ReaderSettings
+            }
     }
 }
 

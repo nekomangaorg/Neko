@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
+import eu.kanade.tachiyomi.ui.main.SplashScreen
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
@@ -27,6 +28,7 @@ import org.nekomanga.presentation.components.AppBar
 @Composable
 fun MainScreen(
     contentPadding: PaddingValues,
+    startingScreen: NavKey,
     backStack: NavBackStack<NavKey>,
     windowSizeClass: WindowSizeClass,
     incognitoMode: Boolean,
@@ -55,6 +57,13 @@ fun MainScreen(
                 ),
             entryProvider =
                 entryProvider {
+                    entry<Screens.Splash> {
+                        SplashScreen {
+                            backStack.clear()
+                            backStack.add(startingScreen)
+                        }
+                    }
+
                     entry<Screens.Library> { screen ->
                         val libraryViewModel: LibraryViewModel = viewModel()
                         if (screen.initialSearch.isNotEmpty()) {
