@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 
 object Screens {
 
+    @Serializable data object Onboarding : NavKey
+
     @Serializable data class Library(val initialSearch: String = "") : NavKey
 
     @Serializable data object Feed : NavKey

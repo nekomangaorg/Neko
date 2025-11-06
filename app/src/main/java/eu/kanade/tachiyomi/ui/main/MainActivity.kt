@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
@@ -23,17 +22,11 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -88,7 +81,8 @@ import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
-import org.nekomanga.presentation.screens.main.PulsingIcon
+import org.nekomanga.presentation.screens.main.BottomBar
+import org.nekomanga.presentation.screens.main.NavigationSideBar
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -108,17 +102,22 @@ class MainActivity : ComponentActivity() {
         }
 
         val startingScreen =
-            when (viewModel.preferences.startingTab().get()) {
-                1 -> {
-                    if (viewModel.preferences.lastUsedStartingTab().get() == 0) {
-                        Screens.Library()
-                    } else {
-                        Screens.Feed
+            if (!viewModel.preferences.hasShownOnboarding().get()) {
+                Screens.Onboarding
+            } else {
+                when (viewModel.preferences.startingTab().get()) {
+                    1 -> {
+                        if (viewModel.preferences.lastUsedStartingTab().get() == 0) {
+                            Screens.Library()
+                        } else {
+                            Screens.Feed
+                        }
                     }
+
+                    -2 -> Screens.Feed
+                    -3 -> Screens.Browse()
+                    else -> Screens.Library()
                 }
-                -2 -> Screens.Feed
-                -3 -> Screens.Browse()
-                else -> Screens.Library()
             }
 
         handleDeepLink(intent)
@@ -287,7 +286,13 @@ class MainActivity : ComponentActivity() {
                     trackColor = pullRefreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
                 ) {
                     Row(Modifier.fillMaxSize()) {
-                        if (showNavigationRail && backStack.size == 1) {
+                        if (
+                            showNavigationRail &&
+                                backStack.size == 1 &&
+                                (backStack[0] is Screens.Library ||
+                                    backStack[0] is Screens.Feed ||
+                                    backStack[0] is Screens.Browse)
+                        ) {
                             NavigationSideBar(
                                 items = navItems,
                                 libraryUpdating = libraryUpdating,
@@ -311,7 +316,13 @@ class MainActivity : ComponentActivity() {
                                 NekoSnackbarHost(snackbarHostState, currentSnackbarColor)
                             },
                             bottomBar = {
-                                if (!showNavigationRail && backStack.size == 1) {
+                                if (
+                                    !showNavigationRail &&
+                                        backStack.size == 1 &&
+                                        (backStack[0] is Screens.Library ||
+                                            backStack[0] is Screens.Feed ||
+                                            backStack[0] is Screens.Browse)
+                                ) {
                                     BottomBar(
                                         items = navItems,
                                         libraryUpdating = libraryUpdating,
@@ -349,6 +360,7 @@ class MainActivity : ComponentActivity() {
                                 onMenuShowing = { visible -> mainDropdownShowing = visible },
                                 incognitoMode = mainScreenState.incognitoMode,
                                 incognitoClick = viewModel::toggleIncoginito,
+                                onboardingCompleted = viewModel::onboardingCompleted,
                             )
 
                             if (mainScreenState.appUpdateResult != null) {
@@ -541,74 +553,4 @@ class MainActivity : ComponentActivity() {
                 action = DeepLinks.Actions.ReaderSettings
             }
     }
-}
-
-@Composable
-fun BottomBar(
-    items: List<NavigationItem>,
-    libraryUpdating: Boolean,
-    downloaderRunning: Boolean,
-    selectedItemIndex: Int,
-    onNavigate: (NavKey) -> Unit,
-) {
-
-    NavigationBar(
-        modifier = Modifier.fillMaxWidth(),
-        content = {
-            items.forEachIndexed { index, item ->
-                NavigationBarItem(
-                    selected = selectedItemIndex == index,
-                    onClick = { onNavigate(item.screen) },
-                    icon = {
-                        PulsingIcon(
-                            isPulsing =
-                                ((index == 0 && libraryUpdating) ||
-                                    (index == 1 && downloaderRunning)),
-                            imageVector =
-                                if (selectedItemIndex == index) item.selectedIcon
-                                else item.unselectedIcon,
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text(text = item.title) },
-                )
-            }
-        },
-    )
-}
-
-@Composable
-fun NavigationSideBar(
-    items: List<NavigationItem>,
-    libraryUpdating: Boolean,
-    downloaderRunning: Boolean,
-    selectedItemIndex: Int,
-    onNavigate: (NavKey) -> Unit,
-) {
-
-    val context = LocalContext.current
-
-    NavigationRail(
-        modifier = Modifier.fillMaxHeight(),
-        content = {
-            items.forEachIndexed { index, item ->
-                NavigationRailItem(
-                    selected = selectedItemIndex == index,
-                    onClick = { onNavigate(item.screen) },
-                    icon = {
-                        PulsingIcon(
-                            isPulsing =
-                                ((index == 0 && libraryUpdating) ||
-                                    (index == 1 && downloaderRunning)),
-                            imageVector =
-                                if (selectedItemIndex == index) item.selectedIcon
-                                else item.unselectedIcon,
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text(text = item.title) },
-                )
-            }
-        },
-    )
 }

@@ -34,6 +34,7 @@ fun MainScreen(
     incognitoMode: Boolean,
     incognitoClick: () -> Unit,
     onMenuShowing: (Boolean) -> Unit,
+    onboardingCompleted: () -> Unit,
 ) {
 
     val mainDropDown =
@@ -62,6 +63,16 @@ fun MainScreen(
                             backStack.clear()
                             backStack.add(startingScreen)
                         }
+                    }
+
+                    entry<Screens.Onboarding> {
+                        OnboardingScreen(
+                            finishedOnBoarding = {
+                                onboardingCompleted()
+                                backStack.clear()
+                                backStack.add(Screens.Library())
+                            }
+                        )
                     }
 
                     entry<Screens.Library> { screen ->

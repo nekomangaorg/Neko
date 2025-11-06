@@ -89,6 +89,10 @@ class MainActivityViewModel : ViewModel() {
         viewModelScope.launch { securityPreferences.incognitoMode().toggle() }
     }
 
+    fun onboardingCompleted() {
+        viewModelScope.launch { preferences.hasShownOnboarding().set(true) }
+    }
+
     fun saveExtras(currentTabIsLibrary: Boolean) {
         viewModelScope.launch {
             val startingTab = if (currentTabIsLibrary) 0 else 1
