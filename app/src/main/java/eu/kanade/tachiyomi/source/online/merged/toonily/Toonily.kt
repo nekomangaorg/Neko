@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.merged.toonily
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -32,7 +31,7 @@ import tachiyomi.core.network.await
 
 class Toonily : ReducedHttpSource() {
     override val name = Toonily.name
-    override val baseUrl = "https://toonily.com"
+    override val baseUrl = Toonily.baseUrl
     val dateFormat = SimpleDateFormat("MMM d, yy", Locale.US)
 
     private fun parseChapterDate(date: String?): Long {
@@ -278,5 +277,6 @@ class Toonily : ReducedHttpSource() {
 
     companion object {
         const val name = "Toonily"
+        const val baseUrl = "https://toonily.com"
     }
 }
