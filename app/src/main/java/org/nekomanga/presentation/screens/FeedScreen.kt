@@ -256,7 +256,7 @@ private fun FeedWrapper(
             onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
         }
 
-        val recyclerContentPadding = PaddingValues()
+        val recyclerContentPadding = PaddingValues(bottom = Size.huge)
 
         Box(modifier = Modifier.fillMaxSize()) {
             FeedScreenContent(
