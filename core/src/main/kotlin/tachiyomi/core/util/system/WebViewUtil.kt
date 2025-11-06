@@ -9,8 +9,9 @@ import android.webkit.WebView
 import org.nekomanga.logging.TimberKt
 
 object WebViewUtil {
-
-    const val MINIMUM_WEBVIEW_VERSION = 114
+    private const val CHROME_PACKAGE = "com.android.chrome"
+    private const val SYSTEM_SETTINGS_PACKAGE = "com.android.settings"
+    const val MINIMUM_WEBVIEW_VERSION = 118
 
     fun supportsWebView(context: Context): Boolean {
         try {
@@ -23,6 +24,16 @@ object WebViewUtil {
         }
 
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)
+    }
+
+    fun spoofedPackageName(context: Context): String {
+        return try {
+            context.packageManager.getPackageInfo(CHROME_PACKAGE, PackageManager.GET_META_DATA)
+
+            CHROME_PACKAGE
+        } catch (_: PackageManager.NameNotFoundException) {
+            SYSTEM_SETTINGS_PACKAGE
+        }
     }
 }
 

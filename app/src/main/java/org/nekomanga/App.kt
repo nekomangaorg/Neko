@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Looper
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.widget.Toast
@@ -48,6 +49,7 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.logging.CrashReportingTree
 import org.nekomanga.logging.DebugReportingTree
 import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.system.WebViewUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy
 
@@ -172,6 +174,23 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         super.onLowMemory()
         LibraryPresenter.onLowMemory()
         FeedPresenter.onLowMemory()
+    }
+
+    override fun getPackageName(): String {
+        try {
+            // Override the value passed as X-Requested-With in WebView requests
+            val stackTrace = Looper.getMainLooper().thread.stackTrace
+            val isChromiumCall =
+                stackTrace.any { trace ->
+                    trace.className.lowercase() in
+                        setOf("org.chromium.base.buildinfo", "org.chromium.base.apkinfo") &&
+                        trace.methodName.lowercase() in setOf("getall", "getpackagename", "<init>")
+                }
+
+            if (isChromiumCall) return WebViewUtil.spoofedPackageName(applicationContext)
+        } catch (_: Exception) {}
+
+        return super.getPackageName()
     }
 
     override fun newImageLoader(context: Context) = coilImageLoader(context)
