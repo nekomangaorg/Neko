@@ -2,9 +2,10 @@ package org.nekomanga.presentation.components.sheets
 
 import Header
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -56,6 +57,7 @@ import coil3.request.crossfade
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
@@ -65,6 +67,8 @@ import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun MergeSheet(
@@ -79,6 +83,7 @@ fun MergeSheet(
     removeMergeSource: (MergeType) -> Unit,
     mergeMangaClick: (SourceMergeManga) -> Unit,
     cancelClick: () -> Unit,
+    sourceManager: SourceManager = Injekt.get(),
 ) {
     when (isMergedManga) {
         is IsMergedManga.Yes -> {
@@ -136,9 +141,11 @@ fun MergeSheet(
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                         MergeType.Comick -> R.drawable.ic_comick_logo
                                     }
+                                val source = MergeType.getSource(validMergeType, sourceManager)
                                 MergeLogo(
                                     id = id,
                                     onClick = { mergeType = validMergeType },
+                                    onLongClick = { openMergeSource(source.baseUrl, source.name) },
                                     title = validMergeType.name,
                                 )
                             }
@@ -189,13 +196,19 @@ fun MergeSheet(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MergeLogo(@DrawableRes id: Int, title: String, onClick: () -> Unit) {
+private fun MergeLogo(
+    @DrawableRes id: Int,
+    title: String,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier =
                 Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                    .clickable(onClick = onClick)
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                     .padding(Size.small)
                     .clip(RoundedCornerShape(Shapes.coverRadius))
         ) {
