@@ -49,13 +49,20 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     val context = LocalContext.current
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
-    val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main)
+    val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main())
     val wasDeepLink = remember(deepLink) { deepLink != null }
 
     val settingsVm: SettingsViewModel = viewModel()
 
     NavDisplay(
         backStack = backStack,
+        onBack = {
+            reset(
+                backstack = backStack,
+                wasDeepLink = deepLink != null,
+                onBackPressed = onBackPressed,
+            )
+        },
         entryDecorators =
             listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
@@ -258,7 +265,7 @@ private fun reset(
         onBackPressed()
     } else {
         backstack.clear()
-        backstack.add(Screens.Settings.Main)
+        backstack.add(Screens.Settings.Main())
     }
 }
 

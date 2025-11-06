@@ -28,7 +28,7 @@ object Screens {
     @Serializable data class Similar(val mangaUUID: String) : NavKey
 
     object Settings {
-        @Serializable data object Main : NavKey
+        @Serializable data class Main(val deepLink: NavKey? = null) : NavKey
 
         @Serializable data object General : NavKey
 

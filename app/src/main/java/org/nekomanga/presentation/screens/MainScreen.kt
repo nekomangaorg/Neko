@@ -40,7 +40,7 @@ fun MainScreen(
         AppBar.MainDropdown(
             incognitoMode = incognitoMode,
             incognitoModeClick = incognitoClick,
-            settingsClick = { backStack.add(Screens.Settings.Main) },
+            settingsClick = { backStack.add(Screens.Settings.Main()) },
             statsClick = { backStack.add(Screens.Stats) },
             aboutClick = { backStack.add(Screens.About) },
             menuShowing = onMenuShowing,
@@ -145,11 +145,11 @@ fun MainScreen(
                         )
                     }
 
-                    entry<Screens.Settings.Main> {
+                    entry<Screens.Settings.Main> { screen ->
                         SettingsScreen(
                             windowSizeClass = windowSizeClass,
                             onBackPressed = { backStack.removeLastOrNull() },
-                            deepLink = null,
+                            deepLink = screen.deepLink,
                         )
                     }
                     entry<Screens.Stats> {

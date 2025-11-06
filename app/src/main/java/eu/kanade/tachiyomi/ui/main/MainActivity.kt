@@ -470,7 +470,6 @@ class MainActivity : ComponentActivity() {
                 }
                 deepLinkScreens = listOf(Screens.Library(), Screens.Manga(mangaId))
             }
-        /*
 
         SHORTCUT_READER_SETTINGS -> {
             val settingsController = SettingsController()
