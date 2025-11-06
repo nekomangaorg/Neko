@@ -116,7 +116,6 @@ ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmtVersion" }
 
 [bundles]
 coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]
-conductor = ["conductor", "conductor-supportpref"]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
