@@ -12,9 +12,6 @@ import eu.kanade.tachiyomi.util.asJsoup
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.TimeUnit
-import kotlin.math.absoluteValue
-import kotlin.random.Random
 import okhttp3.FormBody
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -28,63 +25,35 @@ import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import tachiyomi.core.network.await
+import tachiyomi.core.network.interceptors.CookieInterceptor
 
 class Toonily : ReducedHttpSource() {
     override val name = Toonily.name
     override val baseUrl = Toonily.baseUrl
     val dateFormat = SimpleDateFormat("MMM d, yy", Locale.US)
 
-    private fun parseChapterDate(date: String?): Long {
-        date ?: return 0
-
-        return when (date.contains("UP")) {
-            true -> {
-                Calendar.getInstance()
-                    .apply {
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }
-                    .timeInMillis
-            }
-            false -> {
-                runCatching { dateFormat.parse(date)?.time ?: 0 }.getOrElse { 0L }
-            }
-        }
-    }
-
-    val userAgentRandomizer = " ${Random.nextInt().absoluteValue}"
-
     override val client: OkHttpClient =
         network.cloudFlareClient
             .newBuilder()
-            .connectTimeout(1, TimeUnit.MINUTES)
-            .readTimeout(1, TimeUnit.MINUTES)
-            .writeTimeout(1, TimeUnit.MINUTES)
             .rateLimit(2)
+            .addNetworkInterceptor(CookieInterceptor(domain, "toonily-mature" to "1"))
             .build()
 
-    override val headers =
-        Headers.Builder()
-            .add("Referer", baseUrl)
-            .add(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer",
-            )
-            .build()
+    override val headers = Headers.Builder().add("Referer", "$baseUrl/").build()
 
     private val searchHeaders =
         headers.newBuilder().add("X-Requested-With", "XMLHttpRequest").build()
 
     override suspend fun searchManga(query: String): List<SManga> {
+        val sanitizedQuery = query.replace(titleSpecialCharactersRegex, " ").trim()
+
         val response =
             client
                 .newCall(
                     POST(
                         "$baseUrl/wp-admin/admin-ajax.php",
                         searchHeaders,
-                        searchFormBuilder(query).build(),
+                        searchFormBuilder(sanitizedQuery).build(),
                     )
                 )
                 .await()
@@ -112,7 +81,6 @@ class Toonily : ReducedHttpSource() {
             add("vars[post_type]", "wp-manga")
             add("vars[post_status]", "publish")
             add("vars[manga_archives_item_layout]", "big_thumbnail")
-            add("vars[posts_per_page]", "30")
             add("vars[s]", query)
         }
 
@@ -225,6 +193,26 @@ class Toonily : ReducedHttpSource() {
         return Ok(chapters.reversed())
     }
 
+    private fun parseChapterDate(date: String?): Long {
+        date ?: return 0
+
+        return when (date.contains("UP")) {
+            true -> {
+                Calendar.getInstance()
+                    .apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    .timeInMillis
+            }
+            false -> {
+                runCatching { dateFormat.parse(date)?.time ?: 0 }.getOrElse { 0L }
+            }
+        }
+    }
+
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET(chapter.url, headers)).await()
         val document = response.asJsoup()
@@ -277,6 +265,8 @@ class Toonily : ReducedHttpSource() {
 
     companion object {
         const val name = "Toonily"
-        const val baseUrl = "https://toonily.com"
+        const val domain = "toonily.com"
+        const val baseUrl = "https://$domain"
+        val titleSpecialCharactersRegex = "[^a-z0-9]+".toRegex()
     }
 }

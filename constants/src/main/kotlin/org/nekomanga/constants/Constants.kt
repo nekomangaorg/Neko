@@ -4,7 +4,8 @@ object Constants {
 
     const val SEARCH_DEBOUNCE_MILLIS = 250L
 
-    const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64)"
+    const val USER_AGENT =
+        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.7444.49 Mobile Safari/537.36"
 
     const val DONT_KILL_MY_APP_URL = "https://dontkillmyapp.com/"
 

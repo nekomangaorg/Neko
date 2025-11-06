@@ -17,6 +17,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.Jsoup
 import org.nekomanga.core.R
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.AndroidCookieJar
 import tachiyomi.core.util.system.isOutdated
 import tachiyomi.core.util.system.toast
@@ -62,6 +63,7 @@ class CloudflareInterceptor(
         // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
         // we don't crash the entire app
         catch (e: CloudflareBypassException) {
+            TimberKt.e(e) { "Failed to bypass error" }
             throw IOException(context.getString(R.string.information_cloudflare_bypass_failure))
         } catch (e: Exception) {
             throw IOException(e)
@@ -88,6 +90,7 @@ class CloudflareInterceptor(
 
             webview.webViewClient =
                 object : WebViewClient() {
+
                     override fun onPageFinished(view: WebView, url: String) {
                         fun isCloudFlareBypassed(): Boolean {
                             return cookieManager

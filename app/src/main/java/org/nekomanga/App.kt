@@ -88,8 +88,9 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
         // Avoid potential crashes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val process = getProcessName()
-            if (packageName != process)
+            if (packageName != process) {
                 kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
+            }
         }
 
         Injekt.importModule(PreferenceModule(this))

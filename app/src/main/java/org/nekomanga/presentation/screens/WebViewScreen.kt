@@ -168,7 +168,7 @@ fun WebViewScreen(
                             WebView.setWebContentsDebuggingEnabled(true)
                         }
 
-                        headers["User-Agent"]?.let { webView.settings.userAgentString = it }
+                        headers["user-agent"]?.let { webView.settings.userAgentString = it }
                     },
                     client = webClient,
                     onDispose = { webview -> webview.destroy() },

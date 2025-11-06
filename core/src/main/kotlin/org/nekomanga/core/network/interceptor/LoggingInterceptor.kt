@@ -1,7 +1,6 @@
 package org.nekomanga.core.network.interceptor
 
 import com.google.common.net.HttpHeaders
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.logging.HttpLoggingInterceptor
 import org.nekomanga.logging.TimberKt
@@ -26,7 +25,7 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
     return HttpLoggingInterceptor(logger).apply {
         level =
             when (verboseLoggingProvider()) {
-                true -> HttpLoggingInterceptor.Level.BODY
+                true -> HttpLoggingInterceptor.Level.HEADERS
                 false -> HttpLoggingInterceptor.Level.BASIC
             }
         redactHeader(HttpHeaders.AUTHORIZATION)
