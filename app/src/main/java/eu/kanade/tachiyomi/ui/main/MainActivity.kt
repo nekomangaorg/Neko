@@ -151,7 +151,7 @@ class MainActivity : ComponentActivity() {
             val updateScreenBars: (ScreenBars) -> Unit = { newBars ->
                 if (newBars.id == screenBars.id && newBars.topBar == null) {
                     // This is a screen being disposed, only clear if it is the current screen
-                    screenBars = ScreenBars()
+                    // screenBars = ScreenBars()
                 } else if (newBars.topBar != null) {
                     screenBars = newBars
                 }
@@ -164,7 +164,7 @@ class MainActivity : ComponentActivity() {
                         newPullRefreshState.onRefresh == null
                 ) {
                     // This is a screen being disposed, only clear if it is the current screen
-                    pullRefreshState = PullRefreshState()
+                    //   pullRefreshState = PullRefreshState()
                 } else if (newPullRefreshState.onRefresh != null) {
                     pullRefreshState = newPullRefreshState
                 }
