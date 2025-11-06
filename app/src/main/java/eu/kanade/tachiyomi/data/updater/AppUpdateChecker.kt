@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.withIOContext
 import io.github.g00fy2.versioncompare.Version
 import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.GET
@@ -29,14 +30,14 @@ class AppUpdateChecker {
         isUserPrompt: Boolean = false,
         doExtrasAfterNewUpdate: Boolean = true,
     ): AppUpdateResult {
-        /* if (!BuildConfig.INCLUDE_UPDATER) return AppUpdateResult.NoNewUpdate
+         if (!BuildConfig.INCLUDE_UPDATER) return AppUpdateResult.NoNewUpdate
         // Limit checks to once a day at most
         if (
             !isUserPrompt &&
                 Date().time < preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
-        }*/
+        }
 
         return withIOContext {
             val result =
@@ -49,7 +50,7 @@ class AppUpdateChecker {
                             preferences.lastAppCheck().set(Date().time)
 
                             // Check if latest version is different from current version
-                            if (Version(it.version).isHigherThan("3.1.3")) {
+                            if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
                                 AppUpdateResult.NewUpdate(it)
                             } else {
                                 AppUpdateResult.NoNewUpdate
