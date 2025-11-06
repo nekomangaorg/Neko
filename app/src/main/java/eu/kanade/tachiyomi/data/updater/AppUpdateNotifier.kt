@@ -43,7 +43,8 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     fun promptUpdate(body: String, url: String, releaseUrl: String) {
 
-        val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
+        val pendingIntent =
+            NotificationReceiver.openUpdatePendingActivity(context, body, url, releaseUrl)
         releasePageUrl = releaseUrl
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.app_name))

@@ -14,16 +14,12 @@ import androidx.compose.ui.res.stringResource
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
-import eu.kanade.tachiyomi.data.updater.GithubRelease
+import eu.kanade.tachiyomi.data.updater.Release
 import org.nekomanga.R
 
 /** Dialog that shows when an app update is available */
 @Composable
-fun AppUpdateDialog(
-    release: GithubRelease,
-    onDismissRequest: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
+fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (String) -> Unit) {
     val body = release.info.substringBeforeLast("Downloads & Checksums")
     val url = release.downloadLink
     AlertDialog(

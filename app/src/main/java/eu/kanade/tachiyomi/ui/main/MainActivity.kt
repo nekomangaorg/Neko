@@ -119,6 +119,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(deepLink) {
                 if (deepLink != null) {
                     backStack.clear()
+
                     deepLink!!.forEach { screen -> backStack.add(screen) }
                     viewModel.consumeDeepLink()
                 }
@@ -352,6 +353,13 @@ class MainActivity : ComponentActivity() {
             )
         }
         when (intent.action) {
+            DeepLinks.Actions.UpdateNotes -> {
+                val extras = intent.extras ?: return
+                val downloadUrl = extras.getString(DeepLinks.Extras.AppUpdateUrl) ?: return
+                val notes = extras.getString(DeepLinks.Extras.AppUpdateNotes) ?: return
+                val releaseUrl = extras.getString(DeepLinks.Extras.AppUpdateNotes) ?: return
+                viewModel.addAppUpdateResult(downloadUrl, notes, releaseUrl)
+            }
             Intent.ACTION_SEARCH,
             Intent.ACTION_SEND,
             "com.google.android.gms.actions.SEARCH_ACTION" -> {

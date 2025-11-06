@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.SimpleGithubRelease
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -38,6 +39,21 @@ class MainActivityViewModel : ViewModel() {
 
     fun consumeAppUpdateResult() {
         _mainScreenState.update { it.copy(appUpdateResult = null) }
+    }
+
+    fun addAppUpdateResult(url: String, notes: String, releaseLink: String) {
+        _mainScreenState.update {
+            it.copy(
+                appUpdateResult =
+                    AppUpdateResult.NewUpdate(
+                        SimpleGithubRelease(
+                            downloadLink = url,
+                            info = notes,
+                            releaseLink = releaseLink,
+                        )
+                    )
+            )
+        }
     }
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()

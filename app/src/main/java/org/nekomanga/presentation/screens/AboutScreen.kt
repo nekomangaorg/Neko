@@ -132,7 +132,7 @@ private fun AboutWrapper(
             aboutScreenState.updateResult is AppUpdateResult.NewUpdate
     ) {
         AppUpdateDialog(
-            release = (aboutScreenState.updateResult as AppUpdateResult.NewUpdate).release,
+            release = aboutScreenState.updateResult.release,
             onDismissRequest = dismissDialog,
             onConfirm = onDownloadClicked,
         )

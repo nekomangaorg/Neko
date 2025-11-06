@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -591,13 +590,16 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             notes: String,
             downloadLink: String,
+            releaseLink: String,
         ): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java)
                     .setAction(DeepLinks.Actions.UpdateNotes)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .putExtra(NewUpdateDialogController.BODY_KEY, notes)
-                    .putExtra(NewUpdateDialogController.URL_KEY, downloadLink)
+                    .putExtra(DeepLinks.Extras.AppUpdateNotes, notes)
+                    .putExtra(DeepLinks.Extras.AppUpdateUrl, downloadLink)
+                    .putExtra(DeepLinks.Extras.AppUpdateReleaseUrl, releaseLink)
+
             return PendingIntent.getActivity(
                 context,
                 downloadLink.hashCode(),

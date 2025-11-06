@@ -5,6 +5,12 @@ object DeepLinks {
         const val MangaId = "mangaId"
         const val NotificationId = "notificationId"
         const val GroupId = "groupId"
+
+        const val AppUpdateNotes = "notes"
+
+        const val AppUpdateUrl = "DownloadUrl"
+
+        const val AppUpdateReleaseUrl = "releaseUrl"
     }
 
     object Intents {
