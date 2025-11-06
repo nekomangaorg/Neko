@@ -3,9 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -15,15 +13,10 @@ import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
-import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
-import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
-import kotlin.collections.set
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.time.Duration.Companion.seconds
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -79,11 +72,9 @@ class ImageHandler {
     private suspend fun requestImage(request: Request, page: Page): Response {
 
         var attempt =
-            com.github.michaelbull.result
-                .runCatching {
-                    network.cdnClient.newCachelessCallWithProgress(request, page).await()
-                }
-                .onSuccess { response -> reportImageWithResponse(response) }
+            com.github.michaelbull.result.runCatching {
+                network.cdnClient.newCachelessCallWithProgress(request, page).await()
+            }
 
         if (
             (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
@@ -115,47 +106,8 @@ class ImageHandler {
         return attempt.getOrThrow { e ->
             if (e !is CancellationException) {
                 TimberKt.e(attempt.getError()) { "$tag error getting images" }
-                reportFailedImage(request.url.toString())
             }
             e
-        }
-    }
-
-    private fun reportFailedImage(url: String) {
-        val atHomeImageReportDto =
-            AtHomeImageReportDto(url, false, duration = 30.seconds.inWholeMilliseconds)
-        sendReport(atHomeImageReportDto)
-    }
-
-    private fun reportImageWithResponse(response: Response) {
-        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size.toLong()
-        val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
-        val cache = response.header("X-Cache", "") == "HIT"
-        val atHomeImageReportDto =
-            AtHomeImageReportDto(
-                response.request.url.toString(),
-                response.isSuccessful,
-                byteSize,
-                cache,
-                duration,
-            )
-        TimberKt.d { "$tag  $atHomeImageReportDto" }
-        sendReport(atHomeImageReportDto)
-    }
-
-    private fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
-
-        TimberKt.d { "$tag Image to report $atHomeImageReportDto" }
-
-        if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-            TimberKt.d { "$tag image is at CDN don't report to md@home node" }
-            return
-        }
-        launchIO {
-            withNonCancellableContext {
-                runCatching { networkServices.service.atHomeImageReport(atHomeImageReportDto) }
-                    .onFailure { TimberKt.w(it) { "failed to report image" } }
-            }
         }
     }
 
