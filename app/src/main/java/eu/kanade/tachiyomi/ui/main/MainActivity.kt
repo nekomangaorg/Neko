@@ -470,9 +470,17 @@ class MainActivity : ComponentActivity() {
                 }
                 deepLinkScreens = listOf(Screens.Library(), Screens.Manga(mangaId))
             }
-            DeepLinks.Actions.ReaderSettings -> {
-                deepLinkScreens = listOf(Screens.Settings.Reader)
-            }
+        /*
+
+        SHORTCUT_READER_SETTINGS -> {
+            val settingsController = SettingsController()
+            settingsController.presenter.deepLink = Screens.Settings.Reader
+            router.replaceTopController(
+                RouterTransaction.with(settingsController)
+                    .pushChangeHandler(SimpleSwapChangeHandler())
+                    .popChangeHandler(FadeChangeHandler())
+            )
+        }*/
         }
         if (deepLinkScreens != null) {
             viewModel.setDeepLink(deepLinkScreens)

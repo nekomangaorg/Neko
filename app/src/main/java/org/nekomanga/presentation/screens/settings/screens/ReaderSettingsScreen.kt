@@ -31,8 +31,8 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 internal class ReaderSettingsScreen(
     val readerPreferences: ReaderPreferences,
     incognitoMode: Boolean,
-    onBackPressed: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+    onNavigationIconClick: () -> Unit,
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.reader_settings
 

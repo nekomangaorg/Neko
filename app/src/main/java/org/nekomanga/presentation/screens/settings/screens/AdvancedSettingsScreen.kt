@@ -63,8 +63,8 @@ internal class AdvancedSettingsScreen(
     val reindexDownloads: () -> Unit,
     val clearDatabase: (Boolean) -> Unit,
     val dedupeCategories: () -> Unit,
-    onBackPressed: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+    onNavigationIconClick: () -> Unit,
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.advanced
 

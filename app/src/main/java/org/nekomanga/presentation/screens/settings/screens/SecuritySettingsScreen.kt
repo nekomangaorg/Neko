@@ -20,8 +20,8 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 internal class SecuritySettingsScreen(
     incognitoMode: Boolean,
     val securityPreferences: SecurityPreferences,
-    onBackPressed: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+    onNavigationIconClick: () -> Unit,
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.security
 

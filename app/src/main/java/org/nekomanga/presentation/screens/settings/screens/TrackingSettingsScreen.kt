@@ -34,8 +34,8 @@ internal class TrackingSettingsScreen(
     val logout: (TrackServiceItem) -> Unit,
     val login: (TrackServiceItem, String, String) -> Unit,
     val loginEvent: SharedFlow<MergeLoginEvent>,
-    onBackPressed: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+    onNavigationIconClick: () -> Unit,
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.tracking
 
     @Composable

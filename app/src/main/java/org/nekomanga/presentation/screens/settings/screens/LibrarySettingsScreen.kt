@@ -38,11 +38,11 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class LibrarySettingsScreen(
     incognitoMode: Boolean,
     val libraryPreferences: LibraryPreferences,
-    onBackPressed: () -> Unit,
+    onNavigationIconClick: () -> Unit,
     val categories: PersistentList<CategoryItem>,
     val viewModelScope: CoroutineScope,
     val onAddEditCategoryClick: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.library
 

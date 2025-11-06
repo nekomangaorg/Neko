@@ -14,9 +14,9 @@ internal class GeneralSettingsScreen(
     incognitoMode: Boolean,
     val preferencesHelper: PreferencesHelper,
     val showNotificationSetting: Boolean,
-    onBackPressed: () -> Unit,
+    onNavigationIconClick: () -> Unit,
     val manageNotificationsClicked: () -> Unit,
-) : SearchableSettings(onBackPressed, incognitoMode) {
+) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.general
 
