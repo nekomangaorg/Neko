@@ -29,7 +29,7 @@ import uy.kohesive.injekt.injectLazy
 
 class MangaLife : ReducedHttpSource() {
     override val name = MangaLife.name
-    override val baseUrl = "https://manga4life.com"
+    override val baseUrl = MangaLife.baseUrl
 
     override val client: OkHttpClient =
         network.cloudFlareClient
@@ -272,5 +272,6 @@ class MangaLife : ReducedHttpSource() {
     companion object {
         @Deprecated("deprecated") const val oldName = "Merged Chapter"
         const val name = "MangaLife"
+        const val baseUrl = "https://manga4life.com"
     }
 }
