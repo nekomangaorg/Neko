@@ -36,6 +36,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -97,9 +101,20 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
+        TimberKt.d { "Starting screen tab # ${viewModel.preferences.startingTab().get()}" }
+        TimberKt.d {
+            "Starting lastUsed tab # ${viewModel.preferences.lastUsedStartingTab().get()}"
+        }
+
         val startingScreen =
             when (viewModel.preferences.startingTab().get()) {
-                1,
+                1 -> {
+                    if (viewModel.preferences.lastUsedStartingTab().get() == 0) {
+                        Screens.Library()
+                    } else {
+                        Screens.Feed
+                    }
+                }
                 -2 -> Screens.Feed
                 -3 -> Screens.Browse()
                 else -> Screens.Library()
@@ -109,10 +124,36 @@ class MainActivity : ComponentActivity() {
 
         setComposeContent {
             val context = LocalContext.current
-
             val mainScreenState by viewModel.mainScreenState.collectAsStateWithLifecycle()
 
+            val lifecycleOwner = LocalLifecycleOwner.current
+
             val backStack = rememberNavBackStack(startingScreen)
+
+            val selectedItemIndex =
+                remember(backStack.lastOrNull()) {
+                    when (backStack.lastOrNull()) {
+                        is Screens.Library -> 0
+                        is Screens.Feed -> 1
+                        is Screens.Browse -> 2
+                        else -> -1
+                    }
+                }
+
+            DisposableEffect(lifecycleOwner, selectedItemIndex) {
+                // Create an observer
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_DESTROY) {
+                        viewModel.saveExtras(selectedItemIndex == 0)
+                    }
+                }
+
+                // Add the observer to the lifecycle
+                lifecycleOwner.lifecycle.addObserver(observer)
+
+                // When the composable leaves the composition, remove the observer
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
 
             val deepLink by viewModel.deepLinkScreen.collectAsStateWithLifecycle()
 
@@ -124,16 +165,6 @@ class MainActivity : ComponentActivity() {
                     viewModel.consumeDeepLink()
                 }
             }
-
-            val selectedItemIndex =
-                remember(backStack.lastOrNull()) {
-                    when (backStack.lastOrNull()) {
-                        is Screens.Library -> 0
-                        is Screens.Feed -> 1
-                        is Screens.Browse -> 2
-                        else -> -1
-                    }
-                }
 
             val snackbarHostState = remember { SnackbarHostState() }
             var currentSnackbarColor by remember { mutableStateOf<SnackbarColor?>(null) }
@@ -313,28 +344,6 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         handleDeepLink(intent)
     }
-
-    override fun onPause() {
-        super.onPause()
-        //    setStartingTab()
-        saveExtras()
-    }
-
-    fun saveExtras() {
-        viewModel.saveExtras()
-    }
-
-    /*   override fun finish() {
-            if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
-                setStartingTab()
-            }
-            if (this !is SearchActivity) {
-                SecureActivityDelegate.locked = true
-            }
-            saveExtras()
-            super.finish()
-        }
-    */
 
     private fun handleDeepLink(intent: Intent?) {
         if (intent == null) {

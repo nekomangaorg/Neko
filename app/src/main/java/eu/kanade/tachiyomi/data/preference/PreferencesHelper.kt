@@ -44,7 +44,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun startingTab() = this.preferenceStore.getInt(Keys.startingTab, 1)
 
-    fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)
+    fun lastUsedStartingTab() = this.preferenceStore.getInt("last_used_tab", 1)
 
     fun hasShownNotifPermission() =
         this.preferenceStore.getBoolean("has_shown_notification_permission", false)

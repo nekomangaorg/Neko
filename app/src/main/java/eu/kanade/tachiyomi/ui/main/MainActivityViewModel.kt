@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -86,7 +87,14 @@ class MainActivityViewModel : ViewModel() {
         viewModelScope.launch { securityPreferences.incognitoMode().toggle() }
     }
 
-    fun saveExtras() {
+    fun saveExtras(currentTabIsLibrary: Boolean) {
+        viewModelScope.launch {
+            TimberKt.d { "Starting tab currentTabIsLibrary $currentTabIsLibrary" }
+            val startingTab = if (currentTabIsLibrary) 0 else 1
+            TimberKt.d { "Starting tab set to $startingTab" }
+            preferences.lastUsedStartingTab().set(startingTab)
+        }
+
         viewModelScope.launch {
             mangaShortcutManager.updateShortcuts()
             MangaCoverMetadata.savePrefs()

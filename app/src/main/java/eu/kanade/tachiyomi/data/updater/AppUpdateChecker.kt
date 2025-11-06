@@ -30,7 +30,7 @@ class AppUpdateChecker {
         isUserPrompt: Boolean = false,
         doExtrasAfterNewUpdate: Boolean = true,
     ): AppUpdateResult {
-         if (!BuildConfig.INCLUDE_UPDATER) return AppUpdateResult.NoNewUpdate
+        if (!BuildConfig.INCLUDE_UPDATER) return AppUpdateResult.NoNewUpdate
         // Limit checks to once a day at most
         if (
             !isUserPrompt &&
