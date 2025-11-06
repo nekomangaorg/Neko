@@ -2,9 +2,11 @@ package org.nekomanga.presentation.components.sheets
 
 import Header
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -139,6 +141,14 @@ fun MergeSheet(
                                 MergeLogo(
                                     id = id,
                                     onClick = { mergeType = validMergeType },
+                                    onLongClick = {
+                                        if (validMergeType.baseUrl.isNotEmpty()) {
+                                            openMergeSource(
+                                                validMergeType.baseUrl,
+                                                validMergeType.scanlatorName,
+                                            )
+                                        }
+                                    },
                                     title = validMergeType.name,
                                 )
                             }
@@ -189,13 +199,19 @@ fun MergeSheet(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MergeLogo(@DrawableRes id: Int, title: String, onClick: () -> Unit) {
+private fun MergeLogo(
+    @DrawableRes id: Int,
+    title: String,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier =
                 Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                    .clickable(onClick = onClick)
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                     .padding(Size.small)
                     .clip(RoundedCornerShape(Shapes.coverRadius))
         ) {
