@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -53,10 +52,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
@@ -72,6 +76,7 @@ import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import java.math.BigInteger
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
@@ -83,6 +88,7 @@ import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
+import org.nekomanga.presentation.screens.main.PulsingIcon
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -99,11 +105,6 @@ class MainActivity : ComponentActivity() {
             // See:
             // https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
             window.isNavigationBarContrastEnforced = false
-        }
-
-        TimberKt.d { "Starting screen tab # ${viewModel.preferences.startingTab().get()}" }
-        TimberKt.d {
-            "Starting lastUsed tab # ${viewModel.preferences.lastUsedStartingTab().get()}"
         }
 
         val startingScreen =
@@ -139,6 +140,29 @@ class MainActivity : ComponentActivity() {
                         else -> -1
                     }
                 }
+
+            var libraryUpdating by remember { mutableStateOf(false) }
+            var downloaderRunning by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                lifecycleScope.launch {
+                    repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        WorkManager.getInstance(this@MainActivity)
+                            .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                            .map { workInfoList ->
+                                workInfoList.any { it.state == WorkInfo.State.RUNNING }
+                            }
+                            .collect { running -> libraryUpdating = running }
+                    }
+                }
+                lifecycleScope.launch {
+                    repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        viewModel.downloadManager.isDownloaderRunning.collect { running ->
+                            downloaderRunning = running
+                        }
+                    }
+                }
+            }
 
             DisposableEffect(lifecycleOwner, selectedItemIndex) {
                 // Create an observer
@@ -266,6 +290,8 @@ class MainActivity : ComponentActivity() {
                         if (showNavigationRail && backStack.size == 1) {
                             NavigationSideBar(
                                 items = navItems,
+                                libraryUpdating = libraryUpdating,
+                                downloaderRunning = downloaderRunning,
                                 selectedItemIndex = selectedItemIndex,
                                 onNavigate = { screen ->
                                     backStack.clear()
@@ -288,6 +314,8 @@ class MainActivity : ComponentActivity() {
                                 if (!showNavigationRail && backStack.size == 1) {
                                     BottomBar(
                                         items = navItems,
+                                        libraryUpdating = libraryUpdating,
+                                        downloaderRunning = downloaderRunning,
                                         selectedItemIndex = selectedItemIndex,
                                         onNavigate = { screen ->
                                             backStack.clear()
@@ -516,7 +544,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BottomBar(items: List<NavigationItem>, selectedItemIndex: Int, onNavigate: (NavKey) -> Unit) {
+fun BottomBar(
+    items: List<NavigationItem>,
+    libraryUpdating: Boolean,
+    downloaderRunning: Boolean,
+    selectedItemIndex: Int,
+    onNavigate: (NavKey) -> Unit,
+) {
 
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
@@ -526,7 +560,10 @@ fun BottomBar(items: List<NavigationItem>, selectedItemIndex: Int, onNavigate: (
                     selected = selectedItemIndex == index,
                     onClick = { onNavigate(item.screen) },
                     icon = {
-                        Icon(
+                        PulsingIcon(
+                            isPulsing =
+                                ((index == 0 && libraryUpdating) ||
+                                    (index == 1 && downloaderRunning)),
                             imageVector =
                                 if (selectedItemIndex == index) item.selectedIcon
                                 else item.unselectedIcon,
@@ -543,9 +580,14 @@ fun BottomBar(items: List<NavigationItem>, selectedItemIndex: Int, onNavigate: (
 @Composable
 fun NavigationSideBar(
     items: List<NavigationItem>,
+    libraryUpdating: Boolean,
+    downloaderRunning: Boolean,
     selectedItemIndex: Int,
     onNavigate: (NavKey) -> Unit,
 ) {
+
+    val context = LocalContext.current
+
     NavigationRail(
         modifier = Modifier.fillMaxHeight(),
         content = {
@@ -554,7 +596,10 @@ fun NavigationSideBar(
                     selected = selectedItemIndex == index,
                     onClick = { onNavigate(item.screen) },
                     icon = {
-                        Icon(
+                        PulsingIcon(
+                            isPulsing =
+                                ((index == 0 && libraryUpdating) ||
+                                    (index == 1 && downloaderRunning)),
                             imageVector =
                                 if (selectedItemIndex == index) item.selectedIcon
                                 else item.unselectedIcon,

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -29,6 +29,8 @@ class MainActivityViewModel : ViewModel() {
 
     private val _deepLinkScreen = MutableStateFlow<List<NavKey>?>(null)
     val deepLinkScreen: StateFlow<List<NavKey>?> = _deepLinkScreen.asStateFlow()
+
+    val downloadManager: DownloadManager by injectLazy()
 
     fun setDeepLink(screens: List<NavKey>) {
         _deepLinkScreen.value = screens
@@ -89,9 +91,7 @@ class MainActivityViewModel : ViewModel() {
 
     fun saveExtras(currentTabIsLibrary: Boolean) {
         viewModelScope.launch {
-            TimberKt.d { "Starting tab currentTabIsLibrary $currentTabIsLibrary" }
             val startingTab = if (currentTabIsLibrary) 0 else 1
-            TimberKt.d { "Starting tab set to $startingTab" }
             preferences.lastUsedStartingTab().set(startingTab)
         }
 
