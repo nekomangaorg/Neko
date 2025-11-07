@@ -883,15 +883,21 @@ class LibraryPresenter(
 
     fun observeLibraryUpdates() {
         presenterScope.launchIO {
-            workManager
-                .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                .map { list -> list.any { !it.state.isFinished } }
-                .distinctUntilChanged()
-                .collectLatest { active ->
-                    if (!active) {
-                        _mangaRefreshingState.update { emptySet() }
+            val jobActiveFlow =
+                workManager
+                    .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                    .map { list -> list.any { !it.state.isFinished } }
+                    .distinctUntilChanged()
+
+            jobActiveFlow.collectLatest { active ->
+                if (active) {
+                    LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
+                        _mangaRefreshingState.update { it + mangaId }
                     }
+                } else {
+                    _mangaRefreshingState.update { emptySet() }
                 }
+            }
         }
 
         presenterScope.launchIO {
@@ -918,12 +924,6 @@ class LibraryPresenter(
 
         presenterScope.launchIO {
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
-        }
-
-        presenterScope.launchIO {
-            LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
-                _mangaRefreshingState.update { it + mangaId }
-            }
         }
     }
 

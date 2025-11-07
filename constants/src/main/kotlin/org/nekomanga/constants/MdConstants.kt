@@ -36,7 +36,6 @@ object MdConstants {
         const val readingStatusForAllManga = "/manga/status"
         const val rating = "/rating"
         const val atHomeServer = "/at-home/server"
-        const val legacyMapping = "/legacy/mapping"
 
         const val baseAuthUrl = "https://auth.mangadex.org"
         private const val auth = "/realms/mangadex/protocol/openid-connect"
@@ -80,6 +79,7 @@ object MdConstants {
         const val author = 100
         const val group = 100
         const val latest = 100
+        const val user = 100
         const val latestSmaller = 50
     }
 

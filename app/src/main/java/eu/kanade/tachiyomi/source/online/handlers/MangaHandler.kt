@@ -18,16 +18,15 @@ import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
-import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
-import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.throws
+import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -59,17 +58,18 @@ class MangaHandler {
         TimberKt.d { "fetch manga and chapter details" }
 
         return withContext(Dispatchers.IO) {
-            val detailsManga =
-                withContext(Dispatchers.Default) { fetchMangaDetails(manga.uuid(), fetchArtwork) }
-            val chapterList =
-                withContext(Dispatchers.Default) {
-                    fetchChapterList(
-                        manga.uuid(),
-                        manga.last_chapter_number,
-                        manga.last_volume_number,
-                        mangaDexPreferences.includeUnavailableChapters().get(),
-                    )
-                }
+            val detailsMangaJob = async { fetchMangaDetailsInternal(manga.uuid(), fetchArtwork) }
+            val chapterListJob = async {
+                fetchChapterList(
+                    manga.uuid(),
+                    manga.last_chapter_number,
+                    manga.last_volume_number,
+                    mangaDexPreferences.includeUnavailableChapters().get(),
+                )
+            }
+
+            val detailsManga = detailsMangaJob.await()
+            val chapterList = chapterListJob.await()
 
             return@withContext zip(
                 { detailsManga },
@@ -96,38 +96,26 @@ class MangaHandler {
         }
     }
 
+    private suspend fun CoroutineScope.fetchMangaDetailsInternal(
+        mangaUUID: String,
+        fetchArtwork: Boolean,
+    ): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
+        // 'this' is already a CoroutineScope, so we can call the async helpers
+        val artworks = artworkAsync(mangaUUID, fetchArtwork)
+        val stats = statsAsync(mangaUUID)
+        val manga = mangaAsync(mangaUUID)
+
+        return manga
+            .await()
+            .andThen { mangaDto -> apiMangaParser.mangaDetailsParse(mangaDto.data, stats.await()) }
+            .andThen { sManga -> Ok(sManga to artworks.await()) }
+    }
+
     suspend fun fetchMangaDetails(
         mangaUUID: String,
         fetchArtwork: Boolean,
     ): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
-        return withContext(Dispatchers.IO) {
-            val artworks = artworkAsync(mangaUUID, fetchArtwork)
-            val stats = statsAsync(mangaUUID)
-            val manga = mangaAsync(mangaUUID)
-
-            manga
-                .await()
-                .andThen { mangaDto ->
-                    apiMangaParser.mangaDetailsParse(mangaDto.data, stats.await())
-                }
-                .andThen { sManga -> Ok(sManga to artworks.await()) }
-        }
-    }
-
-    private fun CoroutineScope.simpleChaptersAsync(mangaUUID: String) = async {
-        service
-            .aggregateChapters(mangaUUID, MdUtil.getLangsToShow(mangaDexPreferences))
-            .getOrResultError("trying to aggregate for $mangaUUID")
-            .mapBoth(
-                success = { aggregateDto ->
-                    aggregateDto.volumes
-                        .asMdMap<AggregateVolume>()
-                        .values
-                        .flatMap { it.chapters.values }
-                        .map { it.chapter }
-                },
-                failure = { emptyList() },
-            )
+        return withContext(Dispatchers.IO) { fetchMangaDetailsInternal(mangaUUID, fetchArtwork) }
     }
 
     private fun CoroutineScope.mangaAsync(mangaUUID: String) = async {
@@ -220,9 +208,14 @@ class MangaHandler {
         total: Int,
     ): List<ChapterDataDto> {
         return withContext(Dispatchers.IO) {
-            val totalRequestNo = (total / limit)
+            val itemsRemaining = total - limit
+            if (itemsRemaining <= 0) {
+                return@withContext emptyList()
+            }
 
-            (1..totalRequestNo)
+            val pagesToFetch = ceil(itemsRemaining.toDouble() / limit.toDouble()).toInt()
+
+            (1..pagesToFetch)
                 .map { pos ->
                     async { fetchOffset(mangaUUID, langs, includeUnavailable, pos * limit) }
                 }
