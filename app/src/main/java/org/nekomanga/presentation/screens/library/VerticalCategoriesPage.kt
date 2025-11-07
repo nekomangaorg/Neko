@@ -75,8 +75,8 @@ fun VerticalCategoriesPage(
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        libraryScreenState.items.forEachIndexed { index, item ->
-            item(key = "$index-${item.categoryItem.name}-${item.categoryItem.id}") {
+        libraryScreenState.items.forEach { item ->
+            item(key = "header-${item.categoryItem.name}-${item.categoryItem.id}") {
                 LibraryCategoryHeader(
                     categoryItem = item.categoryItem,
                     useVividColorHeaders = libraryScreenState.useVividColorHeaders,
@@ -113,8 +113,8 @@ fun VerticalCategoriesPage(
                     is LibraryDisplayMode.CompactGrid -> {
                         itemsIndexed(
                             items = item.libraryItems.chunked(columns),
-                            key = { gridIndex, row ->
-                                "$index-${item.categoryItem.name}-$gridIndex-${row.joinToString { it.displayManga.mangaId.toString() }}"
+                            key = { _, row ->
+                                "grid-row-${item.categoryItem.name}-${row.joinToString { it.displayManga.mangaId.toString() }}"
                             },
                         ) { gridIndex, rowItems ->
                             RowGrid(
@@ -135,7 +135,7 @@ fun VerticalCategoriesPage(
                         itemsIndexed(
                             item.libraryItems,
                             key = { _, libraryItem ->
-                                "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                "list-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
                             },
                         ) { index, libraryItem ->
                             ListItem(

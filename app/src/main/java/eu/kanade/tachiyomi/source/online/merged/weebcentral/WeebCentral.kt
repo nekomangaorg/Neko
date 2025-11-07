@@ -29,7 +29,7 @@ import tachiyomi.core.network.await
 class WeebCentral : ReducedHttpSource() {
     override val name = WeebCentral.name
 
-    override val baseUrl = "https://weebcentral.com"
+    override val baseUrl = WeebCentral.baseUrl
 
     override val client = network.cloudFlareClient.newBuilder().rateLimit(2).build()
 
@@ -214,5 +214,6 @@ class WeebCentral : ReducedHttpSource() {
 
     companion object {
         const val name = "Weeb Central"
+        const val baseUrl = "https://weebcentral.com"
     }
 }

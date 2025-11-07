@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,10 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.cheonjaeung.compose.grid.SimpleGridCells
+import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.extensions.gridItems
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -54,22 +56,30 @@ fun MangaGridWithHeader(
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
             if (allGrids.isNotEmpty()) {
-                item { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
-
-                gridItems(
-                    items = allGrids,
-                    columns = columns,
-                    modifier = Modifier.padding(horizontal = Size.small),
-                    horizontalArrangement = Arrangement.spacedBy(Size.small),
-                    key = { manga -> manga.mangaId },
-                ) { displayManga ->
-                    MangaGridItem(
-                        displayManga = displayManga,
-                        shouldOutlineCover = shouldOutlineCover,
-                        isComfortable = isComfortable,
-                        onClick = { onClick(displayManga.mangaId) },
-                        onLongClick = { onLongClick(displayManga) },
-                    )
+                item(key = "header-$stringRes") {
+                    HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+                }
+                itemsIndexed(
+                    items = allGrids.chunked(columns),
+                    key = { _, row ->
+                        "grid-row-$stringRes-${row.joinToString { it.mangaId.toString() }}"
+                    },
+                ) { gridIndex, rowItems ->
+                    VerticalGrid(
+                        columns = SimpleGridCells.Fixed(columns),
+                        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
+                        horizontalArrangement = Arrangement.spacedBy(Size.small),
+                    ) {
+                        rowItems.forEach { displayManga ->
+                            MangaGridItem(
+                                displayManga = displayManga,
+                                shouldOutlineCover = shouldOutlineCover,
+                                isComfortable = isComfortable,
+                                onClick = { onClick(displayManga.mangaId) },
+                                onLongClick = { onLongClick(displayManga) },
+                            )
+                        }
+                    }
                 }
             }
         }

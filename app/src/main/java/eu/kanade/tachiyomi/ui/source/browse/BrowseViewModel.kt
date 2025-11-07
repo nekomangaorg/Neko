@@ -66,7 +66,8 @@ class BrowseViewModel() : ViewModel() {
                 isList = preferences.browseAsList().get(),
                 libraryEntryVisibility = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
+                isComfortableGrid =
+                    libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 filters = createInitialDexFilter(""),
                 defaultContentRatings =

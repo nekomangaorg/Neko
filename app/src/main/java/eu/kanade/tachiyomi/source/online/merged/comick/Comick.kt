@@ -24,8 +24,8 @@ import uy.kohesive.injekt.injectLazy
 
 class Comick : ReducedHttpSource() {
 
-    override val name = "Comick"
-    override val baseUrl = "https://comick.io"
+    override val name = Comick.name
+    override val baseUrl = Comick.baseUrl
     val apiUrl = "https://api.comick.fun"
     override val headers = Headers.Builder().add("Referer", "$apiUrl/").build()
     private val json: Json by injectLazy()
@@ -181,6 +181,7 @@ class Comick : ReducedHttpSource() {
 
     companion object {
         const val name = "Comick"
+        const val baseUrl = "https://comick.io"
         internal val MDcovers.gpurl: String?
             get() {
                 return this.b2key?.let { "https://meo.comick.pictures/$it" }

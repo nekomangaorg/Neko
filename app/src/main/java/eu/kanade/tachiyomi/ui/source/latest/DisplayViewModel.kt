@@ -51,7 +51,8 @@ class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
                 title = displayScreenType.title,
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
+                isComfortableGrid =
+                    libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 libraryEntryVisibility = preferences.browseDisplayMode().get(),
             )

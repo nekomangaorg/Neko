@@ -2,7 +2,10 @@ package tachiyomi.core.network.interceptors
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import java.io.IOException
@@ -12,9 +15,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import org.jsoup.Jsoup
 import org.nekomanga.core.R
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.AndroidCookieJar
-import tachiyomi.core.util.system.WebViewClientCompat
 import tachiyomi.core.util.system.isOutdated
 import tachiyomi.core.util.system.toast
 
@@ -28,7 +32,19 @@ class CloudflareInterceptor(
 
     override fun shouldIntercept(response: Response): Boolean {
         // Check if Cloudflare anti-bot is on
-        return response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK
+        return if (response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK) {
+            val document =
+                Jsoup.parse(
+                    response.peekBody(Long.MAX_VALUE).string(),
+                    response.request.url.toString(),
+                )
+
+            // solve with webview only on captcha, not on geo block
+            document.getElementById("challenge-error-title") != null ||
+                document.getElementById("challenge-error-text") != null
+        } else {
+            false
+        }
     }
 
     override fun intercept(
@@ -47,6 +63,7 @@ class CloudflareInterceptor(
         // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
         // we don't crash the entire app
         catch (e: CloudflareBypassException) {
+            TimberKt.e(e) { "Failed to bypass error" }
             throw IOException(context.getString(R.string.information_cloudflare_bypass_failure))
         } catch (e: Exception) {
             throw IOException(e)
@@ -71,8 +88,9 @@ class CloudflareInterceptor(
         executor.execute {
             webview = createWebView(originalRequest)
 
-            webview?.webViewClient =
-                object : WebViewClientCompat() {
+            webview.webViewClient =
+                object : WebViewClient() {
+
                     override fun onPageFinished(view: WebView, url: String) {
                         fun isCloudFlareBypassed(): Boolean {
                             return cookieManager
@@ -92,15 +110,13 @@ class CloudflareInterceptor(
                         }
                     }
 
-                    override fun onReceivedErrorCompat(
-                        view: WebView,
-                        errorCode: Int,
-                        description: String?,
-                        failingUrl: String,
-                        isMainFrame: Boolean,
+                    override fun onReceivedHttpError(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                        errorResponse: WebResourceResponse?,
                     ) {
-                        if (isMainFrame) {
-                            if (errorCode in ERROR_CODES) {
+                        if (request?.isForMainFrame == true) {
+                            if (errorResponse?.statusCode in ERROR_CODES) {
                                 // Found the Cloudflare challenge page.
                                 challengeFound = true
                             } else {
@@ -111,7 +127,7 @@ class CloudflareInterceptor(
                     }
                 }
 
-            webview?.loadUrl(origRequestUrl, headers)
+            webview.loadUrl(origRequestUrl, headers)
         }
 
         latch.awaitFor30Seconds()

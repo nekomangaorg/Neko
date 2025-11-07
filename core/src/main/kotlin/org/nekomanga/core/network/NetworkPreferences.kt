@@ -7,7 +7,7 @@ class NetworkPreferences(
     private val verboseLogging: Boolean = false,
 ) {
 
-    fun verboseLogging() = this.preferenceStore.getBoolean("verbose_logging")
+    fun verboseLogging() = this.preferenceStore.getBoolean("verbose_logging", verboseLogging)
 
     fun dohProvider() = this.preferenceStore.getInt("doh_provider", -1)
 }

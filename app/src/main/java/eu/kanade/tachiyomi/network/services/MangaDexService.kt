@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
-import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -18,10 +17,8 @@ import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.UserResultDto
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
-import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
@@ -125,9 +122,6 @@ interface MangaDexService {
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
-
-    @POST(MdConstants.atHomeReportUrl)
-    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
 
     @GET(MdConstants.seasonalApi) suspend fun getSeasonalList(): ApiResponse<SeasonalDto>
 }

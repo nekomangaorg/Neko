@@ -30,12 +30,28 @@ data class SourceMergeManga(
     }
 }
 
-enum class MergeType(val id: Int, val scanlatorName: String) {
-    MangaLife(0, eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.name),
+enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String = "") {
+    MangaLife(
+        0,
+        eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.name,
+        eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.baseUrl,
+    ),
     Komga(1, eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
-    Toonily(2, eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name),
-    WeebCentral(3, eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name),
-    Comick(4, eu.kanade.tachiyomi.source.online.merged.comick.Comick.name),
+    Toonily(
+        2,
+        eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name,
+        eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.baseUrl,
+    ),
+    WeebCentral(
+        3,
+        eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name,
+        eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.baseUrl,
+    ),
+    Comick(
+        4,
+        eu.kanade.tachiyomi.source.online.merged.comick.Comick.name,
+        eu.kanade.tachiyomi.source.online.merged.comick.Comick.baseUrl,
+    ),
     Suwayomi(5, eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name);
 
     companion object {
