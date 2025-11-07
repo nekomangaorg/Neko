@@ -68,9 +68,9 @@ fun MainScreen(
                     entry<Screens.Onboarding> {
                         OnboardingScreen(
                             finishedOnBoarding = {
-                                onboardingCompleted()
                                 backStack.clear()
                                 backStack.add(Screens.Library())
+                                onboardingCompleted()
                             }
                         )
                     }
