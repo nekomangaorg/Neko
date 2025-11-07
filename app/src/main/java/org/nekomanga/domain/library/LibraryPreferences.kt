@@ -66,8 +66,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             deserializer = { i -> LibraryDisplayMode.fromInt(i) },
         )
 
-    fun layoutLegacy() = this.preferenceStore.getInt("pref_display_library_layout", 2)
-
     fun sortingMode() = this.preferenceStore.getInt("library_sorting_mode")
 
     fun sortAscending() = this.preferenceStore.getBoolean("library_sorting_ascending", true)

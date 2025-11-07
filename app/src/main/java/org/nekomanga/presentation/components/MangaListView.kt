@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import java.util.Objects
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
@@ -103,11 +102,13 @@ fun MangaListWithHeader(
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
             if (mangaList.isNotEmpty()) {
-                item { HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) } }
+                item(key = "header-$stringRes") {
+                    HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+                }
                 itemsIndexed(
                     mangaList,
                     key = { _, displayManga ->
-                        Objects.hash(displayManga.title, displayManga.mangaId, stringRes)
+                        "${stringRes}-item-${displayManga.title}-${displayManga.mangaId}"
                     },
                 ) { index, displayManga ->
                     val listCardType =

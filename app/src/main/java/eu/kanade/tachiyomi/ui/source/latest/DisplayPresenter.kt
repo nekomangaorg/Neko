@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -49,7 +50,8 @@ class DisplayPresenter(
                         ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
                         ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                isComfortableGrid = libraryPreferences.layoutLegacy().get() == 2,
+                isComfortableGrid =
+                    libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 libraryEntryVisibility = preferences.browseDisplayMode().get(),
             )
