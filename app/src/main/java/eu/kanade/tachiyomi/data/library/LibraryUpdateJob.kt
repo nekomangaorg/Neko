@@ -57,8 +57,7 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.logTimeTakenSeconds
+import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -344,7 +343,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
-        logTimeTakenSeconds("Total Library Update time") {
+        saveTimeTaken(libraryPreferences) {
             emitScope.launch { mangaToAdd.forEach { mangaToUpdateMutableFlow.emit(it.id!!) } }
 
             mangaToUpdate.addAll(mangaToAdd)
@@ -842,22 +841,22 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     async(Dispatchers.IO) {
                         val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
                         val hasDLs =
-                            logTimeTaken("library manga ${manga.title}") {
-                                if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
-                                    TimberKt.w {
-                                        "Manga : ${manga.title} is not migrated to v5 skipping"
-                                    }
-                                    false
-                                } else {
-                                    updateMangaChapters(manga, shouldDownload)
+                            if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
+                                TimberKt.w {
+                                    "Manga : ${manga.title} is not migrated to v5 skipping"
                                 }
+                                false
+                            } else {
+                                updateMangaChapters(manga, shouldDownload)
                             }
+
                         if (hasDLs && !hasDownloads) {
                             hasDownloads = true
                         }
                         return@async hasDLs
                     }
                 }
+
             extraDeferredJobs.addAll(jobs)
         }
     }

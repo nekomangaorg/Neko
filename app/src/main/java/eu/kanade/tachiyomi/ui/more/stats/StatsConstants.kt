@@ -30,6 +30,7 @@ object StatsConstants {
         val readDuration: String = "",
         val lastLibraryUpdate: String = "",
         val lastLibraryUpdateAttempt: String = "",
+        val lastLibraryUpdateDuration: String = "",
     )
 
     data class DetailedState(

@@ -18,7 +18,7 @@ inline fun <T> logTimeTakenSeconds(text: String? = null, block: () -> T): T {
 
 inline fun <T> saveTimeTaken(preferences: LibraryPreferences, block: () -> T): T {
     val result = measureTimedValue(block)
-    val timeTaken = "${result.duration.inWholeSeconds} s"
+    val timeTaken = "${result.duration.inWholeSeconds}s"
     preferences.lastUpdateDuration().set(timeTaken)
     TimberKt.d { "||NEKO- LibraryUpdate took $timeTaken" }
     return result.value
