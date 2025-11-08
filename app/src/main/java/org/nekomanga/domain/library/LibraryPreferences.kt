@@ -58,8 +58,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun whichCategoriesToExclude() =
         this.preferenceStore.getStringSet("library_update_categories_exclude")
 
-    fun updatePrioritization() = this.preferenceStore.getInt("library_update_prioritization")
-
     fun layout() =
         this.preferenceStore.getObjectFromInt(
             key = "pref_display_library_layout",
@@ -113,8 +111,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             serializer = LibraryGroup::type,
             deserializer = LibraryGroup::fromInt,
         )
-
-    fun showCategoryInTitle() = this.preferenceStore.getBoolean("category_in_title")
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 

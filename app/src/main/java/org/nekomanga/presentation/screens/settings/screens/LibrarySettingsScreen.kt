@@ -245,16 +245,6 @@ internal class LibrarySettingsScreen(
                         pref = libraryPreferences.updateFaster(),
                         title = stringResource(R.string.faster_library_update),
                     ),
-                    Preference.PreferenceItem.ListPreference(
-                        pref = libraryPreferences.updatePrioritization(),
-                        title = stringResource(R.string.library_update_order),
-                        entries =
-                            persistentMapOf(
-                                0 to stringResource(R.string.alphabetically),
-                                1 to stringResource(R.string.last_updated),
-                                2 to stringResource(R.string.next_updated),
-                            ),
-                    ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.categories),
                         subtitle =
@@ -318,10 +308,6 @@ internal class LibrarySettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.faster_library_update),
-                    group = stringResource(R.string.global_updates),
-                ),
-                SearchTerm(
-                    title = stringResource(R.string.library_update_order),
                     group = stringResource(R.string.global_updates),
                 ),
                 SearchTerm(
