@@ -53,7 +53,7 @@ data class LibraryMangaItem(
         return if (searchQuery == null) {
             true
         } else {
-            displayManga.title.contains(searchQuery, true) ||
+            displayManga.getTitle().contains(searchQuery, true) ||
                 this.altTitles.fastAny { altTitle -> altTitle.contains(searchQuery, true) } ||
                 this.author.fastAny { author -> author.contains(searchQuery, true) } ||
                 if (searchQuery.contains(",")) {
@@ -85,13 +85,19 @@ data class DisplayManga(
     val inLibrary: Boolean,
     val currentArtwork: Artwork,
     val url: String,
-    val title: String,
+    val originalTitle: String,
+    val userTitle: String,
     val displayText: String = "",
     val isVisible: Boolean = true,
     @param:StringRes val displayTextRes: Int? = null,
 ) {
+
+    fun getTitle(): String {
+        return userTitle.ifEmpty { originalTitle }
+    }
+
     fun toDbManga(): DbManga =
-        DbManga.create(url, title).apply {
+        DbManga.create(url, originalTitle).apply {
             id = mangaId
             favorite = inLibrary
             thumbnail_url = currentArtwork.url

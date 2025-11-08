@@ -286,7 +286,8 @@ class MangaDetailPresenter(
                             alternativeArtwork = allInfo.altArtwork,
                             currentArtwork = allInfo.artwork,
                             currentDescription = allInfo.mangaItem.getDescription(),
-                            currentTitle = allInfo.mangaItem.title,
+                            currentTitle =
+                                allInfo.mangaItem.userTitle.ifEmpty { allInfo.mangaItem.title },
                             externalLinks = allInfo.mangaItem.externalLinks,
                             genres = allInfo.mangaItem.genre,
                             initialized = allInfo.mangaItem.initialized,
@@ -299,7 +300,7 @@ class MangaDetailPresenter(
                                 ),
                             langFlag = allInfo.mangaItem.langFlag,
                             missingChapters = allInfo.mangaItem.missingChapters,
-                            originalTitle = allInfo.mangaItem.ogTitle,
+                            originalTitle = allInfo.mangaItem.title,
                             stats =
                                 Stats(
                                     rating = allInfo.mangaItem.rating,
@@ -1224,7 +1225,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val previousTitle = mangaDetailScreenState.value.currentTitle
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            dbManga.user_title = title ?: dbManga.originalTitle
+            dbManga.user_title = title ?: dbManga.title
             db.insertManga(dbManga).executeOnIO()
             _snackbarState.emit(
                 SnackbarState(

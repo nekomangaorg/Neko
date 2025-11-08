@@ -63,9 +63,6 @@ interface SManga : Serializable {
 
     var alt_titles: String?
 
-    val originalTitle: String
-        get() = (this as? MangaImpl)?.ogTitle ?: title
-
     fun setAltTitles(altTitles: List<String>?) {
         alt_titles = altTitles?.joinToString(ALT_TITLES_SEPARATOR)
     }

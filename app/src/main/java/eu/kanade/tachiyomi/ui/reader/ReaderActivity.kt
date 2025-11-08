@@ -1161,7 +1161,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
         )
 
-        supportActionBar?.title = manga.title
+        supportActionBar?.title = manga.user_title ?: manga.title
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
 

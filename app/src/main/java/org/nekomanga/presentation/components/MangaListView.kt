@@ -108,7 +108,7 @@ fun MangaListWithHeader(
                 itemsIndexed(
                     mangaList,
                     key = { _, displayManga ->
-                        "${stringRes}-item-${displayManga.title}-${displayManga.mangaId}"
+                        "${stringRes}-item-${displayManga.getTitle()}-${displayManga.mangaId}"
                     },
                 ) { index, displayManga ->
                     val listCardType =
@@ -177,7 +177,7 @@ fun MangaRow(
                     true -> 2
                     false -> 1
                 }
-            MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
+            MangaListTitle(title = displayManga.getTitle(), maxLines = titleLineCount)
             MangaListSubtitle(
                 text = displayManga.displayText,
                 textRes = displayManga.displayTextRes,

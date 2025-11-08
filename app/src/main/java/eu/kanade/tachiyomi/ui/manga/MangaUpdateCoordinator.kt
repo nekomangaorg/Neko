@@ -96,7 +96,7 @@ class MangaUpdateCoordinator {
 
                 if (
                     updatedMangaItem.userTitle.isNotEmpty() &&
-                        updatedMangaItem.userTitle != updatedMangaItem.ogTitle &&
+                        updatedMangaItem.userTitle != updatedMangaItem.title &&
                         updatedMangaItem.userTitle !in updatedMangaItem.altTitles
                 ) {
                     updatedMangaItem = updatedMangaItem.copy(userTitle = "")

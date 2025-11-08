@@ -204,7 +204,7 @@ interface Manga : SManga {
         return alt_titles
             ?.split(ALT_TITLES_SEPARATOR)
             ?.filter { it.isNotBlank() }
-            ?.filter { it != originalTitle } ?: emptyList()
+            ?.filter { it != title } ?: emptyList()
     }
 
     fun getExternalLinks(): List<ExternalLink> {

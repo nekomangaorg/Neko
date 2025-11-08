@@ -50,7 +50,6 @@ data class MangaItem(
     val userTitle: String = "",
     val repliesCount: String = "",
     val threadId: String = "",
-    val ogTitle: String = "",
 )
 
 fun MangaItem.toManga(): Manga {
@@ -135,7 +134,6 @@ fun Manga.toMangaItem(): MangaItem {
         userTitle = this.user_title ?: "",
         repliesCount = this.replies_count ?: "",
         threadId = this.thread_id ?: "",
-        ogTitle = this.originalTitle,
     )
 }
 

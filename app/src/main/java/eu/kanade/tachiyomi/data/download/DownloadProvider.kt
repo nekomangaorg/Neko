@@ -243,7 +243,7 @@ class DownloadProvider(
      * @param manga the manga to query.
      */
     fun getMangaDirName(manga: Manga): String {
-        return DiskUtil.buildValidFilename(manga.originalTitle)
+        return DiskUtil.buildValidFilename(manga.title)
     }
 
     /**
