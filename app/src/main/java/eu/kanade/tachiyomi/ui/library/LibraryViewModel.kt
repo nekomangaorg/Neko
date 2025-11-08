@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.compose.ui.util.fastAny
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -886,15 +887,21 @@ class LibraryViewModel() : ViewModel() {
 
     fun observeLibraryUpdates() {
         viewModelScope.launchIO {
-            workManager
-                .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                .map { list -> list.any { !it.state.isFinished } }
-                .distinctUntilChanged()
-                .collectLatest { active ->
-                    if (!active) {
-                        _mangaRefreshingState.update { emptySet() }
+            val jobActiveFlow =
+                workManager
+                    .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
+                    .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
+                    .distinctUntilChanged()
+
+            jobActiveFlow.collectLatest { active ->
+                if (active) {
+                    LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
+                        _mangaRefreshingState.update { it + mangaId }
                     }
+                } else {
+                    _mangaRefreshingState.update { emptySet() }
                 }
+            }
         }
 
         viewModelScope.launchIO {
@@ -921,12 +928,6 @@ class LibraryViewModel() : ViewModel() {
 
         viewModelScope.launchIO {
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
-        }
-
-        viewModelScope.launchIO {
-            LibraryUpdateJob.mangaToUpdateFlow.collect { mangaId ->
-                _mangaRefreshingState.update { it + mangaId }
-            }
         }
     }
 
