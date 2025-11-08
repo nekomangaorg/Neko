@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import androidx.compose.ui.util.fastAny
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -886,7 +887,7 @@ class LibraryPresenter(
             val jobActiveFlow =
                 workManager
                     .getWorkInfosByTagFlow(LibraryUpdateJob.TAG)
-                    .map { list -> list.any { !it.state.isFinished } }
+                    .map { list -> list.any { it.state == WorkInfo.State.RUNNING } }
                     .distinctUntilChanged()
 
             jobActiveFlow.collectLatest { active ->
