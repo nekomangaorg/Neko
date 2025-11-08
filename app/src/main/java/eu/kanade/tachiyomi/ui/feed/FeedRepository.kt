@@ -264,7 +264,7 @@ class FeedRepository(
                         val displayManga = manga.toDisplayManga()
                         FeedManga(
                             mangaId = displayManga.mangaId,
-                            mangaTitle = displayManga.title,
+                            mangaTitle = displayManga.getTitle(),
                             date = manga.date_added,
                             artwork = displayManga.currentArtwork,
                             chapters = persistentListOf(getChapterItem(manga, simpleChapter)),

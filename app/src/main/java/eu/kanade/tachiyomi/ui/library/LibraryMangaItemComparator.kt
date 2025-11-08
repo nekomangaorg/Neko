@@ -76,8 +76,8 @@ fun libraryMangaItemComparator(
 private fun compareByTitle(removeArticles: Boolean): Comparator<LibraryMangaItem> {
     return compareBy {
         when (removeArticles) {
-            true -> it.displayManga.title.removeArticles()
-            false -> it.displayManga.title
+            true -> it.displayManga.getTitle().removeArticles()
+            false -> it.displayManga.getTitle()
         }
     }
 }

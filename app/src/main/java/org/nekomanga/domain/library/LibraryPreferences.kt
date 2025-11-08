@@ -32,6 +32,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun lastUpdateAttemptTimestamp() =
         this.preferenceStore.getLong("library_update_last_attempt_timestamp")
 
+    fun lastUpdateDuration() = this.preferenceStore.getString("library_update_duration")
+
     fun libraryUpdateIds() = this.preferenceStore.getString("library_update_ids")
 
     fun autoUpdateDeviceRestrictions() =
@@ -55,8 +57,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun whichCategoriesToExclude() =
         this.preferenceStore.getStringSet("library_update_categories_exclude")
-
-    fun updatePrioritization() = this.preferenceStore.getInt("library_update_prioritization")
 
     fun layout() =
         this.preferenceStore.getObjectFromInt(
@@ -111,8 +111,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             serializer = LibraryGroup::type,
             deserializer = LibraryGroup::fromInt,
         )
-
-    fun showCategoryInTitle() = this.preferenceStore.getBoolean("category_in_title")
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 

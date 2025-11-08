@@ -71,6 +71,7 @@ class StatsViewModel() : ViewModel() {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
                 val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
+                val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
                 val favoritedMangalist = db.getFavoriteMangaList().executeAsBlocking()
 
@@ -122,6 +123,7 @@ class StatsViewModel() : ViewModel() {
                             if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
                         lastLibraryUpdateAttempt =
                             if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
+                        lastLibraryUpdateDuration = lastUpdateDuration,
                     )
             }
         }

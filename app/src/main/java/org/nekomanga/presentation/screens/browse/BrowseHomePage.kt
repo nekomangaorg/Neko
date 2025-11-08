@@ -126,7 +126,7 @@ fun BrowseHomePage(
                                         shouldOutlineCover = shouldOutlineCover,
                                         modifier = Modifier.requiredHeight(coverSize),
                                     )
-                                    MangaGridTitle(title = displayManga.title)
+                                    MangaGridTitle(title = displayManga.getTitle())
                                     MangaGridSubtitle(subtitleText = displayManga.displayText)
                                 }
                             }

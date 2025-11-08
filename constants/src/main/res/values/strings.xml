@@ -307,7 +307,6 @@
 
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
-    <string name="library_update_order">Library update order</string>
     <string name="library_update_device_restriction">Library device auto update restrictions</string>
     <string name="library_update__device_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
@@ -1142,6 +1141,7 @@
     <string name="typeNoSemi">Type</string>
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>
+    <string name="last_library_update_duration">Last library update duration</string>
     <string name="last_library_update_attempt">Last library update attempt</string>
     <string name="manga_status_distribution">Status distribution</string>
     <string name="content_rating_distribution">Content rating</string>

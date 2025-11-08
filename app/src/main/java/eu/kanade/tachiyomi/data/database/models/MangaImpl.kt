@@ -14,14 +14,7 @@ open class MangaImpl : Manga {
 
     override lateinit var url: String
 
-    override var title: String
-        get() = user_title ?: ogTitle
-        set(value) {
-            ogTitle = value
-        }
-
-    lateinit var ogTitle: String
-        private set
+    override lateinit var title: String
 
     override var artist: String? = null
 
@@ -94,12 +87,12 @@ open class MangaImpl : Manga {
     override var thread_id: String? = null
 
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl && other.ogTitle.isNotBlank() && other.ogTitle != ogTitle) {
-            val oldTitle = ogTitle
-            ogTitle = other.ogTitle
+        if (other is MangaImpl && other.title.isNotBlank() && other.title != title) {
+            val oldTitle = title
+            title = other.title
             val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
-            provider.renameMangaFolder(oldTitle, ogTitle)
+            provider.renameMangaFolder(oldTitle, title)
         }
         super.copyFrom(other)
     }

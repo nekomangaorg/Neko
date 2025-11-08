@@ -213,7 +213,7 @@ fun ComfortableGridItem(
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
-    MangaGridTitle(title = manga.title, hasSubtitle = subtitleText.isNotBlank())
+    MangaGridTitle(title = manga.getTitle(), hasSubtitle = subtitleText.isNotBlank())
 
     MangaGridSubtitle(subtitleText = subtitleText)
 }
@@ -253,7 +253,7 @@ fun BoxScope.CompactGridItem(
     ) {
         Column(modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart)) {
             MangaGridTitle(
-                title = manga.title,
+                title = manga.getTitle(),
                 hasSubtitle = subtitleText.isNotBlank(),
                 isComfortable = false,
             )

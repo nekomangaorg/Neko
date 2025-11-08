@@ -71,7 +71,8 @@ fun Manga.toDisplayManga(
     return DisplayManga(
         mangaId = this.id!!,
         url = this.url,
-        title = (this as? MangaImpl)?.title ?: this.title,
+        originalTitle = this.title,
+        userTitle = this.user_title ?: "",
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
         displayTextRes = displayTextRes,
@@ -94,7 +95,7 @@ fun LibraryMangaItem.toLibraryManga(): LibraryManga {
         this.unavailableCount = this@toLibraryManga.unavailableCount
         this.id = this@toLibraryManga.displayManga.mangaId
         this.url = this@toLibraryManga.displayManga.url
-        this.title = this@toLibraryManga.displayManga.title
+        this.title = this@toLibraryManga.displayManga.getTitle()
         this.favorite = true
         this.initialized = true
     }

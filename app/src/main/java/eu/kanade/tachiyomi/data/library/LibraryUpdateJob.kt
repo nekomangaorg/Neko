@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.library
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.core.text.isDigitsOnly
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -57,8 +56,7 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.logTimeTakenSeconds
+import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -156,8 +154,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         instance = WeakReference(this)
 
-        val selectedScheme = libraryPreferences.updatePrioritization().get()
-
         val allLibraryManga = db.getLibraryMangaList().executeOnIO()
         val allTracks = db.getAllTracks().executeOnIO()
         val tracksByMangaId = allTracks.groupBy { it.manga_id }
@@ -184,16 +180,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 } else {
                     allLibraryManga
                 })
-                .sortedWith(LibraryUpdateRanker.rankingScheme[selectedScheme])
 
         val categoryId = inputData.getInt(KEY_CATEGORY, -1)
 
         val mangaList =
             getAndFilterMangaToUpdate(mangaListToFilter, tracksByMangaId, categoryId)
-                .sortedWith(
-                    LibraryUpdateRanker.rankingScheme[
-                            libraryPreferences.updatePrioritization().get()]
-                )
 
         return withIOContext {
             try {
@@ -344,7 +335,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
-        logTimeTakenSeconds("Total Library Update time") {
+        saveTimeTaken(libraryPreferences) {
             emitScope.launch { mangaToAdd.forEach { mangaToUpdateMutableFlow.emit(it.id!!) } }
 
             mangaToUpdate.addAll(mangaToAdd)
@@ -802,10 +793,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val tracksByMangaId = db.getAllTracks().executeOnIO().groupBy { it.manga_id }
             val mangaToAdd =
                 getAndFilterMangaToUpdate(manga, tracksByMangaId = tracksByMangaId, categoryId = -1)
-                    .sortedWith(
-                        LibraryUpdateRanker.rankingScheme[
-                                libraryPreferences.updatePrioritization().get()]
-                    )
+
 
             addManga(mangaToAdd)
         }
@@ -820,10 +808,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         allLibraryManga,
                         tracksByMangaId = tracksByMangaId,
                         categoryId = categoryId,
-                    )
-                    .sortedWith(
-                        LibraryUpdateRanker.rankingScheme[
-                                libraryPreferences.updatePrioritization().get()]
                     )
             addManga(mangaToAdd)
         }
@@ -841,23 +825,15 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 distinctManga.map { manga ->
                     async(Dispatchers.IO) {
                         val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
-                        val hasDLs =
-                            logTimeTaken("library manga ${manga.title}") {
-                                if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
-                                    TimberKt.w {
-                                        "Manga : ${manga.title} is not migrated to v5 skipping"
-                                    }
-                                    false
-                                } else {
-                                    updateMangaChapters(manga, shouldDownload)
-                                }
-                            }
+                        val hasDLs = updateMangaChapters(manga, shouldDownload)
+
                         if (hasDLs && !hasDownloads) {
                             hasDownloads = true
                         }
                         return@async hasDLs
                     }
                 }
+
             extraDeferredJobs.addAll(jobs)
         }
     }

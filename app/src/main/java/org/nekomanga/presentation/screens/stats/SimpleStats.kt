@@ -59,6 +59,11 @@ fun SimpleStats(
                 true -> never
                 false -> statsState.lastLibraryUpdateAttempt
             }
+        val lastUpdateDuration =
+            when (statsState.lastLibraryUpdateDuration.isEmpty()) {
+                true -> never
+                false -> statsState.lastLibraryUpdateDuration
+            }
 
         listOf(
                 numberFormat.format(statsState.mangaCount).toString() to
@@ -73,6 +78,7 @@ fun SimpleStats(
                     context.getString(R.string.chapters_unavailable),
                 statsState.readDuration to context.getString(R.string.read_duration),
                 libUpdates to context.getString(R.string.last_library_update),
+                lastUpdateDuration to context.getString(R.string.last_library_update_duration),
                 libUpdateAttempt to context.getString(R.string.last_library_update_attempt),
                 numberFormat.format(statsState.globalUpdateCount).toString() to
                     context.getString(R.string.global_update_manga),
