@@ -42,12 +42,14 @@ class MdUtil {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
 
-        val dateFormatter =
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
+        fun parseDate(dateAsString: String): Long {
+            val dateFormatter =
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
 
-        fun parseDate(dateAsString: String): Long = dateFormatter.parse(dateAsString)?.time ?: 0
+            return dateFormatter.parse(dateAsString)?.time ?: 0
+        }
 
         fun cdnCoverUrl(dexId: String, fileName: String, quality: Int): String {
             val coverQualitySuffix =
