@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.launchIn
@@ -57,45 +56,9 @@ open class WebViewActivity : AppCompatActivity() {
         val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
         setContent {
             NekoTheme {
-                WebViewScreen(
-                    title = title.toString(),
-                    url = url,
-                    headers = headers,
-                    onShare = this::shareWebpage,
-                    onOpenInBrowser = this::openInBrowser,
-                    canOpenInApp = this::canOpenInApp,
-                    onOpenInApp = this::openInApp,
-                    onClose = { finish() },
-                )
+                WebViewScreen(title = title.toString(), url = url, onBackPressed = { finish() })
             }
         }
-    }
-
-    private fun shareWebpage(url: String) {
-        try {
-            val intent =
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, url)
-                }
-            startActivity(Intent.createChooser(intent, getString(R.string.share)))
-        } catch (e: Exception) {
-            toast(e.message)
-        }
-    }
-
-    private fun openInBrowser(url: String) {
-        openInBrowser(url, forceDefaultBrowser = true)
-    }
-
-    private fun openInApp(url: String) {
-        openInBrowser(url, forceDefaultBrowser = false)
-    }
-
-    private fun canOpenInApp(url: String): Boolean {
-        return url.contains("mangadex.org/manga/", true) ||
-            url.contains("mangadex.org/title/", true) ||
-            url.contains("mangadex.org/group", true)
     }
 
     companion object {

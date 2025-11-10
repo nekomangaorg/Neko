@@ -21,6 +21,8 @@ object Screens {
 
     @Serializable data object License : NavKey
 
+    @Serializable data class WebView(val title: String, val url: String) : NavKey
+
     @Serializable data class Browse(val searchBrowse: SearchBrowse? = null) : NavKey
 
     @Serializable data class Manga(val mangaId: Long) : NavKey

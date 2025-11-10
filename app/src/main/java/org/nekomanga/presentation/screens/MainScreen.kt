@@ -191,6 +191,14 @@ fun MainScreen(
                         )
                     }
 
+                    entry<Screens.WebView> { screen ->
+                        WebViewScreen(
+                            title = screen.title,
+                            url = screen.url,
+                            onBackPressed = { backStack.removeLastOrNull() },
+                        )
+                    }
+
                     entry<Screens.Display> { screen ->
                         val displayViewModel: DisplayViewModel =
                             viewModel(factory = DisplayViewModel.Factory(screen.displayScreenType))

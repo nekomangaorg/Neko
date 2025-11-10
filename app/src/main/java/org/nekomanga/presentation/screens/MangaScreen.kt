@@ -73,7 +73,6 @@ import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -339,6 +338,7 @@ fun MangaScreen(
                     }
                 },
             ),
+        openWebView = { url, title -> onNavigate(Screens.WebView(title = title, url = url)) },
         onBackPressed = onBackPressed,
     )
 }
@@ -349,6 +349,7 @@ private fun MangaScreenWrapper(
     windowSizeClass: WindowSizeClass,
     onRefresh: () -> Unit,
     onSearch: (String?) -> Unit,
+    openWebView: (String, String) -> Unit,
     generatePalette: (Drawable) -> Unit,
     updateSnackbarColor: (SnackbarColor) -> Unit,
     onToggleFavorite: (Boolean) -> Unit,
@@ -445,7 +446,7 @@ private fun MangaScreenWrapper(
                     coverActions = coverActions,
                     mergeActions = mergeActions,
                     chapterFilterActions = chapterFilterActions,
-                    openInWebView = { url, title -> context.openInWebView(url, title) },
+                    openInWebView = { url, title -> openWebView(url, title) },
                     onNavigate = { newSheet -> scope.launch { currentBottomSheet = newSheet } },
                 )
             },
