@@ -62,6 +62,7 @@ data class RelationshipDto(
 @Serializable
 data class IncludesAttributesDto(
     val name: String? = null,
+    val username: String? = null,
     val fileName: String? = null,
     val description: String? = null,
     val locale: String? = null,
