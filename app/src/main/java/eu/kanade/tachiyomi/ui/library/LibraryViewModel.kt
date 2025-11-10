@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -1157,8 +1158,10 @@ class LibraryViewModel() : ViewModel() {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
+            val availableChapters =
+                chapters.filter { it.isAvailable(downloadManager, manga) }
             val chapter =
-                ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters)
+                ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(availableChapters)
             chapter ?: return@launchIO
             openChapter(manga, chapter)
         }
