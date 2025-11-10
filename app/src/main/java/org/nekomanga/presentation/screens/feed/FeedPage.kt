@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +45,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
+    modifier: Modifier,
     feedMangaList: PersistentList<FeedManga>,
     summaryScreenPagingState: SummaryScreenPagingState,
     outlineCovers: Boolean,
@@ -64,7 +64,7 @@ fun FeedPage(
     when (feedScreenType) {
         FeedScreenType.Summary -> {
             FeedSummaryPage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier,
                 contentPadding = contentPadding,
                 outlineCovers = outlineCovers,
                 useVividColorHeaders = useVividColorHeaders,
@@ -79,7 +79,7 @@ fun FeedPage(
         }
         FeedScreenType.History -> {
             FeedHistoryPage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier,
                 contentPadding = contentPadding,
                 feedHistoryMangaList = feedMangaList,
                 outlineCovers = outlineCovers,
@@ -93,7 +93,7 @@ fun FeedPage(
         }
         FeedScreenType.Updates -> {
             FeedUpdatesPage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier,
                 contentPadding = contentPadding,
                 useVividColorHeaders = useVividColorHeaders,
                 feedUpdatesMangaList = feedMangaList,

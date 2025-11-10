@@ -87,7 +87,7 @@ fun HorizontalCategoriesPage(
             MaterialTheme.colorScheme.onSurface
         }
 
-    Column(modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
+    Column(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         if (isValidState) {
             SecondaryScrollableTabRow(
                 selectedTabIndex = pagerState.currentPage,

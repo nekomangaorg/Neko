@@ -130,6 +130,7 @@ fun FeedScreenContent(
             false -> {
                 FeedPage(
                     contentPadding = contentPadding,
+                    modifier = Modifier.fillMaxSize(),
                     summaryScreenPagingState = summaryScreenPagingState,
                     feedMangaList = feedManga,
                     hasMoreResults = hasMoreResults,

@@ -3,6 +3,8 @@ package org.nekomanga.presentation.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,8 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
@@ -250,13 +254,24 @@ private fun FeedWrapper(
                     openSheetClick = { showBottomSheet = true },
                 )
             },
-        ) { contentPadding ->
-            val recyclerContentPadding = PaddingValues(bottom = Size.huge)
+        ) { innerPadding ->
+            val layoutDirection = LocalLayoutDirection.current
+            // Create new padding that ignores the top bar's height
+            val contentPadding =
+                PaddingValues(
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateEndPadding(layoutDirection),
+                    bottom = innerPadding.calculateBottomPadding(),
+                    top = 0.dp,
+                )
+
+            val recyclerPadding =
+                PaddingValues(top = innerPadding.calculateTopPadding(), bottom = Size.huge)
 
             Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
                 FeedScreenContent(
                     downloadScreenVisible = downloadScreenVisible,
-                    contentPadding = recyclerContentPadding,
+                    contentPadding = recyclerPadding,
                     feedScreenState = feedScreenState,
                     summaryScreenPagingState = summaryScreenPagingState,
                     historyPagingScreenState = historyPagingScreenState,

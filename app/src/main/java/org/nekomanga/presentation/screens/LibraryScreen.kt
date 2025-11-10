@@ -3,8 +3,12 @@ package org.nekomanga.presentation.screens
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ModalBottomSheet
@@ -23,7 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -273,8 +279,20 @@ private fun LibraryWrapper(
                     removeActionClick = { removeAction -> removeActionConfirmation = removeAction },
                 )
             },
-        ) { contentPadding ->
-            Box(modifier = Modifier.fillMaxSize()) {
+        ) { innerPadding ->
+            val layoutDirection = LocalLayoutDirection.current
+            // Create new padding that ignores the top bar's height
+            val contentPadding =
+                PaddingValues(
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateEndPadding(layoutDirection),
+                    bottom = innerPadding.calculateBottomPadding(),
+                    top = 0.dp,
+                )
+
+            val recyclerPadding = PaddingValues(top = innerPadding.calculateTopPadding())
+
+            Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
                 LibraryDialogs(
                     deleteMangaConfirmation = deleteMangaConfirmation,
                     markActionConfirmation = markActionConfirmation,
@@ -299,7 +317,7 @@ private fun LibraryWrapper(
                 } else {
                     if (libraryScreenState.horizontalCategories) {
                         HorizontalCategoriesPage(
-                            contentPadding = contentPadding,
+                            contentPadding = recyclerPadding,
                             selectionMode = selectionMode,
                             libraryScreenState = libraryScreenState,
                             libraryScreenActions = libraryScreenActions,
@@ -316,7 +334,7 @@ private fun LibraryWrapper(
                         )
                     } else {
                         VerticalCategoriesPage(
-                            contentPadding = contentPadding,
+                            contentPadding = recyclerPadding,
                             selectionMode = selectionMode,
                             libraryScreenState = libraryScreenState,
                             libraryScreenActions = libraryScreenActions,

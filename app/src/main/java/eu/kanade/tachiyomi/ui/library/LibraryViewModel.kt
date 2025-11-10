@@ -1158,10 +1158,10 @@ class LibraryViewModel() : ViewModel() {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
-            val availableChapters =
-                chapters.filter { it.isAvailable(downloadManager, manga) }
+            val availableChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
             val chapter =
-                ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(availableChapters)
+                ChapterSort(manga, chapterFilter, preferences)
+                    .getNextUnreadChapter(availableChapters)
             chapter ?: return@launchIO
             openChapter(manga, chapter)
         }
