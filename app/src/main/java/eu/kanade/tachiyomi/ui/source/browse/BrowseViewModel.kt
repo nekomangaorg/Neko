@@ -82,6 +82,9 @@ class BrowseViewModel() : ViewModel() {
     val deepLinkMangaFlow = _deepLinkManga.asStateFlow()
 
     fun deepLinkQuery(searchBrowse: SearchBrowse) {
+        if (_browseScreenState.value.deepLinkHandled) return
+        _browseScreenState.update { it.copy(deepLinkHandled = true) }
+
         TimberKt.tag("DeepLink").d("Creating filter for ${searchBrowse.query}")
         val filters =
             when (searchBrowse.type) {

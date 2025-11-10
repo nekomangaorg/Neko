@@ -32,6 +32,7 @@ data class BrowseScreenState(
     val endReached: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
+    val deepLinkHandled: Boolean = false,
     val isList: Boolean,
     val libraryEntryVisibility: Int,
     val outlineCovers: Boolean,

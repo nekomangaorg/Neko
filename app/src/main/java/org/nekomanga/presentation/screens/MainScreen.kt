@@ -3,8 +3,8 @@ package org.nekomanga.presentation.screens
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,7 +28,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.main.SplashScreen
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
@@ -78,40 +77,22 @@ fun MainScreen(
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
             transitionSpec = {
-                // Screen A -> Screen B
-                // B slides IN from the BOTTOM
-                slideInVertically(animationSpec = animationSpec, initialOffsetY = { it }) +
-                    fadeIn(animationSpec = fadeSpec) togetherWith
-                    // A slides OUT to the TOP
-                    slideOutVertically(animationSpec = animationSpec, targetOffsetY = { -it }) +
-                        fadeOut(animationSpec = fadeSpec)
+                slideInHorizontally(
+                    animationSpec = animationSpec,
+                    initialOffsetX = { it },
+                ) togetherWith fadeOut(animationSpec = fadeSpec)
             },
             popTransitionSpec = {
-                // Screen B -> Screen A
-                // A slides IN from the TOP
-                slideInVertically(animationSpec = animationSpec, initialOffsetY = { -it }) +
-                    fadeIn(animationSpec = fadeSpec) togetherWith
-                    // B slides OUT to the BOTTOM
-                    slideOutVertically(animationSpec = animationSpec, targetOffsetY = { it }) +
-                        fadeOut(animationSpec = fadeSpec)
+                fadeIn(animationSpec = fadeSpec) togetherWith
+                    slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it })
             },
             predictivePopTransitionSpec = {
-                // Screen B -> Screen A (while user is swiping back)
-                // A slides IN from the TOP
-                slideInVertically(animationSpec = animationSpec, initialOffsetY = { -it }) +
-                    fadeIn(animationSpec = fadeSpec) togetherWith
-                    // B slides OUT to the BOTTOM
-                    slideOutVertically(animationSpec = animationSpec, targetOffsetY = { it }) +
-                        fadeOut(animationSpec = fadeSpec)
+                fadeIn(animationSpec = fadeSpec) togetherWith
+                    slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it })
             },
             entryProvider =
                 entryProvider {
-                    entry<Screens.Splash> {
-                        SplashScreen {
-                            backStack.clear()
-                            backStack.add(startingScreen)
-                        }
-                    }
+                    entry<Screens.Loading> { LoadingScreen() }
 
                     entry<Screens.Onboarding> {
                         OnboardingScreen(

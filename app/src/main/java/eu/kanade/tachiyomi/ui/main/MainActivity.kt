@@ -82,8 +82,12 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
+        val isInitialDeepLink = isDeepLink(intent)
+
         val startingScreen =
-            if (!viewModel.preferences.hasShownOnboarding().get()) {
+            if (isInitialDeepLink) {
+                Screens.Loading
+            } else if (!viewModel.preferences.hasShownOnboarding().get()) {
                 Screens.Onboarding
             } else {
                 when (viewModel.preferences.startingTab().get()) {
@@ -165,7 +169,7 @@ class MainActivity : ComponentActivity() {
                 if (deepLink != null) {
                     backStack.clear()
 
-                    deepLink!!.forEach { screen -> backStack.add(screen) }
+                    backStack.addAll(deepLink!!)
                     viewModel.consumeDeepLink()
                 }
             }
@@ -438,6 +442,20 @@ class MainActivity : ComponentActivity() {
             viewModel.setDeepLink(deepLinkScreens)
         }
         setIntent(null)
+    }
+
+    private fun isDeepLink(intent: Intent?): Boolean {
+        if (intent == null) return false
+        return when (intent.action) {
+            Intent.ACTION_SEARCH,
+            Intent.ACTION_SEND,
+            "com.google.android.gms.actions.SEARCH_ACTION",
+            DeepLinks.Intents.Search,
+            DeepLinks.Actions.Manga,
+            DeepLinks.Actions.MangaBack,
+            DeepLinks.Actions.ReaderSettings -> true
+            else -> false
+        }
     }
 
     companion object {

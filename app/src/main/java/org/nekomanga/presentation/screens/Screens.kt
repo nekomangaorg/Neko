@@ -13,7 +13,7 @@ object Screens {
 
     @Serializable data object Feed : NavKey
 
-    @Serializable data object Splash : NavKey
+    @Serializable data object Loading : NavKey
 
     @Serializable data object Stats : NavKey
 
