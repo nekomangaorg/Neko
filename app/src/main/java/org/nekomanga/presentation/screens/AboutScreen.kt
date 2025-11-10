@@ -18,9 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,8 +38,6 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.data.updater.REPO_URL
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -54,6 +50,7 @@ import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.about.AboutTopAppBar
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
@@ -107,129 +104,123 @@ private fun AboutWrapper(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
 
-    val updateTopBar = LocalBarUpdater.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    val screenBars = remember {
-        ScreenBars(
-            topBar = {
-                AboutTopAppBar(
-                    incognitoMode = aboutScreenState.incognitoMode,
-                    scrollBehavior = scrollBehavior,
-                    onNavigationClicked = onBackPressed,
-                )
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }
-    DisposableEffect(Unit) {
-        updateTopBar(screenBars)
-        onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-    }
+    ChildScreenScaffold(
+        scrollBehavior = scrollBehavior,
+        topBar = {
+            AboutTopAppBar(
+                incognitoMode = aboutScreenState.incognitoMode,
+                scrollBehavior = scrollBehavior,
+                onNavigationClicked = onBackPressed,
+            )
+        },
+    ) { contentPadding ->
+        if (
+            aboutScreenState.shouldShowUpdateDialog &&
+                aboutScreenState.updateResult is AppUpdateResult.NewUpdate
+        ) {
+            AppUpdateDialog(
+                release = aboutScreenState.updateResult.release,
+                onDismissRequest = dismissDialog,
+                onConfirm = onDownloadClicked,
+            )
+        }
 
-    if (
-        aboutScreenState.shouldShowUpdateDialog &&
-            aboutScreenState.updateResult is AppUpdateResult.NewUpdate
-    ) {
-        AppUpdateDialog(
-            release = aboutScreenState.updateResult.release,
-            onDismissRequest = dismissDialog,
-            onConfirm = onDownloadClicked,
-        )
-    }
+        LazyColumn(
+            contentPadding = contentPadding,
+            modifier = Modifier.padding(horizontal = Size.medium),
+            verticalArrangement = Arrangement.spacedBy(Size.tiny),
+        ) {
+            item { LogoHeader() }
+            item { Spacer(modifier = Modifier.size(Size.large)) }
+            item {
+                ExpressiveListCard(listCardType = ListCardType.Top) {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.version),
+                        subtitle =
+                            when {
+                                BuildConfig.DEBUG -> {
+                                    "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.buildTime})"
+                                }
 
-    LazyColumn(
-        modifier = Modifier.padding(horizontal = Size.medium),
-        verticalArrangement = Arrangement.spacedBy(Size.tiny),
-    ) {
-        item { LogoHeader() }
-        item { Spacer(modifier = Modifier.size(Size.large)) }
-        item {
-            ExpressiveListCard(listCardType = ListCardType.Top) {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.version),
-                    subtitle =
-                        when {
-                            BuildConfig.DEBUG -> {
-                                "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.buildTime})"
-                            }
+                                else -> {
+                                    "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
+                                }
+                            },
+                        onPreferenceClick = { onVersionClicked(context) },
+                    )
+                }
+            }
 
-                            else -> {
-                                "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
+            item {
+                ExpressiveListCard(listCardType = ListCardType.Center) {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.check_for_updates),
+                        onPreferenceClick = {
+                            if (!context.isOnline()) {
+                                notOnlineSnackbar()
+                            } else {
+                                checkForUpdate()
                             }
                         },
-                    onPreferenceClick = { onVersionClicked(context) },
-                )
+                    )
+                }
             }
-        }
+            item {
+                ExpressiveListCard(listCardType = ListCardType.Center) {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.whats_new),
+                        onPreferenceClick = {
+                            val url =
+                                if (BuildConfig.DEBUG) {
+                                    LATEST_COMMIT_URL
+                                } else {
+                                    RELEASE_URL
+                                }
+                            uriHandler.openUri(url)
+                        },
+                    )
+                }
+            }
 
-        item {
-            ExpressiveListCard(listCardType = ListCardType.Center) {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.check_for_updates),
-                    onPreferenceClick = {
-                        if (!context.isOnline()) {
-                            notOnlineSnackbar()
-                        } else {
-                            checkForUpdate()
-                        }
-                    },
-                )
+            item {
+                ExpressiveListCard(listCardType = ListCardType.Center) {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.open_source_licenses),
+                        onPreferenceClick = onClickLicenses,
+                    )
+                }
             }
-        }
-        item {
-            ExpressiveListCard(listCardType = ListCardType.Center) {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.whats_new),
-                    onPreferenceClick = {
-                        val url =
-                            if (BuildConfig.DEBUG) {
-                                LATEST_COMMIT_URL
-                            } else {
-                                RELEASE_URL
-                            }
-                        uriHandler.openUri(url)
-                    },
-                )
-            }
-        }
 
-        item {
-            ExpressiveListCard(listCardType = ListCardType.Center) {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.open_source_licenses),
-                    onPreferenceClick = onClickLicenses,
-                )
+            item {
+                ExpressiveListCard(listCardType = ListCardType.Bottom) {
+                    TextPreferenceWidget(
+                        title = stringResource(R.string.privacy_policy),
+                        onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
+                    )
+                }
             }
-        }
 
-        item {
-            ExpressiveListCard(listCardType = ListCardType.Bottom) {
-                TextPreferenceWidget(
-                    title = stringResource(R.string.privacy_policy),
-                    onPreferenceClick = { uriHandler.openUri(PRIVACY_POLICY_URL) },
-                )
-            }
-        }
-
-        item {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(Size.medium),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                val modifier = Modifier.size(Size.extraLarge)
-                LinkIcon(
-                    label = "Discord",
-                    modifier = modifier,
-                    icon = SimpleIcons.Discord,
-                    url = DISCORD_URL,
-                )
-                LinkIcon(
-                    modifier = modifier,
-                    label = "GitHub",
-                    icon = SimpleIcons.Github,
-                    url = REPO_URL,
-                )
+            item {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    val modifier = Modifier.size(Size.extraLarge)
+                    LinkIcon(
+                        label = "Discord",
+                        modifier = modifier,
+                        icon = SimpleIcons.Discord,
+                        url = DISCORD_URL,
+                    )
+                    LinkIcon(
+                        modifier = modifier,
+                        label = "GitHub",
+                        icon = SimpleIcons.Github,
+                        url = REPO_URL,
+                    )
+                }
             }
         }
     }

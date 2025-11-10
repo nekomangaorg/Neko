@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.settings
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.setting.SettingsScreenType
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -41,6 +39,7 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.icons.MergeIcon
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.settings.screens.AdvancedSettingsScreen
@@ -66,58 +65,49 @@ fun SettingsMainScreen(
     incognitoMode: Boolean,
 ) {
 
-    val updateTopBar = LocalBarUpdater.current
-
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     var searchText: String by remember { mutableStateOf("") }
 
-    val screenBars = remember {
-        ScreenBars(
-            topBar = {
-                SettingsSearchTopBar(
-                    onSearch = { searchText = it ?: "" },
-                    incognitoMode = incognitoMode,
-                    scrollBehavior = scrollBehavior,
-                    onNavigationIconClick = onNavigationIconClick,
-                )
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }
-
-    DisposableEffect(Unit) {
-        updateTopBar(screenBars)
-        onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-    }
-
-    if (searchText.isNotEmpty()) {
-        SearchResult(searchKey = searchText) { result ->
-            SearchableSettings.highlightKey = result.highlightKey
-            val route =
-                when (result.settingScreenType) {
-                    SettingsScreenType.Advanced -> Screens.Settings.Advanced
-                    SettingsScreenType.Appearance -> Screens.Settings.Appearance
-                    SettingsScreenType.DataAndStorage -> Screens.Settings.DataStorage
-                    SettingsScreenType.Downloads -> Screens.Settings.Downloads
-                    SettingsScreenType.General -> Screens.Settings.General
-                    SettingsScreenType.Library -> Screens.Settings.Library
-                    SettingsScreenType.MangaDex -> Screens.Settings.MangaDex
-                    SettingsScreenType.MergeSource -> Screens.Settings.MergeSource
-                    SettingsScreenType.Reader -> Screens.Settings.Reader
-                    SettingsScreenType.Security -> Screens.Settings.Security
-                    SettingsScreenType.Tracking -> Screens.Settings.Tracking
-                }
-            onNavigateClick(route)
+    ChildScreenScaffold(
+        scrollBehavior = scrollBehavior,
+        topBar = {
+            SettingsSearchTopBar(
+                onSearch = { searchText = it ?: "" },
+                incognitoMode = incognitoMode,
+                scrollBehavior = scrollBehavior,
+                onNavigationIconClick = onNavigationIconClick,
+            )
+        },
+    ) { contentPadding ->
+        if (searchText.isNotEmpty()) {
+            SearchResult(contentPadding = contentPadding, searchKey = searchText) { result ->
+                SearchableSettings.highlightKey = result.highlightKey
+                val route =
+                    when (result.settingScreenType) {
+                        SettingsScreenType.Advanced -> Screens.Settings.Advanced
+                        SettingsScreenType.Appearance -> Screens.Settings.Appearance
+                        SettingsScreenType.DataAndStorage -> Screens.Settings.DataStorage
+                        SettingsScreenType.Downloads -> Screens.Settings.Downloads
+                        SettingsScreenType.General -> Screens.Settings.General
+                        SettingsScreenType.Library -> Screens.Settings.Library
+                        SettingsScreenType.MangaDex -> Screens.Settings.MangaDex
+                        SettingsScreenType.MergeSource -> Screens.Settings.MergeSource
+                        SettingsScreenType.Reader -> Screens.Settings.Reader
+                        SettingsScreenType.Security -> Screens.Settings.Security
+                        SettingsScreenType.Tracking -> Screens.Settings.Tracking
+                    }
+                onNavigateClick(route)
+            }
+        } else {
+            mainContent(contentPadding = contentPadding, onNavigateClick = onNavigateClick)
         }
-    } else {
-        mainContent(onNavigateClick = onNavigateClick)
     }
 }
 
 @Composable
-private fun mainContent(onNavigateClick: (NavKey) -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+private fun mainContent(contentPadding: PaddingValues, onNavigateClick: (NavKey) -> Unit) {
+    LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
         item {
             IconItem(
                 labelText = UiText.StringResource(R.string.general),
@@ -209,6 +199,7 @@ private fun mainContent(onNavigateClick: (NavKey) -> Unit) {
 
 @Composable
 private fun SearchResult(
+    contentPadding: PaddingValues,
     searchKey: String,
     modifier: Modifier = Modifier,
     onItemClick: (SearchResultItem) -> Unit,
@@ -253,6 +244,7 @@ private fun SearchResult(
             }
             else -> {
                 LazyColumn(
+                    contentPadding = contentPadding,
                     modifier = modifier.fillMaxSize().padding(top = Size.medium),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {

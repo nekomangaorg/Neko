@@ -8,12 +8,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
@@ -21,13 +15,11 @@ import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,12 +27,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -56,10 +44,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
@@ -75,10 +59,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
-import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
-import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.main.BottomBar
@@ -198,32 +179,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            var mainDropdownShowing by remember { mutableStateOf(false) }
-
-            var screenBars by remember { mutableStateOf(ScreenBars()) }
-
-            val updateScreenBars: (ScreenBars) -> Unit = { newBars ->
-                if (newBars.id == screenBars.id && newBars.topBar == null) {
-                    // This is a screen being disposed, only clear if it is the current screen
-                    // screenBars = ScreenBars()
-                } else if (newBars.topBar != null) {
-                    screenBars = newBars
-                }
-            }
-
-            var pullRefreshState by remember { mutableStateOf(PullRefreshState()) }
-            val updateRefreshScreenBars: (PullRefreshState) -> Unit = { newPullRefreshState ->
-                if (
-                    newPullRefreshState.id == pullRefreshState.id &&
-                        newPullRefreshState.onRefresh == null
-                ) {
-                    // This is a screen being disposed, only clear if it is the current screen
-                    //   pullRefreshState = PullRefreshState()
-                } else if (newPullRefreshState.onRefresh != null) {
-                    pullRefreshState = newPullRefreshState
-                }
-            }
-
             // TODO status bar colors and navigation bar colors
 
             val windowSizeClass = calculateWindowSizeClass(this)
@@ -253,128 +208,75 @@ class MainActivity : ComponentActivity() {
                 remember(windowSizeClass.widthSizeClass) {
                     windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
                 }
-            CompositionLocalProvider(
-                LocalBarUpdater provides updateScreenBars,
-                LocalPullRefreshState provides updateRefreshScreenBars,
-            ) {
-                val scope = rememberCoroutineScope()
-                ObserveAsEvents(viewModel.appSnackbarManager.events, snackbarHostState) { event ->
-                    scope.launch {
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        currentSnackbarColor = event.snackBarColor
-                        val result =
-                            snackbarHostState.showSnackbar(
-                                message = event.getFormattedMessage(context),
-                                actionLabel = event.getFormattedActionLabel(context),
-                                duration = event.snackbarDuration,
-                                withDismissAction = true,
-                            )
-                        when (result) {
-                            SnackbarResult.ActionPerformed -> event.action?.invoke()
-                            SnackbarResult.Dismissed -> event.dismissAction?.invoke()
-                            else -> Unit
-                        }
+
+            val navigationRail: @Composable () -> Unit = {
+                if (showNavigationRail) {
+                    NavigationSideBar(
+                        items = navItems,
+                        libraryUpdating = libraryUpdating,
+                        downloaderRunning = downloaderRunning,
+                        selectedItemIndex = selectedItemIndex,
+                        onNavigate = { screen ->
+                            backStack.clear()
+                            backStack.add(screen)
+                        },
+                    )
+                }
+            }
+
+            val bottomBar: @Composable () -> Unit = {
+                if (!showNavigationRail) {
+                    BottomBar(
+                        items = navItems,
+                        libraryUpdating = libraryUpdating,
+                        downloaderRunning = downloaderRunning,
+                        selectedItemIndex = selectedItemIndex,
+                        onNavigate = { screen ->
+                            backStack.clear()
+                            backStack.add(screen)
+                        },
+                    )
+                }
+            }
+
+            val scope = rememberCoroutineScope()
+            ObserveAsEvents(viewModel.appSnackbarManager.events, snackbarHostState) { event ->
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    currentSnackbarColor = event.snackBarColor
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = event.getFormattedMessage(context),
+                            actionLabel = event.getFormattedActionLabel(context),
+                            duration = event.snackbarDuration,
+                            withDismissAction = true,
+                        )
+                    when (result) {
+                        SnackbarResult.ActionPerformed -> event.action?.invoke()
+                        SnackbarResult.Dismissed -> event.dismissAction?.invoke()
+                        else -> Unit
                     }
                 }
+            }
+            MainScreen(
+                startingScreen = startingScreen,
+                backStack = backStack,
+                windowSizeClass = windowSizeClass,
+                incognitoMode = mainScreenState.incognitoMode,
+                incognitoClick = viewModel::toggleIncoginito,
+                onboardingCompleted = viewModel::onboardingCompleted,
+                snackbarHostState = snackbarHostState,
+                currentSnackbarColor = currentSnackbarColor,
+                navigationRail = navigationRail,
+                bottomBar = bottomBar,
+            )
 
-                val nestedScroll = screenBars.scrollBehavior?.nestedScrollConnection
-                PullRefresh(
-                    enabled = pullRefreshState.enabled,
-                    isRefreshing = pullRefreshState.isRefreshing,
-                    onRefresh = pullRefreshState.onRefresh,
-                    blurBackground = mainDropdownShowing,
-                    trackColor = pullRefreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
-                ) {
-                    Row(Modifier.fillMaxSize()) {
-                        if (
-                            showNavigationRail &&
-                                backStack.size == 1 &&
-                                (backStack[0] is Screens.Library ||
-                                    backStack[0] is Screens.Feed ||
-                                    backStack[0] is Screens.Browse)
-                        ) {
-                            NavigationSideBar(
-                                items = navItems,
-                                libraryUpdating = libraryUpdating,
-                                downloaderRunning = downloaderRunning,
-                                selectedItemIndex = selectedItemIndex,
-                                onNavigate = { screen ->
-                                    backStack.clear()
-                                    backStack.add(screen)
-                                },
-                            )
-                        }
-                        Scaffold(
-                            modifier =
-                                Modifier.fillMaxHeight().weight(1f).conditional(
-                                    nestedScroll != null
-                                ) {
-                                    this.nestedScroll(nestedScroll!!)
-                                },
-                            topBar = { screenBars.topBar?.invoke() },
-                            snackbarHost = {
-                                NekoSnackbarHost(snackbarHostState, currentSnackbarColor)
-                            },
-                            bottomBar = {
-                                if (
-                                    !showNavigationRail &&
-                                        backStack.size == 1 &&
-                                        (backStack[0] is Screens.Library ||
-                                            backStack[0] is Screens.Feed ||
-                                            backStack[0] is Screens.Browse)
-                                ) {
-                                    BottomBar(
-                                        items = navItems,
-                                        libraryUpdating = libraryUpdating,
-                                        downloaderRunning = downloaderRunning,
-                                        selectedItemIndex = selectedItemIndex,
-                                        onNavigate = { screen ->
-                                            backStack.clear()
-                                            backStack.add(screen)
-                                        },
-                                    )
-                                }
-                            },
-                        ) { innerPadding ->
-                            val currentScreen = backStack.lastOrNull()
-                            val drawUnderTopBar = currentScreen is Screens.Manga
-                            val layoutDirection = LocalLayoutDirection.current
-
-                            val padding =
-                                if (drawUnderTopBar) {
-                                    PaddingValues(
-                                        start = innerPadding.calculateStartPadding(layoutDirection),
-                                        end = innerPadding.calculateEndPadding(layoutDirection),
-                                        bottom = innerPadding.calculateBottomPadding(),
-                                        top = 0.dp,
-                                    )
-                                } else {
-                                    innerPadding
-                                }
-
-                            MainScreen(
-                                contentPadding = padding,
-                                startingScreen = startingScreen,
-                                backStack = backStack,
-                                windowSizeClass = windowSizeClass,
-                                onMenuShowing = { visible -> mainDropdownShowing = visible },
-                                incognitoMode = mainScreenState.incognitoMode,
-                                incognitoClick = viewModel::toggleIncoginito,
-                                onboardingCompleted = viewModel::onboardingCompleted,
-                            )
-
-                            if (mainScreenState.appUpdateResult != null) {
-                                AppUpdateDialog(
-                                    release = mainScreenState.appUpdateResult!!.release,
-                                    onDismissRequest = { viewModel.consumeAppUpdateResult() },
-                                    onConfirm = { url ->
-                                        AppDownloadInstallJob.start(context, url, true)
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
+            if (mainScreenState.appUpdateResult != null) {
+                AppUpdateDialog(
+                    release = mainScreenState.appUpdateResult!!.release,
+                    onDismissRequest = { viewModel.consumeAppUpdateResult() },
+                    onConfirm = { url -> AppDownloadInstallJob.start(context, url, true) },
+                )
             }
         }
     }

@@ -3,12 +3,13 @@ package org.nekomanga.presentation.screens
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ZoomInMap
 import androidx.compose.material.icons.filled.ZoomOutMap
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
@@ -17,12 +18,11 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
+import org.nekomanga.presentation.screens.stats.StatsTopBar
 
 @Composable
 fun StatsScreen(
@@ -92,46 +92,45 @@ fun StatsWrapper(
             false -> Icons.Default.ZoomOutMap
         }
 
-    NekoScaffold(
-        type = NekoScaffoldType.Title,
-        onNavigationIconClicked = onBackPressed,
-        title = stringResource(id = titleText),
-        actions = {
-            if (!hideAction) {
-                ToolTipButton(
-                    toolTipLabel = stringResource(id = actionText),
-                    icon = actionIcon,
-                    onClick = onSwitchClick,
-                )
-            }
+    val scrollBehavior =
+        TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
+
+    ChildScreenScaffold(
+        scrollBehavior = scrollBehavior,
+        topBar = {
+            StatsTopBar(
+                statsState = statsState,
+                onNavigationIconClicked = onBackPressed,
+                scrollBehavior = scrollBehavior,
+                onSwitchClick = onSwitchClick,
+            )
         },
-        content = { incomingPaddingValues ->
-            if (
-                statsState.screenState is Loading ||
-                    (statsState.screenState is Detailed && detailedState.isLoading)
-            ) {
-                LoadingScreen()
-            } else if (statsState.screenState is StatsConstants.ScreenState.NoResults) {
-                EmptyScreen(
-                    message = UiText.StringResource(resourceId = R.string.unable_to_generate_stats),
-                    contentPadding = incomingPaddingValues,
+    ) { contentPadding ->
+        if (
+            statsState.screenState is Loading ||
+                (statsState.screenState is Detailed && detailedState.isLoading)
+        ) {
+            LoadingScreen()
+        } else if (statsState.screenState is StatsConstants.ScreenState.NoResults) {
+            EmptyScreen(
+                message = UiText.StringResource(resourceId = R.string.unable_to_generate_stats),
+                contentPadding = contentPadding,
+            )
+        } else {
+            if (isSimple) {
+                SimpleStats(
+                    statsState = statsState,
+                    contentPadding = contentPadding,
+                    windowSizeClass = windowSizeClass,
                 )
             } else {
-                if (isSimple) {
-                    SimpleStats(
-                        statsState = statsState,
-                        contentPadding = incomingPaddingValues,
-                        windowSizeClass = windowSizeClass,
-                    )
-                } else {
-                    DetailedStats(
-                        detailedStats = detailedState,
-                        colors = colors,
-                        contentPadding = incomingPaddingValues,
-                        windowSizeClass = windowSizeClass,
-                    )
-                }
+                DetailedStats(
+                    detailedStats = detailedState,
+                    colors = colors,
+                    contentPadding = contentPadding,
+                    windowSizeClass = windowSizeClass,
+                )
             }
-        },
-    )
+        }
+    }
 }

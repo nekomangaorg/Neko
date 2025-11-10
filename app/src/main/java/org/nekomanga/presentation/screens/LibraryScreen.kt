@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +13,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,10 +30,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
@@ -50,6 +45,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
+import org.nekomanga.presentation.components.scaffold.RootScaffold
 import org.nekomanga.presentation.screens.library.HorizontalCategoriesPage
 import org.nekomanga.presentation.screens.library.LibraryBottomSheet
 import org.nekomanga.presentation.screens.library.LibraryBottomSheetScreen
@@ -61,15 +57,21 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     openManga: (Long) -> Unit,
     onSearchMangaDex: (SearchBrowse) -> Unit,
     windowSizeClass: WindowSizeClass,
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     LibraryWrapper(
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
+        mainDropdown = mainDropdown,
+        mainDropdownShowing = mainDropdownShowing,
         libraryStateFlow = libraryViewModel.libraryScreenState,
-        mainDropDown = mainDropDown,
         libraryScreenActions =
             LibraryScreenActions(
                 mangaClick = openManga,
@@ -154,8 +156,11 @@ fun LibraryScreen(
 
 @Composable
 private fun LibraryWrapper(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
     libraryStateFlow: StateFlow<LibraryScreenState>,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     libraryScreenActions: LibraryScreenActions,
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
@@ -164,13 +169,8 @@ private fun LibraryWrapper(
 
     val libraryScreenState by libraryStateFlow.collectAsState()
 
-    val updateTopBar = LocalBarUpdater.current
-    val updateRefreshState = LocalPullRefreshState.current
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val pullRefreshState = remember { PullRefreshState() }
 
     var selectionMode by
         remember(libraryScreenState.selectedItems) {
@@ -238,104 +238,100 @@ private fun LibraryWrapper(
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val screenBars = remember {
-            ScreenBars(
-                topBar = {
-                    LibraryScreenTopBar(
-                        scrollBehavior = scrollBehavior,
-                        mainDropDown = mainDropDown,
-                        libraryScreenState = libraryScreenState,
-                        libraryScreenActions = libraryScreenActions,
-                        displayOptionsClick = {
-                            scope.launch { openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet) }
-                        },
-                        groupByClick = {
-                            scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
-                        },
-                        editCategoryClick = {
-                            scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
-                        },
-                        removeFromLibraryClick = { deleteMangaConfirmation = true },
-                        markActionClick = { markAction -> markActionConfirmation = markAction },
-                        removeActionClick = { removeAction ->
-                            removeActionConfirmation = removeAction
-                        },
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        }
-        DisposableEffect(Unit) {
-            updateTopBar(screenBars)
-            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-        }
-
-        DisposableEffect(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
-            updateRefreshState(
-                pullRefreshState.copy(
+        val pullRefreshState =
+            remember(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
+                PullRefreshState(
                     enabled = true,
                     isRefreshing = libraryScreenState.isRefreshing,
                     onRefresh = libraryScreenActions.updateLibrary,
                 )
-            )
-            onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
-        }
+            }
 
-        val recyclerContentPadding = PaddingValues()
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            LibraryDialogs(
-                deleteMangaConfirmation = deleteMangaConfirmation,
-                markActionConfirmation = markActionConfirmation,
-                removeActionConfirmation = removeActionConfirmation,
-                onDeleteDismiss = { deleteMangaConfirmation = !deleteMangaConfirmation },
-                onDeleteConfirm = { libraryScreenActions.deleteSelectedLibraryMangaItems() },
-                onMarkDismiss = { markActionConfirmation = null },
-                onMarkConfirm = {
-                    libraryScreenActions.markMangaChapters(markActionConfirmation!!)
-                },
-                onRemoveDismiss = { removeActionConfirmation = null },
-                onRemoveConfirm = {
-                    libraryScreenActions.downloadChapters(removeActionConfirmation!!)
-                },
-            )
-
-            if (libraryScreenState.items.isEmpty()) {
-                EmptyLibrary(
+        RootScaffold(
+            pullRefreshState = pullRefreshState,
+            scrollBehavior = scrollBehavior,
+            mainSettingsExpanded = mainDropdownShowing,
+            navigationRail = navigationRail,
+            bottomBar = bottomBar,
+            topBar = {
+                LibraryScreenTopBar(
+                    scrollBehavior = scrollBehavior,
+                    mainDropDown = mainDropdown,
                     libraryScreenState = libraryScreenState,
-                    onSearchMangaDex = libraryScreenActions.onSearchMangaDex,
+                    libraryScreenActions = libraryScreenActions,
+                    displayOptionsClick = {
+                        scope.launch { openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet) }
+                    },
+                    groupByClick = {
+                        scope.launch { openSheet(LibraryBottomSheetScreen.GroupBySheet) }
+                    },
+                    editCategoryClick = {
+                        scope.launch { openSheet(LibraryBottomSheetScreen.CategorySheet) }
+                    },
+                    removeFromLibraryClick = { deleteMangaConfirmation = true },
+                    markActionClick = { markAction -> markActionConfirmation = markAction },
+                    removeActionClick = { removeAction -> removeActionConfirmation = removeAction },
                 )
-            } else {
-                if (libraryScreenState.horizontalCategories) {
-                    HorizontalCategoriesPage(
-                        contentPadding = recyclerContentPadding,
-                        selectionMode = selectionMode,
+            },
+        ) { contentPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                LibraryDialogs(
+                    deleteMangaConfirmation = deleteMangaConfirmation,
+                    markActionConfirmation = markActionConfirmation,
+                    removeActionConfirmation = removeActionConfirmation,
+                    onDeleteDismiss = { deleteMangaConfirmation = !deleteMangaConfirmation },
+                    onDeleteConfirm = { libraryScreenActions.deleteSelectedLibraryMangaItems() },
+                    onMarkDismiss = { markActionConfirmation = null },
+                    onMarkConfirm = {
+                        libraryScreenActions.markMangaChapters(markActionConfirmation!!)
+                    },
+                    onRemoveDismiss = { removeActionConfirmation = null },
+                    onRemoveConfirm = {
+                        libraryScreenActions.downloadChapters(removeActionConfirmation!!)
+                    },
+                )
+
+                if (libraryScreenState.items.isEmpty()) {
+                    EmptyLibrary(
                         libraryScreenState = libraryScreenState,
-                        libraryScreenActions = libraryScreenActions,
-                        libraryCategoryActions = libraryCategoryActions,
-                        categorySortClick = { categoryItem ->
-                            scope.launch {
-                                openSheet(
-                                    LibraryBottomSheetScreen.SortSheet(categoryItem = categoryItem)
-                                )
-                            }
-                        },
+                        onSearchMangaDex = libraryScreenActions.onSearchMangaDex,
                     )
                 } else {
-                    VerticalCategoriesPage(
-                        contentPadding = recyclerContentPadding,
-                        selectionMode = selectionMode,
-                        libraryScreenState = libraryScreenState,
-                        libraryScreenActions = libraryScreenActions,
-                        libraryCategoryActions = libraryCategoryActions,
-                        categorySortClick = { categoryItem ->
-                            scope.launch {
-                                openSheet(
-                                    LibraryBottomSheetScreen.SortSheet(categoryItem = categoryItem)
-                                )
-                            }
-                        },
-                    )
+                    if (libraryScreenState.horizontalCategories) {
+                        HorizontalCategoriesPage(
+                            contentPadding = contentPadding,
+                            selectionMode = selectionMode,
+                            libraryScreenState = libraryScreenState,
+                            libraryScreenActions = libraryScreenActions,
+                            libraryCategoryActions = libraryCategoryActions,
+                            categorySortClick = { categoryItem ->
+                                scope.launch {
+                                    openSheet(
+                                        LibraryBottomSheetScreen.SortSheet(
+                                            categoryItem = categoryItem
+                                        )
+                                    )
+                                }
+                            },
+                        )
+                    } else {
+                        VerticalCategoriesPage(
+                            contentPadding = contentPadding,
+                            selectionMode = selectionMode,
+                            libraryScreenState = libraryScreenState,
+                            libraryScreenActions = libraryScreenActions,
+                            libraryCategoryActions = libraryCategoryActions,
+                            categorySortClick = { categoryItem ->
+                                scope.launch {
+                                    openSheet(
+                                        LibraryBottomSheetScreen.SortSheet(
+                                            categoryItem = categoryItem
+                                        )
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

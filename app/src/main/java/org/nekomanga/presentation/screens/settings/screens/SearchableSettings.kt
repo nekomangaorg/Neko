@@ -4,12 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import kotlinx.collections.immutable.PersistentList
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsTopBar
@@ -25,30 +22,20 @@ internal abstract class SearchableSettings(
 
     @Composable
     fun Content() {
-        val updateTopBar = LocalBarUpdater.current
-
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-
-        val screenBars = remember {
-            ScreenBars(
-                topBar = {
-                    SettingsTopBar(
-                        scrollBehavior = scrollBehavior,
-                        incognitoMode = incognitoMode,
-                        onNavigationIconClicked = onNavigationBackClick,
-                        title = stringResource(getTitleRes()),
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-            )
+        ChildScreenScaffold(
+            scrollBehavior = scrollBehavior,
+            topBar = {
+                SettingsTopBar(
+                    scrollBehavior = scrollBehavior,
+                    incognitoMode = incognitoMode,
+                    onNavigationIconClicked = onNavigationBackClick,
+                    title = stringResource(getTitleRes()),
+                )
+            },
+        ) { contentPadding ->
+            PreferenceScreen(contentPadding = contentPadding, items = getPreferences())
         }
-
-        DisposableEffect(Unit) {
-            updateTopBar(screenBars)
-            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-        }
-
-        PreferenceScreen(items = getPreferences())
     }
 
     companion object {

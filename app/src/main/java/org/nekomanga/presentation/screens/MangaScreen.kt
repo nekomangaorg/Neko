@@ -31,7 +31,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,10 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -98,6 +94,7 @@ import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -377,11 +374,6 @@ private fun MangaScreenWrapper(
 
     val defaultColorState = defaultThemeColorState()
 
-    val updateTopBar = LocalBarUpdater.current
-    val updateRefreshState = LocalPullRefreshState.current
-
-    val pullRefreshState = remember { PullRefreshState() }
-
     val themeColorState =
         remember(screenState.themeBasedOffCovers, screenState.vibrantColor, isDark) {
             // 3. The logic inside here is now non-composable.
@@ -462,38 +454,6 @@ private fun MangaScreenWrapper(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    val screenBars = remember {
-        ScreenBars(
-            topBar = {
-                MangaScreenTopBar(
-                    screenState = screenState,
-                    chapterActions = chapterActions,
-                    themeColorState = themeColorState,
-                    scrollBehavior = scrollBehavior,
-                    onNavigationIconClick = onBackPressed,
-                    onSearch = onSearch,
-                )
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }
-    DisposableEffect(Unit) {
-        updateTopBar(screenBars)
-        onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-    }
-
-    DisposableEffect(screenState.isRefreshing, onRefresh, themeColorState) {
-        updateRefreshState(
-            pullRefreshState.copy(
-                enabled = true,
-                isRefreshing = screenState.isRefreshing,
-                onRefresh = onRefresh,
-                trackColor = themeColorState.primaryColor,
-            )
-        )
-        onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
-    }
-
     val isTablet =
         windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
             !screenState.forcePortrait
@@ -535,52 +495,74 @@ private fun MangaScreenWrapper(
                 }
         )
 
-    if (isTablet) {
-        SideBySideLayout(
-            incomingPadding = PaddingValues(),
-            backdropHeight = backdropHeight,
-            screenState = screenState,
-            windowSizeClass = windowSizeClass,
-            themeColorState = themeColorState,
-            chapterActions = chapterActions,
-            informationActions = informationActions,
-            descriptionActions = descriptionActions,
-            onSimilarClick = onSimilarClick,
-            onShareClick = onShareClick,
-            onToggleFavorite = onToggleFavoriteAction,
-            generatePalette = generatePalette,
-            onOpenSheet = ::openSheet,
-            categoryActions = categoryActions,
-        )
-    } else {
-        VerticalLayout(
-            incomingPadding = PaddingValues(),
-            backdropHeight = backdropHeight,
-            screenState = screenState,
-            windowSizeClass = windowSizeClass,
-            themeColorState = themeColorState,
-            chapterActions = chapterActions,
-            informationActions = informationActions,
-            descriptionActions = descriptionActions,
-            onSimilarClick = onSimilarClick,
-            onShareClick = onShareClick,
-            onToggleFavorite = onToggleFavoriteAction,
-            generatePalette = generatePalette,
-            onOpenSheet = ::openSheet,
-            categoryActions = categoryActions,
-        )
-    }
+    ChildScreenScaffold(
+        pullRefreshState =
+            PullRefreshState(
+                enabled = true,
+                isRefreshing = screenState.isRefreshing,
+                onRefresh = onRefresh,
+                trackColor = themeColorState.primaryColor,
+            ),
+        drawUnderTopBar = true,
+        scrollBehavior = scrollBehavior,
+        topBar = {
+            MangaScreenTopBar(
+                screenState = screenState,
+                chapterActions = chapterActions,
+                themeColorState = themeColorState,
+                scrollBehavior = scrollBehavior,
+                onNavigationIconClick = onBackPressed,
+                onSearch = onSearch,
+            )
+        },
+    ) { contentPaddingValues ->
+        if (isTablet) {
+            SideBySideLayout(
+                incomingPadding = contentPaddingValues,
+                backdropHeight = backdropHeight,
+                screenState = screenState,
+                windowSizeClass = windowSizeClass,
+                themeColorState = themeColorState,
+                chapterActions = chapterActions,
+                informationActions = informationActions,
+                descriptionActions = descriptionActions,
+                onSimilarClick = onSimilarClick,
+                onShareClick = onShareClick,
+                onToggleFavorite = onToggleFavoriteAction,
+                generatePalette = generatePalette,
+                onOpenSheet = ::openSheet,
+                categoryActions = categoryActions,
+            )
+        } else {
+            VerticalLayout(
+                incomingPadding = contentPaddingValues,
+                backdropHeight = backdropHeight,
+                screenState = screenState,
+                windowSizeClass = windowSizeClass,
+                themeColorState = themeColorState,
+                chapterActions = chapterActions,
+                informationActions = informationActions,
+                descriptionActions = descriptionActions,
+                onSimilarClick = onSimilarClick,
+                onShareClick = onShareClick,
+                onToggleFavorite = onToggleFavoriteAction,
+                generatePalette = generatePalette,
+                onOpenSheet = ::openSheet,
+                categoryActions = categoryActions,
+            )
+        }
 
-    if (screenState.removedChapters.isNotEmpty()) {
-        RemovedChaptersDialog(
-            themeColorState = themeColorState,
-            chapters = screenState.removedChapters,
-            onConfirm = {
-                chapterActions.delete(screenState.removedChapters)
-                chapterActions.clearRemoved()
-            },
-            onDismiss = { chapterActions.clearRemoved() },
-        )
+        if (screenState.removedChapters.isNotEmpty()) {
+            RemovedChaptersDialog(
+                themeColorState = themeColorState,
+                chapters = screenState.removedChapters,
+                onConfirm = {
+                    chapterActions.delete(screenState.removedChapters)
+                    chapterActions.clearRemoved()
+                },
+                onDismiss = { chapterActions.clearRemoved() },
+            )
+        }
     }
 }
 

@@ -6,12 +6,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,19 +35,25 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
+import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.AppBar
+import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 
 @Composable
 fun MainScreen(
-    contentPadding: PaddingValues,
+    snackbarHostState: SnackbarHostState,
+    currentSnackbarColor: SnackbarColor?,
     startingScreen: NavKey,
     backStack: NavBackStack<NavKey>,
     windowSizeClass: WindowSizeClass,
     incognitoMode: Boolean,
     incognitoClick: () -> Unit,
-    onMenuShowing: (Boolean) -> Unit,
     onboardingCompleted: () -> Unit,
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
 ) {
+
+    var mainDropdownShowing by remember { mutableStateOf(false) }
 
     val mainDropDown =
         AppBar.MainDropdown(
@@ -51,13 +62,13 @@ fun MainScreen(
             settingsClick = { backStack.add(Screens.Settings.Main()) },
             statsClick = { backStack.add(Screens.Stats) },
             aboutClick = { backStack.add(Screens.About) },
-            menuShowing = onMenuShowing,
+            menuShowing = { mainDropdownShowing = it },
         )
 
     val animationSpec = tween<IntOffset>(durationMillis = 300)
     val fadeSpec = tween<Float>(durationMillis = 300)
 
-    Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         NavDisplay(
             backStack = backStack,
             onBack = { backStack.removeLastOrNull() },
@@ -119,13 +130,16 @@ fun MainScreen(
                         }
                         LibraryScreen(
                             libraryViewModel = libraryViewModel,
-                            mainDropDown = mainDropDown,
+                            mainDropdown = mainDropDown,
+                            mainDropdownShowing = mainDropdownShowing,
                             openManga = { mangaId -> backStack.add(Screens.Manga(mangaId)) },
                             onSearchMangaDex = { search ->
                                 backStack.clear()
                                 backStack.add(Screens.Browse(search))
                             },
                             windowSizeClass = windowSizeClass,
+                            navigationRail = navigationRail,
+                            bottomBar = bottomBar,
                         )
                     }
                     entry<Screens.Feed> {
@@ -133,9 +147,12 @@ fun MainScreen(
 
                         FeedScreen(
                             feedViewModel = feedViewModel,
-                            mainDropDown = mainDropDown,
+                            mainDropdown = mainDropDown,
+                            mainDropdownShowing = mainDropdownShowing,
                             openManga = { mangaId -> backStack.add(Screens.Manga(mangaId)) },
                             windowSizeClass = windowSizeClass,
+                            navigationRail = navigationRail,
+                            bottomBar = bottomBar,
                         )
                     }
                     entry<Screens.Browse> { screen ->
@@ -145,9 +162,12 @@ fun MainScreen(
                         }
                         BrowseScreen(
                             browseViewModel = browseViewModel,
-                            mainDropDown = mainDropDown,
+                            mainDropdown = mainDropDown,
+                            mainDropdownShowing = mainDropdownShowing,
                             onNavigateTo = { screen -> backStack.add(screen) },
                             windowSizeClass = windowSizeClass,
+                            navigationRail = navigationRail,
+                            bottomBar = bottomBar,
                         )
                     }
 
@@ -224,6 +244,10 @@ fun MainScreen(
                         LicenseScreen(onBackPressed = { backStack.removeLastOrNull() })
                     }
                 },
+        )
+        NekoSnackbarHost(
+            snackbarHostState = snackbarHostState,
+            snackBarColor = currentSnackbarColor,
         )
     }
 }

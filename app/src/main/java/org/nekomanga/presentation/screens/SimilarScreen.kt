@@ -15,7 +15,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +26,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -41,6 +37,7 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
 import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
@@ -82,10 +79,14 @@ private fun SimilarWrapper(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val updateTopBar = LocalBarUpdater.current
-    val updateRefreshState = LocalPullRefreshState.current
-
-    val pullRefreshState = remember { PullRefreshState() }
+    val pullRefreshState =
+        remember(similarScreenState.isRefreshing) {
+            PullRefreshState(
+                enabled = true,
+                isRefreshing = similarScreenState.isRefreshing,
+                onRefresh = onRefresh,
+            )
+        }
 
     var currentBottomSheet: DisplaySheetScreen? by remember { mutableStateOf(null) }
 
@@ -129,75 +130,60 @@ private fun SimilarWrapper(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    val screenBars = remember {
-        ScreenBars(
-            topBar = {
-                SimilarTopBar(
-                    screenState = similarScreenState,
-                    onNavigationIconClicked = onBackPress,
-                    scrollBehavior = scrollBehavior,
-                    onSettingClick = {
-                        scope.launch {
-                            openSheet(
-                                DisplaySheetScreen.BrowseDisplayOptionsSheet(
-                                    showIsList = true,
-                                    switchDisplayClick = switchDisplayClick,
-                                    libraryEntryVisibilityClick = libraryEntryVisibilityClick,
-                                )
-                            )
-                        }
-                    },
-                )
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }
-    DisposableEffect(Unit) {
-        updateTopBar(screenBars)
-        onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-    }
-
-    DisposableEffect(similarScreenState.isRefreshing, onRefresh) {
-        updateRefreshState(
-            pullRefreshState.copy(
-                enabled = true,
-                isRefreshing = similarScreenState.isRefreshing,
-                onRefresh = onRefresh,
-            )
-        )
-        onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
-    }
-
     val haptic = LocalHapticFeedback.current
 
-    SimilarContent(
-        similarScreenState = similarScreenState,
-        onRefresh = onRefresh,
-        mangaClick = mangaClick,
-        mangaLongClick = { displayManga: DisplayManga ->
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            if (!displayManga.inLibrary && similarScreenState.promptForCategories) {
-                scope.launch {
-                    openSheet(
-                        DisplaySheetScreen.CategoriesSheet(
-                            setCategories = { selectedCategories ->
-                                scope.launch { sheetState.hide() }
-                                toggleFavorite(displayManga.mangaId, selectedCategories)
-                            }
+    ChildScreenScaffold(
+        pullRefreshState = pullRefreshState,
+        scrollBehavior = scrollBehavior,
+        topBar = {
+            SimilarTopBar(
+                screenState = similarScreenState,
+                onNavigationIconClicked = onBackPress,
+                scrollBehavior = scrollBehavior,
+                onSettingClick = {
+                    scope.launch {
+                        openSheet(
+                            DisplaySheetScreen.BrowseDisplayOptionsSheet(
+                                showIsList = true,
+                                switchDisplayClick = switchDisplayClick,
+                                libraryEntryVisibilityClick = libraryEntryVisibilityClick,
+                            )
                         )
-                    )
-                }
-            } else {
-                toggleFavorite(displayManga.mangaId, emptyList())
-            }
+                    }
+                },
+            )
         },
-    )
+    ) { contentPadding ->
+        SimilarContent(
+            contentPadding = contentPadding,
+            similarScreenState = similarScreenState,
+            onRefresh = onRefresh,
+            mangaClick = mangaClick,
+            mangaLongClick = { displayManga: DisplayManga ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (!displayManga.inLibrary && similarScreenState.promptForCategories) {
+                    scope.launch {
+                        openSheet(
+                            DisplaySheetScreen.CategoriesSheet(
+                                setCategories = { selectedCategories ->
+                                    scope.launch { sheetState.hide() }
+                                    toggleFavorite(displayManga.mangaId, selectedCategories)
+                                }
+                            )
+                        )
+                    }
+                } else {
+                    toggleFavorite(displayManga.mangaId, emptyList())
+                }
+            },
+        )
+    }
 }
 
 @Composable
 private fun SimilarContent(
     similarScreenState: SimilarScreenState,
-    paddingValues: PaddingValues = PaddingValues(),
+    contentPadding: PaddingValues = PaddingValues(),
     onRefresh: () -> Unit,
     mangaClick: (Long) -> Unit,
     mangaLongClick: (DisplayManga) -> Unit,
@@ -215,16 +201,6 @@ private fun SimilarContent(
             )
         }
     } else {
-        val contentPadding =
-            PaddingValues(
-                bottom =
-                    WindowInsets.navigationBars
-                        .only(WindowInsetsSides.Bottom)
-                        .asPaddingValues()
-                        .calculateBottomPadding(),
-                top = paddingValues.calculateTopPadding(),
-            )
-
         if (similarScreenState.isList) {
             MangaListWithHeader(
                 groupedManga = similarScreenState.filteredDisplayManga,

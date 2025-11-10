@@ -17,7 +17,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,10 +39,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
 import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +48,7 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.ButtonGroup
+import org.nekomanga.presentation.components.scaffold.RootScaffold
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedScreenContent
 import org.nekomanga.presentation.screens.feed.FeedScreenDialogs
@@ -60,20 +57,26 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedScreen(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
     feedViewModel: FeedViewModel,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     openManga: (Long) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
     val context = LocalContext.current
 
     FeedWrapper(
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
         feedScreenFlow = feedViewModel.feedScreenState,
         updateScreenFlow = feedViewModel.updatesScreenPagingState,
         historyScreenFlow = feedViewModel.historyScreenPagingState,
         summaryScreenFlow = feedViewModel.summaryScreenPagingState,
         windowSizeClass = windowSizeClass,
-        mainDropDown = mainDropDown,
+        mainDropdown = mainDropdown,
+        mainDropdownShowing = mainDropdownShowing,
         loadNextPage = feedViewModel::loadNextPage,
         feedSettingActions =
             FeedSettingActions(
@@ -133,12 +136,15 @@ fun FeedScreen(
 
 @Composable
 private fun FeedWrapper(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
     feedScreenFlow: StateFlow<FeedScreenState>,
     updateScreenFlow: StateFlow<UpdatesScreenPagingState>,
     historyScreenFlow: StateFlow<HistoryScreenPagingState>,
     summaryScreenFlow: StateFlow<SummaryScreenPagingState>,
     windowSizeClass: WindowSizeClass,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     loadNextPage: () -> Unit,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
@@ -149,13 +155,8 @@ private fun FeedWrapper(
     val historyPagingScreenState by historyScreenFlow.collectAsState()
     val summaryScreenPagingState by summaryScreenFlow.collectAsState()
 
-    val updateTopBar = LocalBarUpdater.current
-    val updateRefreshState = LocalPullRefreshState.current
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val pullRefreshState = remember { PullRefreshState() }
 
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -221,133 +222,132 @@ private fun FeedWrapper(
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val screenBars = remember {
-            ScreenBars(
-                topBar = {
-                    FeedScreenTopBar(
-                        scrollBehavior = scrollBehavior,
-                        mainDropDown = mainDropDown,
-                        feedScreenState = feedScreenState,
-                        feedScreenActions = feedScreenActions,
-                        openSheetClick = { showBottomSheet = true },
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        }
-
-        DisposableEffect(Unit) {
-            updateTopBar(screenBars)
-            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-        }
-
-        DisposableEffect(
-            feedScreenState.swipeRefreshEnabled,
-            feedScreenState.isRefreshing,
-            feedScreenActions.updateLibrary,
-        ) {
-            updateRefreshState(
-                pullRefreshState.copy(
+        val pullRefreshState =
+            remember(
+                feedScreenState.swipeRefreshEnabled,
+                feedScreenState.isRefreshing,
+                feedScreenActions.updateLibrary,
+            ) {
+                PullRefreshState(
                     enabled = feedScreenState.swipeRefreshEnabled,
                     isRefreshing = feedScreenState.isRefreshing,
                     onRefresh = { feedScreenActions.updateLibrary(true) },
                 )
-            )
-            onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
-        }
+            }
 
-        val recyclerContentPadding = PaddingValues(bottom = Size.huge)
+        RootScaffold(
+            pullRefreshState = pullRefreshState,
+            scrollBehavior = scrollBehavior,
+            mainSettingsExpanded = mainDropdownShowing,
+            navigationRail = navigationRail,
+            bottomBar = bottomBar,
+            topBar = {
+                FeedScreenTopBar(
+                    scrollBehavior = scrollBehavior,
+                    mainDropDown = mainDropdown,
+                    feedScreenState = feedScreenState,
+                    feedScreenActions = feedScreenActions,
+                    openSheetClick = { showBottomSheet = true },
+                )
+            },
+        ) { contentPadding ->
+            val recyclerContentPadding = PaddingValues(bottom = Size.huge)
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            FeedScreenContent(
-                downloadScreenVisible = downloadScreenVisible,
-                contentPadding = recyclerContentPadding,
-                feedScreenState = feedScreenState,
-                summaryScreenPagingState = summaryScreenPagingState,
-                historyPagingScreenState = historyPagingScreenState,
-                updatesPagingScreenState = updatesPagingScreenState,
-                downloadScreenActions = downloadScreenActions,
-                feedScreenActions = feedScreenActions,
-                loadNextPage = loadNextPage,
-            )
+            Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+                FeedScreenContent(
+                    downloadScreenVisible = downloadScreenVisible,
+                    contentPadding = recyclerContentPadding,
+                    feedScreenState = feedScreenState,
+                    summaryScreenPagingState = summaryScreenPagingState,
+                    historyPagingScreenState = historyPagingScreenState,
+                    updatesPagingScreenState = updatesPagingScreenState,
+                    downloadScreenActions = downloadScreenActions,
+                    feedScreenActions = feedScreenActions,
+                    loadNextPage = loadNextPage,
+                )
 
-            if (!feedScreenState.firstLoad) {
-                val buttonItems = remember {
-                    listOf(FeedScreenType.Summary, FeedScreenType.History, FeedScreenType.Updates)
-                }
-
-                val downloadButton = "downloads"
-                val items: List<Any> =
-                    if (feedScreenState.downloads.isNotEmpty()) {
-                        buttonItems + downloadButton
-                    } else {
-                        buttonItems
+                if (!feedScreenState.firstLoad) {
+                    val buttonItems = remember {
+                        listOf(
+                            FeedScreenType.Summary,
+                            FeedScreenType.History,
+                            FeedScreenType.Updates,
+                        )
                     }
 
-                val selectedItem: Any =
-                    when (feedScreenState.showingDownloads) {
-                        true -> downloadButton
-                        false -> feedScreenType
-                    }
+                    val downloadButton = "downloads"
+                    val items: List<Any> =
+                        if (feedScreenState.downloads.isNotEmpty()) {
+                            buttonItems + downloadButton
+                        } else {
+                            buttonItems
+                        }
 
-                ButtonGroup(
-                    modifier =
-                        Modifier.align(Alignment.BottomCenter).padding(horizontal = Size.tiny),
-                    items = items,
-                    selectedItem = selectedItem,
-                    onItemClick = { item ->
-                        scope.launch { sheetState.hide() }
-                        if (item is FeedScreenType) {
-                            if (feedScreenState.showingDownloads) {
+                    val selectedItem: Any =
+                        when (feedScreenState.showingDownloads) {
+                            true -> downloadButton
+                            false -> feedScreenType
+                        }
+
+                    ButtonGroup(
+                        modifier =
+                            Modifier.align(Alignment.BottomCenter).padding(horizontal = Size.tiny),
+                        items = items,
+                        selectedItem = selectedItem,
+                        onItemClick = { item ->
+                            scope.launch { sheetState.hide() }
+                            if (item is FeedScreenType) {
+                                if (feedScreenState.showingDownloads) {
+                                    feedScreenActions.toggleShowingDownloads()
+                                }
+                                if (feedScreenType != item) {
+                                    feedScreenActions.switchViewType(item)
+                                }
+                            } else {
                                 feedScreenActions.toggleShowingDownloads()
                             }
-                            if (feedScreenType != item) {
-                                feedScreenActions.switchViewType(item)
+                        },
+                    ) { item ->
+                        when (item) {
+                            is FeedScreenType -> {
+                                val name =
+                                    when (item) {
+                                        FeedScreenType.History -> stringResource(R.string.history)
+
+                                        FeedScreenType.Updates -> stringResource(R.string.updates)
+
+                                        FeedScreenType.Summary -> stringResource(R.string.summary)
+                                    }
+                                Text(
+                                    text = name,
+                                    style =
+                                        MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                )
                             }
-                        } else {
-                            feedScreenActions.toggleShowingDownloads()
-                        }
-                    },
-                ) { item ->
-                    when (item) {
-                        is FeedScreenType -> {
-                            val name =
-                                when (item) {
-                                    FeedScreenType.History -> stringResource(R.string.history)
 
-                                    FeedScreenType.Updates -> stringResource(R.string.updates)
-
-                                    FeedScreenType.Summary -> stringResource(R.string.summary)
-                                }
-                            Text(
-                                text = name,
-                                style =
-                                    MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                            )
-                        }
-
-                        else -> {
-                            Icon(
-                                imageVector = Icons.Default.Downloading,
-                                contentDescription = stringResource(id = R.string.downloads),
-                            )
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Default.Downloading,
+                                    contentDescription = stringResource(id = R.string.downloads),
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    FeedScreenDialogs(
-        showClearHistoryDialog = showClearHistoryDialog,
-        showClearDownloadsDialog = showClearDownloadsDialog,
-        onClearHistoryDismiss = { showClearHistoryDialog = false },
-        onClearHistoryConfirm = { feedSettingActions.clearHistoryClick() },
-        onClearDownloadsDismiss = { showClearDownloadsDialog = false },
-        onClearDownloadsConfirm = { feedSettingActions.clearDownloadQueueClick() },
-        scope = scope,
-        sheetStateHide = { sheetState.hide() },
-    )
+        FeedScreenDialogs(
+            showClearHistoryDialog = showClearHistoryDialog,
+            showClearDownloadsDialog = showClearDownloadsDialog,
+            onClearHistoryDismiss = { showClearHistoryDialog = false },
+            onClearHistoryConfirm = { feedSettingActions.clearHistoryClick() },
+            onClearDownloadsDismiss = { showClearDownloadsDialog = false },
+            onClearDownloadsConfirm = { feedSettingActions.clearDownloadQueueClick() },
+            scope = scope,
+            sheetStateHide = { sheetState.hide() },
+        )
+    }
 }

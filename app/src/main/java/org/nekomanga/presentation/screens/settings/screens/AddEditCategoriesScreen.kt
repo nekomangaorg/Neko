@@ -20,6 +20,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,10 +38,10 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
+import org.nekomanga.presentation.screens.category.AddEditCategoryTopBar
 import org.nekomanga.presentation.theme.Size
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -120,11 +122,16 @@ internal class AddEditCategoriesScreen(
             )
         }
 
-        NekoScaffold(
-            type = NekoScaffoldType.Title,
-            onNavigationIconClicked = onNavigationIconClick,
-            title = stringResource(R.string.edit_categories),
-            content = { contentPadding ->
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+
+        ChildScreenScaffold(
+            scrollBehavior = scrollBehavior,
+            topBar = { AddEditCategoryTopBar(
+                onNavigationIconClicked = onNavigationIconClick,
+                scrollBehavior = scrollBehavior
+            ) }
+        ) {  contentPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -212,7 +219,6 @@ internal class AddEditCategoriesScreen(
                         text = { Text(text = stringResource(R.string.add)) },
                     )
                 }
-            },
-        )
+            }
     }
 }

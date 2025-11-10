@@ -1,10 +1,7 @@
 package org.nekomanga.presentation.screens
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -19,7 +16,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,18 +25,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.main.states.LocalBarUpdater
-import eu.kanade.tachiyomi.ui.main.states.LocalPullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
-import eu.kanade.tachiyomi.ui.main.states.ScreenBars
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
@@ -54,9 +43,8 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.ButtonGroup
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.components.scaffold.RootScaffold
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
@@ -68,8 +56,11 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseScreen(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
     browseViewModel: BrowseViewModel,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     onNavigateTo: (NavKey) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
@@ -84,8 +75,11 @@ fun BrowseScreen(
     }
 
     BrowseWrapper(
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
         browseScreenFlow = browseViewModel.browseScreenState,
-        mainDropDown = mainDropDown,
+        mainDropdown = mainDropdown,
+        mainDropdownShowing = mainDropdownShowing,
         switchDisplayClick = browseViewModel::switchDisplayMode,
         libraryEntryVisibilityClick = browseViewModel::switchLibraryEntryVisibility,
         windowSizeClass = windowSizeClass,
@@ -113,8 +107,11 @@ fun BrowseScreen(
 
 @Composable
 private fun BrowseWrapper(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
     browseScreenFlow: StateFlow<BrowseScreenState>,
-    mainDropDown: AppBar.MainDropdown,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     switchDisplayClick: () -> Unit,
     libraryEntryVisibilityClick: (Int) -> Unit,
     windowSizeClass: WindowSizeClass,
@@ -132,17 +129,10 @@ private fun BrowseWrapper(
 
     val browseScreenState by browseScreenFlow.collectAsState()
 
-    val updateTopBar = LocalBarUpdater.current
-    val updateRefreshState = LocalPullRefreshState.current
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val pullRefreshState = remember { PullRefreshState() }
-
     var currentBottomSheet: BrowseBottomSheetScreen? by remember { mutableStateOf(null) }
-
-    var mainDropdownShowing by remember { mutableStateOf(false) }
 
     val browseScreenType = browseScreenState.screenType
 
@@ -159,74 +149,56 @@ private fun BrowseWrapper(
 
     val openSheet: (BrowseBottomSheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
-    Box(
-        modifier =
-            Modifier.fillMaxSize().conditional(mainDropdownShowing) {
-                this.blur(16.dp).clickable(enabled = false) {}
-            }
-    ) {
-        if (currentBottomSheet != null) {
-            ModalBottomSheet(
-                sheetState = sheetState,
-                onDismissRequest = { currentBottomSheet = null },
-                content = {
-                    Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                        currentBottomSheet?.let { currentSheet ->
-                            BrowseBottomSheet(
-                                currentScreen = currentSheet,
-                                browseScreenState = browseScreenState,
-                                addNewCategory = addNewCategory,
-                                closeSheet = {
-                                    scope.launch {
-                                        sheetState.hide()
-                                        currentBottomSheet = null
-                                    }
-                                },
-                                filterActions = filterActions,
+    if (currentBottomSheet != null) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = { currentBottomSheet = null },
+            content = {
+                Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
+                    currentBottomSheet?.let { currentSheet ->
+                        BrowseBottomSheet(
+                            currentScreen = currentSheet,
+                            browseScreenState = browseScreenState,
+                            addNewCategory = addNewCategory,
+                            closeSheet = {
+                                scope.launch {
+                                    sheetState.hide()
+                                    currentBottomSheet = null
+                                }
+                            },
+                            filterActions = filterActions,
+                        )
+                    }
+                }
+            },
+        )
+    }
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+    RootScaffold(
+        scrollBehavior = scrollBehavior,
+        mainSettingsExpanded = mainDropdownShowing,
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
+        topBar = {
+            BrowseScreenTopBar(
+                browseScreenState = browseScreenState,
+                scrollBehavior = scrollBehavior,
+                mainDropDown = mainDropdown,
+                openSheetClick = {
+                    scope.launch {
+                        openSheet(
+                            BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
+                                switchDisplayClick = switchDisplayClick,
+                                libraryEntryVisibilityClick = libraryEntryVisibilityClick,
                             )
-                        }
+                        )
                     }
                 },
             )
-        }
-
-        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-
-        val screenBars = remember {
-            ScreenBars(
-                topBar = {
-                    BrowseScreenTopBar(
-                        browseScreenState = browseScreenState,
-                        scrollBehavior = scrollBehavior,
-                        mainDropDown = mainDropDown,
-                        openSheetClick = {
-                            scope.launch {
-                                openSheet(
-                                    BrowseBottomSheetScreen.BrowseDisplayOptionsSheet(
-                                        switchDisplayClick = switchDisplayClick,
-                                        libraryEntryVisibilityClick = libraryEntryVisibilityClick,
-                                    )
-                                )
-                            }
-                        },
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        }
-
-        DisposableEffect(Unit) {
-            updateTopBar(screenBars)
-            onDispose { updateTopBar(ScreenBars(id = screenBars.id, topBar = null)) }
-        }
-
-        LaunchedEffect(Unit) {
-            updateRefreshState(pullRefreshState.copy(enabled = false, onRefresh = {}))
-        }
-        DisposableEffect(Unit) {
-            onDispose { updateRefreshState(pullRefreshState.copy(onRefresh = null)) }
-        }
-
+        },
+    ) { contentPadding ->
         val recyclerContentPadding = PaddingValues(bottom = Size.huge)
 
         val haptic = LocalHapticFeedback.current
@@ -248,7 +220,7 @@ private fun BrowseWrapper(
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
             if (browseScreenState.initialLoading) {
                 ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (browseScreenState.error != null) {
@@ -373,13 +345,5 @@ private fun BrowseWrapper(
                 }
             }
         }
-    }
-    // this is needed for Android SDK where blur isn't available
-    if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-        Box(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
-        ) {}
     }
 }
