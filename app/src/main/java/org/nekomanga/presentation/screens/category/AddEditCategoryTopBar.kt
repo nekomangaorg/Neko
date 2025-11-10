@@ -23,6 +23,6 @@ fun AddEditCategoryTopBar(
         onNavigationIconClicked = onNavigationIconClicked,
         navigationIconLabel = stringResource(R.string.back),
         incognitoMode = false,
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }
