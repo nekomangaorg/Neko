@@ -56,8 +56,6 @@ data class UserListDto(
     val data: List<UserDto>,
 )
 
-@Serializable data class UserResultDto(val result: String, val data: UserDto)
-
 @Serializable data class UserDto(val id: String, val attributes: UserAttributesDto)
 
 @Serializable data class UserAttributesDto(val username: String)
