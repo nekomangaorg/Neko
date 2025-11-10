@@ -579,13 +579,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         ) {
             finish()
         } else {
-            viewModel.onBackPressed()
+            viewModel.onActivityFinish()
             super.finishAfterTransition()
         }
     }
 
     override fun finish() {
-        viewModel.onBackPressed()
+        viewModel.onActivityFinish()
         super.finish()
     }
 
@@ -1178,13 +1178,14 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     override fun onPause() {
         viewModel.saveCurrentChapterReadingProgress()
+        viewModel.flushReadTimer()
         viewModel.deletePendingChapters()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.setReadStartTime()
+        viewModel.restartReadTimer()
     }
 
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {

@@ -86,8 +86,10 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /** Presenter used by the activity to perform background operations. */
-class ReaderViewModel(
-    private val savedState: SavedStateHandle = SavedStateHandle(),
+class ReaderViewModel
+@JvmOverloads
+constructor(
+    private val savedState: SavedStateHandle,
     private val db: DatabaseHelper = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
@@ -120,6 +122,15 @@ class ReaderViewModel(
     private var chapterId = savedState.get<Long>("chapter_id") ?: -1L
         set(value) {
             savedState["chapter_id"] = value
+            field = value
+        }
+
+    /**
+     * The visible page index of the currently loaded chapter. Used to restore from process kill.
+     */
+    private var chapterPageIndex = savedState.get<Int>("page_index") ?: -1
+        set(value) {
+            savedState["page_index"] = value
             field = value
         }
 
@@ -168,35 +179,45 @@ class ReaderViewModel(
     }
 
     init {
-        var secondRun = false
-        // To save state
         state
             .map { it.viewerChapters?.currChapter }
             .distinctUntilChanged()
             .filterNotNull()
             .onEach { currentChapter ->
-                chapterId = currentChapter.chapter.id!!
-                if (secondRun || !currentChapter.chapter.read) {
+                if (chapterPageIndex >= 0) {
+                    // Restore from SavedState
+                    currentChapter.requestedPage = chapterPageIndex
+                } else if (!currentChapter.chapter.read) {
                     currentChapter.requestedPage = currentChapter.chapter.last_page_read
                 }
-                secondRun = true
+                chapterId = currentChapter.chapter.id!!
             }
             .launchIn(viewModelScope)
+    }
+
+    override fun onCleared() {
+        val currentChapters = state.value.viewerChapters
+        if (currentChapters != null) {
+            // 1. Unreference the viewer chapters
+            currentChapters.unref()
+
+            // 2. Add any chapter that was de-queued back to the download queue
+            chapterToDownload?.let { downloadManager.addDownloadsToStartOfQueue(listOf(it)) }
+        }
+        super.onCleared()
     }
 
     /**
      * Called when the user pressed the back button and is going to leave the reader. Used to
      * trigger deletion of the downloaded chapters.
      */
-    fun onBackPressed() {
+    fun onActivityFinish() {
         if (finished) return
         finished = true
         deletePendingChapters()
         val currentChapters = state.value.viewerChapters
         if (currentChapters != null) {
-            currentChapters.unref()
             saveReadingProgress(currentChapters.currChapter)
-            chapterToDownload?.let { downloadManager.addDownloadsToStartOfQueue(listOf(it)) }
         }
     }
 
@@ -341,6 +362,9 @@ class ReaderViewModel(
 
         TimberKt.d { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
+        flushReadTimer()
+        restartReadTimer()
+
         withIOContext {
             try {
                 loadChapter(loader, chapter)
@@ -459,43 +483,72 @@ class ReaderViewModel(
      */
     fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
         val currentChapters = state.value.viewerChapters ?: return
-
         val selectedChapter = page.chapter
 
-        // Save last page read and mark as read if needed
-        if (!securityPreferences.incognitoMode().get()) {
-            selectedChapter.chapter.last_page_read = page.index
-            selectedChapter.chapter.pages_left =
-                (selectedChapter.pages?.size ?: page.index) - page.index
+        viewModelScope.launchNonCancellable {
+            updateChapterProgress(selectedChapter, page, hasExtraPage)
         }
+
+        // This logic remains the same, but the timer calls are gone
+        if (selectedChapter != currentChapters.currChapter) {
+            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
+            viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
+            viewModelScope.launch { loadNewChapter(selectedChapter) }
+        }
+
+        // This logic is the same, but uses the 0.25 threshold from the new file
+        val pages = page.chapter.pages ?: return
+        val inDownloadRange = page.number.toDouble() / pages.size > 0.25
+        if (inDownloadRange) {
+            downloadNextChapters()
+        }
+    }
+
+    /**
+     * Saves the chapter progress (last read page and whether it's read) if incognito mode isn't on.
+     */
+    private fun updateChapterProgress(
+        readerChapter: ReaderChapter,
+        page: ReaderPage,
+        hasExtraPage: Boolean,
+    ) {
+        val pageIndex = page.index
+
+        // Update the UI state
+        mutableState.update { it.copy(lastPage = pageIndex) }
+
+        // Save the page index for process restoration
+        chapterPageIndex = pageIndex
+
+        // ---- This logic is from your original onPageSelected ----
+        if (!securityPreferences.incognitoMode().get()) {
+            readerChapter.chapter.last_page_read = pageIndex
+            readerChapter.chapter.pages_left = (readerChapter.pages?.size ?: pageIndex) - pageIndex
+        }
+
         val shouldTrack =
             !securityPreferences.incognitoMode().get() ||
                 hasTrackers ||
                 mangaDexPreferences.readingSync().get()
+
+        // Check if the chapter is completed
         if (
             shouldTrack &&
-                // For double pages, check if the second to last page is doubled up
-                ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
-                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))
+                ((readerChapter.pages?.lastIndex == pageIndex && page.firstHalf != true) ||
+                    (hasExtraPage && readerChapter.pages?.lastIndex?.minus(1) == pageIndex))
         ) {
-            if (!securityPreferences.incognitoMode().get()) {
-                selectedChapter.chapter.read = true
-                updateTrackChapterAfterReading(selectedChapter)
-                updateReadingStatus(selectedChapter)
-                deleteChapterIfNeeded(selectedChapter)
-            }
+            // This is a new function, see below
+            updateChapterProgressOnComplete(readerChapter)
         }
+    }
 
-        if (selectedChapter != currentChapters.currChapter) {
-            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
-            saveReadingProgress(currentChapters.currChapter)
-            setReadStartTime()
-            viewModelScope.launch { loadNewChapter(selectedChapter) }
-        }
-        val pages = page.chapter.pages ?: return
-        val inDownloadRange = page.number.toDouble() / pages.size > 0.2
-        if (inDownloadRange) {
-            downloadNextChapters()
+    /** Helper function to run completion logic. */
+    private fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
+        if (!securityPreferences.incognitoMode().get()) {
+            readerChapter.chapter.read = true
+            updateTrackChapterAfterReading(readerChapter)
+            updateReadingStatus(readerChapter)
+            deleteChapterIfNeeded(readerChapter)
         }
     }
 
@@ -609,21 +662,27 @@ class ReaderViewModel(
         if (!securityPreferences.incognitoMode().get()) {
             val readAt = Date().time
             val sessionReadDuration = chapterReadStartTime?.let { readAt - it } ?: 0
-            val oldTimeRead =
-                db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()?.time_read
-                    ?: 0
             val history =
-                History.create(readerChapter.chapter).apply {
-                    last_read = readAt
-                    time_read = sessionReadDuration + oldTimeRead
-                }
+                db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()
+                    ?: History.create(readerChapter.chapter)
+
+            val oldTimeRead = history.time_read
+
+            history.apply {
+                last_read = readAt
+                time_read = sessionReadDuration + oldTimeRead
+            }
             db.upsertHistoryLastRead(history).executeAsBlocking()
             chapterReadStartTime = null
         }
     }
 
-    fun setReadStartTime() {
+    fun restartReadTimer() {
         chapterReadStartTime = Date().time
+    }
+
+    fun flushReadTimer() {
+        getCurrentChapter()?.let { viewModelScope.launchNonCancellable { saveChapterHistory(it) } }
     }
 
     /** Called from the activity to preload the given [chapter]. */
