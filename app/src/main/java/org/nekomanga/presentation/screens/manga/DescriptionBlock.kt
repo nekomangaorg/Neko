@@ -95,12 +95,14 @@ fun DescriptionBlock(
     val collapsedMarkdownState =
         rememberMarkdownState(
             content = smallDescription,
+            retainState = true,
             flavour = CommonMarkFlavourDescriptor(),
             immediate = true,
         )
     val expandedMarkdownState =
         rememberMarkdownState(
             content = description,
+            retainState = true,
             flavour = CommonMarkFlavourDescriptor(),
             immediate = true,
         )

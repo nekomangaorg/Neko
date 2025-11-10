@@ -272,7 +272,7 @@ class MangaHandler {
             .toMap()
     }
 
-    private suspend fun getUploaderMap(
+    private fun getUploaderMap(
         results: List<ChapterDataDto>,
         groups: Map<String, String>,
     ): Map<String, String> {
@@ -283,15 +283,6 @@ class MangaHandler {
             .flatten()
             .filter { it.type == MdConstants.Types.uploader }
             .distinctBy { it.id }
-            .associate {
-                it.id to
-                    service
-                        .uploader(it.id)
-                        .getOrResultError("Trying to get uploader username")
-                        .mapBoth(
-                            success = { user -> user.data.attributes.username },
-                            failure = { "" },
-                        )
-            }
+            .associate { it.id to it.attributes!!.username!! }
     }
 }

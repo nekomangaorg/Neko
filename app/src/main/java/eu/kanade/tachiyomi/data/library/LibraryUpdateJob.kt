@@ -176,15 +176,14 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         val mangaListToFilter =
             (if (savedMangaList != null) {
-                    allLibraryManga.filter { it.id in savedMangaList }
-                } else {
-                    allLibraryManga
-                })
+                allLibraryManga.filter { it.id in savedMangaList }
+            } else {
+                allLibraryManga
+            })
 
         val categoryId = inputData.getInt(KEY_CATEGORY, -1)
 
-        val mangaList =
-            getAndFilterMangaToUpdate(mangaListToFilter, tracksByMangaId, categoryId)
+        val mangaList = getAndFilterMangaToUpdate(mangaListToFilter, tracksByMangaId, categoryId)
 
         return withIOContext {
             try {
@@ -794,7 +793,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val mangaToAdd =
                 getAndFilterMangaToUpdate(manga, tracksByMangaId = tracksByMangaId, categoryId = -1)
 
-
             addManga(mangaToAdd)
         }
     }
@@ -805,10 +803,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val tracksByMangaId = db.getAllTracks().executeOnIO().groupBy { it.manga_id }
             val mangaToAdd =
                 getAndFilterMangaToUpdate(
-                        allLibraryManga,
-                        tracksByMangaId = tracksByMangaId,
-                        categoryId = categoryId,
-                    )
+                    allLibraryManga,
+                    tracksByMangaId = tracksByMangaId,
+                    categoryId = categoryId,
+                )
             addManga(mangaToAdd)
         }
     }
