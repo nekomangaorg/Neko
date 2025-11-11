@@ -1,4 +1,3 @@
-/*
 package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
@@ -20,12 +19,14 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.math.BigInteger
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.chapter.toChapterItem
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.presentation.screens.Screens
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -193,10 +194,21 @@ class SearchActivity : MainActivity() {
                             val availableChapters =
                                 chapters.filter { it.isAvailable(downloadManager, manga) }
                             val nextUnreadChapter =
-                                ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
+                                ChapterItemSort()
+                                    .getNextUnreadChapter(
+                                        manga,
+                                        availableChapters.map {
+                                            it.toSimpleChapter()!!.toChapterItem()
+                                        },
+                                        false,
+                                    )
                             if (nextUnreadChapter != null) {
                                 val activity =
-                                    ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                                    ReaderActivity.newIntent(
+                                        this,
+                                        manga,
+                                        nextUnreadChapter.chapter.toDbChapter(),
+                                    )
                                 startActivity(activity)
                                 finish()
                                 return true
@@ -247,4 +259,3 @@ class SearchActivity : MainActivity() {
             Intent(context, SearchActivity::class.java).apply { action = SHORTCUT_READER_SETTINGS }
     }
 }
-*/

@@ -30,7 +30,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -64,6 +64,7 @@ import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
@@ -1160,10 +1161,13 @@ class LibraryViewModel() : ViewModel() {
             val chapters = db.getChapters(manga).executeAsBlocking()
             val availableChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
             val chapter =
-                ChapterSort(manga, chapterFilter, preferences)
-                    .getNextUnreadChapter(availableChapters)
+                ChapterItemSort(chapterFilter, preferences)
+                    .getNextUnreadChapter(
+                        manga,
+                        availableChapters.map { it.toSimpleChapter()!!.toChapterItem() },
+                    )
             chapter ?: return@launchIO
-            openChapter(manga, chapter)
+            openChapter(manga, chapter.chapter.toDbChapter())
         }
     }
 

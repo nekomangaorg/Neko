@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
@@ -26,6 +26,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
+import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -95,8 +96,12 @@ class FeedRepository(
                                     .mapNotNull { it.chapters.firstOrNull() }
                                     .maxOfOrNull { it.chapter.dateUpload }
                             val chapter =
-                                ChapterSort(manga).getNextUnreadChapter(chapters)?.toSimpleChapter()
-                                    ?: return@mapNotNull null
+                                ChapterItemSort()
+                                    .getNextUnreadChapter(
+                                        manga,
+                                        chapters.map { it.toChapterItem() },
+                                    )
+                                    ?.chapter ?: return@mapNotNull null
 
                             FeedManga(
                                 mangaId = manga.id!!,
@@ -194,8 +199,12 @@ class FeedRepository(
                                         it.isAvailable(downloadManager, manga)
                                     }
                                 val chapter =
-                                    ChapterSort(manga).getNextUnreadChapter(chapters)
-                                        ?: return@mapNotNull null
+                                    ChapterItemSort()
+                                        .getNextUnreadChapter(
+                                            manga,
+                                            chapters.map { it.toChapterItem() },
+                                        )
+                                        ?.chapter ?: return@mapNotNull null
 
                                 FeedManga(
                                     mangaId = manga.id!!,

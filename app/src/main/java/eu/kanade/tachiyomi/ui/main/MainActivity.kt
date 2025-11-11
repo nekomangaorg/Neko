@@ -45,7 +45,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.ui.source.browse.SearchType
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
@@ -54,6 +54,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
+import org.nekomanga.domain.chapter.toChapterItem
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.screens.MainScreen
@@ -383,10 +385,21 @@ class MainActivity : ComponentActivity() {
                             val availableChapters =
                                 chapters.filter { it.isAvailable(downloadManager, manga) }
                             val nextUnreadChapter =
-                                ChapterSort(manga).getNextUnreadChapter(availableChapters, false)
+                                ChapterItemSort()
+                                    .getNextUnreadChapter(
+                                        manga,
+                                        availableChapters.map {
+                                            it.toSimpleChapter()!!.toChapterItem()
+                                        },
+                                        false,
+                                    )
                             if (nextUnreadChapter != null) {
                                 val activity =
-                                    ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                                    ReaderActivity.newIntent(
+                                        this,
+                                        manga,
+                                        nextUnreadChapter.chapter.toDbChapter(),
+                                    )
                                 startActivity(activity)
                                 finish()
                             }
