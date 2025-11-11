@@ -44,7 +44,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -152,19 +151,30 @@ constructor(
         val manga = manga!!
         val dbChapters = db.getChapters(manga).executeAsBlocking()
 
-        val selectedChapter =
-            dbChapters.find { it.id == chapterId }
-                ?: error("Requested chapter of id $chapterId not found in chapter list")
+        val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
 
-        val chapterSort = ChapterSort(manga, chapterFilter, preferences)
+        val chapterItemSort = ChapterItemSort()
+
+        val filteredChapterItems = chapterItemFilter.filterChapters(allChapterItems, manga)
+
+        val sortedChapterItems =
+            filteredChapterItems.sortedWith(chapterItemSort.sortComparator(manga, true))
+
         val chaptersForReader =
-            chapterFilter.filterChaptersForReader(
-                dbChapters,
-                manga,
-                chapterSort.sortComparator(true),
-                selectedChapter,
-            )
-        chaptersForReader.map(::ReaderChapter)
+            if (sortedChapterItems.any { it.chapter.id == chapterId }) {
+                sortedChapterItems
+            } else {
+                val selectedChapterItem =
+                    allChapterItems.find { it.chapter.id == chapterId }
+                        ?: error("Selected chapter $chapterId not in allChapterItems")
+                // Add selected chapter back and re-sort
+                (sortedChapterItems + selectedChapterItem).sortedWith(
+                    chapterItemSort.sortComparator(manga, true)
+                )
+            }
+
+        // 6. Map back to ReaderChapter
+        chaptersForReader.map { it.chapter.toDbChapter() }.map(::ReaderChapter)
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
@@ -287,21 +297,48 @@ constructor(
         val manga = manga ?: return emptyList()
         chapterItems =
             withContext(Dispatchers.IO) {
-                val chapterSort = ChapterSort(manga, chapterFilter, preferences)
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
-                chapterSort
-                    .getChaptersSorted(
-                        dbChapters,
-                        filterForReader = true,
-                        currentChapter = getCurrentChapter()?.chapter,
-                    )
-                    .map {
-                        ReaderChapterItem(
-                            it,
-                            manga,
-                            it.id == (getCurrentChapter()?.chapter?.id ?: chapterId),
+                val currentReaderChapter = getCurrentChapter()
+
+                // 1. Convert to ChapterItem
+                val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
+
+                // 2. Instantiate new sort
+                val chapterItemSort = ChapterItemSort()
+
+                // 3. Filter using new filter
+                val filteredChapterItems = chapterItemFilter.filterChapters(allChapterItems, manga)
+
+                // 4. Sort using new sort (always ascending)
+                val sortedChapterItems =
+                    filteredChapterItems.sortedWith(chapterItemSort.sortComparator(manga, true))
+
+                // 5. Re-implement logic from filterChaptersForReader
+                val chaptersForReader =
+                    if (
+                        sortedChapterItems.any {
+                            it.chapter.id == (currentReaderChapter?.chapter?.id ?: chapterId)
+                        }
+                    ) {
+                        sortedChapterItems
+                    } else {
+                        val selectedChapterItem =
+                            allChapterItems.first {
+                                it.chapter.id == (currentReaderChapter?.chapter?.id ?: chapterId)
+                            }
+                        (sortedChapterItems + selectedChapterItem).sortedWith(
+                            chapterItemSort.sortComparator(manga, true)
                         )
                     }
+
+                // 6. Map to ReaderChapterItem
+                chaptersForReader.map {
+                    ReaderChapterItem(
+                        it.chapter.toDbChapter(),
+                        manga,
+                        it.chapter.id == (currentReaderChapter?.chapter?.id ?: chapterId),
+                    )
+                }
             }
 
         return chapterItems

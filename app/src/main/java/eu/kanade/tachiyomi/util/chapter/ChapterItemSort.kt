@@ -45,7 +45,9 @@ class ChapterItemSort(
             } else {
                 manga.sortDescending(mangaDetailsPreferences) // this really is Asc
             }
-        TimberKt.d { "SortAsc :$sortAsc" }
+        TimberKt.d {
+            "SortAsc :$sortAsc, sort order ${manga.chapterOrder(mangaDetailsPreferences)}"
+        }
 
         return when (manga.chapterOrder(mangaDetailsPreferences)) {
             Manga.CHAPTER_SORTING_SOURCE ->
