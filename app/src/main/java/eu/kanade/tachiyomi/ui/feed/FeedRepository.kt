@@ -26,7 +26,6 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
-import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -99,7 +98,7 @@ class FeedRepository(
                                 ChapterItemSort()
                                     .getNextUnreadChapter(
                                         manga,
-                                        chapters.map { it.toChapterItem() },
+                                        chapters.map { it.toSimpleChapter()!!.toChapterItem() },
                                     )
                                     ?.chapter ?: return@mapNotNull null
 
@@ -202,7 +201,7 @@ class FeedRepository(
                                     ChapterItemSort()
                                         .getNextUnreadChapter(
                                             manga,
-                                            chapters.map { it.toChapterItem() },
+                                            chapters.map { it.toSimpleChapter()!!.toChapterItem() },
                                         )
                                         ?.chapter ?: return@mapNotNull null
 
@@ -212,10 +211,7 @@ class FeedRepository(
                                     date = 0L,
                                     artwork = manga.toDisplayManga().currentArtwork,
                                     lastReadChapter = lastReadChapter,
-                                    chapters =
-                                        persistentListOf(
-                                            chapter.toSimpleChapter()!!.toChapterItem()
-                                        ),
+                                    chapters = persistentListOf(chapter.toChapterItem()),
                                 )
                             }
                         }

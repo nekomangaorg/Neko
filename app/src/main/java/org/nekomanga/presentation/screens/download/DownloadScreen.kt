@@ -66,7 +66,10 @@ fun DownloadScreen(
             modifier = Modifier.fillMaxWidth().padding(start = Size.small, end = Size.small),
             state = scrollState,
             contentPadding =
-                PaddingValues(bottom = contentPadding.calculateBottomPadding() + Size.huge),
+                PaddingValues(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding() + Size.huge,
+                ),
         ) {
             downloadGroup.entries.forEach { entry ->
                 item(entry.key) {

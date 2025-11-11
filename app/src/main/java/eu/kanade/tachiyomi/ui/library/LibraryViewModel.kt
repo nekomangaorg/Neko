@@ -64,7 +64,6 @@ import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
-import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
@@ -1161,7 +1160,7 @@ class LibraryViewModel() : ViewModel() {
             val chapters = db.getChapters(manga).executeAsBlocking()
             val availableChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
             val chapter =
-                ChapterItemSort(chapterFilter, preferences)
+                ChapterItemSort()
                     .getNextUnreadChapter(
                         manga,
                         availableChapters.map { it.toSimpleChapter()!!.toChapterItem() },

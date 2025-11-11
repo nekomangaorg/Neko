@@ -187,6 +187,10 @@ fun Chapter.toSimpleChapter(lastRead: Long = 0L): SimpleChapter? {
     )
 }
 
+fun SimpleChapter.toChapterItem(): ChapterItem {
+    return ChapterItem(chapter = this)
+}
+
 data class ChapterItem(
     val chapter: SimpleChapter,
     val downloadState: Download.State = Download.State.NOT_DOWNLOADED,
