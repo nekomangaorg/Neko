@@ -288,7 +288,7 @@ internal class MangaDexSettingsScreen(
                 onDismiss = { pullFollowsFromMangaDexToLibrary = false },
                 onConfirm = { selectedIndicies ->
                     mangaDexPreferences.mangaDexPullToLibraryIndices().set(selectedIndicies)
-                    StatusSyncJob.startNow(context, StatusSyncJob.entireFollowsFromDex)
+                    StatusSyncJob.startNow(context, StatusSyncJob.followsFromDex)
                 },
             )
         }

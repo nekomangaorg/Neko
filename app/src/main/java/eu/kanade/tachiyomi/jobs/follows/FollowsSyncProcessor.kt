@@ -77,6 +77,7 @@ class FollowsSyncProcessor {
                                 count.andIncrement,
                                 listManga.size,
                             )
+
                             var dbManga =
                                 db.getManga(networkManga.url, sourceManager.mangaDex.id)
                                     .executeAsBlocking()

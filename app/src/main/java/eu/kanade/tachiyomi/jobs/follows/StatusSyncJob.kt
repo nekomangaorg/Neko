@@ -72,7 +72,7 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
             return@coroutineScope Result.failure()
         }
         try {
-            when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
+            when (val ids = inputData.getString(SYNC_TYPE)) {
                 null,
                 "0" -> {
                     TimberKt.d { "sync to MangaDex" }
@@ -180,35 +180,24 @@ class StatusSyncJob(val context: Context, params: WorkerParameters) :
     companion object {
 
         val TAG = "follow_sync_job"
-        private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
+        private const val SYNC_TYPE = "sync_type"
 
         const val entireLibraryToDex: String = "0"
-        const val entireFollowsFromDex = "1"
+        const val followsFromDex = "1"
 
-        fun startNow(workManager: WorkManager, syncToMangadex: String) {
+        fun startNow(workManager: WorkManager, syncType: String) {
             val request =
                 OneTimeWorkRequestBuilder<StatusSyncJob>()
                     .addTag(TAG)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build()
-                    )
+                    .setInputData(Data.Builder().putString(SYNC_TYPE, syncType).build())
                     .build()
             workManager.enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
         }
 
-        fun startNow(context: Context, syncToMangadex: String) {
-            val request =
-                OneTimeWorkRequestBuilder<StatusSyncJob>()
-                    .addTag(TAG)
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build()
-                    )
-                    .build()
-
-            WorkManager.getInstance(context)
-                .enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+        fun startNow(context: Context, syncType: String) {
+            val workManager = WorkManager.getInstance(context)
+            startNow(workManager, syncType)
         }
 
         fun stop(context: Context) {
