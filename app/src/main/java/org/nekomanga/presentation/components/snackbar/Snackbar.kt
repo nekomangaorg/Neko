@@ -12,7 +12,7 @@ import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun NekoSnackbarHost(snackbarHostState: SnackbarHostState, snackBarColor: SnackbarColor? = null) {
+fun NekoSnackbarHost(snackbarHostState: SnackbarHostState, snackbarColor: SnackbarColor? = null) {
     SwipeableSnackbarHost(snackbarHostState) { data ->
         Snackbar(
             dismissAction = {},
@@ -22,7 +22,7 @@ fun NekoSnackbarHost(snackbarHostState: SnackbarHostState, snackBarColor: Snackb
                         Text(
                             text = data.visuals.actionLabel!!,
                             color =
-                                snackBarColor?.actionColor ?: MaterialTheme.colorScheme.onSurface,
+                                snackbarColor?.actionColor ?: MaterialTheme.colorScheme.onSurface,
                             style =
                                 MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Medium
@@ -33,9 +33,9 @@ fun NekoSnackbarHost(snackbarHostState: SnackbarHostState, snackBarColor: Snackb
             },
             dismissActionContentColor = MaterialTheme.colorScheme.onSurface,
             containerColor =
-                snackBarColor?.containerColor
+                snackbarColor?.containerColor
                     ?: MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
-            contentColor = snackBarColor?.contentColor ?: MaterialTheme.colorScheme.onSurface,
+            contentColor = snackbarColor?.contentColor ?: MaterialTheme.colorScheme.onSurface,
         ) {
             Text(text = data.visuals.message)
         }

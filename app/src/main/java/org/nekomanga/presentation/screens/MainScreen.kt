@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,15 +33,10 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
-import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 
 @Composable
 fun MainScreen(
-    snackbarHostState: SnackbarHostState,
-    currentSnackbarColor: SnackbarColor?,
-    startingScreen: NavKey,
     backStack: NavBackStack<NavKey>,
     windowSizeClass: WindowSizeClass,
     incognitoMode: Boolean,
@@ -237,10 +231,6 @@ fun MainScreen(
                         LicenseScreen(onBackPressed = { backStack.removeLastOrNull() })
                     }
                 },
-        )
-        NekoSnackbarHost(
-            snackbarHostState = snackbarHostState,
-            snackBarColor = currentSnackbarColor,
         )
     }
 }

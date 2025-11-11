@@ -20,6 +20,7 @@ fun ChildScreenScaffold(
     refreshState: RefreshState = RefreshState(),
     drawUnderTopBar: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior,
+    snackbarHost: @Composable () -> Unit = {},
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -32,6 +33,7 @@ fun ChildScreenScaffold(
         Scaffold(
             modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = topBar,
+            snackbarHost = snackbarHost,
         ) { innerPadding ->
             val layoutDirection = LocalLayoutDirection.current
             val padding =

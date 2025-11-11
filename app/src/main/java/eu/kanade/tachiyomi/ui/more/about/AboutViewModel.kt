@@ -28,7 +28,7 @@ class AboutViewModel : ViewModel() {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
 
-    private val appSnackbarManager: AppSnackbarManager by injectLazy()
+    val appSnackbarManager: AppSnackbarManager by injectLazy()
 
     private val _aboutScreenState =
         MutableStateFlow(

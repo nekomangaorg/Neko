@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,10 +41,12 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.data.updater.REPO_URL
+import eu.kanade.tachiyomi.ui.main.ObserveAsEvents
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.isOnline
+import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.DISCORD_URL
@@ -51,6 +56,7 @@ import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
+import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.screens.about.AboutTopAppBar
 import org.nekomanga.presentation.screens.settings.widgets.TextPreferenceWidget
 import org.nekomanga.presentation.theme.Size
@@ -66,6 +72,24 @@ fun AboutScreen(
     val screenState by aboutViewModel.aboutScreenState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Re-implementation of ObserveAsEvents from MainActivity
+    ObserveAsEvents(flow = aboutViewModel.appSnackbarManager.events, snackbarHostState) { event ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result =
+                snackbarHostState.showSnackbar(
+                    message = event.getFormattedMessage(context),
+                    actionLabel = event.getFormattedActionLabel(context),
+                    duration = event.snackbarDuration,
+                    withDismissAction = true,
+                )
+            // We don't need to handle the result for AboutScreen's snackbars
+        }
+    }
 
     AboutWrapper(
         aboutScreenState = screenState,
@@ -86,6 +110,7 @@ fun AboutScreen(
         onClickLicenses = { onNavigateTo(Screens.License) },
         onBackPressed = onBackPressed,
         dismissDialog = aboutViewModel::hideUpdateDialog,
+        snackbarHost = { NekoSnackbarHost(snackbarHostState = snackbarHostState) },
     )
 }
 
@@ -100,6 +125,7 @@ private fun AboutWrapper(
     onClickLicenses: () -> Unit,
     onBackPressed: () -> Unit,
     dismissDialog: () -> Unit,
+    snackbarHost: @Composable () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -108,6 +134,7 @@ private fun AboutWrapper(
 
     ChildScreenScaffold(
         scrollBehavior = scrollBehavior,
+        snackbarHost = snackbarHost,
         topBar = {
             AboutTopAppBar(
                 incognitoMode = aboutScreenState.incognitoMode,

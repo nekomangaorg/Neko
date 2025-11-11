@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -50,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.uuid
+import eu.kanade.tachiyomi.ui.main.ObserveAsEvents
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -91,6 +94,7 @@ import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
+import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -113,12 +117,42 @@ fun MangaScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Re-implementation of ObserveAsEvents from MainActivity
+    ObserveAsEvents(flow = mangaViewModel.appSnackbarManager.events, snackbarHostState) { event ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result =
+                snackbarHostState.showSnackbar(
+                    message = event.getFormattedMessage(context),
+                    actionLabel = event.getFormattedActionLabel(context),
+                    duration = event.snackbarDuration,
+                    withDismissAction = true,
+                )
+            when (result) {
+                SnackbarResult.ActionPerformed -> event.action?.invoke()
+                SnackbarResult.Dismissed -> event.dismissAction?.invoke()
+                else -> Unit
+            }
+        }
+    }
+
+    val screenState by mangaViewModel.mangaDetailScreenState.collectAsStateWithLifecycle()
+
     MangaScreenWrapper(
-        screenState = mangaViewModel.mangaDetailScreenState.collectAsStateWithLifecycle().value,
+        screenState = screenState,
         windowSizeClass = windowSizeClass,
         onRefresh = mangaViewModel::onRefresh,
         onSearch = mangaViewModel::onSearch,
         updateSnackbarColor = mangaViewModel::updateSnackbarColor,
+        snackbarHost = {
+            NekoSnackbarHost(
+                snackbarHostState = snackbarHostState,
+                snackbarColor = screenState.snackbarColor,
+            )
+        },
         categoryActions =
             CategoryActions(
                 set = { enabledCategories ->
@@ -362,10 +396,10 @@ private fun MangaScreenWrapper(
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
+    snackbarHost: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     val surfaceColor = MaterialTheme.colorScheme.surface
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
@@ -502,6 +536,7 @@ private fun MangaScreenWrapper(
         refreshState = refreshState,
         drawUnderTopBar = true,
         scrollBehavior = scrollBehavior,
+        snackbarHost = snackbarHost,
         topBar = {
             MangaScreenTopBar(
                 screenState = screenState,

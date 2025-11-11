@@ -15,8 +15,6 @@ import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -25,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -57,7 +54,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
-import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.screens.MainScreen
@@ -174,15 +170,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val snackbarHostState = remember { SnackbarHostState() }
-            var currentSnackbarColor by remember { mutableStateOf<SnackbarColor?>(null) }
-
-            LaunchedEffect(snackbarHostState.currentSnackbarData) {
-                if (snackbarHostState.currentSnackbarData == null) {
-                    currentSnackbarColor = null
-                }
-            }
-
             // TODO status bar colors and navigation bar colors
 
             val windowSizeClass = calculateWindowSizeClass(this)
@@ -243,34 +230,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val scope = rememberCoroutineScope()
-            ObserveAsEvents(viewModel.appSnackbarManager.events, snackbarHostState) { event ->
-                scope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    currentSnackbarColor = event.snackBarColor
-                    val result =
-                        snackbarHostState.showSnackbar(
-                            message = event.getFormattedMessage(context),
-                            actionLabel = event.getFormattedActionLabel(context),
-                            duration = event.snackbarDuration,
-                            withDismissAction = true,
-                        )
-                    when (result) {
-                        SnackbarResult.ActionPerformed -> event.action?.invoke()
-                        SnackbarResult.Dismissed -> event.dismissAction?.invoke()
-                        else -> Unit
-                    }
-                }
-            }
             MainScreen(
-                startingScreen = startingScreen,
                 backStack = backStack,
                 windowSizeClass = windowSizeClass,
                 incognitoMode = mainScreenState.incognitoMode,
                 incognitoClick = viewModel::toggleIncoginito,
                 onboardingCompleted = viewModel::onboardingCompleted,
-                snackbarHostState = snackbarHostState,
-                currentSnackbarColor = currentSnackbarColor,
                 navigationRail = navigationRail,
                 bottomBar = bottomBar,
             )
