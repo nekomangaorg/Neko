@@ -282,7 +282,7 @@ class FeedRepository(
     suspend fun getHistoryPage(
         searchQuery: String = "",
         offset: Int,
-        limit: Int = FeedPresenter.HISTORY_ENDLESS_LIMIT,
+        limit: Int = FeedViewModel.HISTORY_ENDLESS_LIMIT,
         group: FeedHistoryGroup,
     ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         if (offset > 0) {

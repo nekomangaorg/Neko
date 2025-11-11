@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
-import eu.kanade.tachiyomi.ui.main.SearchActivity
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
@@ -83,7 +83,7 @@ class MangaShortcutManager(
                                 }
                             )
                             .setIntent(
-                                SearchActivity.openMangaIntent(context, item.id!!, true)
+                                MainActivity.openMangaIntent(context, item.id!!, true)
                                     .addFlags(
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                             Intent.FLAG_ACTIVITY_SINGLE_TOP

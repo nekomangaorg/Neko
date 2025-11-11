@@ -1,30 +1,26 @@
 package org.nekomanga.presentation.screens
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Downloading
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,55 +28,137 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import eu.kanade.tachiyomi.ui.feed.FeedScreenState
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.feed.FeedSettingActions
+import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.ButtonGroup
-import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.PullRefresh
-import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.dialog.ClearDownloadQueueDialog
-import org.nekomanga.presentation.components.dialog.ConfirmationDialog
-import org.nekomanga.presentation.components.rememberNavBarPadding
-import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.screens.download.DownloadScreen
+import org.nekomanga.presentation.components.scaffold.RootScaffold
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
-import org.nekomanga.presentation.screens.feed.FeedPage
+import org.nekomanga.presentation.screens.feed.FeedScreenContent
+import org.nekomanga.presentation.screens.feed.FeedScreenDialogs
+import org.nekomanga.presentation.screens.feed.FeedScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedScreen(
-    feedScreenState: State<FeedScreenState>,
-    updatesPagingScreenState: State<UpdatesScreenPagingState>,
-    historyPagingScreenState: State<HistoryScreenPagingState>,
-    summaryScreenPagingState: State<SummaryScreenPagingState>,
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
+    feedViewModel: FeedViewModel,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
+    openManga: (Long) -> Unit,
     windowSizeClass: WindowSizeClass,
+) {
+    val context = LocalContext.current
+
+    FeedWrapper(
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
+        feedScreenFlow = feedViewModel.feedScreenState,
+        updateScreenFlow = feedViewModel.updatesScreenPagingState,
+        historyScreenFlow = feedViewModel.historyScreenPagingState,
+        summaryScreenFlow = feedViewModel.summaryScreenPagingState,
+        windowSizeClass = windowSizeClass,
+        mainDropdown = mainDropdown,
+        mainDropdownShowing = mainDropdownShowing,
+        loadNextPage = feedViewModel::loadNextPage,
+        feedSettingActions =
+            FeedSettingActions(
+                groupHistoryClick = feedViewModel::toggleGroupHistoryType,
+                clearHistoryClick = feedViewModel::deleteAllHistoryForAllManga,
+                switchUploadsSortOrder = feedViewModel::toggleUploadsSortOrder,
+                outlineCoversClick = feedViewModel::toggleOutlineCovers,
+                outlineCardsClick = feedViewModel::toggleOutlineCards,
+                clearDownloadQueueClick = feedViewModel::clearDownloadQueue,
+                toggleDownloadOnlyOnWifi = feedViewModel::toggleDownloadOnlyOnWifi,
+                toggleGroupUpdateChapters = feedViewModel::togglerGroupUpdateChapters,
+                toggleSwipeRefresh = feedViewModel::toggleSwipeRefresh,
+            ),
+        feedScreenActions =
+            FeedScreenActions(
+                mangaClick = openManga,
+                chapterClick = { mangaId, chapterId ->
+                    context.startActivity(ReaderActivity.newIntent(context, mangaId, chapterId))
+                },
+                chapterSwipe = feedViewModel::toggleChapterRead,
+                switchViewType = feedViewModel::switchViewType,
+                deleteAllHistoryClick = feedViewModel::deleteAllHistory,
+                deleteHistoryClick = feedViewModel::deleteHistory,
+                search = feedViewModel::search,
+                downloadClick = { chapterItem, feedManga, downloadAction ->
+                    if (
+                        MdConstants.UnsupportedOfficialGroupList.contains(
+                            chapterItem.chapter.scanlator
+                        )
+                    ) {
+                        context.toast("${chapterItem.chapter.scanlator} not supported, try WebView")
+                    } else if (chapterItem.chapter.isUnavailable) {
+                        context.toast("Chapter is not available")
+                    } else {
+                        feedViewModel.downloadChapter(chapterItem, feedManga, downloadAction)
+                    }
+                },
+                toggleShowingDownloads = feedViewModel::toggleShowingDownloads,
+                updateLibrary = { start ->
+                    if (LibraryUpdateJob.isRunning(context) && !start) {
+                        LibraryUpdateJob.stop(context)
+                    } else if (!LibraryUpdateJob.isRunning(context) && start) {
+                        LibraryUpdateJob.startNow(context)
+                    }
+                },
+            ),
+        downloadScreenActions =
+            DownloadScreenActions(
+                downloadSwiped = feedViewModel::removeDownload,
+                fabClick = feedViewModel::toggleDownloader,
+                moveDownloadClick = feedViewModel::moveDownload,
+                moveSeriesClick = feedViewModel::moveDownloadSeries,
+                cancelSeriesClick = feedViewModel::cancelDownloadSeries,
+            ),
+    )
+}
+
+@Composable
+private fun FeedWrapper(
+    navigationRail: @Composable () -> Unit,
+    bottomBar: @Composable () -> Unit,
+    feedScreenFlow: StateFlow<FeedScreenState>,
+    updateScreenFlow: StateFlow<UpdatesScreenPagingState>,
+    historyScreenFlow: StateFlow<HistoryScreenPagingState>,
+    summaryScreenFlow: StateFlow<SummaryScreenPagingState>,
+    windowSizeClass: WindowSizeClass,
+    mainDropdown: AppBar.MainDropdown,
+    mainDropdownShowing: Boolean,
     loadNextPage: () -> Unit,
-    legacySideNav: Boolean,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
     downloadScreenActions: DownloadScreenActions,
-    incognitoClick: () -> Unit,
-    settingsClick: () -> Unit,
-    statsClick: () -> Unit,
-    helpClick: () -> Unit,
-    aboutClick: () -> Unit,
 ) {
+    val feedScreenState by feedScreenFlow.collectAsState()
+    val updatesPagingScreenState by updateScreenFlow.collectAsState()
+    val historyPagingScreenState by historyScreenFlow.collectAsState()
+    val summaryScreenPagingState by summaryScreenFlow.collectAsState()
+
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -97,38 +175,19 @@ fun FeedScreen(
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
-    var mainDropdownShowing by remember { mutableStateOf(false) }
-
-    val feedScreenType = feedScreenState.value.feedScreenType
-
-    val searchHint =
-        when (feedScreenType) {
-            FeedScreenType.History -> stringResource(R.string.search_history)
-            FeedScreenType.Updates -> stringResource(R.string.search_updates)
-            else -> ""
-        }
-
-    // val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
-    val actualSideNav = legacySideNav
-    val navBarPadding = rememberNavBarPadding(actualSideNav)
+    val feedScreenType = feedScreenState.feedScreenType
 
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showClearDownloadsDialog by remember { mutableStateOf(false) }
 
     var downloadScreenVisible by
-        remember(feedScreenState.value.showingDownloads, feedScreenState.value.downloads.size) {
+        remember(feedScreenState.showingDownloads, feedScreenState.downloads.size) {
             mutableStateOf(
-                feedScreenState.value.showingDownloads &&
-                    feedScreenState.value.downloads.isNotEmpty()
+                feedScreenState.showingDownloads && feedScreenState.downloads.isNotEmpty()
             )
         }
 
-    Box(
-        modifier =
-            Modifier.fillMaxSize().conditional(mainDropdownShowing) {
-                this.blur(Size.medium).clickable(enabled = false) {}
-            }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (showBottomSheet) {
             ModalBottomSheet(
                 sheetState = sheetState,
@@ -136,15 +195,15 @@ fun FeedScreen(
                 content = {
                     Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                         FeedBottomSheet(
-                            feedScreenType = feedScreenState.value.feedScreenType,
+                            feedScreenType = feedScreenState.feedScreenType,
                             downloadScreenVisible = downloadScreenVisible,
-                            downloadOnlyOnWifi = feedScreenState.value.downloadOnlyOnWifi,
-                            historyGrouping = historyPagingScreenState.value.historyGrouping,
-                            sortByFetched = updatesPagingScreenState.value.updatesSortedByFetch,
-                            outlineCovers = feedScreenState.value.outlineCovers,
-                            outlineCards = feedScreenState.value.outlineCards,
-                            swipeRefreshEnabled = feedScreenState.value.swipeRefreshEnabled,
-                            groupUpdateChapters = feedScreenState.value.groupUpdateChapters,
+                            downloadOnlyOnWifi = feedScreenState.downloadOnlyOnWifi,
+                            historyGrouping = historyPagingScreenState.historyGrouping,
+                            sortByFetched = updatesPagingScreenState.updatesSortedByFetch,
+                            outlineCovers = feedScreenState.outlineCovers,
+                            outlineCards = feedScreenState.outlineCards,
+                            swipeRefreshEnabled = feedScreenState.swipeRefreshEnabled,
+                            groupUpdateChapters = feedScreenState.groupUpdateChapters,
                             groupHistoryClick = { feedHistoryGroup ->
                                 feedSettingActions.groupHistoryClick(feedHistoryGroup)
                             },
@@ -165,276 +224,145 @@ fun FeedScreen(
                 },
             )
         }
-        PullRefresh(
-            enabled = feedScreenState.value.swipeRefreshEnabled,
-            isRefreshing = feedScreenState.value.isRefreshing,
-            onRefresh = { feedScreenActions.updateLibrary(true) },
-        ) {
-            NekoScaffold(
-                type =
-                    if (
-                        feedScreenState.value.showingDownloads ||
-                            feedScreenType == FeedScreenType.Summary
-                    )
-                        NekoScaffoldType.Title
-                    else NekoScaffoldType.SearchOutline,
-                title =
-                    if (feedScreenType == FeedScreenType.Summary) stringResource(R.string.summary)
-                    else "",
-                searchPlaceHolder = searchHint,
-                incognitoMode = feedScreenState.value.incognitoMode,
-                isRoot = true,
-                onSearch = feedScreenActions.search,
-                actions = {
-                    AppBarActions(
-                        actions =
-                            if (feedScreenState.value.feedScreenType != FeedScreenType.Summary) {
-                                listOf(
-                                    AppBar.Action(
-                                        title = UiText.StringResource(R.string.settings),
-                                        icon = Icons.Outlined.Tune,
-                                        onClick = { showBottomSheet = true },
-                                    )
-                                )
-                            } else {
-                                listOf()
-                            } +
-                                listOf(
-                                    AppBar.MainDropdown(
-                                        incognitoMode = feedScreenState.value.incognitoMode,
-                                        incognitoModeClick = incognitoClick,
-                                        settingsClick = settingsClick,
-                                        statsClick = statsClick,
-                                        aboutClick = aboutClick,
-                                        helpClick = helpClick,
-                                        menuShowing = { visible -> mainDropdownShowing = visible },
-                                    )
-                                )
-                    )
-                },
-                content = { incomingContentPadding ->
-                    val recyclerContentPadding =
-                        PaddingValues(
-                            top = incomingContentPadding.calculateTopPadding(),
-                            bottom =
-                                if (actualSideNav) {
-                                    Size.navBarSize
-                                } else {
-                                    Size.navBarSize
-                                } +
-                                    WindowInsets.navigationBars
-                                        .asPaddingValues()
-                                        .calculateBottomPadding(),
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+        val refreshState =
+            remember(
+                feedScreenState.swipeRefreshEnabled,
+                feedScreenState.isRefreshing,
+                feedScreenActions.updateLibrary,
+            ) {
+                RefreshState(
+                    enabled = feedScreenState.swipeRefreshEnabled,
+                    isRefreshing = feedScreenState.isRefreshing,
+                    onRefresh = { feedScreenActions.updateLibrary(true) },
+                )
+            }
+
+        RootScaffold(
+            refreshState = refreshState,
+            scrollBehavior = scrollBehavior,
+            mainSettingsExpanded = mainDropdownShowing,
+            navigationRail = navigationRail,
+            bottomBar = bottomBar,
+            topBar = {
+                FeedScreenTopBar(
+                    scrollBehavior = scrollBehavior,
+                    mainDropDown = mainDropdown,
+                    feedScreenState = feedScreenState,
+                    feedScreenActions = feedScreenActions,
+                    openSheetClick = { showBottomSheet = true },
+                )
+            },
+        ) { innerPadding ->
+            val layoutDirection = LocalLayoutDirection.current
+            // Create new padding that ignores the top bar's height
+            val contentPadding =
+                PaddingValues(
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateEndPadding(layoutDirection),
+                    bottom = innerPadding.calculateBottomPadding(),
+                    top = 0.dp,
+                )
+
+            val recyclerPadding =
+                PaddingValues(top = innerPadding.calculateTopPadding(), bottom = Size.huge)
+
+            Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+                FeedScreenContent(
+                    downloadScreenVisible = downloadScreenVisible,
+                    contentPadding = recyclerPadding,
+                    feedScreenState = feedScreenState,
+                    summaryScreenPagingState = summaryScreenPagingState,
+                    historyPagingScreenState = historyPagingScreenState,
+                    updatesPagingScreenState = updatesPagingScreenState,
+                    downloadScreenActions = downloadScreenActions,
+                    feedScreenActions = feedScreenActions,
+                    loadNextPage = loadNextPage,
+                )
+
+                if (!feedScreenState.firstLoad) {
+                    val buttonItems = remember {
+                        listOf(
+                            FeedScreenType.Summary,
+                            FeedScreenType.History,
+                            FeedScreenType.Updates,
                         )
+                    }
 
-                    Box(
+                    val downloadButton = "downloads"
+                    val items: List<Any> =
+                        if (feedScreenState.downloads.isNotEmpty()) {
+                            buttonItems + downloadButton
+                        } else {
+                            buttonItems
+                        }
+
+                    val selectedItem: Any =
+                        when (feedScreenState.showingDownloads) {
+                            true -> downloadButton
+                            false -> feedScreenType
+                        }
+
+                    ButtonGroup(
                         modifier =
-                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                                .fillMaxSize()
-                    ) {
-                        if (
-                            (feedScreenState.value.feedScreenType == FeedScreenType.History &&
-                                historyPagingScreenState.value.pageLoading &&
-                                historyPagingScreenState.value.offset == 0) ||
-                                (feedScreenState.value.feedScreenType == FeedScreenType.Updates &&
-                                    updatesPagingScreenState.value.pageLoading &&
-                                    updatesPagingScreenState.value.offset == 0)
-                        ) {
-                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-
-                        val (feedManga, hasMoreResults) =
-                            when (feedScreenType) {
-                                FeedScreenType.Summary -> {
-                                    if (
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
-                                            false
-                                    } else {
-                                        historyPagingScreenState.value.historyFeedMangaList to
-                                            historyPagingScreenState.value.hasMoreResults
-                                    }
+                            Modifier.align(Alignment.BottomCenter).padding(horizontal = Size.tiny),
+                        items = items,
+                        selectedItem = selectedItem,
+                        onItemClick = { item ->
+                            scope.launch { sheetState.hide() }
+                            if (item is FeedScreenType) {
+                                if (feedScreenState.showingDownloads) {
+                                    feedScreenActions.toggleShowingDownloads()
                                 }
-
-                                FeedScreenType.History -> {
-                                    if (
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        historyPagingScreenState.value.searchHistoryFeedMangaList to
-                                            false
-                                    } else {
-                                        historyPagingScreenState.value.historyFeedMangaList to
-                                            historyPagingScreenState.value.hasMoreResults
-                                    }
+                                if (feedScreenType != item) {
+                                    feedScreenActions.switchViewType(item)
                                 }
-
-                                FeedScreenType.Updates -> {
-                                    if (
-                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList
-                                            .isNotEmpty()
-                                    ) {
-                                        updatesPagingScreenState.value.searchUpdatesFeedMangaList to
-                                            false
-                                    } else {
-                                        updatesPagingScreenState.value.updatesFeedMangaList to
-                                            updatesPagingScreenState.value.hasMoreResults
-                                    }
-                                }
+                            } else {
+                                feedScreenActions.toggleShowingDownloads()
                             }
+                        },
+                    ) { item ->
+                        when (item) {
+                            is FeedScreenType -> {
+                                val name =
+                                    when (item) {
+                                        FeedScreenType.History -> stringResource(R.string.history)
 
-                        if (
-                            feedScreenState.value.showingDownloads &&
-                                feedScreenState.value.downloads.isEmpty()
-                        ) {
-                            feedScreenActions.toggleShowingDownloads()
-                        }
+                                        FeedScreenType.Updates -> stringResource(R.string.updates)
 
-                        when (downloadScreenVisible) {
-                            true ->
-                                DownloadScreen(
-                                    contentPadding = recyclerContentPadding,
-                                    downloads = feedScreenState.value.downloads,
-                                    downloaderStatus = feedScreenState.value.downloaderStatus,
-                                    downloadScreenActions = downloadScreenActions,
-                                )
-
-                            false -> {
-                                FeedPage(
-                                    contentPadding = recyclerContentPadding,
-                                    summaryScreenPagingState = summaryScreenPagingState,
-                                    feedMangaList = feedManga,
-                                    hasMoreResults = hasMoreResults,
-                                    loadingResults =
-                                        if (
-                                            feedScreenState.value.feedScreenType ==
-                                                FeedScreenType.History
-                                        )
-                                            historyPagingScreenState.value.pageLoading
-                                        else updatesPagingScreenState.value.pageLoading,
-                                    groupedBySeries = feedScreenState.value.groupUpdateChapters,
-                                    feedScreenType = feedScreenState.value.feedScreenType,
-                                    historyGrouping =
-                                        historyPagingScreenState.value.historyGrouping,
-                                    outlineCovers = feedScreenState.value.outlineCovers,
-                                    outlineCards = feedScreenState.value.outlineCards,
-                                    useVividColorHeaders =
-                                        feedScreenState.value.useVividColorHeaders,
-                                    updatesFetchSort =
-                                        updatesPagingScreenState.value.updatesSortedByFetch,
-                                    feedScreenActions = feedScreenActions,
-                                    loadNextPage = loadNextPage,
-                                )
-                            }
-                        }
-
-                        if (!feedScreenState.value.firstLoad) {
-                            val buttonItems = remember {
-                                listOf(
-                                    FeedScreenType.Summary,
-                                    FeedScreenType.History,
-                                    FeedScreenType.Updates,
+                                        FeedScreenType.Summary -> stringResource(R.string.summary)
+                                    }
+                                Text(
+                                    text = name,
+                                    style =
+                                        MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
                                 )
                             }
 
-                            val downloadButton = "downloads"
-                            val items: List<Any> =
-                                if (feedScreenState.value.downloads.isNotEmpty()) {
-                                    buttonItems + downloadButton
-                                } else {
-                                    buttonItems
-                                }
-
-                            val selectedItem: Any =
-                                when (feedScreenState.value.showingDownloads) {
-                                    true -> downloadButton
-                                    false -> feedScreenType
-                                }
-
-                            ButtonGroup(
-                                modifier =
-                                    Modifier.align(Alignment.BottomCenter)
-                                        .padding(horizontal = Size.tiny),
-                                items = items,
-                                selectedItem = selectedItem,
-                                onItemClick = { item ->
-                                    scope.launch { sheetState.hide() }
-                                    if (item is FeedScreenType) {
-                                        if (feedScreenState.value.showingDownloads) {
-                                            feedScreenActions.toggleShowingDownloads()
-                                        }
-                                        if (feedScreenType != item) {
-                                            feedScreenActions.switchViewType(item)
-                                        }
-                                    } else {
-                                        feedScreenActions.toggleShowingDownloads()
-                                    }
-                                },
-                            ) { item ->
-                                when (item) {
-                                    is FeedScreenType -> {
-                                        val name =
-                                            when (item) {
-                                                FeedScreenType.History ->
-                                                    stringResource(R.string.history)
-
-                                                FeedScreenType.Updates ->
-                                                    stringResource(R.string.updates)
-
-                                                FeedScreenType.Summary ->
-                                                    stringResource(R.string.summary)
-                                            }
-                                        Text(
-                                            text = name,
-                                            style =
-                                                MaterialTheme.typography.labelLarge.copy(
-                                                    fontWeight = FontWeight.Medium
-                                                ),
-                                        )
-                                    }
-
-                                    else -> {
-                                        Icon(
-                                            imageVector = Icons.Default.Downloading,
-                                            contentDescription =
-                                                stringResource(id = R.string.downloads),
-                                        )
-                                    }
-                                }
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Default.Downloading,
+                                    contentDescription = stringResource(id = R.string.downloads),
+                                )
                             }
                         }
                     }
-                },
-            )
+                }
+            }
         }
-        // this is needed for Android SDK where blur isn't available
-        if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
-            )
-        }
-    }
-    if (showClearHistoryDialog) {
-        ConfirmationDialog(
-            title = stringResource(R.string.clear_history_confirmation_1),
-            body = stringResource(R.string.clear_history_confirmation_2),
-            confirmButton = stringResource(id = R.string.clear),
-            onDismiss = { showClearHistoryDialog = false },
-            onConfirm = { feedSettingActions.clearHistoryClick() },
-        )
-    }
 
-    if (showClearDownloadsDialog) {
-        ClearDownloadQueueDialog(
-            onDismiss = { showClearDownloadsDialog = false },
-            onConfirm = {
-                feedSettingActions.clearDownloadQueueClick()
-                scope.launch { sheetState.hide() }
-            },
+        FeedScreenDialogs(
+            showClearHistoryDialog = showClearHistoryDialog,
+            showClearDownloadsDialog = showClearDownloadsDialog,
+            onClearHistoryDismiss = { showClearHistoryDialog = false },
+            onClearHistoryConfirm = { feedSettingActions.clearHistoryClick() },
+            onClearDownloadsDismiss = { showClearDownloadsDialog = false },
+            onClearDownloadsConfirm = { feedSettingActions.clearDownloadQueueClick() },
+            scope = scope,
+            sheetStateHide = { sheetState.hide() },
         )
     }
 }

@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
@@ -60,7 +61,7 @@ data class LibraryScreenActions(
     val deleteSelectedLibraryMangaItems: () -> Unit,
     val clearSelectedManga: () -> Unit,
     val search: (String?) -> Unit,
-    val searchMangaDex: (String) -> Unit,
+    val onSearchMangaDex: (SearchBrowse) -> Unit,
     val updateLibrary: () -> Unit,
     val collapseExpandAllCategories: () -> Unit,
     val clearActiveFilters: () -> Unit,

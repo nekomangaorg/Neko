@@ -63,11 +63,10 @@ fun DownloadScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .padding(start = Size.small, end = Size.small, bottom = Size.huge),
+            modifier = Modifier.fillMaxWidth().padding(start = Size.small, end = Size.small),
             state = scrollState,
-            contentPadding = contentPadding,
+            contentPadding =
+                PaddingValues(bottom = contentPadding.calculateBottomPadding() + Size.huge),
         ) {
             downloadGroup.entries.forEach { entry ->
                 item(entry.key) {
@@ -170,7 +169,7 @@ fun DownloadScreen(
             ExtendedFloatingActionButton(
                 modifier =
                     Modifier.padding(
-                        bottom = contentPadding.calculateBottomPadding() - Size.medium,
+                        bottom = contentPadding.calculateBottomPadding() + Size.tiny,
                         end = Size.small,
                     ),
                 onClick = downloadScreenActions.fabClick,

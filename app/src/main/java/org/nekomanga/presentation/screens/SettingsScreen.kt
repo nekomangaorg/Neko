@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -30,9 +29,6 @@ import eu.kanade.tachiyomi.ui.setting.MergeSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.ReaderSettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.SettingsViewModel
 import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
-import org.nekomanga.R
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.screens.settings.SettingsMainScreen
 import org.nekomanga.presentation.screens.settings.editCategoryscreens.AddEditCategoriesScreen
 import org.nekomanga.presentation.screens.settings.screens.AdvancedSettingsScreen
@@ -46,7 +42,6 @@ import org.nekomanga.presentation.screens.settings.screens.MangaDexSettingsScree
 import org.nekomanga.presentation.screens.settings.screens.MergeSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.ReaderSettingsScreen
 import org.nekomanga.presentation.screens.settings.screens.SecuritySettingsScreen
-import org.nekomanga.presentation.screens.settings.screens.SettingsSearchScreen
 import org.nekomanga.presentation.screens.settings.screens.TrackingSettingsScreen
 
 @Composable
@@ -54,13 +49,20 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     val context = LocalContext.current
     val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
-    val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main)
+    val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main())
     val wasDeepLink = remember(deepLink) { deepLink != null }
 
     val settingsVm: SettingsViewModel = viewModel()
 
     NavDisplay(
         backStack = backStack,
+        onBack = {
+            reset(
+                backstack = backStack,
+                wasDeepLink = deepLink != null,
+                onBackPressed = onBackPressed,
+            )
+        },
         entryDecorators =
             listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
@@ -69,47 +71,13 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         entryProvider =
             entryProvider {
                 entry<Screens.Settings.Main> {
-                    NekoScaffold(
-                        type = NekoScaffoldType.SearchOutlineDummy,
+                    SettingsMainScreen(
+                        onNavigateClick = { screen -> backStack.add(screen) },
                         incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                        onNavigationIconClicked = onBackPressed,
-                        title = stringResource(R.string.settings),
-                        searchPlaceHolder = stringResource(R.string.search_settings),
-                        searchNavigationEnabled = true,
-                        onSearchEnabled = { backStack.add(Screens.Settings.Search) },
-                        content = { contentPadding ->
-                            SettingsMainScreen(
-                                contentPadding = contentPadding,
-                                onGeneralClick = { backStack.add(Screens.Settings.General) },
-                                onAppearanceClick = { backStack.add(Screens.Settings.Appearance) },
-                                onLibraryClick = { backStack.add(Screens.Settings.Library) },
-                                onDataStorageClick = {
-                                    backStack.add(Screens.Settings.DataStorage)
-                                },
-                                onSiteSpecificClick = { backStack.add(Screens.Settings.MangaDex) },
-                                onMergeSourceClick = {
-                                    backStack.add(Screens.Settings.MergeSource)
-                                },
-                                onReaderClick = { backStack.add(Screens.Settings.Reader) },
-                                onDownloadsClick = { backStack.add(Screens.Settings.Downloads) },
-                                onTrackingClick = { backStack.add(Screens.Settings.Tracking) },
-                                onSecurityClick = { backStack.add(Screens.Settings.Security) },
-                                onAdvancedClick = { backStack.add(Screens.Settings.Advanced) },
-                                onDebugClick = { backStack.add(Screens.Settings.Debug) },
-                            )
-                        },
+                        onNavigationIconClick = onBackPressed,
                     )
                 }
-                entry<Screens.Settings.Search> {
-                    SettingsSearchScreen(
-                        incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                        onNavigationIconClicked = { reset(backStack, wasDeepLink, onBackPressed) },
-                        navigate = { route ->
-                            backStack.clear()
-                            backStack.addAll(listOf(Screens.Settings.Main, route))
-                        },
-                    )
-                }
+
                 entry<Screens.Settings.General> {
                     GeneralSettingsScreen(
                             onNavigationIconClick = {
@@ -297,7 +265,7 @@ private fun reset(
         onBackPressed()
     } else {
         backstack.clear()
-        backstack.add(Screens.Settings.Main)
+        backstack.add(Screens.Settings.Main())
     }
 }
 

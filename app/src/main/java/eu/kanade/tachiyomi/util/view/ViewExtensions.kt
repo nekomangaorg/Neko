@@ -12,8 +12,14 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.annotation.IdRes
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionContext
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
@@ -30,6 +36,19 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
 import org.nekomanga.R
+import org.nekomanga.presentation.theme.NekoTheme
+
+inline fun ComponentActivity.setComposeContent(
+    parent: CompositionContext? = null,
+    crossinline content: @Composable () -> Unit,
+) {
+    setContent(parent) { NekoTheme { content() } }
+}
+
+fun ComposeView.setComposeContent(content: @Composable () -> Unit) {
+    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+    setContent { NekoTheme { content() } }
+}
 
 /**
  * Shows a snackbar in this view.

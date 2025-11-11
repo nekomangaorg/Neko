@@ -48,11 +48,6 @@ internal class GeneralSettingsScreen(
                         "yyyy-MM-dd" to "yyyy-MM-dd",
                     ),
             ),
-            Preference.PreferenceItem.SwitchPreference(
-                pref = preferencesHelper.backReturnsToStart(),
-                title = stringResource(R.string.back_to_start),
-                subtitle = stringResource(R.string.pressing_back_to_start),
-            ),
             Preference.PreferenceItem.TextPreference(
                 title = stringResource(R.string.manage_notifications),
                 enabled = showNotificationSetting,
@@ -109,10 +104,6 @@ internal class GeneralSettingsScreen(
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.starting_screen)),
                 SearchTerm(title = stringResource(R.string.date_format)),
-                SearchTerm(
-                    title = stringResource(R.string.back_to_start),
-                    subtitle = stringResource(R.string.pressing_back_to_start),
-                ),
                 SearchTerm(title = stringResource(R.string.manage_notifications)),
                 SearchTerm(
                     title = stringResource(R.string.show_recent_series),

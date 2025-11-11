@@ -78,18 +78,7 @@ fun BrowseHomePage(
                 }
             },
         ) { homePageManga ->
-            val headerText =
-                when (homePageManga.displayScreenType) {
-                    is DisplayScreenType.LatestChapters ->
-                        stringResource(homePageManga.displayScreenType.titleRes)
-                    is DisplayScreenType.RecentlyAdded ->
-                        stringResource(homePageManga.displayScreenType.titleRes)
-                    is DisplayScreenType.List -> homePageManga.displayScreenType.title
-                    is DisplayScreenType.PopularNewTitles ->
-                        stringResource(homePageManga.displayScreenType.titleRes)
-                    is DisplayScreenType.FeedUpdates ->
-                        stringResource(homePageManga.displayScreenType.titleRes)
-                }
+            val headerText = homePageManga.displayScreenType.title.asString()
             val mangaList = homePageManga.displayManga.filter { it.isVisible }
 
             if (mangaList.isNotEmpty()) {

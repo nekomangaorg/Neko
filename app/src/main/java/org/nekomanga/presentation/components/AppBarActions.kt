@@ -80,7 +80,6 @@ fun AppBarActions(
                 settingsClick = mainDropDown.settingsClick,
                 statsClick = mainDropDown.statsClick,
                 aboutClick = mainDropDown.aboutClick,
-                helpClick = mainDropDown.helpClick,
                 onDismiss = { showMenu = false },
             )
         }
@@ -96,7 +95,6 @@ object AppBar {
         val settingsClick: () -> Unit,
         val statsClick: () -> Unit,
         val aboutClick: () -> Unit,
-        val helpClick: () -> Unit,
         val menuShowing: (Boolean) -> Unit,
     ) : AppBarAction
 

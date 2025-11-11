@@ -10,8 +10,8 @@ class DeepLinkActivity : Activity() {
         super.onCreate(savedInstanceState)
         intent.apply {
             flags = flags or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            setClass(applicationContext, SearchActivity::class.java)
-            action = MainActivity.INTENT_SEARCH
+            setClass(applicationContext, MainActivity::class.java)
+            action = DeepLinks.Intents.Search
         }
         startActivity(intent)
         finish()

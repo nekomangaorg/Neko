@@ -20,6 +20,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,10 +38,10 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.dialog.AddEditCategoryDialog
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
+import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
+import org.nekomanga.presentation.screens.category.AddEditCategoryTopBar
 import org.nekomanga.presentation.theme.Size
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -120,99 +122,98 @@ internal class AddEditCategoriesScreen(
             )
         }
 
-        NekoScaffold(
-            type = NekoScaffoldType.Title,
-            onNavigationIconClicked = onNavigationIconClick,
-            title = stringResource(R.string.edit_categories),
-            content = { contentPadding ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = contentPadding,
-                        state = lazyListState,
-                        verticalArrangement = Arrangement.spacedBy(Size.small),
-                    ) {
-                        items(items = categoriesState, key = { category -> category.name }) {
-                            category ->
-                            // skip the default category
-                            if (category.id != 0) {
-                                ReorderableItem(reorderableState, category.name) { isDragging ->
-                                    val interactionSource = remember { MutableInteractionSource() }
-                                    ElevatedCard(
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .padding(horizontal = Size.medium),
-                                        onClick = {},
-                                        interactionSource = interactionSource,
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth().padding(Size.small),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            IconButton(
-                                                modifier =
-                                                    Modifier.draggableHandle(
-                                                        onDragStarted = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType
-                                                                    .GestureThresholdActivate
-                                                            )
-                                                        },
-                                                        onDragStopped = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.GestureEnd
-                                                            )
-                                                        },
-                                                        interactionSource = interactionSource,
-                                                    ),
-                                                onClick = {},
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.DragHandle,
-                                                    contentDescription = "Reorder",
-                                                )
-                                            }
-                                            Text(
-                                                text = category.name,
-                                                modifier = Modifier.weight(1f),
-                                            )
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-                                            IconButton(
-                                                onClick = { editCategoryName = category.name }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Edit,
-                                                    contentDescription = null,
-                                                )
-                                            }
-                                            IconButton(
-                                                onClick = { deleteCategoryName = category.name }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Delete,
-                                                    contentDescription = null,
-                                                )
-                                            }
+        ChildScreenScaffold(
+            scrollBehavior = scrollBehavior,
+            topBar = {
+                AddEditCategoryTopBar(
+                    onNavigationIconClicked = onNavigationIconClick,
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { contentPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding,
+                    state = lazyListState,
+                    verticalArrangement = Arrangement.spacedBy(Size.small),
+                ) {
+                    items(items = categoriesState, key = { category -> category.name }) { category
+                        ->
+                        // skip the default category
+                        if (category.id != 0) {
+                            ReorderableItem(reorderableState, category.name) { isDragging ->
+                                val interactionSource = remember { MutableInteractionSource() }
+                                ElevatedCard(
+                                    modifier =
+                                        Modifier.fillMaxWidth().padding(horizontal = Size.medium),
+                                    onClick = {},
+                                    interactionSource = interactionSource,
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(Size.small),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        IconButton(
+                                            modifier =
+                                                Modifier.draggableHandle(
+                                                    onDragStarted = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType
+                                                                .GestureThresholdActivate
+                                                        )
+                                                    },
+                                                    onDragStopped = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.GestureEnd
+                                                        )
+                                                    },
+                                                    interactionSource = interactionSource,
+                                                ),
+                                            onClick = {},
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.DragHandle,
+                                                contentDescription = "Reorder",
+                                            )
+                                        }
+                                        Text(text = category.name, modifier = Modifier.weight(1f))
+
+                                        IconButton(onClick = { editCategoryName = category.name }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Edit,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { deleteCategoryName = category.name }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Delete,
+                                                contentDescription = null,
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
                     }
-
-                    ExtendedFloatingActionButton(
-                        modifier =
-                            Modifier.align(Alignment.BottomEnd)
-                                .padding(
-                                    bottom = contentPadding.calculateBottomPadding(),
-                                    end = Size.small,
-                                ),
-                        onClick = { showAddDialog = true },
-                        icon = { Icon(Icons.Default.Add, null) },
-                        text = { Text(text = stringResource(R.string.add)) },
-                    )
                 }
-            },
-        )
+
+                ExtendedFloatingActionButton(
+                    modifier =
+                        Modifier.align(Alignment.BottomEnd)
+                            .padding(
+                                bottom = contentPadding.calculateBottomPadding(),
+                                end = Size.small,
+                            ),
+                    onClick = { showAddDialog = true },
+                    icon = { Icon(Icons.Default.Add, null) },
+                    text = { Text(text = stringResource(R.string.add)) },
+                )
+            }
+        }
     }
 }

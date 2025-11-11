@@ -16,6 +16,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
+import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.UiText
@@ -26,6 +27,7 @@ object MangaConstants {
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
         val firstLoad: Boolean = true,
+        val snackbarColor: SnackbarColor? = null,
         val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
         val searchChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allCategories: PersistentList<CategoryItem> = persistentListOf(),

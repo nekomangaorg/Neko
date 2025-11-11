@@ -66,7 +66,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
@@ -657,7 +656,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         binding.toolbar.setOnClickListener {
             viewModel.manga?.id?.let { id ->
-                val intent = SearchActivity.openMangaIntent(this, id)
+                //  val intent = SearchActivity.openMangaIntent(this, id)
                 startActivity(intent)
             }
         }
