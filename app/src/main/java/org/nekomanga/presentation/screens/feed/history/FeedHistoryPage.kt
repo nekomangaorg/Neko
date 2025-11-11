@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
@@ -23,6 +27,8 @@ import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
+import org.nekomanga.presentation.components.EmptyScreen
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -38,6 +44,14 @@ fun FeedHistoryPage(
     loadNextPage: () -> Unit,
     historyGrouping: FeedHistoryGroup,
 ) {
+    if (feedHistoryMangaList.isEmpty()) {
+        EmptyScreen(
+            icon = Icons.Default.History,
+            iconSize = 176.dp,
+            message = stringResource(id = R.string.no_history_feed),
+        )
+        return
+    }
     val scrollState = rememberLazyListState()
 
     val now = Date().time
