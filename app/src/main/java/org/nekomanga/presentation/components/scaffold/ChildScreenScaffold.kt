@@ -12,22 +12,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import org.nekomanga.presentation.components.PullRefresh
 
 @Composable
 fun ChildScreenScaffold(
-    pullRefreshState: PullRefreshState = PullRefreshState(),
+    refreshState: RefreshState = RefreshState(),
     drawUnderTopBar: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior,
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     PullRefresh(
-        enabled = pullRefreshState.enabled,
-        isRefreshing = pullRefreshState.isRefreshing,
-        onRefresh = pullRefreshState.onRefresh,
-        trackColor = pullRefreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
+        enabled = refreshState.enabled,
+        isRefreshing = refreshState.isRefreshing,
+        onRefresh = refreshState.onRefresh,
+        trackColor = refreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),

@@ -26,7 +26,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -79,9 +79,9 @@ private fun SimilarWrapper(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val pullRefreshState =
+    val refreshState =
         remember(similarScreenState.isRefreshing) {
-            PullRefreshState(
+            RefreshState(
                 enabled = true,
                 isRefreshing = similarScreenState.isRefreshing,
                 onRefresh = onRefresh,
@@ -133,7 +133,7 @@ private fun SimilarWrapper(
     val haptic = LocalHapticFeedback.current
 
     ChildScreenScaffold(
-        pullRefreshState = pullRefreshState,
+        refreshState = refreshState,
         scrollBehavior = scrollBehavior,
         topBar = {
             SimilarTopBar(

@@ -77,18 +77,22 @@ fun MainScreen(
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
             transitionSpec = {
-                slideInHorizontally(
-                    animationSpec = animationSpec,
-                    initialOffsetX = { it },
-                ) togetherWith fadeOut(animationSpec = fadeSpec)
+                slideInHorizontally(animationSpec = animationSpec, initialOffsetX = { it / 4 }) +
+                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
             },
             popTransitionSpec = {
                 fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it })
+                    slideOutHorizontally(
+                        animationSpec = animationSpec,
+                        targetOffsetX = { it / 4 },
+                    ) + fadeOut(animationSpec = fadeSpec)
             },
             predictivePopTransitionSpec = {
                 fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it })
+                    slideOutHorizontally(
+                        animationSpec = animationSpec,
+                        targetOffsetX = { it / 4 },
+                    ) + fadeOut(animationSpec = fadeSpec)
             },
             entryProvider =
                 entryProvider {

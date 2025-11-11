@@ -43,7 +43,7 @@ import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.StateFlow
@@ -226,13 +226,13 @@ private fun FeedWrapper(
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val pullRefreshState =
+        val refreshState =
             remember(
                 feedScreenState.swipeRefreshEnabled,
                 feedScreenState.isRefreshing,
                 feedScreenActions.updateLibrary,
             ) {
-                PullRefreshState(
+                RefreshState(
                     enabled = feedScreenState.swipeRefreshEnabled,
                     isRefreshing = feedScreenState.isRefreshing,
                     onRefresh = { feedScreenActions.updateLibrary(true) },
@@ -240,7 +240,7 @@ private fun FeedWrapper(
             }
 
         RootScaffold(
-            pullRefreshState = pullRefreshState,
+            refreshState = refreshState,
             scrollBehavior = scrollBehavior,
             mainSettingsExpanded = mainDropdownShowing,
             navigationRail = navigationRail,

@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,11 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toBitmap
@@ -54,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -79,6 +75,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
@@ -480,30 +477,29 @@ private fun MangaScreenWrapper(
             }
         }
 
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val backdropHeight by
-        animateDpAsState(
-            targetValue =
-                when {
-                    !screenState.initialized -> screenHeight.dp
-                    screenState.isSearching -> (screenHeight / 4).dp
-                    else ->
-                        when (screenState.backdropSize) {
-                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                            MangaConstants.BackdropSize.Default -> (screenHeight / 2.1).dp
-                        }
-                }
-        )
+    var isInitialized by remember { mutableStateOf(false) }
 
-    ChildScreenScaffold(
-        pullRefreshState =
-            PullRefreshState(
+    LaunchedEffect(screenState.initialized, screenState.firstLoad) {
+        if (screenState.initialized && !screenState.firstLoad) {
+            delay(500L)
+            isInitialized = true
+        } else {
+            isInitialized = false
+        }
+    }
+
+    val refreshState =
+        remember(screenState.isRefreshing) {
+            RefreshState(
                 enabled = true,
                 isRefreshing = screenState.isRefreshing,
                 onRefresh = onRefresh,
                 trackColor = themeColorState.primaryColor,
-            ),
+            )
+        }
+
+    ChildScreenScaffold(
+        refreshState = refreshState,
         drawUnderTopBar = true,
         scrollBehavior = scrollBehavior,
         topBar = {
@@ -520,7 +516,7 @@ private fun MangaScreenWrapper(
         if (isTablet) {
             SideBySideLayout(
                 incomingPadding = contentPaddingValues,
-                backdropHeight = backdropHeight,
+                isInitialized = isInitialized,
                 screenState = screenState,
                 windowSizeClass = windowSizeClass,
                 themeColorState = themeColorState,
@@ -537,7 +533,7 @@ private fun MangaScreenWrapper(
         } else {
             VerticalLayout(
                 incomingPadding = contentPaddingValues,
-                backdropHeight = backdropHeight,
+                isInitialized = isInitialized,
                 screenState = screenState,
                 windowSizeClass = windowSizeClass,
                 themeColorState = themeColorState,
@@ -650,7 +646,7 @@ private fun LazyListScope.chapterList(
 @Composable
 private fun VerticalLayout(
     incomingPadding: PaddingValues,
-    backdropHeight: Dp,
+    isInitialized: Boolean,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     themeColorState: ThemeColorState,
@@ -671,7 +667,7 @@ private fun VerticalLayout(
         item(key = "header") {
             MangaDetailsHeader(
                 mangaDetailScreenState = screenState,
-                backdropHeight = backdropHeight,
+                isInitialized = isInitialized,
                 windowSizeClass = windowSizeClass,
                 isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
                 themeColorState = themeColorState,
@@ -712,7 +708,7 @@ private fun VerticalLayout(
 @Composable
 private fun SideBySideLayout(
     incomingPadding: PaddingValues,
-    backdropHeight: Dp,
+    isInitialized: Boolean,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
     themeColorState: ThemeColorState,
@@ -742,7 +738,7 @@ private fun SideBySideLayout(
             item(key = "header") {
                 MangaDetailsHeader(
                     mangaDetailScreenState = screenState,
-                    backdropHeight = backdropHeight,
+                    isInitialized = isInitialized,
                     windowSizeClass = windowSizeClass,
                     isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
                     themeColorState = themeColorState,

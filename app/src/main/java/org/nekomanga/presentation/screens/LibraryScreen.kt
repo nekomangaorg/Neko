@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
 import eu.kanade.tachiyomi.ui.library.LibrarySheetActions
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
@@ -244,9 +244,9 @@ private fun LibraryWrapper(
 
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-        val pullRefreshState =
+        val refreshState =
             remember(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
-                PullRefreshState(
+                RefreshState(
                     enabled = true,
                     isRefreshing = libraryScreenState.isRefreshing,
                     onRefresh = libraryScreenActions.updateLibrary,
@@ -254,7 +254,7 @@ private fun LibraryWrapper(
             }
 
         RootScaffold(
-            pullRefreshState = pullRefreshState,
+            refreshState = refreshState,
             scrollBehavior = scrollBehavior,
             mainSettingsExpanded = mainDropdownShowing,
             navigationRail = navigationRail,

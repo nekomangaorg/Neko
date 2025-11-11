@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
@@ -46,7 +45,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun MangaDetailsHeader(
     mangaDetailScreenState: MangaConstants.MangaDetailScreenState,
-    backdropHeight: Dp,
+    isInitialized: Boolean,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackers: Boolean,
     themeColorState: ThemeColorState,
@@ -77,19 +76,21 @@ fun MangaDetailsHeader(
 
         val alpha: Float by
             animateFloatAsState(
-                targetValue = if (mangaDetailScreenState.initialized) 1f else 0f,
+                targetValue = if (isInitialized) 1f else 0f,
                 animationSpec = tween(durationMillis = 600, delayMillis = 200),
             )
 
         Column {
             Box {
                 AnimatedBackdropContainer(
-                    backdropHeight = backdropHeight,
+                    isInitialized = isInitialized,
                     themeColorState = themeColorState,
                     artwork = mangaDetailScreenState.currentArtwork,
                     showBackdrop = mangaDetailScreenState.themeBasedOffCovers,
                     initialized = mangaDetailScreenState.initialized,
                     generatePalette = generatePalette,
+                    isSearching = mangaDetailScreenState.isSearching,
+                    backdropSize = mangaDetailScreenState.backdropSize,
                 )
                 Column(
                     modifier = Modifier.align(Alignment.BottomStart).graphicsLayer(alpha = alpha)

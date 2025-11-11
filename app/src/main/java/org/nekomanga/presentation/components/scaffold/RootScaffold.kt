@@ -9,12 +9,12 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import eu.kanade.tachiyomi.ui.main.states.PullRefreshState
+import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import org.nekomanga.presentation.components.PullRefresh
 
 @Composable
 fun RootScaffold(
-    pullRefreshState: PullRefreshState = PullRefreshState(),
+    refreshState: RefreshState = RefreshState(),
     scrollBehavior: TopAppBarScrollBehavior,
     mainSettingsExpanded: Boolean,
     navigationRail: @Composable () -> Unit = {},
@@ -24,11 +24,11 @@ fun RootScaffold(
 ) {
 
     PullRefresh(
-        enabled = pullRefreshState.enabled,
-        isRefreshing = pullRefreshState.isRefreshing,
-        onRefresh = pullRefreshState.onRefresh,
+        enabled = refreshState.enabled,
+        isRefreshing = refreshState.isRefreshing,
+        onRefresh = refreshState.onRefresh,
         blurBackground = mainSettingsExpanded,
-        trackColor = pullRefreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
+        trackColor = refreshState.trackColor ?: MaterialTheme.colorScheme.secondary,
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             navigationRail() // if composable is empty this wont show
