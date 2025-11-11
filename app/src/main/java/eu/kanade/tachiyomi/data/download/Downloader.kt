@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -55,6 +55,7 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
@@ -258,8 +259,6 @@ class Downloader(
         val wasEmpty = queueState.value.isEmpty()
         val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()
 
-        val chapterSort = ChapterSort(manga)
-
         val chaptersToQueue =
             chapters
                 .asSequence()
@@ -274,15 +273,16 @@ class Downloader(
                         else -> !MdConstants.UnsupportedOfficialGroupList.contains(it.scanlator!!)
                     }
                 }
-                .sortedWith(chapterSort.sortComparator(true))
+                .map { it.toSimpleChapter()!!.toChapterItem() }
+                .sortedWith(ChapterItemSort().sortComparator(manga, true))
+                .map { it.chapter }
                 // Add chapters to queue from the start.
                 // Filter out those already enqueued.
                 .filter { chapter -> queueState.value.none { it.chapterItem.id == chapter.id } }
                 // Create a download for each one.
                 .map {
                     val source = it.getHttpSource(sourceManager)
-                    val simpleChapter = it.toSimpleChapter()!!
-                    Download(source, manga.toSimpleManga(), simpleChapter)
+                    Download(source, manga.toSimpleManga(), it)
                 }
                 .toList()
 

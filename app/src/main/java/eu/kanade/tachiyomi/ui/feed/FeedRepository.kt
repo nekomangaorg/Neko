@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
@@ -95,8 +95,12 @@ class FeedRepository(
                                     .mapNotNull { it.chapters.firstOrNull() }
                                     .maxOfOrNull { it.chapter.dateUpload }
                             val chapter =
-                                ChapterSort(manga).getNextUnreadChapter(chapters)?.toSimpleChapter()
-                                    ?: return@mapNotNull null
+                                ChapterItemSort()
+                                    .getNextUnreadChapter(
+                                        manga,
+                                        chapters.map { it.toSimpleChapter()!!.toChapterItem() },
+                                    )
+                                    ?.chapter ?: return@mapNotNull null
 
                             FeedManga(
                                 mangaId = manga.id!!,
@@ -194,8 +198,12 @@ class FeedRepository(
                                         it.isAvailable(downloadManager, manga)
                                     }
                                 val chapter =
-                                    ChapterSort(manga).getNextUnreadChapter(chapters)
-                                        ?: return@mapNotNull null
+                                    ChapterItemSort()
+                                        .getNextUnreadChapter(
+                                            manga,
+                                            chapters.map { it.toSimpleChapter()!!.toChapterItem() },
+                                        )
+                                        ?.chapter ?: return@mapNotNull null
 
                                 FeedManga(
                                     mangaId = manga.id!!,
@@ -203,10 +211,7 @@ class FeedRepository(
                                     date = 0L,
                                     artwork = manga.toDisplayManga().currentArtwork,
                                     lastReadChapter = lastReadChapter,
-                                    chapters =
-                                        persistentListOf(
-                                            chapter.toSimpleChapter()!!.toChapterItem()
-                                        ),
+                                    chapters = persistentListOf(chapter.toChapterItem()),
                                 )
                             }
                         }
