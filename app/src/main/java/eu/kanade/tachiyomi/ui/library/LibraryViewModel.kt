@@ -127,7 +127,10 @@ class LibraryViewModel() : ViewModel() {
     /** Save the current list to speed up loading later */
     override fun onCleared() {
         super.onCleared()
-        lastLibraryCategoryItems = _libraryScreenState.value.items
+        val state = _libraryScreenState.value
+        lastLibraryCategoryItems = state.items
+        lastPagerIndex = state.pagerIndex
+        lastScrollPositions = state.scrollPositions
     }
 
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
@@ -258,11 +261,15 @@ class LibraryViewModel() : ViewModel() {
                             isFirstLoad = false,
                             items = items.toPersistentList(),
                             allCollapsed = !notAllCollapsed,
+                            pagerIndex = lastPagerIndex ?: 0,
+                            scrollPositions = lastScrollPositions ?: emptyMap(),
                         )
                     }
                 }
             }
             lastLibraryCategoryItems = null
+            lastPagerIndex = null
+            lastScrollPositions = null
         }
         observeLibraryUpdates()
         preferenceUpdates()
@@ -1140,10 +1147,14 @@ class LibraryViewModel() : ViewModel() {
 
     companion object {
         private var lastLibraryCategoryItems: List<LibraryCategoryItem>? = null
+        private var lastPagerIndex: Int? = null
+        private var lastScrollPositions: Map<Int, Int>? = null
         private const val dynamicCategorySplitter = "??\t??\t?"
 
         fun onLowMemory() {
             lastLibraryCategoryItems = null
+            lastPagerIndex = null
+            lastScrollPositions = null
         }
     }
 }
