@@ -28,11 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
@@ -68,8 +73,22 @@ fun BrowseScreen(
     onNavigateTo: (NavKey) -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
-
     val deepLinkManga by browseViewModel.deepLinkMangaFlow.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val currentUpdateMangaForChanges by rememberUpdatedState(browseViewModel::updateMangaForChanges)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                currentUpdateMangaForChanges()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(deepLinkManga) {
         deepLinkManga?.let { mangaId ->
