@@ -76,12 +76,13 @@ private val ErrorFaces =
 @Composable
 fun EmptyScreen(
     message: UiText,
+    modifier: Modifier = Modifier.fillMaxSize(),
     actions: PersistentList<Action> = persistentListOf(),
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val errorFace = remember { ErrorFaces.random() }
     Column(
-        modifier = Modifier.fillMaxSize().padding(contentPadding),
+        modifier = modifier.padding(contentPadding),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

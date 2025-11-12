@@ -3,14 +3,13 @@ package org.nekomanga.presentation.screens.feed.summary
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,17 +21,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.EmptyScreen
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
+import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.screens.feed.updates.UpdatesCard
 import org.nekomanga.presentation.theme.Size
 
@@ -50,18 +48,7 @@ fun FeedSummaryPage(
     useVividColorHeaders: Boolean,
     feedScreenActions: FeedScreenActions,
 ) {
-    if (
-        (updatesFeedMangaList.isEmpty() && !updatingUpdates) &&
-            (continueReadingFeedMangaList.isEmpty() && !updatingContinueReading) &&
-            (newlyAddedFeedMangaList.isEmpty() && !updatingNewlyAdded)
-    ) {
-        EmptyScreen(
-            icon = Icons.Default.CollectionsBookmark,
-            iconSize = 176.dp,
-            message = stringResource(id = R.string.no_feed_summary),
-        )
-        return
-    }
+
     val scrollState = rememberLazyListState()
 
     val headerColor =
@@ -253,10 +240,8 @@ private fun SummaryHeader(text: String, isRefreshing: Boolean, color: Color) {
 
 @Composable
 private fun NoResults() {
-    Text(
-        text = stringResource(R.string.no_results_found),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.fillMaxWidth(),
+    EmptyScreen(
+        message = UiText.StringResource(R.string.no_results_found),
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(.33f),
     )
 }
