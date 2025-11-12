@@ -251,21 +251,18 @@ class LibraryViewModel() : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            if (lastLibraryCategoryItems == null) {
-                _libraryScreenState.update { it.copy(isFirstLoad = true) }
-            } else {
-                lastLibraryCategoryItems?.let { items ->
-                    val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
-                    _libraryScreenState.update {
-                        it.copy(
-                            isFirstLoad = false,
-                            items = items.toPersistentList(),
-                            allCollapsed = !notAllCollapsed,
-                            pagerIndex = lastPagerIndex ?: 0,
-                            scrollPositions = lastScrollPositions ?: emptyMap(),
-                        )
-                    }
-                }
+            val items = lastLibraryCategoryItems
+            val pagerIndex = lastPagerIndex
+            val scrollPositions = lastScrollPositions
+
+            _libraryScreenState.update {
+                it.copy(
+                    isFirstLoad = items == null,
+                    items = items?.toPersistentList() ?: it.items,
+                    allCollapsed = items?.fastAny { item -> !item.categoryItem.isHidden } == false,
+                    pagerIndex = pagerIndex ?: 0,
+                    scrollPositions = scrollPositions ?: emptyMap(),
+                )
             }
             lastLibraryCategoryItems = null
             lastPagerIndex = null

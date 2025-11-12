@@ -82,6 +82,12 @@ fun HorizontalCategoriesPage(
         }
     }
 
+    LaunchedEffect(libraryScreenState.pagerIndex) {
+        if (pagerState.currentPage != libraryScreenState.pagerIndex) {
+            pagerState.scrollToPage(libraryScreenState.pagerIndex)
+        }
+    }
+
     val isValidState = pagerState.currentPage < pageCount
 
     val scope = rememberCoroutineScope()
