@@ -10,14 +10,9 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -534,7 +529,6 @@ private fun MangaScreenWrapper(
 
     ChildScreenScaffold(
         refreshState = refreshState,
-        drawUnderTopBar = true,
         scrollBehavior = scrollBehavior,
         snackbarHost = snackbarHost,
         topBar = {
@@ -547,10 +541,10 @@ private fun MangaScreenWrapper(
                 onSearch = onSearch,
             )
         },
-    ) { contentPaddingValues ->
+    ) { contentPadding ->
         if (isTablet) {
             SideBySideLayout(
-                incomingPadding = contentPaddingValues,
+                incomingContentPadding = contentPadding,
                 isInitialized = isInitialized,
                 screenState = screenState,
                 windowSizeClass = windowSizeClass,
@@ -567,7 +561,7 @@ private fun MangaScreenWrapper(
             )
         } else {
             VerticalLayout(
-                incomingPadding = contentPaddingValues,
+                incomingContentPadding = contentPadding,
                 isInitialized = isInitialized,
                 screenState = screenState,
                 windowSizeClass = windowSizeClass,
@@ -680,7 +674,7 @@ private fun LazyListScope.chapterList(
 
 @Composable
 private fun VerticalLayout(
-    incomingPadding: PaddingValues,
+    incomingContentPadding: PaddingValues,
     isInitialized: Boolean,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
@@ -696,7 +690,9 @@ private fun VerticalLayout(
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     val contentPadding =
-        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+        PaddingValues(
+            bottom = incomingContentPadding.calculateBottomPadding(),
+        )
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
         item(key = "header") {
@@ -726,7 +722,7 @@ private fun VerticalLayout(
                 onQuickReadClick = { chapterActions.openNext() },
             )
         }
-        if (screenState.initialized) {
+        if (isInitialized) {
             chapterList(
                 chapters =
                     if (screenState.isSearching) screenState.searchChapters
@@ -742,7 +738,7 @@ private fun VerticalLayout(
 
 @Composable
 private fun SideBySideLayout(
-    incomingPadding: PaddingValues,
+    incomingContentPadding: PaddingValues,
     isInitialized: Boolean,
     screenState: MangaConstants.MangaDetailScreenState,
     windowSizeClass: WindowSizeClass,
@@ -757,12 +753,16 @@ private fun SideBySideLayout(
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
+
     val detailsContentPadding =
-        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+        PaddingValues(
+            bottom = incomingContentPadding.calculateBottomPadding(),
+        )
+
     val chapterContentPadding =
         PaddingValues(
-            bottom = detailsContentPadding.calculateBottomPadding(),
-            top = incomingPadding.calculateTopPadding(),
+            bottom = incomingContentPadding.calculateBottomPadding(),
+            top = incomingContentPadding.calculateTopPadding()
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -806,7 +806,7 @@ private fun SideBySideLayout(
                 Modifier.align(Alignment.TopEnd).fillMaxWidth(.5f).fillMaxHeight().clipToBounds(),
             contentPadding = chapterContentPadding,
         ) {
-            if (screenState.initialized) {
+            if (isInitialized) {
                 chapterList(
                     chapters =
                         if (screenState.isSearching) screenState.searchChapters
