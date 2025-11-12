@@ -77,7 +77,7 @@ fun MangaDetailsHeader(
         val alpha: Float by
             animateFloatAsState(
                 targetValue = if (isInitialized) 1f else 0f,
-                animationSpec = tween(durationMillis = 600, delayMillis = 200),
+                animationSpec = tween(durationMillis = 600),
             )
 
         Column {

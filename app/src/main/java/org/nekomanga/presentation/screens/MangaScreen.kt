@@ -689,10 +689,7 @@ private fun VerticalLayout(
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
-    val contentPadding =
-        PaddingValues(
-            bottom = incomingContentPadding.calculateBottomPadding(),
-        )
+    val contentPadding = PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
         item(key = "header") {
@@ -755,14 +752,12 @@ private fun SideBySideLayout(
 ) {
 
     val detailsContentPadding =
-        PaddingValues(
-            bottom = incomingContentPadding.calculateBottomPadding(),
-        )
+        PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
 
     val chapterContentPadding =
         PaddingValues(
             bottom = incomingContentPadding.calculateBottomPadding(),
-            top = incomingContentPadding.calculateTopPadding()
+            top = incomingContentPadding.calculateTopPadding(),
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
