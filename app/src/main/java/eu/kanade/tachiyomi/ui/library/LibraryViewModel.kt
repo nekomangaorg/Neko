@@ -1126,6 +1126,18 @@ class LibraryViewModel() : ViewModel() {
         _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
     }
 
+    fun pagerIndexChanged(index: Int) {
+        _libraryScreenState.update { it.copy(pagerIndex = index) }
+    }
+
+    fun scrollPositionChanged(categoryIndex: Int, scrollPosition: Int) {
+        _libraryScreenState.update { state ->
+            val newScrollPositions = state.scrollPositions.toMutableMap()
+            newScrollPositions[categoryIndex] = scrollPosition
+            state.copy(scrollPositions = newScrollPositions)
+        }
+    }
+
     companion object {
         private var lastLibraryCategoryItems: List<LibraryCategoryItem>? = null
         private const val dynamicCategorySplitter = "??\t??\t?"

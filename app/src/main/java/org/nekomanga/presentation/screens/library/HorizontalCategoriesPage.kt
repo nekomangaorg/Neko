@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -63,7 +65,16 @@ fun HorizontalCategoriesPage(
     val pageCount = libraryScreenState.items.size
 
     val pagerState =
-        rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f) { pageCount }
+        rememberPagerState(
+            initialPage = libraryScreenState.pagerIndex,
+            initialPageOffsetFraction = 0f
+        ) {
+            pageCount
+        }
+
+    LaunchedEffect(pagerState.currentPage) {
+        libraryScreenActions.pagerIndexChanged(pagerState.currentPage)
+    }
 
     LaunchedEffect(libraryScreenState.currentGroupBy) {
         if (pagerState.currentPage != 0) {
@@ -128,6 +139,18 @@ fun HorizontalCategoriesPage(
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
+                        val gridState =
+                            rememberLazyGridState(
+                                initialFirstVisibleItemIndex =
+                                    libraryScreenState.scrollPositions[page] ?: 0,
+                            )
+
+                        LaunchedEffect(gridState.firstVisibleItemIndex) {
+                            libraryScreenActions.scrollPositionChanged(
+                                page,
+                                gridState.firstVisibleItemIndex
+                            )
+                        }
                         Column {
                             Row(
                                 modifier =
@@ -178,6 +201,7 @@ fun HorizontalCategoriesPage(
                                 )
                             }
                             LazyVerticalGrid(
+                                state = gridState,
                                 columns = GridCells.Fixed(columns),
                                 modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
                                 horizontalArrangement = Arrangement.spacedBy(Size.small),
@@ -232,6 +256,17 @@ fun HorizontalCategoriesPage(
                     }
 
                     is LibraryDisplayMode.List -> {
+                        val listState =
+                            rememberLazyListState(
+                                initialFirstVisibleItemIndex =
+                                    libraryScreenState.scrollPositions[page] ?: 0,
+                            )
+                        LaunchedEffect(listState.firstVisibleItemIndex) {
+                            libraryScreenActions.scrollPositionChanged(
+                                page,
+                                listState.firstVisibleItemIndex
+                            )
+                        }
                         Column(modifier = Modifier.fillMaxSize()) {
                             Row(
                                 modifier =
@@ -282,6 +317,7 @@ fun HorizontalCategoriesPage(
                                 )
                             }
                             LazyColumn(
+                                state = listState,
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
                                     PaddingValues(bottom = contentPadding.calculateBottomPadding()),
