@@ -200,11 +200,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             deserializer = FilterMissingChapters::fromInt,
         )
 
-    fun showEmptyCategoriesWhileFiltering() =
-        this.preferenceStore.getBoolean("show_empty_categories_filtering")
-
-    fun defaultMangaOrder() = this.preferenceStore.getString("default_manga_order")
-
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
     fun chapterScanlatorFilterOption() =

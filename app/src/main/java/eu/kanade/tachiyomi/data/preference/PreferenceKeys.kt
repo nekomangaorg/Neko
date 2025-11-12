@@ -41,8 +41,6 @@ object PreferenceKeys {
     const val showUpdatedTime = "show_updated_time"
     const val groupChaptersUpdates = "group_chapters_updates"
 
-    const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
-
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
 

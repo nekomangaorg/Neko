@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
+import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -176,9 +177,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
 
-    // Tutorial preferences
-
-    fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
+    fun sideNavIconAlignment() =
+        this.preferenceStore.getObjectFromInt(
+            key = "pref_side_nav_icon_alignment",
+            defaultValue = SideNavAlignment.Center,
+            serializer = SideNavAlignment::toInt,
+            deserializer = SideNavAlignment::fromInt,
+        )
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
 

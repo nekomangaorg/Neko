@@ -59,7 +59,6 @@ class MainActivityViewModel : ViewModel() {
         }
     }
 
-    val appSnackbarManager: AppSnackbarManager = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
 
@@ -72,6 +71,13 @@ class MainActivityViewModel : ViewModel() {
                 _mainScreenState.update { it.copy(incognitoMode = incognitoMode) }
             }
         }
+
+        viewModelScope.launchIO {
+            preferences.sideNavIconAlignment().changes().collect { sideNavAlignment ->
+                _mainScreenState.update { it.copy(sideNavAlignment = sideNavAlignment) }
+            }
+        }
+
         viewModelScope.launchIO {
             val update =
                 runCatching { updateChecker.checkForUpdate() }

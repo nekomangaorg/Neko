@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.getActivity
@@ -147,9 +148,9 @@ internal class AppearanceSettingsScreen(
                         title = stringResource(R.string.side_nav_icon_alignment),
                         entries =
                             persistentMapOf(
-                                0 to stringResource(R.string.top),
-                                1 to stringResource(R.string.center),
-                                2 to stringResource(R.string.bottom),
+                                SideNavAlignment.Top to stringResource(R.string.top),
+                                SideNavAlignment.Center to stringResource(R.string.center),
+                                SideNavAlignment.Bottom to stringResource(R.string.bottom),
                             ),
                     ),
                     Preference.PreferenceItem.ListPreference(

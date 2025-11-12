@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
-import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
@@ -206,6 +205,7 @@ class MainActivity : ComponentActivity() {
                 if (showNavigationRail) {
                     NavigationSideBar(
                         items = navItems,
+                        sideNavAlignment = mainScreenState.sideNavAlignment,
                         libraryUpdating = libraryUpdating,
                         downloaderRunning = downloaderRunning,
                         selectedItemIndex = selectedItemIndex,
