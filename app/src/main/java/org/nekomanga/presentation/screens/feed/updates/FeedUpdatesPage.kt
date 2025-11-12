@@ -24,8 +24,10 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
+import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -42,6 +44,10 @@ fun FeedUpdatesPage(
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
 ) {
+    if (feedUpdatesMangaList.isEmpty()) {
+        EmptyScreen(message = UiText.StringResource(R.string.no_results_found))
+        return
+    }
     val headerColor =
         when (useVividColorHeaders) {
             true -> MaterialTheme.colorScheme.primary

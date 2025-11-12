@@ -23,6 +23,9 @@ import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -38,6 +41,10 @@ fun FeedHistoryPage(
     loadNextPage: () -> Unit,
     historyGrouping: FeedHistoryGroup,
 ) {
+    if (feedHistoryMangaList.isEmpty()) {
+        EmptyScreen(message = UiText.StringResource(R.string.no_results_found))
+        return
+    }
     val scrollState = rememberLazyListState()
 
     val now = Date().time
