@@ -127,7 +127,10 @@ class LibraryViewModel() : ViewModel() {
     /** Save the current list to speed up loading later */
     override fun onCleared() {
         super.onCleared()
-        lastLibraryCategoryItems = _libraryScreenState.value.items
+        val state = _libraryScreenState.value
+        lastLibraryCategoryItems = state.items
+        lastPagerIndex = state.pagerIndex
+        lastScrollPositions = state.scrollPositions
     }
 
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
@@ -248,21 +251,22 @@ class LibraryViewModel() : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            if (lastLibraryCategoryItems == null) {
-                _libraryScreenState.update { it.copy(isFirstLoad = true) }
-            } else {
-                lastLibraryCategoryItems?.let { items ->
-                    val notAllCollapsed = items.fastAny { !it.categoryItem.isHidden }
-                    _libraryScreenState.update {
-                        it.copy(
-                            isFirstLoad = false,
-                            items = items.toPersistentList(),
-                            allCollapsed = !notAllCollapsed,
-                        )
-                    }
-                }
+            val items = lastLibraryCategoryItems
+            val pagerIndex = lastPagerIndex
+            val scrollPositions = lastScrollPositions
+
+            _libraryScreenState.update {
+                it.copy(
+                    isFirstLoad = items == null,
+                    items = items?.toPersistentList() ?: it.items,
+                    allCollapsed = items?.fastAny { item -> !item.categoryItem.isHidden } == false,
+                    pagerIndex = pagerIndex ?: 0,
+                    scrollPositions = scrollPositions ?: emptyMap(),
+                )
             }
             lastLibraryCategoryItems = null
+            lastPagerIndex = null
+            lastScrollPositions = null
         }
         observeLibraryUpdates()
         preferenceUpdates()
@@ -1126,12 +1130,28 @@ class LibraryViewModel() : ViewModel() {
         _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
     }
 
+    fun pagerIndexChanged(index: Int) {
+        _libraryScreenState.update { it.copy(pagerIndex = index) }
+    }
+
+    fun scrollPositionChanged(categoryIndex: Int, scrollPosition: Int) {
+        _libraryScreenState.update { state ->
+            val newScrollPositions = state.scrollPositions.toMutableMap()
+            newScrollPositions[categoryIndex] = scrollPosition
+            state.copy(scrollPositions = newScrollPositions)
+        }
+    }
+
     companion object {
         private var lastLibraryCategoryItems: List<LibraryCategoryItem>? = null
+        private var lastPagerIndex: Int? = null
+        private var lastScrollPositions: Map<Int, Int>? = null
         private const val dynamicCategorySplitter = "??\t??\t?"
 
         fun onLowMemory() {
             lastLibraryCategoryItems = null
+            lastPagerIndex = null
+            lastScrollPositions = null
         }
     }
 }
