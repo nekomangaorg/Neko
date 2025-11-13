@@ -341,13 +341,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
             coroutineScope {
                 val downloadResults =
-                    mangaToAdd.mapAsync { manga ->
+                    mangaToAdd.mapAsync(launchDelayMillis = 500) { manga ->
                         val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
-                        if (updateMangaChapters(manga, shouldDownload)) {
-                            true
-                        } else {
-                            false
-                        }
+                        updateMangaChapters(manga, shouldDownload)
                     }
 
                 if (!hasDownloads) {

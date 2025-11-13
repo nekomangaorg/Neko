@@ -1,12 +1,34 @@
 package org.nekomanga.util.system
 
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 
-suspend fun <T, R> Iterable<T>.mapAsync(transform: suspend (T) -> R): List<R> = coroutineScope {
+suspend fun <T, R> Iterable<T>.mapAsync(
+    launchDelayMillis: Long = 0L,
+    transform: suspend (T) -> R,
+): List<R> = coroutineScope {
     // Launch a coroutine for each item and collect the Deferred results
-    val deferredResults = this@mapAsync.map { item -> async { transform(item) } }
+    val deferredResults = mutableListOf<Deferred<R>>()
+
+    // Use a for-loop instead of .map to insert a delay
+    for (item in this@mapAsync) {
+        // Launch the new coroutine
+        val deferred = async { transform(item) }
+
+        // Add its Deferred to the list
+        deferredResults.add(deferred)
+
+        // If a delay is specified, wait before launching the next one
+        if (launchDelayMillis > 0) {
+            delay(launchDelayMillis)
+        }
+    }
+
+    // Wait for all the launched jobs to complete
+    deferredResults.awaitAll()
 
     deferredResults.awaitAll()
 }

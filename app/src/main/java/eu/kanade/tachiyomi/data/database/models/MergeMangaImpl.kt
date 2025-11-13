@@ -84,6 +84,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 WeebCentral -> sourceManager.weebCentral
                 Comick -> sourceManager.comick
                 Suwayomi -> sourceManager.suwayomi
+
             }
         }
 
