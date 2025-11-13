@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
-import java.text.ParseException
+import eu.kanade.tachiyomi.util.system.tryParse
 import java.text.SimpleDateFormat
 import java.util.Locale
 import okhttp3.FormBody
@@ -192,24 +192,15 @@ class WeebCentral : ReducedHttpSource() {
                         this.chapter_txt = chapterName.find { it.startsWith("Ch.") } ?: this.name
 
                         date_upload =
-                            element.selectFirst("time[datetime]")?.attr("datetime").parseDate()
+                            dateFormat.tryParse(
+                                element.selectFirst("time[datetime]")?.attr("datetime")
+                            )
                         scanlator = WeebCentral.name
                         mangadex_chapter_id = url.substringAfter("chapters/")
                     } to false
                 }
             }
         return Ok(chapters)
-    }
-
-    private fun String?.parseDate(): Long {
-        return try {
-            when (this == null) {
-                true -> 0L
-                false -> dateFormat.parse(this)!!.time
-            }
-        } catch (_: ParseException) {
-            0L
-        }
     }
 
     companion object {

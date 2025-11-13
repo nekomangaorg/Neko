@@ -107,6 +107,8 @@ class StatsViewModel() : ViewModel() {
                             mergedMangaList.count { it.mergeType == MergeType.Comick },
                         weebCentralMergeCount =
                             mergedMangaList.count { it.mergeType == MergeType.WeebCentral },
+                        kaganeMergeCount =
+                            mergedMangaList.count { it.mergeType == MergeType.Kagane },
                         globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                         downloadCount = libraryList.sumOf { getDownloadCount(it) },
                         tagCount =
