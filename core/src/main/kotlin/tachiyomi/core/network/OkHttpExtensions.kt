@@ -7,6 +7,7 @@ import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.Json.Default.encodeToString
 import kotlinx.serialization.json.okio.decodeFromBufferedSource
 import kotlinx.serialization.serializer
 import okhttp3.Call
@@ -134,6 +135,9 @@ context(jsonInstance: Json)
 inline fun <reified T> Response.parseAs(): T {
     return decodeFromJsonResponse(serializer(), this)
 }
+
+context(jsonInstance: Json)
+inline fun <reified T> T.toJsonString(): String = encodeToString(this)
 
 context(jsonInstance: Json)
 fun <T> decodeFromJsonResponse(deserializer: DeserializationStrategy<T>, response: Response): T {

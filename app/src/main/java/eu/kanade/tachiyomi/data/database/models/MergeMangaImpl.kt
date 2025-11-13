@@ -52,7 +52,12 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         eu.kanade.tachiyomi.source.online.merged.comick.Comick.name,
         eu.kanade.tachiyomi.source.online.merged.comick.Comick.baseUrl,
     ),
-    Suwayomi(5, eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name);
+    Suwayomi(5, eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name),
+    Kagane(
+        6,
+        eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.name,
+        eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
+    );
 
     companion object {
         fun getById(id: Int): MergeType {
@@ -68,6 +73,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 WeebCentral.scanlatorName -> WeebCentral
                 Comick.scanlatorName -> Comick
                 Suwayomi.scanlatorName -> Suwayomi
+                Kagane.scanlatorName -> Kagane
                 else -> null
             }
         }
@@ -84,7 +90,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 WeebCentral -> sourceManager.weebCentral
                 Comick -> sourceManager.comick
                 Suwayomi -> sourceManager.suwayomi
-
+                Kagane -> sourceManager.kagane
             }
         }
 

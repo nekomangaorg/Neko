@@ -24,6 +24,7 @@ object StatsConstants {
         val suwayomiMergeCount: Int = 0,
         val toonilyMergeCount: Int = 0,
         val weebCentralMergeCount: Int = 0,
+        val kaganeMergeCount: Int = 0,
         val averageMangaRating: Double = 0.0,
         val averageUserRating: Double = 0.0,
         val trackerCount: Int = 0,

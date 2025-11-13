@@ -70,6 +70,12 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
+                    val allDbMangaByUuid =
+                        db.getMangaList()
+                            .executeOnIO()
+                            .filter { it.favorite }
+                            .map { it.uuid() to it }
+
                     val mangaIdsToUpdate =
                         listManga.mapNotNull { networkManga ->
                             updateNotification(

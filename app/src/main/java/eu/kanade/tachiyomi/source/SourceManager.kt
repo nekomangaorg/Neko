@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.comick.Comick
+import eu.kanade.tachiyomi.source.online.merged.kagane.Kagane
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
@@ -21,6 +22,8 @@ open class SourceManager {
     val komga: Komga by lazy { Komga() }
 
     val suwayomi: Suwayomi by lazy { Suwayomi() }
+
+    val kagane: Kagane by lazy { Kagane() }
 
     val toonily: Toonily by lazy { Toonily() }
 
@@ -46,6 +49,7 @@ open class SourceManager {
                 Suwayomi.name,
                 Toonily.name,
                 WeebCentral.name,
+                Kagane.name,
             )
 
         val possibleIds = MdLang.entries.map { getId(it.lang) }
