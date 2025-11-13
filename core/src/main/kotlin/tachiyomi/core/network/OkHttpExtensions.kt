@@ -137,6 +137,8 @@ inline fun <reified T> Response.parseAs(): T {
 }
 
 context(jsonInstance: Json)
+inline fun <reified T> String.parseAs(json: Json = jsonInstance): T = json.decodeFromString(this)
+
 inline fun <reified T> T.toJsonString(): String = encodeToString(this)
 
 context(jsonInstance: Json)
