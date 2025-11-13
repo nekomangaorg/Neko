@@ -83,7 +83,7 @@ fun HorizontalCategoriesPage(
     }
 
     LaunchedEffect(libraryScreenState.pagerIndex) {
-        if (pagerState.currentPage != libraryScreenState.pagerIndex) {
+        if (pagerState.currentPage != libraryScreenState.pagerIndex && !pagerState.isScrollInProgress) {
             pagerState.scrollToPage(libraryScreenState.pagerIndex)
         }
     }
