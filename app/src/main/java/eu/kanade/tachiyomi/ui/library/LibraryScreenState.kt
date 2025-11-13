@@ -51,6 +51,8 @@ data class LibraryScreenState(
     val userCategories: PersistentList<CategoryItem> = persistentListOf(),
     val horizontalCategories: Boolean = false,
     val showLibraryButtonBar: Boolean = true,
+    val pagerIndex: Int = 0,
+    val scrollPositions: Map<Int, Int> = emptyMap(),
 )
 
 data class LibraryScreenActions(
@@ -70,6 +72,8 @@ data class LibraryScreenActions(
     val syncMangaToDex: () -> Unit,
     val markMangaChapters: (ChapterMarkActions) -> Unit,
     val filterToggled: (LibraryFilterType) -> Unit,
+    val pagerIndexChanged: (Int) -> Unit,
+    val scrollPositionChanged: (Int, Int) -> Unit,
 )
 
 data class LibrarySheetActions(

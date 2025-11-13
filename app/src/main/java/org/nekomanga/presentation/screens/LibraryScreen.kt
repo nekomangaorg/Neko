@@ -87,6 +87,8 @@ fun LibraryScreen(
                 clearSelectedManga = libraryViewModel::clearSelectedManga,
                 search = libraryViewModel::search,
                 onSearchMangaDex = onSearchMangaDex,
+                pagerIndexChanged = libraryViewModel::pagerIndexChanged,
+                scrollPositionChanged = libraryViewModel::scrollPositionChanged,
                 updateLibrary = {
                     if (!LibraryUpdateJob.isRunning(context)) {
                         LibraryUpdateJob.startNow(context)
