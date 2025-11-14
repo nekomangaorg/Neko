@@ -138,6 +138,7 @@ fun MergeSheet(
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                         MergeType.Comick -> R.drawable.ic_comick_logo
                                         MergeType.Kagane -> R.drawable.ic_kagane_logo
+                                        MergeType.MangaBall -> R.drawable.ic_mangaball_logo
                                     }
                                 MergeLogo(
                                     id = id,

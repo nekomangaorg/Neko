@@ -421,27 +421,5 @@ class Kagane : ReducedHttpSource() {
         const val domain = "kagane.org"
         const val apiUrl = "https://api.$domain"
         const val baseUrl = "https://$domain"
-
-        private const val CONTENT_RATING = "pref_content_rating"
-        private const val CONTENT_RATING_DEFAULT = "pornographic"
-        internal val CONTENT_RATINGS = arrayOf("safe", "suggestive", "erotica", "pornographic")
-
-        private const val DATA_SAVER = "data_saver_default"
     }
-
-    // ============================= Filters ==============================
-
-    private val metadataClient =
-        client
-            .newBuilder()
-            .addNetworkInterceptor { chain ->
-                chain
-                    .proceed(chain.request())
-                    .newBuilder()
-                    .header("Cache-Control", "max-age=${24 * 60 * 60}")
-                    .removeHeader("Pragma")
-                    .removeHeader("Expires")
-                    .build()
-            }
-            .build()
 }
