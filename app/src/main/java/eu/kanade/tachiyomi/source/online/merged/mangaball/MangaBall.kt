@@ -151,7 +151,7 @@ class MangaBall : ReducedHttpSource() {
 
                             chapterName.add(chapterNum)
 
-                            chapterName.add(translation.name.trim())
+                            chapterName.add(normalizeChapterName(translation.name, chapter.number))
 
                             name = chapterName.joinToString(" ")
 
@@ -172,6 +172,45 @@ class MangaBall : ReducedHttpSource() {
             }
 
         return Ok(chapters.map { it to false })
+    }
+
+    fun normalizeChapterName(name: String, number: Float): String {
+        val trimmedName = name.trim()
+
+        // Regex to find "Chapter XXX:", "Ch. 12:", "Chapter 12.1 - ", etc.
+        // This matches the prefix AND a separator (like ':', '-', '—')
+        // and returns *only* the text after it.
+        val prefixRegex = Regex("""^(?i)(Chapter|Ch\.?)\s+\d+(\.\d+)?\s*[:\-–—]\s*(.*)$""")
+        val prefixMatch = prefixRegex.find(trimmedName)
+        if (prefixMatch != null) {
+            // Found a prefix and a title. Return just the title part.
+            // groupValues[3] is the (.*) part
+            return prefixMatch.groupValues[3].trim()
+        }
+
+        // Regex to find if the *entire string* is just a chapter identifier
+        // (e.f., "Chapter 1506", "Ch. 12", "Chapter 04")
+        val fullMatchRegex = Regex("""^(?i)(Chapter|Ch\.?)\s+\d+(\.\d+)?\s*$""")
+        if (fullMatchRegex.matches(trimmedName)) {
+            // The name is just "Chapter XXX", no title.
+            return ""
+        }
+
+        // Check if the name is *just* the number (e.g., "77.1")
+        val numAsStr =
+            if (number == number.toInt().toFloat()) {
+                number.toInt().toString() // "77"
+            } else {
+                number.toString() // "77.1"
+            }
+
+        if (trimmedName == numAsStr) {
+            return ""
+        }
+
+        // If no patterns matched, the name is already a valid title.
+        // (e.g., "Official Translation", "The Island of Destiny")
+        return trimmedName
     }
 
     private val groupIdRegex = Regex("""[a-z0-9]{24}""")

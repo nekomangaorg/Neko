@@ -37,8 +37,3 @@ class Chapter(
 )
 
 @Serializable class Group(@SerialName("_id") val id: String, val name: String)
-
-@Serializable
-class Yoast(@SerialName("@graph") val graph: List<Graph>) {
-    @Serializable class Graph(@SerialName("@type") val type: String, val url: String? = null)
-}

@@ -59,7 +59,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
     ),
     MangaBall(
-        6,
+        7,
         eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.name,
         eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.baseUrl,
     );
