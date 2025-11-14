@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -87,6 +86,11 @@ class StatsViewModel() : ViewModel() {
                         }
                     }
 
+                mergedMangaList
+                    .groupBy { it.mergeType }
+                    .map { it.key to it.value.size }
+                    .toPersistentList()
+
                 _simpleState.value =
                     StatsConstants.SimpleState(
                         screenState = StatsConstants.ScreenState.Simple,
@@ -96,19 +100,11 @@ class StatsViewModel() : ViewModel() {
                         bookmarkCount = libraryList.sumOf { it.bookmarkCount },
                         unavailableCount = libraryList.sumOf { it.unavailableCount },
                         trackedCount = getMangaByTrackCount(libraryList, tracks),
-                        komgaMergeCount = mergedMangaList.count { it.mergeType == MergeType.Komga },
-                        mangaLifeMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.MangaLife },
-                        suwayomiMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.Suwayomi },
-                        toonilyMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.Toonily },
-                        comickMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.Comick },
-                        weebCentralMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.WeebCentral },
-                        kaganeMergeCount =
-                            mergedMangaList.count { it.mergeType == MergeType.Kagane },
+                        mergeCounts =
+                            mergedMangaList
+                                .groupBy { it.mergeType }
+                                .map { it.key to it.value.size }
+                                .toPersistentList(),
                         globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                         downloadCount = libraryList.sumOf { getDownloadCount(it) },
                         tagCount =

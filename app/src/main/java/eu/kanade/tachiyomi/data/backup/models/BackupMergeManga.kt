@@ -12,13 +12,20 @@ data class BackupMergeManga(
     @ProtoNumber(3) var coverUrl: String = "",
     @ProtoNumber(4) var mergeType: Int,
 ) {
-    fun toMergeMangaImpl(): MergeMangaImpl {
+    fun toMergeMangaImpl(): MergeMangaImpl? {
+
+        val mergeType = MergeType.getById(this.mergeType)
+
+        if (mergeType == MergeType.Invalid) {
+            return null
+        }
+
         return MergeMangaImpl(
             mangaId = 0L,
             title = this.title,
             url = this.url,
             coverUrl = this.coverUrl,
-            mergeType = MergeType.getById(this.mergeType),
+            mergeType = mergeType,
         )
     }
 

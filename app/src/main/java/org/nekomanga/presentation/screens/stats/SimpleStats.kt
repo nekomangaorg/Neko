@@ -65,7 +65,12 @@ fun SimpleStats(
                 false -> statsState.lastLibraryUpdateDuration
             }
 
-        listOf(
+        val mergeCounts =
+            statsState.mergeCounts
+                .filter { it.second > 0 }
+                .map { (it.first.scanlatorName + " merged") to it.second.toString() }
+
+        (listOf(
                 numberFormat.format(statsState.mangaCount).toString() to
                     context.getString(R.string.total_manga),
                 numberFormat.format(statsState.chapterCount).toString() to
@@ -90,19 +95,7 @@ fun SimpleStats(
                     context.getString(R.string.manga_tracked),
                 numberFormat.format(statsState.tagCount).toString() to
                     context.getString(R.string.total_tags),
-                numberFormat.format(statsState.komgaMergeCount).toString() to
-                    context.getString(R.string.komga_merged),
-                numberFormat.format(statsState.mangaLifeMergeCount).toString() to
-                    context.getString(R.string.mangalife_merged),
-                numberFormat.format(statsState.comickMergeCount).toString() to
-                    context.getString(R.string.comick_merged),
-                numberFormat.format(statsState.suwayomiMergeCount).toString() to
-                    context.getString(R.string.suwayomi_merged),
-                numberFormat.format(statsState.toonilyMergeCount).toString() to
-                    context.getString(R.string.toonily_merged),
-                numberFormat.format(statsState.weebCentralMergeCount).toString() to
-                    context.getString(R.string.weebcentral_merged),
-            )
+            ) + mergeCounts)
             .toPersistentList()
     }
 

@@ -44,4 +44,15 @@ interface MergeMangaQueries : DbProvider {
                     .build()
             )
             .prepare()
+
+    fun deleteMergeManga(mangaId: Long) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(MergeMangaTable.TABLE)
+                    .where("${MergeMangaTable.COL_MANGA_ID} = ?")
+                    .whereArgs(mangaId)
+                    .build()
+            )
+            .prepare()
 }

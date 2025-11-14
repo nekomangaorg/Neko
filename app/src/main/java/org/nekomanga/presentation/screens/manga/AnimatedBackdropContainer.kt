@@ -111,7 +111,8 @@ fun AnimatedBackdropContainer(
         BackDrop(
             themeColorState = themeColorState,
             artwork = artwork,
-            showBackdrop = showBackdrop,
+            showBackdropOverlay = showBackdrop,
+            backdropOverlayModifier = Modifier.alpha(animatedGradientAlpha),
             modifier = Modifier.matchParentSize(),
             generatePalette = generatePalette,
         )

@@ -76,7 +76,7 @@ data class BackupManga(
     }
 
     fun getMergeMangaImpl(): List<MergeMangaImpl> {
-        return mergeMangaList.map { it.toMergeMangaImpl() }
+        return mergeMangaList.mapNotNull { it.toMergeMangaImpl() }
     }
 
     fun getChaptersImpl(): List<ChapterImpl> {

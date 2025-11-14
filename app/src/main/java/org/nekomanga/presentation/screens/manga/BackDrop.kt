@@ -21,7 +21,8 @@ import org.nekomanga.presentation.components.theme.ThemeColorState
 fun BackDrop(
     themeColorState: ThemeColorState,
     artwork: Artwork,
-    showBackdrop: Boolean,
+    showBackdropOverlay: Boolean,
+    backdropOverlayModifier: Modifier,
     modifier: Modifier = Modifier,
     generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
@@ -37,10 +38,11 @@ fun BackDrop(
         }
 
     Box(modifier = modifier) {
-        if (showBackdrop) {
+        if (showBackdropOverlay) {
             Box(
                 modifier =
-                    Modifier.matchParentSize()
+                    backdropOverlayModifier
+                        .matchParentSize()
                         .background(themeColorState.primaryColor.copy(alpha = .25f))
             )
         }

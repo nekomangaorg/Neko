@@ -6,8 +6,6 @@ import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
-import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -19,7 +17,6 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
-import okio.source
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -173,18 +170,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
             val dbMangaExists = dbManga != null
 
             // needed for legacy merge manga
-            val mergeMangaList =
-                if (manga.merge_manga_url != null) {
-                    listOf(
-                        MergeMangaImpl(
-                            mangaId = 0L,
-                            url = manga.merge_manga_url!!,
-                            mergeType = MergeType.MangaLife,
-                        )
-                    )
-                } else {
-                    backupManga.getMergeMangaImpl()
-                }
+            val mergeMangaList = backupManga.getMergeMangaImpl()
 
             if (dbMangaExists) {
                 restoreHelper.restoreMangaNoFetch(manga, dbManga!!)

@@ -844,8 +844,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 MergeType.entries
                     .filter { mergeType ->
                         when (mergeType) {
-                            MergeType.MangaLife,
-                            MergeType.Comick -> false
+                            MergeType.Invalid,
+                            MergeType.Kagane -> false
                             // Conditionally keep these types if they are configured
                             MergeType.Komga -> sourceManager.komga.isConfigured()
                             MergeType.Suwayomi -> sourceManager.suwayomi.isConfigured()
@@ -1378,7 +1378,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun removeMergedManga(mergeType: MergeType) {
         viewModelScope.launchIO {
             val dbManga = db.getManga(mangaId).executeOnIO()!!
-            db.deleteMergeMangaForType(mangaId, mergeType).executeAsBlocking()
+            db.deleteMergeManga(mangaId).executeAsBlocking()
             val (mergedChapters, _) =
                 db.getChapters(dbManga).executeOnIO().partition {
                     it.isMergedChapterOfType(mergeType)

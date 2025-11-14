@@ -132,13 +132,12 @@ fun MergeSheet(
                                 val id =
                                     when (validMergeType) {
                                         MergeType.Komga -> R.drawable.ic_komga_logo
-                                        MergeType.MangaLife -> R.drawable.ic_mangalife_logo
                                         MergeType.Suwayomi -> R.drawable.ic_suwayomi_logo
                                         MergeType.Toonily -> R.drawable.ic_toonily
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
-                                        MergeType.Comick -> R.drawable.ic_comick_logo
                                         MergeType.Kagane -> R.drawable.ic_kagane_logo
                                         MergeType.MangaBall -> R.drawable.ic_mangaball_logo
+                                        MergeType.Invalid -> R.drawable.ic_neko_yokai
                                     }
                                 MergeLogo(
                                     id = id,

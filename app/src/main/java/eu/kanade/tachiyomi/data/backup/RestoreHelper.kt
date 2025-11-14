@@ -17,8 +17,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.isLegacyMergedChapter
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -384,9 +382,6 @@ class RestoreHelper(val context: Context) {
         chapters.forEach { chapter ->
             val dbChapter = dbChapters.find { it.url == chapter.url }
 
-            if (chapter.isLegacyMergedChapter()) {
-                chapter.scanlator = MangaLife.name
-            }
             if (dbChapter != null) {
                 chapter.id = dbChapter.id
 

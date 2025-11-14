@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.more.stats
 
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.manga.MangaContentRating
@@ -18,13 +19,7 @@ object StatsConstants {
         val globalUpdateCount: Int = 0,
         val downloadCount: Int = 0,
         val tagCount: Int = 0,
-        val komgaMergeCount: Int = 0,
-        val mangaLifeMergeCount: Int = 0,
-        val comickMergeCount: Int = 0,
-        val suwayomiMergeCount: Int = 0,
-        val toonilyMergeCount: Int = 0,
-        val weebCentralMergeCount: Int = 0,
-        val kaganeMergeCount: Int = 0,
+        val mergeCounts: PersistentList<Pair<MergeType, Int>> = persistentListOf(),
         val averageMangaRating: Double = 0.0,
         val averageUserRating: Double = 0.0,
         val trackerCount: Int = 0,

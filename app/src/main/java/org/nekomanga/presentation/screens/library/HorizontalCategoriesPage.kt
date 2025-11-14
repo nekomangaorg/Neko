@@ -67,7 +67,7 @@ fun HorizontalCategoriesPage(
     val pagerState =
         rememberPagerState(
             initialPage = libraryScreenState.pagerIndex,
-            initialPageOffsetFraction = 0f
+            initialPageOffsetFraction = 0f,
         ) {
             pageCount
         }
@@ -83,7 +83,10 @@ fun HorizontalCategoriesPage(
     }
 
     LaunchedEffect(libraryScreenState.pagerIndex) {
-        if (pagerState.currentPage != libraryScreenState.pagerIndex && !pagerState.isScrollInProgress) {
+        if (
+            pagerState.currentPage != libraryScreenState.pagerIndex &&
+                !pagerState.isScrollInProgress
+        ) {
             pagerState.scrollToPage(libraryScreenState.pagerIndex)
         }
     }
@@ -148,13 +151,13 @@ fun HorizontalCategoriesPage(
                         val gridState =
                             rememberLazyGridState(
                                 initialFirstVisibleItemIndex =
-                                    libraryScreenState.scrollPositions[page] ?: 0,
+                                    libraryScreenState.scrollPositions[page] ?: 0
                             )
 
                         LaunchedEffect(gridState.firstVisibleItemIndex) {
                             libraryScreenActions.scrollPositionChanged(
                                 page,
-                                gridState.firstVisibleItemIndex
+                                gridState.firstVisibleItemIndex,
                             )
                         }
                         Column {
@@ -265,12 +268,12 @@ fun HorizontalCategoriesPage(
                         val listState =
                             rememberLazyListState(
                                 initialFirstVisibleItemIndex =
-                                    libraryScreenState.scrollPositions[page] ?: 0,
+                                    libraryScreenState.scrollPositions[page] ?: 0
                             )
                         LaunchedEffect(listState.firstVisibleItemIndex) {
                             libraryScreenActions.scrollPositionChanged(
                                 page,
-                                listState.firstVisibleItemIndex
+                                listState.firstVisibleItemIndex,
                             )
                         }
                         Column(modifier = Modifier.fillMaxSize()) {

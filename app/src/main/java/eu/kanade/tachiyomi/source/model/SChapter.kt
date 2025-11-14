@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import java.io.Serializable
 import org.nekomanga.constants.Constants
 
@@ -76,8 +75,6 @@ interface SChapter : Serializable {
 
 fun SChapter.isLocalSource() =
     this.scanlator?.equals(Constants.LOCAL_SOURCE) == true && this.isUnavailable
-
-fun SChapter.isLegacyMergedChapter() = this.scanlator?.equals(MangaLife.oldName) == true
 
 fun SChapter.isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 

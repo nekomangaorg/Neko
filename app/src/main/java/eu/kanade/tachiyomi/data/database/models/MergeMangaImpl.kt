@@ -30,53 +30,46 @@ data class SourceMergeManga(
     }
 }
 
+// id 0 was MangaLife, 4 was Comick,
 enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String = "") {
-    MangaLife(
-        0,
-        eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.name,
-        eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.baseUrl,
-    ),
-    Komga(1, eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
+    Invalid(id = -1, scanlatorName = "Invalid Merge source"),
+    Komga(id = 1, scanlatorName = eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
     Toonily(
-        2,
-        eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name,
-        eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.baseUrl,
+        id = 2,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.baseUrl,
     ),
     WeebCentral(
-        3,
-        eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name,
-        eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.baseUrl,
+        id = 3,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.baseUrl,
     ),
-    Comick(
-        4,
-        eu.kanade.tachiyomi.source.online.merged.comick.Comick.name,
-        eu.kanade.tachiyomi.source.online.merged.comick.Comick.baseUrl,
+    Suwayomi(
+        id = 5,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name,
     ),
-    Suwayomi(5, eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name),
     Kagane(
-        6,
-        eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.name,
-        eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
+        id = 6,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
     ),
     MangaBall(
-        7,
-        eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.name,
-        eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.baseUrl,
+        id = 7,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.baseUrl,
     );
 
     companion object {
         fun getById(id: Int): MergeType {
-            return entries.firstOrNull { it.id == id } ?: MangaLife
+            return entries.firstOrNull { it.id == id } ?: Invalid
         }
 
         fun getMergeTypeFromName(name: String?): MergeType? {
             val splitName = name?.split(Constants.SCANLATOR_SEPARATOR)?.firstOrNull()
             return when (splitName) {
-                MangaLife.scanlatorName -> MangaLife
                 Komga.scanlatorName -> Komga
                 Toonily.scanlatorName -> Toonily
                 WeebCentral.scanlatorName -> WeebCentral
-                Comick.scanlatorName -> Comick
                 Suwayomi.scanlatorName -> Suwayomi
                 Kagane.scanlatorName -> Kagane
                 MangaBall.scanlatorName -> MangaBall
@@ -90,14 +83,13 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
 
         fun getSource(mergeType: MergeType, sourceManager: SourceManager): ReducedHttpSource {
             return when (mergeType) {
-                MangaLife -> sourceManager.mangaLife
                 Komga -> sourceManager.komga
                 Toonily -> sourceManager.toonily
                 WeebCentral -> sourceManager.weebCentral
-                Comick -> sourceManager.comick
                 Suwayomi -> sourceManager.suwayomi
                 Kagane -> sourceManager.kagane
                 MangaBall -> sourceManager.mangaBall
+                Invalid -> sourceManager.mangaBall
             }
         }
 
