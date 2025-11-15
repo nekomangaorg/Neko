@@ -510,7 +510,7 @@ private fun MangaScreenWrapper(
 
     LaunchedEffect(screenState.initialized, screenState.firstLoad) {
         if (screenState.initialized && !screenState.firstLoad) {
-            delay(500L)
+            delay(250L)
             isInitialized = true
         } else {
             isInitialized = false

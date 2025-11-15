@@ -33,30 +33,24 @@ fun AnimatedBackdropContainer(
     backdropSize: MangaConstants.BackdropSize,
     themeColorState: ThemeColorState,
     artwork: Artwork,
-    initialized: Boolean,
-    showBackdrop: Boolean,
+    showBackdropOverlay: Boolean,
     generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
 
     val screenHeight = LocalConfiguration.current.screenHeightDp
 
     val targetHeight: Dp by
-        remember(isInitialized, isSearching, backdropSize, showBackdrop, screenHeight) {
+        remember(isInitialized, isSearching, backdropSize, screenHeight) {
             derivedStateOf {
-                // Use the 250.dp logic from your original file
-                if (!showBackdrop) {
-                    250.dp
-                } else {
-                    when {
-                        !isInitialized -> screenHeight.dp
-                        isSearching -> (screenHeight / 4).dp
-                        else ->
-                            when (backdropSize) {
-                                MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
-                                MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
-                                else -> (screenHeight / 2.1).dp
-                            }
-                    }
+                when {
+                    !isInitialized -> screenHeight.dp
+                    isSearching -> (screenHeight / 4).dp
+                    else ->
+                        when (backdropSize) {
+                            MangaConstants.BackdropSize.Small -> (screenHeight / 2.8).dp
+                            MangaConstants.BackdropSize.Large -> (screenHeight / 1.2).dp
+                            else -> (screenHeight / 2.1).dp
+                        }
                 }
             }
         }
@@ -106,13 +100,38 @@ fun AnimatedBackdropContainer(
             baseModifier.height(animatedHeight)
         }
 
+    val animatedOverlayAlpha by
+        transition.animateFloat(
+            label = "OverlayAlphaAnimation",
+            transitionSpec = {
+                // Case 1: Shrinking from full-screen
+                if (this.initialState == screenHeight.dp && this.targetState < this.initialState) {
+                    // Delay fade-in until *after* the 600ms height animation
+                    tween(durationMillis = 300)
+                } else {
+                    // Fade out immediately (or cross-fade)
+                    tween(durationMillis = 200)
+                }
+            },
+        ) { targetDp ->
+            // The overlay should show IF:
+            // 1. The master boolean `showBackdropOverlay` is true
+            // 2. The target height is NOT full-screen
+            // 3. The target height is NOT hidden (250.dp)
+            if (showBackdropOverlay && targetDp != screenHeight.dp && targetDp != 250.dp) {
+                1f
+            } else {
+                // Hide if disabled, or full-screen, or hidden.
+                0f
+            }
+        }
+
     // 4. Apply the animated height to the BackDrop modifier
     Box(modifier = heightModifier) {
         BackDrop(
             themeColorState = themeColorState,
             artwork = artwork,
-            showBackdropOverlay = showBackdrop,
-            backdropOverlayModifier = Modifier.alpha(animatedGradientAlpha),
+            backdropOverlayAlpha = animatedOverlayAlpha,
             modifier = Modifier.matchParentSize(),
             generatePalette = generatePalette,
         )

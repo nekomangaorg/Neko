@@ -21,8 +21,7 @@ import org.nekomanga.presentation.components.theme.ThemeColorState
 fun BackDrop(
     themeColorState: ThemeColorState,
     artwork: Artwork,
-    showBackdropOverlay: Boolean,
-    backdropOverlayModifier: Modifier,
+    backdropOverlayAlpha: Float,
     modifier: Modifier = Modifier,
     generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
@@ -38,12 +37,13 @@ fun BackDrop(
         }
 
     Box(modifier = modifier) {
-        if (showBackdropOverlay) {
+        if (backdropOverlayAlpha > 0f) {
             Box(
                 modifier =
-                    backdropOverlayModifier
-                        .matchParentSize()
+                    Modifier.matchParentSize()
                         .background(themeColorState.primaryColor.copy(alpha = .25f))
+                        // Apply the animated alpha from the transition
+                        .alpha(backdropOverlayAlpha)
             )
         }
 
