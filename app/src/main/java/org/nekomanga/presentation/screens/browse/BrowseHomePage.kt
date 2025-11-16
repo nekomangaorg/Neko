@@ -69,15 +69,15 @@ fun BrowseHomePage(
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = contentPadding) {
         items(
             items = browseHomePageManga,
-            key = { homePageManga ->
-                homePageManga.displayScreenType.hashCode()
-            },
+            key = { homePageManga -> homePageManga.displayScreenType.hashCode() },
         ) { homePageManga ->
             val headerText = homePageManga.displayScreenType.title.asString()
             val mangaList = homePageManga.displayManga.filter { it.isVisible }
 
             if (mangaList.isNotEmpty()) {
-                TextButton(onClick = { titleClick(homePageManga.displayScreenType.toSerializable()) }) {
+                TextButton(
+                    onClick = { titleClick(homePageManga.displayScreenType.toSerializable()) }
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,

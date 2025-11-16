@@ -148,10 +148,15 @@ class MangaBall : ReducedHttpSource() {
                             val number = chapter.number.toString().removeSuffix(".0")
 
                             val chapterNum = "Ch.$number"
+                            chapter_txt = chapterNum
 
                             chapterName.add(chapterNum)
 
-                            chapterName.add(normalizeChapterName(translation.name, chapter.number))
+                            val title = normalizeChapterName(translation.name, chapter.number)
+                            if (title.isNotBlank()) {
+                                chapterName.add("-")
+                                chapterName.add(title)
+                            }
 
                             name = chapterName.joinToString(" ")
 
