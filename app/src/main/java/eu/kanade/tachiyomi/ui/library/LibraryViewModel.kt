@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
-import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.system.asFlow
@@ -83,8 +83,8 @@ class LibraryViewModel() : ViewModel() {
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
-    val chapterFilter: ChapterFilter = Injekt.get()
     val workManager: WorkManager = Injekt.get()
+    val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
 
     private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
@@ -1063,10 +1063,12 @@ class LibraryViewModel() : ViewModel() {
 
             displayMangaList.mapAsync { displayManga ->
                 val dbManga = db.getManga(displayManga.mangaId).executeOnIO()!!
-                val dbChapters =
-                    chapterFilter
+                val chapterItems =
+                    chapterItemFilter
                         .filterChaptersByScanlatorsAndLanguage(
-                            db.getChapters(dbManga).executeOnIO(),
+                            db.getChapters(dbManga).executeOnIO().mapNotNull {
+                                it.toSimpleChapter()?.toChapterItem()
+                            },
                             dbManga,
                             mangadexPreferences,
                             libraryPreferences,
@@ -1075,22 +1077,36 @@ class LibraryViewModel() : ViewModel() {
 
                 when (downloadAction) {
                     DownloadAction.DownloadAll -> {
-                        downloadManager.downloadChapters(dbManga, dbChapters)
+                        downloadManager.downloadChapters(
+                            dbManga,
+                            chapterItems.map { it.chapter.toDbChapter() },
+                        )
                     }
                     is DownloadAction.DownloadNextUnread -> {
                         val amount = downloadAction.numberToDownload
-                        val unreadDbChapters = dbChapters.filterNot { it.read }.take(amount)
+                        val unreadDbChapters =
+                            chapterItems
+                                .filterNot { it.chapter.read }
+                                .take(amount)
+                                .map { it.chapter.toDbChapter() }
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
-                        val unreadDbChapters = dbChapters.filterNot { it.read }
+                        val unreadDbChapters =
+                            chapterItems
+                                .filterNot { it.chapter.read }
+                                .map { it.chapter.toDbChapter() }
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
-                        downloadManager.deleteChapters(dbManga, dbChapters)
+                        downloadManager.deleteChapters(
+                            dbManga,
+                            chapterItems.map { it.chapter.toDbChapter() },
+                        )
                     }
                     DownloadAction.RemoveRead -> {
-                        val readDbChapters = dbChapters.filter { it.read }
+                        val readDbChapters =
+                            chapterItems.filter { it.chapter.read }.map { it.chapter.toDbChapter() }
                         downloadManager.deleteChapters(dbManga, readDbChapters)
                     }
                     else -> Unit

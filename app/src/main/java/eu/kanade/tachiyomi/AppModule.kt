@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
-import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -87,8 +86,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { DownloadManager(app) }
 
         addSingletonFactory { TrackManager(app) }
-
-        addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { ChapterItemFilter() }
 
@@ -162,8 +159,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(AppSnackbarManager())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
-
-        addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { MangaShortcutManager() }
 

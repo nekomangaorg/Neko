@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import org.nekomanga.domain.chapter.ChapterItem
 
 /** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
@@ -75,20 +76,20 @@ fun getChapterNum(chapter: SChapter): Float? {
     }
 }
 
+fun getChapterNum(chapter: ChapterItem): Float? {
+    return getChapterNum(chapter.chapter.toDbChapter())
+}
+
 private fun String.subStringFloatOrNull(delimiter: String): Float? {
     return this.substringAfter(delimiter)
         .takeWhile { it.isWhitespace() || it.isDigit() || it == '.' }
         .toFloatOrNull()
 }
 
-// fun getChapterNumInt(chapter: SChapter): Int? {
-//    val float = getChapterNum(chapter)
-//    return when (float != null) {
-//        true -> floor(float).toInt()
-//        else -> null
-//    }
-// }
-
 fun getVolumeNum(chapter: SChapter): Int? {
     return chapter.vol.toIntOrNull()
+}
+
+fun getVolumeNum(chapter: ChapterItem): Int? {
+    return getVolumeNum(chapter.chapter.toDbChapter())
 }

@@ -41,7 +41,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
-import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -97,7 +96,6 @@ constructor(
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
     private val readerPreferences: ReaderPreferences = Injekt.get(),
     private val securityPreferences: SecurityPreferences = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
 ) : ViewModel() {
@@ -155,23 +153,17 @@ constructor(
 
         val chapterItemSort = ChapterItemSort()
 
-        val filteredChapterItems = chapterItemFilter.filterChapters(allChapterItems, manga)
-
-        val sortedChapterItems =
-            filteredChapterItems.sortedWith(chapterItemSort.sortComparator(manga, true))
+        val selectedChapterItem =
+            allChapterItems.find { it.chapter.id == chapterId }
+                ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            if (sortedChapterItems.any { it.chapter.id == chapterId }) {
-                sortedChapterItems
-            } else {
-                val selectedChapterItem =
-                    allChapterItems.find { it.chapter.id == chapterId }
-                        ?: error("Selected chapter $chapterId not in allChapterItems")
-                // Add selected chapter back and re-sort
-                (sortedChapterItems + selectedChapterItem).sortedWith(
-                    chapterItemSort.sortComparator(manga, true)
-                )
-            }
+            chapterItemFilter.filterChaptersForReader(
+                allChapterItems,
+                manga,
+                chapterItemSort.sortComparator(manga, true), // Ascending sort for reader
+                selectedChapterItem,
+            )
 
         // 6. Map back to ReaderChapter
         chaptersForReader.map { it.chapter.toDbChapter() }.map(::ReaderChapter)

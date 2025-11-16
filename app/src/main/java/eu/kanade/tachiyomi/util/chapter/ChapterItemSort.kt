@@ -15,15 +15,15 @@ class ChapterItemSort(
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
 ) {
 
-    fun <T : ChapterItem> getChaptersSorted(manga: Manga, rawChapters: List<T>): List<T> {
+    fun getChaptersSorted(manga: Manga, rawChapters: List<ChapterItem>): List<ChapterItem> {
         return chapterFilter.filterChapters(rawChapters, manga).sortedWith(sortComparator(manga))
     }
 
-    fun <T : ChapterItem> getNextUnreadChapter(
+    fun getNextUnreadChapter(
         manga: Manga,
-        rawChapters: List<T>,
+        rawChapters: List<ChapterItem>,
         andFiltered: Boolean = true,
-    ): T? {
+    ): ChapterItem? {
         val chapters =
             when {
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
@@ -34,10 +34,7 @@ class ChapterItemSort(
         }
     }
 
-    fun <T : ChapterItem> sortComparator(
-        manga: Manga,
-        forceAscending: Boolean = false,
-    ): Comparator<T> {
+    fun sortComparator(manga: Manga, forceAscending: Boolean = false): Comparator<ChapterItem> {
         // arrow down in UI is ASC.  The below sorts them all that way.
         val sortAsc =
             if (forceAscending) {
@@ -59,10 +56,10 @@ class ChapterItemSort(
             Manga.CHAPTER_SORTING_UPLOAD_DATE ->
                 when (sortAsc) {
                     true ->
-                        compareBy<T> { it.chapter.dateUpload }
+                        compareBy<ChapterItem> { it.chapter.dateUpload }
                             .thenByDescending { it.chapter.smartOrder }
                     false ->
-                        compareByDescending<T> { it.chapter.dateUpload }
+                        compareByDescending<ChapterItem> { it.chapter.dateUpload }
                             .thenBy { it.chapter.smartOrder }
                 }
             else -> { // default is Smart Sort

@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.isAvailable
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -25,7 +26,7 @@ class ChapterItemFilter(
 ) {
 
     /** filters chapters based on the manga values */
-    fun <T : ChapterItem> filterChapters(chapters: List<T>, manga: Manga): List<T> {
+    fun filterChapters(chapters: List<ChapterItem>, manga: Manga): List<ChapterItem> {
         val readEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_READ
         val unreadEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNREAD
         val downloadEnabled =
@@ -80,13 +81,108 @@ class ChapterItemFilter(
         }
     }
 
+    /** filter chapters for the reader */
+    fun filterChaptersForReader(
+        chapters: List<ChapterItem>,
+        manga: Manga,
+        comparator: Comparator<ChapterItem>,
+        selectedChapterItem: ChapterItem? = null,
+    ): List<ChapterItem> {
+        // 1. Filter by isAvailable
+        var filteredChapters =
+            chapters.filter {
+                val dbChapter = it.chapter.toDbChapter()
+                val isDownloaded = downloadManager.isChapterDownloaded(dbChapter, manga)
+                // Use the extension function for Chapter
+                dbChapter.isAvailable(isDownloaded)
+            }
+
+        // 2. Filter by scanlators/language
+        filteredChapters =
+            filterChaptersByScanlatorsAndLanguage(
+                filteredChapters,
+                manga,
+                mangaDexPreferences,
+                libraryPreferences,
+            )
+
+        // 3. Filter out unsupported groups
+        filteredChapters =
+            filteredChapters.filter {
+                it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList
+            }
+
+        // 4. Check if reader filters are enabled
+        if (
+            !readerPreferences.skipRead().get() &&
+                !readerPreferences.skipFiltered().get() &&
+                !readerPreferences.skipDuplicates().get()
+        ) {
+            return filteredChapters.sortedWith(comparator)
+        }
+
+        // 5. Apply skipRead
+        if (readerPreferences.skipRead().get()) {
+            filteredChapters = filteredChapters.filter { !it.chapter.read }
+        }
+
+        // 6. Apply skipFiltered (use the *other* filter method)
+        if (readerPreferences.skipFiltered().get()) {
+            filteredChapters = filterChapters(filteredChapters, manga)
+        }
+
+        // 7. Sort
+        filteredChapters = filteredChapters.sortedWith(comparator)
+
+        // 8. Apply skipDuplicates
+        if (readerPreferences.skipDuplicates().get()) {
+            filteredChapters =
+                filteredChapters.partitionByChapterNumber().mapNotNull { chapterItems ->
+                    chapterItems.find { it.chapter.id == selectedChapterItem?.chapter?.id }
+                        ?: chapterItems.find {
+                            it.chapter.scanlator == selectedChapterItem?.chapter?.scanlator &&
+                                it.chapter.uploader == selectedChapterItem?.chapter?.uploader
+                        }
+                        ?: chapterItems.maxByOrNull {
+                            val mainScans =
+                                ChapterUtil.getScanlators(it.chapter.scanlator).toMutableSet()
+                            if (Constants.NO_GROUP in mainScans)
+                                it.chapter.uploader?.let { up -> mainScans.add(up) }
+
+                            val currScans =
+                                ChapterUtil.getScanlators(selectedChapterItem?.chapter?.scanlator)
+                                    .toMutableSet()
+                            if (Constants.NO_GROUP in currScans)
+                                selectedChapterItem?.chapter?.uploader?.let { up ->
+                                    currScans.add(up)
+                                }
+
+                            mainScans.intersect(currScans).size
+                        }
+                }
+        }
+
+        // 9. Add selected chapter back if filtered
+        if (selectedChapterItem?.chapter?.id != null) {
+            val find = filteredChapters.find { it.chapter.id == selectedChapterItem.chapter.id }
+            if (find == null) {
+                val mutableList = filteredChapters.toMutableList()
+                mutableList.add(selectedChapterItem)
+                // Re-sort after adding
+                filteredChapters = mutableList.sortedWith(comparator)
+            }
+        }
+
+        return filteredChapters
+    }
+
     /** filters chapters for scanlators */
-    private fun <T : ChapterItem> filterChaptersByScanlatorsAndLanguage(
-        chapters: List<T>,
+    fun filterChaptersByScanlatorsAndLanguage(
+        chapters: List<ChapterItem>,
         manga: Manga,
         mangaDexPreferences: MangaDexPreferences,
         libraryPreferences: LibraryPreferences,
-    ): List<T> {
+    ): List<ChapterItem> {
 
         val blockedGroups = mangaDexPreferences.blockedGroups().get().toSet()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
@@ -133,5 +229,26 @@ class ChapterItemFilter(
                 )
             }
             .toList()
+    }
+
+    // Adapted from https://stackoverflow.com/a/65465410
+    fun List<ChapterItem>.partitionByChapterNumber(): List<List<ChapterItem>> {
+        val result = mutableListOf<List<ChapterItem>>()
+        var currentList = mutableListOf<ChapterItem>()
+        this.forEachIndexed { i, ch ->
+            currentList.add(ch)
+            if (
+                i + 1 >= this.size ||
+                    getChapterNum(ch) == null ||
+                    getChapterNum(ch) != getChapterNum(this[i + 1]) ||
+                    (getVolumeNum(ch) != getVolumeNum(this[i + 1]) &&
+                        getVolumeNum(ch) != null &&
+                        getVolumeNum(this[i + 1]) != null)
+            ) {
+                result.add(currentList.toList())
+                currentList = mutableListOf()
+            }
+        }
+        return result
     }
 }
