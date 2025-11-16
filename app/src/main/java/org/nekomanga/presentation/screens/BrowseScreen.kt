@@ -43,7 +43,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
-import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -144,7 +144,7 @@ private fun BrowseWrapper(
     otherClick: (String) -> Unit,
     filterActions: FilterActions,
     changeScreenType: (BrowseScreenType) -> Unit,
-    homeScreenTitleClick: (DisplayScreenType) -> Unit,
+    homeScreenTitleClick: (SerializableDisplayScreenType) -> Unit,
     randomClick: () -> Unit,
 ) {
 
