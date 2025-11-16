@@ -7,7 +7,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
 sealed class UiText {
-
     data class String(val str: kotlin.String) : UiText()
 
     class PluralsResource(

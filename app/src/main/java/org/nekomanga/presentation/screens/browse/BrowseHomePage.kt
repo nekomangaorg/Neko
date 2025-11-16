@@ -30,7 +30,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
-import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
@@ -49,7 +50,7 @@ fun BrowseHomePage(
     useVividColorHeaders: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
-    titleClick: (DisplayScreenType) -> Unit,
+    titleClick: (SerializableDisplayScreenType) -> Unit,
     randomClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -69,20 +70,14 @@ fun BrowseHomePage(
         items(
             items = browseHomePageManga,
             key = { homePageManga ->
-                when (homePageManga.displayScreenType) {
-                    is DisplayScreenType.LatestChapters -> R.string.latest_chapters
-                    is DisplayScreenType.RecentlyAdded -> R.string.recently_added
-                    is DisplayScreenType.PopularNewTitles -> R.string.popular_new_titles
-                    is DisplayScreenType.FeedUpdates -> R.string.feed
-                    is DisplayScreenType.List -> homePageManga.displayScreenType.hashCode()
-                }
+                homePageManga.displayScreenType.hashCode()
             },
         ) { homePageManga ->
             val headerText = homePageManga.displayScreenType.title.asString()
             val mangaList = homePageManga.displayManga.filter { it.isVisible }
 
             if (mangaList.isNotEmpty()) {
-                TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
+                TextButton(onClick = { titleClick(homePageManga.displayScreenType.toSerializable()) }) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
