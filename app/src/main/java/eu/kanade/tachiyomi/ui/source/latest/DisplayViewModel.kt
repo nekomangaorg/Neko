@@ -33,9 +33,10 @@ import uy.kohesive.injekt.api.get
 
 class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
 
-    class Factory(private val displayScreenType: DisplayScreenType) : ViewModelProvider.Factory {
+    class Factory(private val serializableDisplayScreenType: SerializableDisplayScreenType) :
+        ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return DisplayViewModel(displayScreenType) as T
+            return DisplayViewModel(serializableDisplayScreenType.toDomain()) as T
         }
     }
 
