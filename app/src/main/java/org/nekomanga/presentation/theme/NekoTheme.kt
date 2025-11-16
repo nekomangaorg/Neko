@@ -45,19 +45,15 @@ fun NekoTheme(colorScheme: ColorScheme? = null, content: @Composable () -> Unit)
 fun nekoThemeColorScheme(): ColorScheme {
     val preferences = Injekt.get<PreferencesHelper>()
 
-    val theme =
-        if (
-                (isSystemInDarkTheme() ||
-                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
-                    preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
-            ) {
-                preferences.darkTheme()
-            } else {
-                preferences.lightTheme()
-            }
-            .get()
+    val isDarkMode = (isSystemInDarkTheme() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) && preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
 
-    return colorSchemeFromTheme(LocalContext.current, theme, isSystemInDarkTheme())
+    val theme = if (isDarkMode) {
+        preferences.darkTheme()
+    } else {
+        preferences.lightTheme()
+    }.get()
+
+    return colorSchemeFromTheme(LocalContext.current, theme, isDarkMode)
 }
 
 fun colorSchemeFromTheme(
