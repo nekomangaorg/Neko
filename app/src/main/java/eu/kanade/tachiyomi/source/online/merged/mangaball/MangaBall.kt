@@ -138,22 +138,21 @@ class MangaBall : ReducedHttpSource() {
                     if (translation.language == "en") {
                         SChapter.create().apply {
                             url = translation.id
-                            val chapterName = mutableListOf<String>()
+                            val chapterPrefix = mutableListOf<String>()
                             if (translation.volume > 0) {
                                 val volume = "Vol.${translation.volume}"
                                 vol = volume
-                                chapterName.add(volume)
+                                chapterPrefix.add(volume)
                             }
 
                             val number = chapter.number.toString().removeSuffix(".0")
-
                             val chapterNum = "Ch.$number"
+                            chapterPrefix.add(chapterNum)
 
-                            chapterName.add(chapterNum)
+                            val prefix = chapterPrefix.joinToString(" ")
+                            val title = normalizeChapterName(translation.name, chapter.number)
 
-                            chapterName.add(normalizeChapterName(translation.name, chapter.number))
-
-                            name = chapterName.joinToString(" ")
+                            name = if (title.isNotBlank()) "$prefix - $title" else prefix
 
                             chapter_number = chapter.number
                             date_upload = dateFormat.tryParse(translation.date)
