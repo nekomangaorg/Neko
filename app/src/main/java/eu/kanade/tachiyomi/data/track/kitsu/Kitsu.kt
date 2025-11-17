@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import java.text.DecimalFormat
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
@@ -170,5 +169,9 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         } catch (e: Exception) {
             null
         }
+    }
+
+    override fun isLogged(): Boolean {
+        return super.isLogged() && restoreToken() != null
     }
 }
