@@ -656,7 +656,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         binding.toolbar.setOnClickListener {
             viewModel.manga?.id?.let { id ->
-                //  val intent = SearchActivity.openMangaIntent(this, id)
+                val intent = MainActivity.openMangaIntent(this, id)
                 startActivity(intent)
             }
         }
