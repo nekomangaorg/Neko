@@ -263,7 +263,7 @@ class FeedRepository(
                         val simpleChapter =
                             chapters
                                 .filter { it.isAvailable(downloadManager, manga) }
-                                .maxByOrNull { it.source_order }
+                                .maxByOrNull { it.smart_order }
                                 ?.toSimpleChapter() ?: return@mapNotNull null
 
                         val displayManga = manga.toDisplayManga()
