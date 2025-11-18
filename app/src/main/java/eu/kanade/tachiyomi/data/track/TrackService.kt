@@ -173,6 +173,6 @@ suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long 
 
 suspend fun TrackService.getLastChapterRead(track: Track): Float {
     val chapters = db.getChapters(track.manga_id).executeOnIO()
-    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.source_order }
+    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.smart_order }
     return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
 }
