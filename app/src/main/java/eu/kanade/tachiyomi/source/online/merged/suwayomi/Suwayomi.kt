@@ -237,9 +237,10 @@ class Suwayomi : MergedServerSource() {
                                         name = sanitized.name
                                         vol = sanitized.vol
                                         chapter_number = sanitized.chapter_number
-                                        previous = chapter_number to sanitized.premiere
                                         chapter_txt = sanitized.chapter_txt
                                         chapter_title = sanitized.chapter_title
+                                        // For next
+                                        previous = chapter_number to sanitized.premiere
                                     } else {
                                         name = chapter.name
                                         chapter_number = chapter.chapterNumber
@@ -331,11 +332,17 @@ class Suwayomi : MergedServerSource() {
                 edgeCases.any { rawName.contains(it, true) }
         ) {
             var chapterNumber = previous.first!!.toLong()
-            if (!previous.second) chapterNumber += 1
-            val chtxt = "Ch.$chapterNumber"
+            val half =
+                if (rawName.contains("season", true) && rawName.contains("announcement", true)) ".5"
+                else {
+                    if (!previous.second) chapterNumber += 1
+                    ""
+                }
+            val chtxt = "Ch.$chapterNumber$half"
             val title = removeEndTag(rawName)
             val name = listOf(chtxt, "-", title).joinToString(" ")
             edgeCases.remove("season")
+            edgeCases.add("announcement")
             return Name.Sanitized(
                 name,
                 "",
