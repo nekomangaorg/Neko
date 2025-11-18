@@ -152,7 +152,7 @@ dependencies {
     // Required outsde of version catalog cause aar
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.mikepenz:community-material-typeface:7.0.96.1-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:7.0.96.2-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.3-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.2-kotlin@aar")
 
