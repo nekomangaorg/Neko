@@ -419,21 +419,6 @@ fun Context.createFileInCacheDir(name: String): File {
     return file
 }
 
-/**
- * Returns the color
- *
- * @param resource the attribute.
- */
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawableLarge(
-    icon: IIcon,
-    size: Int = 24,
-    color: Int = R.attr.colorAccent,
-    attributeColor: Boolean = true,
-): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
-}
-
 /** default tinted to actionbar */
 @SuppressLint("ResourceType")
 fun Context.iconicsDrawableMedium(

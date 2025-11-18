@@ -38,8 +38,6 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        /* if (this !is SearchActivity) {
-            SecureActivityDelegate.promptLockIfNeeded(this)
-        }*/
+        SecureActivityDelegate.promptLockIfNeeded(this)
     }
 }
