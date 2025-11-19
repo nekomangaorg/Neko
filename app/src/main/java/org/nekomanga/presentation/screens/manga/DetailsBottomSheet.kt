@@ -195,7 +195,10 @@ fun DetailsBottomSheet(
                 themeColorState = themeColorState,
                 alternativeArtwork = mangaDetailScreenState.alternativeArtwork,
                 inLibrary = mangaDetailScreenState.inLibrary,
-                saveClick = coverActions.save,
+                saveClick = { artwork ->
+                    onNavigate(null)
+                    coverActions.save(artwork)
+                },
                 shareClick = { url -> coverActions.share(context, url) },
                 setClick = { url ->
                     onNavigate(null)

@@ -1793,15 +1793,23 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 val directory = destDir ?: storageManager.getCoverDirectory()!!
 
                 val destinationUri = saveCover(directory, artwork)
-                launchUI {
-                    /*view?.applicationContext?.let { context ->
-                        DiskUtil.scanMedia(context, destinationUri)
-                        view?.applicationContext?.toast(R.string.cover_saved)
-                    }*/
+                preferences.context.let { context ->
+                    DiskUtil.scanMedia(context, destinationUri)
+                    appSnackbarManager.showSnackbar(
+                        SnackbarState(
+                            messageRes = R.string.cover_saved,
+                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        )
+                    )
                 }
             } catch (e: Exception) {
                 TimberKt.e(e) { "error saving cover" }
-                /* launchUI { view?.applicationContext?.toast("Error saving cover") }*/
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        messageRes = R.string.error_saving_cover,
+                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    )
+                )
             }
         }
     }
