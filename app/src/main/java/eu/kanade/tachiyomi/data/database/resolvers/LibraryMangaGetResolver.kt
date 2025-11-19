@@ -75,8 +75,10 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         val chapterList =
             list.filterNot {
                 val (scanlator, uploader) = it.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
+                val scanlators = ChapterUtil.getScanlators(scanlator)
+
                 ChapterUtil.filterByScanlator(
-                    scanlator,
+                    scanlators,
                     uploader,
                     false,
                     blockedGroups,
@@ -101,9 +103,12 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                                     Constants.RAW_CHAPTER_SEPARATOR,
                                     Constants.SCANLATOR_SEPARATOR,
                                 )
+
+                            val scanlatorList = ChapterUtil.getScanlators(scanlators)
+
                             ChapterUtil.filteredBySource(
                                 source,
-                                scanlators,
+                                scanlatorList,
                                 MergeType.containsMergeSourceName(scanlators),
                                 scanlators == Constants.LOCAL_SOURCE,
                                 filtered,
@@ -113,8 +118,11 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     .filterNot { pairs ->
                         val (scanlator, uploader) =
                             pairs.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
+
+                        val scanlatorList = ChapterUtil.getScanlators(scanlator)
+
                         ChapterUtil.filterByScanlator(
-                            scanlator,
+                            scanlatorList,
                             uploader,
                             scanlatorMatchAll,
                             filtered,

@@ -75,7 +75,7 @@ class ChapterUtil {
          */
         fun filteredBySource(
             sourceName: String,
-            groupStr: String,
+            scanlators: List<String>,
             isMerged: Boolean,
             isLocal: Boolean,
             filteredSources: Set<String>,
@@ -105,18 +105,18 @@ class ChapterUtil {
                 return false
             }
 
-            return getScanlators(groupStr).any { group -> group == sourceName }
+            return scanlators.any { group -> group == sourceName }
         }
 
         /**
          * returns true for a list filter, if the language of the chapter exists in the filtered
          * language set
          */
-        fun filterByLanguage(languageStr: String, filteredLanguages: Set<String>): Boolean {
+        fun filterByLanguage(languages: List<String>, filteredLanguages: Set<String>): Boolean {
             return when {
                 filteredLanguages.isEmpty() -> false
                 else -> {
-                    getLanguages(languageStr).any { language -> language in filteredLanguages }
+                    languages.any { language -> language in filteredLanguages }
                 }
             }
         }
@@ -127,34 +127,32 @@ class ChapterUtil {
          * need to be in the group set.
          */
         fun filterByScanlator(
-            groupStr: String,
-            uploaderStr: String,
+            scanlators: List<String>,
+            uploader: String,
             all: Boolean,
             filteredGroups: Set<String>,
             filteredUploaders: Set<String> = emptySet(),
         ): Boolean {
-            val scanlators =
-                getScanlators(groupStr)
-                    .filterNot { it in SourceManager.mergeSourceNames }
-                    .toMutableList()
+            val chapterScanlators =
+                scanlators.filterNot { it in SourceManager.mergeSourceNames }.toMutableList()
             val filtered = filteredGroups.toMutableSet()
 
-            if (uploaderStr.isNotEmpty()) {
+            if (uploader.isNotEmpty()) {
                 // Check uploaders if there is no group
-                if (Constants.NO_GROUP in scanlators) {
-                    scanlators.add(uploaderStr)
+                if (Constants.NO_GROUP in chapterScanlators) {
+                    chapterScanlators.add(uploader)
                     filtered += filteredUploaders
                 }
                 // Match all should ignore No Group if uploader is filtered
-                if (all && uploaderStr.isNotEmpty() && Constants.NO_GROUP !in filteredGroups) {
-                    scanlators.remove(Constants.NO_GROUP)
+                if (all && uploader.isNotEmpty() && Constants.NO_GROUP !in filteredGroups) {
+                    chapterScanlators.remove(Constants.NO_GROUP)
                 }
             }
 
             return when {
-                scanlators.isEmpty() || filtered.isEmpty() -> false
-                all -> scanlators.all { group -> group in filtered }
-                else -> scanlators.any { group -> group in filtered }
+                chapterScanlators.isEmpty() || filtered.isEmpty() -> false
+                all -> chapterScanlators.all { group -> group in filtered }
+                else -> chapterScanlators.any { group -> group in filtered }
             }
         }
     }
