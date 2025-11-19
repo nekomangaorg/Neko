@@ -524,12 +524,14 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     // only download scanlators not filtered out
                                     chaptersToDl =
                                         chaptersToDl.filterNot {
+                                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
+
                                             val scanlatorMatchAll =
                                                 libraryPreferences
                                                     .chapterScanlatorFilterOption()
                                                     .get() == 0
                                             ChapterUtil.filterByScanlator(
-                                                it.scanlator ?: "",
+                                                scanlators,
                                                 it.uploader ?: "",
                                                 scanlatorMatchAll,
                                                 toIgnore,

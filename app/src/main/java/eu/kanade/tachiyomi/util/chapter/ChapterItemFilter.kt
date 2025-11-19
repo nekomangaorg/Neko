@@ -209,11 +209,7 @@ class ChapterItemFilter(
                     )
                 }
 
-            val languageFiltered =
-                ChapterUtil.filterByLanguage(
-                    languages,
-                    filteredLanguages,
-                )
+            val languageFiltered = ChapterUtil.filterByLanguage(languages, filteredLanguages)
 
             val blockedScanlator =
                 ChapterUtil.filterByScanlator(
