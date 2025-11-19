@@ -89,7 +89,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 Suwayomi -> sourceManager.suwayomi
                 Kagane -> sourceManager.kagane
                 MangaBall -> sourceManager.mangaBall
-                Invalid -> sourceManager.mangaBall
+                Invalid -> sourceManager.invalidMergeSource
             }
         }
 

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
 import eu.kanade.tachiyomi.source.online.merged.kagane.Kagane
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
@@ -17,6 +18,8 @@ open class SourceManager {
     val mangaDex: MangaDex = MangaDex()
 
     val mangaBall: MangaBall by lazy { MangaBall() }
+
+    val invalidMergeSource:  InvalidHttpSource by lazy { InvalidHttpSource() }
 
     val komga: Komga by lazy { Komga() }
 

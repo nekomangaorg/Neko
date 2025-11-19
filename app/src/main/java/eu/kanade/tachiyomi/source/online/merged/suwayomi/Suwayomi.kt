@@ -333,11 +333,10 @@ class Suwayomi : MergedServerSource() {
         ) {
             var chapterNumber = previous.first!!.toLong()
             val half =
-                if (rawName.contains("season", true) && rawName.contains("announcement", true)){
+                if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
                     edgeCases.add("announcement")
                     ".5"
-                }
-                else {
+                } else {
                     if (!previous.second) chapterNumber += 1
                     ""
                 }
