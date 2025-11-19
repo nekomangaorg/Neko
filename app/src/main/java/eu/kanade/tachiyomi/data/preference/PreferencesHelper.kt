@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
+import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -190,7 +191,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun openChapterInShortcuts() =
         this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
 
-    fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
+    fun sideNavMode() =
+        this.preferenceStore.getObjectFromInt(
+            key = "side_nav_mode",
+            defaultValue = SideNavMode.Default,
+            serializer = SideNavMode::toInt,
+            deserializer = SideNavMode::fromInt,
+        )
 
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)

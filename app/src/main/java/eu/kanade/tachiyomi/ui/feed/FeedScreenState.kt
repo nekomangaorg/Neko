@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.feed
 
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.chapter.ChapterItem
@@ -14,7 +13,6 @@ data class FeedScreenState(
     val isRefreshing: Boolean = false,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val showingDownloads: Boolean = false,
-    val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
     val outlineCards: Boolean,
     val groupUpdateChapters: Boolean = false,

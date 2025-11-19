@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
@@ -30,7 +29,6 @@ data class BrowseScreenState(
     val otherResults: PersistentList<DisplayResult> = persistentListOf(),
     val error: UiText? = null,
     val endReached: Boolean = false,
-    val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
     val deepLinkHandled: Boolean = false,
     val isList: Boolean,

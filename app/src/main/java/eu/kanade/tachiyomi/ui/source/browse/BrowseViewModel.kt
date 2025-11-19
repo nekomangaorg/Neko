@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
@@ -212,16 +211,6 @@ class BrowseViewModel() : ViewModel() {
         }
 
         updateBrowseFilters(_browseScreenState.value.firstLoad)
-
-        viewModelScope.launch {
-            _browseScreenState.update {
-                it.copy(
-                    sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()),
-                    isLoggedIn = browseRepository.isLoggedIn(),
-                    firstLoad = false,
-                )
-            }
-        }
 
         viewModelScope.launch {
             val categories =

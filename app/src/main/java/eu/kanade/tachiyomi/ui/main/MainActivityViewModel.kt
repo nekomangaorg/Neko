@@ -79,6 +79,12 @@ class MainActivityViewModel : ViewModel() {
         }
 
         viewModelScope.launchIO {
+            preferences.sideNavMode().changes().collect { sideNavMode ->
+                _mainScreenState.update { it.copy(sideNavMode = sideNavMode) }
+            }
+        }
+
+        viewModelScope.launchIO {
             val update =
                 runCatching { updateChecker.checkForUpdate() }
                     .getOrElse { error ->

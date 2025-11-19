@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -190,12 +189,6 @@ class FeedViewModel() : ViewModel() {
         if (_feedScreenState.value.firstLoad) {
             _feedScreenState.update { state -> state.copy(firstLoad = false) }
             viewModelScope.launchIO { loadNextPage() }
-        }
-
-        viewModelScope.launch {
-            _feedScreenState.update {
-                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()))
-            }
         }
 
         viewModelScope.launchIO {

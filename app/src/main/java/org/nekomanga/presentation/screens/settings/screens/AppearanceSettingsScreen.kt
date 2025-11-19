@@ -13,8 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
+import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.getActivity
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -158,12 +158,9 @@ internal class AppearanceSettingsScreen(
                         title = stringResource(R.string.use_side_navigation),
                         entries =
                             persistentMapOf(
-                                SideNavMode.DEFAULT.prefValue to
-                                    stringResource(SideNavMode.DEFAULT.stringRes),
-                                SideNavMode.NEVER.prefValue to
-                                    stringResource(SideNavMode.NEVER.stringRes),
-                                SideNavMode.ALWAYS.prefValue to
-                                    stringResource(SideNavMode.ALWAYS.stringRes),
+                                SideNavMode.Default to stringResource(R.string.default_behavior),
+                                SideNavMode.Never to stringResource(R.string.never),
+                                SideNavMode.Always to stringResource(R.string.always),
                             ),
                         onValueChanged = {
                             context.getActivity()?.let { activity ->

@@ -44,8 +44,6 @@ object PreferenceKeys {
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
 
-    const val sideNavMode = "side_nav_mode"
-
     const val shouldAutoUpdate = "should_auto_update"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"

@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentListOf
@@ -36,7 +35,6 @@ data class LibraryScreenState(
     val isFirstLoad: Boolean = true,
     val allCollapsed: Boolean = false,
     val isRefreshing: Boolean = false,
-    val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean = false,
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,

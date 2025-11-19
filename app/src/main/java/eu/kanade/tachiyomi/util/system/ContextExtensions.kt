@@ -38,7 +38,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
@@ -46,8 +45,6 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
@@ -223,28 +220,6 @@ fun Context.notificationBuilder(
         builder.block()
     }
     return builder
-}
-
-fun Context.prepareSideNavContext(): Context {
-    val configuration = resources.configuration
-    val expected =
-        when (Injekt.get<PreferencesHelper>().sideNavMode().get()) {
-            SideNavMode.ALWAYS.prefValue -> true
-            SideNavMode.NEVER.prefValue -> false
-            else -> null
-        }
-    if (expected != null) {
-        val overrideConf = Configuration()
-        overrideConf.setTo(configuration)
-        overrideConf.screenWidthDp =
-            if (expected) {
-                overrideConf.screenWidthDp.coerceAtLeast(TABLET_UI_MIN_SCREEN_WIDTH_DP)
-            } else {
-                overrideConf.screenWidthDp.coerceAtMost(TABLET_UI_MIN_SCREEN_WIDTH_DP - 1)
-            }
-        return createConfigurationContext(overrideConf)
-    }
-    return this
 }
 
 fun Context.withOriginalWidth(): Context {

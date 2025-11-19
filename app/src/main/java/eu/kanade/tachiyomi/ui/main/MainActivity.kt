@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
+import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
@@ -171,8 +172,6 @@ class MainActivity : BaseMainActivity() {
                 }
             }
 
-            // TODO status bar colors and navigation bar colors
-
             val windowSizeClass = calculateWindowSizeClass(this)
             val navItems =
                 listOf(
@@ -197,8 +196,12 @@ class MainActivity : BaseMainActivity() {
                 )
 
             val showNavigationRail =
-                remember(windowSizeClass.widthSizeClass) {
-                    windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+                remember(windowSizeClass.widthSizeClass, mainScreenState.sideNavMode) {
+                    when {
+                        mainScreenState.sideNavMode == SideNavMode.Always -> true
+                        mainScreenState.sideNavMode == SideNavMode.Never -> false
+                        else -> windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+                    }
                 }
 
             val navigationRail: @Composable () -> Unit = {
