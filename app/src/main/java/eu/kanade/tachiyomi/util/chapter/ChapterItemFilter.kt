@@ -188,47 +188,50 @@ class ChapterItemFilter(
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get().toSet()
 
         // Filtered sources, groups and uploaders
-        val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+        val filteredScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
         val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toSet()
 
         val sources = SourceManager.mergeSourceNames + MdConstants.name
         val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
 
-        return chapters
-            .asSequence()
-            .filterNot { chapterItem ->
+        return chapters.filterNot { chapterItem ->
+            val scanlators = ChapterUtil.getScanlators(chapterItem.chapter.scanlator)
+            val languages = ChapterUtil.getLanguages(chapterItem.chapter.language)
+
+            val sourceFiltered =
                 sources.any { sourceName ->
                     ChapterUtil.filteredBySource(
                         sourceName,
-                        chapterItem.chapter.scanlator,
+                        scanlators,
                         chapterItem.chapter.isMergedChapter(),
                         chapterItem.chapter.isLocalSource(),
-                        filtered,
+                        filteredScanlators,
                     )
                 }
-            }
-            .filterNot { chapterItem ->
-                ChapterUtil.filterByLanguage(chapterItem.chapter.language, filteredLanguages)
-            }
-            // blocked groups are always Any
-            .filterNot { chapterItem ->
+
+            val languageFiltered =
+                ChapterUtil.filterByLanguage(
+                    languages,
+                    filteredLanguages,
+                )
+
+            val blockedScanlator =
                 ChapterUtil.filterByScanlator(
-                    chapterItem.chapter.scanlator,
+                    scanlators,
                     chapterItem.chapter.uploader,
                     false,
                     blockedGroups,
                     blockedUploaders,
                 )
-            }
-            .filterNot { chapterItem ->
+            val filteredScanlator =
                 ChapterUtil.filterByScanlator(
-                    chapterItem.chapter.scanlator,
+                    scanlators,
                     chapterItem.chapter.uploader,
                     scanlatorMatchAll,
-                    filtered,
+                    filteredScanlators,
                 )
-            }
-            .toList()
+            sourceFiltered || languageFiltered || blockedScanlator || filteredScanlator
+        }
     }
 
     // Adapted from https://stackoverflow.com/a/65465410
