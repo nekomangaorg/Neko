@@ -5,8 +5,10 @@ import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.util.MissingChapterHolder
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import org.nekomanga.constants.MdConstants
@@ -22,6 +24,15 @@ import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.UiText
 
 object MangaConstants {
+
+    data class StaticChapterData(
+        val allChapters: PersistentList<ChapterItem>,
+        val missingChapters: MissingChapterHolder,
+        val allScanlators: PersistentSet<String>,
+        val allUploaders: PersistentSet<String>,
+        val allSources: PersistentSet<String>,
+        val allLanguages: PersistentSet<String>,
+    )
 
     data class MangaDetailScreenState(
         val isRefreshing: Boolean = false,
