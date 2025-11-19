@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
 import eu.kanade.tachiyomi.ui.library.LibraryScreenState
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -45,6 +46,8 @@ import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 fun VerticalCategoriesPage(
@@ -116,7 +119,7 @@ fun VerticalCategoriesPage(
                             key = { _, row ->
                                 "grid-row-${item.categoryItem.name}-${row.joinToString { it.displayManga.mangaId.toString() }}"
                             },
-                        ) { gridIndex, rowItems ->
+                        ) { _, rowItems ->
                             RowGrid(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
@@ -332,6 +335,38 @@ fun LibraryCategoryHeader(
             categoryIsRefreshing = isRefreshing,
             ascendingClick = categoryAscendingClick,
             categoryRefreshClick = categoryRefreshClick,
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun LibraryCategoryHeaderPreview() {
+    val categoryItem =
+        CategoryItem(
+            id = 1,
+            name = "This is a very long category",
+            sortOrder = LibrarySort.DateAdded,
+            order = 0,
+            isDynamic = false,
+            isHidden = false,
+            isAscending = true,
+            isSystemCategory = true,
+        )
+
+    ThemedPreviews {
+        LibraryCategoryHeader(
+            categoryItem = categoryItem,
+            useVividColorHeaders = false,
+            isRefreshing = false,
+            isCollapsible = true,
+            selectionMode = false,
+            allSelected = false,
+            categoryItemClick = {},
+            categorySortClick = {},
+            categoryAscendingClick = {},
+            categoryRefreshClick = {},
+            enabled = true,
         )
     }
 }
