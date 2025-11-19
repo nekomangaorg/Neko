@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -35,11 +36,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
+import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -53,11 +56,13 @@ import eu.kanade.tachiyomi.util.view.setComposeContent
 import java.math.BigInteger
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
+import org.nekomanga.presentation.components.dialog.WhatsNewDialog
 import org.nekomanga.presentation.screens.MainScreen
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.main.BottomBar
@@ -104,6 +109,12 @@ class MainActivity : BaseMainActivity() {
             }
 
         handleDeepLink(intent)
+
+        if (Migrations.upgrade(viewModel.preferences)) {
+            if (!BuildConfig.DEBUG) {
+                viewModel.setWhatsNewDialog(true)
+            }
+        }
 
         setComposeContent {
             val context = LocalContext.current
@@ -170,6 +181,16 @@ class MainActivity : BaseMainActivity() {
                     backStack.addAll(deepLink!!)
                     viewModel.consumeDeepLink()
                 }
+            }
+
+            if (mainScreenState.showWhatsNewDialog) {
+                WhatsNewDialog(
+                    onDismissRequest = { viewModel.setWhatsNewDialog(false) },
+                    onSeeWhatsNewClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, RELEASE_URL.toUri())
+                        startActivity(intent)
+                    },
+                )
             }
 
             val windowSizeClass = calculateWindowSizeClass(this)

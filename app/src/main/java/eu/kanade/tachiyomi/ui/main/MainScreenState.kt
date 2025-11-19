@@ -9,4 +9,5 @@ data class MainScreenState(
     val appUpdateResult: AppUpdateResult.NewUpdate? = null,
     val sideNavAlignment: SideNavAlignment = SideNavAlignment.Center,
     val sideNavMode: SideNavMode = SideNavMode.Default,
+    val showWhatsNewDialog: Boolean = false,
 )

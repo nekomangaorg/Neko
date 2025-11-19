@@ -65,6 +65,10 @@ class MainActivityViewModel : ViewModel() {
     private val _mainScreenState = MutableStateFlow(MainScreenState())
     val mainScreenState: StateFlow<MainScreenState> = _mainScreenState.asStateFlow()
 
+    fun setWhatsNewDialog(shouldShow: Boolean) {
+        _mainScreenState.update { it.copy(showWhatsNewDialog = shouldShow) }
+    }
+
     init {
         viewModelScope.launchIO {
             securityPreferences.incognitoMode().changes().collect { incognitoMode ->
