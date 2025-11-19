@@ -235,7 +235,9 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
-            context.toast(error.message)
+            withContext(Dispatchers.Main) {
+                context.toast(error.message)
+            }
             notifier.cancelInstallNotification()
             notifier.onDownloadFinished(file.getUriCompat(context))
             PreferenceManager.getDefaultSharedPreferences(context).edit {
