@@ -249,7 +249,7 @@ private fun ListItem(
 }
 
 @Composable
-private fun LibraryCategoryHeader(
+fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
     useVividColorHeaders: Boolean,
     isRefreshing: Boolean,
