@@ -112,7 +112,9 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
             deserializer = LibraryGroup::fromInt,
         )
 
-    fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
+    fun skipMangaMetadataDuringUpdate() = this.preferenceStore.getBoolean("faster_library_updates")
+
+    fun prioritizeLibraryUpdates() = this.preferenceStore.getBoolean("prioritize_library_updates")
 
     fun updateCovers() = this.preferenceStore.getBoolean("refresh_covers_too", true)
 

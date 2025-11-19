@@ -242,8 +242,14 @@ internal class LibrarySettingsScreen(
                         subtitle = stringResource(R.string.restrictions_),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
-                        pref = libraryPreferences.updateFaster(),
-                        title = stringResource(R.string.faster_library_update),
+                        pref = libraryPreferences.skipMangaMetadataDuringUpdate(),
+                        title = stringResource(R.string.skip_manga_metadata_title),
+                        subtitle = stringResource(R.string.skip_manga_metadata_description),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.prioritizeLibraryUpdates(),
+                        title = stringResource(R.string.prioritize_library_title),
+                        subtitle = stringResource(R.string.prioritize_library_description),
                     ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(R.string.categories),
@@ -307,7 +313,13 @@ internal class LibrarySettingsScreen(
                     group = stringResource(R.string.global_updates),
                 ),
                 SearchTerm(
-                    title = stringResource(R.string.faster_library_update),
+                    title = stringResource(R.string.skip_manga_metadata_title),
+                    subtitle = stringResource(R.string.skip_manga_metadata_description),
+                    group = stringResource(R.string.global_updates),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.prioritize_library_title),
+                    subtitle = stringResource(R.string.prioritize_library_description),
                     group = stringResource(R.string.global_updates),
                 ),
                 SearchTerm(

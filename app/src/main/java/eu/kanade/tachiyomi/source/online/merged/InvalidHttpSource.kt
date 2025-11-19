@@ -11,12 +11,14 @@ import okhttp3.Headers
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 
-class InvalidHttpSource: ReducedHttpSource() {
+class InvalidHttpSource : ReducedHttpSource() {
     override suspend fun searchManga(query: String): List<SManga> {
         return emptyList()
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapterStatusPair>, ResultError> {
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
         return Err(ResultError.Generic("Invalid merge source unmerge"))
     }
 
@@ -30,5 +32,4 @@ class InvalidHttpSource: ReducedHttpSource() {
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         return emptyList()
     }
-
 }

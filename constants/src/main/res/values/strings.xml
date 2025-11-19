@@ -330,7 +330,10 @@
     <string name="chapter_filter_all_summary">"If all of the scanlator groups match the filter, the chapter will be filtered out."</string>
 
 
-    <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
+    <string name="skip_manga_metadata_title">Skip updating the manga metadata and covers during library update</string>
+    <string name="skip_manga_metadata_description">Enabling this speeds up the library update and only updates the chapters for a manga.</string>
+    <string name="prioritize_library_title">Prioritize library update</string>
+    <string name="prioritize_library_description">This speeds up the library update drastically but prevents you from using Browse, or reading a chapter that is not downloaded.  On lower end devices it might also cause your device to crash. </string>
     <string name="include_unavailable">Include unavailable chapters</string>
     <string name="include_unavailable_summary">If a chapter was removed from MangaDex this shows the placeholder for the removed chapter.  Note: Library filters for unavailable chapters only shows after app restart</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>

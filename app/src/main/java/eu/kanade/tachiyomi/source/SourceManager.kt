@@ -19,7 +19,7 @@ open class SourceManager {
 
     val mangaBall: MangaBall by lazy { MangaBall() }
 
-    val invalidMergeSource:  InvalidHttpSource by lazy { InvalidHttpSource() }
+    val invalidMergeSource: InvalidHttpSource by lazy { InvalidHttpSource() }
 
     val komga: Komga by lazy { Komga() }
 

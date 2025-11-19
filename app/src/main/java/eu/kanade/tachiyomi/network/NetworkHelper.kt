@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.network
 import android.content.Context
 import com.google.common.net.HttpHeaders
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.util.lang.isUUID
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
+import okhttp3.Dispatcher
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import org.nekomanga.BuildConfig
@@ -14,6 +16,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.network.interceptor.HeadersInterceptor
+import org.nekomanga.core.network.interceptor.PriorityRateLimitInterceptor
 import org.nekomanga.core.network.interceptor.UserAgentInterceptor
 import org.nekomanga.core.network.interceptor.authInterceptor
 import org.nekomanga.core.network.interceptor.loggingInterceptor
@@ -60,6 +63,39 @@ class NetworkHelper(val context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
+    private val sharedPriorityInterceptor =
+        PriorityRateLimitInterceptor(
+            permits = 5,
+            period = 1,
+            unit = TimeUnit.SECONDS,
+            prioritySelector = { url ->
+                val string = url.toString()
+                val isReaderChapter =
+                    url.pathSegments.isNotEmpty() &&
+                        url.pathSegments[0] == MdConstants.Api.chapter.substringAfterLast("/") &&
+                        string.substringAfterLast("/").isUUID()
+                val isHomePageOrSearch =
+                    url.pathSegments.size == 1 &&
+                        url.pathSegments[0] == MdConstants.Api.manga.substringAfterLast("/")
+
+                when {
+                    // High Priority (User Actions)
+                    isReaderChapter ||
+                        isHomePageOrSearch ||
+                        url.pathSegments.contains("chapter") ||
+                        url.pathSegments.contains("user") ||
+                        url.pathSegments.contains("list") ||
+                        url.pathSegments.contains("mangadex-seasonal") -> 10
+
+                    // Medium Priority
+                    url.host == "uploads.mangadex.org" -> 5
+
+                    // Low Priority (Background Jobs usually fall here)
+                    else -> 1
+                }
+            },
+        )
+
     private val baseClientBuilder: OkHttpClient.Builder
         get() {
             val builder =
@@ -88,9 +124,16 @@ class NetworkHelper(val context: Context) {
             return builder
         }
 
-    private fun buildRateLimitedClient(): OkHttpClient {
+    private fun buildPriorityRateLimitedClient(): OkHttpClient {
+
+        val dispatcher =
+            Dispatcher().apply {
+                maxRequestsPerHost = 20
+                maxRequests = 30
+            }
         return baseClientBuilder
-            .rateLimit(permits = 5, period = 1, unit = TimeUnit.SECONDS)
+            .dispatcher(dispatcher) // Apply the wider dispatcher
+            .addInterceptor(sharedPriorityInterceptor) // Use the SINGLE shared instance
             .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
             .build()
     }
@@ -112,7 +155,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
-        return buildRateLimitedClient()
+        return buildPriorityRateLimitedClient()
             .newBuilder()
             .addNetworkInterceptor(authInterceptor { mangadexPreferences.sessionToken().get() })
             .authenticator(MangaDexTokenAuthenticator(mangaDexLoginHelper))
@@ -131,7 +174,7 @@ class NetworkHelper(val context: Context) {
 
     val cloudFlareClient = buildCloudFlareClient()
 
-    val client = buildRateLimitedClient()
+    val client = buildPriorityRateLimitedClient()
 
     val mangadexClient =
         client

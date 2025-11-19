@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
-import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -53,12 +52,6 @@ interface MangaDexService {
         "${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}"
     )
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
-
-    @GET("${MdConstants.Api.manga}/{id}/aggregate")
-    suspend fun aggregateChapters(
-        @Path("id") mangaId: String,
-        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
-    ): ApiResponse<AggregateDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.manga}/{id}")
     suspend fun mangaStatistics(@Path("id") mangaId: String): ApiResponse<StatisticResponseDto>

@@ -80,7 +80,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.toSimpleChapter
@@ -340,11 +342,25 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             mangaToUpdate.addAll(mangaToAdd)
 
             coroutineScope {
-                val downloadResults =
-                    mangaToAdd.mapAsync(launchDelayMillis = 500) { manga ->
-                        val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
-                        updateMangaChapters(manga, shouldDownload)
+                val semaphoreAmount =
+                    when (libraryPreferences.prioritizeLibraryUpdates().get()) {
+                        true -> 20
+                        false -> 5
                     }
+
+                val requestSemaphore = Semaphore(semaphoreAmount)
+                val downloadResults =
+                    mangaToAdd
+                        .map { manga ->
+                            async {
+                                requestSemaphore.withPermit {
+                                    val shouldDownload =
+                                        manga.shouldDownloadNewChapters(db, preferences)
+                                    updateMangaChapters(manga, shouldDownload)
+                                }
+                            }
+                        }
+                        .awaitAll()
 
                 if (!hasDownloads) {
                     hasDownloads = downloadResults.any { it }
@@ -384,7 +400,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     val source = sourceManager.mangaDex
 
                     val holder = withIOContext {
-                        if (libraryPreferences.updateFaster().get()) {
+                        if (libraryPreferences.skipMangaMetadataDuringUpdate().get()) {
                             MangaDetailChapterInformation(
                                 null,
                                 emptyList(),
