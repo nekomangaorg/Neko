@@ -55,6 +55,7 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.manga.MangaUseCases
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.core.util.storage.AndroidStorageFolderProvider
@@ -153,6 +154,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(BrowseRepository())
 
         addSingleton(ChapterUseCases())
+
+        addSingleton(MangaUseCases())
 
         addSingleton(FeedRepository())
 

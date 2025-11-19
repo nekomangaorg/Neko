@@ -46,11 +46,8 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
-import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.getMissingChapters
-import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
@@ -85,7 +82,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
-import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
@@ -93,6 +89,7 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -112,6 +109,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val trackManager by injectLazy<TrackManager>()
     private val mangaDexLoginHelper by injectLazy<MangaDexLoginHelper>()
     private val statusHandler by injectLazy<StatusHandler>()
+
+    private val mangaUseCases by injectLazy<MangaUseCases>()
 
     private var extraDeferredJobs = Collections.synchronizedList(mutableListOf<Deferred<Any>>())
     private val extraScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -648,50 +647,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 }
         }
 
-    private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
-        val allChaps = db.getChapters(manga).executeOnIO()
-        val missingChapters =
-            allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
-
-        var updated = false
-        if (missingChapters == null) {
-            val status = updateMangaStatus(allChaps, manga)
-            if (manga.status != status) {
-                manga.status = status
-                updated = true
-            }
-        }
-        if (missingChapters != manga.missing_chapters) {
-            manga.missing_chapters = missingChapters
-            updated = true
-        }
-
-        if (updated) db.insertManga(manga).executeOnIO()
-        return manga
-    }
-
-    private fun updateMangaStatus(chapters: List<Chapter>, manga: LibraryManga): Int {
-        val cancelledOrCompleted =
-            manga.status == SManga.PUBLICATION_COMPLETE || manga.status == SManga.CANCELLED
-        if (
-            cancelledOrCompleted &&
-                manga.missing_chapters == null &&
-                manga.last_chapter_number != null
-        ) {
-            val final =
-                chapters
-                    .filter { it.isAvailable(downloadManager, manga) }
-                    .filter { getChapterNum(it)?.toInt() == manga.last_chapter_number }
-                    .filter {
-                        getVolumeNum(it) == manga.last_volume_number ||
-                            getVolumeNum(it) == null ||
-                            manga.last_volume_number == null
-                    }
-            if (final.isNotEmpty()) {
-                return SManga.COMPLETED
-            }
-        }
-        return manga.status
+    private suspend fun updateMissingChapterCount(manga: LibraryManga) {
+        mangaUseCases.updateMangaStatusAndMissingCount(manga)
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) = coroutineScope {

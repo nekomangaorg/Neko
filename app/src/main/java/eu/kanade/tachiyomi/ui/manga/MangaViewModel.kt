@@ -119,6 +119,7 @@ import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.system.mapAsync
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -151,6 +152,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val trackingCoordinator: TrackingCoordinator = Injekt.get()
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
+
+    private val mangaUseCases: MangaUseCases = Injekt.get()
 
     private val _mangaDetailScreenState =
         MutableStateFlow(
@@ -438,29 +441,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         _mangaDetailScreenState.update { it.copy(firstLoad = false) }
                     }
 
-                    val chapterCountChanged =
-                        allInfo.mangaItem.missingChapters !=
-                            allInfo.allChapterInfo.missingChapters.count
-                    val statusNeedsUpdate =
-                        allInfo.mangaStatusCompleted && allInfo.mangaItem.status != SManga.COMPLETED
-
-                    if (chapterCountChanged || statusNeedsUpdate) {
-                        val finalManga =
-                            allInfo.mangaItem
-                                .let { manga ->
-                                    if (chapterCountChanged)
-                                        manga.copy(
-                                            missingChapters =
-                                                allInfo.allChapterInfo.missingChapters.count
-                                        )
-                                    else manga
-                                }
-                                .let { manga ->
-                                    if (statusNeedsUpdate) manga.copy(status = SManga.COMPLETED)
-                                    else manga
-                                }
-
-                        db.insertManga(finalManga.toManga()).executeAsBlocking()
+                    if (allInfo.mangaItem.initialized) {
+                        launchIO {
+                            mangaUseCases.updateMangaStatusAndMissingCount(
+                                allInfo.mangaItem.toManga()
+                            )
+                        }
                     }
                 }
         }
