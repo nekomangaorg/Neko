@@ -1,11 +1,14 @@
 package eu.kanade.tachiyomi.data.library
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -259,6 +262,11 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
             NotificationManagerCompat.from(context).apply {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@apply
+                }
                 notify(
                     Notifications.ID_NEW_CHAPTERS,
                     context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
