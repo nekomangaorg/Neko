@@ -148,16 +148,6 @@ fun MangaGridItem(
         Box(
             modifier =
                 Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                    .background(
-                        color =
-                            if (isSelected) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(
-                                    alpha = NekoColors.mediumAlphaHighContrast
-                                )
-                            } else {
-                                Color.Transparent
-                            }
-                    )
                     .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                     .padding(Size.extraTiny)
         ) {
@@ -184,6 +174,15 @@ fun MangaGridItem(
                     onStartReadingClick = onStartReadingClick,
                 )
             }
+        }
+
+        if (isSelected) {
+            Box(
+                modifier =
+                    Modifier.matchParentSize()
+                        .clip(RoundedCornerShape(Shapes.coverRadius))
+                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f))
+            )
         }
 
         if (displayManga.inLibrary) {

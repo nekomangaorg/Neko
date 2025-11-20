@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -153,50 +152,48 @@ fun MangaRow(
     unreadCount: Int = 0,
     downloadCount: Int = 0,
 ) {
-    Row(
-        modifier =
-            modifier
-                .background(
-                    color =
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer.copy(
-                                alpha = NekoColors.mediumAlphaHighContrast
-                            )
-                        } else {
-                            Color.Transparent
-                        }
-                )
-                .padding(Size.tiny),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MangaListCover(displayManga, shouldOutlineCover)
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier.padding(Size.tiny),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MangaListCover(displayManga, shouldOutlineCover)
 
-        Column(modifier = Modifier.weight(1f).padding(Size.tiny)) {
-            val titleLineCount =
-                when (displayManga.displayText.isBlank()) {
-                    true -> 2
-                    false -> 1
-                }
-            MangaListTitle(title = displayManga.getTitle(), maxLines = titleLineCount)
-            MangaListSubtitle(
-                text = displayManga.displayText,
-                textRes = displayManga.displayTextRes,
-            )
+            Column(modifier = Modifier.weight(1f).padding(Size.tiny)) {
+                val titleLineCount =
+                    when (displayManga.displayText.isBlank()) {
+                        true -> 2
+                        false -> 1
+                    }
+                MangaListTitle(title = displayManga.getTitle(), maxLines = titleLineCount)
+                MangaListSubtitle(
+                    text = displayManga.displayText,
+                    textRes = displayManga.displayTextRes,
+                )
+            }
+            if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
+                Gap(Size.tiny)
+                DownloadUnreadBadge(
+                    offset = 0.dp,
+                    outline = shouldOutlineCover,
+                    showUnread = showUnreadBadge,
+                    showDownloads = showDownloadBadge,
+                    unreadCount = unreadCount,
+                    downloadCount = downloadCount,
+                )
+            }
+            if (showStartReadingButton) {
+                Gap(Size.tiny)
+                StartReadingButton(onStartReadingClick = onStartReadingClick)
+            }
         }
-        if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
-            Gap(Size.tiny)
-            DownloadUnreadBadge(
-                offset = 0.dp,
-                outline = shouldOutlineCover,
-                showUnread = showUnreadBadge,
-                showDownloads = showDownloadBadge,
-                unreadCount = unreadCount,
-                downloadCount = downloadCount,
+        if (isSelected) {
+            Box(
+                modifier =
+                    modifier
+                        .matchParentSize()
+                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f))
             )
-        }
-        if (showStartReadingButton) {
-            Gap(Size.tiny)
-            StartReadingButton(onStartReadingClick = onStartReadingClick)
         }
     }
 }
@@ -234,7 +231,7 @@ private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
 
 @Composable
 private fun RowScope.MangaListCover(displayManga: DisplayManga, shouldOutlineCover: Boolean) {
-    Box(modifier = Modifier.Companion.align(alignment = Alignment.CenterVertically)) {
+    Box(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
         MangaCover.Square.invoke(
             artwork = displayManga.currentArtwork,
             shouldOutlineCover = shouldOutlineCover,
