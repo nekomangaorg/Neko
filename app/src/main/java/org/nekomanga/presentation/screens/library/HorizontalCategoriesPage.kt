@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.library.LibraryScreenActions
@@ -175,12 +176,29 @@ fun HorizontalCategoriesPage(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 AnimatedVisibility(selectionMode) {
-                                    Icon(
-                                        imageVector =
-                                            if (allSelected) Icons.Default.CheckCircleOutline
-                                            else Icons.Outlined.Circle,
-                                        contentDescription = null,
-                                        tint = indicatorColor,
+                                    Row {
+                                        Gap(Size.medium)
+                                        Icon(
+                                            imageVector =
+                                                if (allSelected) Icons.Default.CheckCircleOutline
+                                                else Icons.Outlined.Circle,
+                                            contentDescription = null,
+                                            tint = indicatorColor,
+                                        )
+                                    }
+                                }
+                                if (item.libraryItems.isNotEmpty()) {
+                                    Gap(Size.medium)
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                org.nekomanga.R.string.total_items,
+                                                item.libraryItems.size,
+                                            ),
+                                        color = indicatorColor,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(1f))

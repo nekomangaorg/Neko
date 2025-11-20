@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,6 +85,7 @@ fun VerticalCategoriesPage(
                     categoryItem = item.categoryItem,
                     useVividColorHeaders = libraryScreenState.useVividColorHeaders,
                     enabled = !item.libraryItems.isEmpty(),
+                    total = item.libraryItems.size,
                     isRefreshing = item.isRefreshing,
                     selectionMode = selectionMode,
                     allSelected =
@@ -255,6 +257,7 @@ private fun ListItem(
 fun LibraryCategoryHeader(
     categoryItem: CategoryItem,
     useVividColorHeaders: Boolean,
+    total: Int,
     isRefreshing: Boolean,
     isCollapsible: Boolean,
     selectionMode: Boolean,
@@ -316,15 +319,25 @@ fun LibraryCategoryHeader(
                 !isCollapsible && categoryItem.isSystemCategory -> ""
                 else -> categoryItem.name
             }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = text,
+                color = textColor,
+                style = MaterialTheme.typography.titleLarge,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 3,
+            )
 
-        Text(
-            text = text,
-            color = textColor,
-            style = MaterialTheme.typography.titleLarge,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 3,
-            modifier = Modifier.weight(1f),
-        )
+            if (total > 0) {
+                Text(
+                    text = stringResource(org.nekomanga.R.string.total_items, total),
+                    color = textColor,
+                    style = MaterialTheme.typography.labelSmall,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            }
+        }
 
         CategorySortButtons(
             enabled = enabled,
@@ -358,6 +371,7 @@ private fun LibraryCategoryHeaderPreview() {
         LibraryCategoryHeader(
             categoryItem = categoryItem,
             useVividColorHeaders = false,
+            total = 10,
             isRefreshing = false,
             isCollapsible = true,
             selectionMode = false,
