@@ -18,8 +18,8 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
-import org.nekomanga.presentation.components.icons.IncognitoCircleIcon
-import org.nekomanga.presentation.components.icons.IncognitoCircleOffIcon
+import org.nekomanga.presentation.components.icons.IncognitoIcon
+import org.nekomanga.presentation.components.icons.IncognitoOffIcon
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -40,9 +40,9 @@ fun MainDropdownMenu(
         remember(incognitoModeEnabled) {
             val (incognitoText, incognitoIcon) =
                 if (incognitoModeEnabled) {
-                    R.string.turn_off_incognito_mode to IncognitoCircleOffIcon
+                    R.string.turn_off_incognito_mode to IncognitoOffIcon
                 } else {
-                    R.string.turn_on_incognito_mode to IncognitoCircleIcon
+                    R.string.turn_on_incognito_mode to IncognitoIcon
                 }
 
             listOf(
