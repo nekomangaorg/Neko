@@ -79,6 +79,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
@@ -1078,40 +1079,24 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         chapterScanlatorFilter: MangaConstants.ScanlatorFilter,
         languageFilter: MangaConstants.LanguageFilter,
     ): String {
-        val hasDisabledScanlators = chapterScanlatorFilter.scanlators.any { it.disabled }
-        val hasDisabledSources = chapterSourceFilter.scanlators.any { it.disabled }
-        val hasDisabledLanguageFilters = languageFilter.languages.any { it.disabled }
-        val filtersId = mutableListOf<Int?>()
-        filtersId.add(
-            if (chapterDisplay.unread == ToggleableState.Indeterminate) R.string.read else null
-        )
-        filtersId.add(if (chapterDisplay.unread == ToggleableState.On) R.string.unread else null)
-        filtersId.add(
-            if (chapterDisplay.downloaded == ToggleableState.On) R.string.downloaded else null
-        )
-        filtersId.add(
-            if (chapterDisplay.downloaded == ToggleableState.Indeterminate) R.string.not_downloaded
-            else null
-        )
-        filtersId.add(
-            if (chapterDisplay.bookmarked == ToggleableState.On) R.string.bookmarked else null
-        )
-        filtersId.add(
-            if (chapterDisplay.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked
-            else null
-        )
-        filtersId.add(
-            if (chapterDisplay.available == ToggleableState.On) R.string.available else null
-        )
-        filtersId.add(
-            if (chapterDisplay.available == ToggleableState.Indeterminate) R.string.unavailable
-            else null
-        )
-        filtersId.add(if (hasDisabledLanguageFilters) R.string.language else null)
-        filtersId.add(if (hasDisabledScanlators) R.string.scanlators else null)
-        filtersId.add(if (hasDisabledSources) R.string.sources else null)
+        val context = preferences.context
+        val filters = buildList {
+            if (chapterDisplay.unread == ToggleableState.Indeterminate) add(R.string.read)
+            if (chapterDisplay.unread == ToggleableState.On) add(R.string.unread)
+            if (chapterDisplay.downloaded == ToggleableState.On) add(R.string.downloaded)
+            if (chapterDisplay.downloaded == ToggleableState.Indeterminate)
+                add(R.string.not_downloaded)
+            if (chapterDisplay.bookmarked == ToggleableState.On) add(R.string.bookmarked)
+            if (chapterDisplay.bookmarked == ToggleableState.Indeterminate)
+                add(R.string.not_bookmarked)
+            if (chapterDisplay.available == ToggleableState.On) add(R.string.available)
+            if (chapterDisplay.available == ToggleableState.Indeterminate) add(R.string.unavailable)
+            if (languageFilter.languages.any { it.disabled }) add(R.string.language)
+            if (chapterScanlatorFilter.scanlators.any { it.disabled }) add(R.string.scanlators)
+            if (chapterSourceFilter.scanlators.any { it.disabled }) add(R.string.sources)
+        }
 
-        return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
+        return filters.joinToString(", ") { context.getString(it) }
     }
 
     private fun getSortFilter(mangaItem: MangaItem): MangaConstants.SortFilter {
@@ -1475,50 +1460,31 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
+    private fun calculateNewFilter(
+        currentFilter: MangaConstants.ChapterDisplay,
+        option: MangaConstants.ChapterDisplayOptions,
+    ): MangaConstants.ChapterDisplay {
+        return when (option.displayType) {
+            MangaConstants.ChapterDisplayType.All -> MangaConstants.ChapterDisplay(showAll = true)
+            MangaConstants.ChapterDisplayType.Unread ->
+                currentFilter.copy(showAll = false, unread = option.displayState)
+            MangaConstants.ChapterDisplayType.Bookmarked ->
+                currentFilter.copy(showAll = false, bookmarked = option.displayState)
+            MangaConstants.ChapterDisplayType.Downloaded ->
+                currentFilter.copy(showAll = false, downloaded = option.displayState)
+            MangaConstants.ChapterDisplayType.HideTitles ->
+                currentFilter.copy(hideChapterTitles = option.displayState)
+            MangaConstants.ChapterDisplayType.Available ->
+                currentFilter.copy(showAll = false, available = option.displayState)
+        }
+    }
+
     /** Get current merge result */
     fun changeFilterOption(filterOption: MangaConstants.ChapterDisplayOptions?) {
-
         // update the UI immediately
         if (filterOption != null) {
             _mangaDetailScreenState.update { state ->
-                val currentFilter = state.chapterFilter
-                val newFilter =
-                    when (filterOption.displayType) {
-                        MangaConstants.ChapterDisplayType.All -> {
-                            currentFilter.copy(
-                                showAll = true,
-                                unread = ToggleableState.Off,
-                                downloaded = ToggleableState.Off,
-                                bookmarked = ToggleableState.Off,
-                                available = ToggleableState.Off,
-                            )
-                        }
-                        MangaConstants.ChapterDisplayType.Unread -> {
-                            currentFilter.copy(showAll = false, unread = filterOption.displayState)
-                        }
-                        MangaConstants.ChapterDisplayType.Bookmarked -> {
-                            currentFilter.copy(
-                                showAll = false,
-                                bookmarked = filterOption.displayState,
-                            )
-                        }
-                        MangaConstants.ChapterDisplayType.Downloaded -> {
-                            currentFilter.copy(
-                                showAll = false,
-                                downloaded = filterOption.displayState,
-                            )
-                        }
-                        MangaConstants.ChapterDisplayType.HideTitles -> {
-                            currentFilter.copy(hideChapterTitles = filterOption.displayState)
-                        }
-                        MangaConstants.ChapterDisplayType.Available -> {
-                            currentFilter.copy(
-                                showAll = false,
-                                available = filterOption.displayState,
-                            )
-                        }
-                    }
-                state.copy(chapterFilter = newFilter)
+                state.copy(chapterFilter = calculateNewFilter(state.chapterFilter, filterOption))
             }
         }
 
@@ -2033,6 +1999,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             downloadManager
                 .progressFlow()
                 .filter { it.mangaItem.id == mangaId }
+                .conflate()
                 .catch { error -> TimberKt.e(error) }
                 .collect { updateDownloadState(it) }
         }
