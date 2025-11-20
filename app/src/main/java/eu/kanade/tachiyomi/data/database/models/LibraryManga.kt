@@ -29,12 +29,5 @@ class LibraryManga : MangaImpl() {
                 id = Long.MIN_VALUE
                 category = categoryId
             }
-
-        fun createHide(categoryId: Int, title: String, hideCount: Int): LibraryManga =
-            createBlank(categoryId).apply {
-                this.title = title
-                status = -1
-                read = hideCount
-            }
     }
 }

@@ -75,6 +75,19 @@ class StorageManager(private val context: Context, storagePreferences: StoragePr
         return getSavedDir()?.createDirectory(PAGES_DIR)
     }
 
+    fun renamePagesAndCoverDirectory(from: String, to: String) {
+        val oldName = DiskUtil.buildValidFilename(from)
+        val newName = DiskUtil.buildValidFilename(to)
+
+        val pagesDir = getPagesDirectory()
+        val mangaPageDir = pagesDir?.findFile(oldName)
+        mangaPageDir?.renameTo(newName)
+
+        val coverDir = getCoverDirectory()
+        val mangaCoverDir = coverDir?.findFile(oldName)
+        mangaCoverDir?.renameTo(newName)
+    }
+
     fun getCrashLogDirectory(): UniFile? {
         return baseDir?.createDirectory(CRASH_LOG_DIR)
     }

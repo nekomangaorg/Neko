@@ -262,8 +262,11 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
             NotificationManagerCompat.from(context).apply {
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED
+                if (
+                    ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return@apply
                 }

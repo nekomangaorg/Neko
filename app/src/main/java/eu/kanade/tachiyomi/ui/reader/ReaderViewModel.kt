@@ -825,7 +825,7 @@ constructor(
         // create chapter name so its always sorted correctly  max character is 75
         val pageName = parseChapterName(chapter.name, page.number.toString())
         // take only 150 characters so this file maxes at 225
-        val trimmedTitle = (prefix + manga.title).take(150)
+        val trimmedTitle = (prefix + manga.displayTitle()).take(150)
 
         // Build destination file
         val filename =
@@ -895,7 +895,7 @@ constructor(
 
         // Build destination file.
         val filename =
-            DiskUtil.buildValidFilename("${manga.title} - ${chapter.name}".take(225)) +
+            DiskUtil.buildValidFilename("${manga.displayTitle()} - ${chapter.name}".take(225)) +
                 " - ${page1.number}-${page2.number}.jpg"
 
         val destFile = directory.createFile(filename)!!
@@ -923,7 +923,9 @@ constructor(
 
                 if (readerPreferences.folderPerManga().get() && directory != null) {
                     directory =
-                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                        directory.createDirectory(
+                            DiskUtil.buildValidFilename(manga.displayTitle())
+                        )!!
                 }
                 directory ?: throw Exception("Error creating directory to save page")
 
@@ -958,7 +960,9 @@ constructor(
 
                 if (readerPreferences.folderPerManga().get()) {
                     directory =
-                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                        directory.createDirectory(
+                            DiskUtil.buildValidFilename(manga.displayTitle())
+                        )!!
                 }
                 val file = saveImages(firstPage, secondPage, isLTR, bg, directory, manga)
                 DiskUtil.scanMedia(context, file.uri)

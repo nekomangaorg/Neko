@@ -346,6 +346,10 @@ class DownloadManager(val context: Context) {
         provider.getMangaDir(manga)
     }
 
+    fun updateDownloadCacheForManga(manga: Manga) {
+        cache.updateManga(manga)
+    }
+
     /**
      * Deletes the directories of chapters that were read or have no match
      *
@@ -388,7 +392,7 @@ class DownloadManager(val context: Context) {
                 mangaFolder.delete()
                 cache.removeManga(manga)
             } else {
-                TimberKt.e { "Cache and download folder doesn't match for ${manga.title}" }
+                TimberKt.e { "Cache and download folder doesn't match for ${manga.displayTitle()}" }
             }
         }
         return cleaned

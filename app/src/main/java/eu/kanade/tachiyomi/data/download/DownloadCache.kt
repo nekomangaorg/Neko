@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.lang.isUUID
-import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -99,6 +98,23 @@ class DownloadCache(
 
     fun findChapterDirName(chapter: Chapter, manga: Manga): String {
         return provider.findChapterDir(chapter, manga)?.name ?: ""
+    }
+
+    @Synchronized
+    fun updateManga(manga: Manga) {
+        val id = manga.id ?: return
+        val mangaDir = provider.findMangaDir(manga) ?: return
+
+        val fileNames =
+            mangaDir
+                .listFiles()
+                .orEmpty()
+                .mapNotNull { it.name?.substringBeforeLast(".cbz") }
+                .toMutableSet()
+
+        val mangadexIds = fileNames.map { it.takeLast(36) }.filter { it.isUUID() }.toMutableSet()
+
+        mangaFiles[id] = Pair(fileNames, mangadexIds)
     }
 
     /**
@@ -237,9 +253,9 @@ class DownloadCache(
 
     /** Searches a manga list and matches the given mangakey and source key */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
-        return mangaList.find {
-            DiskUtil.buildValidFilename(it.title).lowercase(Locale.US) ==
-                mangaKey.lowercase(Locale.US) && it.source == sourceKey
+        return mangaList.find { manga ->
+            DiskUtil.buildValidFilename(manga.displayTitle()).equals(mangaKey, ignoreCase = true) &&
+                manga.source == sourceKey
         }
     }
 
