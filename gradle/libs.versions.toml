@@ -7,7 +7,6 @@ fastAdapterVersion = "5.7.0"
 firebaseBomVersion = "34.6.0"
 firebasePluginVersion = "3.0.6"
 googleServicesPluginVersion = "4.4.4"
-iconicsVersion = "5.4.0"
 injektCoreVersion = "1.16.1"
 kotlinResultVersion = "2.1.0"
 ktfmtVersion = "0.25.0"
@@ -46,10 +45,6 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
-iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconicsVersion" }
-iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconicsVersion" }
-iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconicsVersion" }
-
 
 jsoup = "org.jsoup:jsoup:1.21.2"
 
@@ -62,7 +57,6 @@ rx-relay = "com.jakewharton.rxrelay:rxrelay:1.2.0"
 
 j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
 
-simple-icons = { module = "br.com.devsrsouza.compose.icons.android:simple-icons", version.ref = "simpleIconsVersion" }
 sqlite-android = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroidVersion" }
 storio-sqlite = "com.github.inorichi.storio:storio-sqlite:8be19de"
 storio-common = "com.github.inorichi.storio:storio-common:8be19de"
@@ -120,7 +114,6 @@ coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
-iconics = ["iconics-core", "iconics-views", "iconics-compose"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]

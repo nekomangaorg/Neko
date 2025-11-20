@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
@@ -34,10 +33,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.IIcon
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
@@ -392,34 +387,6 @@ fun Context.createFileInCacheDir(name: String): File {
     }
     file.createNewFile()
     return file
-}
-
-/** default tinted to actionbar */
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawableMedium(
-    icon: IIcon,
-    size: Int = 18,
-    color: Int = R.attr.actionBarTintColor,
-    attributeColor: Boolean = true,
-): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
-}
-
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawable(
-    icon: IIcon,
-    size: Int = 15,
-    color: Int = R.attr.colorAccent,
-    attributeColor: Boolean = true,
-): IconicsDrawable {
-    return IconicsDrawable(this, icon).apply {
-        sizeDp = size
-        colorInt =
-            when {
-                attributeColor -> getResourceColor(color)
-                else -> contextCompatColor(color)
-            }
-    }
 }
 
 fun Context.sharedCacheDir(): UniFile? {

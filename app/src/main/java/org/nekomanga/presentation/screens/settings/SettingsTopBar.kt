@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.nekomanga.R
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
-import org.nekomanga.presentation.components.getTopAppBarColor
+import org.nekomanga.presentation.functions.getTopAppBarColor
 
 @Composable
 fun SettingsTopBar(

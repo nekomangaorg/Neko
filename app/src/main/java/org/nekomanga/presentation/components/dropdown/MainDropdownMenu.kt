@@ -13,14 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import com.mikepenz.iconics.compose.Image
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import androidx.compose.ui.graphics.vector.ImageVector
 import org.nekomanga.R
 import org.nekomanga.presentation.components.Divider
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.icons.IncognitoCircleIcon
+import org.nekomanga.presentation.components.icons.IncognitoCircleOffIcon
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
@@ -41,31 +40,31 @@ fun MainDropdownMenu(
         remember(incognitoModeEnabled) {
             val (incognitoText, incognitoIcon) =
                 if (incognitoModeEnabled) {
-                    R.string.turn_off_incognito_mode to CommunityMaterial.Icon2.cmd_incognito_off
+                    R.string.turn_off_incognito_mode to IncognitoCircleOffIcon
                 } else {
-                    R.string.turn_on_incognito_mode to CommunityMaterial.Icon2.cmd_incognito
+                    R.string.turn_on_incognito_mode to IncognitoCircleIcon
                 }
 
             listOf(
                 DropdownMenuItem(
                     title = UiText.StringResource(incognitoText),
                     subtitle = UiText.StringResource(R.string.pauses_reading_history),
-                    icon = UiIcon.IIcon(incognitoIcon),
+                    icon = incognitoIcon,
                     onClick = incognitoModeClick,
                 ),
                 DropdownMenuItem(
                     title = UiText.StringResource(R.string.settings),
-                    icon = UiIcon.Icon(Icons.Outlined.Settings),
+                    icon = Icons.Outlined.Settings,
                     onClick = settingsClick,
                 ),
                 DropdownMenuItem(
                     title = UiText.StringResource(R.string.stats),
-                    icon = UiIcon.Icon(Icons.Outlined.QueryStats),
+                    icon = Icons.Outlined.QueryStats,
                     onClick = statsClick,
                 ),
                 DropdownMenuItem(
                     title = UiText.StringResource(R.string.about),
-                    icon = UiIcon.Icon(Icons.Outlined.Info),
+                    icon = Icons.Outlined.Info,
                     onClick = aboutClick,
                 ),
             )
@@ -89,7 +88,7 @@ fun MainDropdownMenu(
 }
 
 @Composable
-private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: () -> Unit) {
+private fun Row(title: UiText, subTitle: UiText? = null, icon: ImageVector, onClick: () -> Unit) {
     MaterialDropdownMenuItem(
         text = {
             Column {
@@ -113,21 +112,12 @@ private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: 
             }
         },
         leadingIcon = {
-            when (icon) {
-                is UiIcon.Icon ->
-                    Icon(
-                        imageVector = icon.icon,
-                        modifier = Modifier.size(Size.large),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                is UiIcon.IIcon ->
-                    Image(
-                        asset = icon.icon,
-                        modifier = Modifier.size(Size.large),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
-                    )
-            }
+            Icon(
+                imageVector = icon,
+                modifier = Modifier.size(Size.large),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
         },
         onClick = onClick,
     )

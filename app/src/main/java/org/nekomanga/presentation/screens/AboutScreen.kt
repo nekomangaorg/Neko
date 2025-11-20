@@ -33,9 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
-import compose.icons.SimpleIcons
-import compose.icons.simpleicons.Discord
-import compose.icons.simpleicons.Github
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
@@ -53,6 +50,8 @@ import org.nekomanga.constants.Constants.DISCORD_URL
 import org.nekomanga.constants.Constants.PRIVACY_POLICY_URL
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
+import org.nekomanga.presentation.components.icons.DiscordIcon
+import org.nekomanga.presentation.components.icons.GithubIcon
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
@@ -238,13 +237,13 @@ private fun AboutWrapper(
                     LinkIcon(
                         label = "Discord",
                         modifier = modifier,
-                        icon = SimpleIcons.Discord,
+                        icon = DiscordIcon,
                         url = DISCORD_URL,
                     )
                     LinkIcon(
                         modifier = modifier,
                         label = "GitHub",
-                        icon = SimpleIcons.Github,
+                        icon = GithubIcon,
                         url = REPO_URL,
                     )
                 }
