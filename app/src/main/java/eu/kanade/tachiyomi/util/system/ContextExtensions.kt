@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
@@ -336,8 +337,18 @@ suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
         TimberKt.i { "Successfully set foreground info" }
-    } catch (e: IllegalStateException) {
-        TimberKt.e(e) { "Not allowed to set foreground job" }
+    } catch (e: Exception) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            e is ForegroundServiceStartNotAllowedException
+        ) {
+            // On Android 12+, if the app is in the background, we are not allowed to
+            // start a foreground service. We swallow this exception so the worker
+            // continues execution as a standard background job (without a notification).
+            TimberKt.e { "ForegroundServiceStartNotAllowedException: Running as background worker instead." }
+        } else {
+            // Log other errors (like IllegalStateException) but don't crash
+            TimberKt.e(e) { "Failed to set foreground job" }
+        }
     }
 }
 
