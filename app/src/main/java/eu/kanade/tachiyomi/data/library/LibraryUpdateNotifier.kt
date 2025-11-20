@@ -17,9 +17,9 @@ import coil3.toBitmap
 import coil3.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
@@ -71,12 +71,12 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification(manga: SManga, current: Int, total: Int) {
+    fun showProgressNotification(manga: Manga, current: Int, total: Int) {
         val title =
             if (securityPreferences.hideNotificationContent().get()) {
                 context.getString(R.string.checking_for_new_chapters)
             } else {
-                manga.title
+                manga.user_title
             }
 
         context.notificationManager.notify(
