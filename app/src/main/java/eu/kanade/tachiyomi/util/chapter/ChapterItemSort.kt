@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -42,9 +41,6 @@ class ChapterItemSort(
             } else {
                 manga.sortDescending(mangaDetailsPreferences) // this really is Asc
             }
-        TimberKt.d {
-            "SortAsc :$sortAsc, sort order ${manga.chapterOrder(mangaDetailsPreferences)}"
-        }
 
         return when (manga.chapterOrder(mangaDetailsPreferences)) {
             Manga.CHAPTER_SORTING_SOURCE ->
