@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
@@ -83,6 +84,7 @@ import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.VerticalDivider
+import org.nekomanga.presentation.components.VerticalFastScroller
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -690,45 +692,52 @@ private fun VerticalLayout(
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     val contentPadding = PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
+    val listState = rememberLazyListState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
-        item(key = "header") {
-            MangaDetailsHeader(
-                mangaDetailScreenState = screenState,
-                isInitialized = isInitialized,
-                windowSizeClass = windowSizeClass,
-                isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
-                themeColorState = themeColorState,
-                generatePalette = generatePalette,
-                toggleFavorite = onToggleFavorite,
-                onCategoriesClick = {
-                    onOpenSheet(
-                        DetailsBottomSheetScreen.CategoriesSheet(
-                            setCategories = categoryActions.set
+    VerticalFastScroller(listState = listState, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
+        ) {
+            item(key = "header") {
+                MangaDetailsHeader(
+                    mangaDetailScreenState = screenState,
+                    isInitialized = isInitialized,
+                    windowSizeClass = windowSizeClass,
+                    isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
+                    themeColorState = themeColorState,
+                    generatePalette = generatePalette,
+                    toggleFavorite = onToggleFavorite,
+                    onCategoriesClick = {
+                        onOpenSheet(
+                            DetailsBottomSheetScreen.CategoriesSheet(
+                                setCategories = categoryActions.set
+                            )
                         )
-                    )
-                },
-                onTrackingClick = { onOpenSheet(DetailsBottomSheetScreen.TrackingSheet) },
-                onArtworkClick = { onOpenSheet(DetailsBottomSheetScreen.ArtworkSheet) },
-                onSimilarClick = onSimilarClick,
-                onMergeClick = { onOpenSheet(DetailsBottomSheetScreen.MergeSheet) },
-                onLinksClick = { onOpenSheet(DetailsBottomSheetScreen.ExternalLinksSheet) },
-                onShareClick = onShareClick,
-                descriptionActions = descriptionActions,
-                informationActions = informationActions,
-                onQuickReadClick = { chapterActions.openNext() },
-            )
-        }
-        if (isInitialized) {
-            chapterList(
-                chapters =
-                    if (screenState.isSearching) screenState.searchChapters
-                    else screenState.activeChapters,
-                screenState = screenState,
-                themeColorState = themeColorState,
-                chapterActions = chapterActions,
-                onOpenSheet = onOpenSheet,
-            )
+                    },
+                    onTrackingClick = { onOpenSheet(DetailsBottomSheetScreen.TrackingSheet) },
+                    onArtworkClick = { onOpenSheet(DetailsBottomSheetScreen.ArtworkSheet) },
+                    onSimilarClick = onSimilarClick,
+                    onMergeClick = { onOpenSheet(DetailsBottomSheetScreen.MergeSheet) },
+                    onLinksClick = { onOpenSheet(DetailsBottomSheetScreen.ExternalLinksSheet) },
+                    onShareClick = onShareClick,
+                    descriptionActions = descriptionActions,
+                    informationActions = informationActions,
+                    onQuickReadClick = { chapterActions.openNext() },
+                )
+            }
+            if (isInitialized) {
+                chapterList(
+                    chapters =
+                        if (screenState.isSearching) screenState.searchChapters
+                        else screenState.activeChapters,
+                    screenState = screenState,
+                    themeColorState = themeColorState,
+                    chapterActions = chapterActions,
+                    onOpenSheet = onOpenSheet,
+                )
+            }
         }
     }
 }
@@ -796,21 +805,25 @@ private fun SideBySideLayout(
 
         VerticalDivider(Modifier.align(Alignment.TopCenter))
 
-        LazyColumn(
+        val listState = rememberLazyListState()
+
+        VerticalFastScroller(
+            listState = listState,
             modifier =
                 Modifier.align(Alignment.TopEnd).fillMaxWidth(.5f).fillMaxHeight().clipToBounds(),
-            contentPadding = chapterContentPadding,
         ) {
-            if (isInitialized) {
-                chapterList(
-                    chapters =
-                        if (screenState.isSearching) screenState.searchChapters
-                        else screenState.activeChapters,
-                    screenState = screenState,
-                    themeColorState = themeColorState,
-                    chapterActions = chapterActions,
-                    onOpenSheet = onOpenSheet,
-                )
+            LazyColumn(state = listState, contentPadding = chapterContentPadding) {
+                if (isInitialized) {
+                    chapterList(
+                        chapters =
+                            if (screenState.isSearching) screenState.searchChapters
+                            else screenState.activeChapters,
+                        screenState = screenState,
+                        themeColorState = themeColorState,
+                        chapterActions = chapterActions,
+                        onOpenSheet = onOpenSheet,
+                    )
+                }
             }
         }
     }
