@@ -694,7 +694,13 @@ private fun VerticalLayout(
     val contentPadding = PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
     val listState = rememberLazyListState()
 
-    VerticalFastScroller(listState = listState, modifier = Modifier.fillMaxSize()) {
+    VerticalFastScroller(
+        listState = listState,
+        modifier = Modifier.fillMaxSize(),
+        thumbColor = themeColorState.primaryColor,
+        topContentPadding = incomingContentPadding.calculateTopPadding(),
+        bottomContentPadding = incomingContentPadding.calculateBottomPadding(),
+    ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
@@ -811,6 +817,9 @@ private fun SideBySideLayout(
             listState = listState,
             modifier =
                 Modifier.align(Alignment.TopEnd).fillMaxWidth(.5f).fillMaxHeight().clipToBounds(),
+            thumbColor = themeColorState.primaryColor,
+            topContentPadding = incomingContentPadding.calculateTopPadding(),
+            bottomContentPadding = incomingContentPadding.calculateBottomPadding(),
         ) {
             LazyColumn(state = listState, contentPadding = chapterContentPadding) {
                 if (isInitialized) {
