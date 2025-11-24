@@ -185,22 +185,37 @@ class Suwayomi : MergedServerSource() {
                     }
                     val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
                     var chapters =
-                        customClient()
-                            .newCall(
-                                POST(apiUrl, headers, fetchChaptersFormBuilder(mangaId.toLong()))
-                            )
-                            .await()
-                            .body
-                            .use {
-                                json
-                                    .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>>(
-                                        it.string()
+                        try {
+                            customClient()
+                                .newCall(
+                                    POST(
+                                        apiUrl,
+                                        headers,
+                                        fetchChaptersFormBuilder(mangaId.toLong()),
                                     )
-                                    .data
-                                    .fetchChapters
-                                    ?.chapters
+                                )
+                                .await()
+                                .body
+                                .use {
+                                    json
+                                        .decodeFromString<
+                                            SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>
+                                        >(
+                                            it.string()
+                                        )
+                                        .data
+                                        .fetchChapters
+                                        ?.chapters
+                                }
+                        } catch (e: Exception) {
+                            TimberKt.e(e) {
+                                "Error fetching suwayomi chapters, trying backup request"
                             }
-                            ?: customClient()
+                            null
+                        }
+                    if (chapters == null) {
+                        chapters =
+                            customClient()
                                 .newCall(
                                     POST(apiUrl, headers, getChaptersFormBuilder(mangaId.toLong()))
                                 )
@@ -217,6 +232,7 @@ class Suwayomi : MergedServerSource() {
                                         .chapters
                                         .nodes
                                 }
+                    }
                     chapters = chapters.sortedBy { it.sourceOrder }
                     var previous: Pair<Float?, Boolean> = null to false
                     val chapterPairs =
