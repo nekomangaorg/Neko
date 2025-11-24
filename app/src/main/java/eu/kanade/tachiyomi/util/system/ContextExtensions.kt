@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.annotation.SuppressLint
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
@@ -34,10 +34,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.IIcon
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
@@ -341,8 +337,21 @@ suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
         TimberKt.i { "Successfully set foreground info" }
-    } catch (e: IllegalStateException) {
-        TimberKt.e(e) { "Not allowed to set foreground job" }
+    } catch (e: Exception) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                e is ForegroundServiceStartNotAllowedException
+        ) {
+            // On Android 12+, if the app is in the background, we are not allowed to
+            // start a foreground service. We swallow this exception so the worker
+            // continues execution as a standard background job (without a notification).
+            TimberKt.e {
+                "ForegroundServiceStartNotAllowedException: Running as background worker instead."
+            }
+        } else {
+            // Log other errors (like IllegalStateException) but don't crash
+            TimberKt.e(e) { "Failed to set foreground job" }
+        }
     }
 }
 
@@ -392,34 +401,6 @@ fun Context.createFileInCacheDir(name: String): File {
     }
     file.createNewFile()
     return file
-}
-
-/** default tinted to actionbar */
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawableMedium(
-    icon: IIcon,
-    size: Int = 18,
-    color: Int = R.attr.actionBarTintColor,
-    attributeColor: Boolean = true,
-): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
-}
-
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawable(
-    icon: IIcon,
-    size: Int = 15,
-    color: Int = R.attr.colorAccent,
-    attributeColor: Boolean = true,
-): IconicsDrawable {
-    return IconicsDrawable(this, icon).apply {
-        sizeDp = size
-        colorInt =
-            when {
-                attributeColor -> getResourceColor(color)
-                else -> contextCompatColor(color)
-            }
-    }
 }
 
 fun Context.sharedCacheDir(): UniFile? {

@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -1249,8 +1250,20 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             val previousTitle = mangaDetailScreenState.value.currentTitle
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+
+            val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
             dbManga.user_title = title ?: dbManga.title
+            val newEffectiveTitle = dbManga.user_title ?: dbManga.title
             db.insertManga(dbManga).executeOnIO()
+            if (previousEffectiveTitle != newEffectiveTitle) {
+                val provider = DownloadProvider(preferences.context)
+                provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
+                downloadManager.updateDownloadCacheForManga(dbManga)
+                storageManager.renamePagesAndCoverDirectory(
+                    previousEffectiveTitle,
+                    newEffectiveTitle,
+                )
+            }
             appSnackbarManager.showSnackbar(
                 SnackbarState(
                     messageRes = R.string.updated_title_to_,

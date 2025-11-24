@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
-import org.nekomanga.presentation.components.getTopAppBarColor
+import org.nekomanga.presentation.functions.getTopAppBarColor
 
 @Composable
 fun StatsTopBar(

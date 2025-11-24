@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.injectLazy
 
 open class MangaImpl : Manga {
@@ -90,9 +91,15 @@ open class MangaImpl : Manga {
         if (other is MangaImpl && other.title.isNotBlank() && other.title != title) {
             val oldTitle = title
             title = other.title
-            val db: DownloadManager by injectLazy()
-            val provider = DownloadProvider(db.context)
-            provider.renameMangaFolder(oldTitle, title)
+
+            if (user_title.isNullOrBlank()) {
+                val downloadManager: DownloadManager by injectLazy()
+                val storageManager: StorageManager by injectLazy()
+                val provider = DownloadProvider(downloadManager.context)
+                provider.renameMangaFolder(oldTitle, title)
+                storageManager.renamePagesAndCoverDirectory(oldTitle, title)
+                downloadManager.updateDownloadCacheForManga(this)
+            }
         }
         super.copyFrom(other)
     }

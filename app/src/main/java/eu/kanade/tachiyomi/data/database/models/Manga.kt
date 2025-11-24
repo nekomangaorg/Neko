@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.models
 
-import android.content.Context
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
@@ -23,7 +22,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
-import org.nekomanga.R
 import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
 import org.nekomanga.domain.details.MangaDetailsPreferences
 
@@ -52,6 +50,10 @@ interface Manga : SManga {
     var user_cover: String?
 
     var user_title: String?
+
+    fun displayTitle(): String {
+        return user_title ?: title
+    }
 
     fun isBlank() = id == Long.MIN_VALUE
 
@@ -113,23 +115,6 @@ interface Manga : SManga {
     fun availableFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
         if (usesLocalFilter) availableFilter
         else mangaDetailsPreferences.filterChapterByAvailable().get()
-
-    fun showChapterTitle(defaultShow: Boolean): Boolean =
-        chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
-
-    fun seriesType(context: Context): String {
-        return context
-            .getString(
-                when (seriesType()) {
-                    TYPE_WEBTOON -> R.string.webtoon
-                    TYPE_MANHWA -> R.string.manhwa
-                    TYPE_MANHUA -> R.string.manhua
-                    TYPE_COMIC -> R.string.comic
-                    else -> R.string.manga
-                }
-            )
-            .lowercase(Locale.getDefault())
-    }
 
     fun getGenres(filterOutSafe: Boolean = false): List<String>? {
         return genre
@@ -315,8 +300,6 @@ interface Manga : SManga {
         const val TYPE_MANGA = 1
         const val TYPE_MANHWA = 2
         const val TYPE_MANHUA = 3
-        const val TYPE_COMIC = 4
-        const val TYPE_WEBTOON = 5
 
         fun create(source: Long): Manga = MangaImpl().apply { this.source = source }
 

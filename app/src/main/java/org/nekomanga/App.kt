@@ -24,9 +24,6 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
 import coil3.SingletonImageLoader
-import com.mikepenz.iconics.Iconics
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
@@ -106,9 +103,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
 
         setupNotificationChannels()
 
-        Iconics.init(applicationContext)
-        Iconics.registerFont(CommunityMaterial)
-        Iconics.registerFont(MaterialDesignDx)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         MangaCoverMetadata.load()

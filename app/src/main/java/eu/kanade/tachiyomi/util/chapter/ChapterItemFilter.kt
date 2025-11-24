@@ -12,7 +12,6 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -43,7 +42,6 @@ class ChapterItemFilter(
             manga.availableFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNAVAILABLE
 
         // if none of the filters are enabled skip the filtering of them
-        TimberKt.d { "Filtering by scanlators and language" }
         val filteredChapters =
             filterChaptersByScanlatorsAndLanguage(
                 chapters,
@@ -51,7 +49,6 @@ class ChapterItemFilter(
                 mangaDexPreferences,
                 libraryPreferences,
             )
-        TimberKt.d { "Filtering by scanlators and language done" }
 
         return if (
             readEnabled ||

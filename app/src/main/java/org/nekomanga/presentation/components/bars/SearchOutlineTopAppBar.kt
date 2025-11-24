@@ -14,7 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -33,17 +33,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import com.mikepenz.iconics.compose.Image
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.FlexibleTopBar
 import org.nekomanga.presentation.components.FlexibleTopBarColors
 import org.nekomanga.presentation.components.ToolTipButton
+import org.nekomanga.presentation.components.icons.IncognitoCircleIcon
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -144,10 +142,10 @@ fun SearchOutlineTopAppBar(
                                 }
                                 if (incognitoMode) {
                                     Gap(Size.small)
-                                    Image(
-                                        CommunityMaterial.Icon2.cmd_incognito_circle,
-                                        colorFilter = ColorFilter.tint(LocalContentColor.current),
+                                    Icon(
+                                        imageVector = IncognitoCircleIcon,
                                         modifier = Modifier.size(Size.extraLarge),
+                                        contentDescription = null,
                                     )
                                     Gap(Size.small)
                                 }

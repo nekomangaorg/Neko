@@ -7,7 +7,6 @@ import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
-import org.nekomanga.logging.TimberKt
 
 /**
  * An OkHttp interceptor that handles rate limiting with support for Request Priority.
@@ -58,8 +57,6 @@ class PriorityRateLimitInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val url = chain.request().url
         val priority = prioritySelector(url)
-
-        TimberKt.d { "ESCO priority $priority" }
 
         // We define the ticket outside, but initialize it inside the lock to ensure sequence safety
         val ticket: Ticket

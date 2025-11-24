@@ -61,6 +61,19 @@ fun MainScreen(
     val animationSpec = tween<IntOffset>(durationMillis = 300)
     val fadeSpec = tween<Float>(durationMillis = 300)
 
+    val slideInTransition =
+        slideInHorizontally(animationSpec = animationSpec, initialOffsetX = { it / 4 }) +
+            fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+
+    val slideOutTransition =
+        fadeIn(animationSpec = fadeSpec) togetherWith
+            slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it / 4 }) +
+                fadeOut(animationSpec = fadeSpec)
+
+    // The new fade-only animation for top-level screens
+    val fadeTransition =
+        fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         NavDisplay(
             backStack = backStack,
@@ -71,22 +84,34 @@ fun MainScreen(
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
             transitionSpec = {
-                slideInHorizontally(animationSpec = animationSpec, initialOffsetX = { it / 4 }) +
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+                val initialIsTop = isTopLevel(initialState.key)
+                val targetIsTop = isTopLevel(targetState.key)
+
+                if (initialIsTop && targetIsTop) {
+                    fadeTransition
+                } else {
+                    slideInTransition
+                }
             },
             popTransitionSpec = {
-                fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = animationSpec,
-                        targetOffsetX = { it / 4 },
-                    ) + fadeOut(animationSpec = fadeSpec)
+                val initialIsTop = isTopLevel(initialState.key)
+                val targetIsTop = isTopLevel(targetState.key)
+
+                if (initialIsTop && targetIsTop) {
+                    fadeTransition
+                } else {
+                    slideOutTransition
+                }
             },
             predictivePopTransitionSpec = {
-                fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = animationSpec,
-                        targetOffsetX = { it / 4 },
-                    ) + fadeOut(animationSpec = fadeSpec)
+                val initialIsTop = isTopLevel(initialState.key)
+                val targetIsTop = isTopLevel(targetState.key)
+
+                if (initialIsTop && targetIsTop) {
+                    fadeTransition
+                } else {
+                    slideOutTransition
+                }
             },
             entryProvider =
                 entryProvider {
@@ -233,4 +258,12 @@ fun MainScreen(
                 },
         )
     }
+}
+
+private fun isTopLevel(key: Any?): Boolean {
+    if (key == null) return false
+    val keyString = key.toString()
+    return keyString.contains("Library") ||
+        keyString.contains("Feed") ||
+        keyString.contains("Browse")
 }

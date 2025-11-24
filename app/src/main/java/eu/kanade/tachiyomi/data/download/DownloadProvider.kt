@@ -54,7 +54,7 @@ class DownloadProvider(
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
             return downloadsDir!!.createDirectory(sourceDirName)!!.createDirectory(mangaDirName)!!
         } catch (e: Exception) {
-            TimberKt.e(e) { "error getting download folder for ${manga.title}" }
+            TimberKt.e(e) { "error getting download folder for ${manga.displayTitle()}" }
 
             throw Exception(
                 context.getString(
@@ -243,7 +243,7 @@ class DownloadProvider(
      * @param manga the manga to query.
      */
     fun getMangaDirName(manga: Manga): String {
-        return DiskUtil.buildValidFilename(manga.title)
+        return DiskUtil.buildValidFilename(manga.displayTitle())
     }
 
     /**

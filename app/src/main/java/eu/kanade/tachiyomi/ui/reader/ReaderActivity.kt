@@ -55,7 +55,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import com.hippo.unifile.UniFile
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
@@ -91,7 +90,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
-import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -650,8 +648,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.navigationIcon =
-            this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
+
         binding.toolbar.setNavigationOnClickListener { popToMain() }
 
         binding.toolbar.setOnClickListener {

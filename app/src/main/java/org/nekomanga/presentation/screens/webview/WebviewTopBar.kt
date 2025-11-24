@@ -13,7 +13,7 @@ import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.bars.TitleTopAppBar
-import org.nekomanga.presentation.components.getTopAppBarColor
+import org.nekomanga.presentation.functions.getTopAppBarColor
 
 @Composable
 fun WebviewTopBar(

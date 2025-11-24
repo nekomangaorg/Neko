@@ -1,11 +1,14 @@
 package eu.kanade.tachiyomi.data.library
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -17,9 +20,9 @@ import coil3.toBitmap
 import coil3.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.DeepLinks
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
@@ -71,12 +74,12 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification(manga: SManga, current: Int, total: Int) {
+    fun showProgressNotification(manga: Manga, current: Int, total: Int) {
         val title =
             if (securityPreferences.hideNotificationContent().get()) {
                 context.getString(R.string.checking_for_new_chapters)
             } else {
-                manga.title
+                manga.user_title
             }
 
         context.notificationManager.notify(
@@ -259,6 +262,14 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
             NotificationManagerCompat.from(context).apply {
+                if (
+                    ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@apply
+                }
                 notify(
                     Notifications.ID_NEW_CHAPTERS,
                     context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
