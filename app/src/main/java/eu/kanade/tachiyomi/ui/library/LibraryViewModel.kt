@@ -41,6 +41,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
@@ -308,119 +310,124 @@ class LibraryViewModel() : ViewModel() {
                     mangaRefreshingState,
                     lastReadMap,
                     lastFetchMap ->
-                    val collapsedCategorySet =
-                        libraryViewPreferences.collapsedCategories
-                            .mapNotNull { it.toIntOrNull() }
-                            .toSet()
+                    withContext(Dispatchers.Default) {
+                        val collapsedCategorySet =
+                            libraryViewPreferences.collapsedCategories
+                                .mapNotNull { it.toIntOrNull() }
+                                .toSet()
 
-                    val removeArticles = libraryPreferences.removeArticles().get()
+                        val removeArticles = libraryPreferences.removeArticles().get()
 
-                    val downloadCountMapAsync = async {
-                        downloadManager.getDownloadCountsById(
-                            filteredMangaList.map { it.displayManga.mangaId }
-                        )
-                    }
-
-                    val layout = libraryPreferences.layout().get()
-                    val gridSize = libraryPreferences.gridSize().get()
-
-                    val unsortedLibraryCategoryItems =
-                        when (libraryViewPreferences.groupBy) {
-                            LibraryGroup.ByCategory -> {
-                                groupByCategory(
-                                    filteredMangaList,
-                                    categoryList,
-                                    collapsedCategorySet,
-                                )
-                            }
-                            LibraryGroup.ByAuthor,
-                            LibraryGroup.ByContent,
-                            LibraryGroup.ByLanguage,
-                            LibraryGroup.ByStatus,
-                            LibraryGroup.ByTag,
-                            LibraryGroup.ByTrackStatus -> {
-                                groupByDynamic(
-                                    libraryMangaList = filteredMangaList,
-                                    collapsedDynamicCategorySet =
-                                        libraryViewPreferences.collapsedDynamicCategories,
-                                    currentLibraryGroup = libraryViewPreferences.groupBy,
-                                    sortOrder = libraryViewPreferences.sortingMode,
-                                    sortAscending = libraryViewPreferences.sortAscending,
-                                    loggedInTrackStatus = trackMap,
-                                )
-                            }
-                            LibraryGroup.Ungrouped -> {
-                                groupByUngrouped(
-                                    filteredMangaList,
-                                    libraryViewPreferences.sortingMode,
-                                    libraryViewPreferences.sortAscending,
-                                )
-                            }
+                        val downloadCountMapAsync = async {
+                            downloadManager.getDownloadCountsById(
+                                filteredMangaList.map { it.displayManga.mangaId }
+                            )
                         }
 
-                    var allCollapsed = true
+                        val layout = libraryPreferences.layout().get()
+                        val gridSize = libraryPreferences.gridSize().get()
 
-                    val downloadCountMap = downloadCountMapAsync.await()
-                    val items =
-                        unsortedLibraryCategoryItems
-                            .mapAsync { libraryCategoryItem ->
-                                if (!libraryCategoryItem.categoryItem.isHidden) {
-                                    allCollapsed = false
-                                }
-
-                                val comparator =
-                                    libraryMangaItemComparator(
-                                        categorySort = libraryCategoryItem.categoryItem.sortOrder,
-                                        categoryIsAscending =
-                                            libraryCategoryItem.categoryItem.isAscending,
-                                        removeArticles = removeArticles,
-                                        mangaOrder = libraryCategoryItem.categoryItem.mangaOrder,
-                                        lastReadMap = lastReadMap,
-                                        lastFetchMap = lastFetchMap,
+                        val unsortedLibraryCategoryItems =
+                            when (libraryViewPreferences.groupBy) {
+                                LibraryGroup.ByCategory -> {
+                                    groupByCategory(
+                                        filteredMangaList,
+                                        categoryList,
+                                        collapsedCategorySet,
                                     )
+                                }
+                                LibraryGroup.ByAuthor,
+                                LibraryGroup.ByContent,
+                                LibraryGroup.ByLanguage,
+                                LibraryGroup.ByStatus,
+                                LibraryGroup.ByTag,
+                                LibraryGroup.ByTrackStatus -> {
+                                    groupByDynamic(
+                                        libraryMangaList = filteredMangaList,
+                                        collapsedDynamicCategorySet =
+                                            libraryViewPreferences.collapsedDynamicCategories,
+                                        currentLibraryGroup = libraryViewPreferences.groupBy,
+                                        sortOrder = libraryViewPreferences.sortingMode,
+                                        sortAscending = libraryViewPreferences.sortAscending,
+                                        loggedInTrackStatus = trackMap,
+                                    )
+                                }
+                                LibraryGroup.Ungrouped -> {
+                                    groupByUngrouped(
+                                        filteredMangaList,
+                                        libraryViewPreferences.sortingMode,
+                                        libraryViewPreferences.sortAscending,
+                                    )
+                                }
+                            }
 
-                                val sortedMangaList =
-                                    libraryCategoryItem.libraryItems
-                                        .distinctBy { it.displayManga.mangaId }
-                                        .map { item ->
-                                            item.copy(
-                                                downloadCount =
-                                                    downloadCountMap[item.displayManga.mangaId]
-                                                        ?: 0,
-                                                trackCount =
-                                                    trackMap[item.displayManga.mangaId]?.size ?: 0,
-                                            )
-                                        }
-                                        .applyFilters(libraryFilters, trackMap)
-                                        .sortedWith(comparator)
-                                        .toPersistentList()
+                        var allCollapsed = true
 
-                                val isRefreshing =
-                                    libraryCategoryItem.libraryItems.fastAny {
-                                        it.displayManga.mangaId in mangaRefreshingState
+                        val downloadCountMap = downloadCountMapAsync.await()
+                        val items =
+                            unsortedLibraryCategoryItems
+                                .mapAsync { libraryCategoryItem ->
+                                    if (!libraryCategoryItem.categoryItem.isHidden) {
+                                        allCollapsed = false
                                     }
 
-                                libraryCategoryItem.copy(
-                                    libraryItems = sortedMangaList,
-                                    isRefreshing = isRefreshing,
-                                )
-                            }
-                            .sortedBy { it.libraryItems.isEmpty() }
-                            .toPersistentList()
+                                    val comparator =
+                                        libraryMangaItemComparator(
+                                            categorySort =
+                                                libraryCategoryItem.categoryItem.sortOrder,
+                                            categoryIsAscending =
+                                                libraryCategoryItem.categoryItem.isAscending,
+                                            removeArticles = removeArticles,
+                                            mangaOrder =
+                                                libraryCategoryItem.categoryItem.mangaOrder,
+                                            lastReadMap = lastReadMap,
+                                            lastFetchMap = lastFetchMap,
+                                        )
 
-                    _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
+                                    val sortedMangaList =
+                                        libraryCategoryItem.libraryItems
+                                            .distinctBy { it.displayManga.mangaId }
+                                            .map { item ->
+                                                item.copy(
+                                                    downloadCount =
+                                                        downloadCountMap[item.displayManga.mangaId]
+                                                            ?: 0,
+                                                    trackCount =
+                                                        trackMap[item.displayManga.mangaId]?.size
+                                                            ?: 0,
+                                                )
+                                            }
+                                            .applyFilters(libraryFilters, trackMap)
+                                            .sortedWith(comparator)
+                                            .toPersistentList()
 
-                    LibraryViewItem(
-                        libraryDisplayMode = layout,
-                        libraryCategoryItems = items,
-                        rawColumnCount = gridSize,
-                        currentGroupBy = libraryViewPreferences.groupBy,
-                        trackMap = trackMap.toPersistentMap(),
-                        userCategories =
-                            categoryList
-                                .filterNot { category -> category.isSystemCategory }
-                                .toPersistentList(),
-                    )
+                                    val isRefreshing =
+                                        libraryCategoryItem.libraryItems.fastAny {
+                                            it.displayManga.mangaId in mangaRefreshingState
+                                        }
+
+                                    libraryCategoryItem.copy(
+                                        libraryItems = sortedMangaList,
+                                        isRefreshing = isRefreshing,
+                                    )
+                                }
+                                .sortedBy { it.libraryItems.isEmpty() }
+                                .toPersistentList()
+
+                        _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
+
+                        return@withContext LibraryViewItem(
+                            libraryDisplayMode = layout,
+                            libraryCategoryItems = items,
+                            rawColumnCount = gridSize,
+                            currentGroupBy = libraryViewPreferences.groupBy,
+                            trackMap = trackMap.toPersistentMap(),
+                            userCategories =
+                                categoryList
+                                    .filterNot { category -> category.isSystemCategory }
+                                    .toPersistentList(),
+                        )
+                    }
                 }
                 .distinctUntilChanged()
                 .collectLatest { libraryViewItem ->
@@ -532,36 +539,37 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    private suspend fun List<LibraryMangaItem>.applyFilters(
+    private fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
     ): List<LibraryMangaItem> {
         return this.filter { libraryMangaItem ->
+            // Check Unread first (most common filter)
+            if (!libraryFilters.filterUnread.matches(libraryMangaItem)) return@filter false
+
+            // Check Downloaded second (common and quick)
+            if (!libraryFilters.filterDownloaded.matches(libraryMangaItem)) return@filter false
+
+            // Check the rest
+            if (!libraryFilters.filterBookmarked.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterCompleted.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterMangaType.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterMerged.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterUnavailable.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterTracked.matches(libraryMangaItem)) return@filter false
+
+            // Special handling for Tracking logic preserved from original code
             val displayManga = libraryMangaItem.displayManga
-            val bookmarkedCondition = libraryFilters.filterBookmarked.matches(libraryMangaItem)
-            val completedCondition = libraryFilters.filterCompleted.matches(libraryMangaItem)
-            val downloadedCondition = libraryFilters.filterDownloaded.matches(libraryMangaItem)
-            val mangaTypeCondition = libraryFilters.filterMangaType.matches(libraryMangaItem)
-            val mergedCondition = libraryFilters.filterMerged.matches(libraryMangaItem)
             val missingChaptersCondition =
                 when (libraryFilters.filterTracked) {
                     FilterTracked.Inactive -> true
                     FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
                     FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
                 }
-            val trackedCondition = libraryFilters.filterTracked.matches(libraryMangaItem)
-            val unavailableCondition = libraryFilters.filterUnavailable.matches(libraryMangaItem)
-            val unreadCondition = libraryFilters.filterUnread.matches(libraryMangaItem)
 
-            completedCondition &&
-                downloadedCondition &&
-                unreadCondition &&
-                trackedCondition &&
-                missingChaptersCondition &&
-                bookmarkedCondition &&
-                mergedCondition &&
-                unavailableCondition &&
-                mangaTypeCondition
+            if (!missingChaptersCondition) return@filter false
+
+            true // passed all checks
         }
     }
 
