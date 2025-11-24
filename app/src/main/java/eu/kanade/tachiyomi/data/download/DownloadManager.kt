@@ -231,6 +231,15 @@ class DownloadManager(val context: Context) {
         return cache.getDownloadCounts(manga.mapNotNull { it.id })
     }
 
+    /**
+     * Returns the amount of downloaded chapters for a list of manga IDs.
+     *
+     * @param mangaIds the list of manga IDs to check.
+     */
+    fun getDownloadCountsById(mangaIds: List<Long>): Map<Long, Int> {
+        return cache.getDownloadCounts(mangaIds)
+    }
+
     /** Returns the list of downloaded file names */
     fun getAllDownloads(manga: Manga): List<UniFile> {
         return cache.getAllDownloadFiles(manga)
