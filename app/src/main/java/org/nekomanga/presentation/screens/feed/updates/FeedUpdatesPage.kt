@@ -45,7 +45,9 @@ fun FeedUpdatesPage(
     loadNextPage: () -> Unit,
 ) {
     if (feedUpdatesMangaList.isEmpty()) {
-        EmptyScreen(message = UiText.StringResource(R.string.no_results_found))
+        if (!loadingResults) {
+            EmptyScreen(message = UiText.StringResource(R.string.no_results_found))
+        }
         return
     }
     val headerColor =
