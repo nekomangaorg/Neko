@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.channelFlow
@@ -67,9 +66,13 @@ class MangaUpdateCoordinator {
                 val mangaWasInitialized = mangaItem.initialized
 
                 // Run manga details and chapter updates in parallel.
-                coroutineScope {
-                    launch { updateMangaDetailsAndPersist(mangaItem) }
-                    launch { updateChapters(mangaItem, mangaWasInitialized, isMerging) }
+                try {
+                    coroutineScope {
+                        launch { updateMangaDetailsAndPersist(mangaItem) }
+                        launch { updateChapters(mangaItem, mangaWasInitialized, isMerging) }
+                    }
+                } catch (e: UpdateError) {
+                    return@channelFlow
                 }
 
                 send(MangaResult.Success)
@@ -84,8 +87,7 @@ class MangaUpdateCoordinator {
             .getMangaDetails(mangaItem.uuid())
             .onFailure {
                 send(MangaResult.Error(text = "Error getting manga from MangaDex"))
-                cancel()
-                return
+                throw UpdateError()
             }
             .onSuccess { (networkManga, artwork) ->
                 val currentManga = mangaItem.toManga()
@@ -174,7 +176,7 @@ class MangaUpdateCoordinator {
                 .fetchChapterList(manga)
                 .onFailure {
                     send(MangaResult.Error(text = "MangaDex chapter fetch failed: ${it.message()}"))
-                    cancel()
+                    throw UpdateError()
                 }
                 .getOrElse { emptyList() }
         }
@@ -276,3 +278,5 @@ sealed class MangaResult {
 
     object Success : MangaResult()
 }
+
+private class UpdateError : Exception()
