@@ -70,7 +70,6 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
-import org.nekomanga.util.system.filterAsync
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -317,8 +316,8 @@ class LibraryViewModel() : ViewModel() {
                     val removeArticles = libraryPreferences.removeArticles().get()
 
                     val downloadCountMapAsync = async {
-                        downloadManager.getDownloadCounts(
-                            filteredMangaList.map { it.displayManga.toDbManga() }
+                        downloadManager.getDownloadCountsById(
+                            filteredMangaList.map { it.displayManga.mangaId }
                         )
                     }
 
@@ -383,8 +382,7 @@ class LibraryViewModel() : ViewModel() {
                                 val sortedMangaList =
                                     libraryCategoryItem.libraryItems
                                         .distinctBy { it.displayManga.mangaId }
-                                        .sortedWith(comparator)
-                                        .mapAsync { item ->
+                                        .map { item ->
                                             item.copy(
                                                 downloadCount =
                                                     downloadCountMap[item.displayManga.mangaId]
@@ -394,6 +392,7 @@ class LibraryViewModel() : ViewModel() {
                                             )
                                         }
                                         .applyFilters(libraryFilters, trackMap)
+                                        .sortedWith(comparator)
                                         .toPersistentList()
 
                                 val isRefreshing =
@@ -537,7 +536,7 @@ class LibraryViewModel() : ViewModel() {
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
     ): List<LibraryMangaItem> {
-        return this.filterAsync { libraryMangaItem ->
+        return this.filter { libraryMangaItem ->
             val displayManga = libraryMangaItem.displayManga
             val bookmarkedCondition = libraryFilters.filterBookmarked.matches(libraryMangaItem)
             val completedCondition = libraryFilters.filterCompleted.matches(libraryMangaItem)
