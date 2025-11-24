@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.resolvers.MangaScanlatorFilterFlagsPutR
 import eu.kanade.tachiyomi.data.database.resolvers.MangaTitlePutResolver
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
+import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
@@ -196,7 +197,7 @@ interface MangaQueries : DbProvider {
             .withQuery(
                 RawQuery.builder()
                     .query(getLastReadMangaQuery())
-                    .observesTables(MangaTable.TABLE)
+                    .observesTables(MangaTable.TABLE, ChapterTable.TABLE, HistoryTable.TABLE)
                     .build()
             )
             .prepare()
@@ -207,7 +208,7 @@ interface MangaQueries : DbProvider {
             .withQuery(
                 RawQuery.builder()
                     .query(getLastFetchedMangaQuery())
-                    .observesTables(MangaTable.TABLE)
+                    .observesTables(MangaTable.TABLE, ChapterTable.TABLE)
                     .build()
             )
             .prepare()
@@ -218,7 +219,7 @@ interface MangaQueries : DbProvider {
             .withQuery(
                 RawQuery.builder()
                     .query(getTotalChapterMangaQuery())
-                    .observesTables(MangaTable.TABLE)
+                    .observesTables(MangaTable.TABLE, ChapterTable.TABLE)
                     .build()
             )
             .prepare()
