@@ -42,7 +42,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -161,9 +160,11 @@ class LibraryViewModel() : ViewModel() {
         db.getAllTracks()
             .asFlow()
             .mapNotNull { tracks ->
+                val serviceMap = loggedServices.associateBy { it.id }
+
                 tracks
                     .mapNotNull { track ->
-                        val trackService = loggedServices.firstOrNull { it.id == track.sync_id }
+                        val trackService = serviceMap[track.sync_id]
                         if (trackService == null) {
                             return@mapNotNull null
                         }
@@ -249,6 +250,138 @@ class LibraryViewModel() : ViewModel() {
                 filterUnread = it[8] as FilterUnread,
             )
         }
+    // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
+    private val activeMangaFlow =
+        combine(filteredMangaListFlow, filterPreferencesFlow, trackMapFlow) {
+                mangaList,
+                libraryFilters,
+                trackMap ->
+                withContext(Dispatchers.Default) {
+                    // Get download counts for the whole list so we can filter by 'Downloaded'
+                    val downloadCountMap =
+                        downloadManager.getDownloadCountsById(
+                            mangaList.map { it.displayManga.mangaId }
+                        )
+
+                    mangaList
+                        .map { item ->
+                            // Enrich item with volatile data needed for filtering
+                            item.copy(
+                                downloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0,
+                                trackCount = trackMap[item.displayManga.mangaId]?.size ?: 0,
+                            )
+                        }
+                        .applyFilters(libraryFilters, trackMap)
+                }
+            }
+            .distinctUntilChanged()
+
+    // 2. GROUP FLOW: Groups the filtered items (By Category, Status, etc.)
+    private val groupedMangaFlow =
+        combine(activeMangaFlow, libraryViewFlow, categoryListFlow, trackMapFlow) {
+                activeMangaList,
+                libraryViewPreferences,
+                categoryList,
+                trackMap ->
+                withContext(Dispatchers.Default) {
+                    val collapsedCategorySet =
+                        libraryViewPreferences.collapsedCategories
+                            .mapNotNull { it.toIntOrNull() }
+                            .toSet()
+
+                    when (libraryViewPreferences.groupBy) {
+                        LibraryGroup.ByCategory -> {
+                            groupByCategory(activeMangaList, categoryList, collapsedCategorySet)
+                        }
+                        LibraryGroup.ByAuthor,
+                        LibraryGroup.ByContent,
+                        LibraryGroup.ByLanguage,
+                        LibraryGroup.ByStatus,
+                        LibraryGroup.ByTag,
+                        LibraryGroup.ByTrackStatus -> {
+                            groupByDynamic(
+                                libraryMangaList = activeMangaList,
+                                collapsedDynamicCategorySet =
+                                    libraryViewPreferences.collapsedDynamicCategories,
+                                currentLibraryGroup = libraryViewPreferences.groupBy,
+                                sortOrder = libraryViewPreferences.sortingMode,
+                                sortAscending = libraryViewPreferences.sortAscending,
+                                loggedInTrackStatus = trackMap,
+                            )
+                        }
+                        LibraryGroup.Ungrouped -> {
+                            groupByUngrouped(
+                                activeMangaList,
+                                libraryViewPreferences.sortingMode,
+                                libraryViewPreferences.sortAscending,
+                            )
+                        }
+                    }
+                }
+            }
+            .distinctUntilChanged()
+
+    // 3. SORT FLOW: Sorts the items inside each group
+    private val sortedMangaFlow =
+        combine(
+                groupedMangaFlow,
+                libraryViewFlow,
+                lastReadMangaFlow,
+                lastFetchMangaFlow,
+                _mangaRefreshingState.asStateFlow(),
+                libraryPreferences.removeArticles().changes(),
+            ) {
+                groupedItems,
+                libraryViewPreferences,
+                lastReadMap,
+                lastFetchMap,
+                mangaRefreshingState,
+                removeArticles ->
+                withContext(Dispatchers.Default) {
+                    var allCollapsed = true
+
+                    val sortedItems =
+                        groupedItems
+                            .mapAsync { libraryCategoryItem ->
+                                if (!libraryCategoryItem.categoryItem.isHidden) {
+                                    allCollapsed = false
+                                }
+
+                                // Create the comparator
+                                val comparator =
+                                    libraryMangaItemComparator(
+                                        categorySort = libraryCategoryItem.categoryItem.sortOrder,
+                                        categoryIsAscending =
+                                            libraryCategoryItem.categoryItem.isAscending,
+                                        removeArticles = removeArticles,
+                                        mangaOrder = libraryCategoryItem.categoryItem.mangaOrder,
+                                        lastReadMap = lastReadMap,
+                                        lastFetchMap = lastFetchMap,
+                                    )
+
+                                // Sort the items in this category
+                                val sortedList =
+                                    libraryCategoryItem.libraryItems
+                                        .sortedWith(comparator)
+                                        .toPersistentList()
+
+                                val isRefreshing =
+                                    libraryCategoryItem.libraryItems.fastAny {
+                                        it.displayManga.mangaId in mangaRefreshingState
+                                    }
+
+                                libraryCategoryItem.copy(
+                                    libraryItems = sortedList,
+                                    isRefreshing = isRefreshing,
+                                )
+                            }
+                            .toPersistentList()
+
+                    // Return a lightweight object or Pair to pass to the collector
+                    Triple(sortedItems, allCollapsed, libraryViewPreferences)
+                }
+            }
+            .distinctUntilChanged()
 
     init {
         viewModelScope.launchIO {
@@ -292,154 +425,39 @@ class LibraryViewModel() : ViewModel() {
         }
 
         viewModelScope.launchIO {
-            combine(
-                    filteredMangaListFlow,
-                    categoryListFlow,
-                    filterPreferencesFlow,
-                    trackMapFlow,
-                    libraryViewFlow,
-                    _mangaRefreshingState.asStateFlow(),
-                    lastReadMangaFlow,
-                    lastFetchMangaFlow,
-                ) {
-                    filteredMangaList,
-                    categoryList,
-                    libraryFilters,
-                    trackMap,
-                    libraryViewPreferences,
-                    mangaRefreshingState,
-                    lastReadMap,
-                    lastFetchMap ->
-                    withContext(Dispatchers.Default) {
-                        val collapsedCategorySet =
-                            libraryViewPreferences.collapsedCategories
-                                .mapNotNull { it.toIntOrNull() }
-                                .toSet()
-
-                        val removeArticles = libraryPreferences.removeArticles().get()
-
-                        val downloadCountMapAsync = async {
-                            downloadManager.getDownloadCountsById(
-                                filteredMangaList.map { it.displayManga.mangaId }
-                            )
-                        }
-
-                        val layout = libraryPreferences.layout().get()
-                        val gridSize = libraryPreferences.gridSize().get()
-
-                        val unsortedLibraryCategoryItems =
-                            when (libraryViewPreferences.groupBy) {
-                                LibraryGroup.ByCategory -> {
-                                    groupByCategory(
-                                        filteredMangaList,
-                                        categoryList,
-                                        collapsedCategorySet,
-                                    )
-                                }
-                                LibraryGroup.ByAuthor,
-                                LibraryGroup.ByContent,
-                                LibraryGroup.ByLanguage,
-                                LibraryGroup.ByStatus,
-                                LibraryGroup.ByTag,
-                                LibraryGroup.ByTrackStatus -> {
-                                    groupByDynamic(
-                                        libraryMangaList = filteredMangaList,
-                                        collapsedDynamicCategorySet =
-                                            libraryViewPreferences.collapsedDynamicCategories,
-                                        currentLibraryGroup = libraryViewPreferences.groupBy,
-                                        sortOrder = libraryViewPreferences.sortingMode,
-                                        sortAscending = libraryViewPreferences.sortAscending,
-                                        loggedInTrackStatus = trackMap,
-                                    )
-                                }
-                                LibraryGroup.Ungrouped -> {
-                                    groupByUngrouped(
-                                        filteredMangaList,
-                                        libraryViewPreferences.sortingMode,
-                                        libraryViewPreferences.sortAscending,
-                                    )
-                                }
-                            }
-
-                        var allCollapsed = true
-
-                        val downloadCountMap = downloadCountMapAsync.await()
-                        val items =
-                            unsortedLibraryCategoryItems
-                                .mapAsync { libraryCategoryItem ->
-                                    if (!libraryCategoryItem.categoryItem.isHidden) {
-                                        allCollapsed = false
-                                    }
-
-                                    val comparator =
-                                        libraryMangaItemComparator(
-                                            categorySort =
-                                                libraryCategoryItem.categoryItem.sortOrder,
-                                            categoryIsAscending =
-                                                libraryCategoryItem.categoryItem.isAscending,
-                                            removeArticles = removeArticles,
-                                            mangaOrder =
-                                                libraryCategoryItem.categoryItem.mangaOrder,
-                                            lastReadMap = lastReadMap,
-                                            lastFetchMap = lastFetchMap,
-                                        )
-
-                                    val sortedMangaList =
-                                        libraryCategoryItem.libraryItems
-                                            .distinctBy { it.displayManga.mangaId }
-                                            .map { item ->
-                                                item.copy(
-                                                    downloadCount =
-                                                        downloadCountMap[item.displayManga.mangaId]
-                                                            ?: 0,
-                                                    trackCount =
-                                                        trackMap[item.displayManga.mangaId]?.size
-                                                            ?: 0,
-                                                )
-                                            }
-                                            .applyFilters(libraryFilters, trackMap)
-                                            .sortedWith(comparator)
-                                            .toPersistentList()
-
-                                    val isRefreshing =
-                                        libraryCategoryItem.libraryItems.fastAny {
-                                            it.displayManga.mangaId in mangaRefreshingState
-                                        }
-
-                                    libraryCategoryItem.copy(
-                                        libraryItems = sortedMangaList,
-                                        isRefreshing = isRefreshing,
-                                    )
-                                }
-                                .sortedBy { it.libraryItems.isEmpty() }
-                                .toPersistentList()
-
-                        _libraryScreenState.update { it.copy(allCollapsed = allCollapsed) }
-
-                        return@withContext LibraryViewItem(
-                            libraryDisplayMode = layout,
-                            libraryCategoryItems = items,
-                            rawColumnCount = gridSize,
-                            currentGroupBy = libraryViewPreferences.groupBy,
-                            trackMap = trackMap.toPersistentMap(),
-                            userCategories =
-                                categoryList
-                                    .filterNot { category -> category.isSystemCategory }
-                                    .toPersistentList(),
+            viewModelScope.launchIO {
+                sortedMangaFlow.collectLatest { (sortedItems, allCollapsed, libraryViewPreferences)
+                    ->
+                    _libraryScreenState.update { state ->
+                        state.copy(
+                            items = sortedItems,
+                            allCollapsed = allCollapsed,
+                            libraryDisplayMode =
+                                libraryViewPreferences.sortingMode.let { state.libraryDisplayMode },
+                            isFirstLoad = false,
                         )
                     }
                 }
-                .distinctUntilChanged()
-                .collectLatest { libraryViewItem ->
-                    _libraryScreenState.update {
-                        it.copy(
-                            libraryDisplayMode = libraryViewItem.libraryDisplayMode,
-                            rawColumnCount = libraryViewItem.rawColumnCount,
-                            items = libraryViewItem.libraryCategoryItems,
-                            isFirstLoad = false,
-                            currentGroupBy = libraryViewItem.currentGroupBy,
-                            trackMap = libraryViewItem.trackMap,
-                            userCategories = libraryViewItem.userCategories,
+            }
+        }
+
+        viewModelScope.launchIO {
+            combine(libraryViewFlow, trackMapFlow, categoryListFlow) {
+                    viewPrefs,
+                    trackMap,
+                    categories ->
+                    Triple(viewPrefs, trackMap, categories)
+                }
+                .collectLatest { (viewPrefs, trackMap, categories) ->
+                    _libraryScreenState.update { state ->
+                        state.copy(
+                            libraryDisplayMode =
+                                libraryPreferences.layout().get(), // Or from viewPrefs if mapped
+                            rawColumnCount = libraryPreferences.gridSize().get(),
+                            currentGroupBy = viewPrefs.groupBy,
+                            trackMap = trackMap.toPersistentMap(),
+                            userCategories =
+                                categories.filterNot { it.isSystemCategory }.toPersistentList(),
                         )
                     }
                 }
@@ -737,8 +755,12 @@ class LibraryViewModel() : ViewModel() {
         loggedInTrackStatus: Map<Long, List<String>>,
     ): PersistentList<LibraryCategoryItem> {
         val groupedMap = mutableMapOf<String, MutableList<LibraryMangaItem>>()
+        val notTrackedList = listOf("Not tracked")
+        val groupTypeStr = currentLibraryGroup.type.toString()
 
-        for (libraryMangaItem in libraryMangaList) {
+        val distinctMangaList = libraryMangaList.distinctBy { it.displayManga.mangaId }
+
+        for (libraryMangaItem in distinctMangaList) {
             val groupingKeys =
                 when (currentLibraryGroup) {
                     LibraryGroup.ByAuthor -> libraryMangaItem.author
@@ -747,8 +769,7 @@ class LibraryViewModel() : ViewModel() {
                     LibraryGroup.ByStatus -> libraryMangaItem.status
                     LibraryGroup.ByTag -> libraryMangaItem.genre
                     LibraryGroup.ByTrackStatus -> {
-                        loggedInTrackStatus[libraryMangaItem.displayManga.mangaId]
-                            ?: listOf("Not tracked")
+                        loggedInTrackStatus[libraryMangaItem.displayManga.mangaId] ?: notTrackedList
                     }
                     else -> libraryMangaItem.language
                 }
@@ -771,7 +792,7 @@ class LibraryViewModel() : ViewModel() {
                         isAscending = sortAscending,
                         name = categoryName,
                         isHidden =
-                            dynamicCategoryName(currentLibraryGroup.type, categoryName) in
+                            (groupTypeStr + dynamicCategorySplitter + categoryName) in
                                 collapsedDynamicCategorySet,
                         isDynamic = true,
                     )
@@ -803,11 +824,11 @@ class LibraryViewModel() : ViewModel() {
                 isDynamic = true,
             )
 
+        val distinctList =
+            libraryMangaList.distinctBy { it.displayManga.mangaId }.toPersistentList()
+
         return persistentListOf(
-            LibraryCategoryItem(
-                categoryItem = allCategoryItem,
-                libraryItems = libraryMangaList.toPersistentList(),
-            )
+            LibraryCategoryItem(categoryItem = allCategoryItem, libraryItems = distinctList)
         )
     }
 
