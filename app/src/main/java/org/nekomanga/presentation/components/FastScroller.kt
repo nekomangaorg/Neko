@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -60,7 +59,7 @@ fun VerticalFastScroller(
     listState: LazyListState,
     modifier: Modifier = Modifier,
     thumbAllowed: () -> Boolean = { true },
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbColor: Color = MaterialTheme.colorScheme.secondary,
     topContentPadding: Dp = Dp.Hairline,
     bottomContentPadding: Dp = Dp.Hairline,
     endContentPadding: Dp = Dp.Hairline,
@@ -232,7 +231,7 @@ fun VerticalFastScroller(
                                 .padding(end = endContentPadding)
                                 .width(ThumbThickness)
                                 .alpha(alpha.value)
-                                .background(color = thumbColor, shape = ThumbShape)
+                                .background(color = thumbColor, shape = MaterialTheme.shapes.medium)
                     )
                 }
                 .map { it.measure(scrollerConstraints) }
@@ -280,7 +279,7 @@ fun VerticalGridFastScroller(
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
     thumbAllowed: () -> Boolean = { true },
-    thumbColor: Color = MaterialTheme.colorScheme.primary,
+    thumbColor: Color = MaterialTheme.colorScheme.secondary,
     topContentPadding: Dp = Dp.Hairline,
     bottomContentPadding: Dp = Dp.Hairline,
     endContentPadding: Dp = Dp.Hairline,
@@ -423,7 +422,7 @@ fun VerticalGridFastScroller(
                                 .padding(end = endContentPadding)
                                 .width(ThumbThickness)
                                 .alpha(alpha.value)
-                                .background(color = thumbColor, shape = ThumbShape)
+                                .background(color = thumbColor, shape = MaterialTheme.shapes.medium)
                     )
                 }
                 .map { it.measure(scrollerConstraints) }
@@ -467,7 +466,6 @@ private class MutableData<T>(var value: T)
 
 private val ThumbLength = 48.dp
 private val ThumbThickness = 12.dp
-private val ThumbShape = RoundedCornerShape(ThumbThickness / 2)
 private val FadeOutAnimationSpec =
     tween<Float>(durationMillis = ViewConfiguration.getScrollBarFadeDuration(), delayMillis = 2000)
 private val ImmediateFadeOutAnimationSpec =
