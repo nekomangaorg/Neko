@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -445,15 +446,24 @@ private fun MangaScreenWrapper(
 
     var currentBottomSheet by remember { mutableStateOf<DetailsBottomSheetScreen?>(null) }
 
-    LaunchedEffect(currentBottomSheet) {
-        if (currentBottomSheet != null) {
-            sheetState.show()
-        } else {
-            sheetState.hide()
-        }
+    LaunchedEffect(sheetState) {
+        snapshotFlow { sheetState.isVisible }
+            .collect { isVisible ->
+                if (!isVisible && currentBottomSheet != null) {
+                    currentBottomSheet = null
+                }
+            }
     }
 
-    BackHandler(enabled = currentBottomSheet != null) { currentBottomSheet = null }
+    BackHandler(enabled = currentBottomSheet != null) {
+        scope
+            .launch { sheetState.hide() }
+            .invokeOnCompletion {
+                if (!it.isCancelled) {
+                    currentBottomSheet = null
+                }
+            }
+    }
 
     fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch { currentBottomSheet = sheet }
