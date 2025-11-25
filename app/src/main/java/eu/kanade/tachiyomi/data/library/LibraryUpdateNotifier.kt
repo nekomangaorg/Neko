@@ -79,7 +79,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             if (securityPreferences.hideNotificationContent().get()) {
                 context.getString(R.string.checking_for_new_chapters)
             } else {
-                manga.user_title
+                manga.displayTitle()
             }
 
         context.notificationManager.notify(
