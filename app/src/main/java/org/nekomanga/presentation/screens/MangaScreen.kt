@@ -515,7 +515,7 @@ private fun MangaScreenWrapper(
     }
 
     val refreshState =
-        remember(screenState.isRefreshing) {
+        remember(screenState.isRefreshing, themeColorState) {
             RefreshState(
                 enabled = true,
                 isRefreshing = screenState.isRefreshing,
