@@ -57,7 +57,10 @@ class MangaShortcutManager(
 
                 val shortcuts =
                     recents.map { item ->
-                        val request = ImageRequest.Builder(context).data(item.toDisplayManga().currentArtwork).build()
+                        val request =
+                            ImageRequest.Builder(context)
+                                .data(item.toDisplayManga().currentArtwork)
+                                .build()
                         val bitmap = context.imageLoader.execute(request).image?.toBitmap()
 
                         ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
