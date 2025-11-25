@@ -44,6 +44,7 @@ import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
@@ -87,47 +89,30 @@ class LibraryViewModel() : ViewModel() {
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
 
-    private val _libraryScreenState = MutableStateFlow(LibraryScreenState())
+    private val initialState =
+        LibraryScreenState(
+            items = lastLibraryCategoryItems?.toPersistentList() ?: persistentListOf(),
+            pagerIndex = lastPagerIndex ?: 0,
+            scrollPositions = lastScrollPositions ?: emptyMap(),
+            isFirstLoad = lastLibraryCategoryItems == null,
+            rawColumnCount = libraryPreferences.gridSize().get(),
+            libraryDisplayMode = libraryPreferences.layout().get(),
+        )
+
+    private val _internalLibraryScreenState = MutableStateFlow(initialState)
+
+    private val _downloadRefreshTrigger = MutableStateFlow(0)
+
     private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
     }
 
-    val libraryScreenState: StateFlow<LibraryScreenState> = _libraryScreenState.asStateFlow()
-
-    fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
-        flow: Flow<T1>,
-        flow2: Flow<T2>,
-        flow3: Flow<T3>,
-        flow4: Flow<T4>,
-        flow5: Flow<T5>,
-        flow6: Flow<T6>,
-        flow7: Flow<T7>,
-        flow8: Flow<T8>,
-        transform: suspend (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
-    ): Flow<R> =
-        combine(
-            combine(flow, flow2, flow3, ::Triple),
-            combine(flow4, flow5, flow6, ::Triple),
-            combine(flow7, flow8, ::Pair),
-        ) { t1, t2, t3 ->
-            transform(
-                t1.first,
-                t1.second,
-                t1.third,
-                t2.first,
-                t2.second,
-                t2.third,
-                t3.first,
-                t3.second,
-            )
-        }
-
     /** Save the current list to speed up loading later */
     override fun onCleared() {
         super.onCleared()
-        val state = _libraryScreenState.value
+        val state = libraryScreenState.value
         lastLibraryCategoryItems = state.items
         lastPagerIndex = state.pagerIndex
         lastScrollPositions = state.scrollPositions
@@ -189,12 +174,12 @@ class LibraryViewModel() : ViewModel() {
     val filteredMangaListFlow =
         combine(
                 libraryMangaListFlow,
-                libraryScreenState
+                _internalLibraryScreenState
                     .map { it.searchQuery }
                     .distinctUntilChanged()
                     .debounce(SEARCH_DEBOUNCE_MILLIS),
             ) { mangaList, searchQuery ->
-                _libraryScreenState.update { it.copy(initialSearch = "") }
+                _internalLibraryScreenState.update { it.copy(initialSearch = "") }
                 if (searchQuery.isNullOrBlank()) {
                     mangaList
                 } else {
@@ -252,10 +237,12 @@ class LibraryViewModel() : ViewModel() {
         }
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
-        combine(filteredMangaListFlow, filterPreferencesFlow, trackMapFlow) {
-                mangaList,
-                libraryFilters,
-                trackMap ->
+        combine(
+                filteredMangaListFlow,
+                filterPreferencesFlow,
+                trackMapFlow,
+                _downloadRefreshTrigger,
+            ) { mangaList, libraryFilters, trackMap, _ ->
                 withContext(Dispatchers.Default) {
                     // Get download counts for the whole list so we can filter by 'Downloaded'
                     val downloadCountMap =
@@ -383,25 +370,48 @@ class LibraryViewModel() : ViewModel() {
             }
             .distinctUntilChanged()
 
-    init {
-        viewModelScope.launchIO {
-            val items = lastLibraryCategoryItems
-            val pagerIndex = lastPagerIndex
-            val scrollPositions = lastScrollPositions
-
-            _libraryScreenState.update {
-                it.copy(
-                    isFirstLoad = items == null,
-                    items = items?.toPersistentList() ?: it.items,
-                    allCollapsed = items?.fastAny { item -> !item.categoryItem.isHidden } == false,
-                    pagerIndex = pagerIndex ?: 0,
-                    scrollPositions = scrollPositions ?: emptyMap(),
+    val libraryScreenState: StateFlow<LibraryScreenState> =
+        combine(
+                _internalLibraryScreenState,
+                sortedMangaFlow,
+                trackMapFlow,
+                categoryListFlow,
+                libraryViewFlow,
+                libraryPreferences.gridSize().changes(),
+                libraryPreferences.layout().changes(),
+            ) {
+                state,
+                (sortedItems, allCollapsed, _),
+                trackMap,
+                categories,
+                viewPrefs,
+                gridSize,
+                layout ->
+                state.copy(
+                    items = sortedItems,
+                    allCollapsed = allCollapsed,
+                    libraryDisplayMode = layout,
+                    rawColumnCount = gridSize,
+                    currentGroupBy = viewPrefs.groupBy,
+                    trackMap = trackMap.toPersistentMap(),
+                    userCategories =
+                        categories.filterNot { it.isSystemCategory }.toPersistentList(),
+                    isFirstLoad = false,
                 )
             }
-            lastLibraryCategoryItems = null
-            lastPagerIndex = null
-            lastScrollPositions = null
-        }
+            .stateIn(
+                scope = viewModelScope,
+                started =
+                    SharingStarted.WhileSubscribed(5000), // Stops processing 5s after UI disappears
+                initialValue = initialState,
+            )
+
+    init {
+
+        lastLibraryCategoryItems = null
+        lastPagerIndex = null
+        lastScrollPositions = null
+
         observeLibraryUpdates()
         preferenceUpdates()
 
@@ -421,46 +431,9 @@ class LibraryViewModel() : ViewModel() {
             if (db.getCategories().executeAsBlocking().isNotEmpty()) {
                 groupItems.add(LibraryGroup.Ungrouped)
             }
-            _libraryScreenState.update { it.copy(groupByOptions = groupItems.toPersistentList()) }
-        }
-
-        viewModelScope.launchIO {
-            viewModelScope.launchIO {
-                sortedMangaFlow.collectLatest { (sortedItems, allCollapsed, libraryViewPreferences)
-                    ->
-                    _libraryScreenState.update { state ->
-                        state.copy(
-                            items = sortedItems,
-                            allCollapsed = allCollapsed,
-                            libraryDisplayMode =
-                                libraryViewPreferences.sortingMode.let { state.libraryDisplayMode },
-                            isFirstLoad = false,
-                        )
-                    }
-                }
+            _internalLibraryScreenState.update {
+                it.copy(groupByOptions = groupItems.toPersistentList())
             }
-        }
-
-        viewModelScope.launchIO {
-            combine(libraryViewFlow, trackMapFlow, categoryListFlow) {
-                    viewPrefs,
-                    trackMap,
-                    categories ->
-                    Triple(viewPrefs, trackMap, categories)
-                }
-                .collectLatest { (viewPrefs, trackMap, categories) ->
-                    _libraryScreenState.update { state ->
-                        state.copy(
-                            libraryDisplayMode =
-                                libraryPreferences.layout().get(), // Or from viewPrefs if mapped
-                            rawColumnCount = libraryPreferences.gridSize().get(),
-                            currentGroupBy = viewPrefs.groupBy,
-                            trackMap = trackMap.toPersistentMap(),
-                            userCategories =
-                                categories.filterNot { it.isSystemCategory }.toPersistentList(),
-                        )
-                    }
-                }
         }
     }
 
@@ -469,7 +442,7 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
                 enabled ->
-                _libraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
+                _internalLibraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
         }
 
@@ -479,7 +452,7 @@ class LibraryViewModel() : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .collectLatest { enabled ->
-                    _libraryScreenState.update { it.copy(showStartReadingButton = enabled) }
+                    _internalLibraryScreenState.update { it.copy(showStartReadingButton = enabled) }
                 }
         }
 
@@ -489,35 +462,35 @@ class LibraryViewModel() : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .collectLatest { enabled ->
-                    _libraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
+                    _internalLibraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
                 }
         }
 
         viewModelScope.launchIO {
             securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
                 enabled ->
-                _libraryScreenState.update { it.copy(incognitoMode = enabled) }
+                _internalLibraryScreenState.update { it.copy(incognitoMode = enabled) }
             }
         }
 
         viewModelScope.launchIO {
             libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
                 enabled ->
-                _libraryScreenState.update { it.copy(outlineCovers = enabled) }
+                _internalLibraryScreenState.update { it.copy(outlineCovers = enabled) }
             }
         }
 
         viewModelScope.launchIO {
             libraryPreferences.showDownloadBadge().changes().distinctUntilChanged().collectLatest {
                 enabled ->
-                _libraryScreenState.update { it.copy(showDownloadBadges = enabled) }
+                _internalLibraryScreenState.update { it.copy(showDownloadBadges = enabled) }
             }
         }
 
         viewModelScope.launchIO {
             libraryPreferences.showUnreadBadge().changes().distinctUntilChanged().collectLatest {
                 enabled ->
-                _libraryScreenState.update { it.copy(showUnreadBadges = enabled) }
+                _internalLibraryScreenState.update { it.copy(showUnreadBadges = enabled) }
             }
         }
 
@@ -527,7 +500,7 @@ class LibraryViewModel() : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .collectLatest { enabled ->
-                    _libraryScreenState.update { it.copy(horizontalCategories = enabled) }
+                    _internalLibraryScreenState.update { it.copy(horizontalCategories = enabled) }
                 }
         }
 
@@ -537,7 +510,7 @@ class LibraryViewModel() : ViewModel() {
                 .changes()
                 .distinctUntilChanged()
                 .collectLatest { enabled ->
-                    _libraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
+                    _internalLibraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
                 }
         }
 
@@ -550,7 +523,7 @@ class LibraryViewModel() : ViewModel() {
                 }
                 .distinctUntilChanged()
                 .collectLatest { pair ->
-                    _libraryScreenState.update {
+                    _internalLibraryScreenState.update {
                         it.copy(libraryDisplayMode = pair.second, rawColumnCount = pair.first)
                     }
                 }
@@ -701,7 +674,7 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order =
-                (_libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
+                (libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
             db.insertCategory(category).executeAsBlocking()
         }
     }
@@ -880,17 +853,6 @@ class LibraryViewModel() : ViewModel() {
         }
 
         viewModelScope.launchIO {
-            filterPreferencesFlow.distinctUntilChanged().collectLatest { libraryFilters ->
-                _libraryScreenState.update {
-                    it.copy(
-                        libraryFilters = libraryFilters,
-                        hasActiveFilters = libraryFilters.hasActiveFilter(),
-                    )
-                }
-            }
-        }
-
-        viewModelScope.launchIO {
             downloadManager
                 .statusFlow()
                 .catch { error -> TimberKt.e(error) }
@@ -907,36 +869,13 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun updateDownloadBadges(mangaId: Long) {
-        viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
-            val downloadCount = downloadManager.getDownloadCount(manga)
-            _libraryScreenState.update { state ->
-                val newItems =
-                    state.items
-                        .map { categoryItem ->
-                            categoryItem.copy(
-                                libraryItems =
-                                    categoryItem.libraryItems
-                                        .map { libraryMangaItem ->
-                                            if (libraryMangaItem.displayManga.mangaId == mangaId) {
-                                                libraryMangaItem.copy(downloadCount = downloadCount)
-                                            } else {
-                                                libraryMangaItem
-                                            }
-                                        }
-                                        .toPersistentList()
-                            )
-                        }
-                        .toPersistentList()
-                state.copy(items = newItems)
-            }
-        }
+        _downloadRefreshTrigger.update { it + 1 }
     }
 
     fun collapseExpandAllCategories() {
         viewModelScope.launchIO {
-            val updatedAllCollapsed = !_libraryScreenState.value.allCollapsed
-            val categoryItems = _libraryScreenState.value.items.map { it.categoryItem }
+            val updatedAllCollapsed = !libraryScreenState.value.allCollapsed
+            val categoryItems = libraryScreenState.value.items.map { it.categoryItem }
             if (categoryItems.isEmpty()) {
                 return@launchIO
             }
@@ -970,11 +909,11 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun search(searchQuery: String?) {
-        _libraryScreenState.update { it.copy(searchQuery = searchQuery) }
+        _internalLibraryScreenState.update { it.copy(searchQuery = searchQuery) }
     }
 
     fun deepLinkSearch(searchQuery: String) {
-        _libraryScreenState.update {
+        _internalLibraryScreenState.update {
             it.copy(searchQuery = searchQuery, initialSearch = searchQuery)
         }
     }
@@ -983,18 +922,18 @@ class LibraryViewModel() : ViewModel() {
     fun syncMangaToDex() {
         viewModelScope.launchIO {
             val mangaIds =
-                _libraryScreenState.value.selectedItems
+                libraryScreenState.value.selectedItems
                     .map { it.displayManga.mangaId }
                     .distinct()
                     .joinToString()
             StatusSyncJob.startNow(workManager, mangaIds)
-            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
+            _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
         }
     }
 
     fun selectAllLibraryMangaItems(libraryMangaItems: List<LibraryMangaItem>) {
         viewModelScope.launchIO {
-            val currentSelected = _libraryScreenState.value.selectedItems.toList()
+            val currentSelected = libraryScreenState.value.selectedItems.toList()
 
             val categoryItemIds = libraryMangaItems.map { it.displayManga.mangaId }.toSet()
             val selectedItemIds = currentSelected.map { it.displayManga.mangaId }.toSet()
@@ -1015,7 +954,7 @@ class LibraryViewModel() : ViewModel() {
                 newSelectedItems = currentSelected + itemsToAdd
             }
 
-            _libraryScreenState.update {
+            _internalLibraryScreenState.update {
                 it.copy(selectedItems = newSelectedItems.toPersistentList())
             }
         }
@@ -1023,7 +962,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun deleteSelectedLibraryMangaItems() {
         viewModelScope.launchNonCancellable {
-            val currentSelected = _libraryScreenState.value.selectedItems.toList()
+            val currentSelected = libraryScreenState.value.selectedItems.toList()
             clearSelectedManga()
             currentSelected.mapAsync { libraryMangaItem ->
                 val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
@@ -1038,22 +977,22 @@ class LibraryViewModel() : ViewModel() {
     fun libraryItemLongClick(libraryMangaItem: LibraryMangaItem) {
         viewModelScope.launchIO {
             val index =
-                _libraryScreenState.value.selectedItems.indexOfFirst {
+                libraryScreenState.value.selectedItems.indexOfFirst {
                     it.displayManga.mangaId == libraryMangaItem.displayManga.mangaId
                 }
             val updatedSelectedItems =
                 if (index >= 0) {
-                    _libraryScreenState.value.selectedItems.removeAt(index)
+                    libraryScreenState.value.selectedItems.removeAt(index)
                 } else {
                     val categoryItems =
                         db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
                             .executeOnIO()
                             .map { it.toCategoryItem() }
                     val copy = libraryMangaItem.copy(allCategories = categoryItems)
-                    _libraryScreenState.value.selectedItems.add(copy)
+                    libraryScreenState.value.selectedItems.add(copy)
                 }
 
-            _libraryScreenState.update {
+            _internalLibraryScreenState.update {
                 it.copy(selectedItems = updatedSelectedItems.distinct().toPersistentList())
             }
         }
@@ -1061,8 +1000,8 @@ class LibraryViewModel() : ViewModel() {
 
     fun markChapters(markAction: ChapterMarkActions) {
         viewModelScope.launchIO {
-            val selectedItems = _libraryScreenState.value.selectedItems
-            _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
+            val selectedItems = libraryScreenState.value.selectedItems
+            _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
             selectedItems.mapAsync { selectedItem ->
                 val dbManga = db.getManga(selectedItem.displayManga.mangaId).executeOnIO()!!
@@ -1078,7 +1017,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun downloadChapters(downloadAction: DownloadAction) {
         viewModelScope.launchIO {
-            val displayMangaList = _libraryScreenState.value.selectedItems.map { it.displayManga }
+            val displayMangaList = libraryScreenState.value.selectedItems.map { it.displayManga }
             clearSelectedManga()
             if (
                 downloadAction == DownloadAction.Cancel ||
@@ -1162,7 +1101,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun getSelectedMangaUrls(): String {
         val urls =
-            _libraryScreenState.value.selectedItems
+            libraryScreenState.value.selectedItems
                 .map { selected -> selected.url }
                 .distinct()
                 .joinToString("\n")
@@ -1171,15 +1110,15 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun clearSelectedManga() {
-        _libraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
+        _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
     }
 
     fun pagerIndexChanged(index: Int) {
-        _libraryScreenState.update { it.copy(pagerIndex = index) }
+        _internalLibraryScreenState.update { it.copy(pagerIndex = index) }
     }
 
     fun scrollPositionChanged(categoryIndex: Int, scrollPosition: Int) {
-        _libraryScreenState.update { state ->
+        _internalLibraryScreenState.update { state ->
             val newScrollPositions = state.scrollPositions.toMutableMap()
             newScrollPositions[categoryIndex] = scrollPosition
             state.copy(scrollPositions = newScrollPositions)
