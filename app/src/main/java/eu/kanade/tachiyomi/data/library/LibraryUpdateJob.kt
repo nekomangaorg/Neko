@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.toDisplayManga
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Collections
@@ -490,10 +491,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                         libraryPreferences.updateCovers().get()
                                 ) {
                                     coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
+                                    val artwork = manga.toDisplayManga().currentArtwork
                                     // load new covers in background
                                     val request =
                                         ImageRequest.Builder(applicationContext)
-                                            .data(manga)
+                                            .data(artwork)
                                             .memoryCachePolicy(CachePolicy.DISABLED)
                                             .build()
                                     context.imageLoader.execute(request)
