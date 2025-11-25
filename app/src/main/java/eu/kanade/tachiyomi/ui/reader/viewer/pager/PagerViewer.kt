@@ -305,7 +305,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         if (!hasMoved) {
             activity.isScrollingThroughPagesOrChapters = true
             chapters.currChapter.pages?.let { pages ->
-                moveToPage(pages[chapters.currChapter.requestedPage], false)
+                val page = chapters.currChapter.requestedPage.coerceIn(0, pages.lastIndex)
+                moveToPage(pages[page], false)
             }
             activity.isScrollingThroughPagesOrChapters = false
         }
@@ -349,7 +350,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         if (pager.visibility == View.GONE) {
             TimberKt.d { "Pager first layout" }
             val pages = chapters.currChapter.pages ?: return
-            moveToPage(pages[chapters.currChapter.requestedPage])
+            val page = chapters.currChapter.requestedPage.coerceIn(0, pages.lastIndex)
+            moveToPage(pages[page])
             pager.isVisible = true
         }
         activity.invalidateOptionsMenu()
