@@ -114,9 +114,12 @@ class LibraryViewModel() : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         val state = libraryScreenState.value
-        lastLibraryCategoryItems = state.items
-        lastPagerIndex = state.pagerIndex
-        lastScrollPositions = state.scrollPositions
+        // dont save state if it didnt actually load
+        if (!state.isFirstLoad) {
+            lastLibraryCategoryItems = state.items
+            lastPagerIndex = state.pagerIndex
+            lastScrollPositions = state.scrollPositions
+        }
     }
 
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
