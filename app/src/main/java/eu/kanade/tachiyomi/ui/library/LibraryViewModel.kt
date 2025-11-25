@@ -402,7 +402,7 @@ class LibraryViewModel() : ViewModel() {
             .stateIn(
                 scope = viewModelScope,
                 started =
-                    SharingStarted.WhileSubscribed(5000), // Stops processing 5s after UI disappears
+                    SharingStarted.WhileSubscribed(5000),
                 initialValue = initialState,
             )
 

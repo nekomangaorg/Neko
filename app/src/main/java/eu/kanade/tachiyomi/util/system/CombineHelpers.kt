@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package eu.kanade.tachiyomi.util.system
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
