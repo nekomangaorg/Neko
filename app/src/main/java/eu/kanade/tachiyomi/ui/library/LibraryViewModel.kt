@@ -404,6 +404,7 @@ class LibraryViewModel() : ViewModel() {
                     libraryDisplayMode = layout,
                     rawColumnCount = gridSize,
                     libraryFilters = filters,
+                    hasActiveFilters = filters.hasActiveFilter(),
                     currentGroupBy = viewPrefs.groupBy,
                     trackMap = trackMap.toPersistentMap(),
                     userCategories =
