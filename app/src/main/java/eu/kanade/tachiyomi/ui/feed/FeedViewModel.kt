@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.download.DownloadItem
@@ -346,10 +347,6 @@ class FeedViewModel() : ViewModel() {
         viewModelScope.launchIO { libraryPreferences.outlineOnCovers().toggle() }
     }
 
-    fun toggleIncognitoMode() {
-        viewModelScope.launchIO { securityPreferences.incognitoMode().toggle() }
-    }
-
     fun toggleShowingDownloads() {
         viewModelScope.launchIO {
             _feedScreenState.update { it.copy(showingDownloads = !it.showingDownloads) }
@@ -407,6 +404,8 @@ class FeedViewModel() : ViewModel() {
 
     fun deleteHistory(feedManga: FeedManga, simpleChapter: SimpleChapter) {
         viewModelScope.launchIO {
+            feedRepository.markChapter(simpleChapter.toChapterItem(), ChapterMarkActions.Unread())
+
             feedRepository.deleteHistoryForChapter(simpleChapter.url)
             val index =
                 _historyScreenPagingState.value.historyFeedMangaList.indexOfFirst {
@@ -415,26 +414,41 @@ class FeedViewModel() : ViewModel() {
             val mutableFeedManga =
                 _historyScreenPagingState.value.historyFeedMangaList.toMutableList()
 
-            if (feedManga.chapters.size == 1) {
-                mutableFeedManga.removeAt(index)
-            } else if (_historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series) {
-                val newFeedManga = feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
-                mutableFeedManga[index] = newFeedManga
-            } else {
-                val newFeedManga = _historyScreenPagingState.value.historyFeedMangaList[index]
-                mutableFeedManga[index] =
-                    newFeedManga.copy(
-                        chapters =
-                            newFeedManga.chapters
-                                .filter { it.chapter.url != simpleChapter.url }
-                                .toPersistentList()
-                    )
+            _summaryScreenPagingState.update { state ->
+                state.copy(
+                    continueReadingList =
+                        state.continueReadingList
+                            .filter { fm -> fm.mangaId != feedManga.mangaId }
+                            .toPersistentList()
+                )
             }
-            _historyScreenPagingState.update {
-                it.copy(historyFeedMangaList = mutableFeedManga.toPersistentList())
+
+            if (index >= 0) {
+                if (feedManga.chapters.size == 1) {
+                    mutableFeedManga.removeAt(index)
+                } else if (
+                    _historyScreenPagingState.value.historyGrouping == FeedHistoryGroup.Series
+                ) {
+                    val newFeedManga =
+                        feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
+                    mutableFeedManga[index] = newFeedManga
+                } else {
+                    val newFeedManga = _historyScreenPagingState.value.historyFeedMangaList[index]
+                    mutableFeedManga[index] =
+                        newFeedManga.copy(
+                            chapters =
+                                newFeedManga.chapters
+                                    .filter { it.chapter.url != simpleChapter.url }
+                                    .toPersistentList()
+                        )
+                }
+                _historyScreenPagingState.update {
+                    it.copy(historyFeedMangaList = mutableFeedManga.toPersistentList())
+                }
             }
+
+            loadSummaryPage()
         }
-        loadSummaryPage()
     }
 
     fun loadSummaryPage() {
