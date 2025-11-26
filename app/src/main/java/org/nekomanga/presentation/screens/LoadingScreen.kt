@@ -12,9 +12,11 @@ import org.nekomanga.ui.theme.ThemePreviews
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
-fun LoadingScreen() {
+fun LoadingScreen(showLoadingIcon: Boolean = true) {
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
-        ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+        if (showLoadingIcon) {
+            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
 

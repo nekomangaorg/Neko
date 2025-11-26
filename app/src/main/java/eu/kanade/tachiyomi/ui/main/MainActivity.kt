@@ -51,13 +51,10 @@ import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
-import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import java.math.BigInteger
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
@@ -69,7 +66,6 @@ import org.nekomanga.presentation.screens.main.BottomBar
 import org.nekomanga.presentation.screens.main.NavigationSideBar
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 class MainActivity : BaseMainActivity() {
 
@@ -89,7 +85,7 @@ class MainActivity : BaseMainActivity() {
 
         val startingScreen =
             if (isInitialDeepLink) {
-                Screens.Loading
+                Screens.Loading(false)
             } else if (!viewModel.preferences.hasShownOnboarding().get()) {
                 Screens.Onboarding
             } else {

@@ -4,38 +4,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation3.NavBackStackEntry
-import eu.kanade.tachiyomi.util.manga.MangaMappings
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation3.runtime.NavKey
+import eu.kanade.tachiyomi.util.system.toast
 import org.nekomanga.presentation.screens.LoadingScreen
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import org.nekomanga.presentation.screens.Screens
 
 @Composable
 fun DeepLinkScreen(
-    navBackStackEntry: NavBackStackEntry,
-    deepLinkViewModel: DeepLinkViewModel =
-        viewModel(factory = viewModelFactory { DeepLinkViewModel(Injekt.get<MangaMappings>()) }),
-    onDeepLinkHandled: (String) -> Unit,
+    host: String,
+    path: String,
+    id: String,
+    deepLinkViewModel: DeepLinkViewModel,
+    onNavigate: (List<NavKey>) -> Unit,
 ) {
     val deepLinkState by deepLinkViewModel.deepLinkState.collectAsState()
 
-    val host = navBackStackEntry.arguments?.getString("host")
-    val path = navBackStackEntry.arguments?.getString("path")
-    val id = navBackStackEntry.arguments?.getString("id")
-
-    LaunchedEffect(host, path, id) {
-        if (host != null && path != null && id != null) {
-            deepLinkViewModel.handleDeepLink(host, path, id)
-        }
-    }
+    LaunchedEffect(host, path, id) { deepLinkViewModel.handleDeepLink(host, path, id) }
 
     when (val state = deepLinkState) {
         is DeepLinkState.Loading -> LoadingScreen()
+        is DeepLinkState.Error -> {
+            LocalContext.current.toast(state.errorMessage)
+            onNavigate(listOf(Screens.Browse()))
+        }
         is DeepLinkState.Success -> {
-            LaunchedEffect(state.query) {
-                onDeepLinkHandled(state.query)
-            }
+            onNavigate(state.screens)
         }
     }
 }

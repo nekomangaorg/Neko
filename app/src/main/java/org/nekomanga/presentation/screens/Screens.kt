@@ -13,7 +13,7 @@ object Screens {
 
     @Serializable data object Feed : NavKey
 
-    @Serializable data object Loading : NavKey
+    @Serializable data class Loading(val showLoadingIndicator: Boolean) : NavKey
 
     @Serializable data object Stats : NavKey
 
