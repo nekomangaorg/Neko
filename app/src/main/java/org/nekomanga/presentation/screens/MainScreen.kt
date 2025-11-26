@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import org.nekomanga.presentation.components.AppBar
+import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
 
 @Composable
 fun MainScreen(
@@ -116,7 +117,15 @@ fun MainScreen(
             entryProvider =
                 entryProvider {
                     entry<Screens.Loading> { LoadingScreen() }
-
+                    entry<Screens.DeepLink> {
+                        DeepLinkScreen(
+                            navBackStackEntry = it,
+                            onDeepLinkHandled = { query ->
+                                backStack.clear()
+                                backStack.add(Screens.Browse(query))
+                            },
+                        )
+                    }
                     entry<Screens.Onboarding> {
                         OnboardingScreen(
                             finishedOnBoarding = {

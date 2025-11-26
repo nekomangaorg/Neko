@@ -337,57 +337,7 @@ class MainActivity : BaseMainActivity() {
                     val path = pathSegments[0]
                     val id = pathSegments[1]
                     if (id != null && id.isNotEmpty()) {
-
-                        val mappings: MangaMappings by injectLazy()
-
-                        val query =
-                            when {
-                                host.contains("anilist", true) -> {
-                                    val dexId = mappings.getMangadexUUID(id, "al")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for AniList ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                host.contains("myanimelist", true) -> {
-                                    val dexId = mappings.getMangadexUUID(id, "mal")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                host.contains("mangaupdates", true) -> {
-                                    val base = BigInteger(id, 36)
-                                    val muID = base.toString(10)
-                                    val dexId = mappings.getMangadexUUID(muID, "mu_new")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                path.equals("GROUP", true) -> {
-                                    MdConstants.DeepLinkPrefix.group + id
-                                }
-                                path.equals("AUTHOR", true) -> {
-                                    MdConstants.DeepLinkPrefix.author + id
-                                }
-                                path.equals("LIST", true) -> {
-                                    MdConstants.DeepLinkPrefix.list + id
-                                }
-                                else -> {
-                                    MdConstants.DeepLinkPrefix.manga + id
-                                }
-                            }
-                        deepLinkScreens =
-                            listOf(
-                                Screens.Browse(SearchBrowse(type = SearchType.Title, query = query))
-                            )
+                        deepLinkScreens = listOf(Screens.DeepLink(host, path, id))
                     }
                 }
             }
