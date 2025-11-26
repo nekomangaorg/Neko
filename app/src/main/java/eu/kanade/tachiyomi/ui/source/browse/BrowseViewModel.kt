@@ -485,28 +485,7 @@ class BrowseViewModel() : ViewModel() {
                         }
                     }
                 }
-                DeepLinkType.Error -> {
-                    _browseScreenState.update {
-                        it.copy(
-                            title = UiText.String(""),
-                            initialLoading = false,
-                            error = UiText.String(uuid),
-                        )
-                    }
-                }
-                DeepLinkType.Manga -> {
-                    browseRepository
-                        .getDeepLinkManga(uuid)
-                        .onFailure {
-                            _browseScreenState.update { state ->
-                                state.copy(
-                                    error = UiText.String(it.message()),
-                                    initialLoading = false,
-                                )
-                            }
-                        }
-                        .onSuccess { displayManga -> _deepLinkManga.value = displayManga.mangaId }
-                }
+
                 DeepLinkType.List -> {
                     _browseScreenState.update {
                         it.copy(title = UiText.StringResource(R.string.list))

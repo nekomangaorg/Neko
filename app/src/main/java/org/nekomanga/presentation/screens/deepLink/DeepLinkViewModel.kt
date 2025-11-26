@@ -13,6 +13,8 @@ import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.browse.UuidType
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.math.BigInteger
@@ -22,7 +24,10 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
-import org.nekomanga.presentation.screens.Screens
+import org.nekomanga.presentation.screens.Screens.Browse
+import org.nekomanga.presentation.screens.Screens.Manga
+import org.nekomanga.presentation.screens.deepLink.DeepLinkState.Error
+import org.nekomanga.presentation.screens.deepLink.DeepLinkState.Success
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -36,20 +41,33 @@ class DeepLinkViewModel() : ViewModel() {
     val deepLinkState = _deepLinkState.asStateFlow()
 
     fun handleDeepLink(host: String, path: String, id: String) {
+
         viewModelScope.launch {
             parseUri(host, path, id)
                 .andThen { deepLinkType ->
                     when (deepLinkType) {
-                        else -> {
+                        is DeepLinkType.Author -> Success(listOf(Browse(SearchBrowse(UuidType.Creator(deepLinkType.uuid)))))
+                        is DeepLinkType.Group -> Success(listOf(
+                            Browse(
+                                SearchBrowse(
+                                    UuidType.Group(
+                                        deepLinkType.uuid
+                                    )
+                                )
+                            )
+                        ))
+
+                        is DeepLinkType.List -> Success(listOf(Browse(SearchBrowse(UuidType.List(deepLinkType.uuid)))))
+                        is DeepLinkType.Manga ->  {
                             getDeepLinkManga(deepLinkType.uuid).map { displayManga ->
-                                DeepLinkState.Success(
-                                    listOf(Screens.Browse(), Screens.Manga(displayManga.mangaId))
+                                Success(
+                                    listOf(Browse(), Manga(displayManga.mangaId))
                                 )
                             }
                         }
                     }
                 }
-                .onFailure { _deepLinkState.value = DeepLinkState.Error(it.message()) }
+                .onFailure { _deepLinkState.value = Error(it.message()) }
                 .onSuccess { result -> _deepLinkState.value = result }
         }
     }
@@ -76,10 +94,6 @@ class DeepLinkViewModel() : ViewModel() {
                 resolveMapping(convertedId, "mu_new", "MangaUpdates")
             }
 
-            host.contains("kitsu", true) -> {
-                val convertedId = BigInteger(id, 36).toString()
-                resolveMapping(convertedId, "kitsu", "Kitsu")
-            }
 
             // Direct matches
             path.equals("GROUP", true) -> Ok(DeepLinkType.Group(id))

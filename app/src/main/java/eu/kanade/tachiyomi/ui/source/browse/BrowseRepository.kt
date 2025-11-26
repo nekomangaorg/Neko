@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
@@ -132,39 +131,6 @@ class BrowseRepository(
     suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
             Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList())
-        }
-    }
-}
-
-enum class DeepLinkType {
-    Author,
-    Group,
-    Error,
-    Manga,
-    List,
-    None;
-
-    companion object {
-        fun getDeepLinkType(query: String): DeepLinkType {
-            return when {
-                query.startsWith(MdConstants.DeepLinkPrefix.author) -> Author
-                query.startsWith(MdConstants.DeepLinkPrefix.group) -> Group
-                query.startsWith(MdConstants.DeepLinkPrefix.manga) -> Manga
-                query.startsWith(MdConstants.DeepLinkPrefix.error) -> Error
-                query.startsWith(MdConstants.DeepLinkPrefix.list) -> List
-                else -> None
-            }
-        }
-
-        fun removePrefix(query: String, deepLinkType: DeepLinkType): String {
-            return when (deepLinkType) {
-                Author -> query.removePrefix(MdConstants.DeepLinkPrefix.author)
-                Group -> query.removePrefix(MdConstants.DeepLinkPrefix.group)
-                Manga -> query.removePrefix(MdConstants.DeepLinkPrefix.manga)
-                List -> query.removePrefix(MdConstants.DeepLinkPrefix.list)
-                Error -> query.removePrefix(MdConstants.DeepLinkPrefix.error)
-                None -> query
-            }
         }
     }
 }
