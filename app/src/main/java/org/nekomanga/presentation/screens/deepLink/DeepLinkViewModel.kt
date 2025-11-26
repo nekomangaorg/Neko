@@ -46,8 +46,8 @@ class DeepLinkViewModel() : ViewModel() {
             parseUri(host, path, id)
                 .andThen { deepLinkType ->
                     when (deepLinkType) {
-                        is DeepLinkType.Author -> Success(listOf(Browse(SearchBrowse(UuidType.Creator(deepLinkType.uuid)))))
-                        is DeepLinkType.Group -> Success(listOf(
+                        is DeepLinkType.Author -> Ok(listOf(Browse(SearchBrowse(UuidType.Creator(deepLinkType.uuid)))))
+                        is DeepLinkType.Group -> Ok(listOf(
                             Browse(
                                 SearchBrowse(
                                     UuidType.Group(
@@ -57,18 +57,16 @@ class DeepLinkViewModel() : ViewModel() {
                             )
                         ))
 
-                        is DeepLinkType.List -> Success(listOf(Browse(SearchBrowse(UuidType.List(deepLinkType.uuid)))))
+                        is DeepLinkType.List -> Ok(listOf(Browse(SearchBrowse(UuidType.List(deepLinkType.uuid)))))
                         is DeepLinkType.Manga ->  {
-                            getDeepLinkManga(deepLinkType.uuid).map { displayManga ->
-                                Success(
+                           getDeepLinkManga(deepLinkType.uuid).map { displayManga ->
                                     listOf(Browse(), Manga(displayManga.mangaId))
-                                )
                             }
                         }
                     }
                 }
                 .onFailure { _deepLinkState.value = Error(it.message()) }
-                .onSuccess { result -> _deepLinkState.value = result }
+                .onSuccess { screens -> _deepLinkState.value = Success(screens) }
         }
     }
 

@@ -84,49 +84,60 @@ class BrowseViewModel() : ViewModel() {
         if (_browseScreenState.value.deepLinkHandled) return
         _browseScreenState.update { it.copy(deepLinkHandled = true) }
 
-        TimberKt.tag("DeepLink").d("Creating filter for ${searchBrowse.query}")
-        val filters =
-            when (searchBrowse.type) {
-                SearchType.Tag -> {
-                    val blankFilter = createInitialDexFilter("")
-                    if (searchBrowse.query.startsWith("Content rating: ")) {
-                        val rating =
-                            MangaContentRating.getContentRating(
-                                searchBrowse.query.substringAfter("Content rating: ")
-                            )
-                        blankFilter.copy(
-                            contentRatings =
-                                blankFilter.contentRatings
-                                    .map {
-                                        if (it.rating == rating) it.copy(state = true)
-                                        else it.copy(state = false)
-                                    }
-                                    .toPersistentList()
-                        )
-                    } else {
-                        blankFilter.copy(
-                            tags =
-                                blankFilter.tags
-                                    .map {
-                                        if (it.tag.prettyPrint.equals(searchBrowse.query, true))
-                                            it.copy(state = ToggleableState.On)
-                                        else it
-                                    }
-                                    .toPersistentList()
-                        )
-                    }
-                }
 
-                SearchType.Title -> createInitialDexFilter(searchBrowse.query)
-                SearchType.Creator ->
-                    createInitialDexFilter("")
-                        .copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(searchBrowse.query, QueryType.Author),
+
+        if(searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType){
+            val query = searchBrowse.type.query
+           val filters =
+            if(searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Title){
+                createInitialDexFilter(query)
+            }else if(searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Creator){
+                createInitialDexFilter("")
+                    .copy(
+                        queryMode = QueryType.Author,
+                        query = Filter.Query(query, QueryType.Author),
+                    )
+            }else if(searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Tag){
+                val blankFilter = createInitialDexFilter("")
+                if (query.startsWith("Content rating: ")) {
+                    val rating =
+                        MangaContentRating.getContentRating(
+                            query.substringAfter("Content rating: ")
                         )
+                    blankFilter.copy(
+                        contentRatings =
+                            blankFilter.contentRatings
+                                .map {
+                                    if (it.rating == rating) it.copy(state = true)
+                                    else it.copy(state = false)
+                                }
+                                .toPersistentList()
+                    )
+                } else {
+                    blankFilter.copy(
+                        tags =
+                            blankFilter.tags
+                                .map {
+                                    if (it.tag.prettyPrint.equals(query, true))
+                                        it.copy(state = ToggleableState.On)
+                                    else it
+                                }
+                                .toPersistentList()
+                    )
+                }
+            }else{
+                null
+            }
+            if(filters != null){
+                _browseScreenState.update { it.copy(filters = filters) }
             }
 
-        _browseScreenState.update { it.copy(filters = filters) }
+        }else if(searchBrowse is UuidType){
+
+        }
+
+
+
 
         getSearchPage()
     }
