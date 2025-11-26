@@ -102,6 +102,8 @@ jobs:
 
       - name: Generate Custom Changelog
         id: custom_changelog
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -e
           chmod +x ./.github/scripts/generate_changelog.sh

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-OUTPUT=$(curl -H "Accept: application/vnd.github.com/v3+json" \
+OUTPUT=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.com/v3+json" \
   "https://api.github.com/repos/nekomangaorg/neko/compare/$1...$2" \
   | jq -r ' # The -r flag is essential here!
 
