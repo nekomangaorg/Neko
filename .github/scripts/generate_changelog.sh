@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Check if token is present to avoid rate limiting errors
+# Check if token is present
 if [ -z "$GITHUB_TOKEN" ]; then
-  echo "Error: GITHUB_TOKEN is not set. API requests will fail." >&2
+  echo "Error: GITHUB_TOKEN is not set." >&2
   exit 1
 fi
 
@@ -14,16 +14,20 @@ OUTPUT=$(curl -s -f -H "Authorization: token $GITHUB_TOKEN" \
 
     def get_normalized_line:
       (.message[0]? // "" | select(type == "string") // "")
-      | sub("^fix\\(deps\\)"; "chore:")
+      # 1. Fix double colons: consume the optional colon in the match
+      | sub("^fix\\(deps\\):?"; "chore:")
+      | sub("^chore\\(deps\\):?"; "chore:")
       | sub("^feature/"; "feat:")
+      # 2. Handle "Fix:" (capitalized with colon) explicitly
+      | sub("^(fix|Fix):"; "fix:")
       | sub("^(fix|Fix)/"; "fix:")
       | sub("^(fix|Fix)\\s"; "fix: "; "i")
       | sub("^chore/"; "chore:")
-      | sub("^chore\\(deps\\):"; "chore:")
       | sub("^opt/"; "opt:")
       | sub("^ref/"; "ref:")
-      | sub("^(feat|fix|opt|ref|chore):\\s*"; "\\1: ")
-      | sub("^\\s*"; "");  # <--- FIXED: Added semicolon here
+      # 3. Fix corruption: Use named capture group (?<p>...) instead of \1
+      | sub("^(?<p>feat|fix|opt|ref|chore):\\s*"; "\(.p): ")
+      | sub("^\\s*"; "");
 
     def get_sort_priority:
       get_normalized_line as $line |
@@ -33,11 +37,10 @@ OUTPUT=$(curl -s -f -H "Authorization: token $GITHUB_TOKEN" \
       elif ($line | startswith("ref:")) then 3
       elif ($line | startswith("chore:")) then 4
       else 5
-      end; # <--- Semicolon is required here too
+      end;
 
     def is_merge_commit:
       (.message[0]? // "" | select(type == "string") // "") |
-      # FIXED: Escaped single quotes ('\'') for origin/main
       startswith("Merge remote-tracking branch '\''origin/main'\''");
 
     # --- Main processing starts here ---
@@ -71,10 +74,11 @@ OUTPUT=$(curl -s -f -H "Authorization: token $GITHUB_TOKEN" \
 
 # Check if OUTPUT is empty
 if [ -z "$OUTPUT" ]; then
-  echo "Error: Output is empty. Check API response or GITHUB_TOKEN permissions." >&2
+  echo "Error: Output is empty." >&2
   exit 1
 fi
 
+# Cleanup step
 CLEANED_OUTPUT=$(echo "$OUTPUT" | sed 's/ (@nonproto)//gi')
 
 printf "%b\n" "$CLEANED_OUTPUT"
