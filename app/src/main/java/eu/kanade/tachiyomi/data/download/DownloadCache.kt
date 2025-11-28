@@ -214,6 +214,9 @@ class DownloadCache(
         val allManga = db.getMangaList().executeAsBlocking()
         val mangaGroupedBySource = allManga.groupBy { it.source }
 
+        val newCache = HashMap<Long, MangaFiles>()
+        val duplicateSuffixRegex = Regex(" \\(\\d+\\)$")
+
         sourceDirs.forEach { (sourceId, sourceDir) ->
             val sourceMangaList = mangaGroupedBySource[sourceId].orEmpty()
 
@@ -229,7 +232,12 @@ class DownloadCache(
             mangaDirs.forEach { mangaDir ->
                 val dirName = mangaDir.name ?: return@forEach
                 // Fast lookup
-                val manga = mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
+                var manga = mangaLookup[dirName.lowercase(Locale.getDefault())]
+                if (manga == null) {
+                    val cleanedDirName = dirName.replace(duplicateSuffixRegex, "")
+                    manga = mangaLookup[cleanedDirName.lowercase(Locale.getDefault())]
+                }
+                if (manga == null) return@forEach
                 val id = manga.id ?: return@forEach
 
                 val files =
@@ -240,9 +248,14 @@ class DownloadCache(
                 val mangadexIds =
                     files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
 
-                mangaFiles[id] = MangaFiles(files, mangadexIds)
+                val entry = newCache.getOrPut(id) { MangaFiles(mutableSetOf(), mutableSetOf()) }
+                entry.files.addAll(files)
+                entry.mangadexIds.addAll(mangadexIds)
             }
         }
+
+        mangaFiles.clear()
+        mangaFiles.putAll(newCache)
     }
 
     @Synchronized
