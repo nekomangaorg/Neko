@@ -92,7 +92,7 @@ open class MangaImpl : Manga {
             val oldTitle = title
             title = other.title
 
-            if (user_title.isNullOrBlank()) {
+            if (user_title.isNullOrBlank() && oldTitle != other.title) {
                 val downloadManager: DownloadManager by injectLazy()
                 val storageManager: StorageManager by injectLazy()
                 val provider = DownloadProvider(downloadManager.context)
