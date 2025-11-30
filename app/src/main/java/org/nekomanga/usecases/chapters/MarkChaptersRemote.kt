@@ -19,7 +19,9 @@ class MarkChaptersRemote(
     ) {
         val syncRead =
             when (markAction) {
+                is ChapterMarkActions.PreviousRead,
                 is ChapterMarkActions.Read -> true
+                is ChapterMarkActions.PreviousUnread,
                 is ChapterMarkActions.Unread -> false
                 else -> null
             }
