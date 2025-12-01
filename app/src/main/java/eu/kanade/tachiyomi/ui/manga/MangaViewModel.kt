@@ -736,7 +736,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             chapterUseCases.markChapters(markAction, updatedChapterList)
 
             suspend fun finalizeChapters() {
-                if (markAction is ChapterMarkActions.Read) {
+                if (
+                    markAction is ChapterMarkActions.Read ||
+                        markAction is ChapterMarkActions.PreviousRead
+                ) {
                     if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(
