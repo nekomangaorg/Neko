@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download
 
-import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -17,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
@@ -51,6 +51,7 @@ class DownloadCache(
 
     init {
         storageManager.baseDirChanges.onEach { forceRenewCache() }.launchIn(scope)
+        scope.launch { renew() }
     }
 
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
@@ -79,17 +80,18 @@ class DownloadCache(
 
         // Slow path: Check directory names (requires provider generation)
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
-        return validChapterDirNames.any { it in fileNames || "$it.cbz" in fileNames }
-    }
-
-    fun findChapterDirName(chapter: Chapter, manga: Manga): String {
-        return provider.findChapterDir(chapter, manga)?.name ?: ""
+        return validChapterDirNames.any { it in fileNames }
     }
 
     @Synchronized
     fun updateManga(manga: Manga) {
         val id = manga.id ?: return
-        val mangaDir = provider.findMangaDir(manga) ?: return
+        val mangaDir = provider.findMangaDir(manga)
+
+        if (mangaDir == null) {
+            mangaFiles.remove(id)
+            return
+        }
 
         val fileNames =
             mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
@@ -103,60 +105,13 @@ class DownloadCache(
 
     fun getDownloadCount(manga: Manga, forceCheckFolder: Boolean = false): Int {
         checkRenew()
-
         if (forceCheckFolder) {
             val mangaDir = provider.findMangaDir(manga) ?: return 0
             return mangaDir.listFiles { _, filename -> !filename.endsWith(TMP_DIR_SUFFIX) }?.size
                 ?: 0
         } else {
             val cache = mangaFiles[manga.id] ?: return 0
-            val files = cache.files
-            val ids = cache.mangadexIds
-
-            var count = 0
-            // Optimization: filter loop combined with logic to avoid multiple passes
-            for (file in files) {
-                if (file.endsWith(TMP_DIR_SUFFIX)) continue
-
-                if (!MergeType.containsMergeSourceName(file)) {
-                    val mangadexId = file.substringAfterLast("- ")
-                    if (
-                        mangadexId.isNotBlank() &&
-                            mangadexId.isDigitsOnly() &&
-                            !ids.contains(mangadexId)
-                    ) {
-                        count++
-                    } else {
-                        // If it's in IDs or doesn't match criteria but is a file, we count it
-                        // logic from original: count = files.size (minus tmp) ... then add specific
-                        // extras.
-                        // Simplified: Just counting valid non-tmp files
-                        count++
-                    }
-                } else {
-                    count++
-                }
-            }
-            // Logic correction based on original: Original counted ALL files, then added count for
-            // specific ID mismatches.
-            // Retaining original logic flow requires:
-            val baseCount = files.count { !it.endsWith(TMP_DIR_SUFFIX) }
-            var extraCount = 0
-            files.forEach {
-                if (!it.endsWith(TMP_DIR_SUFFIX) && !MergeType.containsMergeSourceName(it)) {
-                    val mangadexId = it.substringAfterLast("- ")
-                    if (
-                        mangadexId.isNotBlank() &&
-                            mangadexId.isDigitsOnly() &&
-                            !ids.contains(mangadexId)
-                    ) {
-                        extraCount++
-                    }
-                }
-            }
-            return baseCount // The original logic seemed to double count in specific scenarios,
-            // returning simple size is usually safer unless dealing with duplicate
-            // chapters.
+            return cache.files.count { !it.endsWith(TMP_DIR_SUFFIX) }
         }
     }
 
@@ -192,70 +147,50 @@ class DownloadCache(
     @Synchronized
     private fun renew() {
         TimberKt.d { "Renewing cache" }
-        val onlineSources = listOf(sourceManager.mangaDex)
-
-        val downloadDirs = storageManager.getDownloadsDirectory()?.listFiles().orEmpty()
 
         // Map Source ID to the directory on disk
-        val sourceDirs =
-            downloadDirs
-                .associate { dir ->
-                    val sourceId =
-                        onlineSources.find { provider.getSourceDirName() == dir.name }?.id
-                    dir.name to Pair(sourceId, dir)
-                }
-                .mapNotNull {
-                    if (it.value.first != null) it.value.first!! to it.value.second else null
-                }
-                .toMap()
+        val sourceDir =
+            storageManager.getDownloadsDirectory()?.listFiles()?.find {
+                it.name == provider.getSourceDirName()
+            } ?: return
 
         val db: DatabaseHelper by injectLazy()
         // Optimization: Fetch once
         val allManga = db.getMangaList().executeAsBlocking()
-        val mangaGroupedBySource = allManga.groupBy { it.source }
 
-        sourceDirs.forEach { (sourceId, sourceDir) ->
-            val sourceMangaList = mangaGroupedBySource[sourceId].orEmpty()
+        // 3. Create lookup map for O(1) access
+        val mangaLookup =
+            allManga.associateBy {
+                DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
+            }
 
-            // Optimization: Create a lookup map for O(1) access instead of O(N) linear scan
-            // Key: Lowercase sanitized filename, Value: Manga Object
-            val mangaLookup =
-                sourceMangaList.associateBy {
-                    DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
+        // 4. Iterate over the folders on disk
+        sourceDir.listFiles().orEmpty().forEach { mangaDir ->
+            val dirName = mangaDir.name ?: return@forEach
+            val manga = mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
+            val id = manga.id ?: return@forEach
+
+            val files =
+                mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
+                    it.name?.substringBeforeLast(".cbz")
                 }
 
-            val mangaDirs = sourceDir.listFiles().orEmpty()
+            val mangadexIds = files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
 
-            mangaDirs.forEach { mangaDir ->
-                val dirName = mangaDir.name ?: return@forEach
-                // Fast lookup
-                val manga = mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
-                val id = manga.id ?: return@forEach
-
-                val files =
-                    mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                        it.name?.substringBeforeLast(".cbz")
-                    }
-
-                val mangadexIds =
-                    files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
-
-                mangaFiles[id] = MangaFiles(files, mangadexIds)
-            }
+            mangaFiles[id] = MangaFiles(files, mangadexIds)
         }
     }
 
     @Synchronized
     fun addChapter(chapterDirName: String, manga: Manga) {
         val id = manga.id ?: return
-        val mangadexId = chapterDirName.substringAfterLast("- ")
+        val cleanName = chapterDirName.substringBeforeLast(".cbz")
+        val mangadexId = cleanName.substringAfterLast("- ")
 
         // Utilize computeIfAbsent for atomic initialization if needed,
         // though we are in a Synchronized block so standard get/put is fine.
         val entry = mangaFiles.getOrPut(id) { MangaFiles(mutableSetOf(), mutableSetOf()) }
-
-        entry.files.add(chapterDirName)
-
+        entry.files.add(cleanName)
         if (!MergeType.containsMergeSourceName(chapterDirName)) {
             entry.mangadexIds.add(mangadexId)
         }

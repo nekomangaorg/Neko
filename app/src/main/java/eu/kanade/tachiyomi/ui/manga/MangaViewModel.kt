@@ -1296,13 +1296,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             val newEffectiveTitle = dbManga.user_title ?: dbManga.title
             db.insertManga(dbManga).executeOnIO()
             if (previousEffectiveTitle != newEffectiveTitle) {
-                    val provider = DownloadProvider(preferences.context)
-                    provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
-                    downloadManager.updateDownloadCacheForManga(dbManga)
-                    storageManager.renamePagesAndCoverDirectory(
-                        previousEffectiveTitle,
-                        newEffectiveTitle,
-                    )
+                val provider = DownloadProvider(preferences.context)
+                provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
+                downloadManager.updateDownloadCacheForManga(dbManga)
+                storageManager.renamePagesAndCoverDirectory(
+                    previousEffectiveTitle,
+                    newEffectiveTitle,
+                )
             }
             appSnackbarManager.showSnackbar(
                 SnackbarState(
