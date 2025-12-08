@@ -13,8 +13,9 @@ import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.UuidType
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.math.BigInteger
@@ -24,6 +25,8 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.Screens.Browse
 import org.nekomanga.presentation.screens.Screens.Manga
 import org.nekomanga.presentation.screens.deepLink.DeepLinkState.Error
@@ -46,21 +49,22 @@ class DeepLinkViewModel() : ViewModel() {
             parseUri(host, path, id)
                 .andThen { deepLinkType ->
                     when (deepLinkType) {
-                        is DeepLinkType.Author -> Ok(listOf(Browse(SearchBrowse(UuidType.Creator(deepLinkType.uuid)))))
-                        is DeepLinkType.Group -> Ok(listOf(
-                            Browse(
-                                SearchBrowse(
-                                    UuidType.Group(
-                                        deepLinkType.uuid
-                                    )
-                                )
-                            )
-                        ))
-
-                        is DeepLinkType.List -> Ok(listOf(Browse(SearchBrowse(UuidType.List(deepLinkType.uuid)))))
-                        is DeepLinkType.Manga ->  {
-                           getDeepLinkManga(deepLinkType.uuid).map { displayManga ->
-                                    listOf(Browse(), Manga(displayManga.mangaId))
+                        is DeepLinkType.Author ->
+                            getDisplayAuthorFromId(deepLinkType.uuid).map {
+                                listOf(Browse(), Screens.Display(it))
+                            }
+                        is DeepLinkType.Group ->
+                            getDisplayGroupFromId(deepLinkType.uuid).map {
+                                listOf(Browse(), Screens.Display(it))
+                            }
+                        is DeepLinkType.List -> {
+                            getDisplayListFromList(deepLinkType.uuid).map {
+                                listOf(Browse(), Screens.Display(it))
+                            }
+                        }
+                        is DeepLinkType.Manga -> {
+                            getDeepLinkManga(deepLinkType.uuid).map { displayManga ->
+                                listOf(Browse(), Manga(displayManga.mangaId))
                             }
                         }
                     }
@@ -74,6 +78,30 @@ class DeepLinkViewModel() : ViewModel() {
         return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
             val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
             Ok(displayManga)
+        }
+    }
+
+    suspend fun getDisplayListFromList(
+        listUuid: String
+    ): Result<SerializableDisplayScreenType, ResultError> {
+        return mangaDex.fetchList(listUuid).map { resultListPage ->
+            resultListPage.displayScreenType.toSerializable()
+        }
+    }
+
+    suspend fun getDisplayAuthorFromId(
+        authorUuid: String
+    ): Result<SerializableDisplayScreenType, ResultError> {
+        return mangaDex.getAuthorNameByUuid(authorUuid).map { authorName ->
+            DisplayScreenType.AuthorWithUuid(UiText.String(authorName), authorUuid).toSerializable()
+        }
+    }
+
+    suspend fun getDisplayGroupFromId(
+        groupUuid: String
+    ): Result<SerializableDisplayScreenType, ResultError> {
+        return mangaDex.getScanlatorGroupNameByUuid(groupUuid).map { groupName ->
+            DisplayScreenType.GroupByUuid(UiText.String(groupName), groupUuid).toSerializable()
         }
     }
 
@@ -91,7 +119,6 @@ class DeepLinkViewModel() : ViewModel() {
                 val convertedId = BigInteger(id, 36).toString()
                 resolveMapping(convertedId, "mu_new", "MangaUpdates")
             }
-
 
             // Direct matches
             path.equals("GROUP", true) -> Ok(DeepLinkType.Group(id))

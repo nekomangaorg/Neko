@@ -39,8 +39,8 @@ import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.QueryType
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
@@ -377,8 +377,7 @@ private fun EmptyLibrary(
                             onClick = {
                                 onSearchMangaDex(
                                     SearchBrowse(
-                                        query = libraryScreenState.searchQuery,
-                                        type = SearchType.Title,
+                                        QueryType.Title(query = libraryScreenState.searchQuery)
                                     )
                                 )
                             },

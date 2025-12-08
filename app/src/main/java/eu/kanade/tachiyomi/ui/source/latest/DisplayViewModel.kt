@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.source.latest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -65,7 +66,11 @@ class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
         DefaultPaginator(
             initialKey = _displayScreenState.value.page,
             onLoadUpdated = { _displayScreenState.update { state -> state.copy(isLoading = it) } },
-            onRequest = { nextPage -> displayRepository.getPage(nextPage, displayScreenType) },
+            onRequest = { nextPage ->
+                displayRepository.getPage(nextPage, displayScreenType).map { result ->
+                    result.hasNextPage to listOf(result)
+                }
+            },
             getNextKey = { _displayScreenState.value.page + 1 },
             onError = { resultError ->
                 _displayScreenState.update {
@@ -80,22 +85,42 @@ class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
                 }
             },
             onSuccess = { hasNextPage, items, newKey ->
-                _displayScreenState.update {
-                    val allDisplayManga =
-                        (_displayScreenState.value.allDisplayManga + items).distinct()
-                    it.copy(
-                        isLoading = false,
-                        page = newKey,
-                        endReached = !hasNextPage,
-                        allDisplayManga = allDisplayManga.toPersistentList(),
-                        filteredDisplayManga =
-                            allDisplayManga.filterVisibility(preferences).toPersistentList(),
-                    )
+                val isDisplayResult = _displayScreenState.value.isDisplayResult
+
+                if (isDisplayResult) {
+                    _displayScreenState.update {
+                        it.copy(
+                            isLoading = false,
+                            page = newKey,
+                            endReached = !hasNextPage,
+                            alternativeDisplay = items.first().displayResult,
+                        )
+                    }
+                } else {
+                    _displayScreenState.update {
+                        val allDisplayManga =
+                            (_displayScreenState.value.allDisplayManga + items.first().displayManga)
+                                .distinct()
+                        it.copy(
+                            isLoading = false,
+                            page = newKey,
+                            endReached = !hasNextPage,
+                            allDisplayManga = allDisplayManga.toPersistentList(),
+                            filteredDisplayManga =
+                                allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                        )
+                    }
                 }
             },
         )
 
     init {
+        if (
+            displayScreenType is DisplayScreenType.AuthorByName ||
+                displayScreenType is DisplayScreenType.GroupByName
+        ) {
+            _displayScreenState.update { it.copy(isDisplayResult = true) }
+        }
         loadNextItems()
 
         viewModelScope.launch {

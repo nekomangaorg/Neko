@@ -79,3 +79,7 @@ data class FilterActions(
     val resetClick: () -> Unit,
     val filterChanged: (Filter) -> Unit,
 )
+
+sealed class NavigationEvent {
+    data class NavigateToDisplay(val displayScreenType: DisplayScreenType) : NavigationEvent()
+}

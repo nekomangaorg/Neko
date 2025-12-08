@@ -43,6 +43,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
+import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -187,7 +188,13 @@ private fun DisplayWrapper(
                     else persistentListOf(),
             )
         } else {
-            if (displayScreenState.isList) {
+            if (displayScreenState.isDisplayResult) {
+                ResultList(
+                    results = displayScreenState.alternativeDisplay,
+                    contentPadding = contentPadding,
+                    onClick = {},
+                )
+            } else if (displayScreenState.isList) {
                 MangaList(
                     contentPadding = contentPadding,
                     mangaList = displayScreenState.filteredDisplayManga,

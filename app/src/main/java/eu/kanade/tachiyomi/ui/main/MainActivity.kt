@@ -48,7 +48,6 @@ import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
@@ -319,7 +318,12 @@ class MainActivity : BaseMainActivity() {
                     deepLinkScreens =
                         listOf(
                             Screens.Browse(
-                                searchBrowse = SearchBrowse(type = SearchType.Title, query = query)
+                                searchBrowse =
+                                    SearchBrowse(
+                                        eu.kanade.tachiyomi.ui.source.browse.QueryType.Title(
+                                            query = query
+                                        )
+                                    )
                             )
                         )
                 } else {

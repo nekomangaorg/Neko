@@ -61,8 +61,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.QueryType
 import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -168,13 +168,13 @@ fun MangaScreen(
                     copyToClipboard(context, it, R.string.creator)
                 },
                 creatorSearch = { text ->
-                    onSearchMangaDex(SearchBrowse(query = text, type = SearchType.Creator))
+                    onSearchMangaDex(SearchBrowse(QueryType.Creator(query = text)))
                 },
             ),
         descriptionActions =
             DescriptionActions(
                 genreSearch = { text ->
-                    onSearchMangaDex(SearchBrowse(query = text, type = SearchType.Tag))
+                    onSearchMangaDex(SearchBrowse(QueryType.Tag(query = text)))
                 },
                 genreSearchLibrary = onSearchLibrary,
                 altTitleClick = mangaViewModel::setAltTitle,

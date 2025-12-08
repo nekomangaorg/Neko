@@ -1,11 +1,8 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -13,7 +10,6 @@ import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlin.math.min
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +17,6 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.MangaContentRating
-import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.presentation.components.UiText
@@ -29,32 +24,27 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-// If the List Changes ever go live this entire file can be overridden by that branch
-class ListHandler {
+class AuthorHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
-    suspend fun retrieveMangaFromList(
-        listUUID: String,
+    suspend fun retrieveMangaFromAuthor(
+        authorUuid: String,
         page: Int,
-        privateList: Boolean = false,
-        useDefaultContentRating: Boolean = false,
     ): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
-            service.viewList(listUUID).getOrResultError("Error getting list").andThen { listDto ->
-                val allMangaIds =
-                    listDto.data.relationships
-                        .filter { it.type == MdConstants.Types.manga }
-                        .map { it.id }
+            service.authorByUuid(authorUuid).getOrResultError("Error getting list").andThen {
+                authorDto ->
+                val allMangaIds = authorDto.data.relationships?.map { it.id } ?: emptyList()
                 when (
                     allMangaIds.isEmpty() || allMangaIds.size <= MdUtil.getMangaListOffset(page)
                 ) {
                     true ->
                         Ok(
                             ListResults(
-                                DisplayScreenType.List(
-                                    UiText.String(listDto.data.attributes.name ?: ""),
-                                    listUUID,
+                                DisplayScreenType.AuthorWithUuid(
+                                    UiText.String(authorDto.data.attributes.name),
+                                    authorUuid,
                                 ),
                                 persistentListOf(),
                             )
@@ -93,18 +83,21 @@ class ListHandler {
                             .search(ProxyRetrofitQueryMap(queryParameters))
                             .getOrResultError("Error trying to load manga list")
                             .andThen { mangaListDto ->
-                                val title = listDto.data.attributes.name ?: ""
+                                val title = authorDto.data.attributes.name
                                 Ok(
                                     ListResults(
                                         displayScreenType =
-                                            DisplayScreenType.List(UiText.String(title), listUUID),
+                                            DisplayScreenType.AuthorWithUuid(
+                                                UiText.String(title),
+                                                authorUuid,
+                                            ),
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }
                                                 .toPersistentList(),
                                         hasNextPage =
                                             (mangaListDto.limit + mangaListDto.offset) <
-                                                listDto.data.relationships.size,
+                                                (authorDto.data.relationships?.size ?: 0),
                                     )
                                 )
                             }
@@ -113,45 +106,4 @@ class ListHandler {
             }
         }
     }
-
-    suspend fun retrieveAllMangaFromList(
-        listUUID: String,
-        privateList: Boolean,
-    ): Result<ListResults, ResultError> {
-        var hasPages = true
-        var page = 1
-        var list: List<SourceManga> = listOf()
-        var displayScreenType: DisplayScreenType? = null
-        var resultError: ResultError? = null
-        while (hasPages) {
-            retrieveMangaFromList(listUUID, page, privateList, false)
-                .onFailure {
-                    hasPages = false
-                    resultError = it
-                }
-                .onSuccess { successResult ->
-                    page++
-                    hasPages = successResult.hasNextPage
-                    list = list + (successResult.sourceManga.toMutableList())
-                    displayScreenType = successResult.displayScreenType
-                }
-        }
-
-        return when (resultError != null) {
-            true -> Err(resultError!!)
-            false ->
-                Ok(
-                    ListResults(
-                        displayScreenType = displayScreenType!!,
-                        sourceManga = list.toPersistentList(),
-                    )
-                )
-        }
-    }
 }
-
-data class ListResults(
-    val displayScreenType: DisplayScreenType,
-    val sourceManga: PersistentList<SourceManga>,
-    val hasNextPage: Boolean = false,
-)

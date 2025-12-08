@@ -51,13 +51,6 @@ class BrowseRepository(
         }
     }
 
-    suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
-        return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
-            val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
-            Ok(displayManga)
-        }
-    }
-
     suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
         return mangaDex.fetchAllList(listUuid).andThen { resultListPage ->
             val displayManga =
