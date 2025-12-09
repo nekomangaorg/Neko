@@ -319,7 +319,7 @@ class Suwayomi : MergedServerSource() {
             }
             if (next != null && previous.first != null) {
                 if (next <= previous.first!! + 1) {
-                    val chnum = previous.first!! + 0.01f
+                    val chnum = previous.first!! + 0.1f
                     return Name.Sanitized(
                         "Ch.${chnum.formatFloat()} - $rawName",
                         "",
@@ -454,6 +454,11 @@ class Suwayomi : MergedServerSource() {
                             return@any false
                         }
                         title = title.trimStart('0').replaceFirst(ch, "").trimStart()
+                        // In case the number appears multiple times
+                        if (chapterPrefixes.any { title.contains(it) }) {
+                            title = title.substringAfterLast(ch).trimStart()
+                        }
+                        title = title.replace(".cbz", "")
                         return@any true
                     }
                     false
