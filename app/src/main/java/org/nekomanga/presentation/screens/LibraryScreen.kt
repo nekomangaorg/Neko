@@ -379,9 +379,7 @@ private fun GlobalSearchRow(
         modifier = Modifier.fillMaxWidth().padding(paddingValues).padding(Size.small),
         contentAlignment = Alignment.Center,
     ) {
-        ElevatedButton(
-            onClick = { onSearchMangaDex(query) }
-        ) {
+        ElevatedButton(onClick = { onSearchMangaDex(query) }) {
             Text(text = stringResource(R.string.search_globally) + ": " + query)
         }
     }

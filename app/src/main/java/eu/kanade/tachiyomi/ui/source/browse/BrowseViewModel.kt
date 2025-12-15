@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
@@ -323,7 +324,19 @@ class BrowseViewModel() : ViewModel() {
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(
+                    initialLoading = true,
+                    error = null,
+                    page = 1,
+                    pageLoading = false,
+                    screenType = BrowseScreenType.Filter,
+                    displayMangaHolder =
+                        DisplayMangaHolder(
+                            resultType = BrowseScreenType.Filter,
+                            allDisplayManga = persistentListOf(),
+                            filteredDisplayManga = persistentListOf(),
+                        ),
+                )
             }
 
             // If no new search is provided, we use the existing filters in state
