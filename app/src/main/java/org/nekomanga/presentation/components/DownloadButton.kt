@@ -45,6 +45,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -92,17 +96,36 @@ fun DownloadButton(
             previousDownloadState = downloadState
         }
 
+        val downloadStatus =
+            when (downloadState) {
+                Download.State.NOT_DOWNLOADED -> stringResource(R.string.not_downloaded)
+                Download.State.QUEUE -> stringResource(R.string.download_queue)
+                Download.State.DOWNLOADING ->
+                    stringResource(R.string.downloading_progress, downloadProgress, 100)
+                Download.State.DOWNLOADED -> stringResource(R.string.downloaded)
+                Download.State.ERROR -> stringResource(R.string.download_error)
+            }
+
+        val downloadActionLabel =
+            when (downloadState) {
+                Download.State.NOT_DOWNLOADED -> stringResource(R.string.download)
+                else -> stringResource(R.string.options)
+            }
+
         val downloadButtonModifier =
-            Modifier.combinedClickable(
-                onClick = {
-                    when (downloadState) {
-                        Download.State.NOT_DOWNLOADED ->
-                            onClick(MangaConstants.DownloadAction.Download)
-                        else -> showChapterDropdown = true
-                    }
-                },
-                onLongClick = {},
-            )
+            Modifier.semantics { contentDescription = downloadStatus }
+                .combinedClickable(
+                    onClick = {
+                        when (downloadState) {
+                            Download.State.NOT_DOWNLOADED ->
+                                onClick(MangaConstants.DownloadAction.Download)
+                            else -> showChapterDropdown = true
+                        }
+                    },
+                    onLongClick = {},
+                    onClickLabel = downloadActionLabel,
+                    role = Role.Button,
+                )
 
         when {
             isDraining -> {
