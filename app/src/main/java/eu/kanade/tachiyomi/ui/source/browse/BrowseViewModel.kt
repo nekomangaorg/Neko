@@ -322,8 +322,15 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launchIO {
             if (!isOnline()) return@launchIO
 
+            paginator.reset()
+
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(
+                    initialLoading = true,
+                    error = null,
+                    page = 1,
+                    displayMangaHolder = DisplayMangaHolder(),
+                )
             }
 
             // If no new search is provided, we use the existing filters in state
