@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -79,7 +80,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             if (securityPreferences.hideNotificationContent().get()) {
                 context.getString(R.string.checking_for_new_chapters)
             } else {
-                manga.user_title
+                manga.displayTitle()
             }
 
         context.notificationManager.notify(
@@ -186,9 +187,10 @@ class LibraryUpdateNotifier(private val context: Context) {
                             context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                                 setSmallIcon(R.drawable.ic_neko_notification)
                                 try {
+                                    val artwork = manga.toDisplayManga().currentArtwork
                                     val request =
                                         ImageRequest.Builder(context)
-                                            .data(manga)
+                                            .data(artwork)
                                             .networkCachePolicy(CachePolicy.DISABLED)
                                             .diskCachePolicy(CachePolicy.ENABLED)
                                             .transformations(CircleCropTransformation())

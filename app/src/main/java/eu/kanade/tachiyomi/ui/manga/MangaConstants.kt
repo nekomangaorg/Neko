@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import androidx.compose.ui.state.ToggleableState
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -167,6 +168,62 @@ object MangaConstants {
         val changeLanguage: (languageOption: LanguageOption?) -> Unit,
         val setAsGlobal: (SetGlobal) -> Unit,
     )
+
+    fun SortOption.applyToManga(manga: Manga) {
+        val sortInt =
+            when (this.sortType) {
+                SortType.ChapterNumber -> Manga.CHAPTER_SORTING_SMART
+                SortType.SourceOrder -> Manga.CHAPTER_SORTING_SOURCE
+                SortType.UploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
+            }
+        val descInt =
+            when (this.sortState) {
+                MangaConstants.SortState.Ascending -> Manga.CHAPTER_SORT_ASC
+                else -> Manga.CHAPTER_SORT_DESC
+            }
+        manga.setChapterOrder(sortInt, descInt)
+    }
+
+    fun ChapterDisplayOptions.applyToManga(manga: Manga) {
+        // Helper to map toggle state
+        fun getTriState(on: Int, off: Int): Int =
+            when (this.displayState) {
+                ToggleableState.On -> on
+                ToggleableState.Indeterminate -> off
+                else -> Manga.SHOW_ALL
+            }
+
+        when (this.displayType) {
+            ChapterDisplayType.All -> {
+                manga.readFilter = Manga.SHOW_ALL
+                manga.bookmarkedFilter = Manga.SHOW_ALL
+                manga.downloadedFilter = Manga.SHOW_ALL
+                manga.availableFilter = Manga.SHOW_ALL
+            }
+            ChapterDisplayType.Unread -> {
+                manga.readFilter = getTriState(Manga.CHAPTER_SHOW_UNREAD, Manga.CHAPTER_SHOW_READ)
+            }
+            ChapterDisplayType.Bookmarked -> {
+                manga.bookmarkedFilter =
+                    getTriState(Manga.CHAPTER_SHOW_BOOKMARKED, Manga.CHAPTER_SHOW_NOT_BOOKMARKED)
+            }
+            ChapterDisplayType.Downloaded -> {
+                manga.downloadedFilter =
+                    getTriState(Manga.CHAPTER_SHOW_DOWNLOADED, Manga.CHAPTER_SHOW_NOT_DOWNLOADED)
+            }
+            ChapterDisplayType.Available -> {
+                manga.availableFilter =
+                    getTriState(Manga.CHAPTER_SHOW_AVAILABLE, Manga.CHAPTER_SHOW_UNAVAILABLE)
+            }
+            ChapterDisplayType.HideTitles -> {
+                manga.displayMode =
+                    if (this.displayState == ToggleableState.On) Manga.CHAPTER_DISPLAY_NUMBER
+                    else Manga.CHAPTER_DISPLAY_NAME
+            }
+        }
+    }
+
+    data class CategoriesData(val all: List<CategoryItem>, val current: List<CategoryItem>)
 
     sealed class DownloadAction {
         data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()

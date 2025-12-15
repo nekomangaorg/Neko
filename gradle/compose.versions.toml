@@ -1,7 +1,7 @@
 [versions]
 accompanist_version = "0.37.3"
-compose_version = "1.9.5"
-compose_material3_version = "1.5.0-alpha09"
+compose_version = "1.10.0"
+compose_material3_version = "1.5.0-alpha10"
 navigation3 = "1.0.0"
 lifecycleViewmodel = "2.10.0"
 markdown_version = "0.38.1"
@@ -15,14 +15,14 @@ accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-dra
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
-activity = "androidx.activity:activity-compose:1.12.0"
+activity = "androidx.activity:activity-compose:1.12.1"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 
 lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.10.0"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
-material = { module = "androidx.compose.material:material", version = "1.9.5" }
+material = { module = "androidx.compose.material:material", version = "1.10.0" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core",  version = "1.7.8" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended",  version = "1.7.8" }
 collapsing-topbar = "io.github.flaringapp:ComposeCollapsingTopBar:1.2.0"

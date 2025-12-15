@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -447,12 +446,8 @@ private fun MangaScreenWrapper(
     LaunchedEffect(currentBottomSheet) {
         if (currentBottomSheet != null) {
             sheetState.show()
-        } else {
-            sheetState.hide()
         }
     }
-
-    BackHandler(enabled = currentBottomSheet != null) { currentBottomSheet = null }
 
     fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch { currentBottomSheet = sheet }
@@ -519,7 +514,7 @@ private fun MangaScreenWrapper(
     }
 
     val refreshState =
-        remember(screenState.isRefreshing) {
+        remember(screenState.isRefreshing, themeColorState) {
             RefreshState(
                 enabled = true,
                 isRefreshing = screenState.isRefreshing,

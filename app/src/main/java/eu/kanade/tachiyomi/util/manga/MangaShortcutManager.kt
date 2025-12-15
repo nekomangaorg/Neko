@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
 import org.nekomanga.R
@@ -56,7 +57,10 @@ class MangaShortcutManager(
 
                 val shortcuts =
                     recents.map { item ->
-                        val request = ImageRequest.Builder(context).data(item).build()
+                        val request =
+                            ImageRequest.Builder(context)
+                                .data(item.toDisplayManga().currentArtwork)
+                                .build()
                         val bitmap = context.imageLoader.execute(request).image?.toBitmap()
 
                         ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")

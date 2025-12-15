@@ -114,9 +114,12 @@ class LibraryViewModel() : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         val state = libraryScreenState.value
-        lastLibraryCategoryItems = state.items
-        lastPagerIndex = state.pagerIndex
-        lastScrollPositions = state.scrollPositions
+        // dont save state if it didnt actually load
+        if (!state.isFirstLoad) {
+            lastLibraryCategoryItems = state.items
+            lastPagerIndex = state.pagerIndex
+            lastScrollPositions = state.scrollPositions
+        }
     }
 
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
@@ -371,6 +374,15 @@ class LibraryViewModel() : ViewModel() {
             }
             .distinctUntilChanged()
 
+    private val uiSettingsFlow =
+        combine(
+            libraryPreferences.gridSize().changes(),
+            libraryPreferences.layout().changes(),
+            filterPreferencesFlow,
+        ) { gridSize, layout, filters ->
+            Triple(gridSize, layout, filters)
+        }
+
     val libraryScreenState: StateFlow<LibraryScreenState> =
         combine(
                 _internalLibraryScreenState,
@@ -378,21 +390,21 @@ class LibraryViewModel() : ViewModel() {
                 trackMapFlow,
                 categoryListFlow,
                 libraryViewFlow,
-                libraryPreferences.gridSize().changes(),
-                libraryPreferences.layout().changes(),
+                uiSettingsFlow,
             ) {
                 state,
                 (sortedItems, allCollapsed, _),
                 trackMap,
                 categories,
                 viewPrefs,
-                gridSize,
-                layout ->
+                (gridSize, layout, filters) ->
                 state.copy(
                     items = sortedItems,
                     allCollapsed = allCollapsed,
                     libraryDisplayMode = layout,
                     rawColumnCount = gridSize,
+                    libraryFilters = filters,
+                    hasActiveFilters = filters.hasActiveFilter(),
                     currentGroupBy = viewPrefs.groupBy,
                     trackMap = trackMap.toPersistentMap(),
                     userCategories =
@@ -745,7 +757,7 @@ class LibraryViewModel() : ViewModel() {
                         loggedInTrackStatus[libraryMangaItem.displayManga.mangaId] ?: notTrackedList
                     }
                     else -> libraryMangaItem.language
-                }
+                }.distinct()
 
             for (key in groupingKeys) {
                 groupedMap.getOrPut(key) { mutableListOf() }.add(libraryMangaItem)

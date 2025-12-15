@@ -3,15 +3,19 @@ package org.nekomanga.presentation.screens
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -40,7 +44,6 @@ import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.toLibraryManga
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -308,47 +311,57 @@ private fun LibraryWrapper(
                         libraryScreenActions.downloadChapters(removeActionConfirmation!!)
                     },
                 )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (!libraryScreenState.searchQuery.isNullOrBlank()) {
+                        GlobalSearchRow(
+                            query = libraryScreenState.searchQuery!!,
+                            paddingValues = recyclerPadding, // Apply TopBar padding here
+                            onSearchMangaDex = libraryScreenActions.onSearchMangaDex,
+                        )
+                    }
 
-                if (libraryScreenState.items.isEmpty()) {
-                    EmptyLibrary(
-                        libraryScreenState = libraryScreenState,
-                        onSearchMangaDex = libraryScreenActions.onSearchMangaDex,
-                    )
-                } else {
-                    if (libraryScreenState.horizontalCategories) {
-                        HorizontalCategoriesPage(
-                            contentPadding = recyclerPadding,
-                            selectionMode = selectionMode,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            libraryCategoryActions = libraryCategoryActions,
-                            categorySortClick = { categoryItem ->
-                                scope.launch {
-                                    openSheet(
-                                        LibraryBottomSheetScreen.SortSheet(
-                                            categoryItem = categoryItem
-                                        )
-                                    )
-                                }
-                            },
-                        )
+                    val listPadding =
+                        if (!libraryScreenState.searchQuery.isNullOrBlank()) PaddingValues(0.dp)
+                        else recyclerPadding
+
+                    if (libraryScreenState.items.isEmpty()) {
+                        EmptyLibrary(libraryScreenState = libraryScreenState)
                     } else {
-                        VerticalCategoriesPage(
-                            contentPadding = recyclerPadding,
-                            selectionMode = selectionMode,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            libraryCategoryActions = libraryCategoryActions,
-                            categorySortClick = { categoryItem ->
-                                scope.launch {
-                                    openSheet(
-                                        LibraryBottomSheetScreen.SortSheet(
-                                            categoryItem = categoryItem
+                        if (libraryScreenState.horizontalCategories) {
+                            HorizontalCategoriesPage(
+                                contentPadding = listPadding,
+                                selectionMode = selectionMode,
+                                libraryScreenState = libraryScreenState,
+                                libraryScreenActions = libraryScreenActions,
+                                libraryCategoryActions = libraryCategoryActions,
+                                categorySortClick = { categoryItem ->
+                                    scope.launch {
+                                        openSheet(
+                                            LibraryBottomSheetScreen.SortSheet(
+                                                categoryItem = categoryItem
+                                            )
                                         )
-                                    )
-                                }
-                            },
-                        )
+                                    }
+                                },
+                            )
+                        } else {
+                            VerticalCategoriesPage(
+                                contentPadding = listPadding,
+                                selectionMode = selectionMode,
+                                libraryScreenState = libraryScreenState,
+                                libraryScreenActions = libraryScreenActions,
+                                libraryCategoryActions = libraryCategoryActions,
+                                categorySortClick = { categoryItem ->
+                                    scope.launch {
+                                        openSheet(
+                                            LibraryBottomSheetScreen.SortSheet(
+                                                categoryItem = categoryItem
+                                            )
+                                        )
+                                    }
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -357,25 +370,31 @@ private fun LibraryWrapper(
 }
 
 @Composable
-private fun EmptyLibrary(
-    libraryScreenState: LibraryScreenState,
+private fun GlobalSearchRow(
+    query: String,
+    paddingValues: PaddingValues,
     onSearchMangaDex: (String) -> Unit,
 ) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(paddingValues).padding(Size.small),
+        contentAlignment = Alignment.Center,
+    ) {
+        ElevatedButton(
+            onClick = { onSearchMangaDex(query) }
+        ) {
+            Text(text = stringResource(R.string.search_globally) + ": " + query)
+        }
+    }
+}
+
+@Composable
+private fun EmptyLibrary(libraryScreenState: LibraryScreenState) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (libraryScreenState.isFirstLoad) {
             ContainedLoadingIndicator()
         } else if (!libraryScreenState.searchQuery.isNullOrBlank()) {
 
-            EmptyScreen(
-                message = UiText.StringResource(resourceId = R.string.no_results_found),
-                actions =
-                    persistentListOf(
-                        Action(
-                            text = (UiText.StringResource(R.string.search_globally)),
-                            onClick = { onSearchMangaDex(libraryScreenState.searchQuery) },
-                        )
-                    ),
-            )
+            EmptyScreen(message = UiText.StringResource(resourceId = R.string.no_results_found))
         } else {
             EmptyScreen(
                 message =

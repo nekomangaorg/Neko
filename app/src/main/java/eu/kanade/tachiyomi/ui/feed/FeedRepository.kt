@@ -533,6 +533,11 @@ class FeedRepository(
                 false -> ChapterMarkActions.Unread()
             }
 
+        return markChapter(chapterItem, markAction)
+    }
+
+    /** this toggle the chapter read and returns the new chapter item */
+    suspend fun markChapter(chapterItem: ChapterItem, markAction: ChapterMarkActions): ChapterItem {
         chapterUseCases.markChapters(markAction, listOf(chapterItem))
 
         val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!

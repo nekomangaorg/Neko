@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -22,10 +25,12 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,8 +77,11 @@ fun TrackingSearchSheet(
 
     var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
-    BaseSheet(themeColor = themeColorState) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding()) {
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
             when (trackSearchResult) {
@@ -142,6 +150,7 @@ fun TrackingSearchSheet(
                 textChanged = { searchText = it },
                 search = searchTracker,
             )
+            Gap(Size.mediumLarge)
         }
     }
 }

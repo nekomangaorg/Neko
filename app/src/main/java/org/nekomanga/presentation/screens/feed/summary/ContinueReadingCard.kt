@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.feed.FeedManga
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -63,6 +62,8 @@ fun ContinueReadingCard(
 
     val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
     val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
+
+    val hasPagesLeft = !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0
 
     Row(
         modifier =
@@ -98,7 +99,7 @@ fun ContinueReadingCard(
             )
             LastReadLine(
                 lastRead = chapterItem.chapter.lastRead,
-                hasPagesLeft = !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0,
+                hasPagesLeft = hasPagesLeft,
                 pagesLeft = chapterItem.chapter.pagesLeft,
                 lastReadPreviousChapter = feedManga.lastReadChapter,
                 style = MaterialTheme.typography.bodyMedium,
@@ -106,9 +107,6 @@ fun ContinueReadingCard(
             )
         }
         var dropdown by remember { mutableStateOf(false) }
-
-        val buttonColor =
-            MaterialTheme.colorScheme.primary.copy(alpha = NekoColors.highAlphaLowContrast)
 
         DeleteBackground(
             color = Color.Transparent,
@@ -133,18 +131,24 @@ fun ContinueReadingCard(
                                 SimpleDropDownItem.Parent(
                                     UiText.StringResource(R.string.remove_history),
                                     children =
-                                        persistentListOf(
-                                            SimpleDropDownItem.Action(
-                                                UiText.String(chapterItem.chapter.name),
-                                                onClick = {
-                                                    deleteHistoryClick(chapterItem.chapter)
-                                                },
+                                        if (hasPagesLeft) {
+                                            listOf(
+                                                SimpleDropDownItem.Action(
+                                                    UiText.String(chapterItem.chapter.name),
+                                                    onClick = {
+                                                        deleteHistoryClick(chapterItem.chapter)
+                                                    },
+                                                )
+                                            )
+                                        } else {
+                                            emptyList()
+                                        } +
+                                            listOf(
+                                                SimpleDropDownItem.Action(
+                                                    UiText.StringResource(R.string.entire_series),
+                                                    onClick = deleteAllHistoryClick,
+                                                )
                                             ),
-                                            SimpleDropDownItem.Action(
-                                                UiText.StringResource(R.string.entire_series),
-                                                onClick = deleteAllHistoryClick,
-                                            ),
-                                        ),
                                 )
                             )
                             .toPersistentList(),

@@ -4,33 +4,37 @@ import androidx.palette.graphics.Palette
 
 fun Palette.getBestColor(): Int? {
     val vibPopulation = vibrantSwatch?.population ?: -1
-
-    val domLum = dominantSwatch?.hsl?.get(2) ?: -1f
-
     val mutedPopulation = mutedSwatch?.population ?: -1
-    val mutedSaturationLimit = if (mutedPopulation > vibPopulation * 3f) 0.1f else 0.25f
 
-    return when {
-        (dominantSwatch?.hsl?.get(1) ?: 0f) >= .25f && domLum <= .8f && domLum > .2f -> {
-            dominantSwatch?.rgb
-        }
-        vibPopulation >= mutedPopulation * 0.75f -> {
-            vibrantSwatch?.rgb
-        }
-        mutedPopulation > vibPopulation * 1.5f &&
-            (mutedSwatch?.hsl?.get(1) ?: 0f) > mutedSaturationLimit -> {
-            mutedSwatch?.rgb
-        }
-        else -> {
-            arrayListOf(vibrantSwatch, lightVibrantSwatch, darkVibrantSwatch)
-                .sortedBy {
-                    if (it === vibrantSwatch) {
-                        (it?.population ?: -1) * 3
-                    } else {
-                        it?.population ?: -1
-                    }
-                }[1]
-                ?.rgb
+    // Helper for readability
+    fun Palette.Swatch.isSaturatedAndMidTone(): Boolean {
+        val saturation = hsl[1]
+        val luminance = hsl[2]
+        return saturation >= 0.25f && luminance in 0.2f..0.8f
+    }
+
+    // 1. Check Dominant
+    dominantSwatch?.let { swatch -> if (swatch.isSaturatedAndMidTone()) return swatch.rgb }
+
+    // 2. Check Vibrant
+    if (vibPopulation >= mutedPopulation * 0.75f) {
+        vibrantSwatch?.let {
+            return it.rgb
         }
     }
+
+    // 3. Check Muted
+    val mutedSaturationLimit = if (mutedPopulation > vibPopulation * 3f) 0.1f else 0.25f
+    if (
+        mutedPopulation > vibPopulation * 1.5f &&
+            (mutedSwatch?.hsl?.get(1) ?: 0f) > mutedSaturationLimit
+    ) {
+        mutedSwatch?.let {
+            return it.rgb
+        }
+    }
+
+    // 4. Safe Fallback: Filter nulls, sort descending by population, take top
+    val fallbackSwatches = listOfNotNull(vibrantSwatch, lightVibrantSwatch, darkVibrantSwatch)
+    return fallbackSwatches.maxByOrNull { it.population }?.rgb
 }

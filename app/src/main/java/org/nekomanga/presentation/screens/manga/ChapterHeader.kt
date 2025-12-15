@@ -22,6 +22,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.theme.ThemeColorState
@@ -63,6 +64,7 @@ fun ChapterHeader(
                 }
 
                 FilterIcon(themeColor.primaryColor)
+                Gap(Size.tiny)
             }
         }
     }

@@ -4,7 +4,7 @@ cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 coilVersion = "3.3.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "34.6.0"
+firebaseBomVersion = "34.7.0"
 firebasePluginVersion = "3.0.6"
 googleServicesPluginVersion = "4.4.4"
 injektCoreVersion = "1.16.1"
@@ -100,8 +100,8 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.14.6"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.5"
+mockk = "io.mockk:mockk:1.14.7"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.0.7"
 
 [plugins]
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibVersion" }

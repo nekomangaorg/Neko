@@ -32,6 +32,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -77,22 +78,25 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     )
 
     suspend fun restoreBackup(uri: Uri): Boolean {
-        val startTime = System.currentTimeMillis()
-        restoreProgress.set(0)
-        errors.clear()
-        trackingErrors.clear()
-        cancelled = 0
+        return withContext(Dispatchers.IO) {
+            val startTime = System.currentTimeMillis()
+            restoreProgress.set(0)
+            errors.clear()
+            trackingErrors.clear()
+            cancelled = 0
 
-        if (!performRestore(uri)) {
-            return false
+            if (!performRestore(uri)) {
+                false
+            } else {
+
+                val endTime = System.currentTimeMillis()
+                val time = endTime - startTime
+
+                val logFile = writeErrorLog()
+                notifier.showRestoreComplete(time, errors.size, logFile?.parent, logFile?.name)
+                true
+            }
         }
-
-        val endTime = System.currentTimeMillis()
-        val time = endTime - startTime
-
-        val logFile = writeErrorLog()
-        notifier.showRestoreComplete(time, errors.size, logFile?.parent, logFile?.name)
-        return true
     }
 
     private suspend fun performRestore(uri: Uri): Boolean {
@@ -118,9 +122,9 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
             }
 
             // Batch parameters
-            val batchSize = 20 // Safe size for SQLite transactions
+            val batchSize = 10 // Safe size for SQLite transactions
             val chunks = dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.entries.chunked(batchSize)
-            val semaphore = Semaphore(10) // concurrency limit for CPU prep
+            val semaphore = Semaphore(8) // concurrency limit for CPU prep
 
             chunks.forEach { chunk ->
                 if (!isActive) return@coroutineScope false
@@ -167,8 +171,10 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                     restoreBatchCovers(itemsWithCovers)
                 }
 
-                // [FIX] Mandatory pause to allow SQLite WAL Checkpoint to clear the disk queue
-                delay(250)
+                // [FIX] Mandatory pause + yield
+                // Allows SQLite WAL Checkpoint to clear the disk queue and UI to draw
+                delay(200)
+                kotlinx.coroutines.yield()
             }
 
             context.notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
@@ -274,7 +280,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     }
 
     private suspend fun restoreBatchCovers(items: List<RestorableItem>) = coroutineScope {
-        val coverSemaphore = Semaphore(15)
+        val coverSemaphore = Semaphore(5)
 
         items
             .map { item ->

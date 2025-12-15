@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.toDisplayManga
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Collections
@@ -67,9 +68,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
@@ -80,6 +83,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
@@ -193,7 +197,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             } catch (e: Exception) {
                 if (e is CancellationException) {
                     // Assume success although cancelled
-                    finishUpdates(true)
+                    withContext(NonCancellable) { finishUpdates(true) }
                     Result.success()
                 } else {
                     TimberKt.e(e)
@@ -203,6 +207,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 instance = null
                 sendUpdate(null)
                 notifier.cancelProgressNotification()
+                extraScope.cancel()
             }
         }
     }
@@ -486,10 +491,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                         libraryPreferences.updateCovers().get()
                                 ) {
                                     coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
+                                    val artwork = manga.toDisplayManga().currentArtwork
                                     // load new covers in background
                                     val request =
                                         ImageRequest.Builder(applicationContext)
-                                            .data(manga)
+                                            .data(artwork)
                                             .memoryCachePolicy(CachePolicy.DISABLED)
                                             .build()
                                     context.imageLoader.execute(request)
@@ -641,24 +647,21 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                         hasDownloads
                     } finally {
-                        notificationMutex.withLock {
-                            notifier.showProgressNotification(
-                                manga = manga,
-                                current = this@LibraryUpdateJob.count.andIncrement,
-                                total = mangaToUpdate.size,
-                            )
+                        if (!isStopped) {
+                            notificationMutex.withLock {
+                                notifier.showProgressNotification(
+                                    manga = manga,
+                                    current = this@LibraryUpdateJob.count.andIncrement,
+                                    total = mangaToUpdate.size,
+                                )
+                            }
                         }
                     }
                 }
                 .getOrElse { e ->
-                    notificationMutex.withLock {
-                        notifier.showProgressNotification(
-                            manga = manga,
-                            current = this@LibraryUpdateJob.count.andIncrement,
-                            total = mangaToUpdate.size,
-                        )
-                    }
-                    if (e !is CancellationException) {
+                    if (e is CancellationException) {
+                        throw e
+                    } else {
                         failedUpdates[manga] = e.message ?: "unknown error"
                         TimberKt.e(e) { "Failed updating: ${manga.title}" }
                     }
