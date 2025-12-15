@@ -49,6 +49,8 @@ fun WebView.setDefaultSettings() {
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
+        allowFileAccess = false
+        allowContentAccess = false
 
         // Allow zooming
         setSupportZoom(true)
