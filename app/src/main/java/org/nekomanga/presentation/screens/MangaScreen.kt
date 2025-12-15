@@ -61,8 +61,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.QueryType
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
@@ -83,6 +82,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.VerticalFastScroller
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
@@ -109,7 +109,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
     onNavigate: (NavKey) -> Unit,
     onSearchLibrary: (String) -> Unit,
-    onSearchMangaDex: (SearchBrowse) -> Unit,
+    onSearchMangaDex: (DisplayScreenType) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -131,7 +131,6 @@ fun MangaScreen(
             when (result) {
                 SnackbarResult.ActionPerformed -> event.action?.invoke()
                 SnackbarResult.Dismissed -> event.dismissAction?.invoke()
-                else -> Unit
             }
         }
     }
@@ -168,13 +167,13 @@ fun MangaScreen(
                     copyToClipboard(context, it, R.string.creator)
                 },
                 creatorSearch = { text ->
-                    onSearchMangaDex(SearchBrowse(QueryType.Creator(query = text)))
+                    onSearchMangaDex(DisplayScreenType.AuthorByName(UiText.String(text)))
                 },
             ),
         descriptionActions =
             DescriptionActions(
                 genreSearch = { text ->
-                    onSearchMangaDex(SearchBrowse(QueryType.Tag(query = text)))
+                    onSearchMangaDex(DisplayScreenType.Tag(UiText.String(text)))
                 },
                 genreSearchLibrary = onSearchLibrary,
                 altTitleClick = mangaViewModel::setAltTitle,

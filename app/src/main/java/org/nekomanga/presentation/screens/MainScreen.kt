@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
 import org.nekomanga.presentation.screens.deepLink.DeepLinkViewModel
@@ -203,9 +204,8 @@ fun MainScreen(
                                 backStack.clear()
                                 backStack.add(Screens.Library(initialSearch = tag))
                             },
-                            onSearchMangaDex = { searchBrowse ->
-                                backStack.clear()
-                                backStack.add(Screens.Browse(searchBrowse = searchBrowse))
+                            onSearchMangaDex = { displayType ->
+                                backStack.add(Screens.Display(displayType.toSerializable()))
                             },
                         )
                     }

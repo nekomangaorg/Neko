@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
+import androidx.compose.ui.state.ToggleableState
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -37,6 +38,7 @@ class DisplayRepository(
             is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
             is DisplayScreenType.PopularNewTitles -> getPopularNewTitles(page)
             is DisplayScreenType.FeedUpdates -> getFeedUpdatesPage(page)
+            is DisplayScreenType.Tag -> getTagPage(displayScreenType.title.str, page)
             is DisplayScreenType.AuthorByName -> getAuthorPage(displayScreenType.title.str)
             is DisplayScreenType.AuthorWithUuid ->
                 getAuthorManga(page, displayScreenType.authorUUID)
@@ -237,6 +239,61 @@ class DisplayRepository(
                     Ok(
                         DisplayPageResult(
                             hasNextPage = listResults.hasNextPage,
+                            displayManga = displayMangaList.toPersistentList(),
+                        )
+                    )
+                },
+                failure = { Err(it) },
+            )
+    }
+
+    private suspend fun getTagPage(tag: String, page: Int): Result<DisplayPageResult, ResultError> {
+
+        val enabledContentRatings = mangaDexPreferences.visibleContentRatings().get()
+        val contentRatings =
+            MangaContentRating.getOrdered()
+                .map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }
+                .toPersistentList()
+
+        val blankFilter = DexFilters(contentRatings = contentRatings)
+
+        val filters =
+            if (tag.startsWith("Content rating: ")) {
+                val rating =
+                    MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
+                blankFilter.copy(
+                    contentRatings =
+                        blankFilter.contentRatings
+                            .map {
+                                if (it.rating == rating) it.copy(state = true)
+                                else it.copy(state = false)
+                            }
+                            .toPersistentList()
+                )
+            } else {
+                blankFilter.copy(
+                    tags =
+                        blankFilter.tags
+                            .map {
+                                if (it.tag.prettyPrint.equals(tag, true))
+                                    it.copy(state = ToggleableState.On)
+                                else it
+                            }
+                            .toPersistentList()
+                )
+            }
+
+        return mangaDex
+            .search(page, filters)
+            .mapBoth(
+                success = { mangaListPage ->
+                    val displayMangaList =
+                        mangaListPage.sourceManga.map { sourceManga ->
+                            sourceManga.toDisplayManga(db, mangaDex.id)
+                        }
+                    Ok(
+                        DisplayPageResult(
+                            hasNextPage = mangaListPage.hasNextPage,
                             displayManga = displayMangaList.toPersistentList(),
                         )
                     )

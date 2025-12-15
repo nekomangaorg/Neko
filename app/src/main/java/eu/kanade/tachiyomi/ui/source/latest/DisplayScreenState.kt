@@ -58,6 +58,8 @@ sealed interface DisplayScreenType {
 
     data class AuthorByName(override val title: UiText.String) : DisplayScreenType
 
+    data class Tag(override val title: UiText.String) : DisplayScreenType
+
     data class AuthorWithUuid(override val title: UiText.String, val authorUUID: String) :
         DisplayScreenType
 

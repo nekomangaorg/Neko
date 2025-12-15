@@ -59,7 +59,8 @@ data class RelationshipDto(
     val attributes: IncludesAttributesDto? = null,
 )
 
-@Serializable data class MangaRelationshipDto(val id: String, val attributes: MangaAttributesDto)
+@Serializable
+data class MangaRelationshipDto(val id: String, val attributes: MangaAttributesDto? = null)
 
 @Serializable
 data class IncludesAttributesDto(

@@ -27,6 +27,10 @@ sealed interface SerializableDisplayScreenType {
     data class List(val title: String, val listUUID: String) : SerializableDisplayScreenType
 
     @kotlinx.serialization.Serializable
+    @SerialName("tag")
+    data class Tag(val title: String) : SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
     @SerialName("author_name")
     data class AuthorByName(val name: String) : SerializableDisplayScreenType
 
@@ -57,6 +61,7 @@ fun DisplayScreenType.toSerializable(): SerializableDisplayScreenType {
         is DisplayScreenType.List -> {
             SerializableDisplayScreenType.List(title = this.title.str, listUUID = this.listUUID)
         }
+        is DisplayScreenType.Tag -> SerializableDisplayScreenType.Tag(this.title.str)
         is DisplayScreenType.AuthorByName -> {
             SerializableDisplayScreenType.AuthorByName(name = this.title.str)
         }
@@ -91,6 +96,7 @@ fun SerializableDisplayScreenType.toDomain(): DisplayScreenType {
         is SerializableDisplayScreenType.List -> {
             DisplayScreenType.List(title = UiText.String(this.title), listUUID = this.listUUID)
         }
+        is SerializableDisplayScreenType.Tag -> DisplayScreenType.Tag(UiText.String(this.title))
         is SerializableDisplayScreenType.AuthorByName -> {
             DisplayScreenType.AuthorByName(title = UiText.String(this.name))
         }
