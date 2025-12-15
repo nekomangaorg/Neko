@@ -39,8 +39,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.QueryType
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
@@ -66,7 +64,7 @@ fun LibraryScreen(
     mainDropdown: AppBar.MainDropdown,
     mainDropdownShowing: Boolean,
     openManga: (Long) -> Unit,
-    onSearchMangaDex: (SearchBrowse) -> Unit,
+    onSearchMangaDex: (String) -> Unit,
     windowSizeClass: WindowSizeClass,
     navigationRail: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit,
@@ -361,7 +359,7 @@ private fun LibraryWrapper(
 @Composable
 private fun EmptyLibrary(
     libraryScreenState: LibraryScreenState,
-    onSearchMangaDex: (SearchBrowse) -> Unit,
+    onSearchMangaDex: (String) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (libraryScreenState.isFirstLoad) {
@@ -374,13 +372,7 @@ private fun EmptyLibrary(
                     persistentListOf(
                         Action(
                             text = (UiText.StringResource(R.string.search_globally)),
-                            onClick = {
-                                onSearchMangaDex(
-                                    SearchBrowse(
-                                        QueryType.Title(query = libraryScreenState.searchQuery)
-                                    )
-                                )
-                            },
+                            onClick = { onSearchMangaDex(libraryScreenState.searchQuery) },
                         )
                     ),
             )

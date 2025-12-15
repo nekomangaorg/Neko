@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
-import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -83,62 +82,11 @@ class BrowseViewModel() : ViewModel() {
     private val _navigateEvent = Channel<NavigationEvent>()
     val navigateEvent = _navigateEvent.receiveAsFlow()
 
-    fun deepLinkQuery(searchBrowse: SearchBrowse) {
+    fun initSearch(titleQuery: String) {
         if (_browseScreenState.value.deepLinkHandled) return
-        _browseScreenState.update { it.copy(deepLinkHandled = true) }
-        getSearchPage(searchBrowse)
-
-        if (searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType) {
-            val query = searchBrowse.type.query
-            val filters =
-                if (searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Title) {
-                    createInitialDexFilter(query)
-                } else if (
-                    searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Creator
-                ) {
-                    createInitialDexFilter("")
-                        .copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(query, QueryType.Author),
-                        )
-                } else if (
-                    searchBrowse.type is eu.kanade.tachiyomi.ui.source.browse.QueryType.Tag
-                ) {
-                    val blankFilter = createInitialDexFilter("")
-                    if (query.startsWith("Content rating: ")) {
-                        val rating =
-                            MangaContentRating.getContentRating(
-                                query.substringAfter("Content rating: ")
-                            )
-                        blankFilter.copy(
-                            contentRatings =
-                                blankFilter.contentRatings
-                                    .map {
-                                        if (it.rating == rating) it.copy(state = true)
-                                        else it.copy(state = false)
-                                    }
-                                    .toPersistentList()
-                        )
-                    } else {
-                        blankFilter.copy(
-                            tags =
-                                blankFilter.tags
-                                    .map {
-                                        if (it.tag.prettyPrint.equals(query, true))
-                                            it.copy(state = ToggleableState.On)
-                                        else it
-                                    }
-                                    .toPersistentList()
-                        )
-                    }
-                } else {
-                    null
-                }
-            if (filters != null) {
-                _browseScreenState.update { it.copy(filters = filters) }
-            }
-        } else if (searchBrowse is UuidType) {}
-
+        _browseScreenState.update {
+            it.copy(deepLinkHandled = true, filters = createInitialDexFilter(titleQuery))
+        }
         getSearchPage()
     }
 
@@ -370,7 +318,7 @@ class BrowseViewModel() : ViewModel() {
         }
     }
 
-    fun getSearchPage(searchBrowse: SearchBrowse? = null) {
+    fun getSearchPage() {
         viewModelScope.launchIO {
             if (!isOnline()) return@launchIO
 
@@ -378,98 +326,25 @@ class BrowseViewModel() : ViewModel() {
                 state.copy(initialLoading = true, error = null, page = 1)
             }
 
-            // 1. Handle Explicit SearchBrowse Request (DeepLink or new Search)
-            if (searchBrowse != null) {
-                val baseFilter = createInitialDexFilter("")
+            // If no new search is provided, we use the existing filters in state
+            val currentMode = browseScreenState.value.filters.queryMode
+            val currentQuery = browseScreenState.value.filters.query.text
 
-                // Reset filters to clean state for new search
-                _browseScreenState.update { it.copy(filters = baseFilter) }
+            when (currentMode) {
+                QueryType.Author,
+                QueryType.Group -> {
+                    // These modes use special endpoints for text search
+                    if (
+                        currentQuery.isNotBlank() &&
+                            browseScreenState.value.filters.authorId.uuid.isBlank() &&
+                            browseScreenState.value.filters.groupId.uuid.isBlank()
+                    ) {
+                        val result =
+                            if (currentMode == QueryType.Author)
+                                browseRepository.getAuthors(currentQuery)
+                            else browseRepository.getGroups(currentQuery)
 
-                when (val type = searchBrowse.type) {
-                    // --- Text-Based Searches ---
-                    is eu.kanade.tachiyomi.ui.source.browse.QueryType -> {
-                        when (type) {
-                            is eu.kanade.tachiyomi.ui.source.browse.QueryType.Title -> {
-                                val newFilters =
-                                    baseFilter.copy(
-                                        query = Filter.Query(type.query, QueryType.Title)
-                                    )
-                                _browseScreenState.update { it.copy(filters = newFilters) }
-                                paginator.loadNextItems()
-                            }
-                            is eu.kanade.tachiyomi.ui.source.browse.QueryType.Creator -> {
-                                val newFilters =
-                                    baseFilter.copy(
-                                        queryMode = QueryType.Author,
-                                        query = Filter.Query(type.query, QueryType.Author),
-                                    )
-                                _browseScreenState.update { it.copy(filters = newFilters) }
-                                val displayScreenType =
-                                    DisplayScreenType.AuthorByName(UiText.String(type.query))
-                                _navigateEvent.send(
-                                    NavigationEvent.NavigateToDisplay(displayScreenType)
-                                )
-                                return@launchIO
-                            }
-                            is eu.kanade.tachiyomi.ui.source.browse.QueryType.Tag -> {
-                                // Delegate complex tag parsing (Content Rating vs Tag) to existing
-                                // helper
-                                searchTag(type.query)
-                                return@launchIO
-                            }
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-            // 2. Handle Existing State (Pagination / Refresh)
-            else {
-                // If no new search is provided, we use the existing filters in state
-                val currentMode = browseScreenState.value.filters.queryMode
-                val currentQuery = browseScreenState.value.filters.query.text
-
-                when (currentMode) {
-                    QueryType.Author,
-                    QueryType.Group -> {
-                        // These modes use special endpoints for text search
-                        if (
-                            currentQuery.isNotBlank() &&
-                                browseScreenState.value.filters.authorId.uuid.isBlank() &&
-                                browseScreenState.value.filters.groupId.uuid.isBlank()
-                        ) {
-                            val result =
-                                if (currentMode == QueryType.Author)
-                                    browseRepository.getAuthors(currentQuery)
-                                else browseRepository.getGroups(currentQuery)
-
-                            result
-                                .onFailure { error ->
-                                    _browseScreenState.update {
-                                        it.copy(
-                                            error = UiText.String(error.message()),
-                                            initialLoading = false,
-                                        )
-                                    }
-                                }
-                                .onSuccess { dr ->
-                                    _browseScreenState.update {
-                                        it.copy(
-                                            otherResults = dr.toPersistentList(),
-                                            screenType = BrowseScreenType.Other,
-                                            initialLoading = false,
-                                        )
-                                    }
-                                }
-                        } else {
-                            // UUID filter exists, use standard paginator
-                            paginator.loadNextItems()
-                        }
-                    }
-                    QueryType.List -> {
-                        // Lists don't paginate the same way
-                        browseRepository
-                            .getList(currentQuery)
+                        result
                             .onFailure { error ->
                                 _browseScreenState.update {
                                     it.copy(
@@ -478,12 +353,37 @@ class BrowseViewModel() : ViewModel() {
                                     )
                                 }
                             }
-                            .onSuccess { displayManga -> updateStateWithManga(displayManga, true) }
-                    }
-                    else -> {
-                        // Standard Title/Tag search
+                            .onSuccess { dr ->
+                                _browseScreenState.update {
+                                    it.copy(
+                                        otherResults = dr.toPersistentList(),
+                                        screenType = BrowseScreenType.Other,
+                                        initialLoading = false,
+                                    )
+                                }
+                            }
+                    } else {
+                        // UUID filter exists, use standard paginator
                         paginator.loadNextItems()
                     }
+                }
+                QueryType.List -> {
+                    // Lists don't paginate the same way
+                    browseRepository
+                        .getList(currentQuery)
+                        .onFailure { error ->
+                            _browseScreenState.update {
+                                it.copy(
+                                    error = UiText.String(error.message()),
+                                    initialLoading = false,
+                                )
+                            }
+                        }
+                        .onSuccess { displayManga -> updateStateWithManga(displayManga, true) }
+                }
+                else -> {
+                    // Standard Title/Tag search
+                    paginator.loadNextItems()
                 }
             }
         }

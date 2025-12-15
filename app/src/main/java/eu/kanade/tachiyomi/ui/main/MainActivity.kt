@@ -47,7 +47,6 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
@@ -315,17 +314,7 @@ class MainActivity : BaseMainActivity() {
                     intent.getStringExtra(SearchManager.QUERY)
                         ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
-                    deepLinkScreens =
-                        listOf(
-                            Screens.Browse(
-                                searchBrowse =
-                                    SearchBrowse(
-                                        eu.kanade.tachiyomi.ui.source.browse.QueryType.Title(
-                                            query = query
-                                        )
-                                    )
-                            )
-                        )
+                    deepLinkScreens = listOf(Screens.Browse(title = query))
                 } else {
                     finish()
                 }

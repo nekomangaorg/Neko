@@ -164,7 +164,6 @@ fun MainScreen(
                     }
                     entry<Screens.Feed> {
                         val feedViewModel: FeedViewModel = viewModel()
-
                         FeedScreen(
                             feedViewModel = feedViewModel,
                             mainDropdown = mainDropDown,
@@ -177,8 +176,8 @@ fun MainScreen(
                     }
                     entry<Screens.Browse> { screen ->
                         val browseViewModel: BrowseViewModel = viewModel()
-                        if (screen.searchBrowse != null) {
-                            browseViewModel.deepLinkQuery(screen.searchBrowse)
+                        if (screen.title != null) {
+                            browseViewModel.initSearch(screen.title)
                         }
                         BrowseScreen(
                             browseViewModel = browseViewModel,
