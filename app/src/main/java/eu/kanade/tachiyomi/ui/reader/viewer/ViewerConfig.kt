@@ -16,6 +16,7 @@ abstract class ViewerConfig(
 
     var imagePropertyChangedListener: (() -> Unit)? = null
     var reloadChapterListener: ((Boolean) -> Unit)? = null
+    var reloadViewerListener: (() -> Unit)? = null
 
     var navigationModeChangedListener: (() -> Unit)? = null
     var navigationModeInvertedListener: (() -> Unit)? = null

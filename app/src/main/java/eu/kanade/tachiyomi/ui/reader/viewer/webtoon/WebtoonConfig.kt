@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.core.preferences.PreferenceValues
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -30,6 +31,8 @@ class WebtoonConfig(
 
     var webtoonCropBorders = false
         private set
+
+    var disableGaps = readerPreferences.webtoonDisableGaps().get()
 
     var verticalCropBorders = true
         private set
@@ -74,6 +77,16 @@ class WebtoonConfig(
         readerPreferences
             .cropBorders()
             .register({ verticalCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        readerPreferences
+            .webtoonDisableGaps()
+            .changes()
+            .drop(1)
+            .onEach {
+                TimberKt.d { "changed to $it" }
+                reloadViewerListener?.invoke()
+            }
+            .launchIn(scope)
 
         readerPreferences
             .webtoonSidePadding()

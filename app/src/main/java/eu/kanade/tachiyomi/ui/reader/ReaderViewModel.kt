@@ -777,6 +777,10 @@ constructor(
         }
     }
 
+    fun reloadWebtoonViewer() {
+        runBlocking(Dispatchers.IO) { eventChannel.send(Event.ReloadMangaAndChapters) }
+    }
+
     /** Returns the orientation type used by this manga or the default one. */
     fun getMangaOrientationType(): Int {
         val default = readerPreferences.defaultOrientationType().get()
