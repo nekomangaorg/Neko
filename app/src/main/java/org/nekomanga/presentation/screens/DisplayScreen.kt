@@ -19,11 +19,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +34,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -60,12 +66,41 @@ fun DisplayScreen(
 ) {
     val screenState by viewModel.displayScreenState.collectAsStateWithLifecycle()
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val currentUpdateMangaForChanges by rememberUpdatedState(viewModel::updateMangaForChanges)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                currentUpdateMangaForChanges()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     DisplayWrapper(
         displayScreenState = screenState,
         switchDisplayClick = viewModel::switchDisplayMode,
         libraryEntryVisibilityClick = viewModel::switchLibraryEntryVisibility,
         onBackPress = onBackPressed,
         openManga = { mangaId: Long -> onNavigateTo(Screens.Manga(mangaId)) },
+        resultItemClick = { uuid: String ->
+            val result =
+                if (viewModel.displayScreenType is DisplayScreenType.AuthorByName) {
+                    DisplayScreenType.AuthorWithUuid(
+                        title = viewModel.displayScreenType.title,
+                        uuid,
+                    )
+                } else if (viewModel.displayScreenType is DisplayScreenType.GroupByName) {
+                    DisplayScreenType.GroupByUuid(title = viewModel.displayScreenType.title, uuid)
+                } else {
+                    null
+                }
+            if (result != null) {
+                onNavigateTo(Screens.Display(result.toSerializable()))
+            }
+        },
         addNewCategory = viewModel::addNewCategory,
         toggleFavorite = viewModel::toggleFavorite,
         loadNextPage = viewModel::loadNextItems,
@@ -80,6 +115,7 @@ private fun DisplayWrapper(
     libraryEntryVisibilityClick: (Int) -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
+    resultItemClick: (String) -> Unit,
     addNewCategory: (String) -> Unit,
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
@@ -192,7 +228,7 @@ private fun DisplayWrapper(
                 ResultList(
                     results = displayScreenState.alternativeDisplay,
                     contentPadding = contentPadding,
-                    onClick = {},
+                    onClick = resultItemClick,
                 )
             } else if (displayScreenState.isList) {
                 MangaList(

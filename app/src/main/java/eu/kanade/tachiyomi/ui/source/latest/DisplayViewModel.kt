@@ -32,7 +32,7 @@ import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class DisplayViewModel(displayScreenType: DisplayScreenType) : ViewModel() {
+class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     class Factory(private val serializableDisplayScreenType: SerializableDisplayScreenType) :
         ViewModelProvider.Factory {
