@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
@@ -65,7 +66,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
 
             val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
             val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
-            val hasMargins = mangaViewer == ReadingModeType.VERTICAL.flagValue
+            val hasMargins =
+                ((context as? ReaderActivity)?.viewer as? WebtoonViewer)?.hasMargins ?: false
             cropBordersWebtoon.bindToPreference(
                 if (hasMargins) readerPreferences.cropBorders()
                 else readerPreferences.cropBordersWebtoon()
@@ -90,7 +92,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
     fun updatePrefs() {
         val mangaViewer = activity.viewModel.getMangaReadingMode()
         val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
-        val hasMargins = mangaViewer == ReadingModeType.VERTICAL.flagValue
+        val hasMargins =
+            ((context as? ReaderActivity)?.viewer as? WebtoonViewer)?.hasMargins ?: false
         binding.cropBordersWebtoon.bindToPreference(
             if (hasMargins) readerPreferences.cropBorders()
             else readerPreferences.cropBordersWebtoon()

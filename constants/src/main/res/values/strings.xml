@@ -528,6 +528,7 @@
     <string name="crop_borders">Crop borders</string>
     <string name="crop_borders_paged">Crop borders (Paged)</string>
     <string name="crop_borders_webtoon">Crop borders (Webtoon)</string>
+    <string name="disable_gaps">Disable gaps</string>
     <string name="remove_crop">Remove crop</string>
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="grayscale">Grayscale</string>
@@ -558,8 +559,7 @@
     <string name="default_reading_mode">Default reading mode</string>
     <string name="left_to_right_viewer">Left to right</string>
     <string name="right_to_left_viewer">Right to left</string>
-    <string name="vertical_paged_viewer">Paged vertical</string>
-    <string name="vertical_gaps_viewer">Vertical with gaps</string>
+    <string name="vertical_viewer">Paged vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
     <string name="double_page_gap">Double page gap</string>

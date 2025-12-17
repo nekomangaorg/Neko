@@ -1090,9 +1090,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val newViewer =
             when (mangaViewer) {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
-                ReadingModeType.PAGED_VERTICAL.flagValue -> VerticalPagerViewer(this)
-                ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this, false)
-                ReadingModeType.VERTICAL.flagValue -> WebtoonViewer(this, true)
+                ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
+                ReadingModeType.WEBTOON.flagValue ->
+                    WebtoonViewer(
+                        this,
+                        !(manga.isLongStrip() || readerPreferences.webtoonDisableGaps().get()),
+                    )
                 else -> R2LPagerViewer(this)
             }
 
@@ -1109,11 +1112,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 when (mangaViewer) {
                                     ReadingModeType.RIGHT_TO_LEFT.flagValue ->
                                         R.string.right_to_left_viewer
-                                    ReadingModeType.PAGED_VERTICAL.flagValue ->
-                                        R.string.vertical_paged_viewer
+                                    ReadingModeType.VERTICAL.flagValue -> R.string.vertical_viewer
                                     ReadingModeType.WEBTOON.flagValue -> R.string.webtoon_style
-                                    ReadingModeType.VERTICAL.flagValue ->
-                                        R.string.vertical_gaps_viewer
                                     else -> R.string.left_to_right_viewer
                                 }
                             )
