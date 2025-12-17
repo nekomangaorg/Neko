@@ -5,8 +5,9 @@
         <item>@string/default_value</item>
         <item>@string/left_to_right_viewer</item>
         <item>@string/right_to_left_viewer</item>
-        <item>@string/vertical_viewer</item>
+        <item>@string/vertical_paged_viewer</item>
         <item>@string/webtoon</item>
+        <item>@string/vertical_gaps_viewer</item>
     </string-array>
 
     <string-array name="reader_themes">

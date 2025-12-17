@@ -19,7 +19,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             val readingModeType = ReadingModeType.fromSpinner(position)
             (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
-            when (activity.viewModel.getMangaReadingMode() == ReadingModeType.WEBTOON.flagValue) {
+            when (ReadingModeType.isWebtoonType(activity.viewModel.getMangaReadingMode())) {
                 true -> initWebtoonPreferences()
                 else -> initPagerPreferences()
             }
