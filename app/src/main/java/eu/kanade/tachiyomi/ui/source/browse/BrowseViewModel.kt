@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
@@ -12,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -344,55 +344,29 @@ class BrowseViewModel() : ViewModel() {
             val currentQuery = browseScreenState.value.filters.query.text
 
             when (currentMode) {
-                QueryType.Author,
+                QueryType.Author -> {
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.AuthorByName(UiText.String(currentQuery))
+                        )
+                    )
+                }
                 QueryType.Group -> {
-                    // These modes use special endpoints for text search
-                    if (
-                        currentQuery.isNotBlank() &&
-                            browseScreenState.value.filters.authorId.uuid.isBlank() &&
-                            browseScreenState.value.filters.groupId.uuid.isBlank()
-                    ) {
-                        val result =
-                            if (currentMode == QueryType.Author)
-                                browseRepository.getAuthors(currentQuery)
-                            else browseRepository.getGroups(currentQuery)
-
-                        result
-                            .onFailure { error ->
-                                _browseScreenState.update {
-                                    it.copy(
-                                        error = UiText.String(error.message()),
-                                        initialLoading = false,
-                                    )
-                                }
-                            }
-                            .onSuccess { dr ->
-                                _browseScreenState.update {
-                                    it.copy(
-                                        otherResults = dr.toPersistentList(),
-                                        screenType = BrowseScreenType.Other,
-                                        initialLoading = false,
-                                    )
-                                }
-                            }
-                    } else {
-                        // UUID filter exists, use standard paginator
-                        paginator.loadNextItems()
-                    }
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.GroupByName(UiText.String(currentQuery))
+                        )
+                    )
                 }
                 QueryType.List -> {
-                    // Lists don't paginate the same way
-                    browseRepository
-                        .getList(currentQuery)
-                        .onFailure { error ->
-                            _browseScreenState.update {
-                                it.copy(
-                                    error = UiText.String(error.message()),
-                                    initialLoading = false,
-                                )
-                            }
-                        }
-                        .onSuccess { displayManga -> updateStateWithManga(displayManga, true) }
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.List(
+                                title = UiText.String(""),
+                                listUUID = currentQuery,
+                            )
+                        )
+                    )
                 }
                 else -> {
                     // Standard Title/Tag search
@@ -584,57 +558,6 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launch {
             val resetFilters = createInitialDexFilter("")
             _browseScreenState.update { it.copy(filters = resetFilters) }
-        }
-    }
-
-    fun searchTag(tag: String) {
-        viewModelScope.launch {
-            val blankFilter = createInitialDexFilter("")
-
-            val filters =
-                if (tag.startsWith("Content rating: ")) {
-                    val rating =
-                        MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
-                    blankFilter.copy(
-                        contentRatings =
-                            blankFilter.contentRatings
-                                .map {
-                                    if (it.rating == rating) it.copy(state = true)
-                                    else it.copy(state = false)
-                                }
-                                .toPersistentList()
-                    )
-                } else {
-                    blankFilter.copy(
-                        tags =
-                            blankFilter.tags
-                                .map {
-                                    if (it.tag.prettyPrint.equals(tag, true))
-                                        it.copy(state = ToggleableState.On)
-                                    else it
-                                }
-                                .toPersistentList()
-                    )
-                }
-            _browseScreenState.update { it.copy(filters = filters) }
-            getSearchPage()
-        }
-    }
-
-    fun searchCreator(creator: String) {
-        viewModelScope.launch {
-            val blankFilter = createInitialDexFilter("")
-            _browseScreenState.update {
-                it.copy(
-                    filters =
-                        blankFilter.copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(creator, QueryType.Author),
-                        )
-                )
-            }
-
-            getSearchPage()
         }
     }
 

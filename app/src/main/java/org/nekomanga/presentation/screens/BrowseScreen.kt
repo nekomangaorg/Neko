@@ -37,12 +37,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
+import eu.kanade.tachiyomi.ui.source.browse.NavigationEvent
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -91,6 +94,17 @@ fun BrowseScreen(
         deepLinkManga?.let { mangaId ->
             browseViewModel.onDeepLinkMangaHandled()
             onNavigateTo(Screens.Manga(mangaId))
+        }
+    }
+
+    LaunchedEffect(browseViewModel.navigateEvent, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            browseViewModel.navigateEvent.collect { event ->
+                if (event is NavigationEvent.NavigateToDisplay) {
+                    val serializableDisplayScreenType = event.displayScreenType.toSerializable()
+                    onNavigateTo(Screens.Display(serializableDisplayScreenType))
+                }
+            }
         }
     }
 
