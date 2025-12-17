@@ -121,7 +121,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
         config.imagePropertyChangedListener = { refreshAdapter() }
 
-        config.reloadViewerListener = { activity.viewModel.reloadWebtoonViewer() }
+        config.reloadViewerListener = { activity.viewModel.reloadViewer() }
 
         config.zoomPropertyChangedListener = { frame.enableZoomOut = it }
 

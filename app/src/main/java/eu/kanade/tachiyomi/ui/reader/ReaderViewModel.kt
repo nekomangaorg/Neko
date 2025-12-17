@@ -777,7 +777,7 @@ constructor(
         }
     }
 
-    fun reloadWebtoonViewer() {
+    fun reloadViewer() {
         runBlocking(Dispatchers.IO) { eventChannel.send(Event.ReloadMangaAndChapters) }
     }
 

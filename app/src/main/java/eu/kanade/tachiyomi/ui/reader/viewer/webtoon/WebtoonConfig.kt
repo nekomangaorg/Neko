@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.core.preferences.PreferenceValues
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -82,10 +81,7 @@ class WebtoonConfig(
             .webtoonDisableGaps()
             .changes()
             .drop(1)
-            .onEach {
-                TimberKt.d { "changed to $it" }
-                reloadViewerListener?.invoke()
-            }
+            .onEach { reloadViewerListener?.invoke() }
             .launchIn(scope)
 
         readerPreferences
