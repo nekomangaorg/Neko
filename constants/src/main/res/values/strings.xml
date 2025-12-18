@@ -528,6 +528,7 @@
     <string name="crop_borders">Crop borders</string>
     <string name="crop_borders_paged">Crop borders (Paged)</string>
     <string name="crop_borders_webtoon">Crop borders (Webtoon)</string>
+    <string name="disable_gaps">Disable gaps</string>
     <string name="remove_crop">Remove crop</string>
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="grayscale">Grayscale</string>

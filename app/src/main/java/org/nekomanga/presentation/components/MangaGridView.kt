@@ -145,48 +145,52 @@ fun MangaGridItem(
     onLongClick: () -> Unit = {},
 ) {
     Box(modifier = modifier) {
-        Box(
-            modifier =
-                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-                    .padding(Size.extraTiny)
-        ) {
-            val subtitleText =
-                when (displayManga.displayTextRes) {
-                    null -> displayManga.displayText
-                    else -> stringResource(displayManga.displayTextRes)
-                }
+        Box(modifier = Modifier.padding(start = 2.dp, top = 2.dp)) {
+            Box(
+                modifier =
+                    Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                        .padding(Size.extraTiny)
+            ) {
+                val subtitleText =
+                    when (displayManga.displayTextRes) {
+                        null -> displayManga.displayText
+                        else -> stringResource(displayManga.displayTextRes)
+                    }
 
-            if (isComfortable) {
-                Column {
-                    ComfortableGridItem(
-                        manga = displayManga,
-                        subtitleText = subtitleText,
-                        shouldOutlineCover = shouldOutlineCover,
+                if (isComfortable) {
+                    Column {
+                        ComfortableGridItem(
+                            manga = displayManga,
+                            subtitleText = subtitleText,
+                            shouldOutlineCover = shouldOutlineCover,
+                        )
+                    }
+                } else {
+                    Box { CompactGridItem(displayManga, subtitleText, shouldOutlineCover) }
+                }
+                if (showStartReadingButton) {
+                    StartReadingButton(
+                        modifier = Modifier.align(Alignment.TopEnd),
+                        onStartReadingClick = onStartReadingClick,
                     )
                 }
-            } else {
-                Box { CompactGridItem(displayManga, subtitleText, shouldOutlineCover) }
             }
-            if (showStartReadingButton) {
-                StartReadingButton(
-                    modifier = Modifier.align(Alignment.TopEnd),
-                    onStartReadingClick = onStartReadingClick,
+
+            if (isSelected) {
+                Box(
+                    modifier =
+                        Modifier.matchParentSize()
+                            .clip(RoundedCornerShape(Shapes.coverRadius))
+                            .background(
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                            )
                 )
             }
         }
 
-        if (isSelected) {
-            Box(
-                modifier =
-                    Modifier.matchParentSize()
-                        .clip(RoundedCornerShape(Shapes.coverRadius))
-                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f))
-            )
-        }
-
         if (displayManga.inLibrary) {
-            InLibraryBadge(shouldOutlineCover)
+            InLibraryBadge(shouldOutlineCover, offset = 0.dp)
         }
         if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
             DownloadUnreadBadge(
@@ -195,6 +199,7 @@ fun MangaGridItem(
                 unreadCount = unreadCount,
                 showDownloads = showDownloadBadge,
                 downloadCount = downloadCount,
+                offset = 0.dp,
             )
         }
     }

@@ -27,7 +27,7 @@ import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
 /** Implementation of a [BaseViewer] to display pages with a [RecyclerView]. */
-class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = false) : BaseViewer {
+class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = false) : BaseViewer {
 
     val downloadManager: DownloadManager by injectLazy()
 
@@ -35,6 +35,9 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
     /** Recycler view used by this viewer. */
     val recycler = WebtoonRecyclerView(activity)
+
+    val hasMargins: Boolean
+        get() = noWebtoonTag && !config.disableGaps
 
     /** Frame containing the recycler view. */
     private val frame = WebtoonFrame(activity)
@@ -117,6 +120,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
 
         config.imagePropertyChangedListener = { refreshAdapter() }
+
+        config.reloadViewerListener = { activity.viewModel.reloadViewer() }
 
         config.zoomPropertyChangedListener = { frame.enableZoomOut = it }
 

@@ -410,6 +410,10 @@ internal class ReaderSettingsScreen(
                         pref = readerPreferences.cropBordersWebtoon(),
                         title = stringResource(R.string.crop_borders),
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = readerPreferences.webtoonDisableGaps(),
+                        title = stringResource(R.string.disable_gaps),
+                    ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.webtoonSidePadding(),
                         title = stringResource(R.string.pref_webtoon_side_padding),
@@ -642,6 +646,10 @@ internal class ReaderSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.crop_borders),
+                    group = stringResource(R.string.webtoon),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.disable_gaps),
                     group = stringResource(R.string.webtoon),
                 ),
                 SearchTerm(
