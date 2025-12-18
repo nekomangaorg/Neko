@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -76,6 +77,16 @@ fun MainScreen(
     // The new fade-only animation for top-level screens
     val fadeTransition =
         fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val goBack = {
+        if (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        } else {
+            onBackPressedDispatcher?.onBackPressed()
+        }
+        Unit
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         NavDisplay(
@@ -197,7 +208,7 @@ fun MainScreen(
                         MangaScreen(
                             mangaViewModel = mangaViewModel,
                             windowSizeClass = windowSizeClass,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                             onNavigate = { screen -> backStack.add(screen) },
                             onSearchLibrary = { tag ->
                                 backStack.clear()
@@ -213,7 +224,7 @@ fun MainScreen(
                         WebViewScreen(
                             title = screen.title,
                             url = screen.url,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                         )
                     }
 
@@ -223,7 +234,7 @@ fun MainScreen(
 
                         DisplayScreen(
                             viewModel = displayViewModel,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                             onNavigateTo = { screen -> backStack.add(screen) },
                         )
                     }
@@ -234,7 +245,7 @@ fun MainScreen(
 
                         SimilarScreen(
                             viewModel = similarViewModel,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                             onNavigateTo = { screen -> backStack.add(screen) },
                         )
                     }
@@ -242,7 +253,7 @@ fun MainScreen(
                     entry<Screens.Settings.Main> { screen ->
                         SettingsScreen(
                             windowSizeClass = windowSizeClass,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                             deepLink = screen.deepLink,
                         )
                     }
@@ -252,7 +263,7 @@ fun MainScreen(
                         StatsScreen(
                             statsViewModel = statsViewModel,
                             windowSizeClass = windowSizeClass,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                         )
                     }
 
@@ -261,14 +272,12 @@ fun MainScreen(
                         AboutScreen(
                             aboutViewModel = aboutView,
                             windowSizeClass = windowSizeClass,
-                            onBackPressed = { backStack.removeLastOrNull() },
+                            onBackPressed = goBack,
                             onNavigateTo = { backStack.add(Screens.License) },
                         )
                     }
 
-                    entry<Screens.License> {
-                        LicenseScreen(onBackPressed = { backStack.removeLastOrNull() })
-                    }
+                    entry<Screens.License> { LicenseScreen(onBackPressed = goBack) }
                 },
         )
     }
