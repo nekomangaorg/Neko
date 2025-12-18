@@ -186,8 +186,6 @@ fun syncChaptersWithSource(
     if (errorFromMerged)
         allChapters += dbChapters.filter { it.isMergedChapter() && it.url !in sourceChaptersByUrl }
     val sortedChapters = reorderChapters(allChapters)
-    // We partition here because only the smart order is being updated when there is a merged source
-    // error
     val (mergeErrorDbChapters, finalChapters) =
         sortedChapters
             .mapIndexed { i, chapter ->
@@ -204,8 +202,8 @@ fun syncChaptersWithSource(
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
 
-    // Chapters whose metadata have changed. This includes the smart order changes when there is a
-    // merged source error.
+    // Chapters whose metadata have changed.
+    // This includes the smart order changes when there is a merged source error.
     val toChange =
         mergeErrorDbChapters
             .map { chapter ->
