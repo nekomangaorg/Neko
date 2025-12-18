@@ -82,6 +82,7 @@ fun MainScreen(
         } else {
             onBackPressedDispatcher?.onBackPressed()
         }
+        Unit
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
