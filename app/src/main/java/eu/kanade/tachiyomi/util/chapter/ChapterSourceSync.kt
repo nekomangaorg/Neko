@@ -177,28 +177,43 @@ fun syncChaptersWithSource(
             }
         }
 
-    val sortedChapters = reorderChapters(sourceChapters)
-    val finalChapters =
-        sortedChapters.mapIndexed { i, chapter ->
-            Chapter.create().apply {
-                copyFrom(chapter)
-                TimberKt.d {
-                    "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${this.source_order} smartOrder=${i}"
-                }
-                smart_order = i
-            }
-        }
-
     dbChapters = db.getChapters(manga).executeAsBlocking()
-
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
     val sourceChaptersByUrl = sourceChapters.associateBy { it.url }
+
+    // If merged source had an error, we need to get them from the db so the smart order is kept
+    val allChapters = sourceChapters.toMutableList()
+    if (errorFromMerged)
+        allChapters += dbChapters.filter { it.isMergedChapter() && it.url !in sourceChaptersByUrl }
+    val sortedChapters = reorderChapters(allChapters)
+    // We partition here because only the smart order is being updated when there is a merged source
+    // error
+    val (mergeErrorDbChapters, finalChapters) =
+        sortedChapters
+            .mapIndexed { i, chapter ->
+                Chapter.create().apply {
+                    copyFrom(chapter)
+                    TimberKt.d {
+                        "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${this.source_order} smartOrder=${i}"
+                    }
+                    smart_order = i
+                }
+            }
+            .partition { errorFromMerged && it.isMergedChapter() && it.url !in sourceChaptersByUrl }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
 
-    // Chapters whose metadata have changed.
-    val toChange = mutableListOf<Chapter>()
+    // Chapters whose metadata have changed. This includes the smart order changes when there is a
+    // merged source error.
+    val toChange =
+        mergeErrorDbChapters
+            .map { chapter ->
+                val dbChapter = dbChaptersByUrl[chapter.url]!!
+                dbChapter.smart_order = chapter.smart_order
+                dbChapter
+            }
+            .toMutableList()
 
     // Read chapters to push to  remote hosted source.
     val toSync = mutableListOf<Chapter>()
