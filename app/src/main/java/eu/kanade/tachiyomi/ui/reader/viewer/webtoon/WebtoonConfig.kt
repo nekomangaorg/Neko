@@ -31,6 +31,8 @@ class WebtoonConfig(
     var webtoonCropBorders = false
         private set
 
+    var disableGaps = readerPreferences.webtoonDisableGaps().get()
+
     var verticalCropBorders = true
         private set
 
@@ -74,6 +76,13 @@ class WebtoonConfig(
         readerPreferences
             .cropBorders()
             .register({ verticalCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        readerPreferences
+            .webtoonDisableGaps()
+            .changes()
+            .drop(1)
+            .onEach { reloadViewerListener?.invoke() }
+            .launchIn(scope)
 
         readerPreferences
             .webtoonSidePadding()

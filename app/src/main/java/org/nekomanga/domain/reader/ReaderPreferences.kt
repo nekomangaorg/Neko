@@ -119,6 +119,8 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
             PreferenceValues.ReaderHideThreshold.LOW,
         )
 
+    fun webtoonDisableGaps() = this.preferenceStore.getBoolean("webtoon_disable_gaps")
+
     fun webtoonInvertDoublePages() = this.preferenceStore.getBoolean("webtoon_invert_double_pages")
 
     fun readerBottomButtons() =
