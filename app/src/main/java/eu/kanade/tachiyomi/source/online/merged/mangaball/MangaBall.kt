@@ -93,20 +93,22 @@ class MangaBall : ReducedHttpSource() {
                 }
                 .build()
 
+        /* val response =
+        client.newCall(POST("$baseUrl/api/v1/title/search-advanced/", headers, body)).await()*/
         val response =
-            client.newCall(POST("$baseUrl/api/v1/title/search-advanced/", headers, body)).await()
+            client.newCall(POST("$baseUrl/api/v1/smart-search/search", headers, body)).await()
         return parseSearchManga(response)
     }
 
     private fun parseSearchManga(response: Response): List<SManga> {
-        val data = with(json) { response.parseAs<SearchResponse>() }
+        val search = with(json) { response.parseAs<SearchResponse>() }
 
         val mangaList =
-            data.data.map {
+            search.data.manga.map {
                 SManga.create().apply {
-                    url = it.url.toHttpUrl().pathSegments[1]
-                    title = it.name
-                    thumbnail_url = it.cover
+                    url = (baseUrl + it.url).toHttpUrl().pathSegments[1]
+                    title = it.title
+                    thumbnail_url = it.img
                 }
             }
         return mangaList

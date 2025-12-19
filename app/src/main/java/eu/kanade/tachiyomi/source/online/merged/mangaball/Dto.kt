@@ -3,19 +3,11 @@ package eu.kanade.tachiyomi.source.online.merged.mangaball
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-class SearchResponse(val data: List<SearchManga>, private val pagination: Pagination) {
-    @Serializable
-    class Pagination(
-        @SerialName("current_page") val currentPage: Int,
-        @SerialName("last_page") val lastPage: Int,
-    )
+@Serializable class SearchResponse(val data: SearchData)
 
-    fun hasNextPage() = pagination.currentPage < pagination.lastPage
-}
+@Serializable class SearchData(val manga: List<SearchManga> = emptyList())
 
-@Serializable
-class SearchManga(val url: String, val name: String, val cover: String, val isAdult: Boolean)
+@Serializable class SearchManga(val url: String, val title: String, val img: String)
 
 @Serializable
 class ChapterListResponse(@SerialName("ALL_CHAPTERS") val chapters: List<ChapterContainer>)
