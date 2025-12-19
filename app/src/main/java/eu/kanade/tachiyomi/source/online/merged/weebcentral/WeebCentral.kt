@@ -91,19 +91,13 @@ class WeebCentral : ReducedHttpSource() {
     private fun parseSearchManga(response: Response): List<SManga> {
         val document = response.asJsoup()
         response.closeQuietly()
-        return document.select("div").mapNotNull { element ->
-            if (element.select("a").first() == null) {
-                null
-            } else {
-                MangaImpl().apply {
-                    element.select("a").first()?.let { link ->
-                        title = link.text()
-                        setUrlWithoutDomain(link.attr("abs:href"))
-                    }
-                    element.select("picture source").first()?.let { picture ->
-                        thumbnail_url = picture.attr("srcset")
-                    }
-                }
+        return document.select("a.btn.join-item").mapNotNull { link ->
+            MangaImpl().apply {
+                title = link.select("div.flex-1").text()
+                setUrlWithoutDomain(link.attr("abs:href"))
+
+                val source = link.selectFirst("picture source")
+                thumbnail_url = source?.attr("srcset") ?: link.select("img").attr("src")
             }
         }
     }
