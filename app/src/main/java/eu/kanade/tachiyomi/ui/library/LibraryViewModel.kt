@@ -976,10 +976,16 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchNonCancellable {
             val currentSelected = libraryScreenState.value.selectedItems.toList()
             clearSelectedManga()
-            currentSelected.mapAsync { libraryMangaItem ->
-                val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
-                dbManga.favorite = false
-                db.insertManga(dbManga).executeOnIO()
+            val dbMangas =
+                currentSelected.mapAsync { libraryMangaItem ->
+                    val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
+                    dbManga.favorite = false
+                    dbManga
+                }
+
+            db.insertMangaList(dbMangas).executeOnIO()
+
+            dbMangas.forEach { dbManga ->
                 coverCache.deleteFromCache(dbManga)
                 downloadManager.deleteManga(dbManga)
             }
