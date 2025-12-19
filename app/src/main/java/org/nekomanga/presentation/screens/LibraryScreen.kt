@@ -43,8 +43,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.toLibraryManga
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -69,7 +67,7 @@ fun LibraryScreen(
     mainDropdown: AppBar.MainDropdown,
     mainDropdownShowing: Boolean,
     openManga: (Long) -> Unit,
-    onSearchMangaDex: (SearchBrowse) -> Unit,
+    onSearchMangaDex: (String) -> Unit,
     windowSizeClass: WindowSizeClass,
     navigationRail: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit,
@@ -375,15 +373,13 @@ private fun LibraryWrapper(
 private fun GlobalSearchRow(
     query: String,
     paddingValues: PaddingValues,
-    onSearchMangaDex: (SearchBrowse) -> Unit,
+    onSearchMangaDex: (String) -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxWidth().padding(paddingValues).padding(Size.small),
         contentAlignment = Alignment.Center,
     ) {
-        ElevatedButton(
-            onClick = { onSearchMangaDex(SearchBrowse(query = query, type = SearchType.Title)) }
-        ) {
+        ElevatedButton(onClick = { onSearchMangaDex(query) }) {
             Text(text = stringResource(R.string.search_globally) + ": " + query)
         }
     }

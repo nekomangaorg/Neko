@@ -32,18 +32,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
+import eu.kanade.tachiyomi.ui.source.browse.NavigationEvent
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -59,7 +61,6 @@ import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
-import org.nekomanga.presentation.screens.browse.BrowseOtherPage
 import org.nekomanga.presentation.screens.browse.BrowseScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
@@ -75,7 +76,7 @@ fun BrowseScreen(
 ) {
     val deepLinkManga by browseViewModel.deepLinkMangaFlow.collectAsState()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val currentUpdateMangaForChanges by rememberUpdatedState(browseViewModel::updateMangaForChanges)
 
     DisposableEffect(lifecycleOwner) {
@@ -92,6 +93,17 @@ fun BrowseScreen(
         deepLinkManga?.let { mangaId ->
             browseViewModel.onDeepLinkMangaHandled()
             onNavigateTo(Screens.Manga(mangaId))
+        }
+    }
+
+    LaunchedEffect(browseViewModel.navigateEvent, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            browseViewModel.navigateEvent.collect { event ->
+                if (event is NavigationEvent.NavigateToDisplay) {
+                    val serializableDisplayScreenType = event.displayScreenType.toSerializable()
+                    onNavigateTo(Screens.Display(serializableDisplayScreenType))
+                }
+            }
         }
     }
 
@@ -292,14 +304,6 @@ private fun BrowseWrapper(
                                 contentPadding = recyclerContentPadding,
                                 onClick = openManga,
                                 onLongClick = ::mangaLongClick,
-                            )
-                        }
-
-                        BrowseScreenType.Other -> {
-                            BrowseOtherPage(
-                                results = browseScreenState.otherResults,
-                                contentPadding = recyclerContentPadding,
-                                onClick = otherClick,
                             )
                         }
 

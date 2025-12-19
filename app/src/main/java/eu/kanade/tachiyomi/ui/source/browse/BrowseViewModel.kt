@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
@@ -12,9 +11,9 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
-import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.unique
@@ -25,15 +24,16 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -46,7 +46,6 @@ import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
-import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -80,54 +79,14 @@ class BrowseViewModel() : ViewModel() {
     private val _deepLinkManga = MutableStateFlow<Long?>(null)
     val deepLinkMangaFlow = _deepLinkManga.asStateFlow()
 
-    fun deepLinkQuery(searchBrowse: SearchBrowse) {
+    private val _navigateEvent = Channel<NavigationEvent>()
+    val navigateEvent = _navigateEvent.receiveAsFlow()
+
+    fun initSearch(titleQuery: String) {
         if (_browseScreenState.value.deepLinkHandled) return
-        _browseScreenState.update { it.copy(deepLinkHandled = true) }
-
-        TimberKt.tag("DeepLink").d("Creating filter for ${searchBrowse.query}")
-        val filters =
-            when (searchBrowse.type) {
-                SearchType.Tag -> {
-                    val blankFilter = createInitialDexFilter("")
-                    if (searchBrowse.query.startsWith("Content rating: ")) {
-                        val rating =
-                            MangaContentRating.getContentRating(
-                                searchBrowse.query.substringAfter("Content rating: ")
-                            )
-                        blankFilter.copy(
-                            contentRatings =
-                                blankFilter.contentRatings
-                                    .map {
-                                        if (it.rating == rating) it.copy(state = true)
-                                        else it.copy(state = false)
-                                    }
-                                    .toPersistentList()
-                        )
-                    } else {
-                        blankFilter.copy(
-                            tags =
-                                blankFilter.tags
-                                    .map {
-                                        if (it.tag.prettyPrint.equals(searchBrowse.query, true))
-                                            it.copy(state = ToggleableState.On)
-                                        else it
-                                    }
-                                    .toPersistentList()
-                        )
-                    }
-                }
-
-                SearchType.Title -> createInitialDexFilter(searchBrowse.query)
-                SearchType.Creator ->
-                    createInitialDexFilter("")
-                        .copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(searchBrowse.query, QueryType.Author),
-                        )
-            }
-
-        _browseScreenState.update { it.copy(filters = filters) }
-
+        _browseScreenState.update {
+            it.copy(deepLinkHandled = true, filters = createInitialDexFilter(titleQuery))
+        }
         getSearchPage()
     }
 
@@ -243,6 +202,12 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launch {
             securityPreferences.incognitoMode().changes().collectLatest {
                 _browseScreenState.update { state -> state.copy(incognitoMode = it) }
+            }
+        }
+
+        viewModelScope.launch {
+            browseRepository.loginHelper.isLoggedInFlow().collectLatest {
+                _browseScreenState.update { state -> state.copy(isLoggedIn = it) }
             }
         }
 
@@ -364,233 +329,59 @@ class BrowseViewModel() : ViewModel() {
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(
+                    initialLoading = true,
+                    error = null,
+                    page = 1,
+                    pageLoading = false,
+                    screenType = BrowseScreenType.Filter,
+                    displayMangaHolder =
+                        DisplayMangaHolder(
+                            resultType = BrowseScreenType.Filter,
+                            allDisplayManga = persistentListOf(),
+                            filteredDisplayManga = persistentListOf(),
+                        ),
+                )
             }
 
+            // If no new search is provided, we use the existing filters in state
+            val currentMode = browseScreenState.value.filters.queryMode
             val currentQuery = browseScreenState.value.filters.query.text
-            val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
-            val uuid = DeepLinkType.removePrefix(currentQuery, deepLinkType)
 
-            TimberKt.tag("DeepLink").d("DeepLinkType: $deepLinkType")
-
-            if (deepLinkType != DeepLinkType.None) {
-                _browseScreenState.update { it.copy(filters = createInitialDexFilter("")) }
-            }
-
-            when (deepLinkType) {
-                DeepLinkType.None -> {
-                    _browseScreenState.update {
-                        it.copy(
-                            pageLoading = false,
-                            initialLoading = true,
-                            screenType = BrowseScreenType.Filter,
-                            displayMangaHolder =
-                                DisplayMangaHolder(
-                                    resultType = BrowseScreenType.Filter,
-                                    allDisplayManga = persistentListOf(),
-                                    filteredDisplayManga = persistentListOf(),
-                                ),
+            when (currentMode) {
+                QueryType.Author -> {
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.AuthorByName(UiText.String(currentQuery))
                         )
-                    }
-
-                    when (val queryMode = browseScreenState.value.filters.queryMode) {
-                        QueryType.Author,
-                        QueryType.Group -> {
-                            when (queryMode) {
-                                    QueryType.Author -> browseRepository.getAuthors(currentQuery)
-                                    else -> browseRepository.getGroups(currentQuery)
-                                }
-                                .onFailure {
-                                    _browseScreenState.update { state ->
-                                        state.copy(
-                                            error = UiText.String(it.message()),
-                                            initialLoading = false,
-                                        )
-                                    }
-                                }
-                                .onSuccess { dr ->
-                                    _browseScreenState.update {
-                                        it.copy(
-                                            otherResults = dr.toPersistentList(),
-                                            screenType = BrowseScreenType.Other,
-                                            initialLoading = false,
-                                        )
-                                    }
-                                }
-                        }
-                        QueryType.List -> {
-                            if (!currentQuery.isUUID()) {
-                                _browseScreenState.update { state ->
-                                    state.copy(
-                                        error = UiText.String("Invalid List UUID"),
-                                        initialLoading = false,
-                                    )
-                                }
-                            } else {
-                                browseRepository
-                                    .getList(uuid)
-                                    .onFailure {
-                                        _browseScreenState.update { state ->
-                                            state.copy(
-                                                error = UiText.String(it.message()),
-                                                initialLoading = false,
-                                            )
-                                        }
-                                    }
-                                    .onSuccess { allDisplayManga ->
-                                        _browseScreenState.update { state ->
-                                            state.copy(
-                                                screenType = BrowseScreenType.Filter,
-                                                displayMangaHolder =
-                                                    DisplayMangaHolder(
-                                                        BrowseScreenType.Filter,
-                                                        allDisplayManga
-                                                            .distinctBy { it.url }
-                                                            .toPersistentList(),
-                                                        allDisplayManga
-                                                            .distinctBy { it.url }
-                                                            .filterVisibility(preferences)
-                                                            .toPersistentList(),
-                                                    ),
-                                                initialLoading = false,
-                                                pageLoading = false,
-                                                endReached = true,
-                                            )
-                                        }
-                                    }
-                            }
-                        }
-                        else -> {
-                            if (
-                                _browseScreenState.value.filters.authorId.isNotBlankAndInvalidUUID()
-                            ) {
-                                _browseScreenState.update { state ->
-                                    state.copy(
-                                        error = UiText.String("Invalid Author UUID"),
-                                        initialLoading = false,
-                                    )
-                                }
-                            } else if (
-                                _browseScreenState.value.filters.groupId.isNotBlankAndInvalidUUID()
-                            ) {
-                                _browseScreenState.update { state ->
-                                    state.copy(
-                                        error = UiText.String("Invalid Group UUID"),
-                                        initialLoading = false,
-                                    )
-                                }
-                            } else {
-                                paginator.loadNextItems()
-                            }
-                        }
-                    }
+                    )
                 }
-                DeepLinkType.Error -> {
-                    _browseScreenState.update {
-                        it.copy(
-                            title = UiText.String(""),
-                            initialLoading = false,
-                            error = UiText.String(uuid),
+                QueryType.Group -> {
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.GroupByName(UiText.String(currentQuery))
                         )
-                    }
+                    )
                 }
-                DeepLinkType.Manga -> {
-                    browseRepository
-                        .getDeepLinkManga(uuid)
-                        .onFailure {
-                            _browseScreenState.update { state ->
-                                state.copy(
-                                    error = UiText.String(it.message()),
-                                    initialLoading = false,
-                                )
-                            }
-                        }
-                        .onSuccess { displayManga -> _deepLinkManga.value = displayManga.mangaId }
-                }
-                DeepLinkType.List -> {
-                    _browseScreenState.update {
-                        it.copy(title = UiText.StringResource(R.string.list))
-                    }
-                    val searchFilters =
-                        createInitialDexFilter("")
-                            .copy(
-                                queryMode = QueryType.List,
-                                query = Filter.Query(text = uuid, type = QueryType.List),
+                QueryType.List -> {
+                    _navigateEvent.send(
+                        NavigationEvent.NavigateToDisplay(
+                            DisplayScreenType.List(
+                                title = UiText.String(""),
+                                listUUID = currentQuery,
                             )
-                    _browseScreenState.update { it.copy(filters = searchFilters) }
-
-                    browseRepository
-                        .getList(uuid)
-                        .onFailure {
-                            _browseScreenState.update { state ->
-                                state.copy(
-                                    error = UiText.String(it.message()),
-                                    initialLoading = false,
-                                )
-                            }
-                        }
-                        .onSuccess { allDisplayManga ->
-                            _browseScreenState.update { state ->
-                                state.copy(
-                                    screenType = BrowseScreenType.Filter,
-                                    displayMangaHolder =
-                                        DisplayMangaHolder(
-                                            BrowseScreenType.Filter,
-                                            allDisplayManga.toPersistentList(),
-                                            allDisplayManga
-                                                .filterVisibility(preferences)
-                                                .toPersistentList(),
-                                        ),
-                                    initialLoading = false,
-                                    pageLoading = false,
-                                    endReached = true,
-                                )
-                            }
-                        }
+                        )
+                    )
                 }
-                DeepLinkType.Author -> {
-                    _browseScreenState.update {
-                        it.copy(title = UiText.StringResource(R.string.author))
-                    }
-                    val searchFilters =
-                        createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid = uuid))
-                    _browseScreenState.update { it.copy(filters = searchFilters) }
-
-                    paginator.loadNextItems()
-                }
-                DeepLinkType.Group -> {
-                    _browseScreenState.update {
-                        it.copy(title = UiText.StringResource(R.string.scanlator_group))
-                    }
-                    val searchFilters =
-                        createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid = uuid))
-                    _browseScreenState.update { it.copy(filters = searchFilters) }
-
+                else -> {
+                    // Standard Title/Tag search
                     paginator.loadNextItems()
                 }
             }
         }
     }
 
-    fun otherClick(uuid: String) {
-        viewModelScope.launch {
-            if (browseScreenState.value.filters.queryMode == QueryType.Author) {
-                _browseScreenState.update {
-                    it.copy(
-                        filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid))
-                    )
-                }
-                getSearchPage()
-            } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
-                _browseScreenState.update {
-                    it.copy(
-                        filters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid))
-                    )
-                }
-                getSearchPage()
-            }
-        }
-    }
+    fun otherClick(uuid: String) {}
 
     fun onDeepLinkMangaHandled() {
         _deepLinkManga.value = null
@@ -752,57 +543,6 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launch {
             val resetFilters = createInitialDexFilter("")
             _browseScreenState.update { it.copy(filters = resetFilters) }
-        }
-    }
-
-    fun searchTag(tag: String) {
-        viewModelScope.launch {
-            val blankFilter = createInitialDexFilter("")
-
-            val filters =
-                if (tag.startsWith("Content rating: ")) {
-                    val rating =
-                        MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
-                    blankFilter.copy(
-                        contentRatings =
-                            blankFilter.contentRatings
-                                .map {
-                                    if (it.rating == rating) it.copy(state = true)
-                                    else it.copy(state = false)
-                                }
-                                .toPersistentList()
-                    )
-                } else {
-                    blankFilter.copy(
-                        tags =
-                            blankFilter.tags
-                                .map {
-                                    if (it.tag.prettyPrint.equals(tag, true))
-                                        it.copy(state = ToggleableState.On)
-                                    else it
-                                }
-                                .toPersistentList()
-                    )
-                }
-            _browseScreenState.update { it.copy(filters = filters) }
-            getSearchPage()
-        }
-    }
-
-    fun searchCreator(creator: String) {
-        viewModelScope.launch {
-            val blankFilter = createInitialDexFilter("")
-            _browseScreenState.update {
-                it.copy(
-                    filters =
-                        blankFilter.copy(
-                            queryMode = QueryType.Author,
-                            query = Filter.Query(creator, QueryType.Author),
-                        )
-                )
-            }
-
-            getSearchPage()
         }
     }
 

@@ -60,6 +60,9 @@ data class RelationshipDto(
 )
 
 @Serializable
+data class MangaRelationshipDto(val id: String, val attributes: MangaAttributesDto? = null)
+
+@Serializable
 data class IncludesAttributesDto(
     val name: String? = null,
     val username: String? = null,
@@ -72,13 +75,20 @@ data class IncludesAttributesDto(
 @Serializable
 data class AuthorListDto(
     val result: String,
-    val data: List<AuthorDto>,
+    val data: List<AuthorDataDto>,
     val limit: Int,
     val offset: Int,
     val total: Int,
 )
 
-@Serializable data class AuthorDto(val id: String, val attributes: AuthorAttributesDto)
+@Serializable data class AuthorDto(val result: String, val data: AuthorDataDto)
+
+@Serializable
+data class AuthorDataDto(
+    val id: String,
+    val attributes: AuthorAttributesDto,
+    val relationships: List<MangaRelationshipDto>? = null,
+)
 
 @Serializable data class AuthorAttributesDto(val name: String, val biography: JsonElement)
 

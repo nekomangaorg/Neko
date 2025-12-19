@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.source.online.models.dto.AuthorDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -108,6 +109,16 @@ interface MangaDexService {
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdConstants.Api.group)
+    suspend fun scanlatorGroupByUuid(
+        @Query("ids[]") scanlatorUuid: String
+    ): ApiResponse<GroupListDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdConstants.Api.author}/{id}?includes[]=manga")
+    suspend fun authorByUuid(@Path("id") authorUuid: String): ApiResponse<AuthorDto>
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>

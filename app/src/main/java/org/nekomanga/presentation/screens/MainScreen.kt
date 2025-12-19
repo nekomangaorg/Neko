@@ -34,7 +34,10 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
+import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import org.nekomanga.presentation.components.AppBar
+import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
+import org.nekomanga.presentation.screens.deepLink.DeepLinkViewModel
 
 @Composable
 fun MainScreen(
@@ -126,8 +129,21 @@ fun MainScreen(
             },
             entryProvider =
                 entryProvider {
-                    entry<Screens.Loading> { LoadingScreen() }
-
+                    entry<Screens.Loading> { LoadingScreen(it.showLoadingIndicator) }
+                    entry<Screens.DeepLink> {
+                        val deepLinkViewModel: DeepLinkViewModel = viewModel()
+                        DeepLinkScreen(
+                            onNavigate = { screens ->
+                                backStack.clear()
+                                backStack.add(screens.last())
+                                backStack.addAll(0, screens.dropLast(1))
+                            },
+                            host = it.host,
+                            path = it.path,
+                            id = it.id,
+                            deepLinkViewModel = deepLinkViewModel,
+                        )
+                    }
                     entry<Screens.Onboarding> {
                         OnboardingScreen(
                             finishedOnBoarding = {
@@ -159,7 +175,6 @@ fun MainScreen(
                     }
                     entry<Screens.Feed> {
                         val feedViewModel: FeedViewModel = viewModel()
-
                         FeedScreen(
                             feedViewModel = feedViewModel,
                             mainDropdown = mainDropDown,
@@ -172,8 +187,8 @@ fun MainScreen(
                     }
                     entry<Screens.Browse> { screen ->
                         val browseViewModel: BrowseViewModel = viewModel()
-                        if (screen.searchBrowse != null) {
-                            browseViewModel.deepLinkQuery(screen.searchBrowse)
+                        if (screen.title != null) {
+                            browseViewModel.initSearch(screen.title)
                         }
                         BrowseScreen(
                             browseViewModel = browseViewModel,
@@ -199,9 +214,8 @@ fun MainScreen(
                                 backStack.clear()
                                 backStack.add(Screens.Library(initialSearch = tag))
                             },
-                            onSearchMangaDex = { searchBrowse ->
-                                backStack.clear()
-                                backStack.add(Screens.Browse(searchBrowse = searchBrowse))
+                            onSearchMangaDex = { displayType ->
+                                backStack.add(Screens.Display(displayType.toSerializable()))
                             },
                         )
                     }

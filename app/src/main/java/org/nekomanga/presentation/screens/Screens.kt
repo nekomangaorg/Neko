@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens
 
 import androidx.navigation3.runtime.NavKey
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import kotlinx.serialization.Serializable
 
@@ -13,7 +12,7 @@ object Screens {
 
     @Serializable data object Feed : NavKey
 
-    @Serializable data object Loading : NavKey
+    @Serializable data class Loading(val showLoadingIndicator: Boolean) : NavKey
 
     @Serializable data object Stats : NavKey
 
@@ -23,13 +22,15 @@ object Screens {
 
     @Serializable data class WebView(val title: String, val url: String) : NavKey
 
-    @Serializable data class Browse(val searchBrowse: SearchBrowse? = null) : NavKey
+    @Serializable data class Browse(val title: String? = null) : NavKey
 
     @Serializable data class Manga(val mangaId: Long) : NavKey
 
     @Serializable data class Display(val displayScreenType: SerializableDisplayScreenType) : NavKey
 
     @Serializable data class Similar(val mangaUUID: String) : NavKey
+
+    @Serializable data class DeepLink(val host: String, val path: String, val id: String) : NavKey
 
     object Settings {
         @Serializable data class Main(val deepLink: NavKey? = null) : NavKey

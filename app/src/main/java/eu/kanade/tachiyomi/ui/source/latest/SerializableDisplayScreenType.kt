@@ -25,6 +25,27 @@ sealed interface SerializableDisplayScreenType {
     @kotlinx.serialization.Serializable
     @SerialName("list")
     data class List(val title: String, val listUUID: String) : SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
+    @SerialName("tag")
+    data class Tag(val title: String) : SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
+    @SerialName("author_name")
+    data class AuthorByName(val name: String) : SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
+    @SerialName("author_uuid")
+    data class AuthorByUuid(val name: String, val authorUUID: String) :
+        SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
+    @SerialName("group_name")
+    data class GroupByName(val name: String) : SerializableDisplayScreenType
+
+    @kotlinx.serialization.Serializable
+    @SerialName("group_uuid")
+    data class GroupByUuid(val name: String, val groupUUID: String) : SerializableDisplayScreenType
 }
 
 /**
@@ -38,8 +59,26 @@ fun DisplayScreenType.toSerializable(): SerializableDisplayScreenType {
         is DisplayScreenType.RecentlyAdded -> SerializableDisplayScreenType.RecentlyAdded
         is DisplayScreenType.PopularNewTitles -> SerializableDisplayScreenType.PopularNewTitles
         is DisplayScreenType.List -> {
-            // We extract the raw string from UiText.String
             SerializableDisplayScreenType.List(title = this.title.str, listUUID = this.listUUID)
+        }
+        is DisplayScreenType.Tag -> SerializableDisplayScreenType.Tag(this.title.str)
+        is DisplayScreenType.AuthorByName -> {
+            SerializableDisplayScreenType.AuthorByName(name = this.title.str)
+        }
+        is DisplayScreenType.AuthorWithUuid -> {
+            SerializableDisplayScreenType.AuthorByUuid(
+                name = this.title.str,
+                authorUUID = this.authorUUID,
+            )
+        }
+        is DisplayScreenType.GroupByName -> {
+            SerializableDisplayScreenType.GroupByName(name = this.title.str)
+        }
+        is DisplayScreenType.GroupByUuid -> {
+            SerializableDisplayScreenType.GroupByUuid(
+                name = this.title.str,
+                groupUUID = this.groupUUID,
+            )
         }
     }
 }
@@ -55,8 +94,26 @@ fun SerializableDisplayScreenType.toDomain(): DisplayScreenType {
         is SerializableDisplayScreenType.RecentlyAdded -> DisplayScreenType.RecentlyAdded
         is SerializableDisplayScreenType.PopularNewTitles -> DisplayScreenType.PopularNewTitles
         is SerializableDisplayScreenType.List -> {
-            // We reconstruct the UiText.String from the raw string
             DisplayScreenType.List(title = UiText.String(this.title), listUUID = this.listUUID)
+        }
+        is SerializableDisplayScreenType.Tag -> DisplayScreenType.Tag(UiText.String(this.title))
+        is SerializableDisplayScreenType.AuthorByName -> {
+            DisplayScreenType.AuthorByName(title = UiText.String(this.name))
+        }
+        is SerializableDisplayScreenType.AuthorByUuid -> {
+            DisplayScreenType.AuthorWithUuid(
+                title = UiText.String(this.name),
+                authorUUID = this.authorUUID,
+            )
+        }
+        is SerializableDisplayScreenType.GroupByName -> {
+            DisplayScreenType.GroupByName(title = UiText.String(this.name))
+        }
+        is SerializableDisplayScreenType.GroupByUuid -> {
+            DisplayScreenType.GroupByUuid(
+                title = UiText.String(this.name),
+                groupUUID = this.groupUUID,
+            )
         }
     }
 }

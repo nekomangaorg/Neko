@@ -47,17 +47,12 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.source.browse.SearchBrowse
-import eu.kanade.tachiyomi.ui.source.browse.SearchType
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.isAvailable
-import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import java.math.BigInteger
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
-import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.R
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
@@ -69,7 +64,6 @@ import org.nekomanga.presentation.screens.main.BottomBar
 import org.nekomanga.presentation.screens.main.NavigationSideBar
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 class MainActivity : BaseMainActivity() {
 
@@ -89,7 +83,7 @@ class MainActivity : BaseMainActivity() {
 
         val startingScreen =
             if (isInitialDeepLink) {
-                Screens.Loading
+                Screens.Loading(false)
             } else if (!viewModel.preferences.hasShownOnboarding().get()) {
                 Screens.Onboarding
             } else {
@@ -320,12 +314,7 @@ class MainActivity : BaseMainActivity() {
                     intent.getStringExtra(SearchManager.QUERY)
                         ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
-                    deepLinkScreens =
-                        listOf(
-                            Screens.Browse(
-                                searchBrowse = SearchBrowse(type = SearchType.Title, query = query)
-                            )
-                        )
+                    deepLinkScreens = listOf(Screens.Browse(title = query))
                 } else {
                     finish()
                 }
@@ -337,57 +326,7 @@ class MainActivity : BaseMainActivity() {
                     val path = pathSegments[0]
                     val id = pathSegments[1]
                     if (id != null && id.isNotEmpty()) {
-
-                        val mappings: MangaMappings by injectLazy()
-
-                        val query =
-                            when {
-                                host.contains("anilist", true) -> {
-                                    val dexId = mappings.getMangadexUUID(id, "al")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for AniList ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                host.contains("myanimelist", true) -> {
-                                    val dexId = mappings.getMangadexUUID(id, "mal")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                host.contains("mangaupdates", true) -> {
-                                    val base = BigInteger(id, 36)
-                                    val muID = base.toString(10)
-                                    val dexId = mappings.getMangadexUUID(muID, "mu_new")
-                                    when (dexId == null) {
-                                        true ->
-                                            MdConstants.DeepLinkPrefix.error +
-                                                "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
-                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                    }
-                                }
-                                path.equals("GROUP", true) -> {
-                                    MdConstants.DeepLinkPrefix.group + id
-                                }
-                                path.equals("AUTHOR", true) -> {
-                                    MdConstants.DeepLinkPrefix.author + id
-                                }
-                                path.equals("LIST", true) -> {
-                                    MdConstants.DeepLinkPrefix.list + id
-                                }
-                                else -> {
-                                    MdConstants.DeepLinkPrefix.manga + id
-                                }
-                            }
-                        deepLinkScreens =
-                            listOf(
-                                Screens.Browse(SearchBrowse(type = SearchType.Title, query = query))
-                            )
+                        deepLinkScreens = listOf(Screens.DeepLink(host, path, id))
                     }
                 }
             }

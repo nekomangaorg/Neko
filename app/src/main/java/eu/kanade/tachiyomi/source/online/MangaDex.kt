@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
+import eu.kanade.tachiyomi.source.online.handlers.AuthorHandler
 import eu.kanade.tachiyomi.source.online.handlers.FeedUpdatesHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
@@ -57,6 +58,8 @@ open class MangaDex : HttpSource() {
     private val mangaHandler: MangaHandler by injectLazy()
 
     private val searchHandler: SearchHandler by injectLazy()
+
+    private val authorHandler: AuthorHandler by injectLazy()
 
     private val listHandler: ListHandler by injectLazy()
 
@@ -98,6 +101,39 @@ open class MangaDex : HttpSource() {
     suspend fun getChapterCommentId(chapterUUID: String): Result<String?, ResultError> {
         return withIOContext {
             return@withIOContext mangaHandler.fetchChapterCommentId(chapterUUID)
+        }
+    }
+
+    suspend fun getAuthorNameByUuid(authorUuid: String): Result<String, ResultError> {
+        return withIOContext {
+            networkServices.service
+                .authorByUuid(authorUuid)
+                .getOrResultError("Trying to get author")
+                .andThen { authorDto -> Ok(authorDto.data.attributes.name) }
+        }
+    }
+
+    suspend fun getAuthorMangaByAuthorUuid(
+        page: Int,
+        authorUuid: String,
+    ): Result<ListResults, ResultError> {
+        return authorHandler.retrieveMangaFromAuthor(authorUuid, page)
+    }
+
+    suspend fun getScanlatorGroupNameByUuid(groupUuid: String): Result<String, ResultError> {
+        return withIOContext {
+            networkServices.service
+                .scanlatorGroupByUuid(groupUuid)
+                .getOrResultError("Trying to get scanlator")
+                .andThen { groupListDto ->
+                    val groupDto = groupListDto.data.firstOrNull()
+                    when (groupDto == null) {
+                        true -> Err("No Scanlator Group found".toResultError())
+                        false -> {
+                            Ok(groupDto.attributes.name)
+                        }
+                    }
+                }
         }
     }
 
