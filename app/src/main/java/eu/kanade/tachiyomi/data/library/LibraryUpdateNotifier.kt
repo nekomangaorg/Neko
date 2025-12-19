@@ -202,7 +202,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     }
                                 } catch (e: Exception) {}
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                                setContentTitle(manga.title)
+                                setContentTitle(manga.displayTitle())
                                 color = ContextCompat.getColor(context, R.color.iconOutline)
                                 val chaptersNames =
                                     if (chapterNames.size > MAX_CHAPTERS) {
