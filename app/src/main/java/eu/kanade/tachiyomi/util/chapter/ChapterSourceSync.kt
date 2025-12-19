@@ -242,7 +242,9 @@ fun syncChaptersWithSource(
                 dbChapter.vol = sourceChapter.vol
                 dbChapter.chapter_txt = sourceChapter.chapter_txt
                 dbChapter.chapter_title = sourceChapter.chapter_title
-                dbChapter.date_upload = sourceChapter.date_upload
+                if (sourceChapter.date_upload != 0L) {
+                    dbChapter.date_upload = sourceChapter.date_upload
+                }
                 dbChapter.chapter_number = sourceChapter.chapter_number
                 dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
                 dbChapter.language = sourceChapter.language
@@ -400,7 +402,7 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: Chapter): B
     return dbChapter.scanlator != sourceChapter.scanlator ||
         dbChapter.uploader != sourceChapter.uploader ||
         dbChapter.name != sourceChapter.name ||
-        dbChapter.date_upload != sourceChapter.date_upload ||
+        (dbChapter.date_upload != sourceChapter.date_upload && sourceChapter.date_upload != 0L) ||
         dbChapter.chapter_number != sourceChapter.chapter_number ||
         dbChapter.vol != sourceChapter.vol ||
         dbChapter.chapter_title != sourceChapter.chapter_title ||
