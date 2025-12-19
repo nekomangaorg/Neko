@@ -156,8 +156,11 @@ fun MainScreen(
 
                     entry<Screens.Library> { screen ->
                         val libraryViewModel: LibraryViewModel = viewModel()
-                        if (screen.initialSearch.isNotEmpty()) {
-                            libraryViewModel.deepLinkSearch(screen.initialSearch)
+                        remember(screen.initialSearch) {
+                            if (screen.initialSearch.isNotEmpty()) {
+                                libraryViewModel.deepLinkSearch(screen.initialSearch)
+                            }
+                            true
                         }
                         LibraryScreen(
                             libraryViewModel = libraryViewModel,

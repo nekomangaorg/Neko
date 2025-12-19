@@ -73,12 +73,14 @@ fun LibraryScreen(
     bottomBar: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
+
     LibraryWrapper(
         navigationRail = navigationRail,
         bottomBar = bottomBar,
         mainDropdown = mainDropdown,
         mainDropdownShowing = mainDropdownShowing,
         libraryStateFlow = libraryViewModel.libraryScreenState,
+        onSearchLoaded = libraryViewModel::clearInitialSearch,
         libraryScreenActions =
             LibraryScreenActions(
                 mangaClick = openManga,
@@ -170,6 +172,7 @@ private fun LibraryWrapper(
     libraryStateFlow: StateFlow<LibraryScreenState>,
     mainDropdown: AppBar.MainDropdown,
     mainDropdownShowing: Boolean,
+    onSearchLoaded: () -> Unit,
     libraryScreenActions: LibraryScreenActions,
     librarySheetActions: LibrarySheetActions,
     libraryCategoryActions: LibraryCategoryActions,
@@ -268,6 +271,7 @@ private fun LibraryWrapper(
                     mainDropDown = mainDropdown,
                     libraryScreenState = libraryScreenState,
                     libraryScreenActions = libraryScreenActions,
+                    onSearchLoaded = onSearchLoaded,
                     displayOptionsClick = {
                         scope.launch { openSheet(LibraryBottomSheetScreen.DisplayOptionsSheet) }
                     },

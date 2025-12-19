@@ -179,11 +179,18 @@ class LibraryViewModel() : ViewModel() {
         combine(
                 libraryMangaListFlow,
                 _internalLibraryScreenState
-                    .map { it.searchQuery }
+                    .map { it.searchQuery to it.initialSearch }
                     .distinctUntilChanged()
-                    .debounce(SEARCH_DEBOUNCE_MILLIS),
+                    .debounce { (query, initial) ->
+                        // If the query matches the deep link 'initialSearch', skip the delay (0ms).
+                        // Otherwise (manual typing), use the standard debounce (e.g., 500ms).
+                        if (!query.isNullOrBlank() && query == initial) 0L
+                        else SEARCH_DEBOUNCE_MILLIS
+                    }
+                    .map { it.first?.trim() } // Extract just the query string
+                    .distinctUntilChanged(), // Prevent re-emission when 'initialSearch' is cleared
+                // later
             ) { mangaList, searchQuery ->
-                _internalLibraryScreenState.update { it.copy(initialSearch = "") }
                 if (searchQuery.isNullOrBlank()) {
                     mangaList
                 } else {
@@ -1141,6 +1148,10 @@ class LibraryViewModel() : ViewModel() {
             newScrollPositions[categoryIndex] = scrollPosition
             state.copy(scrollPositions = newScrollPositions)
         }
+    }
+
+    fun clearInitialSearch() {
+        _internalLibraryScreenState.update { it.copy(initialSearch = "") }
     }
 
     companion object {

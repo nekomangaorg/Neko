@@ -50,6 +50,7 @@ fun SearchOutlineTopAppBar(
     searchPlaceHolder: String = "",
     searchPlaceHolderAlt: String = "",
     initialSearch: String = "",
+    onSearchLoaded: () -> Unit = {},
     color: Color,
     navigationEnabled: Boolean = false,
     navigationIconLabel: String = "",
@@ -63,13 +64,15 @@ fun SearchOutlineTopAppBar(
 ) {
     val focusRequester = remember { FocusRequester() }
 
-    var searchText by rememberSaveable { mutableStateOf("") }
-    var searchEnabled by rememberSaveable { mutableStateOf(false) }
+    var searchText by rememberSaveable { mutableStateOf(initialSearch) }
+    var searchEnabled by rememberSaveable { mutableStateOf(initialSearch.isNotEmpty()) }
 
     LaunchedEffect(initialSearch) {
-        if (initialSearch.isNotEmpty() && searchText != initialSearch) {
+        if (initialSearch.isNotEmpty()) {
             searchText = initialSearch
             searchEnabled = true
+            onSearch(initialSearch)
+            onSearchLoaded()
         }
     }
 

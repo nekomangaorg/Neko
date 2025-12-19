@@ -26,6 +26,7 @@ fun LibraryScreenTopBar(
     libraryScreenActions: LibraryScreenActions,
     scrollBehavior: TopAppBarScrollBehavior,
     mainDropDown: AppBar.MainDropdown,
+    onSearchLoaded: () -> Unit = {},
     groupByClick: () -> Unit,
     editCategoryClick: () -> Unit,
     displayOptionsClick: () -> Unit,
@@ -72,6 +73,7 @@ fun LibraryScreenTopBar(
             color = color,
             incognitoMode = libraryScreenState.incognitoMode,
             initialSearch = libraryScreenState.initialSearch,
+            onSearchLoaded = onSearchLoaded,
             actions = {
                 AppBarActions(
                     actions =
