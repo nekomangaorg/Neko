@@ -13,18 +13,16 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
-import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
-import org.nekomanga.domain.toDisplayResult
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class BrowseRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
-    private val loginHelper: MangaDexLoginHelper = Injekt.get(),
+    val loginHelper: MangaDexLoginHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
@@ -48,30 +46,6 @@ class BrowseRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
             Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
-        }
-    }
-
-    suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
-        return mangaDex.fetchAllList(listUuid).andThen { resultListPage ->
-            val displayManga =
-                resultListPage.sourceManga
-                    .map { it.toDisplayManga(db, sourceId = mangaDex.id) }
-                    .toPersistentList()
-            Ok(displayManga)
-        }
-    }
-
-    suspend fun getAuthors(authorQuery: String): Result<List<DisplayResult>, ResultError> {
-        return mangaDex.searchForAuthor(authorQuery).andThen { resultListPage ->
-            val displayManga = resultListPage.results.map { it.toDisplayResult() }
-            Ok(displayManga)
-        }
-    }
-
-    suspend fun getGroups(groupQuery: String): Result<List<DisplayResult>, ResultError> {
-        return mangaDex.searchForGroup(groupQuery).andThen { resultListPage ->
-            val displayManga = resultListPage.results.map { it.toDisplayResult() }
-            Ok(displayManga)
         }
     }
 

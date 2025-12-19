@@ -64,7 +64,6 @@ object LibraryEntryVisibility {
 
 enum class BrowseScreenType {
     Homepage,
-    Other,
     Filter,
     Follows,
     None,

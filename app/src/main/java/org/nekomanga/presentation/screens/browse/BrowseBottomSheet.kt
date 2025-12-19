@@ -39,9 +39,7 @@ fun BrowseBottomSheet(
         is BrowseBottomSheetScreen.BrowseDisplayOptionsSheet -> {
 
             BrowseDisplayOptionsSheet(
-                showIsList =
-                    browseScreenState.screenType != BrowseScreenType.Homepage &&
-                        browseScreenState.screenType != BrowseScreenType.Other,
+                showIsList = browseScreenState.screenType != BrowseScreenType.Homepage,
                 isList = browseScreenState.isList,
                 switchDisplayClick = currentScreen.switchDisplayClick,
                 currentLibraryEntryVisibility = browseScreenState.libraryEntryVisibility,

@@ -42,7 +42,6 @@ import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
@@ -203,6 +202,12 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launch {
             securityPreferences.incognitoMode().changes().collectLatest {
                 _browseScreenState.update { state -> state.copy(incognitoMode = it) }
+            }
+        }
+
+        viewModelScope.launch {
+            browseRepository.loginHelper.isLoggedInFlow().collectLatest {
+                _browseScreenState.update { state -> state.copy(isLoggedIn = it) }
             }
         }
 
@@ -373,26 +378,6 @@ class BrowseViewModel() : ViewModel() {
                     paginator.loadNextItems()
                 }
             }
-        }
-    }
-
-    private fun updateStateWithManga(allDisplayManga: List<DisplayManga>, endReached: Boolean) {
-        _browseScreenState.update { state ->
-            state.copy(
-                screenType = BrowseScreenType.Filter,
-                displayMangaHolder =
-                    DisplayMangaHolder(
-                        BrowseScreenType.Filter,
-                        allDisplayManga.distinctBy { it.url }.toPersistentList(),
-                        allDisplayManga
-                            .distinctBy { it.url }
-                            .filterVisibility(preferences)
-                            .toPersistentList(),
-                    ),
-                initialLoading = false,
-                pageLoading = false,
-                endReached = endReached,
-            )
         }
     }
 

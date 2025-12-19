@@ -61,7 +61,6 @@ import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
-import org.nekomanga.presentation.screens.browse.BrowseOtherPage
 import org.nekomanga.presentation.screens.browse.BrowseScreenTopBar
 import org.nekomanga.presentation.theme.Size
 
@@ -305,14 +304,6 @@ private fun BrowseWrapper(
                                 contentPadding = recyclerContentPadding,
                                 onClick = openManga,
                                 onLongClick = ::mangaLongClick,
-                            )
-                        }
-
-                        BrowseScreenType.Other -> {
-                            BrowseOtherPage(
-                                results = browseScreenState.otherResults,
-                                contentPadding = recyclerContentPadding,
-                                onClick = otherClick,
                             )
                         }
 
