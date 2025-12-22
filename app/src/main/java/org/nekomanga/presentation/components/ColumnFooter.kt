@@ -14,8 +14,10 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -42,7 +44,7 @@ fun ColumnScope.SearchFooter(
     search: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val bringIntoViewRequester = BringIntoViewRequester()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
 
     if (showDivider) {
@@ -51,6 +53,13 @@ fun ColumnScope.SearchFooter(
     }
 
     OutlinedTextField(
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = themeColorState.primaryColor,
+                unfocusedBorderColor = themeColorState.primaryColor.copy(alpha = 0.7f),
+                cursorColor = themeColorState.primaryColor,
+                focusedLabelColor = themeColorState.primaryColor,
+            ),
         modifier =
             modifier
                 .fillMaxWidth()
