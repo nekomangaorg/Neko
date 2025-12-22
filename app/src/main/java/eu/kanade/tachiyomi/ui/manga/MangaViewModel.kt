@@ -1189,10 +1189,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             val chapterText =
                 when {
-                    chapter.isMergedChapter() ||
-                        (chapter.volume.isEmpty() && chapter.chapterText.isEmpty()) -> {
-                        chapter.name
-                    }
                     chapter.volume.isNotEmpty() -> "Vol. ${chapter.volume} ${chapter.chapterText}"
                     else -> chapter.chapterText
                 }
