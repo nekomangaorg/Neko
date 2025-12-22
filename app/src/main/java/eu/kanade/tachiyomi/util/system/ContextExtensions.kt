@@ -345,9 +345,7 @@ suspend fun CoroutineWorker.tryToSetForeground() {
             // On Android 12+, if the app is in the background, we are not allowed to
             // start a foreground service. We swallow this exception so the worker
             // continues execution as a standard background job (without a notification).
-            TimberKt.e {
-                "ForegroundServiceStartNotAllowedException: Running as background worker instead."
-            }
+            TimberKt.w { "App in background; failed to promote to foreground service. Continuing as background worker." }
         } else {
             // Log other errors (like IllegalStateException) but don't crash
             TimberKt.e(e) { "Failed to set foreground job" }
