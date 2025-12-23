@@ -240,8 +240,8 @@ fun HorizontalCategoriesPage(
                             ) {
                                 itemsIndexed(
                                     items = item.libraryItems,
-                                    key = { index, libraryItem ->
-                                        "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                    key = { _, libraryItem ->
+                                        "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
                                     },
                                 ) { index, libraryItem ->
                                     MangaGridItem(
@@ -351,8 +351,8 @@ fun HorizontalCategoriesPage(
                             ) {
                                 itemsIndexed(
                                     items = item.libraryItems,
-                                    key = { index, libraryItem ->
-                                        "$index-${item.categoryItem.name}-${libraryItem.displayManga.mangaId}"
+                                    key = { _, libraryItem ->
+                                        "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
                                     },
                                 ) { index, libraryItem ->
                                     ListItem(
