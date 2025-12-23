@@ -45,6 +45,11 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -92,17 +97,41 @@ fun DownloadButton(
             previousDownloadState = downloadState
         }
 
+        val downloadButtonLabel = stringResource(R.string.download)
+        val optionsLabel = stringResource(R.string.options)
+        val notDownloadedDescription = stringResource(R.string.not_downloaded)
+        val queueDescription = stringResource(R.string.download_queue)
+        val downloadingDescription = stringResource(R.string.downloading)
+        val downloadedDescription = stringResource(R.string.downloaded)
+        val errorDescription = stringResource(R.string.download_error)
+
         val downloadButtonModifier =
             Modifier.combinedClickable(
-                onClick = {
-                    when (downloadState) {
-                        Download.State.NOT_DOWNLOADED ->
-                            onClick(MangaConstants.DownloadAction.Download)
-                        else -> showChapterDropdown = true
-                    }
-                },
-                onLongClick = {},
-            )
+                    onClick = {
+                        when (downloadState) {
+                            Download.State.NOT_DOWNLOADED ->
+                                onClick(MangaConstants.DownloadAction.Download)
+                            else -> showChapterDropdown = true
+                        }
+                    },
+                    onLongClick = {},
+                    role = Role.Button,
+                    onClickLabel =
+                        when (downloadState) {
+                            Download.State.NOT_DOWNLOADED -> downloadButtonLabel
+                            else -> optionsLabel
+                        },
+                )
+                .semantics {
+                    contentDescription =
+                        when (downloadState) {
+                            Download.State.NOT_DOWNLOADED -> notDownloadedDescription
+                            Download.State.QUEUE -> queueDescription
+                            Download.State.DOWNLOADING -> downloadingDescription
+                            Download.State.DOWNLOADED -> downloadedDescription
+                            Download.State.ERROR -> errorDescription
+                        }
+                }
 
         when {
             isDraining -> {
