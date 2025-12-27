@@ -455,8 +455,16 @@ class Suwayomi : MergedServerSource() {
                         }
                         title = title.trimStart('0').replaceFirst(ch, "").trimStart()
                         // In case the number appears multiple times
-                        if (chapterPrefixes.any { title.contains(it) }) {
-                            title = title.substringAfterLast(ch).trimStart()
+                        chapterPrefixes.forEach {
+                            if (
+                                title.contains(ch) &&
+                                    title.contains(it) &&
+                                    title.substringAfter(it).substringBefore(ch).trim().isEmpty()
+                            ) {
+                                val pre = title.substringBefore(it).trimEnd()
+                                val pos = title.substringAfter(it).substringAfter(ch).trimStart()
+                                title = (pre + pos).replace("()", "")
+                            }
                         }
                         title = title.replace(".cbz", "")
                         return@any true
