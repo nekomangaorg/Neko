@@ -76,8 +76,12 @@ class Kagane : ReducedHttpSource() {
             .rateLimit(2)
             .build()
 
+    override fun getMangaUrl(url: String): String {
+        return "$baseUrl/series/$url"
+    }
+
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        var (seriesId, chapterId, pageCount) = simpleChapter.url.split(";")
+        val (seriesId, chapterId, _) = simpleChapter.url.split(";")
         return baseUrl
             .toHttpUrl()
             .newBuilder()
@@ -223,7 +227,7 @@ class Kagane : ReducedHttpSource() {
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         if (chapter.url.count { it == ';' } != 2)
             throw Exception("Chapter url error, please refresh chapter list.")
-        var (seriesId, chapterId, pageCount) = chapter.url.split(";")
+        val (seriesId, chapterId, pageCount) = chapter.url.split(";")
 
         val challengeResp = getChallengeResponse(seriesId, chapterId)
         accessToken = challengeResp.accessToken

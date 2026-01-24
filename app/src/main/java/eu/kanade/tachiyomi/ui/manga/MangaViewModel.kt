@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -228,11 +227,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     true -> {
                         val mergeManga = mergeMangaList.first()
                         val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
-                        val url =
-                            when (source) {
-                                is MergedServerSource -> source.getMangaUrl(mergeManga.url)
-                                else -> source.baseUrl + mergeManga.url
-                            }
+                        val url = source.getMangaUrl(mergeManga.url)
                         Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)
                     }
                     false -> No
