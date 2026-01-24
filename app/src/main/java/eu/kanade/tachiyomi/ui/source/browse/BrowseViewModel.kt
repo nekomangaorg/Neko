@@ -227,7 +227,17 @@ class BrowseViewModel() : ViewModel() {
                                     filteredDisplayManga =
                                         it.displayMangaHolder.allDisplayManga
                                             .filterVisibility(preferences)
-                                            .toPersistentList()
+                                            .toPersistentList(),
+                                    groupedDisplayManga =
+                                        it.displayMangaHolder.groupedDisplayManga
+                                            .map { (stringRes, mangaList) ->
+                                                stringRes to
+                                                    mangaList
+                                                        .updateVisibility(preferences)
+                                                        .toPersistentList()
+                                            }
+                                            .toMap()
+                                            .toImmutableMap(),
                                 )
                         )
                     }
@@ -282,7 +292,8 @@ class BrowseViewModel() : ViewModel() {
                     }
                     .onSuccess {
                         val groupedManga =
-                            it.groupBy { manga -> manga.displayTextRes!! }
+                            it.updateVisibility(preferences)
+                                .groupBy { manga -> manga.displayTextRes!! }
                                 .map { entry ->
                                     entry.key to
                                         entry.value
