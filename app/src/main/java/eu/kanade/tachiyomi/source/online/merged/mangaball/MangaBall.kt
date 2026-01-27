@@ -224,6 +224,10 @@ class MangaBall : ReducedHttpSource() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
 
+    override fun getMangaUrl(url: String): String {
+        return "$baseUrl/title-detail/$url/"
+    }
+
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return getChapterUrl(simpleChapter.url)
     }

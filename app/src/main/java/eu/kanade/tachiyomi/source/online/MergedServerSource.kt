@@ -8,7 +8,7 @@ abstract class MergedServerSource : ReducedHttpSource() {
 
     abstract fun hostUrl(): String
 
-    open fun getMangaUrl(url: String): String = hostUrl() + url
+    override fun getMangaUrl(url: String): String = hostUrl() + url
 
     abstract suspend fun loginWithUrl(username: String, password: String, url: String): Boolean
 

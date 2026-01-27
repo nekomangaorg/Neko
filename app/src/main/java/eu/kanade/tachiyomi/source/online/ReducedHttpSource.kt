@@ -15,6 +15,8 @@ abstract class ReducedHttpSource : HttpSource() {
 
     abstract suspend fun searchManga(query: String): List<SManga>
 
+    open fun getMangaUrl(url: String): String = baseUrl + url
+
     abstract suspend fun fetchChapters(
         mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError>
