@@ -298,15 +298,17 @@ class Suwayomi : MergedServerSource() {
                 "original story",
                 "side story",
                 "special episode",
+                "episode special",
                 "finale",
             )
         val chapter =
             if (
-                next != null &&
+                (next != null &&
                     previous.first != null &&
                     next > previous.first!! &&
                     next > 0 &&
-                    chapter > next
+                    chapter > next) ||
+                    (previous.first != null && chapter < previous.first!! && chapter > 0)
             ) {
                 // Assume that the source order is correct and the match was a false positive
                 -1f
@@ -320,12 +322,13 @@ class Suwayomi : MergedServerSource() {
             if (next != null && previous.first != null) {
                 if (next <= previous.first!! + 1) {
                     val chnum = previous.first!! + 0.1f
+                    val title = rawName.trimEnd('.')
                     return Name.Sanitized(
-                        "Ch.${chnum.formatFloat()} - $rawName",
+                        "Ch.${chnum.formatFloat()} - $title",
                         "",
                         chnum,
                         "Ch.${chnum.formatFloat()}",
-                        rawName,
+                        title,
                     )
                 } else if (previous.first == next - 2) {
                     return Name.Sanitized(
@@ -484,7 +487,7 @@ class Suwayomi : MergedServerSource() {
         }
 
         title = removeEndTag(title)
-        title = title.trimStart(':', '-').trimStart()
+        title = title.trimStart(':', '-', '.').trimStart()
         if (title.isNotEmpty()) {
             chapterName.add("-")
             chapterName.add(title)
