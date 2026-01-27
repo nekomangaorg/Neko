@@ -100,6 +100,7 @@ fun MangaListWithHeader(
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
+            val mangaList = mangaList.filter { it.isVisible }
             if (mangaList.isNotEmpty()) {
                 item(key = "header-$stringRes") {
                     HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }

@@ -55,6 +55,7 @@ fun MangaGridWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
+            val allGrids = allGrids.filter { it.isVisible }
             if (allGrids.isNotEmpty()) {
                 item(key = "header-$stringRes") {
                     HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
