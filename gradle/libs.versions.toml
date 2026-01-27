@@ -100,7 +100,7 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.14.7"
+mockk = "io.mockk:mockk:1.14.9"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:6.1.2"
 
 [plugins]
