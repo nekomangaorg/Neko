@@ -73,6 +73,18 @@ fun VerticalCategoriesPage(
             mutableStateOf(libraryScreenState.selectedItems.map { it.displayManga.mangaId })
         }
 
+    // Optimize: Memoize chunking to avoid re-allocating lists on every recomposition.
+    val chunkedLibraryItems =
+        remember(libraryScreenState.items, columns, libraryScreenState.libraryDisplayMode) {
+            if (libraryScreenState.libraryDisplayMode !is LibraryDisplayMode.List) {
+                libraryScreenState.items.associate { category ->
+                    category.categoryItem.id to category.libraryItems.chunked(columns)
+                }
+            } else {
+                emptyMap()
+            }
+        }
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
@@ -116,11 +128,11 @@ fun VerticalCategoriesPage(
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
+                        val chunks = chunkedLibraryItems[item.categoryItem.id] ?: emptyList()
+                        // Optimize: Use index-based key for rows to improve scroll performance.
                         itemsIndexed(
-                            items = item.libraryItems.chunked(columns),
-                            key = { _, row ->
-                                "grid-row-${item.categoryItem.name}-${row.joinToString { it.displayManga.mangaId.toString() }}"
-                            },
+                            items = chunks,
+                            key = { index, _ -> "grid-row-${item.categoryItem.id}-$index" },
                         ) { _, rowItems ->
                             RowGrid(
                                 modifier = Modifier.animateItem(),
