@@ -98,6 +98,15 @@ class LibraryViewModel() : ViewModel() {
             isFirstLoad = lastLibraryCategoryItems == null,
             rawColumnCount = libraryPreferences.gridSize().get(),
             libraryDisplayMode = libraryPreferences.layout().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            showUnreadBadges = libraryPreferences.showUnreadBadge().get(),
+            showDownloadBadges = libraryPreferences.showDownloadBadge().get(),
+            showStartReadingButton = libraryPreferences.showStartReadingButton().get(),
+            horizontalCategories = libraryPreferences.libraryHorizontalCategories().get(),
+            showLibraryButtonBar = libraryPreferences.showLibraryButtonBar().get(),
+            incognitoMode = securityPreferences.incognitoMode().get(),
+            showUnavailableFilter = mangadexPreferences.includeUnavailableChapters().get(),
+            useVividColorHeaders = preferences.useVividColorHeaders().get(),
         )
 
     private val _internalLibraryScreenState = MutableStateFlow(initialState)
