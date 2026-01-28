@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -632,8 +633,8 @@ class FeedViewModel() : ViewModel() {
         chapterId: Long,
         mangaId: Long,
         download: Download?,
-        feedManga: List<FeedManga>,
-    ): Pair<Boolean, List<FeedManga>> {
+        feedManga: PersistentList<FeedManga>,
+    ): Pair<Boolean, PersistentList<FeedManga>> {
         val mangaIndex = feedManga.indexOfFirst { it.mangaId == mangaId }
 
         if (mangaIndex == -1) {
@@ -649,43 +650,39 @@ class FeedViewModel() : ViewModel() {
         }
 
         val updatedChapters =
-            mangaToUpdate.chapters.mapIndexed { index, feedItem ->
-                if (index == chapterIndex) {
-                    feedItem.copy(
-                        downloadState = download?.status ?: Download.State.NOT_DOWNLOADED,
-                        downloadProgress = download?.progress ?: 0,
-                    )
-                } else {
-                    feedItem
-                }
-            }
+            mangaToUpdate.chapters.set(
+                chapterIndex,
+                mangaToUpdate.chapters[chapterIndex].copy(
+                    downloadState = download?.status ?: Download.State.NOT_DOWNLOADED,
+                    downloadProgress = download?.progress ?: 0,
+                ),
+            )
 
         val updatedFeedManga =
-            feedManga.toMutableList().apply {
-                this[mangaIndex] = mangaToUpdate.copy(chapters = updatedChapters.toPersistentList())
-            }
+            feedManga.set(mangaIndex, mangaToUpdate.copy(chapters = updatedChapters))
 
         return true to updatedFeedManga
     }
 
     private fun updateChapterReadStatus(
         updatedChapterItem: ChapterItem,
-        feedManga: List<FeedManga>,
-    ): Pair<Boolean, List<FeedManga>> {
-        var wasUpdated: Boolean = false
-        val updatedFeedManga =
-            feedManga.mapIndexed { index, manga ->
-                if (
-                    manga.mangaId == updatedChapterItem.chapter.mangaId &&
-                        manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
-                ) {
-                    wasUpdated = true
-                    manga.copy(chapters = persistentListOf(updatedChapterItem))
-                } else {
-                    manga
-                }
+        feedManga: PersistentList<FeedManga>,
+    ): Pair<Boolean, PersistentList<FeedManga>> {
+        val index =
+            feedManga.indexOfFirst { manga ->
+                manga.mangaId == updatedChapterItem.chapter.mangaId &&
+                    manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
             }
-        return wasUpdated to updatedFeedManga
+
+        if (index == -1) {
+            return false to feedManga
+        }
+
+        val manga = feedManga[index]
+        val updatedFeedManga =
+            feedManga.set(index, manga.copy(chapters = persistentListOf(updatedChapterItem)))
+
+        return true to updatedFeedManga
     }
 
     private fun onUpdateManga(mangaId: Long?) {
@@ -812,191 +809,158 @@ class FeedViewModel() : ViewModel() {
     }
 
     private fun updateReadOnFeed(chapterItem: ChapterItem) {
-
         viewModelScope.launchIO {
+            // History
+            val historyState = _historyScreenPagingState.value
             val (searchHistoryUpdated, searchHistoryFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
-                )
+                updateChapterReadStatus(chapterItem, historyState.searchHistoryFeedMangaList)
             if (searchHistoryUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toPersistentList()
-                    )
+                    it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList)
                 }
             }
-        }
-        viewModelScope.launchIO {
-            val (searchUpdatesUpdated, searchUpdatesFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
-                )
-            if (searchUpdatesUpdated) {
-                _updatesScreenPagingState.update {
-                    it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toPersistentList()
-                    )
-                }
-            }
-        }
 
-        viewModelScope.launchIO {
             val (historyFeedUpdated, historyFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
-                )
+                updateChapterReadStatus(chapterItem, historyState.historyFeedMangaList)
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = historyFeedMangaList.toPersistentList())
+                    it.copy(historyFeedMangaList = historyFeedMangaList)
                 }
             }
-        }
 
-        viewModelScope.launchIO {
+            // Updates
+            val updatesState = _updatesScreenPagingState.value
+            val (searchUpdatesUpdated, searchUpdatesFeedMangaList) =
+                updateChapterReadStatus(chapterItem, updatesState.searchUpdatesFeedMangaList)
+            if (searchUpdatesUpdated) {
+                _updatesScreenPagingState.update {
+                    it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList)
+                }
+            }
+
             val (updatesFeedUpdated, updatesFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
-                )
+                updateChapterReadStatus(chapterItem, updatesState.updatesFeedMangaList)
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = updatesFeedMangaList)
                 }
             }
-        }
-        viewModelScope.launchIO {
-            val (updatesFeedUpdated, updatesFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
-                )
-            if (updatesFeedUpdated) {
+
+            // Summary
+            val summaryState = _summaryScreenPagingState.value
+            val (summaryUpdatesFeedUpdated, summaryUpdatesFeedMangaList) =
+                updateChapterReadStatus(chapterItem, summaryState.updatesFeedMangaList)
+            if (summaryUpdatesFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList)
                 }
             }
+
             val (newlyAddedFeedUpdated, newlyAddedFeedMangaList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _summaryScreenPagingState.value.newlyAddedFeedMangaList.map { it }.toList(),
-                )
+                updateChapterReadStatus(chapterItem, summaryState.newlyAddedFeedMangaList)
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toPersistentList())
+                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList)
                 }
             }
 
             val (continueReadingFeedUpdated, continueReadingList) =
-                updateChapterReadStatus(
-                    chapterItem,
-                    _summaryScreenPagingState.value.continueReadingList.map { it }.toList(),
-                )
+                updateChapterReadStatus(chapterItem, summaryState.continueReadingList)
             if (continueReadingFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(continueReadingList = continueReadingList.toPersistentList())
+                    it.copy(continueReadingList = continueReadingList)
                 }
             }
 
-            if (updatesFeedUpdated || newlyAddedFeedUpdated || continueReadingFeedUpdated) {
+            if (summaryUpdatesFeedUpdated || newlyAddedFeedUpdated || continueReadingFeedUpdated) {
                 loadSummaryPage()
             }
         }
     }
 
     private fun updateDownloadOnFeed(chapterId: Long, mangaId: Long, download: Download?) {
-
         viewModelScope.launchIO {
+            // History
+            val historyState = _historyScreenPagingState.value
             val (searchHistoryFeedUpdated, searchHistoryFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
-                    _historyScreenPagingState.value.searchHistoryFeedMangaList.map { it }.toList(),
+                    historyState.searchHistoryFeedMangaList,
                 )
             if (searchHistoryFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(
-                        searchHistoryFeedMangaList = searchHistoryFeedMangaList.toPersistentList()
-                    )
+                    it.copy(searchHistoryFeedMangaList = searchHistoryFeedMangaList)
                 }
             }
-        }
-        viewModelScope.launchIO {
-            val (searchUpdatesFeedUpdated, searchUpdatesFeedMangaList) =
-                updateChapterDownloadForManga(
-                    chapterId,
-                    mangaId,
-                    download,
-                    _updatesScreenPagingState.value.searchUpdatesFeedMangaList.map { it }.toList(),
-                )
-            if (searchUpdatesFeedUpdated) {
-                _updatesScreenPagingState.update {
-                    it.copy(
-                        searchUpdatesFeedMangaList = searchUpdatesFeedMangaList.toPersistentList()
-                    )
-                }
-            }
-        }
 
-        viewModelScope.launchIO {
             val (historyFeedUpdated, historyFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
-                    _historyScreenPagingState.value.historyFeedMangaList.map { it }.toList(),
+                    historyState.historyFeedMangaList,
                 )
             if (historyFeedUpdated) {
                 _historyScreenPagingState.update {
-                    it.copy(historyFeedMangaList = historyFeedMangaList.toPersistentList())
+                    it.copy(historyFeedMangaList = historyFeedMangaList)
                 }
             }
-        }
 
-        viewModelScope.launchIO {
+            // Updates
+            val updatesState = _updatesScreenPagingState.value
+            val (searchUpdatesFeedUpdated, searchUpdatesFeedMangaList) =
+                updateChapterDownloadForManga(
+                    chapterId,
+                    mangaId,
+                    download,
+                    updatesState.searchUpdatesFeedMangaList,
+                )
+            if (searchUpdatesFeedUpdated) {
+                _updatesScreenPagingState.update {
+                    it.copy(searchUpdatesFeedMangaList = searchUpdatesFeedMangaList)
+                }
+            }
+
             val (updatesFeedUpdated, updatesFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
-                    _updatesScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    updatesState.updatesFeedMangaList,
                 )
             if (updatesFeedUpdated) {
                 _updatesScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = updatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = updatesFeedMangaList)
                 }
             }
-        }
 
-        viewModelScope.launchIO {
+            // Summary
+            val summaryState = _summaryScreenPagingState.value
             val (summaryUpdatesFeedUpdated, summaryUpdatesFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
-                    _summaryScreenPagingState.value.updatesFeedMangaList.map { it }.toList(),
+                    summaryState.updatesFeedMangaList,
                 )
             if (summaryUpdatesFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList.toPersistentList())
+                    it.copy(updatesFeedMangaList = summaryUpdatesFeedMangaList)
                 }
             }
-        }
 
-        viewModelScope.launchIO {
             val (newlyAddedFeedUpdated, newlyAddedFeedMangaList) =
                 updateChapterDownloadForManga(
                     chapterId,
                     mangaId,
                     download,
-                    _summaryScreenPagingState.value.newlyAddedFeedMangaList.map { it }.toList(),
+                    summaryState.newlyAddedFeedMangaList,
                 )
             if (newlyAddedFeedUpdated) {
                 _summaryScreenPagingState.update {
-                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList.toPersistentList())
+                    it.copy(newlyAddedFeedMangaList = newlyAddedFeedMangaList)
                 }
             }
         }
@@ -1078,6 +1042,7 @@ class FeedViewModel() : ViewModel() {
             downloadManager
                 .progressFlow()
                 .catch { error -> TimberKt.e(error) }
+                .conflate()
                 .collect { download ->
                     updateDownloadOnFeed(download.chapterItem.id, download.mangaItem.id, download)
                     updateDownloadQueue(download)
