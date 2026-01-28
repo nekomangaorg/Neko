@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,12 @@ fun MangaGridWithHeader(
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
+    // Optimize: Memoize chunking to avoid re-allocating lists on every recomposition.
+    val chunkedGroupedManga =
+        remember(groupedManga, columns) {
+            groupedManga.mapValues { (_, list) -> list.chunked(columns) }
+        }
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
         modifier = modifier,
@@ -60,12 +67,11 @@ fun MangaGridWithHeader(
                 item(key = "header-$stringRes") {
                     HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
                 }
-                itemsIndexed(
-                    items = allGrids.chunked(columns),
-                    key = { _, row ->
-                        "grid-row-$stringRes-${row.joinToString { it.mangaId.toString() }}"
-                    },
-                ) { gridIndex, rowItems ->
+
+                val chunks = chunkedGroupedManga[stringRes] ?: emptyList()
+                itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
+                    gridIndex,
+                    rowItems ->
                     VerticalGrid(
                         columns = SimpleGridCells.Fixed(columns),
                         modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
