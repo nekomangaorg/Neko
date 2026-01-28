@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
-import eu.kanade.tachiyomi.source.online.handlers.AuthorHandler
 import eu.kanade.tachiyomi.source.online.handlers.FeedUpdatesHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
@@ -58,8 +57,6 @@ open class MangaDex : HttpSource() {
     private val mangaHandler: MangaHandler by injectLazy()
 
     private val searchHandler: SearchHandler by injectLazy()
-
-    private val authorHandler: AuthorHandler by injectLazy()
 
     private val listHandler: ListHandler by injectLazy()
 
@@ -111,13 +108,6 @@ open class MangaDex : HttpSource() {
                 .getOrResultError("Trying to get author")
                 .andThen { authorDto -> Ok(authorDto.data.attributes.name) }
         }
-    }
-
-    suspend fun getAuthorMangaByAuthorUuid(
-        page: Int,
-        authorUuid: String,
-    ): Result<ListResults, ResultError> {
-        return authorHandler.retrieveMangaFromAuthor(authorUuid, page)
     }
 
     suspend fun getScanlatorGroupNameByUuid(groupUuid: String): Result<String, ResultError> {

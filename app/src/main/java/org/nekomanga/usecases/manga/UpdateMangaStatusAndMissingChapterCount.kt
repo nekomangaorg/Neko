@@ -19,12 +19,13 @@ class UpdateMangaStatusAndMissingChapterCount(
 ) {
     suspend operator fun invoke(manga: Manga) {
         // This can fail due to a race condition
-        val allChaps = try {
-            db.getChapters(manga).executeOnIO()
-        } catch(e: Exception) {
-            TimberKt.d { "Failed to get chapters: $e" }
-            listOf()
-        }
+        val allChaps =
+            try {
+                db.getChapters(manga).executeOnIO()
+            } catch (e: Exception) {
+                TimberKt.d { "Failed to get chapters: $e" }
+                listOf()
+            }
         val missingChapters =
             allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
 

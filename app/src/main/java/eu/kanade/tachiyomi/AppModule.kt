@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.ArtworkHandler
-import eu.kanade.tachiyomi.source.online.handlers.AuthorHandler
 import eu.kanade.tachiyomi.source.online.handlers.FeedUpdatesHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
@@ -123,8 +122,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(LatestChapterHandler())
 
         addSingleton(FeedUpdatesHandler())
-
-        addSingleton(AuthorHandler())
 
         addSingleton(MangaDexLoginHelper())
 

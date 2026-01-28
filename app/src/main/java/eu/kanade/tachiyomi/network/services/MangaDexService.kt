@@ -117,7 +117,7 @@ interface MangaDexService {
     ): ApiResponse<GroupListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdConstants.Api.author}/{id}?includes[]=manga")
+    @GET("${MdConstants.Api.author}/{id}")
     suspend fun authorByUuid(@Path("id") authorUuid: String): ApiResponse<AuthorDto>
 
     @GET("${MdConstants.Api.list}/{id}")

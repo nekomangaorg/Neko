@@ -73,16 +73,19 @@ class DisplayRepository(
         page: Int,
         authorUUID: String,
     ): Result<DisplayPageResult, ResultError> {
-        return mangaDex.getAuthorMangaByAuthorUuid(page, authorUUID).map { listResult ->
-            val displayMangaList =
-                listResult.sourceManga.map { sourceManga ->
-                    sourceManga.toDisplayManga(db, mangaDex.id)
-                }
-            DisplayPageResult(
-                hasNextPage = listResult.hasNextPage,
-                displayManga = displayMangaList.toPersistentList(),
-            )
-        }
+
+        return mangaDex
+            .search(page, createContentRatingFilter().copy(authorId = Filter.AuthorId(authorUUID)))
+            .map { mangaListPage ->
+                val displayMangaList =
+                    mangaListPage.sourceManga.map { sourceManga ->
+                        sourceManga.toDisplayManga(db, mangaDex.id)
+                    }
+                DisplayPageResult(
+                    hasNextPage = mangaListPage.hasNextPage,
+                    displayManga = displayMangaList.toPersistentList(),
+                )
+            }
     }
 
     private suspend fun getGroupPage(groupName: String): Result<DisplayPageResult, ResultError> {
