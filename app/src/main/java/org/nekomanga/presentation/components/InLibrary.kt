@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.nekomanga.R
@@ -25,7 +27,14 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun InLibraryIcon(offset: Dp, outline: Boolean) {
-    Box(modifier = Modifier.offset(x = offset, y = offset), contentAlignment = Alignment.Center) {
+    val inLibraryDescription = stringResource(id = R.string.in_library)
+    Box(
+        modifier =
+            Modifier.offset(x = offset, y = offset).semantics {
+                contentDescription = inLibraryDescription
+            },
+        contentAlignment = Alignment.Center,
+    ) {
         if (outline) {
             Icon(
                 imageVector = Icons.Outlined.Favorite,
