@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import jp.wasabeef.gap.Gap
@@ -91,6 +92,7 @@ fun EmptyScreen(
             style = MaterialTheme.typography.displayMedium,
             color =
                 MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            modifier = Modifier.clearAndSetSemantics {},
         )
         Gap(Size.large)
 

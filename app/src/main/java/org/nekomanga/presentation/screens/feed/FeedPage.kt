@@ -160,7 +160,8 @@ fun FeedChapterTitleLine(
             Gap(Size.extraTiny)
         }
         if (language.isNotEmpty() && !language.equals("en", true)) {
-            val iconRes = MdLang.fromIsoCode(language)?.iconResId
+            val lang = MdLang.fromIsoCode(language)
+            val iconRes = lang?.iconResId
 
             when (iconRes == null) {
                 true -> {
@@ -177,7 +178,7 @@ fun FeedChapterTitleLine(
                             Modifier.height(Size.medium)
                                 .clip(RoundedCornerShape(Size.tiny))
                                 .align(Alignment.CenterVertically),
-                        contentDescription = "flag",
+                        contentDescription = lang!!.prettyPrint,
                     )
                     Gap(Size.extraTiny)
                 }
