@@ -193,6 +193,7 @@ fun InformationBlock(
                         text = formattedRating,
                         icon = Icons.Filled.HotelClass,
                         color = mediumAlpha,
+                        contentDescription = stringResource(id = R.string.rating),
                     )
                 }
                 it.follows.toIntOrNull()?.let { follows ->
@@ -200,6 +201,7 @@ fun InformationBlock(
                         text = numberFormat.format(follows),
                         icon = Icons.Filled.Bookmarks,
                         color = mediumAlpha,
+                        contentDescription = stringResource(id = R.string.bookmarked),
                     )
                 }
                 it.repliesCount.toIntOrNull()?.let { replies ->
@@ -207,12 +209,18 @@ fun InformationBlock(
                         text = numberFormat.format(replies),
                         icon = Icons.AutoMirrored.Filled.Comment,
                         color = mediumAlpha,
+                        contentDescription = stringResource(id = R.string.comments),
                     )
                 }
             }
 
             if (showMergedIcon) {
-                StatItem(text = "", icon = MergeCheckIcon, color = mediumAlpha)
+                StatItem(
+                    text = "",
+                    icon = MergeCheckIcon,
+                    color = mediumAlpha,
+                    contentDescription = stringResource(id = R.string.merged),
+                )
             }
         }
 
@@ -254,9 +262,14 @@ private fun StatItem(text: String, color: Color, icon: @Composable () -> Unit) {
 
 // Overloaded version for standard Material Icons
 @Composable
-private fun StatItem(text: String, icon: ImageVector, color: Color) {
+private fun StatItem(
+    text: String,
+    icon: ImageVector,
+    color: Color,
+    contentDescription: String? = null,
+) {
     StatItem(text = text, color = color) {
-        Icon(imageVector = icon, contentDescription = null, tint = color)
+        Icon(imageVector = icon, contentDescription = contentDescription, tint = color)
     }
 }
 
