@@ -73,6 +73,13 @@ fun VerticalCategoriesPage(
             mutableStateOf(libraryScreenState.selectedItems.map { it.displayManga.mangaId })
         }
 
+    // Optimize: Cache chunked items to avoid re-chunking on every scroll/recomposition
+    // caused by frequent updates to LibraryScreenState (e.g. scroll positions).
+    val chunkedCategories =
+        remember(libraryScreenState.items, columns) {
+            libraryScreenState.items.associateWith { item -> item.libraryItems.chunked(columns) }
+        }
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
@@ -117,7 +124,7 @@ fun VerticalCategoriesPage(
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
                         itemsIndexed(
-                            items = item.libraryItems.chunked(columns),
+                            items = chunkedCategories[item] ?: emptyList(),
                             key = { _, row ->
                                 "grid-row-${item.categoryItem.name}-${row.joinToString { it.displayManga.mangaId.toString() }}"
                             },
@@ -135,7 +142,6 @@ fun VerticalCategoriesPage(
                             )
                         }
                     }
-
                     LibraryDisplayMode.List -> {
                         itemsIndexed(
                             item.libraryItems,
