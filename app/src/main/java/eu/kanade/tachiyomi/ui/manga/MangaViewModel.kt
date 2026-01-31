@@ -1324,6 +1324,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
 
             db.insertManga(editManga).executeAsBlocking()
+            // Add to trackers if it was added to favorites
+            if (editManga.favorite) {
+                autoAddTrackers(
+                    editManga.toMangaItem(),
+                    mangaDetailScreenState.value.loggedInTrackService,
+                    mangaDetailScreenState.value.tracks,
+                )
+            }
             // add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && mangaDetailScreenState.value.hasDefaultCategory) {
                 val defaultCategoryId = libraryPreferences.defaultCategory().get()
