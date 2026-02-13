@@ -95,7 +95,10 @@ class DownloadCache(
 
         val fileNames =
             mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                it.name?.substringBeforeLast(".cbz")
+                val name = it.name ?: return@mapNotNullTo null
+                // Filter out temp files/dirs
+                if (name.endsWith(TMP_DIR_SUFFIX)) return@mapNotNullTo null
+                name.substringBeforeLast(".cbz")
             }
 
         val mangadexIds = fileNames.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
@@ -111,15 +114,13 @@ class DownloadCache(
                 ?: 0
         } else {
             val cache = mangaFiles[manga.id] ?: return 0
-            return cache.files.count { !it.endsWith(TMP_DIR_SUFFIX) }
+            return cache.files.size
         }
     }
 
     fun getDownloadCounts(mangaIds: List<Long>): Map<Long, Int> {
         checkRenew()
-        return mangaIds.associateWith { mangaId ->
-            mangaFiles[mangaId]?.files?.count { !it.endsWith(TMP_DIR_SUFFIX) } ?: 0
-        }
+        return mangaIds.associateWith { mangaId -> mangaFiles[mangaId]?.files?.size ?: 0 }
     }
 
     fun getAllDownloadFiles(manga: Manga): List<UniFile> {
@@ -172,7 +173,10 @@ class DownloadCache(
 
             val files =
                 mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                    it.name?.substringBeforeLast(".cbz")
+                    val name = it.name ?: return@mapNotNullTo null
+                    // Filter out temp files/dirs
+                    if (name.endsWith(TMP_DIR_SUFFIX)) return@mapNotNullTo null
+                    name.substringBeforeLast(".cbz")
                 }
 
             val mangadexIds = files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
