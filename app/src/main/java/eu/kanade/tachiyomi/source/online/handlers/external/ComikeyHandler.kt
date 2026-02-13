@@ -63,6 +63,10 @@ class ComikeyHandler {
             innerWv.settings.domStorageEnabled = true
             innerWv.settings.javaScriptEnabled = true
             innerWv.settings.blockNetworkImage = true
+            // Security: Disable file and content access to prevent potential local file
+            // exfiltration
+            innerWv.settings.allowFileAccess = false
+            innerWv.settings.allowContentAccess = false
             innerWv.settings.userAgentString = headers["User-Agent"]
             innerWv.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
             innerWv.addJavascriptInterface(jsInterface, interfaceName)
