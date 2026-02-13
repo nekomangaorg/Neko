@@ -15,11 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () -> Unit) {
+    val contentDescriptionString = stringResource(id = R.string.start_reading)
     Box(
         modifier =
             modifier
@@ -33,7 +39,8 @@ fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () ->
                             topEnd = Shapes.coverRadius,
                         )
                 )
-                .clickable(onClick = onStartReadingClick)
+                .clickable(onClick = onStartReadingClick, role = Role.Button)
+                .semantics { contentDescription = contentDescriptionString }
                 .border(
                     width = Outline.thickness,
                     color = Outline.color,
