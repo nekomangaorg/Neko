@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.coroutines.flow.collect
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
@@ -46,6 +48,22 @@ fun MangaList(
 ) {
     val scrollState = rememberLazyListState()
 
+    if (!lastPage && mangaList.isNotEmpty()) {
+        LaunchedEffect(scrollState, mangaList.size, lastPage) {
+            snapshotFlow {
+                    val layoutInfo = scrollState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleItemIndex >= (totalItems - 1)
+                }
+                .collect { isAtEnd ->
+                    if (isAtEnd) {
+                        loadNextItems()
+                    }
+                }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         state = scrollState,
@@ -53,11 +71,6 @@ fun MangaList(
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
-            LaunchedEffect(scrollState) {
-                if (!lastPage && index >= mangaList.size - 1) {
-                    loadNextItems()
-                }
-            }
             val listCardType =
                 when {
                     index == 0 && mangaList.size > 1 -> ListCardType.Top
@@ -107,9 +120,7 @@ fun MangaListWithHeader(
                 }
                 itemsIndexed(
                     mangaList,
-                    key = { _, displayManga ->
-                        "${stringRes}-item-${displayManga.getTitle()}-${displayManga.mangaId}"
-                    },
+                    key = { _, displayManga -> "${stringRes}-item-${displayManga.mangaId}" },
                 ) { index, displayManga ->
                     val listCardType =
                         when {
