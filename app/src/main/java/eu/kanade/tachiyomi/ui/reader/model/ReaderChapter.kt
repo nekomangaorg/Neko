@@ -13,7 +13,7 @@ data class ReaderChapter(val chapter: Chapter) {
 
     val stateFlow = _stateFlow.asStateFlow()
 
-    var state: State
+    val state: State
         get() = _stateFlow.value
         set(value) {
             _stateFlow.value = value
