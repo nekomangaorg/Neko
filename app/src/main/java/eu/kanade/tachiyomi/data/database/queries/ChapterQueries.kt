@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterSourceOrderPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
-import eu.kanade.tachiyomi.util.lang.sqLite
 
 interface ChapterQueries : DbProvider {
 
@@ -35,7 +34,8 @@ interface ChapterQueries : DbProvider {
             .listOfObjects(MangaChapter::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentsQuery(search.sqLite, offset, limit, sortByFetched))
+                    .query(getRecentsQuery(offset, limit, sortByFetched))
+                    .args("%$search%")
                     .observesTables(ChapterTable.TABLE)
                     .build()
             )
