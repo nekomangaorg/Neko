@@ -303,13 +303,6 @@ class NotificationReceiver : BroadcastReceiver() {
         dismissNotification(context, Notifications.ID_UPDATER)
     }
 
-    private fun startAppUpdate(context: Context, intent: Intent) {
-        val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
-        val notifyOnInstall =
-            intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
-        AppDownloadInstallJob.start(context, url, notifyOnInstall)
-    }
-
     /**
      * Method called when user wants to download chapters
      *
