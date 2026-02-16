@@ -10,13 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.theme.NekoTheme
-import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 private fun MangaCoverPreviewContent(artwork: Artwork) {
@@ -32,16 +31,10 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
     }
 }
 
-@Preview(name = "Light Mode")
+@ThemePreviews
 @Composable
-private fun MangaCoverPreviewLight(@PreviewParameter(ArtworkProvider::class) artwork: Artwork) {
-    NekoTheme(colorScheme = NekoColorScheme.lightScheme) { MangaCoverPreviewContent(artwork) }
-}
-
-@Preview(name = "Dark Mode")
-@Composable
-private fun MangaCoverPreviewDark(@PreviewParameter(ArtworkProvider::class) artwork: Artwork) {
-    NekoTheme(colorScheme = NekoColorScheme.darkScheme) { MangaCoverPreviewContent(artwork) }
+private fun MangaCoverPreview(@PreviewParameter(ArtworkProvider::class) artwork: Artwork) {
+    ThemedPreviews { MangaCoverPreviewContent(artwork) }
 }
 
 private class ArtworkProvider : PreviewParameterProvider<Artwork> {
