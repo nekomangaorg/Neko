@@ -252,9 +252,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
                     }
                     // Keep the stream alive
                     awaitCancellation()
-                } catch (e: Exception) {
                     // Ignore errors as per original Rx implementation (which swallowed errors in
                     // subscribe)
+                    TimberKt.e(e) { "Error loading image in WebtoonPageHolder" }
                 } finally {
                     openStream?.close()
                 }
