@@ -525,7 +525,7 @@ class PagerPageHolder(
                     awaitCancellation()
                 } catch (e: Exception) {
                     // Ignore errors as per original Rx implementation
-                } finally {
+                    TimberKt.e(e) { "Error loading image in PagerPageHolder" }
                     try {
                         openStream?.close()
                     } catch (e: Exception) {
