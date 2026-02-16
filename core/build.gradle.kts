@@ -19,7 +19,6 @@ dependencies {
     implementation(libs.tokenbucket)
     implementation(libs.timber)
     implementation(libs.jsoup)
-    implementation(libs.rx.java)
     implementation(libs.tachi.unifile)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)

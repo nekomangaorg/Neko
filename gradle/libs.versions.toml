@@ -51,10 +51,6 @@ jsoup = "org.jsoup:jsoup:1.22.1"
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
 
-rx-android = "io.reactivex:rxandroid:1.2.1"
-rx-java = "io.reactivex:rxjava:1.3.8"
-rx-relay = "com.jakewharton.rxrelay:rxrelay:1.2.0"
-
 j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
 
 sqlite-android = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroidVersion" }
@@ -120,4 +116,3 @@ tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-
 tests = ["junit", "mockk", "kotest-assertions"]
 retrofit = ["retrofit-core", "retrofit-serialization", "retrofit-scalars"]
 results = ["kotlin-result", "kotlin-result-coroutines"]
-rx = ["rx-android", "rx-java", "rx-relay"]
