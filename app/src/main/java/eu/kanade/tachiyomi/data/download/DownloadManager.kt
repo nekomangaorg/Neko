@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.logging.TimberKt
@@ -129,13 +128,12 @@ class DownloadManager(val context: Context) {
         return queueState.value.find { it.chapterItem.id == chapterId }
     }
 
-    fun startDownloadNow(chapter: Chapter) {
+    suspend fun startDownloadNow(chapter: Chapter) {
         chapter.id ?: return
         if (chapter.isUnavailable) return
         val existingDownload = getQueuedDownloadOrNull(chapter.id!!)
         // If not in queue try to start a new download
-        val toAdd =
-            existingDownload ?: runBlocking { Download.fromChapterId(chapter.id!!) } ?: return
+        val toAdd = existingDownload ?: Download.fromChapterId(chapter.id!!) ?: return
         queueState.value.toMutableList().apply {
             existingDownload?.let { remove(it) }
             add(0, toAdd)

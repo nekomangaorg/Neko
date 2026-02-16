@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toSimpleManga
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.chapter.toSimpleChapter
 import uy.kohesive.injekt.injectLazy
@@ -72,7 +72,7 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
     }
 
     /** Returns the list of downloads to restore. It should be called in a background thread. */
-    fun restore(): List<Download> {
+    suspend fun restore(): List<Download> {
         val objs =
             preferences.all
                 .mapNotNull { it.value as? String }
@@ -84,8 +84,7 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
                 val manga =
-                    cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeAsBlocking() }
-                        ?: continue
+                    cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeOnIO() } ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
                 val simpleChapter = chapter.toSimpleChapter() ?: continue
                 val source = chapter.getHttpSource(sourceManager)

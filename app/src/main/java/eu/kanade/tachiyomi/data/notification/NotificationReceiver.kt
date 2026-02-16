@@ -84,11 +84,18 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
-                openChapter(
-                    context,
-                    intent.getLongExtra(EXTRA_MANGA_ID, -1),
-                    intent.getLongExtra(EXTRA_CHAPTER_ID, -1),
-                )
+                val pendingResult = goAsync()
+                launchIO {
+                    try {
+                        openChapter(
+                            context,
+                            intent.getLongExtra(EXTRA_MANGA_ID, -1),
+                            intent.getLongExtra(EXTRA_CHAPTER_ID, -1),
+                        )
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
             }
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
@@ -167,11 +174,11 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param mangaId id of manga
      * @param chapterId id of chapter
      */
-    internal fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
+    internal suspend fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
         dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
         val db = DatabaseHelper(context)
-        val manga = db.getManga(mangaId).executeAsBlocking()
-        val chapter = db.getChapter(chapterId).executeAsBlocking()
+        val manga = db.getManga(mangaId).executeOnIO()
+        val chapter = db.getChapter(chapterId).executeOnIO()
         if (manga != null && chapter != null) {
             val intent =
                 ReaderActivity.newIntent(context, manga, chapter).apply {

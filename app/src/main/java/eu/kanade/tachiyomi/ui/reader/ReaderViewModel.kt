@@ -67,7 +67,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
@@ -145,9 +144,15 @@ constructor(
      * Chapter list for the active manga. It's retrieved lazily and should be accessed for the first
      * time in a background thread to avoid blocking the UI.
      */
-    private val chapterList by lazy {
+    private var chapterListCache: List<ReaderChapter>? = null
+
+    private suspend fun getChapterList(): List<ReaderChapter> {
+        chapterListCache?.let {
+            return it
+        }
+
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+        val dbChapters = db.getChapters(manga).executeOnIO()
 
         val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
 
@@ -158,15 +163,18 @@ constructor(
                 ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            chapterItemFilter.filterChaptersForReader(
-                allChapterItems,
-                manga,
-                chapterItemSort.sortComparator(manga, true), // Ascending sort for reader
-                selectedChapterItem,
-            )
+            chapterItemFilter
+                .filterChaptersForReader(
+                    allChapterItems,
+                    manga,
+                    chapterItemSort.sortComparator(manga, true), // Ascending sort for reader
+                    selectedChapterItem,
+                )
+                .map { it.chapter.toDbChapter() }
+                .map(::ReaderChapter)
 
-        // 6. Map back to ReaderChapter
-        chaptersForReader.map { it.chapter.toDbChapter() }.map(::ReaderChapter)
+        chapterListCache = chaptersForReader
+        return chaptersForReader
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
@@ -270,7 +278,7 @@ constructor(
                             sourceManager,
                         )
 
-                    loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
+                    loadChapter(loader!!, getChapterList().first { chapterId == it.chapter.id })
                     Result.success(true)
                 } else {
                     // Unlikely but okay
@@ -415,6 +423,8 @@ constructor(
 
         loader.loadChapter(chapter)
 
+        val chapterList = getChapterList()
+
         val chapterPos = chapterList.indexOf(chapter)
         val newChapters =
             ViewerChapters(
@@ -536,7 +546,7 @@ constructor(
     /**
      * Saves the chapter progress (last read page and whether it's read) if incognito mode isn't on.
      */
-    private fun updateChapterProgress(
+    private suspend fun updateChapterProgress(
         readerChapter: ReaderChapter,
         page: ReaderPage,
         hasExtraPage: Boolean,
@@ -572,7 +582,7 @@ constructor(
     }
 
     /** Helper function to run completion logic. */
-    private fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
+    private suspend fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
         if (!securityPreferences.incognitoMode().get()) {
             readerChapter.chapter.read = true
             updateTrackChapterAfterReading(readerChapter)
@@ -595,16 +605,16 @@ constructor(
         }
     }
 
-    private fun downloadAutoNextChapters(choice: Int, nextChapterId: Long?) {
+    private suspend fun downloadAutoNextChapters(choice: Int, nextChapterId: Long?) {
         val chaptersToDownload = getNextUnreadChaptersSorted(nextChapterId).take(choice - 1)
         if (chaptersToDownload.isNotEmpty()) {
             downloadChapters(chaptersToDownload)
         }
     }
 
-    private fun getNextUnreadChaptersSorted(nextChapterId: Long?): List<DomainChapterItem> {
+    private suspend fun getNextUnreadChaptersSorted(nextChapterId: Long?): List<DomainChapterItem> {
         val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
-        return chapterList
+        return getChapterList()
             .asSequence()
             .map { DomainChapterItem(it.chapter.toSimpleChapter()!!) }
             .filter { !it.chapter.read || it.chapter.id == nextChapterId }
@@ -639,8 +649,9 @@ constructor(
      *
      * @param currentChapter current chapter, which is going to be marked as read.
      */
-    private fun deleteChapterIfNeeded(currentChapter: ReaderChapter) {
+    private suspend fun deleteChapterIfNeeded(currentChapter: ReaderChapter) {
         // Determine which chapter should be deleted and enqueue
+        val chapterList = getChapterList()
         val currentChapterPosition = chapterList.indexOf(currentChapter)
         val removeAfterReadSlots = preferences.removeAfterReadSlots().get()
         val chapterToDelete = chapterList.getOrNull(currentChapterPosition - removeAfterReadSlots)
@@ -757,7 +768,7 @@ constructor(
     fun setMangaReadingMode(readingModeType: Int) {
         val manga = manga ?: return
 
-        runBlocking(Dispatchers.IO) {
+        viewModelScope.launchIO {
             manga.readingModeType = readingModeType
             db.updateViewerFlags(manga).executeAsBlocking()
             val currChapters = state.value.viewerChapters
@@ -778,7 +789,7 @@ constructor(
     }
 
     fun reloadViewer() {
-        runBlocking(Dispatchers.IO) { eventChannel.send(Event.ReloadMangaAndChapters) }
+        viewModelScope.launchIO { eventChannel.send(Event.ReloadMangaAndChapters) }
     }
 
     /** Returns the orientation type used by this manga or the default one. */

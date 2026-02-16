@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Response
 import okio.buffer
@@ -66,12 +65,11 @@ class ChapterCache(private val context: Context) {
         get() = diskCache.directory
 
     /** Returns real size of directory. */
-    private val realSize: Long
-        get() = DiskUtil.getDirectorySize(cacheDir)
-
-    /** Returns real size of directory in human readable format. */
-    val readableSize: String
-        get() = Formatter.formatFileSize(context, realSize)
+    suspend fun getReadableSize(): String =
+        withContext(Dispatchers.IO) {
+            val size = DiskUtil.getDirectorySize(cacheDir)
+            Formatter.formatFileSize(context, size)
+        }
 
     init {
         readerPreferences
