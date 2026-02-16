@@ -14,9 +14,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.nekomanga.R
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
 
 /** View of the ViewPager that contains a chapter transition. */
 @SuppressLint("ViewConstructor")
@@ -27,8 +29,10 @@ class PagerTransitionHolder(val viewer: PagerViewer, val transition: ChapterTran
     override val item: Any
         get() = transition
 
-    /** Subscription for status changes of the transition page. */
-    private var statusSubscription: Subscription? = null
+    /** Job for status changes of the transition page. */
+    private var statusJob: Job? = null
+
+    private val scope = MainScope()
 
     /**
      * View container of the current status of the transition page. Child views will be added
@@ -61,8 +65,8 @@ class PagerTransitionHolder(val viewer: PagerViewer, val transition: ChapterTran
     /** Called when this view is detached from the window. Unsubscribes any active subscription. */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        statusSubscription?.unsubscribe()
-        statusSubscription = null
+        statusJob?.cancel()
+        statusJob = null
     }
 
     /**
@@ -70,15 +74,17 @@ class PagerTransitionHolder(val viewer: PagerViewer, val transition: ChapterTran
      * state, the pages container is cleaned up before setting the new state.
      */
     private fun observeStatus(chapter: ReaderChapter) {
-        statusSubscription?.unsubscribe()
-        statusSubscription =
-            chapter.stateObserver.observeOn(AndroidSchedulers.mainThread()).subscribe { state ->
-                pagesContainer.removeAllViews()
-                when (state) {
-                    is ReaderChapter.State.Wait -> {}
-                    is ReaderChapter.State.Loading -> setLoading()
-                    is ReaderChapter.State.Error -> setError(state.error)
-                    is ReaderChapter.State.Loaded -> setLoaded()
+        statusJob?.cancel()
+        statusJob =
+            scope.launch {
+                chapter.stateFlow.collectLatest { state ->
+                    pagesContainer.removeAllViews()
+                    when (state) {
+                        is ReaderChapter.State.Wait -> {}
+                        is ReaderChapter.State.Loading -> setLoading()
+                        is ReaderChapter.State.Error -> setError(state.error)
+                        is ReaderChapter.State.Loaded -> setLoaded()
+                    }
                 }
             }
     }

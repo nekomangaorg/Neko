@@ -13,16 +13,20 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import eu.kanade.tachiyomi.util.system.dpToPx
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.nekomanga.R
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
 
 /** Holder of the webtoon viewer that contains a chapter transition. */
 class WebtoonTransitionHolder(val layout: LinearLayout, viewer: WebtoonViewer) :
     WebtoonBaseHolder(layout, viewer) {
 
-    /** Subscription for status changes of the transition page. */
-    private var statusSubscription: Subscription? = null
+    /** Job for status changes of the transition page. */
+    private var statusJob: Job? = null
+
+    private val scope = MainScope()
 
     private val transitionView = ReaderTransitionView(context)
 
@@ -68,7 +72,7 @@ class WebtoonTransitionHolder(val layout: LinearLayout, viewer: WebtoonViewer) :
 
     /** Called when the view is recycled and being added to the view pool. */
     override fun recycle() {
-        unsubscribeStatus()
+        cancelStatusJob()
     }
 
     /**
@@ -76,27 +80,27 @@ class WebtoonTransitionHolder(val layout: LinearLayout, viewer: WebtoonViewer) :
      * state, the pages container is cleaned up before setting the new state.
      */
     private fun observeStatus(chapter: ReaderChapter, transition: ChapterTransition) {
-        unsubscribeStatus()
+        cancelStatusJob()
 
-        statusSubscription =
-            chapter.stateObserver.observeOn(AndroidSchedulers.mainThread()).subscribe { state ->
-                pagesContainer.removeAllViews()
-                when (state) {
-                    is ReaderChapter.State.Wait -> {}
-                    is ReaderChapter.State.Loading -> setLoading()
-                    is ReaderChapter.State.Error -> setError(state.error, transition)
-                    is ReaderChapter.State.Loaded -> setLoaded()
+        statusJob =
+            scope.launch {
+                chapter.stateFlow.collectLatest { state ->
+                    pagesContainer.removeAllViews()
+                    when (state) {
+                        is ReaderChapter.State.Wait -> {}
+                        is ReaderChapter.State.Loading -> setLoading()
+                        is ReaderChapter.State.Error -> setError(state.error, transition)
+                        is ReaderChapter.State.Loaded -> setLoaded()
+                    }
+                    pagesContainer.isVisible = pagesContainer.childCount > 0
                 }
-                pagesContainer.isVisible = pagesContainer.childCount > 0
             }
-
-        addSubscription(statusSubscription)
     }
 
-    /** Unsubscribes from the status subscription. */
-    private fun unsubscribeStatus() {
-        removeSubscription(statusSubscription)
-        statusSubscription = null
+    /** Cancels the status job. */
+    private fun cancelStatusJob() {
+        statusJob?.cancel()
+        statusJob = null
     }
 
     /** Sets the loading state on the pages container. */

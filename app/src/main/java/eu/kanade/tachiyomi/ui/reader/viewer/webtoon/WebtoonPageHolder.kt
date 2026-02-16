@@ -24,15 +24,14 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import java.io.BufferedInputStream
 import java.io.InputStream
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
-import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -77,11 +76,8 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     /** Job for progress changes of the page. */
     private var progressJob: Job? = null
 
-    /**
-     * Subscription used to read the header of the image. This is needed in order to instantiate the
-     * appropriate image view depending if the image is animated (GIF).
-     */
-    private var readImageHeaderSubscription: Subscription? = null
+    /** Job for loading the image header and stream. */
+    private var imageLoadJob: Job? = null
 
     init {
         refreshLayoutParams()
@@ -117,7 +113,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
     override fun recycle() {
         cancelLoadJob()
         cancelProgressJob()
-        unsubscribeReadImageHeader()
+        cancelImageLoadJob()
 
         removeDecodeErrorLayout()
         frame.recycle()
@@ -189,10 +185,10 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         progressJob = null
     }
 
-    /** Unsubscribes from the read image header subscription. */
-    private fun unsubscribeReadImageHeader() {
-        removeSubscription(readImageHeaderSubscription)
-        readImageHeaderSubscription = null
+    /** Cancels the image load job. */
+    private fun cancelImageLoadJob() {
+        imageLoadJob?.cancel()
+        imageLoadJob = null
     }
 
     /** Called when the page is queued. */
@@ -227,41 +223,42 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         retryContainer?.isVisible = false
         removeDecodeErrorLayout()
 
-        unsubscribeReadImageHeader()
+        cancelImageLoadJob()
         val streamFn = page?.stream ?: return
 
-        var openStream: InputStream? = null
-        readImageHeaderSubscription =
-            Observable.fromCallable {
+        imageLoadJob =
+            scope.launch(Dispatchers.IO) {
+                var openStream: InputStream? = null
+                try {
                     val stream = streamFn().buffered(16)
                     openStream = process(stream)
+                    val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
 
-                    ImageUtil.isAnimatedAndSupported(stream)
+                    withContext(Dispatchers.Main) {
+                        frame.setImage(
+                            openStream!!,
+                            isAnimated,
+                            ReaderPageImageView.Config(
+                                zoomDuration = viewer.config.doubleTapAnimDuration,
+                                minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
+                                cropBorders =
+                                    if (viewer.hasMargins) {
+                                        viewer.config.verticalCropBorders
+                                    } else {
+                                        viewer.config.webtoonCropBorders
+                                    },
+                            ),
+                        )
+                    }
+                    // Keep the stream alive
+                    awaitCancellation()
+                } catch (e: Exception) {
+                    // Ignore errors as per original Rx implementation (which swallowed errors in
+                    // subscribe)
+                } finally {
+                    openStream?.close()
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { isAnimated ->
-                    frame.setImage(
-                        openStream!!,
-                        isAnimated,
-                        ReaderPageImageView.Config(
-                            zoomDuration = viewer.config.doubleTapAnimDuration,
-                            minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
-                            cropBorders =
-                                if (viewer.hasMargins) {
-                                    viewer.config.verticalCropBorders
-                                } else {
-                                    viewer.config.webtoonCropBorders
-                                },
-                        ),
-                    )
-                }
-                // Keep the Rx stream alive to close the input stream only when unsubscribed
-                .flatMap { Observable.never<Unit>() }
-                .doOnUnsubscribe { openStream?.close() }
-                .subscribe({}, {})
-
-        addSubscription(readImageHeaderSubscription)
+            }
     }
 
     private fun process(imageStream: BufferedInputStream): InputStream {
