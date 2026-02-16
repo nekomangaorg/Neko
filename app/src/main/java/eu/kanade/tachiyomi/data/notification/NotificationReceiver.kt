@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -79,7 +80,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_BACKUP ->
                 shareBackup(
                     context,
-                    intent.getParcelableExtra(EXTRA_URI)!!,
+                    intent.getParcelableExtraCompat(EXTRA_URI, Uri::class.java)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Open reader activity
@@ -131,7 +132,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_CRASH_LOG ->
                 shareFile(
                     context,
-                    intent.getParcelableExtra(EXTRA_URI)!!,
+                    intent.getParcelableExtraCompat(EXTRA_URI, Uri::class.java)!!,
                     "text/plain",
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
