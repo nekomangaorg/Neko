@@ -605,7 +605,7 @@ private fun LazyListScope.chapterList(
             index = index,
             chapterItem = chapterItem,
             count = chapters.size,
-            activeChapters = screenState.activeChapters,
+            activeChapters = chapters,
             themeColorState = themeColorState,
             shouldHideChapterTitles =
                 screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
