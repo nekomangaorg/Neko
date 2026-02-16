@@ -68,7 +68,7 @@ val libraryQuery =
     """
 
 /** Query to get the recent chapters of manga from the library up to a date. */
-fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: Boolean): String {
+fun getRecentsQuery(offset: Int, limit: Int, sortByDateFetched: Boolean): String {
     val orderBy =
         when (sortByDateFetched) {
             true -> Chapter.COL_DATE_FETCH
@@ -80,7 +80,7 @@ fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: 
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
     WHERE ${Manga.COL_FAVORITE} = 1
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
-    AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
+    AND lower(${Manga.COL_TITLE}) LIKE ?
     AND (
       ${Chapter.TABLE}.${Chapter.COL_UNAVAILABLE} = 0
       OR (${Chapter.TABLE}.${Chapter.COL_UNAVAILABLE} = 1 AND ${Chapter.TABLE}.${Chapter.COL_SCANLATOR} = 'Local')
@@ -105,12 +105,7 @@ fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int, limit: In
  * information of chapters that have the same id as the chapter in max_last_read and are read after
  * the given time period
  */
-fun getRecentHistoryUngrouped(
-    search: String = "",
-    offset: Int = 0,
-    limit: Int = 25,
-    isResuming: Boolean,
-) =
+fun getRecentHistoryUngrouped(offset: Int = 0, limit: Int = 25, isResuming: Boolean) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
     FROM ${Manga.TABLE}
@@ -123,7 +118,7 @@ fun getRecentHistoryUngrouped(
     JOIN ${History.TABLE}
     ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND ${History.TABLE}.${History.COL_LAST_READ} > 0
-    AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
+    AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE ?
     ORDER BY ${History.TABLE}.${History.COL_LAST_READ} DESC
     ${limitAndOffset(true, isResuming, offset,limit)}
 """
@@ -158,12 +153,7 @@ fun getAllChapterHistoryByMangaId(mangaId: Long) =
  * information of chapters that have the same id as the chapter in max_last_read and are read after
  * the given time period
  */
-fun getRecentMangasLimitQuery(
-    search: String = "",
-    offset: Int = 0,
-    limit: Int = 25,
-    isResuming: Boolean,
-) =
+fun getRecentMangasLimitQuery(offset: Int = 0, limit: Int = 25, isResuming: Boolean) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
     FROM ${Manga.TABLE}
@@ -183,7 +173,7 @@ fun getRecentMangasLimitQuery(
     ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = max_last_read.${Chapter.COL_MANGA_ID}
     AND max_last_read.${History.COL_CHAPTER_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND max_last_read.${History.COL_LAST_READ} > 0
-    AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
+    AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE ?
     ORDER BY max_last_read.${History.COL_LAST_READ} DESC
     ${limitAndOffset(true, isResuming, offset, limit)}
 """
@@ -215,7 +205,6 @@ fun getHistoryPerPeriodQuery(startDate: Long, endDate: Long) =
  * recents chapters Final Union gets newly added manga
  */
 fun getAllRecentsType(
-    search: String = "",
     includeRead: Boolean,
     endless: Boolean,
     offset: Int = 0,
@@ -251,7 +240,7 @@ fun getAllRecentsType(
     ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = max_last_read.${Chapter.COL_MANGA_ID}
     AND max_last_read.${History.COL_CHAPTER_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND max_last_read.${History.COL_LAST_READ} > 0
-    AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
+    AND lower(${Manga.COL_TITLE}) LIKE ?)
     UNION
     SELECT * FROM
     (SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*,
@@ -272,7 +261,7 @@ fun getAllRecentsType(
     WHERE ${Manga.COL_FAVORITE} = 1
     AND newest_chapter.${History.COL_CHAPTER_ID} = ${Chapter.TABLE}.${Chapter.COL_ID}
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
-    AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
+    AND lower(${Manga.COL_TITLE}) LIKE ?)
     UNION
     SELECT * FROM
     (SELECT mangas.url as mangaUrl,
@@ -303,7 +292,7 @@ fun getAllRecentsType(
         Null as history_time_read
         FROM mangas
     WHERE ${Manga.COL_FAVORITE} = 1
-    AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
+    AND lower(${Manga.COL_TITLE}) LIKE ?)
     ORDER BY history_last_read DESC
     ${limitAndOffset(endless, isResuming, offset, limit)}
 """

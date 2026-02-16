@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryUpsertResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
-import eu.kanade.tachiyomi.util.lang.sqLite
 
 interface HistoryQueries : DbProvider {
 
@@ -48,7 +47,8 @@ interface HistoryQueries : DbProvider {
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentHistoryUngrouped(search.sqLite, offset, limit, isResuming))
+                    .query(getRecentHistoryUngrouped(offset, limit, isResuming))
+                    .args("%$search%")
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -66,7 +66,8 @@ interface HistoryQueries : DbProvider {
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(getRecentMangasLimitQuery(search.sqLite, offset, limit, isResuming))
+                    .query(getRecentMangasLimitQuery(offset, limit, isResuming))
+                    .args("%$search%")
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
@@ -110,16 +111,8 @@ interface HistoryQueries : DbProvider {
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(
                 RawQuery.builder()
-                    .query(
-                        getAllRecentsType(
-                            search.sqLite,
-                            includeRead,
-                            endless,
-                            offset,
-                            limit,
-                            isResuming,
-                        )
-                    )
+                    .query(getAllRecentsType(includeRead, endless, offset, limit, isResuming))
+                    .args("%$search%", "%$search%", "%$search%")
                     //                .args(date.time, startDate.time)
                     .observesTables(HistoryTable.TABLE)
                     .build()
