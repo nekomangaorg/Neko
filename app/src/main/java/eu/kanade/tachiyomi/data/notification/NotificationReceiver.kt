@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -79,7 +80,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_BACKUP ->
                 shareBackup(
                     context,
-                    intent.getParcelableExtra(EXTRA_URI)!!,
+                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Open reader activity
@@ -131,7 +132,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_CRASH_LOG ->
                 shareFile(
                     context,
-                    intent.getParcelableExtra(EXTRA_URI)!!,
+                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
                     "text/plain",
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
@@ -301,13 +302,6 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun cancelDownloadUpdate(context: Context) {
         AppDownloadInstallJob.stop(context)
         dismissNotification(context, Notifications.ID_UPDATER)
-    }
-
-    private fun startAppUpdate(context: Context, intent: Intent) {
-        val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
-        val notifyOnInstall =
-            intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
-        AppDownloadInstallJob.start(context, url, notifyOnInstall)
     }
 
     /**
