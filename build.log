@@ -1,0 +1,154 @@
+Calculating task graph as no cached configuration is available for tasks: assembleDebug
+Type-safe project accessors is an incubating feature.
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources NO-SOURCE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+Checking the license for package Android SDK Build-Tools 35 in /home/jules/Android/sdk/licenses
+License for package Android SDK Build-Tools 35 accepted.
+Preparing "Install Android SDK Build-Tools 35 v.35.0.0".
+"Install Android SDK Build-Tools 35 v.35.0.0" ready.
+Installing Android SDK Build-Tools 35 in /home/jules/Android/sdk/build-tools/35.0.0
+"Install Android SDK Build-Tools 35 v.35.0.0" complete.
+"Install Android SDK Build-Tools 35 v.35.0.0" finished.
+Checking the license for package Android SDK Platform 36 in /home/jules/Android/sdk/licenses
+License for package Android SDK Platform 36 accepted.
+Preparing "Install Android SDK Platform 36 (revision 2)".
+"Install Android SDK Platform 36 (revision 2)" ready.
+Installing Android SDK Platform 36 in /home/jules/Android/sdk/platforms/android-36
+"Install Android SDK Platform 36 (revision 2)" complete.
+"Install Android SDK Platform 36 (revision 2)" finished.
+[=========                              ] 25%
+Checking the license for package Android SDK Platform-Tools in /home/jules/Android/sdk/licenses
+License for package Android SDK Platform-Tools accepted.
+Preparing "Install Android SDK Platform-Tools v.36.0.2".
+"Install Android SDK Platform-Tools v.36.0.2" ready.
+Installing Android SDK Platform-Tools in /home/jules/Android/sdk/platform-tools
+"Install Android SDK Platform-Tools v.36.0.2" complete.
+"Install Android SDK Platform-Tools v.36.0.2" finished.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preStandardDebugBuild UP-TO-DATE
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandard NO-SOURCE
+> Task :app:ktfmtFormatAndroidTest NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatDebug NO-SOURCE
+> Task :app:ktfmtFormatRelease NO-SOURCE
+> Task :app:ktfmtFormatStandard NO-SOURCE
+> Task :app:ktfmtFormatStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatStandardRelease NO-SOURCE
+> Task :app:ktfmtFormatTestDebug NO-SOURCE
+> Task :app:ktfmtFormatTestFixtures NO-SOURCE
+> Task :app:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :app:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :app:ktfmtFormatTestFixturesStandard NO-SOURCE
+> Task :app:ktfmtFormatTestRelease NO-SOURCE
+> Task :app:ktfmtFormatTestStandard NO-SOURCE
+> Task :app:ktfmtFormatTestStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatTestStandardRelease NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:ktfmtFormatMain
+> Task :app:ktfmtFormatScripts
+> Task :app:ktfmtFormatTest
+> Task :app:dataBindingMergeDependencyArtifactsStandardDebug
+> Task :app:generateStandardDebugResValues
+> Task :app:generateStandardDebugResources
+> Task :app:prepareLibraryDefinitionsStandardDebug
+> Task :constants:preBuild UP-TO-DATE
+> Task :constants:preDebugBuild UP-TO-DATE
+> Task :constants:generateDebugResValues FROM-CACHE
+> Task :constants:generateDebugResources
+> Task :constants:packageDebugResources
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core:generateDebugResValues FROM-CACHE
+> Task :core:generateDebugResources
+> Task :core:packageDebugResources
+> Task :app:generateStandardDebugBuildConfig
+> Task :constants:writeDebugAarMetadata
+> Task :core:writeDebugAarMetadata
+> Task :constants:processDebugNavigationResources
+> Task :core:processDebugNavigationResources
+> Task :app:ktfmtFormat
+> Task :app:mapStandardDebugSourceSetPaths
+> Task :app:createStandardDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksStandardDebug
+> Task :constants:extractDeepLinksDebug
+> Task :app:processStandardDebugNavigationResources
+> Task :app:checkStandardDebugAarMetadata
+> Task :core:extractDeepLinksDebug FROM-CACHE
+> Task :core:processDebugManifest
+> Task :constants:processDebugManifest
+> Task :app:compileStandardDebugNavigationResources
+> Task :constants:compileDebugLibraryResources
+> Task :core:compileDebugLibraryResources
+> Task :core:parseDebugLocalResources
+> Task :constants:ktfmtFormatAndroidTest NO-SOURCE
+> Task :constants:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :constants:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :constants:ktfmtFormatDebug NO-SOURCE
+> Task :constants:parseDebugLocalResources
+> Task :constants:ktfmtFormatMain
+> Task :constants:ktfmtFormatRelease NO-SOURCE
+> Task :constants:ktfmtFormatScripts
+> Task :constants:ktfmtFormatTest NO-SOURCE
+> Task :constants:ktfmtFormatTestDebug NO-SOURCE
+> Task :constants:ktfmtFormatTestFixtures NO-SOURCE
+> Task :constants:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :constants:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :constants:ktfmtFormatTestRelease NO-SOURCE
+> Task :constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :constants:generateDebugBuildConfig
+> Task :constants:ktfmtFormat
+
+> Task :app:processStandardDebugMainManifest
+[me.saket.cascade:cascade-compose:2.3.0] /home/jules/.gradle/caches/8.14.4/transforms/e16568c28abe65d1a3304de90cffa4f3/transformed/jetified-cascade-compose-2.3.0/AndroidManifest.xml Warning:
+	Namespace 'me.saket.cascade' is used in multiple modules and/or libraries: me.saket.cascade:cascade-compose:2.3.0, me.saket.cascade:cascade:2.3.0. Please ensure that all modules and libraries have a unique namespace. For more information, See https://developer.android.com/studio/build/configure-app-module#set-namespace
+
+> Task :constants:javaPreCompileDebug
+> Task :core:ktfmtFormatAndroidTest NO-SOURCE
+> Task :core:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :core:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :core:ktfmtFormatDebug NO-SOURCE
+> Task :constants:generateDebugRFile
+> Task :app:processStandardDebugManifest
+> Task :app:processStandardDebugManifestForPackage
+
+> Task :app:mergeStandardDebugResources
+/app/constants/build/intermediates/packaged_res/debug/packageDebugResources/values/values.xml:1006:4: Multiple substitutions specified in non-positional format of string resource string/restore_duration. Did you mean to add the formatted="false" attribute?
+
+> Task :core:ktfmtFormatMain
+> Task :core:ktfmtFormatRelease NO-SOURCE
+> Task :core:ktfmtFormatScripts
+> Task :core:ktfmtFormatTest NO-SOURCE
+> Task :core:ktfmtFormatTestDebug NO-SOURCE
+> Task :core:generateDebugRFile
+> Task :core:ktfmtFormatTestFixtures NO-SOURCE
+> Task :core:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :core:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:generateDebugBuildConfig
+> Task :core:ktfmtFormatTestRelease NO-SOURCE
+> Task :core:ktfmtFormat
+> Task :core:javaPreCompileDebug FROM-CACHE
+> Task :app:generateStandardDebugAssets UP-TO-DATE
+> Task :app:javaPreCompileStandardDebug FROM-CACHE
+> Task :constants:mergeDebugShaders
+> Task :core:mergeDebugShaders
+> Task :core:compileDebugShaders NO-SOURCE
+> Task :constants:compileDebugShaders NO-SOURCE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :constants:generateDebugAssets UP-TO-DATE
+> Task :constants:mergeDebugAssets
+> Task :core:mergeDebugAssets
+> Task :app:mergeStandardDebugAssets
+> Task :app:compressStandardDebugAssets
+> Task :app:dataBindingGenBaseClassesStandardDebug
+> Task :app:checkStandardDebugDuplicateClasses
+> Task :app:desugarStandardDebugFileDependencies

@@ -1,0 +1,198 @@
+Reusing configuration cache.
+> Task :app:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :app:ktfmtFormatDebug NO-SOURCE
+> Task :app:ktfmtFormatAndroidTest NO-SOURCE
+> Task :app:ktfmtFormatRelease NO-SOURCE
+> Task :app:ktfmtFormatStandard NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandard NO-SOURCE
+> Task :app:ktfmtFormatStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatStandardRelease NO-SOURCE
+> Task :app:ktfmtFormatTestDebug NO-SOURCE
+> Task :app:ktfmtFormatTestFixtures NO-SOURCE
+> Task :app:ktfmtFormatMain UP-TO-DATE
+> Task :app:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :app:ktfmtFormatTestFixturesStandard NO-SOURCE
+> Task :app:ktfmtFormatTest UP-TO-DATE
+> Task :app:ktfmtFormatTestStandard NO-SOURCE
+> Task :app:ktfmtFormatTestRelease NO-SOURCE
+> Task :app:ktfmtFormatTestStandardRelease NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preStandardDebugBuild UP-TO-DATE
+> Task :app:ktfmtFormatTestStandardDebug NO-SOURCE
+> Task :app:generateStandardDebugResValues UP-TO-DATE
+> Task :app:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :app:injectCrashlyticsMappingFileIdStandardDebug UP-TO-DATE
+> Task :app:generateStandardDebugResources UP-TO-DATE
+> Task :app:prepareLibraryDefinitionsStandardDebug UP-TO-DATE
+> Task :app:injectCrashlyticsVersionControlInfoStandardDebug UP-TO-DATE
+> Task :constants:preBuild UP-TO-DATE
+> Task :constants:preDebugBuild UP-TO-DATE
+> Task :constants:generateDebugResValues UP-TO-DATE
+> Task :app:ktfmtFormatScripts UP-TO-DATE
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :constants:generateDebugResources UP-TO-DATE
+> Task :core:generateDebugResValues UP-TO-DATE
+> Task :core:generateDebugResources UP-TO-DATE
+> Task :app:processStandardDebugGoogleServices
+> Task :core:packageDebugResources UP-TO-DATE
+> Task :app:ktfmtFormat UP-TO-DATE
+> Task :constants:packageDebugResources UP-TO-DATE
+> Task :constants:writeDebugAarMetadata UP-TO-DATE
+> Task :core:writeDebugAarMetadata UP-TO-DATE
+> Task :app:generateStandardDebugBuildConfig
+> Task :constants:processDebugNavigationResources UP-TO-DATE
+> Task :core:processDebugNavigationResources UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsStandardDebug UP-TO-DATE
+> Task :app:checkStandardDebugAarMetadata UP-TO-DATE
+> Task :app:createStandardDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:mapStandardDebugSourceSetPaths
+> Task :app:processStandardDebugNavigationResources
+> Task :app:compileStandardDebugNavigationResources UP-TO-DATE
+> Task :app:extractDeepLinksStandardDebug UP-TO-DATE
+> Task :constants:extractDeepLinksDebug UP-TO-DATE
+> Task :core:extractDeepLinksDebug UP-TO-DATE
+> Task :constants:processDebugManifest UP-TO-DATE
+> Task :constants:compileDebugLibraryResources UP-TO-DATE
+> Task :core:processDebugManifest UP-TO-DATE
+> Task :core:compileDebugLibraryResources UP-TO-DATE
+> Task :constants:parseDebugLocalResources UP-TO-DATE
+> Task :core:parseDebugLocalResources UP-TO-DATE
+> Task :constants:ktfmtFormatAndroidTest NO-SOURCE
+> Task :constants:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :constants:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :constants:ktfmtFormatDebug NO-SOURCE
+> Task :constants:ktfmtFormatMain UP-TO-DATE
+> Task :constants:ktfmtFormatRelease NO-SOURCE
+> Task :constants:ktfmtFormatScripts UP-TO-DATE
+> Task :constants:ktfmtFormatTest NO-SOURCE
+> Task :constants:ktfmtFormatTestDebug NO-SOURCE
+> Task :constants:ktfmtFormatTestFixtures NO-SOURCE
+> Task :constants:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :constants:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :constants:ktfmtFormatTestRelease NO-SOURCE
+> Task :constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :constants:generateDebugBuildConfig UP-TO-DATE
+> Task :constants:ktfmtFormat UP-TO-DATE
+> Task :constants:javaPreCompileDebug UP-TO-DATE
+> Task :core:ktfmtFormatAndroidTest NO-SOURCE
+> Task :core:ktfmtFormatAndroidTestDebug NO-SOURCE
+> Task :core:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :core:ktfmtFormatDebug NO-SOURCE
+> Task :core:ktfmtFormatMain UP-TO-DATE
+> Task :core:ktfmtFormatRelease NO-SOURCE
+> Task :core:ktfmtFormatScripts UP-TO-DATE
+> Task :core:ktfmtFormatTest NO-SOURCE
+> Task :core:ktfmtFormatTestDebug NO-SOURCE
+> Task :core:ktfmtFormatTestFixtures NO-SOURCE
+> Task :core:ktfmtFormatTestFixturesDebug NO-SOURCE
+> Task :core:ktfmtFormatTestFixturesRelease NO-SOURCE
+> Task :core:ktfmtFormatTestRelease NO-SOURCE
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:generateDebugBuildConfig UP-TO-DATE
+> Task :core:ktfmtFormat UP-TO-DATE
+> Task :core:javaPreCompileDebug UP-TO-DATE
+> Task :constants:generateDebugRFile UP-TO-DATE
+> Task :app:processStandardDebugMainManifest UP-TO-DATE
+> Task :core:generateDebugRFile UP-TO-DATE
+> Task :app:processStandardDebugManifest UP-TO-DATE
+> Task :app:processStandardDebugManifestForPackage UP-TO-DATE
+
+> Task :app:mergeStandardDebugResources
+/app/constants/build/intermediates/packaged_res/debug/packageDebugResources/values/values.xml:1006:4: Multiple substitutions specified in non-positional format of string resource string/restore_duration. Did you mean to add the formatted="false" attribute?
+
+> Task :app:dataBindingGenBaseClassesStandardDebug UP-TO-DATE
+
+> Task :constants:compileDebugKotlin
+w: Opt-in requirement marker kotlin.Experimental is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.ExperimentalMaterial3Api is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material.ExperimentalMaterialApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.ExperimentalMaterial3ExpressiveApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.foundation.layout.ExperimentalLayoutApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.foundation.ExperimentalFoundationApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker coil3.annotation.ExperimentalCoilApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker kotlinx.serialization.ExperimentalSerializationApi is unresolved. Please make sure it's present in the module dependencies
+
+> Task :constants:compileDebugJavaWithJavac
+> Task :constants:bundleLibCompileToJarDebug
+> Task :app:processStandardDebugResources
+
+> Task :core:compileDebugKotlin
+w: Opt-in requirement marker kotlin.Experimental is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.ExperimentalMaterial3Api is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material.ExperimentalMaterialApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.material3.ExperimentalMaterial3ExpressiveApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.foundation.layout.ExperimentalLayoutApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker androidx.compose.foundation.ExperimentalFoundationApi is unresolved. Please make sure it's present in the module dependencies
+w: Opt-in requirement marker coil3.annotation.ExperimentalCoilApi is unresolved. Please make sure it's present in the module dependencies
+w: file:///app/core/src/main/kotlin/tachiyomi/core/util/storage/DiskUtil.kt:23:30 'static fun getExternalFilesDirs(p0: @NonNull() Context, p1: @Nullable() String?): (@NonNull() Array<File!>..@NonNull() Array<out File!>)' is deprecated. Deprecated in Java.
+w: file:///app/core/src/main/kotlin/tachiyomi/core/util/storage/DiskUtil.kt:95:29 'static field ACTION_MEDIA_SCANNER_SCAN_FILE: String' is deprecated. Deprecated in Java.
+w: file:///app/core/src/main/kotlin/tachiyomi/core/util/system/WebViewClientCompat.kt:35:24 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///app/core/src/main/kotlin/tachiyomi/core/util/system/WebViewClientCompat.kt:46:24 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///app/core/src/main/kotlin/tachiyomi/core/util/system/WebViewClientCompat.kt:64:24 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+
+> Task :core:compileDebugJavaWithJavac
+> Task :core:bundleLibCompileToJarDebug
+> Task :app:compileStandardDebugKotlin
+w: Opt-in requirement marker kotlin.Experimental is unresolved. Please make sure it's present in the module dependencies
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/backup/models/BackupManga.kt:68:48 'var mergedMangaUrl: String?' is deprecated. Use mergeMangaList.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/backup/models/BackupTracking.kt:36:41 'var mediaIdInt: Int' is deprecated. Use mediaId instead.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/backup/models/BackupTracking.kt:37:41 'var mediaIdInt: Int' is deprecated. Use mediaId instead.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/notification/NotificationReceiver.kt:82:28 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/notification/NotificationReceiver.kt:134:28 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/notification/NotificationReceiver.kt:243:9 'constructor(): Handler' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/data/updater/AppUpdateBroadcast.kt:19:41 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryGroup.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/manga/MangaViewModel.kt:139:44 Unchecked cast of 'MangaViewModel' to 'T (of fun <T : ViewModel> create)'.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:38:8 'class GestureDetectorCompat : Any' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:649:16 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:754:31 'constructor(p0: @NonNull() Context, p1: @NonNull() GestureDetector.OnGestureListener): GestureDetectorCompat' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:861:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:951:28 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:952:28 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:958:28 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:972:28 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:976:28 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:1047:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/ReaderActivity.kt:1684:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/SaveImageNotifier.kt:45:29 Condition is always 'true'.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/chapter/ReaderChapterSheet.kt:102:41 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/chapter/ReaderChapterSheet.kt:145:45 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/settings/ReaderBottomButton.kt:6:50 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/reader/viewer/webtoon/WebtoonLayoutManager.kt:26:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/security/SecureActivityDelegate.kt:57:30 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/similar/SimilarViewModel.kt:41:48 Unchecked cast of 'SimilarViewModel' to 'T (of fun <T : ViewModel> create)'.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/ui/source/latest/DisplayViewModel.kt:40:79 Unchecked cast of 'DisplayViewModel' to 'T (of fun <T : ViewModel> create)'.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/util/system/ContextExtensions.kt:167:58 'field scaledDensity: Float' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/util/system/RxUtil.kt:15:32 'fun resume(value: T, onCancellation: ((@ParameterName(...) Throwable) -> Unit)?): Unit' is deprecated. Use the overload that also accepts the `value` and the coroutine context in lambda.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/widget/E2EBottomSheetDialog.kt:37:20 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/eu/kanade/tachiyomi/widget/E2EBottomSheetDialog.kt:37:57 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/FeedScreen.kt:77:26 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/feed/FeedBottomSheet.kt:144:37 'fun Modifier.menuAnchor(): Modifier' is deprecated. Use overload that takes ExposedDropdownMenuAnchorType and enabled parameters.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/onboarding/PermissionStep.kt:50:30 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/settings/SettingsItems.kt:28:8 'typealias MenuAnchorType = ExposedDropdownMenuAnchorType' is deprecated. Renamed to ExposedDropdownMenuAnchorType.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/settings/SettingsItems.kt:146:37 'typealias MenuAnchorType = ExposedDropdownMenuAnchorType' is deprecated. Renamed to ExposedDropdownMenuAnchorType.
+w: file:///app/app/src/main/java/org/nekomanga/presentation/screens/stats/DetailedStats.kt:946:25 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+
+BUILD SUCCESSFUL in 2m 33s
+58 actionable tasks: 13 executed, 45 up-to-date
+Configuration cache entry reused.
