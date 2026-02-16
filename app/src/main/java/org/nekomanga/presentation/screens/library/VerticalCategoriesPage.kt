@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,6 +86,21 @@ fun VerticalCategoriesPage(
             }
         }
 
+    val displayOptions =
+        remember(
+            libraryScreenState.showUnreadBadges,
+            libraryScreenState.showDownloadBadges,
+            libraryScreenState.showStartReadingButton,
+            libraryScreenState.outlineCovers,
+        ) {
+            LibraryItemDisplayOptions(
+                showUnreadBadges = libraryScreenState.showUnreadBadges,
+                showDownloadBadges = libraryScreenState.showDownloadBadges,
+                showStartReadingButton = libraryScreenState.showStartReadingButton,
+                outlineCovers = libraryScreenState.outlineCovers,
+            )
+        }
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
@@ -139,10 +155,7 @@ fun VerticalCategoriesPage(
                                 rowItems = rowItems,
                                 selectedIds = selectedIds,
                                 columns = columns,
-                                showUnreadBadges = libraryScreenState.showUnreadBadges,
-                                showDownloadBadges = libraryScreenState.showDownloadBadges,
-                                showStartReadingButton = libraryScreenState.showStartReadingButton,
-                                outlineCovers = libraryScreenState.outlineCovers,
+                                displayOptions = displayOptions,
                                 isComfortableGrid =
                                     libraryScreenState.libraryDisplayMode
                                         is LibraryDisplayMode.ComfortableGrid,
@@ -162,10 +175,7 @@ fun VerticalCategoriesPage(
                                 index = index,
                                 totalSize = item.libraryItems.size,
                                 selectedIds = selectedIds,
-                                showUnreadBadges = libraryScreenState.showUnreadBadges,
-                                showDownloadBadges = libraryScreenState.showDownloadBadges,
-                                showStartReadingButton = libraryScreenState.showStartReadingButton,
-                                outlineCovers = libraryScreenState.outlineCovers,
+                                displayOptions = displayOptions,
                                 libraryItem = libraryItem,
                                 libraryScreenActions = libraryScreenActions,
                             )
@@ -184,10 +194,7 @@ private fun RowGrid(
     rowItems: List<LibraryMangaItem>,
     selectedIds: List<Long>,
     columns: Int,
-    showUnreadBadges: Boolean,
-    showDownloadBadges: Boolean,
-    showStartReadingButton: Boolean,
-    outlineCovers: Boolean,
+    displayOptions: LibraryItemDisplayOptions,
     isComfortableGrid: Boolean,
     libraryScreenActions: LibraryScreenActions,
 ) {
@@ -199,14 +206,15 @@ private fun RowGrid(
         rowItems.forEach { libraryItem ->
             MangaGridItem(
                 displayManga = libraryItem.displayManga,
-                showUnreadBadge = showUnreadBadges,
+                showUnreadBadge = displayOptions.showUnreadBadges,
                 unreadCount = libraryItem.unreadCount,
-                showDownloadBadge = showDownloadBadges,
+                showDownloadBadge = displayOptions.showDownloadBadges,
                 downloadCount = libraryItem.downloadCount,
-                shouldOutlineCover = outlineCovers,
+                shouldOutlineCover = displayOptions.outlineCovers,
                 isComfortable = isComfortableGrid,
                 isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
-                showStartReadingButton = showStartReadingButton && libraryItem.unreadCount > 0,
+                showStartReadingButton =
+                    displayOptions.showStartReadingButton && libraryItem.unreadCount > 0,
                 onStartReadingClick = {
                     libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
                 },
@@ -229,10 +237,7 @@ private fun ListItem(
     index: Int,
     totalSize: Int,
     selectedIds: List<Long>,
-    showUnreadBadges: Boolean,
-    showDownloadBadges: Boolean,
-    showStartReadingButton: Boolean,
-    outlineCovers: Boolean,
+    displayOptions: LibraryItemDisplayOptions,
     libraryItem: LibraryMangaItem,
     libraryScreenActions: LibraryScreenActions,
 ) {
@@ -262,18 +267,27 @@ private fun ListItem(
                     ),
             displayManga = libraryItem.displayManga,
             isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
-            showUnreadBadge = showUnreadBadges,
+            showUnreadBadge = displayOptions.showUnreadBadges,
             unreadCount = libraryItem.unreadCount,
-            showDownloadBadge = showDownloadBadges,
+            showDownloadBadge = displayOptions.showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
-            showStartReadingButton = showStartReadingButton && libraryItem.unreadCount > 0,
+            showStartReadingButton =
+                displayOptions.showStartReadingButton && libraryItem.unreadCount > 0,
             onStartReadingClick = {
                 libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
             },
-            shouldOutlineCover = outlineCovers,
+            shouldOutlineCover = displayOptions.outlineCovers,
         )
     }
 }
+
+@Immutable
+data class LibraryItemDisplayOptions(
+    val showUnreadBadges: Boolean,
+    val showDownloadBadges: Boolean,
+    val showStartReadingButton: Boolean,
+    val outlineCovers: Boolean,
+)
 
 @Composable
 fun LibraryCategoryHeader(
