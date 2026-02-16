@@ -1187,6 +1187,7 @@
     <string name="every_12_hours">Every 12 hours</string>
     <string name="daily">Daily</string>
     <string name="every_2_days">Every 2 days</string>
+    <string name="every_3_days">Every 3 days</string>
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
     <plurals name="after_minutes">
@@ -1224,8 +1225,9 @@
     <string name="ok">Ok</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
-    <string name="charging">Charging</string>
-    <string name="battery_not_low">Battery not low</string>
+    <string name="charging">WHen charging</string>
+    <string name="connected_to_wifi">Only on Wi-Fi</string>
+    <string name="network_not_metered">Only on unmetered network</string>
     <string name="clear">Clear</string>
     <string name="clear_filters">Clear filters</string>
     <string name="close">Close</string>

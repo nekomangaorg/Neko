@@ -2,7 +2,10 @@ package eu.kanade.tachiyomi.data.library
 
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -52,6 +55,8 @@ import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
+import eu.kanade.tachiyomi.util.system.jobIsRunning
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
@@ -87,8 +92,8 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -149,11 +154,19 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
-        // Find a running manual worker. If exists, try again later
-        if (WORK_NAME_AUTO in tags && instance != null) {
-            return Result.retry()
-        }
+        if (tags.contains(WORK_NAME_AUTO)) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
+                if ((DEVICE_ONLY_ON_WIFI in restrictions) && !context.isConnectedToWifi()) {
+                    return Result.retry()
+                }
+            }
 
+            // Find a running manual worker. If exists, try again later
+            if (WorkManager.getInstance(context).jobIsRunning(WORK_NAME_MANUAL)) {
+                return Result.retry()
+            }
+        }
         tryToSetForeground()
 
         instance = WeakReference(this)
@@ -328,13 +341,15 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = notifier.progressNotificationBuilder.build()
-        val id = Notifications.Id.Library.Progress
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        } else {
-            ForegroundInfo(id, notification)
-        }
+        return ForegroundInfo(
+            Notifications.Id.Library.Progress,
+            notifier.progressNotificationBuilder.build(),
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            } else {
+                0
+            },
+        )
     }
 
     private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
@@ -856,34 +871,52 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val libraryPreferences = Injekt.get<LibraryPreferences>()
-            val interval = prefInterval ?: libraryPreferences.updateInterval().get()
+            var interval = prefInterval ?: libraryPreferences.updateInterval().get()
+
+            if (interval == 6) {
+                libraryPreferences.updateInterval().set(12)
+                interval = 12
+            }
             if (interval > 0) {
                 val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
 
                 val networkType =
-                    if (DEVICE_ONLY_ON_WIFI in restrictions) {
-                        NetworkType.UNMETERED // wifi only
+                    if (DEVICE_NETWORK_NOT_METERED in restrictions) {
+                        NetworkType.UNMETERED
                     } else {
-                        NetworkType.CONNECTED // Any network
+                        NetworkType.CONNECTED
                     }
+
+                val networkRequestBuilder = NetworkRequest.Builder()
+                if (DEVICE_ONLY_ON_WIFI in restrictions) {
+                    networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                }
+                if (DEVICE_NETWORK_NOT_METERED in restrictions) {
+                    networkRequestBuilder.addCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+                    )
+                }
 
                 val constraints =
                     Constraints.Builder()
-                        .setRequiredNetworkType(networkType)
+                        // 'networkRequest' only applies to Android 9+, otherwise 'networkType' is
+                        // used
+                        .setRequiredNetworkRequest(networkRequestBuilder.build(), networkType)
                         .setRequiresCharging(DEVICE_CHARGING in restrictions)
-                        .setRequiresBatteryNotLow(DEVICE_BATTERY_NOT_LOW in restrictions)
+                        .setRequiresBatteryNotLow(true)
                         .build()
 
                 val request =
                     PeriodicWorkRequestBuilder<LibraryUpdateJob>(
                             interval.toLong(),
                             TimeUnit.HOURS,
-                            1L,
-                            TimeUnit.HOURS,
+                            10L,
+                            TimeUnit.MINUTES,
                         )
                         .addTag(TAG)
                         .addTag(WORK_NAME_AUTO)
                         .setConstraints(constraints)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
                         .build()
 
                 WorkManager.getInstance(context)

@@ -20,8 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
-import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -187,10 +187,10 @@ internal class LibrarySettingsScreen(
                         entries =
                             persistentMapOf(
                                 0 to stringResource(R.string.manual),
-                                6 to stringResource(R.string.every_6_hours),
                                 12 to stringResource(R.string.every_12_hours),
                                 24 to stringResource(R.string.daily),
                                 48 to stringResource(R.string.every_2_days),
+                                72 to stringResource(R.string.every_3_days),
                                 168 to stringResource(R.string.weekly),
                             ),
                         onValueChanged = {
@@ -208,9 +208,10 @@ internal class LibrarySettingsScreen(
                         subtitle = stringResource(R.string.restrictions_),
                         entries =
                             persistentMapOf(
-                                DEVICE_ONLY_ON_WIFI to stringResource(R.string.wifi),
+                                DEVICE_ONLY_ON_WIFI to stringResource(R.string.connected_to_wifi),
+                                DEVICE_NETWORK_NOT_METERED to
+                                    stringResource(R.string.network_not_metered),
                                 DEVICE_CHARGING to stringResource(R.string.charging),
-                                DEVICE_BATTERY_NOT_LOW to stringResource(R.string.battery_not_low),
                             ),
                         onValueChanged = {
                             viewModelScope.launchNonCancellable {
