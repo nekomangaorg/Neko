@@ -132,7 +132,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_CRASH_LOG ->
                 shareFile(
                     context,
-                    intent.getParcelableExtraCompat(EXTRA_URI, Uri::class.java)!!,
+                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
                     "text/plain",
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
