@@ -80,7 +80,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_SHARE_BACKUP ->
                 shareBackup(
                     context,
-                    intent.getParcelableExtraCompat(EXTRA_URI, Uri::class.java)!!,
+                    intent.getParcelableExtraCompat<Uri>(EXTRA_URI)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Open reader activity
