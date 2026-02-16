@@ -28,6 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,6 +38,7 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
@@ -151,6 +155,38 @@ fun MangaGridItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
+    val subtitleText =
+        when (displayManga.displayTextRes) {
+            null -> displayManga.displayText
+            else -> stringResource(displayManga.displayTextRes)
+        }
+
+    val title = displayManga.getTitle()
+    val inLibraryText = stringResource(id = R.string.in_library)
+    val unreadText = stringResource(id = R.string.unread)
+    val downloadedText = stringResource(id = R.string.downloaded)
+    val contentDescription =
+        remember(
+            title,
+            subtitleText,
+            displayManga.inLibrary,
+            unreadCount,
+            downloadCount,
+            inLibraryText,
+            unreadText,
+            downloadedText,
+        ) {
+            buildList {
+                    add(title)
+                    if (subtitleText.isNotBlank()) add(subtitleText)
+                    if (displayManga.inLibrary) add(inLibraryText)
+                    if (showUnreadBadge && unreadCount > 0) add("$unreadCount $unreadText")
+                    if (showDownloadBadge && downloadCount > 0)
+                        add("$downloadCount $downloadedText")
+                }
+                .joinToString(", ")
+        }
+
     Box(modifier = modifier) {
         Box(modifier = Modifier.padding(start = 2.dp, top = 2.dp)) {
             Box(
@@ -158,13 +194,8 @@ fun MangaGridItem(
                     Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
                         .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                         .padding(Size.extraTiny)
+                        .semantics { this.contentDescription = contentDescription }
             ) {
-                val subtitleText =
-                    when (displayManga.displayTextRes) {
-                        null -> displayManga.displayText
-                        else -> stringResource(displayManga.displayTextRes)
-                    }
-
                 if (isComfortable) {
                     Column {
                         ComfortableGridItem(
@@ -197,17 +228,21 @@ fun MangaGridItem(
         }
 
         if (displayManga.inLibrary) {
-            InLibraryBadge(shouldOutlineCover, offset = 0.dp)
+            Box(modifier = Modifier.clearAndSetSemantics {}) {
+                InLibraryBadge(shouldOutlineCover, offset = 0.dp)
+            }
         }
         if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
-            DownloadUnreadBadge(
-                outline = shouldOutlineCover,
-                showUnread = showUnreadBadge,
-                unreadCount = unreadCount,
-                showDownloads = showDownloadBadge,
-                downloadCount = downloadCount,
-                offset = 0.dp,
-            )
+            Box(modifier = Modifier.clearAndSetSemantics {}) {
+                DownloadUnreadBadge(
+                    outline = shouldOutlineCover,
+                    showUnread = showUnreadBadge,
+                    unreadCount = unreadCount,
+                    showDownloads = showDownloadBadge,
+                    downloadCount = downloadCount,
+                    offset = 0.dp,
+                )
+            }
         }
     }
 }
