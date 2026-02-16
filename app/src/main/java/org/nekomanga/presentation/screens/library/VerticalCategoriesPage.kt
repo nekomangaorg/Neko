@@ -138,8 +138,11 @@ fun VerticalCategoriesPage(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
                                 selectedIds = selectedIds,
-                                libraryScreenState = libraryScreenState,
                                 columns = columns,
+                                showUnreadBadges = libraryScreenState.showUnreadBadges,
+                                showDownloadBadges = libraryScreenState.showDownloadBadges,
+                                showStartReadingButton = libraryScreenState.showStartReadingButton,
+                                outlineCovers = libraryScreenState.outlineCovers,
                                 isComfortableGrid =
                                     libraryScreenState.libraryDisplayMode
                                         is LibraryDisplayMode.ComfortableGrid,
@@ -159,7 +162,10 @@ fun VerticalCategoriesPage(
                                 index = index,
                                 totalSize = item.libraryItems.size,
                                 selectedIds = selectedIds,
-                                libraryScreenState = libraryScreenState,
+                                showUnreadBadges = libraryScreenState.showUnreadBadges,
+                                showDownloadBadges = libraryScreenState.showDownloadBadges,
+                                showStartReadingButton = libraryScreenState.showStartReadingButton,
+                                outlineCovers = libraryScreenState.outlineCovers,
                                 libraryItem = libraryItem,
                                 libraryScreenActions = libraryScreenActions,
                             )
@@ -177,8 +183,11 @@ private fun RowGrid(
     modifier: Modifier = Modifier,
     rowItems: List<LibraryMangaItem>,
     selectedIds: List<Long>,
-    libraryScreenState: LibraryScreenState,
     columns: Int,
+    showUnreadBadges: Boolean,
+    showDownloadBadges: Boolean,
+    showStartReadingButton: Boolean,
+    outlineCovers: Boolean,
     isComfortableGrid: Boolean,
     libraryScreenActions: LibraryScreenActions,
 ) {
@@ -190,20 +199,19 @@ private fun RowGrid(
         rowItems.forEach { libraryItem ->
             MangaGridItem(
                 displayManga = libraryItem.displayManga,
-                showUnreadBadge = libraryScreenState.showUnreadBadges,
+                showUnreadBadge = showUnreadBadges,
                 unreadCount = libraryItem.unreadCount,
-                showDownloadBadge = libraryScreenState.showDownloadBadges,
+                showDownloadBadge = showDownloadBadges,
                 downloadCount = libraryItem.downloadCount,
-                shouldOutlineCover = libraryScreenState.outlineCovers,
+                shouldOutlineCover = outlineCovers,
                 isComfortable = isComfortableGrid,
                 isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
-                showStartReadingButton =
-                    libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+                showStartReadingButton = showStartReadingButton && libraryItem.unreadCount > 0,
                 onStartReadingClick = {
                     libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
                 },
                 onClick = {
-                    if (libraryScreenState.selectedItems.isNotEmpty()) {
+                    if (selectedIds.isNotEmpty()) {
                         libraryScreenActions.mangaLongClick(libraryItem)
                     } else {
                         libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
@@ -221,7 +229,10 @@ private fun ListItem(
     index: Int,
     totalSize: Int,
     selectedIds: List<Long>,
-    libraryScreenState: LibraryScreenState,
+    showUnreadBadges: Boolean,
+    showDownloadBadges: Boolean,
+    showStartReadingButton: Boolean,
+    outlineCovers: Boolean,
     libraryItem: LibraryMangaItem,
     libraryScreenActions: LibraryScreenActions,
 ) {
@@ -241,7 +252,7 @@ private fun ListItem(
                 Modifier.fillMaxWidth()
                     .combinedClickable(
                         onClick = {
-                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                            if (selectedIds.isNotEmpty()) {
                                 libraryScreenActions.mangaLongClick(libraryItem)
                             } else {
                                 libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
@@ -251,16 +262,15 @@ private fun ListItem(
                     ),
             displayManga = libraryItem.displayManga,
             isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
-            showUnreadBadge = libraryScreenState.showUnreadBadges,
+            showUnreadBadge = showUnreadBadges,
             unreadCount = libraryItem.unreadCount,
-            showDownloadBadge = libraryScreenState.showDownloadBadges,
+            showDownloadBadge = showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
-            showStartReadingButton =
-                libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+            showStartReadingButton = showStartReadingButton && libraryItem.unreadCount > 0,
             onStartReadingClick = {
                 libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
             },
-            shouldOutlineCover = libraryScreenState.outlineCovers,
+            shouldOutlineCover = outlineCovers,
         )
     }
 }
