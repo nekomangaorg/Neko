@@ -102,11 +102,9 @@ fun DownloadButton(
         val optionsLabel = stringResource(R.string.options)
         val notDownloadedDescription = stringResource(R.string.not_downloaded)
         val queueDescription = stringResource(R.string.download_queue)
+        val percentFormatter = remember { NumberFormat.getPercentInstance() }
         val downloadingDescription =
-            stringResource(
-                R.string.downloading_,
-                NumberFormat.getPercentInstance().format(downloadProgress / 100f),
-            )
+            stringResource(R.string.downloading_, percentFormatter.format(downloadProgress / 100f))
         val downloadedDescription = stringResource(R.string.downloaded)
         val errorDescription = stringResource(R.string.download_error)
 
