@@ -490,12 +490,12 @@ private fun DefaultView(
         if (viewType == ViewType.Split) {
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     graph(Modifier, chartWidth)
-                    Column(Modifier.fillMaxWidth(.9f).padding(16.dp)) {
+                    Column(Modifier.fillMaxWidth(.9f).padding(Size.medium)) {
                         sortedSeries.forEach { entry ->
                             StatCard(
                                 header = entry.key,
@@ -649,7 +649,7 @@ private fun LazyListWrapper(
 @Composable
 private fun SortChip(sortType: Sort, onClick: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(end = Size.medium),
         contentAlignment = Alignment.CenterEnd,
     ) {
         AssistChip(
@@ -684,7 +684,7 @@ private fun LazyListScope.CustomChip(
 
 @Composable
 private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modifier) {
-    ElevatedCard(modifier = modifier.padding(horizontal = 16.dp, vertical = Size.small)) {
+    ElevatedCard(modifier = modifier.padding(horizontal = Size.medium, vertical = Size.small)) {
         Column(
             modifier =
                 Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny)
@@ -760,7 +760,7 @@ private fun Line(label: String, value: String) {
 
 @Composable
 private fun Pie(pieData: List<PieData>, chartWidth: Float, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.padding(Size.medium), contentAlignment = Alignment.Center) {
         if (pieData.isNotEmpty()) {
             PieChart(
                 modifier = Modifier.fillMaxWidth(chartWidth),
@@ -787,7 +787,8 @@ private fun Line(
 ) {
     Box(
         modifier =
-            Modifier.padding(horizontal = 16.dp, vertical = Size.none).fillMaxWidth(chartWidth),
+            Modifier.padding(horizontal = Size.medium, vertical = Size.none)
+                .fillMaxWidth(chartWidth),
         contentAlignment = Alignment.Center,
     ) {
         if (lineData.isNotEmpty()) {
@@ -796,7 +797,7 @@ private fun Line(
             LineChart(
                 lineData = lineData,
                 color = color,
-                modifier = Modifier.fillMaxWidth().height(height.dp).padding(16.dp),
+                modifier = Modifier.fillMaxWidth().height(height.dp).padding(Size.medium),
                 chartDimens = ChartDimens(Size.small),
                 axisConfig =
                     AxisConfig(
@@ -832,7 +833,7 @@ private fun StatCard(
     totalReadDuration: Long,
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = Size.small)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium, vertical = Size.small)
     ) {
         val labelStyle =
             MaterialTheme.typography.labelSmall.copy(

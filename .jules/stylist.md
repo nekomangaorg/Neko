@@ -1,0 +1,1 @@
+## 2024-05-23 - [Found Size.medium for 16.dp] **Learning:** The project defines dimension constants in `org.nekomanga.presentation.theme.Constants.kt` under `object Size`. `Size.medium` corresponds to `16.dp`. **Action:** When encountering hardcoded `16.dp`, replace it with `Size.medium`.
