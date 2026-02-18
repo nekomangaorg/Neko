@@ -87,7 +87,6 @@ import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
@@ -878,19 +877,15 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = 12.dpToPx + systemInsets.left
                 rightMargin = 12.dpToPx + systemInsets.right
+                bottomMargin = systemInsets.bottom
             }
-            binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                peek +
-                    if (fullscreen) {
-                        insets.getBottomGestureInsets()
-                    } else {
-                        val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                        max(
-                            0,
-                            (rootInsets.getBottomGestureInsets()) -
-                                rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                        )
-                    }
+
+            binding.pageNumber.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = systemInsets.bottom
+            }
+
+            binding.chaptersSheet.root.sheetBehavior?.peekHeight = 50.dpToPx + systemInsets.bottom
+
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(
                 bottom = systemInsets.bottom
             )
