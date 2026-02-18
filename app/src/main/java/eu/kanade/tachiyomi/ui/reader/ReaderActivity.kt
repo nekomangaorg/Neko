@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
@@ -33,6 +32,7 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import androidx.core.view.GestureDetectorCompat
@@ -114,6 +114,7 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.doOnEnd
 import eu.kanade.tachiyomi.widget.doOnStart
+import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -1790,7 +1791,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 .onEach { setPageNumberVisibility(it) }
                 .launchIn(scope)
 
-            readerPreferences.trueColor().changes().onEach { setTrueColor(it) }.launchIn(scope)
+            readerPreferences
+                .displayProfile()
+                .changes()
+                .onEach { setDisplayProfile(it) }
+                .launchIn(scope)
 
             readerPreferences.fullscreen().changes().onEach { setFullscreen(it) }.launchIn(scope)
 
@@ -1867,12 +1872,14 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.pageNumber.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
 
-        /** Sets the 32-bit color mode according to [enabled]. */
-        private fun setTrueColor(enabled: Boolean) {
-            if (enabled) {
-                SubsamplingScaleImageView.setPreferredBitmapConfig(Bitmap.Config.ARGB_8888)
-            } else {
-                SubsamplingScaleImageView.setPreferredBitmapConfig(Bitmap.Config.RGB_565)
+        /** Sets the display profile to [path]. */
+        private fun setDisplayProfile(path: String) {
+            val file = UniFile.fromUri(baseContext, path.toUri())
+            if (file != null && file.exists()) {
+                val inputStream = file.openInputStream()
+                val outputStream = ByteArrayOutputStream()
+                inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
+                SubsamplingScaleImageView.setDisplayProfile(outputStream.toByteArray())
             }
         }
 

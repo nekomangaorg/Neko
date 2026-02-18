@@ -55,13 +55,13 @@ rx-android = "io.reactivex:rxandroid:1.2.1"
 rx-java = "io.reactivex:rxjava:1.3.8"
 rx-relay = "com.jakewharton.rxrelay:rxrelay:1.2.0"
 
-j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
+subsample = "com.github.nekomangaorg:subsampling-scale-image-view:eac4255"
 
 sqlite-android = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroidVersion" }
 storio-sqlite = "com.github.inorichi.storio:storio-sqlite:8be19de"
 storio-common = "com.github.inorichi.storio:storio-common:8be19de"
 sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
-tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7879b45"
+tachi-image-decoder = "com.github.ivaniskandar:image-decoder:d7e0d3dfaa"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
 tachi-unifile = "com.github.tachiyomiorg:unifile:a9de196cc7"

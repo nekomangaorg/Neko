@@ -111,7 +111,7 @@ dependencies {
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
-    implementation(libs.j2k.subsample) { exclude(module = "image-decoder") }
+    implementation(libs.subsample) { exclude(module = "image-decoder") }
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)

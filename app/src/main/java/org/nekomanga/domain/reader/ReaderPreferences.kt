@@ -23,7 +23,7 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showPageNumber() = this.preferenceStore.getBoolean("pref_show_page_number_key", true)
 
-    fun trueColor() = this.preferenceStore.getBoolean("pref_true_color_key")
+    fun displayProfile() = preferenceStore.getString("pref_display_profile_key", "")
 
     fun fullscreen() = this.preferenceStore.getBoolean("fullscreen", true)
 

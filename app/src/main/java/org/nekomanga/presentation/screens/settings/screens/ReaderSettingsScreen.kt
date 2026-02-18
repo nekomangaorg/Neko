@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.screens.settings.screens
 
-import android.os.Build
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.runtime.Composable
@@ -79,12 +78,6 @@ internal class ReaderSettingsScreen(
                                 250 to stringResource(R.string.normal),
                                 500 to stringResource(R.string.fast),
                             ),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = readerPreferences.trueColor(),
-                        title = stringResource(R.string.true_32bit_color),
-                        subtitle = stringResource(R.string.reduces_banding_impacts_performance),
-                        enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
                     ),
                     Preference.PreferenceItem.ListPreference(
                         pref = readerPreferences.preloadPageAmount(),
@@ -504,11 +497,6 @@ internal class ReaderSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.double_tap_anim_speed),
-                    group = stringResource(R.string.general),
-                ),
-                SearchTerm(
-                    title = stringResource(R.string.true_32bit_color),
-                    subtitle = stringResource(R.string.reduces_banding_impacts_performance),
                     group = stringResource(R.string.general),
                 ),
                 SearchTerm(

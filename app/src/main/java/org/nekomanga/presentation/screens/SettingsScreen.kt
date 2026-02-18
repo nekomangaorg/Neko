@@ -247,8 +247,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
                     AdvancedSettingsScreen(
                             preferences = vm.preferences,
-                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            readerPreferences = vm.readerPreferences,
                             networkPreferences = vm.networkPreference,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             toastEvent = vm.toastEvent,
                             clearNetworkCookies = vm::clearNetworkCookies,
                             clearDatabase = vm::clearDatabase,
