@@ -32,6 +32,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import okio.Buffer
+import okio.BufferedSource
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import tachiyomi.decoder.Format
@@ -76,6 +78,24 @@ object ImageUtil {
         }
     }
 
+    fun findImageType(stream: BufferedSource): ImageType? {
+        return try {
+            when (getImageType(stream)?.format) {
+                Format.Avif -> ImageType.AVIF
+                Format.Gif -> ImageType.GIF
+                Format.Heif -> ImageType.HEIF
+                Format.Jpeg -> ImageType.JPEG
+                Format.Jxl -> ImageType.JXL
+                Format.Png -> ImageType.PNG
+                Format.Webp -> ImageType.WEBP
+                else -> null
+            }
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error getting image type from stream" }
+            null
+        }
+    }
+
     fun getExtensionFromMimeType(mime: String?): String {
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime)
             ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime]
@@ -83,6 +103,24 @@ object ImageUtil {
     }
 
     fun isAnimatedAndSupported(stream: InputStream): Boolean {
+        try {
+            val type = getImageType(stream) ?: return false
+            return when (type.format) {
+                Format.Gif -> true
+                // https://coil-kt.github.io/coil/getting_started/#supported-image-formats
+                // Animated WebP support on Android 9+
+                Format.Webp -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                // Animated HEIF support on Android 11+
+                Format.Heif -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                else -> false
+            }
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error is animated image type" }
+        }
+        return false
+    }
+
+    fun isAnimatedAndSupported(stream: BufferedSource): Boolean {
         try {
             val type = getImageType(stream) ?: return false
             return when (type.format) {
@@ -122,6 +160,16 @@ object ImageUtil {
             }
 
         if (length == -1) {
+            return null
+        }
+
+        return ImageDecoder.findType(bytes)
+    }
+
+    private fun getImageType(stream: BufferedSource): tachiyomi.decoder.ImageType? {
+        val bytes = stream.peek().readByteArray(32)
+
+        if (bytes.isEmpty()) {
             return null
         }
 
@@ -381,7 +429,7 @@ object ImageUtil {
         imageBitmap: Bitmap,
         secondHalf: Boolean,
         progressCallback: ((Int) -> Unit)? = null,
-    ): ByteArrayInputStream {
+    ): BufferedSource {
         val height = imageBitmap.height
         val width = imageBitmap.width
         val result = Bitmap.createBitmap(width / 2, height, Bitmap.Config.ARGB_8888)
@@ -402,7 +450,7 @@ object ImageUtil {
         val output = ByteArrayOutputStream()
         result.compress(Bitmap.CompressFormat.JPEG, 100, output)
         progressCallback?.invoke(100)
-        return ByteArrayInputStream(output.toByteArray())
+        return Buffer().write(output.toByteArray())
     }
 
     fun rotateImage(imageStream: InputStream, degrees: Float): InputStream {
@@ -415,6 +463,18 @@ object ImageUtil {
         rotated.compress(Bitmap.CompressFormat.JPEG, 100, output)
 
         return ByteArrayInputStream(output.toByteArray())
+    }
+
+    fun rotateImage(imageSource: BufferedSource, degrees: Float): BufferedSource {
+        val imageBytes = imageSource.readByteArray()
+
+        val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val rotated = rotateBitMap(imageBitmap, degrees)
+
+        val output = ByteArrayOutputStream()
+        rotated.compress(Bitmap.CompressFormat.JPEG, 100, output)
+
+        return Buffer().write(output.toByteArray())
     }
 
     private fun rotateBitMap(bitmap: Bitmap, degrees: Float): Bitmap {
@@ -430,6 +490,11 @@ object ImageUtil {
     fun isWideImage(imageStream: BufferedInputStream): Boolean {
         val options = extractImageOptions(imageStream)
         imageStream.reset()
+        return options.outWidth > options.outHeight
+    }
+
+    fun isWideImage(imageSource: BufferedSource): Boolean {
+        val options = extractImageOptions(imageSource)
         return options.outWidth > options.outHeight
     }
 
@@ -480,6 +545,53 @@ object ImageUtil {
         return ByteArrayInputStream(output.toByteArray())
     }
 
+    fun splitAndStackBitmap(
+        imageSource: BufferedSource,
+        rightSideOnTop: Boolean,
+        hasMargins: Boolean,
+        progressCallback: ((Int) -> Unit)? = null,
+    ): BufferedSource {
+        val imageBytes = imageSource.readByteArray()
+        val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+        val height = imageBitmap.height
+        val width = imageBitmap.width
+        val gap = if (hasMargins) 15.dpToPx else 0
+        val result = Bitmap.createBitmap(width / 2, height * 2 + gap, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(result)
+        canvas.drawColor(Color.BLACK)
+        progressCallback?.invoke(98)
+        val upperPart = Rect(0, 0, result.width, result.height / 2)
+        val lowerPart = Rect(0, result.height / 2 + gap, result.width, result.height)
+        canvas.drawBitmap(
+            imageBitmap,
+            Rect(
+                if (!rightSideOnTop) 0 else width / 2,
+                0,
+                if (!rightSideOnTop) width / 2 else width,
+                height,
+            ),
+            upperPart,
+            null,
+        )
+        canvas.drawBitmap(
+            imageBitmap,
+            Rect(
+                if (rightSideOnTop) 0 else width / 2,
+                0,
+                if (rightSideOnTop) width / 2 else width,
+                height,
+            ),
+            lowerPart,
+            null,
+        )
+        progressCallback?.invoke(99)
+        val output = ByteArrayOutputStream()
+        result.compress(Bitmap.CompressFormat.JPEG, 100, output)
+        progressCallback?.invoke(100)
+        return Buffer().write(output.toByteArray())
+    }
+
     fun mergeBitmaps(
         imageBitmap: Bitmap,
         imageBitmap2: Bitmap,
@@ -487,7 +599,7 @@ object ImageUtil {
         @ColorInt background: Int = Color.WHITE,
         gap: Int = 0,
         progressCallback: ((Int) -> Unit)? = null,
-    ): ByteArrayInputStream {
+    ): BufferedSource {
         val height = imageBitmap.height
         val width = imageBitmap.width
         val height2 = imageBitmap2.height
@@ -540,7 +652,7 @@ object ImageUtil {
         val output = ByteArrayOutputStream()
         result.compress(Bitmap.CompressFormat.JPEG, 100, output)
         progressCallback?.invoke(100)
-        return ByteArrayInputStream(output.toByteArray())
+        return Buffer().write(output.toByteArray())
     }
 
     /**
@@ -819,6 +931,13 @@ object ImageUtil {
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
         if (resetAfterExtraction) imageStream.reset()
+        return options
+    }
+
+    private fun extractImageOptions(imageSource: BufferedSource): BitmapFactory.Options {
+        val imageBytes = imageSource.peek().readByteArray()
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
         return options
     }
 
