@@ -878,18 +878,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 leftMargin = 12.dpToPx + systemInsets.left
                 rightMargin = 12.dpToPx + systemInsets.right
             }
+            binding.pageNumber.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = 12.dpToPx + systemInsets.bottom
+            }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                peek +
-                    if (fullscreen) {
-                        insets.getBottomGestureInsets()
-                    } else {
-                        val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                        max(
-                            0,
-                            (rootInsets.getBottomGestureInsets()) -
-                                rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                        )
-                    }
+                peek + insets.getBottomGestureInsets()
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(
                 bottom = systemInsets.bottom
             )
