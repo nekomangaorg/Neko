@@ -40,6 +40,10 @@ import timber.log.Timber
 
 object ImageUtil {
 
+    private const val EDGE_OFFSET = 5
+    private const val MARGIN_PERCENTAGE = 0.0275
+    private const val CENTER_OFFSET_PERCENTAGE = 0.01
+
     fun isImage(name: String, openStream: (() -> InputStream)? = null): Boolean {
         val contentType =
             try {
@@ -145,13 +149,13 @@ object ImageUtil {
         if (image.width < 50 || image.height < 50) {
             return ColorDrawable(backgroundColor)
         }
-        val top = 5
-        val bot = image.height - 5
-        val left = (image.width * 0.0275).toInt()
+        val top = EDGE_OFFSET
+        val bot = image.height - EDGE_OFFSET
+        val left = (image.width * MARGIN_PERCENTAGE).toInt()
         val right = image.width - left
         val midX = image.width / 2
         val midY = image.height / 2
-        val offsetX = (image.width * 0.01).toInt()
+        val offsetX = (image.width * CENTER_OFFSET_PERCENTAGE).toInt()
         val topLeftIsDark = image.getPixel(left, top).isDark
         val topRightIsDark = image.getPixel(right, top).isDark
         val midLeftIsDark = image.getPixel(left, midY).isDark
