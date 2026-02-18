@@ -783,7 +783,7 @@ class PagerPageHolder(
             page.isolatedPage = true
             extraPage?.fullPage = true
             splitDoublePages()
-            return imageStream
+            return imageStream2
         }
         val imageBytes = imageStream.readByteArray()
         val imageBitmap =
