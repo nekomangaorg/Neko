@@ -52,6 +52,11 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         id = 7,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.name,
         baseUrl = eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.baseUrl,
+    ),
+    WeebDex(
+        id = 8,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDex.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDex.baseUrl,
     );
 
     companion object {
@@ -67,6 +72,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 WeebCentral.scanlatorName -> WeebCentral
                 Suwayomi.scanlatorName -> Suwayomi
                 MangaBall.scanlatorName -> MangaBall
+                WeebDex.scanlatorName -> WeebDex
                 else -> null
             }
         }
@@ -82,6 +88,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 WeebCentral -> sourceManager.weebCentral
                 Suwayomi -> sourceManager.suwayomi
                 MangaBall -> sourceManager.mangaBall
+                WeebDex -> sourceManager.weebDex
                 Invalid -> sourceManager.invalidMergeSource
             }
         }
