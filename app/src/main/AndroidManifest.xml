@@ -137,10 +137,15 @@
                 <data android:host="${mangadexAuthRedirectUri}" />
             </intent-filter>
         </activity>
+        <!--
+         This activity should not be exported as it is intended to be used only internally
+         by the global exception handler. Exporting it would allow other apps to trigger
+         fake crash screens (phishing risk).
+        -->
         <activity
             android:process=":error_handler"
             android:name="eu.kanade.tachiyomi.crash.CrashActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name="eu.kanade.tachiyomi.ui.main.DeepLinkActivity"
             android:launchMode="singleTask"
