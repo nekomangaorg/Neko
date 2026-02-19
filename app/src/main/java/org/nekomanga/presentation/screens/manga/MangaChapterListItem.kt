@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
-import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.ChapterRow
@@ -20,7 +19,6 @@ fun MangaChapterListItem(
     index: Int,
     chapterItem: ChapterItem,
     count: Int,
-    activeChapters: PersistentList<ChapterItem>,
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
     chapterActions: ChapterActions,
@@ -62,16 +60,7 @@ fun MangaChapterListItem(
             onDownload = { downloadAction ->
                 chapterActions.download(listOf(chapterItem), downloadAction)
             },
-            markPrevious = { read ->
-                val chaptersToMark = activeChapters.subList(0, index)
-                val altChapters =
-                    if (index == activeChapters.lastIndex) emptyList()
-                    else activeChapters.slice(index + 1..activeChapters.lastIndex)
-                val action =
-                    if (read) ChapterMarkActions.PreviousRead(true, altChapters)
-                    else ChapterMarkActions.PreviousUnread(true, altChapters)
-                chapterActions.mark(chaptersToMark, action)
-            },
+            markPrevious = { read -> chapterActions.markPrevious(chapterItem, read) },
             blockScanlator = { blockType, blocked ->
                 chapterActions.blockScanlator(blockType, blocked)
             },
