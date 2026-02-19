@@ -135,7 +135,6 @@ fun MergeSheet(
                                         MergeType.Suwayomi -> R.drawable.ic_suwayomi_logo
                                         MergeType.Toonily -> R.drawable.ic_toonily
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
-                                        MergeType.Kagane -> R.drawable.ic_kagane_logo
                                         MergeType.MangaBall -> R.drawable.ic_mangaball_logo
                                         MergeType.Invalid -> R.drawable.ic_neko_yokai
                                     }

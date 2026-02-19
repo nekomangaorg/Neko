@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
-import eu.kanade.tachiyomi.source.online.merged.kagane.Kagane
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
@@ -25,8 +24,6 @@ open class SourceManager {
 
     val suwayomi: Suwayomi by lazy { Suwayomi() }
 
-    val kagane: Kagane by lazy { Kagane() }
-
     val toonily: Toonily by lazy { Toonily() }
 
     val weebCentral: WeebCentral by lazy { WeebCentral() }
@@ -48,7 +45,6 @@ open class SourceManager {
                 Suwayomi.name,
                 Toonily.name,
                 WeebCentral.name,
-                Kagane.name,
                 MangaBall.name,
             )
 
