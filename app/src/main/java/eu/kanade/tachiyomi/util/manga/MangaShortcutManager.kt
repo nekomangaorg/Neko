@@ -34,73 +34,62 @@ class MangaShortcutManager(
     val context: Context = preferences.context
 
     fun updateShortcuts() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
-            if (!preferences.showSeriesInShortcuts().get()) {
-                val shortcutManager = context.getSystemService(ShortcutManager::class.java)
-                shortcutManager.removeAllDynamicShortcuts()
-                return
-            }
-            GlobalScope.launchIO {
-                val shortcutManager = context.getSystemService(ShortcutManager::class.java)
+        if (!preferences.showSeriesInShortcuts().get()) {
+            val shortcutManager = context.getSystemService(ShortcutManager::class.java)
+            shortcutManager.removeAllDynamicShortcuts()
+            return
+        }
+        GlobalScope.launchIO {
+            val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
-                val recentManga =
-                    if (preferences.showSeriesInShortcuts().get()) {
-                        FeedRepository.getRecentlyReadManga()
-                    } else {
-                        emptyList()
-                    }
-
-                val recents =
-                    (recentManga.take(shortcutManager.maxShortcutCountPerActivity)).take(
-                        shortcutManager.maxShortcutCountPerActivity
-                    )
-
-                val shortcuts =
-                    recents.map { item ->
-                        val request =
-                            ImageRequest.Builder(context)
-                                .data(item.toDisplayManga().currentArtwork)
-                                .build()
-                        val bitmap = context.imageLoader.execute(request).image?.toBitmap()
-
-                        ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
-                            .setShortLabel(
-                                item.title.takeUnless { it.isBlank() }
-                                    ?: context.getString(R.string.manga)
-                            )
-                            .setLongLabel(
-                                item.title.takeUnless { it.isBlank() }
-                                    ?: context.getString(R.string.manga)
-                            )
-                            .setIcon(
-                                if (bitmap != null)
-                                    if (
-                                        android.os.Build.VERSION.SDK_INT >=
-                                            android.os.Build.VERSION_CODES.O
-                                    ) {
-                                        Icon.createWithAdaptiveBitmap(bitmap.toSquare())
-                                    } else {
-                                        Icon.createWithBitmap(bitmap)
-                                    }
-                                else {
-                                    Icon.createWithResource(context, R.drawable.ic_book_24dp)
-                                }
-                            )
-                            .setIntent(
-                                MainActivity.openMangaIntent(context, item.id!!, true)
-                                    .addFlags(
-                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                            Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                    )
-                            )
-                            .build()
-                    }
-
-                TimberKt.d {
-                    "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}"
+            val recentManga =
+                if (preferences.showSeriesInShortcuts().get()) {
+                    FeedRepository.getRecentlyReadManga()
+                } else {
+                    emptyList()
                 }
-                shortcutManager.dynamicShortcuts = shortcuts
-            }
+
+            val recents =
+                (recentManga.take(shortcutManager.maxShortcutCountPerActivity)).take(
+                    shortcutManager.maxShortcutCountPerActivity
+                )
+
+            val shortcuts =
+                recents.map { item ->
+                    val request =
+                        ImageRequest.Builder(context)
+                            .data(item.toDisplayManga().currentArtwork)
+                            .build()
+                    val bitmap = context.imageLoader.execute(request).image?.toBitmap()
+
+                    ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
+                        .setShortLabel(
+                            item.title.takeUnless { it.isBlank() }
+                                ?: context.getString(R.string.manga)
+                        )
+                        .setLongLabel(
+                            item.title.takeUnless { it.isBlank() }
+                                ?: context.getString(R.string.manga)
+                        )
+                        .setIcon(
+                            if (bitmap != null) {
+                                Icon.createWithAdaptiveBitmap(bitmap.toSquare())
+                            } else {
+                                Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                            }
+                        )
+                        .setIntent(
+                            MainActivity.openMangaIntent(context, item.id!!, true)
+                                .addFlags(
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                )
+                        )
+                        .build()
+                }
+
+            TimberKt.d { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
+            shortcutManager.dynamicShortcuts = shortcuts
         }
     }
 
