@@ -942,8 +942,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 MergeType.entries
                     .filter { mergeType ->
                         when (mergeType) {
-                            MergeType.Invalid,
-                            MergeType.Kagane -> false
+                            MergeType.Invalid -> false
                             // Conditionally keep these types if they are configured
                             MergeType.Komga -> sourceManager.komga.isConfigured()
                             MergeType.Suwayomi -> sourceManager.suwayomi.isConfigured()
