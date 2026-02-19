@@ -32,15 +32,15 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         decoder.recycle()
 
         check(bitmap != null) { "Failed to decode image." }
-
-        if (
-            options.bitmapConfig == Bitmap.Config.HARDWARE && ImageUtil.canUseHardwareBitmap(bitmap)
-        ) {
-            bitmap.copy(Bitmap.Config.HARDWARE, false)?.let {
-                bitmap.recycle()
-                return DecodeResult(image = it.asImage(), isSampled = false)
+            if (
+                options.bitmapConfig == Bitmap.Config.HARDWARE &&
+                    ImageUtil.canUseHardwareBitmap(bitmap)
+            ) {
+                bitmap.copy(Bitmap.Config.HARDWARE, false)?.let {
+                    bitmap.recycle()
+                    return DecodeResult(image = it.asImage(), isSampled = false)
+                }
             }
-        }
 
         return DecodeResult(image = bitmap.asImage(), isSampled = false)
     }
