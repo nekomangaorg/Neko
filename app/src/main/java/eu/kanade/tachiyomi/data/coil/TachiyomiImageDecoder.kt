@@ -36,10 +36,9 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         if (
             options.bitmapConfig == Bitmap.Config.HARDWARE && ImageUtil.canUseHardwareBitmap(bitmap)
         ) {
-            val hwBitmap = bitmap.copy(Bitmap.Config.HARDWARE, false)
-            if (hwBitmap != null) {
+            bitmap.copy(Bitmap.Config.HARDWARE, false)?.let {
                 bitmap.recycle()
-                return DecodeResult(image = hwBitmap.asImage(), isSampled = false)
+                return DecodeResult(image = it.asImage(), isSampled = false)
             }
         }
 
