@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -70,24 +69,19 @@ import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
-import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarColor
-import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.VerticalFastScroller
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
-import org.nekomanga.presentation.components.listcard.ExpressiveListCard
-import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
@@ -97,6 +91,7 @@ import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.manga.ChapterHeader
 import org.nekomanga.presentation.screens.manga.DetailsBottomSheet
 import org.nekomanga.presentation.screens.manga.DetailsBottomSheetScreen
+import org.nekomanga.presentation.screens.manga.MangaChapterListItem
 import org.nekomanga.presentation.screens.manga.MangaDetailsHeader
 import org.nekomanga.presentation.screens.manga.MangaScreenTopBar
 import org.nekomanga.presentation.theme.Size
@@ -606,65 +601,16 @@ private fun LazyListScope.chapterList(
 
     itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapterItem
         ->
-        val listCardType =
-            when {
-                index == 0 && chapters.size > 1 -> ListCardType.Top
-                index == chapters.size - 1 && chapters.size > 1 -> ListCardType.Bottom
-
-                chapters.size == 1 -> ListCardType.Single
-                else -> ListCardType.Center
-            }
-        ExpressiveListCard(
-            modifier = Modifier.padding(horizontal = Size.small),
-            listCardType = listCardType,
+        MangaChapterListItem(
+            index = index,
+            chapterItem = chapterItem,
+            count = chapters.size,
+            activeChapters = chapters,
             themeColorState = themeColorState,
-        ) {
-            ChapterRow(
-                themeColor = themeColorState,
-                chapterItem = chapterItem,
-                shouldHideChapterTitles =
-                    screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
-                onClick = { chapterActions.open(chapterItem) },
-                onBookmark = {
-                    chapterActions.mark(
-                        listOf(chapterItem),
-                        if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
-                        else ChapterMarkActions.Bookmark(true),
-                    )
-                },
-                onRead = {
-                    chapterActions.mark(
-                        listOf(chapterItem),
-                        if (chapterItem.chapter.read) ChapterMarkActions.Unread(true)
-                        else ChapterMarkActions.Read(true),
-                    )
-                },
-                onWebView = { chapterActions.openInBrowser(chapterItem) },
-                onComment = { chapterActions.openComment(chapterItem.chapter.mangaDexChapterId) },
-                onDownload = { downloadAction ->
-                    chapterActions.download(listOf(chapterItem), downloadAction)
-                },
-                markPrevious = { read ->
-                    val chaptersToMark = screenState.activeChapters.subList(0, index)
-                    val altChapters =
-                        if (index == screenState.activeChapters.lastIndex) emptyList()
-                        else
-                            screenState.activeChapters.slice(
-                                index + 1..screenState.activeChapters.lastIndex
-                            )
-                    val action =
-                        if (read) ChapterMarkActions.PreviousRead(true, altChapters)
-                        else ChapterMarkActions.PreviousUnread(true, altChapters)
-                    chapterActions.mark(chaptersToMark, action)
-                },
-                blockScanlator = { blockType, blocked ->
-                    chapterActions.blockScanlator(blockType, blocked)
-                },
-            )
-        }
-        if (listCardType != ListCardType.Bottom) {
-            Gap(Size.tiny)
-        }
+            shouldHideChapterTitles =
+                screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
+            chapterActions = chapterActions,
+        )
     }
 }
 
