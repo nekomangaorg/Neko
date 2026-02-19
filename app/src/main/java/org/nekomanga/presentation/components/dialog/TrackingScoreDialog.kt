@@ -19,11 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ExpressivePicker
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingScoreDialog(
@@ -58,7 +58,7 @@ fun TrackingScoreDialog(
             text = {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    modifier = Modifier.padding(Size.medium).fillMaxWidth(),
                 ) {
                     ExpressivePicker(
                         modifier = Modifier.fillMaxWidth(.4f),
