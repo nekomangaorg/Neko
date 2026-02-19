@@ -276,13 +276,15 @@ private fun StatItem(
 @Composable
 private fun LanguageFlag(langFlag: String) {
     val context = LocalContext.current
-    val flag = remember(langFlag) { MdLang.fromIsoCode(langFlag.lowercase(Locale.US))?.iconResId }
-    if (flag != null) {
+    val mdLang = remember(langFlag) { MdLang.fromIsoCode(langFlag.lowercase(Locale.US)) }
+    if (mdLang?.iconResId != null) {
         Image(
             painter =
-                rememberDrawablePainter(drawable = AppCompatResources.getDrawable(context, flag)),
+                rememberDrawablePainter(
+                    drawable = AppCompatResources.getDrawable(context, mdLang.iconResId)
+                ),
             modifier = Modifier.height(Size.large).clip(RoundedCornerShape(Size.tiny)),
-            contentDescription = "Language flag",
+            contentDescription = mdLang.prettyPrint,
         )
     }
 }

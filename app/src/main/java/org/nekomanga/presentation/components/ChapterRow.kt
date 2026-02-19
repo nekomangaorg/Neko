@@ -346,13 +346,13 @@ private fun ChapterSubtitle(subtitleText: String, language: String, textColor: C
 private fun LanguageIcon(language: String, textColor: Color) {
     if (language.equals(MdLang.ENGLISH.lang, true)) return
 
-    val iconRes = remember(language) { MdLang.fromIsoCode(language)?.iconResId }
+    val mdLang = remember(language) { MdLang.fromIsoCode(language) }
 
-    if (iconRes != null) {
+    if (mdLang?.iconResId != null) {
         Image(
-            painter = painterResource(id = iconRes),
+            painter = painterResource(id = mdLang.iconResId),
             modifier = Modifier.height(Size.medium).clip(RoundedCornerShape(Size.tiny)),
-            contentDescription = "Language flag",
+            contentDescription = mdLang.prettyPrint,
         )
         Spacer(modifier = Modifier.size(Size.tiny))
     } else {
