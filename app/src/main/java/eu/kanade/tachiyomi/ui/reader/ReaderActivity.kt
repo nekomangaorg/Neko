@@ -59,6 +59,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
+import eu.kanade.tachiyomi.data.image.coil.TachiyomiImageDecoder
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -1874,7 +1875,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 val inputStream = file.openInputStream()
                 val outputStream = ByteArrayOutputStream()
                 inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
-                SubsamplingScaleImageView.setDisplayProfile(outputStream.toByteArray())
+                val data = outputStream.toByteArray()
+                SubsamplingScaleImageView.setDisplayProfile(data)
+                TachiyomiImageDecoder.displayProfile = data
             }
         }
 
