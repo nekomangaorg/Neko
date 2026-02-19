@@ -268,7 +268,7 @@ object Notifications {
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = manager.getNotificationChannel(channelId)
-            return channel.importance != NotificationManager.IMPORTANCE_NONE
+            return channel != null && channel.importance != NotificationManager.IMPORTANCE_NONE
         }
         return false
     }
