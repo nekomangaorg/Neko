@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -54,7 +53,6 @@ import org.nekomanga.presentation.screens.settings.screens.TrackingSettingsScree
 @Composable
 fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, deepLink: NavKey?) {
     val context = LocalContext.current
-    val sdkMinimumO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
     val backStack = rememberNavBackStack(deepLink ?: Screens.Settings.Main())
     val wasDeepLink = remember(deepLink) { deepLink != null }
@@ -109,10 +107,8 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             },
                             incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             preferencesHelper = settingsVm.preferences,
-                            showNotificationSetting = sdkMinimumO,
-                            manageNotificationsClicked = {
-                                manageNotificationClick(context, sdkMinimumO)
-                            },
+                            showNotificationSetting = true,
+                            manageNotificationsClicked = { manageNotificationClick(context) },
                         )
                         .Content()
                 }
@@ -247,8 +243,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
                     AdvancedSettingsScreen(
                             preferences = vm.preferences,
-                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            readerPreferences = vm.readerPreferences,
                             networkPreferences = vm.networkPreference,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             toastEvent = vm.toastEvent,
                             clearNetworkCookies = vm::clearNetworkCookies,
                             clearDatabase = vm::clearDatabase,
@@ -294,12 +291,10 @@ private fun reset(
 }
 
 @SuppressLint("InlinedApi")
-fun manageNotificationClick(context: Context, sdkMinimumO: Boolean) {
-    if (sdkMinimumO) {
-        val intent =
-            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-            }
-        context.startActivity(intent)
-    }
+fun manageNotificationClick(context: Context) {
+    val intent =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+    context.startActivity(intent)
 }

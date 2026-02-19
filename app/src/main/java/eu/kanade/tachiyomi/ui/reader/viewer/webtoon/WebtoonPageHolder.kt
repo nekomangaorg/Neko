@@ -22,12 +22,13 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import java.io.BufferedInputStream
-import java.io.InputStream
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import okio.BufferedSource
+import okio.buffer
+import okio.source
 import org.nekomanga.R
 import rx.Observable
 import rx.Subscription
@@ -230,10 +231,10 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         unsubscribeReadImageHeader()
         val streamFn = page?.stream ?: return
 
-        var openStream: InputStream? = null
+        var openStream: BufferedSource? = null
         readImageHeaderSubscription =
             Observable.fromCallable {
-                    val stream = streamFn().buffered(16)
+                    val stream = streamFn().source().buffer()
                     openStream = process(stream)
 
                     ImageUtil.isAnimatedAndSupported(stream)
@@ -264,7 +265,7 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
         addSubscription(readImageHeaderSubscription)
     }
 
-    private fun process(imageStream: BufferedInputStream): InputStream {
+    private fun process(imageStream: BufferedSource): BufferedSource {
         if (!viewer.config.splitPages) {
             return imageStream
         }

@@ -1,9 +1,8 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.data.backup
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.data.backup.BackupCreator
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import okio.buffer
 import okio.gzip

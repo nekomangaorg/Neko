@@ -516,7 +516,7 @@
     <string name="enable_zoom_out">Enable zoom out</string>
     <string name="double_tap_anim_speed">Double tap animation speed</string>
     <string name="show_page_number">Show page number</string>
-    <string name="true_32bit_color">32-bit color</string>
+    <string name="display_profile">Custom display profile</string>
     <string name="page_preload_amount">Page preload amount</string>
     <string name="amount_of_pages_to_preload">The amount of pages to preload when reading. Higher values will result in a smoother reading experience, at the cost of higher cache and network usage.</string>
     <string name="reduces_banding_impacts_performance">Reduces banding, but may impact

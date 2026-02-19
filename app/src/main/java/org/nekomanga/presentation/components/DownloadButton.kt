@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import java.text.NumberFormat
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import org.nekomanga.R
@@ -101,7 +102,9 @@ fun DownloadButton(
         val optionsLabel = stringResource(R.string.options)
         val notDownloadedDescription = stringResource(R.string.not_downloaded)
         val queueDescription = stringResource(R.string.download_queue)
-        val downloadingDescription = stringResource(R.string.downloading)
+        val percentFormatter = remember { NumberFormat.getPercentInstance() }
+        val downloadingDescription =
+            stringResource(R.string.downloading_, percentFormatter.format(downloadProgress / 100f))
         val downloadedDescription = stringResource(R.string.downloaded)
         val errorDescription = stringResource(R.string.download_error)
 
