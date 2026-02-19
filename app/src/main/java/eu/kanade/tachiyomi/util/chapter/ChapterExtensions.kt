@@ -1,11 +1,10 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.isLocalSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import kotlin.math.floor
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants

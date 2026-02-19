@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.chapter
 
 import io.kotest.matchers.shouldBe
 import org.junit.Test
