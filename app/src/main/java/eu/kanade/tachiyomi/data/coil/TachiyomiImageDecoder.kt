@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.image.coil
 
+import android.graphics.Bitmap
 import android.os.Build
 import coil3.ImageLoader
 import coil3.asImage
@@ -8,6 +9,7 @@ import coil3.decode.Decoder
 import coil3.decode.ImageSource
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
+import coil3.request.bitmapConfig
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import okio.BufferedSource
 import tachiyomi.decoder.ImageDecoder
@@ -30,6 +32,16 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         decoder.recycle()
 
         check(bitmap != null) { "Failed to decode image." }
+
+        if (
+            options.bitmapConfig == Bitmap.Config.HARDWARE && ImageUtil.canUseHardwareBitmap(bitmap)
+        ) {
+            val hwBitmap = bitmap.copy(Bitmap.Config.HARDWARE, false)
+            if (hwBitmap != null) {
+                bitmap.recycle()
+                return DecodeResult(image = hwBitmap.asImage(), isSampled = false)
+            }
+        }
 
         return DecodeResult(image = bitmap.asImage(), isSampled = false)
     }
