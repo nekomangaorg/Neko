@@ -75,10 +75,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         val idleRun = inputData.getBoolean(IDLE_RUN, false)
         val url: String
         if (idleRun) {
-            if (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                    !context.packageManager.canRequestPackageInstalls()
-            ) {
+            if (!context.packageManager.canRequestPackageInstalls()) {
                 return Result.failure()
             }
             if (

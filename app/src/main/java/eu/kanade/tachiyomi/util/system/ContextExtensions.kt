@@ -372,24 +372,18 @@ fun Context.isOnline(): Boolean {
     val networkCapabilities = connectivityManager.activeNetwork ?: return false
     val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
     val maxTransport =
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 ->
-                NetworkCapabilities.TRANSPORT_LOWPAN
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ->
-                NetworkCapabilities.TRANSPORT_WIFI_AWARE
-            else -> NetworkCapabilities.TRANSPORT_VPN
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            NetworkCapabilities.TRANSPORT_LOWPAN
+        } else {
+            NetworkCapabilities.TRANSPORT_WIFI_AWARE
         }
     return (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
 }
 
 fun Context.launchRequestPackageInstallsPermission() {
     val intent =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                data = Uri.parse("package:$packageName")
-            }
-        } else {
-            Intent(Settings.ACTION_SECURITY_SETTINGS)
+        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+            data = Uri.parse("package:$packageName")
         }
     startActivity(intent)
 }

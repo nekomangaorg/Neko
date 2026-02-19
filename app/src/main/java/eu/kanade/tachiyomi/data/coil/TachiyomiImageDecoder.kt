@@ -59,9 +59,9 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         private fun isApplicable(source: BufferedSource): Boolean {
             val type = source.peek().inputStream().use { ImageUtil.findImageType(it) }
             return when (type) {
+                ImageUtil.ImageType.HEIF,
                 ImageUtil.ImageType.AVIF,
                 ImageUtil.ImageType.JXL -> true
-                ImageUtil.ImageType.HEIF -> Build.VERSION.SDK_INT < Build.VERSION_CODES.O
                 else -> false
             }
         }

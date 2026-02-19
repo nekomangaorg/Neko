@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
@@ -144,12 +143,7 @@ fun NavigationBarView.getItemView(@IdRes id: Int): NavigationBarItemView? {
 }
 
 var View.compatToolTipText: CharSequence?
-    get() =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            tooltipText
-        } else {
-            ""
-        }
+    get() = tooltipText
     set(value) {
         ViewCompat.setTooltipText(this, value)
     }
