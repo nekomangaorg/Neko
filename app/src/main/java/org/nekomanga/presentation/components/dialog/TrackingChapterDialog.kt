@@ -19,11 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.presentation.components.ExpressivePicker
 import org.nekomanga.presentation.components.theme.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingChapterDialog(
@@ -55,7 +55,7 @@ fun TrackingChapterDialog(
             text = {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    modifier = Modifier.padding(Size.medium).fillMaxWidth(),
                 ) {
                     ExpressivePicker(
                         value = currentChapter,

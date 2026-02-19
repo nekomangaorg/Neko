@@ -29,9 +29,9 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 internal fun BasePreferenceWidget(
@@ -55,7 +55,7 @@ internal fun BasePreferenceWidget(
     ) {
         if (icon != null) {
             Box(
-                modifier = Modifier.padding(start = PrefsHorizontalPadding, end = 8.dp),
+                modifier = Modifier.padding(start = PrefsHorizontalPadding, end = Size.small),
                 content = { icon() },
             )
         }
@@ -112,6 +112,6 @@ internal fun Modifier.highlightBackground(highlighted: Boolean): Modifier = comp
     Modifier.background(color = highlight)
 }
 
-internal val TrailingWidgetBuffer = 16.dp
-internal val PrefsHorizontalPadding = 16.dp
-internal val PrefsVerticalPadding = 16.dp
+internal val TrailingWidgetBuffer = Size.medium
+internal val PrefsHorizontalPadding = Size.medium
+internal val PrefsVerticalPadding = Size.medium
