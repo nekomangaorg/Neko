@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.image.coil
 
+import android.graphics.Bitmap
 import android.os.Build
 import coil3.ImageLoader
 import coil3.asImage
@@ -8,7 +9,7 @@ import coil3.decode.Decoder
 import coil3.decode.ImageSource
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
-import coil3.request.allowRgb565
+import coil3.request.bitmapConfig
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import okio.BufferedSource
 import tachiyomi.decoder.ImageDecoder
@@ -27,10 +28,19 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
             "Failed to initialize decoder."
         }
 
-        val bitmap = decoder.decode(rgb565 = options.allowRgb565)
+        val bitmap = decoder.decode()
         decoder.recycle()
 
         check(bitmap != null) { "Failed to decode image." }
+            if (
+                options.bitmapConfig == Bitmap.Config.HARDWARE &&
+                    ImageUtil.canUseHardwareBitmap(bitmap)
+            ) {
+                bitmap.copy(Bitmap.Config.HARDWARE, false)?.let {
+                    bitmap.recycle()
+                    return DecodeResult(image = it.asImage(), isSampled = false)
+                }
+            }
 
         return DecodeResult(image = bitmap.asImage(), isSampled = false)
     }
@@ -49,9 +59,9 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         private fun isApplicable(source: BufferedSource): Boolean {
             val type = source.peek().inputStream().use { ImageUtil.findImageType(it) }
             return when (type) {
+                ImageUtil.ImageType.HEIF,
                 ImageUtil.ImageType.AVIF,
                 ImageUtil.ImageType.JXL -> true
-                ImageUtil.ImageType.HEIF -> Build.VERSION.SDK_INT < Build.VERSION_CODES.O
                 else -> false
             }
         }

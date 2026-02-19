@@ -8,6 +8,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.WebStorage
 import android.webkit.WebView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.constants.Constants.DONT_KILL_MY_APP_URL
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.CleanDownloadsDialog
@@ -57,6 +60,7 @@ internal class AdvancedSettingsScreen(
     incognitoMode: Boolean,
     val preferences: PreferencesHelper,
     val networkPreferences: NetworkPreferences,
+    val readerPreferences: ReaderPreferences,
     val toastEvent: SharedFlow<UiText>,
     val clearNetworkCookies: () -> Unit,
     val cleanupDownloads: (Boolean, Boolean) -> Unit,
@@ -106,6 +110,7 @@ internal class AdvancedSettingsScreen(
             backgroundActivityGroup(context),
             networkGroup(context, clearNetworkCookies),
             dataGroup(cleanupDownloads, clearDatabase, reindexDownloads, dedupeCategories),
+            getReaderGroup(readerPreferences),
         )
     }
 
@@ -203,6 +208,31 @@ internal class AdvancedSettingsScreen(
                             true
                         },
                     ),
+                ),
+        )
+    }
+
+    @Composable
+    fun getReaderGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val chooseColorProfile =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) {
+                uri ->
+                uri?.let {
+                    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    context.contentResolver.takePersistableUriPermission(uri, flags)
+                    readerPreferences.displayProfile().set(uri.toString())
+                }
+            }
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.reader),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.display_profile),
+                        subtitle = readerPreferences.displayProfile().get(),
+                        onClick = { chooseColorProfile.launch(arrayOf("*/*")) },
+                    )
                 ),
         )
     }
@@ -327,6 +357,10 @@ internal class AdvancedSettingsScreen(
                     title = stringResource(R.string.dedupe_categories),
                     subtitle = stringResource(R.string.dedupe_categories_summary),
                     group = stringResource(R.string.data_management),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.display_profile),
+                    group = stringResource(R.string.reader),
                 ),
             )
         }

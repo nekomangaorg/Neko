@@ -24,8 +24,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 56
-        versionName = "3.2.5"
+        versionCode = 58
+        versionName = "3.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -111,7 +111,7 @@ dependencies {
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
-    implementation(libs.j2k.subsample) { exclude(module = "image-decoder") }
+    implementation(libs.subsample) { exclude(module = "image-decoder") }
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)

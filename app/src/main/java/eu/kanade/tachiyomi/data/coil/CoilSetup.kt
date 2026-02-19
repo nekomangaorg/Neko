@@ -14,6 +14,7 @@ import coil3.request.allowHardware
 import coil3.request.allowRgb565
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
+import eu.kanade.tachiyomi.data.coil.BufferedSourceFetcher
 import eu.kanade.tachiyomi.network.NetworkHelper
 import org.nekomanga.core.network.NetworkPreferences
 import uy.kohesive.injekt.Injekt
@@ -37,6 +38,7 @@ fun coilImageLoader(context: Context) =
                 add(ArtworkFactory(lazy(callFactoryInit), lazy(diskCacheInit)))
                 add(MergeArtworkFactory())
                 add(ArtworkKeyer())
+                add(BufferedSourceFetcher.Factory())
             }
             diskCache(diskCacheInit)
             memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.40).build() }

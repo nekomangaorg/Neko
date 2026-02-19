@@ -32,11 +32,13 @@ import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonSubsamplingImageView
 import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import java.io.InputStream
 import java.nio.ByteBuffer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import okio.BufferedSource
 import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -99,6 +101,16 @@ constructor(
         } else {
             prepareNonAnimatedImageView()
             setNonAnimatedImage(inputStream, config)
+        }
+    }
+
+    fun setImage(source: BufferedSource, isAnimated: Boolean, config: Config) {
+        if (isAnimated) {
+            prepareAnimatedImageView()
+            setAnimatedImage(source, config)
+        } else {
+            prepareNonAnimatedImageView()
+            setNonAnimatedImage(source, config)
         }
     }
 
@@ -235,6 +247,64 @@ constructor(
             isVisible = true
         }
 
+    private fun setNonAnimatedImage(data: BufferedSource, config: Config) =
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            setHardwareConfig(ImageUtil.canUseHardwareBitmap(data))
+            setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
+            setMinimumScaleType(config.minimumScaleType)
+            setMinimumDpi(1) // Just so that very small image will be fit for initial load
+            setCropBorders(config.cropBorders)
+            if (config.insetInfo != null) {
+                val topInsets = config.insetInfo.topCutoutInset
+                val bottomInsets = config.insetInfo.bottomCutoutInset
+                setExtendPastCutout(
+                    config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+                        config.insetInfo.scaleTypeIsFullFit &&
+                        topInsets + bottomInsets > 0
+                )
+                if (
+                    (config.insetInfo.cutoutBehavior != PagerConfig.CUTOUT_IGNORE ||
+                        !config.insetInfo.scaleTypeIsFullFit) &&
+                        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
+                        config.insetInfo.isFullscreen
+                ) {
+                    val insets: WindowInsets? = config.insetInfo.insets
+                    setExtraSpace(
+                        0f,
+                        insets?.displayCutout?.boundingRectTop?.height()?.toFloat() ?: 0f,
+                        0f,
+                        insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f,
+                    )
+                }
+            }
+            setOnImageEventListener(
+                object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                    override fun onReady() {
+                        // 5x zoom
+                        setupZoom(config)
+                        this@ReaderPageImageView.onNeedsLandscapeZoom()
+                        this@ReaderPageImageView.onImageLoaded()
+                    }
+
+                    override fun onImageLoadError(e: Exception) {
+                        this@ReaderPageImageView.onImageLoadError()
+                    }
+                }
+            )
+
+            if (readerPreferences.colorEInk16bit().get()) {
+                val original = BitmapFactory.decodeStream(data.inputStream())
+                val processed =
+                    runBlocking(Dispatchers.IO) {
+                        ColorEInk16Bit(readerPreferences.colorEInkDither().get())
+                            .transform(original, Size(original.width, original.height))
+                    }
+                setImage(ImageSource.bitmap(processed))
+            } else setImage(ImageSource.inputStream(data.inputStream()))
+
+            isVisible = true
+        }
+
     private fun prepareAnimatedImageView() {
         if (pageView is AppCompatImageView) return
         removeView(pageView)
@@ -285,6 +355,33 @@ constructor(
             val request =
                 ImageRequest.Builder(context)
                     .data(ByteBuffer.wrap(image.readBytes()))
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .diskCachePolicy(CachePolicy.DISABLED)
+                    .target(
+                        onSuccess = { result ->
+                            val drawable = result.asDrawable(context.resources)
+                            setImageDrawable(drawable)
+                            (drawable as? Animatable)?.start()
+                            isVisible = true
+                            this@ReaderPageImageView.onImageLoaded()
+                        },
+                        onError = { this@ReaderPageImageView.onImageLoadError() },
+                    )
+                    .crossfade(false)
+                    .allowHardware(false) // Disable hardware acceleration for GIFs
+                    .build()
+            context.imageLoader.enqueue(request)
+        }
+
+    private fun setAnimatedImage(data: BufferedSource, config: Config) =
+        (pageView as? AppCompatImageView)?.apply {
+            if (this is PhotoView) {
+                setZoomTransitionDuration(config.zoomDuration.getSystemScaledDuration())
+            }
+
+            val request =
+                ImageRequest.Builder(context)
+                    .data(ByteBuffer.wrap(data.readByteArray()))
                     .memoryCachePolicy(CachePolicy.DISABLED)
                     .diskCachePolicy(CachePolicy.DISABLED)
                     .target(

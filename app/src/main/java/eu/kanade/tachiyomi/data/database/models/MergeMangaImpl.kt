@@ -48,11 +48,6 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         id = 5,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi.name,
     ),
-    Kagane(
-        id = 6,
-        scanlatorName = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.name,
-        baseUrl = eu.kanade.tachiyomi.source.online.merged.kagane.Kagane.baseUrl,
-    ),
     MangaBall(
         id = 7,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall.name,
@@ -71,7 +66,6 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 Toonily.scanlatorName -> Toonily
                 WeebCentral.scanlatorName -> WeebCentral
                 Suwayomi.scanlatorName -> Suwayomi
-                Kagane.scanlatorName -> Kagane
                 MangaBall.scanlatorName -> MangaBall
                 else -> null
             }
@@ -87,7 +81,6 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 Toonily -> sourceManager.toonily
                 WeebCentral -> sourceManager.weebCentral
                 Suwayomi -> sourceManager.suwayomi
-                Kagane -> sourceManager.kagane
                 MangaBall -> sourceManager.mangaBall
                 Invalid -> sourceManager.invalidMergeSource
             }

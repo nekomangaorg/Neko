@@ -89,12 +89,12 @@
         </activity>
         <activity
             android:name="eu.kanade.tachiyomi.ui.webview.WebViewActivity"
-            android:exported="true"
+            android:exported="false"
             android:configChanges="uiMode|orientation|screenSize" />
 
         <activity
             android:name="eu.kanade.tachiyomi.ui.security.BiometricActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name="eu.kanade.tachiyomi.ui.setting.logins.MyAnimeListLoginActivity"
             android:label="MyAnimeList"

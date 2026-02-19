@@ -68,9 +68,7 @@ class TabbedReaderSettingsSheet(
         }
 
         binding.menu.isVisible = true
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            binding.menu.tooltipText = context.getString(R.string.reader_settings)
-        }
+        binding.menu.tooltipText = context.getString(R.string.reader_settings)
         binding.menu.setImageDrawable(
             ContextCompat.getDrawable(context, R.drawable.ic_outline_settings_24dp)
         )

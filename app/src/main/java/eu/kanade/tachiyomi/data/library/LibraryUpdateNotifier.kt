@@ -35,6 +35,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class LibraryUpdateNotifier(private val context: Context) {
@@ -200,7 +201,11 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     context.imageLoader.execute(request).image?.let { drawable ->
                                         setLargeIcon(drawable.toBitmap())
                                     }
-                                } catch (e: Exception) {}
+                                } catch (e: Exception) {
+                                    TimberKt.e(e) {
+                                        "Failed to load notification icon for ${manga.displayTitle()}"
+                                    }
+                                }
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                                 setContentTitle(manga.displayTitle())
                                 color = ContextCompat.getColor(context, R.color.iconOutline)

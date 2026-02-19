@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import java.io.InputStream
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers.Default
@@ -45,6 +44,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.Buffer
+import okio.BufferedSource
+import okio.buffer
+import okio.source
 import org.nekomanga.R
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
@@ -455,13 +458,13 @@ class PagerPageHolder(
         val streamFn = page.stream ?: return
         val streamFn2 = extraPage?.stream
 
-        var openStream: InputStream? = null
+        var openStream: BufferedSource? = null
 
         readImageHeaderSubscription =
             Observable.fromCallable {
-                    val stream = streamFn().buffered(16)
+                    val stream = streamFn().source().buffer()
 
-                    val stream2 = streamFn2?.invoke()?.buffered(16)
+                    val stream2 = streamFn2?.invoke()?.source()?.buffer()
                     openStream =
                         when (
                             viewer.config.doublePageRotate &&
@@ -496,10 +499,10 @@ class PagerPageHolder(
                             // if the user switches to automatic when pages are already cached, the
                             // bg needs to be loaded
                             else {
-                                val bytesArray = openStream!!.readBytes()
-                                val bytesStream = bytesArray.inputStream()
-                                setImage(bytesStream, false, imageConfig)
-                                bytesStream.close()
+                                val bytesArray = openStream!!.readByteArray()
+                                val bytesSource = Buffer().write(bytesArray)
+                                setImage(bytesSource, false, imageConfig)
+                                bytesSource.close()
 
                                 scope.launchUI {
                                     try {
@@ -695,11 +698,16 @@ class PagerPageHolder(
     }
 
     private fun mergeOrSplitPages(
-        imageStream: InputStream,
-        imageStream2: InputStream?,
-    ): InputStream {
+        imageStream: BufferedSource,
+        imageStream2: BufferedSource?,
+    ): BufferedSource {
         if (ImageUtil.isAnimatedAndSupported(imageStream)) {
-            imageStream.reset()
+            // imageStream.reset() // BufferedSource doesn't support reset usually unless it's a
+            // buffer.
+            // But here we passed a Buffer or similar. Actually we peeked in isAnimatedAndSupported
+            // so the stream position is unchanged if we used peek.
+            // But isAnimatedAndSupported(BufferedSource) implementation uses peek() so it doesn't
+            // consume.
             if (page.longPage == null) {
                 page.longPage = true
                 if (viewer.config.splitPages || imageStream2 != null) {
@@ -710,14 +718,14 @@ class PagerPageHolder(
             return imageStream
         }
         if (page.longPage == true && viewer.config.splitPages) {
-            val imageBytes = imageStream.readBytes()
+            val imageBytes = imageStream.readByteArray()
             val imageBitmap =
                 try {
                     BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 } catch (e: Exception) {
                     imageStream.close()
                     TimberKt.e(e) { "Cannot split page" }
-                    return imageBytes.inputStream()
+                    return Buffer().write(imageBytes)
                 }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
             return ImageUtil.splitBitmap(imageBitmap, (page.firstHalf == false).xor(!isLTR)) {
@@ -732,7 +740,7 @@ class PagerPageHolder(
         }
         if (imageStream2 == null) {
             if (viewer.config.splitPages && page.longPage == null) {
-                val imageBytes = imageStream.readBytes()
+                val imageBytes = imageStream.readByteArray()
                 val imageBitmap =
                     try {
                         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
@@ -741,7 +749,7 @@ class PagerPageHolder(
                         page.longPage = true
                         splitDoublePages()
                         TimberKt.e(e) { "Cannot split page" }
-                        return imageBytes.inputStream()
+                        return Buffer().write(imageBytes)
                     }
                 val height = imageBitmap.height
                 val width = imageBitmap.width
@@ -761,7 +769,7 @@ class PagerPageHolder(
                     }
                 } else {
                     page.longPage = false
-                    imageBytes.inputStream()
+                    Buffer().write(imageBytes)
                 }
             }
             return imageStream
@@ -771,37 +779,37 @@ class PagerPageHolder(
             page.fullPage = true
             splitDoublePages()
             return imageStream
-        } else if (ImageUtil.isAnimatedAndSupported(imageStream)) {
+        } else if (imageStream2 != null && ImageUtil.isAnimatedAndSupported(imageStream2)) {
             page.isolatedPage = true
             extraPage?.fullPage = true
             splitDoublePages()
-            return imageStream
+            return imageStream2
         }
-        val imageBytes = imageStream.readBytes()
+        val imageBytes = imageStream.readByteArray()
         val imageBitmap =
             try {
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
-                imageStream2.close()
+                imageStream2?.close()
                 imageStream.close()
                 page.fullPage = true
                 splitDoublePages()
                 TimberKt.e(e) { "Cannot combine pages" }
-                return imageBytes.inputStream()
+                return Buffer().write(imageBytes)
             }
         scope.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
         val width = imageBitmap.width
 
         if (height < width) {
-            imageStream2.close()
+            imageStream2?.close()
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            return imageBytes.inputStream()
+            return Buffer().write(imageBytes)
         }
 
-        val imageBytes2 = imageStream2.readBytes()
+        val imageBytes2 = imageStream2!!.readByteArray()
         val imageBitmap2 =
             try {
                 BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
@@ -812,7 +820,7 @@ class PagerPageHolder(
                 page.isolatedPage = true
                 splitDoublePages()
                 TimberKt.e(e) { "Cannot combine pages" }
-                return imageBytes.inputStream()
+                return Buffer().write(imageBytes)
             }
         scope.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
@@ -824,7 +832,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            return imageBytes.inputStream()
+            return Buffer().write(imageBytes)
         }
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
         val bg =
