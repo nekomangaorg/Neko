@@ -696,6 +696,26 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO { downloadManager.createMangaFolder(getManga()) }
     }
 
+    fun markPreviousChapters(chapterItem: ChapterItem, read: Boolean) {
+        val chapterList =
+            if (mangaDetailScreenState.value.isSearching) {
+                mangaDetailScreenState.value.searchChapters
+            } else {
+                mangaDetailScreenState.value.activeChapters
+            }
+        val chapterIndex = chapterList.indexOf(chapterItem)
+        if (chapterIndex == -1) return
+
+        val chaptersToMark = chapterList.subList(0, chapterIndex)
+        val altChapters =
+            if (chapterIndex == chapterList.lastIndex) emptyList()
+            else chapterList.subList(chapterIndex + 1, chapterList.size)
+        val action =
+            if (read) ChapterMarkActions.PreviousRead(true, altChapters)
+            else ChapterMarkActions.PreviousUnread(true, altChapters)
+        markChapters(chaptersToMark, action)
+    }
+
     fun markChapters(
         chapterItems: List<ChapterItem>,
         markAction: ChapterMarkActions,

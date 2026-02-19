@@ -358,6 +358,7 @@ fun MangaScreen(
                         context.openInBrowser(url)
                     }
                 },
+                markPrevious = mangaViewModel::markPreviousChapters,
             ),
         openWebView = { url, title -> onNavigate(Screens.WebView(title = title, url = url)) },
         onBackPressed = onBackPressed,
@@ -605,7 +606,6 @@ private fun LazyListScope.chapterList(
             index = index,
             chapterItem = chapterItem,
             count = chapters.size,
-            activeChapters = chapters,
             themeColorState = themeColorState,
             shouldHideChapterTitles =
                 screenState.chapterFilter.hideChapterTitles == ToggleableState.On,

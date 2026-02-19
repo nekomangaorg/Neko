@@ -297,6 +297,7 @@ object MangaConstants {
         val openNext: () -> Unit,
         val openComment: (String) -> Unit,
         val openInBrowser: (ChapterItem) -> Unit,
+        val markPrevious: (ChapterItem, Boolean) -> Unit,
     )
 
     enum class BlockType {
