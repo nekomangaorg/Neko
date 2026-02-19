@@ -32,6 +32,7 @@ import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonSubsamplingImageView
 import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -248,6 +249,7 @@ constructor(
 
     private fun setNonAnimatedImage(data: BufferedSource, config: Config) =
         (pageView as? SubsamplingScaleImageView)?.apply {
+            setHardwareConfig(ImageUtil.canUseHardwareBitmap(data))
             setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
             setMinimumScaleType(config.minimumScaleType)
             setMinimumDpi(1) // Just so that very small image will be fit for initial load
