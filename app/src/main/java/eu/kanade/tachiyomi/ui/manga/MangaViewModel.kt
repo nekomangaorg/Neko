@@ -707,9 +707,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         if (chapterIndex == -1) return
 
         val chaptersToMark = chapterList.subList(0, chapterIndex)
-        val altChapters =
-            if (chapterIndex == chapterList.lastIndex) emptyList()
-            else chapterList.subList(chapterIndex + 1, chapterList.size)
+        val altChapters = chapterList.subList(chapterIndex + 1, chapterList.size)
         val action =
             if (read) ChapterMarkActions.PreviousRead(true, altChapters)
             else ChapterMarkActions.PreviousUnread(true, altChapters)
