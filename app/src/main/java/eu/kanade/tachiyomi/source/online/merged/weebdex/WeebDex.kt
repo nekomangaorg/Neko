@@ -42,12 +42,15 @@ class WeebDex : ReducedHttpSource() {
                 .newBuilder()
                 .addQueryParameter("page", "1")
                 .addQueryParameter("availableTranslatedLang", "en")
+                .addQueryParameter("title", query)
+                .addQueryParameter("sort", "relevance")
+                .addQueryParameter("contentRating", "safe")
+                .addQueryParameter("contentRating", "suggestive")
+                .addQueryParameter("contentRating", "erotica")
+                .addQueryParameter("contentRating", "pornographic")
+                .addQueryParameter("limit", "42")
 
-        if (query.isNotBlank()) {
-            urlBuilder.addQueryParameter("title", query)
-        }
-
-        val request = GET(urlBuilder.build(), headers)
+        val request = GET(urlBuilder.build().toString(), headers)
         val response = client.newCall(request).await()
 
         if (!response.isSuccessful) {
@@ -75,6 +78,7 @@ class WeebDex : ReducedHttpSource() {
                         .addQueryParameter("tlang", "en")
                         .addQueryParameter("page", page.toString())
                         .build()
+                        .toString()
 
                 val response = client.newCall(GET(url, headers)).await()
                 if (!response.isSuccessful) {
@@ -92,7 +96,7 @@ class WeebDex : ReducedHttpSource() {
                 }
             }
         } catch (e: Exception) {
-            return Err(ResultError.GenericError(e.message ?: "Unknown error"))
+            return Err(ResultError.Generic(e.message ?: "Unknown error"))
         }
 
         return Ok(chapters.map { it to false })

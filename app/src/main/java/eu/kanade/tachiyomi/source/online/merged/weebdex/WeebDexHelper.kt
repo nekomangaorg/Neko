@@ -16,7 +16,7 @@ class WeebDexHelper {
         when (status?.lowercase(Locale.ROOT)) {
             "ongoing" -> SManga.ONGOING
             "completed" -> SManga.COMPLETED
-            "hiatus" -> SManga.ON_HIATUS
+            "hiatus" -> SManga.HIATUS
             "cancelled" -> SManga.CANCELLED
             else -> SManga.UNKNOWN
         }

@@ -2,11 +2,13 @@ package eu.kanade.tachiyomi.source.online.merged.weebdex.dto
 
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDex
 import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDexConstants
 import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDexHelper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jsoup.parser.Parser
+import org.nekomanga.constants.Constants
 
 @Serializable
 class ChapterListDto(
@@ -65,12 +67,15 @@ class ChapterDto(
             chapterName.add("Oneshot")
         }
 
+        val scanlatorList = mutableListOf(WeebDex.name)
+        relationships?.groups?.forEach { scanlatorList.add(it.name) }
+
         return SChapter.create().apply {
             url = "/chapter/$id"
             name = Parser.unescapeEntities(chapterName.joinToString(" "), false)
             chapter_number = helper.parseChapterNumber(chapter)
             date_upload = helper.parseDate(publishedAt)
-            scanlator = relationships?.groups?.joinToString(", ") { it.name }
+            scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
         }
     }
 
