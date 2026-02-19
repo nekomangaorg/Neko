@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import eu.kanade.tachiyomi.util.lang.removeArticles
 import org.nekomanga.domain.manga.LibraryMangaItem
 
 fun libraryMangaItemComparator(
@@ -76,7 +75,7 @@ fun libraryMangaItemComparator(
 private fun compareByTitle(removeArticles: Boolean): Comparator<LibraryMangaItem> {
     return compareBy {
         when (removeArticles) {
-            true -> it.displayManga.getTitle().removeArticles()
+            true -> it.titleWithoutArticles
             false -> it.displayManga.getTitle()
         }
     }

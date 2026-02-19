@@ -6,6 +6,7 @@ import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.util.lang.removeArticles
 import org.nekomanga.domain.category.CategoryItem
 
 data class SimpleManga(val title: String, val id: Long)
@@ -42,6 +43,7 @@ data class LibraryMangaItem(
     val status: List<String> = emptyList(),
     val seriesType: FilterMangaType = FilterMangaType.Manga,
     val rating: Double = (-1).toDouble(),
+    val titleWithoutArticles: String = displayManga.getTitle().removeArticles(),
 ) {
     val totalChapterCount
         get() = readCount + unreadCount
