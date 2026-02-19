@@ -920,6 +920,15 @@ object ImageUtil {
             .takeIf { it in 0f..1f } ?: 0f
     }
 
+    fun canUseHardwareBitmap(bitmap: Bitmap): Boolean =
+        canUseHardwareBitmap(bitmap.width, bitmap.height)
+
+    fun canUseHardwareBitmap(imageSource: BufferedSource): Boolean =
+        with(extractImageOptions(imageSource)) { canUseHardwareBitmap(outWidth, outHeight) }
+
+    private fun canUseHardwareBitmap(width: Int, height: Int): Boolean =
+        max(width, height) <= GLUtil.maxTextureSize
+
     /** Used to check an image's dimensions without loading it in the memory. */
     private fun extractImageOptions(
         imageStream: InputStream,
