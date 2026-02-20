@@ -12,21 +12,22 @@ class LibraryMangaItemComparatorTest {
         id: Long,
         title: String,
         unreadCount: Int = 0,
-        downloadCount: Int = 0
+        downloadCount: Int = 0,
     ): LibraryMangaItem {
-        val displayManga = DisplayManga(
-            mangaId = id,
-            inLibrary = true,
-            currentArtwork = Artwork(mangaId = id),
-            url = "",
-            originalTitle = title,
-            userTitle = ""
-        )
+        val displayManga =
+            DisplayManga(
+                mangaId = id,
+                inLibrary = true,
+                currentArtwork = Artwork(mangaId = id),
+                url = "",
+                originalTitle = title,
+                userTitle = "",
+            )
         return LibraryMangaItem(
             displayManga = displayManga,
             userCover = null,
             unreadCount = unreadCount,
-            downloadCount = downloadCount
+            downloadCount = downloadCount,
         )
     }
 
@@ -38,11 +39,12 @@ class LibraryMangaItemComparatorTest {
 
         val mangaOrder = listOf(2L, 1L, 3L) // B, A, C
 
-        val comparator = libraryMangaItemComparator(
-            categorySort = LibrarySort.DragAndDrop,
-            categoryIsAscending = true,
-            mangaOrder = mangaOrder
-        )
+        val comparator =
+            libraryMangaItemComparator(
+                categorySort = LibrarySort.DragAndDrop,
+                categoryIsAscending = true,
+                mangaOrder = mangaOrder,
+            )
 
         val list = listOf(item1, item2, item3).sortedWith(comparator)
 
@@ -59,10 +61,11 @@ class LibraryMangaItemComparatorTest {
         val item2 = createItem(2, "B", unreadCount = 5)
         val item3 = createItem(3, "C", unreadCount = 0)
 
-        val comparator = libraryMangaItemComparator(
-            categorySort = LibrarySort.Unread,
-            categoryIsAscending = true
-        )
+        val comparator =
+            libraryMangaItemComparator(
+                categorySort = LibrarySort.Unread,
+                categoryIsAscending = true,
+            )
 
         val list = listOf(item3, item2, item1).sortedWith(comparator)
 
@@ -78,10 +81,11 @@ class LibraryMangaItemComparatorTest {
         val item2 = createItem(2, "B", unreadCount = 5)
         val item3 = createItem(3, "C", unreadCount = 0)
 
-        val comparator = libraryMangaItemComparator(
-            categorySort = LibrarySort.Unread,
-            categoryIsAscending = false
-        )
+        val comparator =
+            libraryMangaItemComparator(
+                categorySort = LibrarySort.Unread,
+                categoryIsAscending = false,
+            )
 
         val list = listOf(item3, item1, item2).sortedWith(comparator)
 
@@ -97,10 +101,11 @@ class LibraryMangaItemComparatorTest {
         val item2 = createItem(2, "B", downloadCount = 5)
         val item3 = createItem(3, "C", downloadCount = 0)
 
-        val comparator = libraryMangaItemComparator(
-            categorySort = LibrarySort.Downloads,
-            categoryIsAscending = true
-        )
+        val comparator =
+            libraryMangaItemComparator(
+                categorySort = LibrarySort.Downloads,
+                categoryIsAscending = true,
+            )
 
         val list = listOf(item3, item2, item1).sortedWith(comparator)
 
