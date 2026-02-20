@@ -14,7 +14,6 @@ import java.util.Calendar
 import java.util.Locale
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -28,6 +27,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -234,15 +234,17 @@ class ProjectSuki : ReducedHttpSource() {
                     if (dateIdx != -1 && cols.size > dateIdx) cols[dateIdx].text() else ""
                 val date = parseDate(dateText)
 
-                val scanlator =
-                    if (groupIdx != -1 && cols.size > groupIdx) cols[groupIdx].text() else ""
+                val scanlatorList = mutableListOf(ProjectSuki.name)
+                if (groupIdx != -1 && cols.size > groupIdx) {
+                    scanlatorList.add(cols[groupIdx].text())
+                }
 
                 val chapter =
                     SChapter.create().apply {
                         this.url = url.replace(baseUrl, "")
                         this.name = title
                         this.date_upload = date
-                        this.scanlator = scanlator
+                        this.scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
                         // Chapter number parsing logic could be added here if needed,
                         // but SChapter usually handles it via regex if not set.
                         // Project Suki implementation had complex logic, simplified here:
