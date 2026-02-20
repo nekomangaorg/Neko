@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.collect
 import org.nekomanga.domain.manga.DisplayManga
