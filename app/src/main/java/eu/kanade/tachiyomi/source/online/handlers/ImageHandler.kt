@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ProjectSukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
@@ -41,6 +42,7 @@ class ImageHandler {
     private val mangaHotHandler: MangaHotHandler by injectLazy()
     private val mangaPlusHandler: MangaPlusHandler by injectLazy()
     private val comikeyHandler: ComikeyHandler by injectLazy()
+    private val projectSukiHandler: ProjectSukiHandler by injectLazy()
     private val namiComiHandler: NamiComiHandler by injectLazy()
 
     // chapter id and last request time
@@ -55,6 +57,8 @@ class ImageHandler {
                     getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
                 isExternal(page, "comikey") ->
                     getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
+                isExternal(page, "projectsuki") ->
+                    getImageResponse(projectSukiHandler.client, projectSukiHandler.headers, page)
                 isExternal(page, "azuki") ->
                     getImageResponse(azukiHandler.client, azukiHandler.headers, page)
                 isExternal(page, "mangahot") ->

@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ProjectSukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
@@ -33,6 +34,7 @@ class PageHandler {
 
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
     val comikeyHandler: ComikeyHandler by injectLazy()
+    val projectSukiHandler: ProjectSukiHandler by injectLazy()
     val azukiHandler: AzukiHandler by injectLazy()
     val mangaHotHandler: MangaHotHandler by injectLazy()
     val namiComiHandler: NamiComiHandler by injectLazy()
@@ -72,6 +74,10 @@ class PageHandler {
                         }
                         "comikey".equals(chapter.scanlator, true) -> {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
+                        }
+                        "projectsuki".equals(chapter.scanlator, true) ||
+                            "project suki".equals(chapter.scanlator, true) -> {
+                            return@withContext projectSukiHandler.fetchPageList(externalUrl)
                         }
                         "namicomi".equals(chapter.scanlator, true) -> {
                             return@withContext namiComiHandler.fetchPageList(externalUrl)
