@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.LoginMode
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
@@ -108,6 +109,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         this.preferenceStore.getString(Keys.sourcePassword(source.id)).set(password)
         this.preferenceStore.getString(Keys.sourceUrl(source.id)).set(url)
     }
+
+    fun suwayomiLoginMode() = this.preferenceStore.getEnum("suwayomi_login_mode", LoginMode.None)
 
     fun sendCrashReports() = this.preferenceStore.getBoolean("acra.enabled", true)
 

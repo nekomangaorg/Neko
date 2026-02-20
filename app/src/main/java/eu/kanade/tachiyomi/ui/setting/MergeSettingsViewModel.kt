@@ -28,22 +28,11 @@ class MergeSettingsViewModel : ViewModel() {
     private val _loginEvent = MutableSharedFlow<MergeLoginEvent>()
     val loginEvent = _loginEvent.asSharedFlow()
 
-    private val _komgaMergeScreenState =
-        MutableStateFlow(
-            MergeScreenState(
-                MergeScreenType.KOMGA,
-                requiresCredentials = komga.requiresCredentials(),
-            )
-        )
+    private val _komgaMergeScreenState = MutableStateFlow(MergeScreenState(MergeScreenType.KOMGA))
     val komgaMergeScreenState = _komgaMergeScreenState.asStateFlow()
 
     private val _suwayomiMergeScreenState =
-        MutableStateFlow(
-            MergeScreenState(
-                MergeScreenType.SUWAYOMI,
-                requiresCredentials = suwayomi.requiresCredentials(),
-            )
-        )
+        MutableStateFlow(MergeScreenState(MergeScreenType.SUWAYOMI))
     val suwayomiMergeScreenState = _suwayomiMergeScreenState.asStateFlow()
 
     init {
@@ -118,6 +107,5 @@ sealed class MergeLoginEvent {
 data class MergeScreenState(
     val mergeScreenType: MergeScreenType,
     val isLoggedIn: Boolean = false,
-    val requiresCredentials: Boolean = false,
     val currentUrl: String = "",
 )

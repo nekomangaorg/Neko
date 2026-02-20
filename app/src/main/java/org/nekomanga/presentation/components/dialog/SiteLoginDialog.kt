@@ -40,8 +40,8 @@ fun LoginDialog(
     sourceName: String,
     onDismiss: () -> Unit,
     onConfirm: (String, String, String) -> Unit,
-    requiresCredential: Boolean = true,
     showUrlField: Boolean = false,
+    showCredentialsField: () -> Boolean = { true },
     usernameLabel: String = stringResource(R.string.username),
     loginEvent: SharedFlow<MergeLoginEvent>,
 ) {
@@ -82,36 +82,38 @@ fun LoginDialog(
                 verticalArrangement = Arrangement.spacedBy(Size.small),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                OutlinedTextField(
-                    label = { Text(usernameLabel) },
-                    value = username,
-                    onValueChange = { username = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (showCredentialsField()) {
+                    OutlinedTextField(
+                        label = { Text(usernameLabel) },
+                        value = username,
+                        onValueChange = { username = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
 
-                var passwordVisible by rememberSaveable { mutableStateOf(false) }
-                OutlinedTextField(
-                    label = { Text(stringResource(R.string.password)) },
-                    value = password,
-                    onValueChange = { password = it },
-                    visualTransformation =
-                        if (passwordVisible) VisualTransformation.None
-                        else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        if (password.text.isNotBlank()) {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = Icons.Filled.RemoveRedEye,
-                                    contentDescription = null,
-                                )
+                    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+                    OutlinedTextField(
+                        label = { Text(stringResource(R.string.password)) },
+                        value = password,
+                        onValueChange = { password = it },
+                        visualTransformation =
+                            if (passwordVisible) VisualTransformation.None
+                            else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        trailingIcon = {
+                            if (password.text.isNotBlank()) {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.RemoveRedEye,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 if (showUrlField) {
                     OutlinedTextField(
                         label = { Text(stringResource(R.string.url)) },
@@ -138,7 +140,7 @@ fun LoginDialog(
                 enabled =
                     !showLoading &&
                         url.text.isNotEmpty() &&
-                        (!requiresCredential ||
+                        (!showCredentialsField() ||
                             username.text.isNotBlank() && password.text.isNotBlank()),
                 onClick = {
                     onConfirm(username.text, password.text, url.text)
