@@ -17,48 +17,19 @@ fun libraryMangaItemComparator(
     val primaryComparator =
         when (categorySort) {
             LibrarySort.Title -> titleComparator
-            LibrarySort.DragAndDrop -> {
-                // Drag and drop is a custom sort that doesn't need a tie-breaker.
-                // It will be handled as a special case.
-                Comparator { item1, item2 ->
-                    val index1 = mangaOrder.indexOf(item1.displayManga.mangaId)
-                    val index2 = mangaOrder.indexOf(item2.displayManga.mangaId)
-                    when {
-                        index1 == index2 -> 0
-                        index1 == -1 -> -1
-                        index2 == -1 -> 1
-                        else -> index1.compareTo(index2)
-                    }
-                }
-            }
-
+            LibrarySort.DragAndDrop -> compareByDragAndDrop(mangaOrder)
             LibrarySort.LastRead ->
                 compareBy { lastReadMap[it.displayManga.mangaId] ?: lastReadMap.size }
-
             LibrarySort.LatestChapter -> compareByDescending { it.latestChapterDate }
-            LibrarySort.Unread ->
-                compareBy {
-                    when {
-                        it.unreadCount == 0 ->
-                            if (categoryIsAscending) Integer.MAX_VALUE else Integer.MIN_VALUE
-                        else -> it.unreadCount
-                    }
-                }
+            LibrarySort.Unread -> compareWithZeroAtEnd(categoryIsAscending) { it.unreadCount }
             LibrarySort.TotalChapters -> compareByDescending { it.totalChapterCount }
             LibrarySort.DateAdded -> compareByDescending { it.addedToLibraryDate }
             LibrarySort.DateFetched ->
                 compareBy { lastFetchMap[it.displayManga.mangaId] ?: lastFetchMap.size }
-
             LibrarySort.Rating -> compareByDescending { it.rating }
-            LibrarySort.Downloads ->
-                compareBy {
-                    when {
-                        it.downloadCount == 0 ->
-                            if (categoryIsAscending) Integer.MAX_VALUE else Integer.MIN_VALUE
-                        else -> it.downloadCount
-                    }
-                }
+            LibrarySort.Downloads -> compareWithZeroAtEnd(categoryIsAscending) { it.downloadCount }
         }
+
     return when (categorySort) {
         LibrarySort.DragAndDrop -> primaryComparator // No secondary sort for drag and drop
         LibrarySort.Title ->
@@ -78,6 +49,41 @@ private fun compareByTitle(removeArticles: Boolean): Comparator<LibraryMangaItem
         when (removeArticles) {
             true -> it.displayManga.getTitle().removeArticles()
             false -> it.displayManga.getTitle()
+        }
+    }
+}
+
+private fun compareByDragAndDrop(mangaOrder: List<Long>): Comparator<LibraryMangaItem> {
+    // Drag and drop is a custom sort that doesn't need a tie-breaker.
+    // It will be handled as a special case.
+    val orderMap = mangaOrder.withIndex().associate { it.value to it.index }
+
+    return Comparator { item1, item2 ->
+        val index1 = orderMap[item1.displayManga.mangaId]
+        val index2 = orderMap[item2.displayManga.mangaId]
+
+        // If not in map, index is null. Treat as -1 (similar to List.indexOf).
+        val i1 = index1 ?: -1
+        val i2 = index2 ?: -1
+
+        when {
+            i1 == i2 -> 0
+            i1 == -1 -> -1
+            i2 == -1 -> 1
+            else -> i1.compareTo(i2)
+        }
+    }
+}
+
+private fun compareWithZeroAtEnd(
+    categoryIsAscending: Boolean,
+    selector: (LibraryMangaItem) -> Int,
+): Comparator<LibraryMangaItem> {
+    return compareBy {
+        val value = selector(it)
+        when (value) {
+            0 -> if (categoryIsAscending) Int.MAX_VALUE else Int.MIN_VALUE
+            else -> value
         }
     }
 }
