@@ -76,8 +76,8 @@ fun MangaGridWithHeader(
             }
 
             itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
-                    _,
-                    rowItems ->
+                _,
+                rowItems ->
                 VerticalGrid(
                     columns = SimpleGridCells.Fixed(columns),
                     modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),

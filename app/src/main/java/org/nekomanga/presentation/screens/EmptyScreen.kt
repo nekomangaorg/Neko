@@ -15,11 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
-import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.theme.Size
@@ -111,15 +109,6 @@ fun EmptyScreen(
             Gap(Size.small)
         }
     }
-}
-
-@Preview
-@Composable
-private fun EmptyViewPreview() {
-    EmptyScreen(
-        message = UiText.StringResource(R.string.no_results_found),
-        actions = persistentListOf(Action(UiText.StringResource(R.string.retry))),
-    )
 }
 
 data class Action(val text: UiText, val onClick: () -> Unit = {})

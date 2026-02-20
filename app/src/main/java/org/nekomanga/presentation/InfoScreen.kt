@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -30,7 +28,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import org.nekomanga.presentation.components.LauncherIcon
@@ -135,21 +132,5 @@ fun InfoScreen(
 
             content()
         }
-    }
-}
-
-@Preview
-@Composable
-private fun InfoScaffoldPreview() {
-    InfoScreen(
-        icon = Icons.Outlined.Newspaper,
-        headingText = "Heading",
-        subtitleText = "Subtitle",
-        acceptText = "Accept",
-        onAcceptClick = {},
-        rejectText = "Reject",
-        onRejectClick = {},
-    ) {
-        Text("Hello world")
     }
 }
