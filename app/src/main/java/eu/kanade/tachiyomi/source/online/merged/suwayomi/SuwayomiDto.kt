@@ -2,7 +2,31 @@ package eu.kanade.tachiyomi.source.online.merged.suwayomi
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class SuwayomiGraphQLDto<T>(val data: T)
+@Serializable
+data class SuwayomiGraphQLDto<T>(val data: T?, val errors: List<SuwayomiErrorDto>? = null) {
+    fun hasErrors(): Boolean {
+        return !errors.isNullOrEmpty()
+    }
+}
+
+@Serializable
+data class SuwayomiGraphQLErrorsDto(val errors: List<SuwayomiErrorDto>? = null) {
+    fun isGraphQLUnauthorized(): Boolean {
+        return !errors.isNullOrEmpty() &&
+            errors.any {
+                it.message.contains("suwayomi.tachidesk.server.user.UnauthorizedException") ||
+                    it.message == "Unauthorized"
+            }
+    }
+}
+
+@Serializable data class SuwayomiErrorDto(val message: String)
+
+@Serializable data class SuwayomiRefreshTokenDto(val refreshToken: SuwayomiTokensDto)
+
+@Serializable data class SuwayomiLoginDto(val login: SuwayomiTokensDto)
+
+@Serializable data class SuwayomiTokensDto(val accessToken: String, val refreshToken: String?)
 
 @Serializable data class SuwayomiSearchMangaDto(val mangas: SuwayomiNodesDto)
 

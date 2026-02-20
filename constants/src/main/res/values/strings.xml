@@ -1501,6 +1501,11 @@
     <string name="signed_in_to">Signed in to: %1$s</string>
     <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
     <string name="minimum_suwayomi_version">Minimum required Suwayomi-Server version: 1.0.0</string>
+    <string name="suwayomi_login_mode">Login mode</string>
+    <string name="suwayomi_login_mode_none">None</string>
+    <string name="suwayomi_login_mode_basic">Basic Authentication</string>
+    <string name="suwayomi_login_mode_simple">Simple Login</string>
+    <string name="suwayomi_login_mode_ui">UI Login</string>
 
 
     <!-- Site Settings -->

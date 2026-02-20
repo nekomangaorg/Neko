@@ -19,8 +19,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.decodeFromStream
 import okhttp3.Credentials
 import okhttp3.Dns
+import okhttp3.FormBody
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -28,6 +30,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
@@ -48,22 +52,166 @@ class Suwayomi : MergedServerSource() {
 
     override fun hostUrl() = preferences.sourceUrl(this).get()
 
-    override fun requiresCredentials(): Boolean = false
+    private val apiUrl
+        get() = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
+
+    private val mode: LoginMode
+        get() = preferences.suwayomiLoginMode().get()
+
+    private val username
+        get() = preferences.sourceUsername(this).get()
+
+    private val password
+        get() = preferences.sourcePassword(this).get()
+
+    private var accessToken: String? = null
+    private var refreshToken: String? = null
+    private var cookies: String = ""
 
     override suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
             try {
                 val suwayomiUrl = "$url/api/graphql".toHttpUrlOrNull()!!.newBuilder()
-                val response =
-                    createClient(username, password)
-                        .newCall(GET(suwayomiUrl.toString(), headers))
-                        .await()
+                refresh(username, password, url)
+                val headers = getHeaders(username, password)
+                val response = createClient().newCall(GET(suwayomiUrl.toString(), headers)).await()
                 response.isSuccessful
             } catch (e: Exception) {
                 TimberKt.w(e) { "error logging into suwayomi" }
                 false
             }
         }
+    }
+
+    fun refresh(user: String? = null, pass: String? = null, url: String? = null) {
+        when (mode) {
+            LoginMode.SimpleLogin -> {
+                val formBody =
+                    FormBody.Builder()
+                        .add("user", user ?: username)
+                        .add("pass", pass ?: password)
+                        .build()
+                val result =
+                    client
+                        .newBuilder()
+                        .followRedirects(false)
+                        .build()
+                        .newCall(POST("${url ?: hostUrl()}/login.html", body = formBody))
+                        .execute()
+
+                // login.html redirects when successful
+                if (!result.isRedirect) {
+                    val err =
+                        result.body.string().replace(
+                            ".*<div class=\"error\">([^<]*)</div>.*"
+                                .toRegex(RegexOption.DOT_MATCHES_ALL)
+                        ) {
+                            it.groups[1]!!.value
+                        }
+                    throw Exception("Login failed: ${result.code} $err")
+                }
+                cookies = result.header("Set-Cookie", "") ?: return
+            }
+
+            LoginMode.UILogin -> {
+                refreshToken?.let {
+                    val response =
+                        client
+                            .newCall(
+                                POST(
+                                    "${url ?: hostUrl()}/api/graphql",
+                                    body = refreshTokenFormBuilder(),
+                                )
+                            )
+                            .execute()
+                            .body
+                            .use {
+                                json.decodeFromString<SuwayomiGraphQLDto<SuwayomiRefreshTokenDto>>(
+                                    it.string()
+                                )
+                            }
+
+                    if (response.hasErrors()) {
+                        this.refreshToken = null
+                    }
+
+                    response.data?.refreshToken?.let { this.accessToken = it.accessToken }
+
+                    return
+                }
+
+                val response =
+                    client
+                        .newCall(
+                            POST(
+                                "${url ?: hostUrl()}/api/graphql",
+                                baseHeaders,
+                                loginFormBuilder(user, pass),
+                            )
+                        )
+                        .execute()
+                        .body
+                        .use {
+                            json.decodeFromString<SuwayomiGraphQLDto<SuwayomiLoginDto>>(it.string())
+                        }
+                if (response.hasErrors()) {
+                    return
+                }
+
+                response.data?.login?.let {
+                    this.accessToken = it.accessToken
+                    this.refreshToken = it.refreshToken
+                }
+            }
+
+            else -> {}
+        }
+    }
+
+    private fun refreshTokenFormBuilder(): RequestBody {
+        val variables = buildJsonObject {
+            put("input", buildJsonObject { put("refreshToken", JsonPrimitive(refreshToken)) })
+        }
+        return buildJsonObject {
+                put("operationName", JsonPrimitive("REFRESH_LOGIN_TOKEN"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation REFRESH_LOGIN_TOKEN(\$input RefreshTokenInput!) {" +
+                            "refreshToken(input: \$input) {" +
+                            "accessToken}}"
+                    ),
+                )
+                put("variables", variables)
+            }
+            .toString()
+            .toRequestBody("application/json".toMediaType())
+    }
+
+    private fun loginFormBuilder(user: String? = null, pass: String? = null): RequestBody {
+        val variables = buildJsonObject {
+            put(
+                "input",
+                buildJsonObject {
+                    put("username", JsonPrimitive(user ?: username))
+                    put("password", JsonPrimitive(pass ?: password))
+                },
+            )
+        }
+        return buildJsonObject {
+                put("operationName", JsonPrimitive("GET_LOGIN_TOKEN"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation GET_LOGIN_TOKEN (\$input: LoginInput!) {" +
+                            "login(input: \$input) {" +
+                            "accessToken refreshToken}}"
+                    ),
+                )
+                put("variables", variables)
+            }
+            .toString()
+            .toRequestBody("application/json".toMediaType())
     }
 
     override fun isConfigured(): Boolean {
@@ -73,15 +221,13 @@ class Suwayomi : MergedServerSource() {
     override suspend fun isLoggedIn(): Boolean {
         return withIOContext {
             if (!isConfigured()) return@withIOContext false
-            val username = preferences.sourceUsername(this@Suwayomi).get()
-            val password = preferences.sourcePassword(this@Suwayomi).get()
             val url = hostUrl()
 
             return@withIOContext loginWithUrl(username, password, url)
         }
     }
 
-    override val headers =
+    val baseHeaders =
         Headers.Builder()
             .add("Referer", hostUrl())
             .add("User-Agent", userAgent)
@@ -89,8 +235,32 @@ class Suwayomi : MergedServerSource() {
             .add("Content-Type", "application/json")
             .build()
 
+    private fun getHeaders(username: String, password: String): Headers {
+        return baseHeaders
+            .newBuilder()
+            .apply {
+                when (mode) {
+                    LoginMode.None -> {}
+                    LoginMode.SimpleLogin -> {
+                        if (cookies.isNotBlank()) add("Cookie", cookies)
+                    }
+
+                    LoginMode.UILogin -> {
+                        accessToken?.let { add("Authorization", "Bearer $accessToken") }
+                    }
+
+                    LoginMode.BasicAuth ->
+                        add("Authorization", Credentials.basic(username, password))
+                }
+            }
+            .build()
+    }
+
+    override val headers: Headers
+        get() = getHeaders(username, password)
+
     override val client: OkHttpClient
-        get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
+        get() = createClient()
 
     override fun getMangaUrl(url: String): String {
         val separator = if (url.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
@@ -101,38 +271,50 @@ class Suwayomi : MergedServerSource() {
         return hostUrl() + simpleChapter.url.split(" ", limit = 2)[0]
     }
 
-    private fun createClient(username: String, password: String): OkHttpClient {
-        return client
+    private fun createClient(): OkHttpClient {
+        return super.client
             .newBuilder()
-            .authenticator { _, response ->
-                if (response.request.header("Authorization") != null) {
-                    null // Give up, we've already failed to authenticate.
-                } else {
-                    response.request
-                        .newBuilder()
-                        .addHeader("Authorization", Credentials.basic(username, password))
-                        .build()
+            .dns(Dns.SYSTEM)
+            .addInterceptor { chain ->
+                fun Response.isGraphQLUnauthorized(): Boolean {
+                    return try {
+                        val body =
+                            this.peekBody(Long.MAX_VALUE).byteStream().use {
+                                json.decodeFromStream<SuwayomiGraphQLErrorsDto>(it)
+                            }
+                        body.isGraphQLUnauthorized()
+                    } catch (_: Exception) {
+                        false
+                    }
                 }
+
+                fun Response.isUnauthorized(): Boolean =
+                    this.code == 401 || this.isGraphQLUnauthorized()
+
+                var response = chain.proceed(chain.request())
+
+                if (response.isUnauthorized()) {
+                    refresh()
+                    response = chain.proceed(chain.request().newBuilder().headers(headers).build())
+                }
+
+                return@addInterceptor response
             }
             .build()
     }
-
-    fun customClient() =
-        createClient(preferences.sourceUsername(this).get(), preferences.sourcePassword(this).get())
 
     override suspend fun searchManga(query: String): List<SManga> {
         if (hostUrl().isBlank()) {
             throw Exception("Invalid host name")
         }
-        val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
 
-        val response =
-            customClient().newCall(POST(apiUrl, headers, searchMangaFormBuilder(query))).await()
+        val response = client.newCall(POST(apiUrl, headers, searchMangaFormBuilder(query))).await()
         val responseBody = response.body
 
         return responseBody.use { body ->
             with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
-                data.mangas.nodes.mapNotNull { manga ->
+                (data ?: throw Exception("Failed to search manga")).mangas.nodes.mapNotNull { manga
+                    ->
                     manga.source ?: return@mapNotNull null
                     SManga.create().apply {
                         this.title = manga.title
@@ -183,10 +365,9 @@ class Suwayomi : MergedServerSource() {
                     if (hostUrl().isBlank()) {
                         throw Exception("Invalid host name")
                     }
-                    val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
                     var chapters =
                         try {
-                            customClient()
+                            client
                                 .newCall(
                                     POST(
                                         apiUrl,
@@ -204,7 +385,7 @@ class Suwayomi : MergedServerSource() {
                                             it.string()
                                         )
                                         .data
-                                        .fetchChapters
+                                        ?.fetchChapters
                                         ?.chapters
                                 }
                         } catch (e: Exception) {
@@ -215,7 +396,7 @@ class Suwayomi : MergedServerSource() {
                         }
                     if (chapters == null) {
                         chapters =
-                            customClient()
+                            client
                                 .newCall(
                                     POST(apiUrl, headers, getChaptersFormBuilder(mangaId.toLong()))
                                 )
@@ -229,8 +410,8 @@ class Suwayomi : MergedServerSource() {
                                             it.string()
                                         )
                                         .data
-                                        .chapters
-                                        .nodes
+                                        ?.chapters
+                                        ?.nodes ?: throw Exception("Failed to get chapters")
                                 }
                     }
                     chapters = chapters.sortedBy { it.sourceOrder }
@@ -566,10 +747,9 @@ class Suwayomi : MergedServerSource() {
         if (hostUrl().isBlank()) {
             throw Exception("Invalid host name")
         }
-        val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
         val chapterId = chapter.url.split(" ", limit = 2)[1].toLong()
         val response =
-            customClient().newCall(POST(apiUrl, headers, fetchPagesFormBuilder(chapterId))).await()
+            client.newCall(POST(apiUrl, headers, fetchPagesFormBuilder(chapterId))).await()
         val responseBody = response.body
 
         val pages =
@@ -577,8 +757,8 @@ class Suwayomi : MergedServerSource() {
                 json
                     .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChapterPagesDto>>(it.string())
                     .data
-                    .fetchChapterPages
-                    .pages
+                    ?.fetchChapterPages
+                    ?.pages ?: throw Exception("Failed to get pages")
             }
         return pages.withIndex().map { (index, page) ->
             Page(index, imageUrl = "${hostUrl()}${page}")
@@ -608,11 +788,10 @@ class Suwayomi : MergedServerSource() {
         if (hostUrl().isBlank()) {
             throw Exception("Invalid host name")
         }
-        val apiUrl = "${hostUrl()}/api/graphql".toHttpUrl().newBuilder().toString()
 
         val chapterIds = chapters.map { it.url.split(" ", limit = 2)[1].toLong() }
         try {
-            customClient()
+            client
                 .newCall(POST(apiUrl, headers, updateChapterFormBuilder(chapterIds, read)))
                 .await()
         } catch (e: Exception) {
@@ -662,4 +841,11 @@ sealed class Name {
     ) : Name()
 
     data object NotSane : Name()
+}
+
+enum class LoginMode(val titleResId: Int) {
+    None(R.string.suwayomi_login_mode_none),
+    BasicAuth(R.string.suwayomi_login_mode_basic),
+    SimpleLogin(R.string.suwayomi_login_mode_simple),
+    UILogin(R.string.suwayomi_login_mode_ui),
 }
