@@ -73,6 +73,11 @@ internal class LibrarySettingsScreen(
                         title = stringResource(R.string.sort_by_ignoring_articles),
                         subtitle = stringResource(R.string.when_sorting_ignore_articles),
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = libraryPreferences.dynamicCover(),
+                        title = stringResource(R.string.dynamic_cover),
+                        subtitle = stringResource(R.string.dynamic_cover_summary),
+                    ),
                     Preference.PreferenceItem.InfoPreference(
                         stringResource(R.string.display_options_can_be)
                     ),

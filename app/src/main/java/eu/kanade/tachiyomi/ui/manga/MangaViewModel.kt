@@ -381,7 +381,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         val artwork = createCurrentArtwork(effectiveManga)
                         var finalArtwork = artwork
 
-                        if (dynamicCover && effectiveManga.userCover.isEmpty()) {
+                        if (dynamicCover && effectiveManga.userCover.isBlank()) {
                             val lastReadChapterId =
                                 history.maxByOrNull { it.last_read }?.chapter_id
 
