@@ -20,13 +20,19 @@ class ImageUtilTest {
                 return m
             }
 
-            assertEquals(ImageUtil.ImageType.AVIF, mockType(Format.Avif).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.GIF, mockType(Format.Gif).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.HEIF, mockType(Format.Heif).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.JPEG, mockType(Format.Jpeg).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.JXL, mockType(Format.Jxl).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.PNG, mockType(Format.Png).toImageUtilType())
-            assertEquals(ImageUtil.ImageType.WEBP, mockType(Format.Webp).toImageUtilType())
+            val typeMappings = mapOf(
+                Format.Avif to ImageUtil.ImageType.AVIF,
+                Format.Gif to ImageUtil.ImageType.GIF,
+                Format.Heif to ImageUtil.ImageType.HEIF,
+                Format.Jpeg to ImageUtil.ImageType.JPEG,
+                Format.Jxl to ImageUtil.ImageType.JXL,
+                Format.Png to ImageUtil.ImageType.PNG,
+                Format.Webp to ImageUtil.ImageType.WEBP,
+            )
+
+            typeMappings.forEach { (format, expectedType) ->
+                assertEquals(expectedType, mockType(format).toImageUtilType())
+            }
         }
     }
 
