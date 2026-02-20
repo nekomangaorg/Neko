@@ -179,3 +179,5 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.mockk) { exclude(group = "junit", module = "junit") }
 }
+
+tasks.withType<Test> { useJUnit() }

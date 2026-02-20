@@ -1,0 +1,4 @@
+
+## 2026-02-20 - [Test Configuration] **Learning:** The `app` module relies on JUnit 4 (via `libs.junit`) but the project root forces `useJUnitPlatform()`. To successfully run unit tests (e.g., `./gradlew app:testStandardDebugUnitTest`), the `app/build.gradle.kts` must explicitly configure `tasks.withType<Test> { useJUnit() }` to use the legacy runner. **Action:** Check parent build configurations for conflicting test runner settings when tests fail to launch.
+
+## 2026-02-20 - [Testing Internal Libraries] **Learning:** Classes in external libraries with `internal` constructors (like `tachiyomi.decoder.ImageType`) cannot be instantiated directly in tests and require MockK (e.g., `mockk<ImageType>()`) to simulate behavior. **Action:** Use mocking frameworks to bypass visibility restrictions when testing extension functions on external types.
