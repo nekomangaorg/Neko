@@ -134,6 +134,7 @@ class LibraryViewModel() : ViewModel() {
 
     val dynamicArtworkFlow: Flow<Map<Long, String>> =
         db.getIdsOfMangaWithProjectedVolumeArtwork()
+            .asRxObservable()
             .asFlow()
             .map { cursor ->
                 val map = mutableMapOf<Long, String>()
