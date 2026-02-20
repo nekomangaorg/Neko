@@ -383,7 +383,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                         if (dynamicCover && effectiveManga.userCover.isEmpty()) {
                             val lastReadChapterId =
-                                history.maxByOrNull { it.last_read }?.history_chapter_id
+                                history.maxByOrNull { it.last_read }?.chapter_id
 
                             if (lastReadChapterId != null) {
                                 val volume =

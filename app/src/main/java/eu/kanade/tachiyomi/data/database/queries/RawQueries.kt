@@ -26,7 +26,7 @@ val getIdsOfMangaWithProjectedVolumeArtworkQuery =
         AND ${History.TABLE}.${History.COL_LAST_READ} = Latest.max_read
     JOIN ${Artwork.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Artwork.TABLE}.${Artwork.COL_MANGA_ID}
-    AND ${Chapter.TABLE}.${Chapter.COL_VOLUME} = ${Artwork.TABLE}.${Artwork.COL_VOLUME}
+    AND ${Chapter.TABLE}.${Chapter.COL_VOL} = ${Artwork.TABLE}.${Artwork.COL_VOLUME}
     WHERE ${Manga.TABLE}.${Manga.COL_FAVORITE} = 1
     """
 
