@@ -39,7 +39,7 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Shapes
@@ -76,8 +76,8 @@ fun MangaGridWithHeader(
             }
 
             itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
-                gridIndex,
-                rowItems ->
+                    _,
+                    rowItems ->
                 VerticalGrid(
                     columns = SimpleGridCells.Fixed(columns),
                     modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
