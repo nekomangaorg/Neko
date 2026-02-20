@@ -196,6 +196,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .map { it.toMangaItem() }
             .distinctUntilChanged()
 
+    val historyFlow = db.getHistoryByMangaId(mangaId).asFlow().distinctUntilChanged()
+
     val artworkFlow = db.getArtwork(mangaId).asFlow().distinctUntilChanged()
 
     val categoriesDataFlow =
@@ -352,23 +354,19 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         observeDownloads()
 
         viewModelScope.launchIO {
-            eu.kanade.tachiyomi.util.system
-                .combine(
-                    mangaFlow,
-                    staticChapterDataFlow,
-                    categoriesDataFlow,
-                    artworkFlow,
-                    tracksFlow,
-                    mergedFlow,
-                    _mangaFilterState,
+            combine(
+                    combine(mangaFlow, staticChapterDataFlow, categoriesDataFlow, ::Triple),
+                    combine(artworkFlow, tracksFlow, mergedFlow, ::Triple),
+                    combine(
+                        _mangaFilterState,
+                        libraryPreferences.dynamicCover().changes(),
+                        historyFlow,
+                        ::Triple,
+                    ),
                 ) {
-                    mangaItem,
-                    staticChapterData,
-                    categoriesData,
-                    artworkList,
-                    tracks,
-                    IsMerged,
-                    filterState ->
+                    (mangaItem, staticChapterData, categoriesData),
+                    (artworkList, tracks, IsMerged),
+                    (filterState, dynamicCover, history) ->
                     withContext(Dispatchers.Default) {
                         val effectiveManga =
                             if (filterState != null) {
@@ -381,15 +379,43 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
 
                         val artwork = createCurrentArtwork(effectiveManga)
+                        var finalArtwork = artwork
+
+                        if (dynamicCover && effectiveManga.userCover.isEmpty()) {
+                            val lastReadChapterId =
+                                history.maxByOrNull { it.last_read }?.history_chapter_id
+
+                            if (lastReadChapterId != null) {
+                                val volume =
+                                    staticChapterData.allChapters
+                                        .find { it.chapter.id == lastReadChapterId }
+                                        ?.chapter
+                                        ?.volume
+
+                                if (!volume.isNullOrBlank()) {
+                                    val dynamicArt = artworkList.firstOrNull { it.volume == volume }
+                                    if (dynamicArt != null) {
+                                        val quality = mangaDexPreferences.coverQuality().get()
+                                        val url =
+                                            MdUtil.cdnCoverUrl(
+                                                effectiveManga.uuid(),
+                                                dynamicArt.fileName,
+                                                quality,
+                                            )
+                                        finalArtwork = artwork.copy(url = url)
+                                    }
+                                }
+                            }
+                        }
 
                         if (!effectiveManga.initialized) {
                             AllInfo(
                                 mangaItem = MangaItem(title = effectiveManga.title),
-                                artwork = artwork,
+                                artwork = finalArtwork,
                             )
                         } else {
                             val alternativeArtwork =
-                                createAltArtwork(effectiveManga, artwork, artworkList)
+                                createAltArtwork(effectiveManga, finalArtwork, artworkList)
 
                             if (
                                 staticChapterData.allScanlators.size == 1 &&
@@ -474,7 +500,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 allCategories = categoriesData.all.toPersistentList(),
                                 mangaCategories = categoriesData.current.toPersistentList(),
                                 allChapterInfo = allChapterInfo,
-                                artwork = artwork,
+                                artwork = finalArtwork,
                                 altArtwork = alternativeArtwork,
                                 tracks = tracks,
                                 loggedInTrackerService = loggedInTrackerService,

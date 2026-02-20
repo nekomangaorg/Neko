@@ -1,11 +1,34 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import eu.kanade.tachiyomi.data.database.tables.ArtworkTable as Artwork
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable as Category
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable as MangaCategory
 import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
 import org.nekomanga.constants.Constants
+
+/**
+ * Query to get the ids of manga and the artwork filename of the volume of the last read chapter.
+ */
+val getIdsOfMangaWithProjectedVolumeArtworkQuery =
+    """
+    SELECT ${Manga.TABLE}.${Manga.COL_ID}, ${Artwork.TABLE}.${Artwork.COL_FILENAME}
+    FROM ${Manga.TABLE}
+    JOIN (
+        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}, MAX(${History.TABLE}.${History.COL_LAST_READ}) as max_read
+        FROM ${Chapter.TABLE}
+        JOIN ${History.TABLE} ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+        GROUP BY ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    ) Latest ON ${Manga.TABLE}.${Manga.COL_ID} = Latest.${Chapter.COL_MANGA_ID}
+    JOIN ${Chapter.TABLE} ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    JOIN ${History.TABLE} ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+        AND ${History.TABLE}.${History.COL_LAST_READ} = Latest.max_read
+    JOIN ${Artwork.TABLE}
+    ON ${Manga.TABLE}.${Manga.COL_ID} = ${Artwork.TABLE}.${Artwork.COL_MANGA_ID}
+    AND ${Chapter.TABLE}.${Chapter.COL_VOLUME} = ${Artwork.TABLE}.${Artwork.COL_VOLUME}
+    WHERE ${Manga.TABLE}.${Manga.COL_FAVORITE} = 1
+    """
 
 /** Query to get the manga from the library, with their categories and unread count. */
 val libraryQuery =
