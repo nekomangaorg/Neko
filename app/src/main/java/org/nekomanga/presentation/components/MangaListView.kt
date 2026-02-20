@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.collect
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
@@ -107,44 +110,49 @@ fun MangaListWithHeader(
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
+    val filteredGroupedManga =
+        remember(groupedManga) {
+            groupedManga
+                .mapValues { (_, list) -> list.filter { it.isVisible }.toPersistentList() }
+                .filterValues { it.isNotEmpty() }
+                .toImmutableMap()
+        }
+
     LazyColumn(
         modifier = modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
-        groupedManga.forEach { (stringRes, mangaList) ->
-            val mangaList = mangaList.filter { it.isVisible }
-            if (mangaList.isNotEmpty()) {
-                item(key = "header-$stringRes") {
-                    HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
-                }
-                itemsIndexed(
-                    mangaList,
-                    key = { _, displayManga -> "${stringRes}-item-${displayManga.mangaId}" },
-                ) { index, displayManga ->
-                    val listCardType =
-                        when {
-                            index == 0 && mangaList.size > 1 -> ListCardType.Top
-                            index == mangaList.size - 1 && mangaList.size > 1 -> ListCardType.Bottom
-                            mangaList.size == 1 -> ListCardType.Single
-                            else -> ListCardType.Center
-                        }
-                    ExpressiveListCard(
-                        modifier = Modifier.padding(horizontal = Size.small),
-                        listCardType = listCardType,
-                    ) {
-                        MangaRow(
-                            displayManga = displayManga,
-                            shouldOutlineCover = shouldOutlineCover,
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .combinedClickable(
-                                        onClick = { onClick(displayManga.mangaId) },
-                                        onLongClick = { onLongClick(displayManga) },
-                                    ),
-                        )
+        filteredGroupedManga.forEach { (stringRes, mangaList) ->
+            item(key = "header-$stringRes") {
+                HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+            }
+            itemsIndexed(
+                mangaList,
+                key = { _, displayManga -> "${stringRes}-item-${displayManga.mangaId}" },
+            ) { index, displayManga ->
+                val listCardType =
+                    when {
+                        index == 0 && mangaList.size > 1 -> ListCardType.Top
+                        index == mangaList.size - 1 && mangaList.size > 1 -> ListCardType.Bottom
+                        mangaList.size == 1 -> ListCardType.Single
+                        else -> ListCardType.Center
                     }
+                ExpressiveListCard(
+                    modifier = Modifier.padding(horizontal = Size.small),
+                    listCardType = listCardType,
+                ) {
+                    MangaRow(
+                        displayManga = displayManga,
+                        shouldOutlineCover = shouldOutlineCover,
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .wrapContentHeight()
+                                .combinedClickable(
+                                    onClick = { onClick(displayManga.mangaId) },
+                                    onLongClick = { onLongClick(displayManga) },
+                                ),
+                    )
                 }
             }
         }
