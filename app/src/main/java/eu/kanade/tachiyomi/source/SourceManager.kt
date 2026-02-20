@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
+import eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.Suwayomi
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
@@ -31,6 +32,8 @@ open class SourceManager {
 
     val weebDex: WeebDex by lazy { WeebDex() }
 
+    val projectSuki: ProjectSuki by lazy { ProjectSuki() }
+
     open fun get(sourceKey: Long): Source? {
         return mangaDex
     }
@@ -50,6 +53,7 @@ open class SourceManager {
                 WeebCentral.name,
                 MangaBall.name,
                 WeebDex.name,
+                ProjectSuki.name,
             )
 
         val possibleIds = MdLang.entries.map { getId(it.lang) }
