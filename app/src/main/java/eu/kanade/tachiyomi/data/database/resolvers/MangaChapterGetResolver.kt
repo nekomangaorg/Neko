@@ -22,6 +22,11 @@ class MangaChapterGetResolver : DefaultGetResolver<MangaChapter>() {
         manga.id = chapter.manga_id
         manga.url = cursor.getString(cursor.getColumnIndex("mangaUrl"))
 
+        val chapterIdIndex = cursor.getColumnIndex("chapter_id")
+        if (chapterIdIndex != -1) {
+            chapter.id = cursor.getLong(chapterIdIndex)
+        }
+
         return MangaChapter(manga, chapter)
     }
 }

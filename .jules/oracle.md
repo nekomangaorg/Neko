@@ -1,0 +1,1 @@
+## 2024-05-22 - StorIO Column Mapping Bug **Learning:** `SELECT *` in JOINs with duplicate column names (like `_id`) causes StorIO `GetResolver` to map the wrong ID if relying on `getColumnIndex(colName)` which returns the first occurrence. **Action:** Always alias ID columns in JOIN queries (e.g., `chapter._id AS chapter_id`) to ensure correct mapping.
