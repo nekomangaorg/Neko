@@ -291,6 +291,11 @@ internal class LibrarySettingsScreen(
                     group = stringResource(R.string.general),
                 ),
                 SearchTerm(
+                    title = stringResource(R.string.dynamic_cover),
+                    subtitle = stringResource(R.string.dynamic_cover_summary),
+                    group = stringResource(R.string.general),
+                ),
+                SearchTerm(
                     title = stringResource(R.string.display_options_can_be),
                     group = stringResource(R.string.general),
                 ),
