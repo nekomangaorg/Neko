@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -211,6 +212,8 @@ private fun ChapterRowContent(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         isDropdownExpanded = true
                     },
+                    role = Role.Button,
+                    onClickLabel = stringResource(id = R.string.start_reading),
                 )
                 .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
