@@ -172,6 +172,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param newUpdates a list of manga with new updates.
      */
     suspend fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
+        if (newUpdates.isEmpty()) return
         // create a copy of the list since it will be cleared by the time it is used
         val updates = newUpdates.toImmutableMap()
         val notifications = ArrayList<Pair<Notification, Int>>()
