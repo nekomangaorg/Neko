@@ -120,7 +120,7 @@ object SafeIntBooleanDeserializer : KSerializer<Int> {
             decoder as? JsonDecoder
                 ?: return try {
                     decoder.decodeInt()
-                } catch (_: Exception) {
+} catch (e: Exception) {
                     try {
                         if (decoder.decodeBoolean()) 1 else 0
                     } catch (_: Exception) {
