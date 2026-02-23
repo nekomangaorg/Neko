@@ -51,6 +51,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -64,7 +66,8 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 private const val iconSize = 20
@@ -560,10 +563,12 @@ private fun Background(
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun DownloadButtonPreview() {
-    ThemedPreviews {
+private fun DownloadButtonPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
         Row(horizontalArrangement = Arrangement.spacedBy(Size.small)) {
             DownloadButton(
                 downloadState = Download.State.NOT_DOWNLOADED,

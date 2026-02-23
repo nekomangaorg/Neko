@@ -13,7 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.ui.theme.withThemes
 
 private data class ToolTipButtonData(
     val label: String,
@@ -21,21 +23,23 @@ private data class ToolTipButtonData(
     val icon: ImageVector,
 )
 
-private class ToolTipButtonProvider : PreviewParameterProvider<ToolTipButtonData> {
+private class ToolTipButtonProvider : PreviewParameterProvider<Themed<ToolTipButtonData>> {
     override val values =
         sequenceOf(
-            ToolTipButtonData("Enabled Action", true, Icons.Default.Favorite),
-            ToolTipButtonData("Disabled Action", false, Icons.Default.Delete),
-            ToolTipButtonData("Long Label Action", true, Icons.Default.Share),
-        )
+                ToolTipButtonData("Enabled Action", true, Icons.Default.Favorite),
+                ToolTipButtonData("Disabled Action", false, Icons.Default.Delete),
+                ToolTipButtonData("Long Label Action", true, Icons.Default.Share),
+            )
+            .withThemes()
 }
 
 @Preview(name = "ToolTipButton Variants", showBackground = true, widthDp = 720)
 @Composable
 private fun ToolTipButtonPreview(
-    @PreviewParameter(ToolTipButtonProvider::class) data: ToolTipButtonData
+    @PreviewParameter(ToolTipButtonProvider::class) themedData: Themed<ToolTipButtonData>
 ) {
-    ThemedPreviews {
+    ThemedPreviews(themedData.themeConfig) {
+        val data = themedData.value
         Box(modifier = Modifier.padding(16.dp)) {
             ToolTipButton(
                 toolTipLabel = data.label,

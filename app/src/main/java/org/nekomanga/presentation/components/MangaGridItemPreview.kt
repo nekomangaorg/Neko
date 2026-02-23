@@ -17,16 +17,19 @@ import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.ui.theme.withThemes
 
 @Preview(widthDp = 400, showBackground = true)
 @Composable
 private fun MangaGridItemPreview(
-    @PreviewParameter(DisplayMangaProvider::class) displayManga: DisplayManga
+    @PreviewParameter(DisplayMangaProvider::class) themedDisplayManga: Themed<DisplayManga>
 ) {
     val previewHandler = AsyncImagePreviewHandler { ColorImage(Color.Red.toArgb()) }
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
-        ThemedPreviews {
+        ThemedPreviews(themedDisplayManga.themeConfig) {
+            val displayManga = themedDisplayManga.value
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -57,35 +60,37 @@ private fun MangaGridItemPreview(
     }
 }
 
-private class DisplayMangaProvider : PreviewParameterProvider<DisplayManga> {
-    override val values: Sequence<DisplayManga> =
+private class DisplayMangaProvider : PreviewParameterProvider<Themed<DisplayManga>> {
+    override val values: Sequence<Themed<DisplayManga>> =
         sequenceOf(
-            DisplayManga(
-                mangaId = 1L,
-                inLibrary = true,
-                currentArtwork = Artwork(mangaId = 1L, inLibrary = true),
-                url = "",
-                originalTitle = "One Piece",
-                userTitle = "One Piece",
-                displayText = "Eiichiro Oda",
-            ),
-            DisplayManga(
-                mangaId = 2L,
-                inLibrary = false,
-                currentArtwork = Artwork(mangaId = 2L, inLibrary = false),
-                url = "",
-                originalTitle = "Detailed Long Title: The Adventure of a Lifetime in Another World",
-                userTitle = "",
-                displayText = "Author Name • Artist Name",
-            ),
-            DisplayManga(
-                mangaId = 3L,
-                inLibrary = true,
-                currentArtwork = Artwork(mangaId = 3L, inLibrary = true),
-                url = "",
-                originalTitle = "No Subtitle",
-                userTitle = "No Subtitle",
-                displayText = "",
-            ),
-        )
+                DisplayManga(
+                    mangaId = 1L,
+                    inLibrary = true,
+                    currentArtwork = Artwork(mangaId = 1L, inLibrary = true),
+                    url = "",
+                    originalTitle = "One Piece",
+                    userTitle = "One Piece",
+                    displayText = "Eiichiro Oda",
+                ),
+                DisplayManga(
+                    mangaId = 2L,
+                    inLibrary = false,
+                    currentArtwork = Artwork(mangaId = 2L, inLibrary = false),
+                    url = "",
+                    originalTitle =
+                        "Detailed Long Title: The Adventure of a Lifetime in Another World",
+                    userTitle = "",
+                    displayText = "Author Name • Artist Name",
+                ),
+                DisplayManga(
+                    mangaId = 3L,
+                    inLibrary = true,
+                    currentArtwork = Artwork(mangaId = 3L, inLibrary = true),
+                    url = "",
+                    originalTitle = "No Subtitle",
+                    userTitle = "No Subtitle",
+                    displayText = "",
+                ),
+            )
+            .withThemes()
 }

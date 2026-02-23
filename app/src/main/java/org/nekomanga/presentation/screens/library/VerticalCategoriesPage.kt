@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
@@ -48,7 +50,8 @@ import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Size
-import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
@@ -388,9 +391,11 @@ fun LibraryCategoryHeader(
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun LibraryCategoryHeaderPreview() {
+private fun LibraryCategoryHeaderPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
     val categoryItem =
         CategoryItem(
             id = 1,
@@ -403,7 +408,7 @@ private fun LibraryCategoryHeaderPreview() {
             isSystemCategory = true,
         )
 
-    ThemedPreviews {
+    ThemedPreviews(themeConfig) {
         LibraryCategoryHeader(
             categoryItem = categoryItem,
             useVividColorHeaders = false,

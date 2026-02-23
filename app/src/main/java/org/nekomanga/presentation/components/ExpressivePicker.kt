@@ -26,12 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
-import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -202,10 +205,12 @@ fun <T> ExpressivePicker(
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun PreviewGenericPicker() {
-    ThemedPreviews {
+private fun PreviewGenericPicker(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
         // --- Preview 1: Integer Range ---
         val numberItems = remember { (1..30).toList() }
         var selectedNumber by remember { mutableStateOf(15) }
