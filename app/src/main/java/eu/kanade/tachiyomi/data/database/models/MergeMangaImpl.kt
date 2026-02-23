@@ -62,6 +62,11 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         id = 9,
         scanlatorName = eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki.name,
         baseUrl = eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki.baseUrl,
+    ),
+    Comix(
+        id = 10,
+        scanlatorName = eu.kanade.tachiyomi.source.online.merged.comix.Comix.name,
+        baseUrl = eu.kanade.tachiyomi.source.online.merged.comix.Comix.baseUrl,
     );
 
     companion object {
@@ -79,6 +84,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 MangaBall.scanlatorName -> MangaBall
                 WeebDex.scanlatorName -> WeebDex
                 ProjectSuki.scanlatorName -> ProjectSuki
+                Comix.scanlatorName -> Comix
                 else -> null
             }
         }
@@ -96,6 +102,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
                 MangaBall -> sourceManager.mangaBall
                 WeebDex -> sourceManager.weebDex
                 ProjectSuki -> sourceManager.projectSuki
+                Comix -> sourceManager.comix
                 Invalid -> sourceManager.invalidMergeSource
             }
         }

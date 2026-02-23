@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
+import eu.kanade.tachiyomi.source.online.merged.comix.Comix
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
 import eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki
@@ -32,6 +33,8 @@ open class SourceManager {
 
     val weebDex: WeebDex by lazy { WeebDex() }
 
+    val comix: Comix by lazy { Comix() }
+
     val projectSuki: ProjectSuki by lazy { ProjectSuki() }
 
     open fun get(sourceKey: Long): Source? {
@@ -53,6 +56,7 @@ open class SourceManager {
                 WeebCentral.name,
                 MangaBall.name,
                 WeebDex.name,
+                Comix.name,
                 ProjectSuki.name,
             )
 
