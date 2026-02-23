@@ -73,6 +73,7 @@ class ChapterDto(
         return SChapter.create().apply {
             url = "/chapter/$id"
             name = Parser.unescapeEntities(chapterName.joinToString(" "), false)
+            this.chapter_txt = chapterName.find { it.startsWith("Ch.") } ?: this.name
             chapter_number = helper.parseChapterNumber(chapter)
             date_upload = helper.parseDate(publishedAt)
             scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
