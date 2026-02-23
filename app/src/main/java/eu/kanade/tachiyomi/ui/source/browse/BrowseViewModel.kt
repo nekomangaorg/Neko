@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
@@ -30,10 +31,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -58,6 +62,7 @@ class BrowseViewModel() : ViewModel() {
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
+    private val downloadManager: DownloadManager = Injekt.get()
 
     private val _browseScreenState =
         MutableStateFlow(
@@ -159,7 +164,7 @@ class BrowseViewModel() : ViewModel() {
         )
 
     init {
-        isOnline()
+        viewModelScope.launch { isOnline() }
 
         if (_browseScreenState.value.firstLoad) {
             if (browseScreenState.value.filters.query.text.isNotBlank()) {
@@ -763,21 +768,22 @@ class BrowseViewModel() : ViewModel() {
     }
 
     /** Check if can access internet */
-    private fun isOnline(): Boolean {
-        // TODO use networkstate  return if (view?.activity?.isOnline() == true) {
-        _browseScreenState.update { it.copy(hideFooterButton = false) }
-        return true
-        /* } else {
-            viewModelScope.launch {
-                _browseScreenState.update {
-                    it.copy(
-                        initialLoading = false,
-                        hideFooterButton = true,
-                        error = UiText.StringResource(R.string.no_network_connection),
-                    )
-                }
+    private suspend fun isOnline(): Boolean {
+        val networkState =
+            downloadManager.networkStateFlow().map { it }.distinctUntilChanged().firstOrNull()
+        val isOnline = networkState?.isOnline == true
+
+        if (isOnline) {
+            _browseScreenState.update { it.copy(hideFooterButton = false) }
+        } else {
+            _browseScreenState.update {
+                it.copy(
+                    initialLoading = false,
+                    hideFooterButton = true,
+                    error = UiText.StringResource(R.string.no_network_connection),
+                )
             }
-            false
-        }*/
+        }
+        return isOnline
     }
 }
