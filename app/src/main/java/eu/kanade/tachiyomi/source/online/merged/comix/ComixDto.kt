@@ -89,7 +89,7 @@ class Chapter(
             chapter_txt = chapterText
             name = buildString {
                 append(chapterText)
-                this@Chapter.name.takeUnless { it.isEmpty() }?.let { append(": $it") }
+                this@Chapter.name.takeUnless { it.isEmpty() }?.let { append("- $it") }
             }
             date_upload = this@Chapter.updatedAt * 1000
             chapter_number = this@Chapter.number.toFloat()
