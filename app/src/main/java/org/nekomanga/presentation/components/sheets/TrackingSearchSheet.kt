@@ -228,7 +228,7 @@ private fun TrackSearchItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.OpenInBrowser,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.open_in_browser),
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
@@ -319,7 +319,7 @@ private fun TrackSearchItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.selected),
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.surface,
                     )
