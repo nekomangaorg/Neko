@@ -114,7 +114,7 @@ class Comix : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-        val res = json.decodeFromString<ChapterResponse>(response.body!!.string())
+val bodyString = response.body?.string() ?: throw Exception("Response body is null")
         val result = res.result ?: throw Exception("Chapter not found")
 
         if (result.images.isEmpty()) {
