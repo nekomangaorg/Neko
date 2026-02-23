@@ -85,7 +85,7 @@ class Chapter(
     fun toSChapter(mangaId: String) =
         SChapter.create().apply {
             url = "title/$mangaId/$chapterId"
-            val chapterText = "Ch." + this@Chapter.number.toString().removeSuffix(".0")
+val chapterText = "Ch." + java.text.DecimalFormat("0.#").format(this@Chapter.number)
             chapter_txt = chapterText
             name = buildString {
                 append(chapterText)
