@@ -2,7 +2,6 @@ package tachiyomi.core.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import tachiyomi.core.preference.AndroidPreference.BooleanPrimitive
@@ -14,7 +13,8 @@ import tachiyomi.core.preference.AndroidPreference.StringSetPrimitive
 
 class AndroidPreferenceStore(context: Context) : PreferenceStore {
 
-    private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val sharedPreferences =
+        context.getSharedPreferences("${context.packageName}_preferences", Context.MODE_PRIVATE)
 
     private val keyFlow = sharedPreferences.keyFlow
 
