@@ -770,7 +770,7 @@ class BrowseViewModel() : ViewModel() {
     /** Check if can access internet */
     private suspend fun isOnline(): Boolean {
         val networkState =
-            downloadManager.networkStateFlow().map { it }.distinctUntilChanged().firstOrNull()
+            downloadManager.networkStateFlow().distinctUntilChanged().firstOrNull()
         val isOnline = networkState?.isOnline == true
 
         if (isOnline) {
