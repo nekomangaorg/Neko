@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -47,10 +46,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.MissingChapterHolder
-import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.getMissingChapters
-import eu.kanade.tachiyomi.util.chapter.getVolumeNum
-import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -1210,35 +1206,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 simpleChapter = chapter,
             )
         } ?: NextUnreadChapter()
-    }
-
-    private fun isMangaStatusCompleted(
-        mangaItem: MangaItem,
-        missingChapterCount: String,
-        allChapters: List<ChapterItem>,
-    ): Boolean {
-        val cancelledOrCompleted =
-            mangaItem.status == SManga.PUBLICATION_COMPLETE || mangaItem.status == SManga.CANCELLED
-        if (
-            cancelledOrCompleted && missingChapterCount == "" && mangaItem.lastChapterNumber != null
-        ) {
-            val final =
-                allChapters
-                    .filter { it.isAvailable() }
-                    .filter {
-                        getChapterNum(it.chapter.toSChapter())?.toInt() ==
-                            mangaItem.lastChapterNumber
-                    }
-                    .filter {
-                        getVolumeNum(it.chapter.toSChapter()) == mangaItem.lastVolumeNumber ||
-                            getVolumeNum(it.chapter.toSChapter()) == null ||
-                            mangaItem.lastVolumeNumber == null
-                    }
-            if (final.isNotEmpty()) {
-                return true
-            }
-        }
-        return false
     }
 
     fun onSearch(searchQuery: String?) {

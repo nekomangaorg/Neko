@@ -9,6 +9,7 @@ firebasePluginVersion = "3.0.6"
 googleServicesPluginVersion = "4.4.4"
 injektCoreVersion = "1.16.1"
 kotlinResultVersion = "2.1.0"
+detektVersion = "1.23.5"
 ktfmtVersion = "0.25.0"
 okhttpVersion = "5.3.2"
 photoViewVersion = "2.3.0"
@@ -108,6 +109,7 @@ about-libraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.r
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServicesPluginVersion" }
 firebase = { id = "com.google.firebase.crashlytics", version.ref = "firebasePluginVersion" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmtVersion" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 
 [bundles]
 coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]
