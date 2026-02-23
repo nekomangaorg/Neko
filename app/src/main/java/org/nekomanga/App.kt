@@ -183,7 +183,9 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
                 }
 
             if (isChromiumCall) return WebViewUtil.spoofedPackageName(applicationContext)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to spoof package name" }
+        }
 
         return super.getPackageName()
     }
