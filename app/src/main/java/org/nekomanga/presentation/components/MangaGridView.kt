@@ -88,8 +88,8 @@ fun MangaGridWithHeader(
                             displayManga = displayManga,
                             shouldOutlineCover = shouldOutlineCover,
                             isComfortable = isComfortable,
-                            onClick = { onClick(displayManga.mangaId) },
-                            onLongClick = { onLongClick(displayManga) },
+                            onClick = onClick,
+                            onLongClick = onLongClick,
                         )
                     }
                 }
@@ -145,8 +145,8 @@ fun MangaGrid(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
                 isComfortable = isComfortable,
-                onClick = { onClick(displayManga.mangaId) },
-                onLongClick = { onLongClick(displayManga) },
+                onClick = onClick,
+                onLongClick = onLongClick,
             )
         }
     }
@@ -165,8 +165,9 @@ fun MangaGridItem(
     isSelected: Boolean = false,
     showStartReadingButton: Boolean = false,
     onStartReadingClick: () -> Unit = {},
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    // Optimize: Use stable function references to allow skipping recomposition
+    onClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
 ) {
     val subtitleText =
         when (displayManga.displayTextRes) {
@@ -205,7 +206,10 @@ fun MangaGridItem(
             Box(
                 modifier =
                     Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                        .combinedClickable(
+                            onClick = { onClick(displayManga.mangaId) },
+                            onLongClick = { onLongClick(displayManga) },
+                        )
                         .padding(Size.extraTiny)
                         .semantics { this.contentDescription = contentDescription }
             ) {
