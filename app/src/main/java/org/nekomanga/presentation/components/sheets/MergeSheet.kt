@@ -239,7 +239,7 @@ private fun SuccessResults(
         modifier = Modifier.fillMaxWidth(),
         contentPadding =
             PaddingValues(
-                top = 16.dp,
+                top = Size.medium,
                 bottom = Size.huge * 2,
                 start = Size.small,
                 end = Size.small,
@@ -309,7 +309,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Gap(16.dp)
+        Gap(Size.medium)
         when (searchResults) {
             is MergeSearchResult.Loading ->
                 CircularProgressIndicator(
@@ -321,7 +321,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
             is MergeSearchResult.Error -> Text(text = searchResults.errorMessage)
             else -> Unit
         }
-        Gap(16.dp)
+        Gap(Size.medium)
         if (altTitles.isNotEmpty()) {
             val allTitles = listOf(title) + altTitles.sorted()
             val partitioned =
