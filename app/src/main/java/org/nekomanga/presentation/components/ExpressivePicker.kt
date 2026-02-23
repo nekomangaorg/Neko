@@ -207,7 +207,7 @@ fun <T> ExpressivePicker(
 
 @Preview
 @Composable
-private fun PreviewGenericPicker(
+private fun PreviewNumberPicker(
     @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
 ) {
     ThemedPreviews(themeConfig) {
@@ -224,6 +224,16 @@ private fun PreviewGenericPicker(
             visibleItemsCount = 5,
         )
 
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewWeekPicker(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
+        // --- Preview 1: Integer Range ---
         // --- Preview 2: String List ---
         val stringItems = remember {
             listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -238,5 +248,7 @@ private fun PreviewGenericPicker(
             modifier = Modifier.width(150.dp),
             visibleItemsCount = 5,
         )
+
     }
 }
+
