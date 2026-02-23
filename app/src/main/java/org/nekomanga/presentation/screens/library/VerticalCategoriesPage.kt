@@ -218,14 +218,14 @@ private fun RowGrid(
                 onStartReadingClick = {
                     libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
                 },
-                onClick = {
+                onClick = { _ ->
                     if (selectedIds.isNotEmpty()) {
                         libraryScreenActions.mangaLongClick(libraryItem)
                     } else {
                         libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
                     }
                 },
-                onLongClick = { libraryScreenActions.mangaLongClick(libraryItem) },
+                onLongClick = { _ -> libraryScreenActions.mangaLongClick(libraryItem) },
             )
         }
     }

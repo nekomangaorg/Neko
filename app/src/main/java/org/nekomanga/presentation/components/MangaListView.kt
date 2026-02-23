@@ -80,22 +80,13 @@ fun MangaList(
                     mangaList.size == 1 -> ListCardType.Single
                     else -> ListCardType.Center
                 }
-            ExpressiveListCard(
-                modifier = Modifier.padding(horizontal = Size.small),
+            MangaListItem(
+                displayManga = displayManga,
                 listCardType = listCardType,
-            ) {
-                MangaRow(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .wrapContentHeight()
-                            .combinedClickable(
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            ),
-                )
-            }
+                shouldOutlineCover = shouldOutlineCover,
+                onClick = onClick,
+                onLongClick = onLongClick,
+            )
         }
     }
 }
@@ -137,24 +128,42 @@ fun MangaListWithHeader(
                         mangaList.size == 1 -> ListCardType.Single
                         else -> ListCardType.Center
                     }
-                ExpressiveListCard(
-                    modifier = Modifier.padding(horizontal = Size.small),
+                MangaListItem(
+                    displayManga = displayManga,
                     listCardType = listCardType,
-                ) {
-                    MangaRow(
-                        displayManga = displayManga,
-                        shouldOutlineCover = shouldOutlineCover,
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .wrapContentHeight()
-                                .combinedClickable(
-                                    onClick = { onClick(displayManga.mangaId) },
-                                    onLongClick = { onLongClick(displayManga) },
-                                ),
-                    )
-                }
+                    shouldOutlineCover = shouldOutlineCover,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun MangaListItem(
+    displayManga: DisplayManga,
+    listCardType: ListCardType,
+    shouldOutlineCover: Boolean,
+    // Optimize: Use stable function references to allow skipping recomposition
+    onClick: (Long) -> Unit,
+    onLongClick: (DisplayManga) -> Unit,
+) {
+    ExpressiveListCard(
+        modifier = Modifier.padding(horizontal = Size.small),
+        listCardType = listCardType,
+    ) {
+        MangaRow(
+            displayManga = displayManga,
+            shouldOutlineCover = shouldOutlineCover,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .wrapContentHeight()
+                    .combinedClickable(
+                        onClick = { onClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga) },
+                    ),
+        )
     }
 }
 
