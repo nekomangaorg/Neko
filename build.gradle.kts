@@ -17,6 +17,7 @@ plugins {
     alias(kotlinx.plugins.serialization) apply false
     alias(libs.plugins.firebase) apply false
     alias(libs.plugins.ktfmt)
+    alias(libs.plugins.detekt)
 }
 
 subprojects {
@@ -57,12 +58,24 @@ subprojects {
         }
     }
 
+    plugins.withType<io.gitlab.arturbosch.detekt.DetektPlugin> {
+        tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
+            reports {
+                html.required.set(true)
+                xml.required.set(true)
+                txt.required.set(true)
+                sarif.required.set(true)
+            }
+        }
+    }
+
     plugins.withType<BasePlugin> {
         plugins.apply(libs.plugins.ktfmt.get().pluginId)
         ktfmt {
             kotlinLangStyle()
             removeUnusedImports = true
         }
+        plugins.apply(libs.plugins.detekt.get().pluginId)
 
         configure<BaseExtension> {
             compileSdkVersion(AndroidConfig.compileSdkVersion)
