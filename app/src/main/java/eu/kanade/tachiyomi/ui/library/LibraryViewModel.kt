@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import eu.kanade.tachiyomi.ui.library.filter.LibraryFilterType
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
@@ -132,54 +131,10 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    val dynamicArtworkFlow: Flow<Map<Long, String>> =
-        db.getIdsOfMangaWithProjectedVolumeArtwork()
-            .asRxObservable()
-            .asFlow()
-            .map { cursor ->
-                val map = mutableMapOf<Long, String>()
-                try {
-                    if (cursor.moveToFirst()) {
-                        do {
-                            map[cursor.getLong(0)] = cursor.getString(1)
-                        } while (cursor.moveToNext())
-                    }
-                } finally {
-                    cursor.close()
-                }
-                map
-            }
-            .distinctUntilChanged()
-
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        combine(
-                db.getLibraryMangaList().asFlow(),
-                libraryPreferences.dynamicCover().changes(),
-                dynamicArtworkFlow,
-            ) { dbManga, dynamicCoverEnabled, dynamicArtworks ->
-                dbManga.map { manga ->
-                    val item = manga.toLibraryMangaItem()
-                    if (dynamicCoverEnabled && manga.user_cover.isNullOrBlank()) {
-                        val dynamicFilename = manga.id?.let { dynamicArtworks[it] }
-                        if (dynamicFilename != null) {
-                            val uuid = manga.uuid()
-                            val quality = mangadexPreferences.coverQuality().get()
-                            val url = MdUtil.cdnCoverUrl(uuid, dynamicFilename, quality)
-                            item.copy(
-                                displayManga =
-                                    item.displayManga.copy(
-                                        currentArtwork =
-                                            item.displayManga.currentArtwork.copy(url = url)
-                                    )
-                            )
-                        } else {
-                            item
-                        }
-                    } else {
-                        item
-                    }
-                }
-            }
+        db.getLibraryMangaList()
+            .asFlow()
+            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
             .distinctUntilChanged()
             .conflate()
 
