@@ -5,3 +5,7 @@
 ## 2025-05-15 - Preview Wrappers and Image Mocks
 **Learning:** This app uses `ThemedPreviews` (composable) to render components across all themes. For Coil images in previews, use `AsyncImagePreviewHandler` provided via `LocalAsyncImagePreviewHandler`.
 **Action:** Wrap previews in `ThemedPreviews { ... }` and provide `LocalAsyncImagePreviewHandler` with a dummy `ColorImage`.
+
+## 2025-05-24 - ThemedPreviews Annotation vs Composable
+**Learning:** The `@ThemePreviews` annotation exists but its usage is discouraged in favor of the `ThemedPreviews` composable within a standard `@Preview`. This provides more control and avoids dependency issues with custom annotations.
+**Action:** Use standard `@Preview` and wrap content with `ThemedPreviews { ... }`.
