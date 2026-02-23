@@ -874,10 +874,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 rightMargin = systemInsets.right
                 height = 280.dpToPx + systemInsets.bottom
             }
-            binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.readerNav.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = 12.dpToPx + systemInsets.left
                 rightMargin = 12.dpToPx + systemInsets.right
-                bottomMargin = systemInsets.bottom
+                bottomMargin = systemInsets.bottom + 6.dpToPx
             }
 
             binding.pageNumber.updateLayoutParams<ViewGroup.MarginLayoutParams> {
