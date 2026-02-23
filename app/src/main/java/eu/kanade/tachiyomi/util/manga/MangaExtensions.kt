@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.manga
 
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper

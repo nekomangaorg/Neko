@@ -61,7 +61,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaViewModel
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.chapter.isAvailable
-import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.manga.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.openInBrowser

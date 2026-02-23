@@ -13,11 +13,11 @@ import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
-import eu.kanade.tachiyomi.util.filterVisibility
-import eu.kanade.tachiyomi.util.resync
+import eu.kanade.tachiyomi.util.manga.filterVisibility
+import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.unique
+import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.unique
-import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf

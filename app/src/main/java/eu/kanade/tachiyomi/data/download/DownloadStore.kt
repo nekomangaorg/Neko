@@ -7,8 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
+import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.toSimpleManga
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.chapter.toSimpleChapter
