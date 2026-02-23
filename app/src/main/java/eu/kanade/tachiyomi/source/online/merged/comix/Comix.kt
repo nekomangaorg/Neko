@@ -124,7 +124,7 @@ class Comix : ReducedHttpSource() {
     }
 
     override fun imageRequest(page: Page): Request {
-return GET(page.imageUrl ?: throw Exception("Image URL is null"), headers)
+        return GET(page.imageUrl ?: throw Exception("Image URL is null"), headers)
     }
 
     override fun getChapterUrl(simpleChapter: org.nekomanga.domain.chapter.SimpleChapter): String {

@@ -14,12 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
-import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
@@ -90,10 +93,10 @@ private fun changeSortState(
     sortChanged(newState)
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun SortRowPreview() {
-    ThemedPreviews { theme ->
+private fun SortRowPreview(@PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig) {
+    ThemedPreviews(themeConfig) { theme ->
         SortRow(
             sortState = MangaConstants.SortState.Ascending,
             sortChanged = {},

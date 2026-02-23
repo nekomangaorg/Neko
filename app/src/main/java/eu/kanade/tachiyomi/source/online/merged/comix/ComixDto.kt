@@ -76,7 +76,7 @@ class Chapter(
     fun toSChapter(mangaId: String) =
         SChapter.create().apply {
             url = "title/$mangaId/$chapterId"
-val chapterText = "Ch." + java.text.DecimalFormat("0.#").format(this@Chapter.number)
+            val chapterText = "Ch." + java.text.DecimalFormat("0.#").format(this@Chapter.number)
             chapter_txt = chapterText
             name = buildString {
                 append(chapterText)
@@ -111,7 +111,7 @@ object SafeIntBooleanDeserializer : KSerializer<Int> {
             decoder as? JsonDecoder
                 ?: return try {
                     decoder.decodeInt()
-} catch (e: Exception) {
+                } catch (e: Exception) {
                     try {
                         if (decoder.decodeBoolean()) 1 else 0
                     } catch (_: Exception) {

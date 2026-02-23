@@ -15,7 +15,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.nekomanga.ui.theme.ThemePreviews
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
@@ -56,10 +59,12 @@ fun <T> ButtonGroup(
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun ButtonGroupPreview() {
-    ThemedPreviews {
+private fun ButtonGroupPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) {
         // Define the items for the button group
         val timePeriods = listOf("Summary", "History", "Updates")
 
