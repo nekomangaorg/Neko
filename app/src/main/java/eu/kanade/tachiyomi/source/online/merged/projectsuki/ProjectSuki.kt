@@ -210,6 +210,8 @@ class ProjectSuki : ReducedHttpSource() {
         val chapters = mutableListOf<SChapter>()
         val tables = document.select("table")
 
+        val regex = Regex("""Chapter\s*(\d+)\s*[-_]?\s*(.*)""", RegexOption.IGNORE_CASE)
+
         for (table in tables) {
             val headers =
                 table.select("thead tr th, thead tr td").map { it.text().lowercase(Locale.US) }
@@ -227,7 +229,13 @@ class ProjectSuki : ReducedHttpSource() {
                 val chapterCol = cols[chapterIdx]
                 val link = chapterCol.selectFirst("a") ?: continue
                 val url = link.attr("abs:href")
-                val title = link.text()
+
+                val (chpText, chpName) =
+                    regex.find(link.text())?.destructured?.let { (num, desc) ->
+                        val short = "Ch.$num"
+                        val full = if (desc.isNotBlank()) "$short - ${desc.trim()}" else short
+                        short to full
+                    } ?: ("" to link.text())
 
                 // Date parsing
                 val dateText =
@@ -242,29 +250,10 @@ class ProjectSuki : ReducedHttpSource() {
                 val chapter =
                     SChapter.create().apply {
                         this.url = url.replace(baseUrl, "")
-                        this.name = title
+                        this.name = chpName
+                        this.chapter_txt = chpText
                         this.date_upload = date
                         this.scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
-                        // Chapter number parsing logic could be added here if needed,
-                        // but SChapter usually handles it via regex if not set.
-                        // Project Suki implementation had complex logic, simplified here:
-                        val numMatch =
-                            Regex(
-                                    """(?:chapter|ch\.?)\s*(\d+)(?:[.,-](\d+))?""",
-                                    RegexOption.IGNORE_CASE,
-                                )
-                                .find(title)
-                        if (numMatch != null) {
-                            val main = numMatch.groupValues[1].toFloat()
-                            val sub =
-                                numMatch.groupValues[2].takeIf { it.isNotEmpty() }?.toFloatOrNull()
-                                    ?: 0f
-                            this.chapter_number =
-                                if (sub == 0f) main
-                                else main + (sub / 10f) // Simplified float conversion
-                        } else {
-                            this.chapter_number = -1f
-                        }
                     }
                 chapters.add(chapter)
             }
