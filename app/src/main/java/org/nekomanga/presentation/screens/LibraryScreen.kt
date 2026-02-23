@@ -43,7 +43,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.toLibraryManga
+import eu.kanade.tachiyomi.util.manga.toLibraryManga
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.R

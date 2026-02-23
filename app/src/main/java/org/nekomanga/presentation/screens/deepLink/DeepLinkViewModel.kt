@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import eu.kanade.tachiyomi.util.manga.MangaMappings
-import eu.kanade.tachiyomi.util.toDisplayManga
+import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import java.math.BigInteger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

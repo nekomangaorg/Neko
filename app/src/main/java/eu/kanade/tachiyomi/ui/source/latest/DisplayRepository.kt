@@ -10,8 +10,8 @@ import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter

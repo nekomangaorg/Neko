@@ -10,10 +10,10 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
-import eu.kanade.tachiyomi.util.filterVisibility
-import eu.kanade.tachiyomi.util.resync
+import eu.kanade.tachiyomi.util.manga.filterVisibility
+import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.unique
 import java.util.Date
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow

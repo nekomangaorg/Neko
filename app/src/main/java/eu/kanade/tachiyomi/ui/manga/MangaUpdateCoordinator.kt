@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
+import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
