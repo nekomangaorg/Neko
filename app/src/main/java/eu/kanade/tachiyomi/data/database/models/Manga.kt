@@ -51,6 +51,8 @@ interface Manga : SManga {
 
     var user_title: String?
 
+    var dynamic_cover: String?
+
     fun displayTitle(): String {
         return user_title ?: title
     }

@@ -379,43 +379,66 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
 
                         val artwork = createCurrentArtwork(effectiveManga)
-                        var finalArtwork = artwork
-
-                        if (dynamicCover && effectiveManga.userCover.isBlank()) {
-                            val lastReadChapterId =
-                                history.maxByOrNull { it.last_read }?.chapter_id
-
-                            if (lastReadChapterId != null) {
-                                val volume =
-                                    staticChapterData.allChapters
-                                        .find { it.chapter.id == lastReadChapterId }
-                                        ?.chapter
-                                        ?.volume
-
-                                if (!volume.isNullOrBlank()) {
-                                    val dynamicArt = artworkList.firstOrNull { it.volume == volume }
-                                    if (dynamicArt != null) {
-                                        val quality = mangaDexPreferences.coverQuality().get()
-                                        val url =
-                                            MdUtil.cdnCoverUrl(
-                                                effectiveManga.uuid(),
-                                                dynamicArt.fileName,
-                                                quality,
-                                            )
-                                        finalArtwork = artwork.copy(url = url)
-                                    }
-                                }
-                            }
-                        }
 
                         if (!effectiveManga.initialized) {
                             AllInfo(
                                 mangaItem = MangaItem(title = effectiveManga.title),
-                                artwork = finalArtwork,
+                                artwork = artwork,
                             )
                         } else {
+                            val dbManga = db.getManga(mangaId).executeOnIO()
+                            if (dbManga != null) {
+                                if (
+                                    dynamicCover &&
+                                        dbManga.user_cover.isNullOrBlank() &&
+                                        dbManga.favorite
+                                ) {
+                                    val lastReadChapterId =
+                                        history.maxByOrNull { it.last_read }?.chapter_id
+
+                                    if (lastReadChapterId != null) {
+                                        val volume =
+                                            staticChapterData.allChapters
+                                                .find { it.chapter.id == lastReadChapterId }
+                                                ?.chapter
+                                                ?.volume
+
+                                        if (!volume.isNullOrBlank()) {
+                                            val dynamicArt =
+                                                artworkList.firstOrNull { it.volume == volume }
+                                            if (dynamicArt != null) {
+                                                val quality =
+                                                    mangaDexPreferences.coverQuality().get()
+                                                val url =
+                                                    MdUtil.cdnCoverUrl(
+                                                        dbManga.uuid(),
+                                                        dynamicArt.fileName,
+                                                        quality,
+                                                    )
+                                                if (dbManga.thumbnail_url != url) {
+                                                    // Back up original thumbnail if not already done
+                                                    if (dbManga.dynamic_cover.isNullOrBlank()) {
+                                                        dbManga.dynamic_cover = dbManga.thumbnail_url
+                                                    }
+                                                    dbManga.thumbnail_url = url
+                                                    db.insertManga(dbManga).executeOnIO()
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else if (!dynamicCover || !dbManga.user_cover.isNullOrBlank()) {
+                                    // Restore original thumbnail if dynamic cover is disabled or
+                                    // user set a cover
+                                    if (!dbManga.dynamic_cover.isNullOrBlank()) {
+                                        dbManga.thumbnail_url = dbManga.dynamic_cover
+                                        dbManga.dynamic_cover = null
+                                        db.insertManga(dbManga).executeOnIO()
+                                    }
+                                }
+                            }
+
                             val alternativeArtwork =
-                                createAltArtwork(effectiveManga, finalArtwork, artworkList)
+                                createAltArtwork(effectiveManga, artwork, artworkList)
 
                             if (
                                 staticChapterData.allScanlators.size == 1 &&
