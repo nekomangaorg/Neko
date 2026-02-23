@@ -62,7 +62,6 @@ class Comix : ReducedHttpSource() {
         val mangaHash = mangaUrl.removePrefix("/").substringAfterLast("/")
 
         // Logic to support deduplication if enabled
-        var chapterMap: LinkedHashMap<Number, Chapter>? = null
         var chapterList: ArrayList<Chapter>? = null
 
         chapterList = ArrayList()
@@ -114,7 +113,7 @@ class Comix : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-val bodyString = response.body?.string() ?: throw Exception("Response body is null")
+        val res = json.decodeFromString<ChapterResponse>(response.body!!.string())
         val result = res.result ?: throw Exception("Chapter not found")
 
         if (result.images.isEmpty()) {

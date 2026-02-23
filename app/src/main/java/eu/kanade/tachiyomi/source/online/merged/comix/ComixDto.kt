@@ -17,15 +17,6 @@ import kotlinx.serialization.json.intOrNull
 import org.nekomanga.constants.Constants
 
 @Serializable
-data class Term(
-    @SerialName("term_id") private val termId: Int,
-    private val type: String,
-    val title: String,
-    private val slug: String,
-    private val count: Int?,
-)
-
-@Serializable
 class Manga(
     @SerialName("hash_id") private val hashId: String,
     private val title: String,
