@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.core.content.res.use
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkInfo
@@ -121,17 +122,11 @@ fun Context.hasPermission(permission: String) =
  */
 @ColorInt
 fun Context.getResourceColor(@AttrRes resource: Int): Int {
-    val typedArray = obtainStyledAttributes(intArrayOf(resource))
-    val attrValue = typedArray.getColor(0, 0)
-    typedArray.recycle()
-    return attrValue
+    return obtainStyledAttributes(intArrayOf(resource)).use { it.getColor(0, 0) }
 }
 
 fun Context.getResourceDrawable(@AttrRes resource: Int): Drawable? {
-    val typedArray = obtainStyledAttributes(intArrayOf(resource))
-    val attrValue = typedArray.getDrawable(0)
-    typedArray.recycle()
-    return attrValue
+    return obtainStyledAttributes(intArrayOf(resource)).use { it.getDrawable(0) }
 }
 
 /**
