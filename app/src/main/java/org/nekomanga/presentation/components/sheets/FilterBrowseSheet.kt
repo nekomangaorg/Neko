@@ -92,7 +92,7 @@ fun FilterBrowseSheet(
     filterChanged: (Filter) -> Unit,
     defaultContentRatings: ImmutableSet<String>,
     savedFilters: PersistentList<BrowseFilterImpl>,
-    bottomContentPadding: Dp = 16.dp,
+    bottomContentPadding: Dp = Size.medium,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(
@@ -146,7 +146,7 @@ fun FilterBrowseSheet(
         BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = 0.dp) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(16.dp)
+            Gap(Size.medium)
 
             val titleRes =
                 when (filters.queryMode) {

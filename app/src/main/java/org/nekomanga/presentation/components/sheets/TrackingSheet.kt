@@ -488,7 +488,7 @@ private fun RowScope.TrackingBox(clickable: () -> Unit, content: @Composable () 
     Box(
         Modifier.weight(1f)
             .clickable { clickable() }
-            .padding(horizontal = Size.small, vertical = 16.dp),
+            .padding(horizontal = Size.small, vertical = Size.medium),
         contentAlignment = Alignment.Center,
     ) {
         content()
