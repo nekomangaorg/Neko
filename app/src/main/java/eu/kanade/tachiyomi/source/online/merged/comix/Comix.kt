@@ -39,17 +39,8 @@ class Comix : ReducedHttpSource() {
                 .newBuilder()
                 .apply {
                     addPathSegment("manga")
-                    if (query.isNotBlank()) {
-                        addQueryParameter("keyword", query)
-                        addQueryParameter("order[relevance]", "desc")
-                    } else {
-                        addQueryParameter("order[views_30d]", "desc")
-                    }
-
-                    if (HIDE_NSFW) {
-                        NSFW_GENRE_IDS.forEach { addQueryParameter("genres[]", "-$it") }
-                    }
-
+                    addQueryParameter("keyword", query)
+                    addQueryParameter("order[relevance]", "desc")
                     addQueryParameter("limit", "50")
                     addQueryParameter("page", "1")
                 }
@@ -61,8 +52,8 @@ class Comix : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-        val res = json.decodeFromString<SearchResponse>(response.body!!.string())
-        return res.result.items.map { it.toBasicSManga(POSTER_QUALITY) }
+        val res = json.decodeFromString<SearchResponse>(response.body.string())
+        return res.result.items.map { it.toSManga() }
     }
 
     override suspend fun fetchChapters(
@@ -74,11 +65,7 @@ class Comix : ReducedHttpSource() {
         var chapterMap: LinkedHashMap<Number, Chapter>? = null
         var chapterList: ArrayList<Chapter>? = null
 
-        if (DEDUPLICATE_CHAPTERS) {
-            chapterMap = LinkedHashMap()
-        } else {
-            chapterList = ArrayList()
-        }
+        chapterList = ArrayList()
 
         var page = 1
         var hasNext: Boolean
@@ -103,60 +90,17 @@ class Comix : ReducedHttpSource() {
                     return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
                 }
 
-                val resp = json.decodeFromString<ChapterDetailsResponse>(response.body!!.string())
+                val resp = json.decodeFromString<ChapterDetailsResponse>(response.body.string())
                 val items = resp.result.items
                 hasNext = resp.result.pagination.lastPage > resp.result.pagination.page
                 page++
 
-                if (DEDUPLICATE_CHAPTERS) {
-                    deduplicateChapters(chapterMap!!, items)
-                } else {
-                    chapterList!!.addAll(items)
-                }
+                chapterList.addAll(items)
             } while (hasNext)
 
-            val finalChapters: List<Chapter> =
-                if (DEDUPLICATE_CHAPTERS) {
-                    chapterMap!!.values.toList()
-                } else {
-                    chapterList!!
-                }
-
-            return Ok(finalChapters.map { it.toSChapter(mangaHash) to false })
+            return Ok(chapterList.map { it.toSChapter(mangaHash) to false })
         } catch (e: Exception) {
             return Err(ResultError.Generic(e.message ?: "Unknown error"))
-        }
-    }
-
-    private fun deduplicateChapters(
-        chapterMap: LinkedHashMap<Number, Chapter>,
-        items: List<Chapter>,
-    ) {
-        for (ch in items) {
-            val key = ch.number
-            val current = chapterMap[key]
-            if (current == null) {
-                chapterMap[key] = ch
-            } else {
-                // Prefer official scan group
-                val officialNew = (ch.scanlationGroupId == 9275 || ch.isOfficial == 1)
-                val officialCurrent = (current.scanlationGroupId == 9275 || current.isOfficial == 1)
-                val better =
-                    when {
-                        officialNew && !officialCurrent -> true
-
-                        !officialNew && officialCurrent -> false
-
-                        // compare votes then updatedAt
-                        else ->
-                            when {
-                                ch.votes > current.votes -> true
-                                ch.votes < current.votes -> false
-                                else -> ch.updatedAt > current.updatedAt
-                            }
-                    }
-                if (better) chapterMap[key] = ch
-            }
         }
     }
 
@@ -191,9 +135,5 @@ class Comix : ReducedHttpSource() {
     companion object {
         const val name = "Comix"
         const val baseUrl = "https://comix.to"
-        private const val POSTER_QUALITY = "large"
-        private const val HIDE_NSFW = true
-        private const val DEDUPLICATE_CHAPTERS = false
-        private val NSFW_GENRE_IDS = listOf("87264", "8", "87265", "13", "87266", "87268")
     }
 }

@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.source.online.merged.comix
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,6 +14,7 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
+import org.nekomanga.constants.Constants
 
 @Serializable
 data class Term(
@@ -30,18 +29,7 @@ data class Term(
 class Manga(
     @SerialName("hash_id") private val hashId: String,
     private val title: String,
-    @SerialName("alt_titles") private val altTitles: List<String>,
-    private val synopsis: String?,
-    private val type: String,
     private val poster: Poster,
-    private val status: String,
-    @SerialName("is_nsfw") private val isNsfw: Boolean,
-    private val author: List<Term>?,
-    private val artist: List<Term>?,
-    private val genre: List<Term>?,
-    private val theme: List<Term>?,
-    private val demographic: List<Term>?,
-    @SerialName("rated_avg") private val ratedAvg: Double = 0.0,
 ) {
     @Serializable
     class Poster(private val small: String, private val medium: String, private val large: String) {
@@ -53,109 +41,12 @@ class Manga(
             }
     }
 
-    private val fancyScore: String
-        get() {
-            if (ratedAvg == 0.0) return ""
-
-            val score = ratedAvg.toBigDecimal()
-            val stars = score.div(BigDecimal(2)).setScale(0, RoundingMode.HALF_UP).toInt()
-
-            val scoreString =
-                if (score.scale() == 0) {
-                    score.toPlainString()
-                } else {
-                    score.stripTrailingZeros().toPlainString()
-                }
-
-            return buildString {
-                append("★".repeat(stars))
-                if (stars < 5) append("☆".repeat(5 - stars))
-                append(" $scoreString")
-            }
-        }
-
-    fun toSManga(
-        posterQuality: String? = "large",
-        altTitlesInDesc: Boolean = false,
-        scorePosition: String = "top",
-    ) =
+    fun toSManga() =
         SManga.create().apply {
             url = "/$hashId"
             title = this@Manga.title
-            author = this@Manga.author.takeUnless { it.isNullOrEmpty() }?.joinToString { it.title }
-            artist = this@Manga.artist.takeUnless { it.isNullOrEmpty() }?.joinToString { it.title }
-            description = buildString {
-                if (scorePosition == "top") {
-                    fancyScore
-                        .takeIf { it.isNotEmpty() }
-                        ?.let {
-                            append(it)
-                            append("\n\n")
-                        }
-                }
-
-                synopsis.takeUnless { it.isNullOrEmpty() }?.let { append(it) }
-                altTitles
-                    .takeIf { altTitlesInDesc && it.isNotEmpty() }
-                    ?.let { altName ->
-                        append("\n\n")
-                        append("Alternative Names:\n")
-                        append(altName.joinToString("\n"))
-                    }
-
-                if (scorePosition == "bottom") {
-                    fancyScore
-                        .takeIf { it.isNotEmpty() }
-                        ?.let {
-                            if (isNotEmpty()) append("\n\n")
-                            append(it)
-                        }
-                }
-            }
-            initialized = true
-            status =
-                when (this@Manga.status) {
-                    "releasing" -> SManga.ONGOING
-                    "on_hiatus" -> SManga.HIATUS
-                    "finished" -> SManga.COMPLETED
-                    "discontinued" -> SManga.CANCELLED
-                    else -> SManga.UNKNOWN
-                }
-            thumbnail_url = this@Manga.poster.from(posterQuality)
-            genre = getGenres()
+            thumbnail_url = this@Manga.poster.from("large")
         }
-
-    fun toBasicSManga(posterQuality: String? = "large") =
-        SManga.create().apply {
-            url = "/$hashId"
-            title = this@Manga.title
-            thumbnail_url = this@Manga.poster.from(posterQuality)
-        }
-
-    fun getGenres() =
-        buildList {
-                when (type) {
-                    "manhwa" -> add("Manhwa")
-                    "manhua" -> add("Manhua")
-                    "manga" -> add("Manga")
-                    else -> add("Other")
-                }
-                genre
-                    .takeUnless { it.isNullOrEmpty() }
-                    ?.map { it.title }
-                    .let { addAll(it ?: emptyList()) }
-                theme
-                    .takeUnless { it.isNullOrEmpty() }
-                    ?.map { it.title }
-                    .let { addAll(it ?: emptyList()) }
-                demographic
-                    .takeUnless { it.isNullOrEmpty() }
-                    ?.map { it.title }
-                    .let { addAll(it ?: emptyList()) }
-                if (isNsfw) add("NSFW")
-            }
-            .distinct()
-            .joinToString()
 }
 
 @Serializable class SingleMangaResponse(val result: Manga)
@@ -194,21 +85,25 @@ class Chapter(
     fun toSChapter(mangaId: String) =
         SChapter.create().apply {
             url = "title/$mangaId/$chapterId"
+            val chapterText = "Ch." + this@Chapter.number.toString().removeSuffix(".0")
+            chapter_txt = chapterText
             name = buildString {
-                append("Chapter ")
-                append(this@Chapter.number.toString().removeSuffix(".0"))
+                append(chapterText)
                 this@Chapter.name.takeUnless { it.isEmpty() }?.let { append(": $it") }
             }
             date_upload = this@Chapter.updatedAt * 1000
             chapter_number = this@Chapter.number.toFloat()
-            scanlator =
-                if (this@Chapter.scanlationGroup != null) {
-                    this@Chapter.scanlationGroup.name
-                } else if (this@Chapter.isOfficial == 1) {
-                    "Official"
-                } else {
-                    "Unknown"
-                }
+
+            val scanlatorList = mutableListOf(Comix.name)
+
+            if (this@Chapter.scanlationGroup != null) {
+                scanlatorList.add(this@Chapter.scanlationGroup.name)
+            } else if (this@Chapter.isOfficial == 1) {
+                scanlatorList.add("Official")
+            } else {
+                scanlatorList.add("Unknown")
+            }
+            scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
         }
 }
 
