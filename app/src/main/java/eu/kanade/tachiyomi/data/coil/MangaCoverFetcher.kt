@@ -53,7 +53,7 @@ class MangaCoverFetcher(
         ArtworkKeyer()
             .key(
                 Artwork(
-                    url = url,
+                    cover = url,
                     inLibrary = inLibrary,
                     originalCover = originalThumbnailUrl,
                     mangaId = mangaId,

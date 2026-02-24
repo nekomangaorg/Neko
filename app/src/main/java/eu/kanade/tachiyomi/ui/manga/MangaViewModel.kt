@@ -1029,7 +1029,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun createInitialCurrentArtwork(): Artwork {
         val manga = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
         return Artwork(
-            url = manga.userCover.ifBlank { manga.dynamicCover },
+            cover = manga.userCover.ifBlank { manga.dynamicCover },
             inLibrary = manga.favorite,
             originalCover = manga.coverUrl,
             mangaId = mangaId,
@@ -1038,7 +1038,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     private fun createCurrentArtwork(manga: MangaItem): Artwork {
         return Artwork(
-            url = manga.userCover.ifBlank { manga.dynamicCover },
+            cover = manga.userCover.ifBlank { manga.dynamicCover },
             inLibrary = manga.favorite,
             originalCover = manga.coverUrl,
             mangaId = mangaId,
@@ -1056,12 +1056,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .map { aw ->
                 Artwork(
                     mangaId = aw.mangaId,
-                    url = MdUtil.cdnCoverUrl(manga.uuid(), aw.fileName, quality),
+                    cover = MdUtil.cdnCoverUrl(manga.uuid(), aw.fileName, quality),
                     volume = aw.volume,
                     description = aw.description,
                     active =
-                        currentArtwork.url.contains(aw.fileName) ||
-                            (currentArtwork.url.isBlank() &&
+                        currentArtwork.cover.contains(aw.fileName) ||
+                            (currentArtwork.cover.isBlank() &&
                                 currentArtwork.originalCover.contains(aw.fileName)),
                 )
             }
@@ -1937,11 +1937,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
         val dbManga = db.getManga(mangaId).executeAsBlocking()!!
         val cover =
-            when (artwork.url.isBlank() || dbManga.thumbnail_url == artwork.url) {
+            when (artwork.cover.isBlank() || dbManga.thumbnail_url == artwork.cover) {
                 true ->
                     coverCache.getCustomCoverFile(dbManga).takeIf { it.exists() }
                         ?: coverCache.getCoverFile(dbManga.thumbnail_url, dbManga.favorite)
-                false -> coverCache.getCoverFile(artwork.url)
+                false -> coverCache.getCoverFile(artwork.cover)
             }
 
         val type = ImageUtil.findImageType(cover.inputStream()) ?: throw Exception("Not an image")
@@ -1965,9 +1965,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun setCover(artwork: Artwork) {
         viewModelScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            coverCache.setCustomCoverToCache(dbManga, artwork.url)
+            coverCache.setCustomCoverToCache(dbManga, artwork.cover)
             MangaCoverMetadata.remove(mangaId)
-            dbManga.user_cover = artwork.url
+            dbManga.user_cover = artwork.cover
             db.insertManga(dbManga).executeOnIO()
         }
     }

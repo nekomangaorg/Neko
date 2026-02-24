@@ -50,8 +50,8 @@ private fun MangaCoverPreview(@PreviewParameter(ArtworkProvider::class) artwork:
 private class ArtworkProvider : PreviewParameterProvider<Artwork> {
     override val values: Sequence<Artwork> =
         sequenceOf(
-            Artwork(url = "dummy", mangaId = 1L, inLibrary = true, active = true),
-            Artwork(url = "", mangaId = 2L, inLibrary = false, active = false),
-            Artwork(url = "dummy", mangaId = 3L, inLibrary = true, active = false),
+            Artwork(cover = "dummy", mangaId = 1L, inLibrary = true, active = true),
+            Artwork(cover = "", mangaId = 2L, inLibrary = false, active = false),
+            Artwork(cover = "dummy", mangaId = 3L, inLibrary = true, active = false),
         )
 }

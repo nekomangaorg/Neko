@@ -7,14 +7,14 @@ import tachiyomi.core.util.storage.DiskUtil
 
 class ArtworkKeyer : Keyer<Artwork> {
     override fun key(data: Artwork, options: Options): String? {
-        if (data.url.isBlank()) {
+        if (data.cover.isBlank()) {
             if (data.originalCover.isBlank()) return null
             return when (data.inLibrary) {
                 true -> DiskUtil.hashKeyForDisk(data.originalCover)
                 false -> data.originalCover
             }
         } else {
-            return DiskUtil.hashKeyForDisk(data.url)
+            return DiskUtil.hashKeyForDisk(data.cover)
         }
     }
 }

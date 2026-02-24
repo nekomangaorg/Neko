@@ -103,7 +103,7 @@ data class DisplayManga(
 data class MergeArtwork(val url: String, val mergeType: MergeType)
 
 data class Artwork(
-    val url: String = "",
+    val cover: String = "",
     val dynamicCover: String = "",
     val originalCover: String = "",
     val mangaId: Long,

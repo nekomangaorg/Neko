@@ -19,10 +19,10 @@ class ArtworkFactory(
     private val sourceManager: SourceManager by injectLazy()
 
     override fun create(data: Artwork, options: Options, imageLoader: ImageLoader): Fetcher {
-        return when (data.url.isBlank()) {
+        return when (data.cover.isBlank()) {
             true ->
                 MangaCoverFetcher(
-                    altUrl = data.url,
+                    altUrl = data.cover,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
                     originalThumbnailUrl = data.originalCover,
@@ -34,7 +34,7 @@ class ArtworkFactory(
                 )
             false ->
                 AlternativeMangaCoverFetcher(
-                    url = data.url,
+                    url = data.cover,
                     mangaId = data.mangaId,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
