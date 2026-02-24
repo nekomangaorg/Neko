@@ -86,14 +86,18 @@ class Chapter(
             chapter_number = this@Chapter.number.toFloat()
 
             val scanlatorList = mutableListOf(Comix.name)
-
-            if (this@Chapter.scanlationGroup != null) {
-                scanlatorList.add(this@Chapter.scanlationGroup.name)
+            val scanGroup = this@Chapter.scanlationGroup
+            if (scanGroup != null) {
+                // treat thinks they think might be Official as official
+                if (scanGroup.name == "Official?") {
+                    scanlatorList.add("Official")
+                } else {
+                    scanlatorList.add(scanGroup.name)
+                }
             } else if (this@Chapter.isOfficial == 1) {
                 scanlatorList.add("Official")
-            } else {
-                scanlatorList.add("Unknown")
             }
+
             scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
         }
 }
