@@ -223,7 +223,6 @@ private fun PreviewNumberPicker(
             modifier = Modifier.width(150.dp).padding(bottom = 16.dp),
             visibleItemsCount = 5,
         )
-
     }
 }
 
@@ -248,7 +247,5 @@ private fun PreviewWeekPicker(
             modifier = Modifier.width(150.dp),
             visibleItemsCount = 5,
         )
-
     }
 }
-
