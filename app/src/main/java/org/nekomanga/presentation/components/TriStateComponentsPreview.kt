@@ -23,7 +23,7 @@ private fun TriStateCheckboxRowPreview(
     @PreviewParameter(ToggleableStateProvider::class) themedState: Themed<ToggleableState>
 ) {
     ThemedPreviews(themeConfig = themedState.themeConfig) {
-        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(16.dp)) {
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(Size.medium)) {
             Column {
                 TriStateCheckboxRow(
                     state = themedState.value,
@@ -48,7 +48,7 @@ private fun TriStateFilterChipPreview(
     @PreviewParameter(ToggleableStateProvider::class) themedState: Themed<ToggleableState>
 ) {
     ThemedPreviews(themeConfig = themedState.themeConfig) {
-        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(16.dp)) {
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(Size.medium)) {
             Column {
                 TriStateFilterChip(
                     state = themedState.value,
