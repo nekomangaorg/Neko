@@ -178,6 +178,40 @@ fun HorizontalCategoriesPage(
                                 libraryCategoryActions = libraryCategoryActions,
                                 isRefreshing = item.isRefreshing,
                             )
+
+                            val onClick =
+                                remember(libraryScreenActions, item.libraryItems, selectedIds) {
+                                    { id: Long ->
+                                        val mangaItem =
+                                            item.libraryItems.find { it.displayManga.mangaId == id }
+                                        if (mangaItem != null) {
+                                            if (selectedIds.isNotEmpty()) {
+                                                libraryScreenActions.mangaLongClick(mangaItem)
+                                            } else {
+                                                libraryScreenActions.mangaClick(id)
+                                            }
+                                        }
+                                    }
+                                }
+
+                            val onLongClick =
+                                remember(libraryScreenActions, item.libraryItems) {
+                                    { displayManga: org.nekomanga.domain.manga.DisplayManga ->
+                                        val mangaItem =
+                                            item.libraryItems.find {
+                                                it.displayManga.mangaId == displayManga.mangaId
+                                            }
+                                        if (mangaItem != null) {
+                                            libraryScreenActions.mangaLongClick(mangaItem)
+                                        }
+                                    }
+                                }
+
+                            val onStartReadingClick =
+                                remember(libraryScreenActions) {
+                                    { id: Long -> libraryScreenActions.mangaStartReadingClick(id) }
+                                }
+
                             LazyVerticalGrid(
                                 state = gridState,
                                 columns = GridCells.Fixed(columns),
@@ -198,11 +232,13 @@ fun HorizontalCategoriesPage(
                                     GridItem(
                                         libraryItem = libraryItem,
                                         libraryScreenState = libraryScreenState,
-                                        libraryScreenActions = libraryScreenActions,
                                         selectedIds = selectedIds,
                                         isComfortable =
                                             libraryScreenState.libraryDisplayMode
                                                 is LibraryDisplayMode.ComfortableGrid,
+                                        onClick = onClick,
+                                        onLongClick = onLongClick,
+                                        onStartReadingClick = onStartReadingClick,
                                     )
                                 }
                             }
@@ -340,9 +376,11 @@ private fun HorizontalCategoryHeader(
 private fun GridItem(
     libraryItem: LibraryMangaItem,
     libraryScreenState: LibraryScreenState,
-    libraryScreenActions: LibraryScreenActions,
     selectedIds: List<Long>,
     isComfortable: Boolean,
+    onClick: (Long) -> Unit,
+    onLongClick: (org.nekomanga.domain.manga.DisplayManga) -> Unit,
+    onStartReadingClick: (Long) -> Unit,
 ) {
     MangaGridItem(
         displayManga = libraryItem.displayManga,
@@ -356,17 +394,9 @@ private fun GridItem(
         isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
         showStartReadingButton =
             libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
-        onStartReadingClick = {
-            libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
-        },
-        onClick = { _ ->
-            if (libraryScreenState.selectedItems.isNotEmpty()) {
-                libraryScreenActions.mangaLongClick(libraryItem)
-            } else {
-                libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
-            }
-        },
-        onLongClick = { _ -> libraryScreenActions.mangaLongClick(libraryItem) },
+        onStartReadingClick = onStartReadingClick,
+        onClick = onClick,
+        onLongClick = onLongClick,
     )
 }
 

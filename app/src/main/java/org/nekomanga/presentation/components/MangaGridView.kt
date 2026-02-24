@@ -169,7 +169,7 @@ fun MangaGridItem(
     isComfortable: Boolean = true,
     isSelected: Boolean = false,
     showStartReadingButton: Boolean = false,
-    onStartReadingClick: () -> Unit = {},
+    onStartReadingClick: (Long) -> Unit = {},
     // Optimize: Use stable function references to allow skipping recomposition
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
@@ -240,7 +240,7 @@ fun MangaGridItem(
                 if (showStartReadingButton) {
                     StartReadingButton(
                         modifier = Modifier.align(Alignment.TopEnd),
-                        onStartReadingClick = onStartReadingClick,
+                        onStartReadingClick = { onStartReadingClick(displayManga.mangaId) },
                     )
                 }
             }

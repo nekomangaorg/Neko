@@ -202,6 +202,35 @@ private fun RowGrid(
     isComfortableGrid: Boolean,
     libraryScreenActions: LibraryScreenActions,
 ) {
+    val onClick =
+        remember(libraryScreenActions, rowItems, selectedIds) {
+            { id: Long ->
+                val item = rowItems.find { it.displayManga.mangaId == id }
+                if (item != null) {
+                    if (selectedIds.isNotEmpty()) {
+                        libraryScreenActions.mangaLongClick(item)
+                    } else {
+                        libraryScreenActions.mangaClick(id)
+                    }
+                }
+            }
+        }
+
+    val onLongClick =
+        remember(libraryScreenActions, rowItems) {
+            { displayManga: org.nekomanga.domain.manga.DisplayManga ->
+                val item = rowItems.find { it.displayManga.mangaId == displayManga.mangaId }
+                if (item != null) {
+                    libraryScreenActions.mangaLongClick(item)
+                }
+            }
+        }
+
+    val onStartReadingClick =
+        remember(libraryScreenActions) {
+            { id: Long -> libraryScreenActions.mangaStartReadingClick(id) }
+        }
+
     VerticalGrid(
         columns = SimpleGridCells.Fixed(columns),
         modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
@@ -220,17 +249,9 @@ private fun RowGrid(
                 isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
                 showStartReadingButton =
                     displayOptions.showStartReadingButton && libraryItem.unreadCount > 0,
-                onStartReadingClick = {
-                    libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
-                },
-                onClick = { _ ->
-                    if (selectedIds.isNotEmpty()) {
-                        libraryScreenActions.mangaLongClick(libraryItem)
-                    } else {
-                        libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
-                    }
-                },
-                onLongClick = { _ -> libraryScreenActions.mangaLongClick(libraryItem) },
+                onStartReadingClick = onStartReadingClick,
+                onClick = onClick,
+                onLongClick = onLongClick,
             )
         }
     }
