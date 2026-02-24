@@ -1227,8 +1227,7 @@
     <string name="ok">Ok</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
-    <string name="charging">WHen charging</string>
-    <string name="connected_to_wifi">Only on Wi-Fi</string>
+    <string name="charging">Only when charging</string>
     <string name="network_not_metered">Only on unmetered network</string>
     <string name="clear">Clear</string>
     <string name="clear_filters">Clear filters</string>

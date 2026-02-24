@@ -321,7 +321,7 @@ class Suwayomi : MergedServerSource() {
                         this.url =
                             listOf(manga.id, manga.source.name, manga.source.lang)
                                 .joinToString(Constants.SEPARATOR)
-                        this.thumbnail_url = manga.thumbnailUrl?.let{ hostUrl() + it }
+                        this.thumbnail_url = manga.thumbnailUrl?.let { hostUrl() + it }
                     }
                 }
             }
