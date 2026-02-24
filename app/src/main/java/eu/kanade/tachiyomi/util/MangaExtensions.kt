@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
+import eu.kanade.tachiyomi.util.lang.orIfBlank
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
@@ -78,7 +79,7 @@ fun Manga.toDisplayManga(
         displayTextRes = displayTextRes,
         currentArtwork =
             Artwork(
-                url = this.user_cover ?: "",
+                url = this.user_cover.orIfBlank(this.dynamic_cover),
                 inLibrary = this.favorite,
                 mangaId = this.id!!,
                 originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
@@ -164,6 +165,7 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
         userCover = this.user_cover,
+        dynamicCover = this.dynamic_cover,
         url = MdConstants.baseUrl + this.url + "/" + this.getSlug(),
         rating = ((mangaRating * 100).roundToInt() / 100.0),
         addedToLibraryDate = this.date_added,

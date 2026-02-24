@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DATE_ADDED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DESCRIPTION
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DYNAMIC_COVER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FAVORITE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FOLLOW_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
@@ -36,7 +37,6 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_IMAGE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
-import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DYNAMIC_COVER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_OTHER_URLS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
