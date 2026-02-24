@@ -15,9 +15,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.math.min
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -28,17 +29,18 @@ class MangaShortcutManager(
     val db: DatabaseHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     val context: Context = preferences.context
 
-    fun updateShortcuts() {
+    suspend fun updateShortcuts() {
         if (!preferences.showSeriesInShortcuts().get()) {
             val shortcutManager = context.getSystemService(ShortcutManager::class.java)
             shortcutManager.removeAllDynamicShortcuts()
             return
         }
-        GlobalScope.launchIO {
+        withContext(ioDispatcher) {
             val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
             val recentManga =
