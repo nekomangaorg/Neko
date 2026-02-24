@@ -115,6 +115,9 @@ fun ButtonBlock(
                                 if (inLibrary) Icons.Filled.Favorite
                                 else Icons.Filled.FavoriteBorder,
                             text = UiText.String(""),
+                            contentDescription =
+                                if (inLibrary) UiText.StringResource(R.string.remove_from_library)
+                                else UiText.StringResource(R.string.add_to_library),
                             isChecked = inLibrary,
                             onClick = toggleFavorite,
                             dropdownItems =
@@ -273,7 +276,9 @@ private fun ActionButton(
             Row {
                 Icon(
                     imageVector = data.icon,
-                    contentDescription = null,
+                    contentDescription =
+                        if (hideText) data.contentDescription?.asString() ?: data.text.asString()
+                        else null,
                     modifier = Modifier.size(Size.large),
                 )
                 if (!hideText) {
@@ -324,4 +329,5 @@ private data class ActionButtonData(
     val onClick: () -> Unit,
     val isChecked: Boolean = false,
     val dropdownItems: ImmutableList<SimpleDropDownItem>? = null,
+    val contentDescription: UiText? = null,
 )
