@@ -33,7 +33,7 @@ private class ToolTipButtonProvider : PreviewParameterProvider<Themed<ToolTipBut
             .withThemes()
 }
 
-@Preview(name = "ToolTipButton Variants", showBackground = true, widthDp = 720)
+@Preview(name = "ToolTipButton Variants", showBackground = true)
 @Composable
 private fun ToolTipButtonPreview(
     @PreviewParameter(ToolTipButtonProvider::class) themedData: Themed<ToolTipButtonData>
