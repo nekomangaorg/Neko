@@ -152,7 +152,47 @@ fun VerticalCategoriesPage(
                         itemsIndexed(
                             items = chunks,
                             key = { index, _ -> "grid-row-${item.categoryItem.id}-$index" },
+                            contentType = { _, _ -> "grid-row" },
                         ) { _, rowItems ->
+                            val mangaIdToLibraryMangaItemMap =
+                                remember(rowItems) {
+                                    rowItems.associateBy { it.displayManga.mangaId }
+                                }
+
+                            val onClick =
+                                remember(
+                                    libraryScreenActions,
+                                    mangaIdToLibraryMangaItemMap,
+                                    selectedIds,
+                                ) {
+                                    { id: Long ->
+                                        val mangaItem = mangaIdToLibraryMangaItemMap[id]
+                                        if (mangaItem != null) {
+                                            if (selectedIds.isNotEmpty()) {
+                                                libraryScreenActions.mangaLongClick(mangaItem)
+                                            } else {
+                                                libraryScreenActions.mangaClick(id)
+                                            }
+                                        }
+                                    }
+                                }
+
+                            val onLongClick =
+                                remember(libraryScreenActions, mangaIdToLibraryMangaItemMap) {
+                                    { displayManga: org.nekomanga.domain.manga.DisplayManga ->
+                                        val mangaItem =
+                                            mangaIdToLibraryMangaItemMap[displayManga.mangaId]
+                                        if (mangaItem != null) {
+                                            libraryScreenActions.mangaLongClick(mangaItem)
+                                        }
+                                    }
+                                }
+
+                            val onStartReadingClick =
+                                remember(libraryScreenActions) {
+                                    { id: Long -> libraryScreenActions.mangaStartReadingClick(id) }
+                                }
+
                             RowGrid(
                                 modifier = Modifier.animateItem(),
                                 rowItems = rowItems,
@@ -162,7 +202,9 @@ fun VerticalCategoriesPage(
                                 isComfortableGrid =
                                     libraryScreenState.libraryDisplayMode
                                         is LibraryDisplayMode.ComfortableGrid,
-                                libraryScreenActions = libraryScreenActions,
+                                onClick = onClick,
+                                onLongClick = onLongClick,
+                                onStartReadingClick = onStartReadingClick,
                             )
                         }
                     }
@@ -199,37 +241,10 @@ private fun RowGrid(
     columns: Int,
     displayOptions: LibraryItemDisplayOptions,
     isComfortableGrid: Boolean,
-    libraryScreenActions: LibraryScreenActions,
+    onClick: (Long) -> Unit,
+    onLongClick: (org.nekomanga.domain.manga.DisplayManga) -> Unit,
+    onStartReadingClick: (Long) -> Unit,
 ) {
-    val onClick =
-        remember(libraryScreenActions, rowItems, selectedIds) {
-            { id: Long ->
-                val item = rowItems.find { it.displayManga.mangaId == id }
-                if (item != null) {
-                    if (selectedIds.isNotEmpty()) {
-                        libraryScreenActions.mangaLongClick(item)
-                    } else {
-                        libraryScreenActions.mangaClick(id)
-                    }
-                }
-            }
-        }
-
-    val onLongClick =
-        remember(libraryScreenActions, rowItems) {
-            { displayManga: org.nekomanga.domain.manga.DisplayManga ->
-                val item = rowItems.find { it.displayManga.mangaId == displayManga.mangaId }
-                if (item != null) {
-                    libraryScreenActions.mangaLongClick(item)
-                }
-            }
-        }
-
-    val onStartReadingClick =
-        remember(libraryScreenActions) {
-            { id: Long -> libraryScreenActions.mangaStartReadingClick(id) }
-        }
-
     VerticalGrid(
         columns = SimpleGridCells.Fixed(columns),
         modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),

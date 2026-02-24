@@ -179,11 +179,19 @@ fun HorizontalCategoriesPage(
                                 isRefreshing = item.isRefreshing,
                             )
 
+                            val mangaIdToLibraryMangaItemMap =
+                                remember(item.libraryItems) {
+                                    item.libraryItems.associateBy { it.displayManga.mangaId }
+                                }
+
                             val onClick =
-                                remember(libraryScreenActions, item.libraryItems, selectedIds) {
+                                remember(
+                                    libraryScreenActions,
+                                    mangaIdToLibraryMangaItemMap,
+                                    selectedIds,
+                                ) {
                                     { id: Long ->
-                                        val mangaItem =
-                                            item.libraryItems.find { it.displayManga.mangaId == id }
+                                        val mangaItem = mangaIdToLibraryMangaItemMap[id]
                                         if (mangaItem != null) {
                                             if (selectedIds.isNotEmpty()) {
                                                 libraryScreenActions.mangaLongClick(mangaItem)
@@ -195,12 +203,10 @@ fun HorizontalCategoriesPage(
                                 }
 
                             val onLongClick =
-                                remember(libraryScreenActions, item.libraryItems) {
+                                remember(libraryScreenActions, mangaIdToLibraryMangaItemMap) {
                                     { displayManga: org.nekomanga.domain.manga.DisplayManga ->
                                         val mangaItem =
-                                            item.libraryItems.find {
-                                                it.displayManga.mangaId == displayManga.mangaId
-                                            }
+                                            mangaIdToLibraryMangaItemMap[displayManga.mangaId]
                                         if (mangaItem != null) {
                                             libraryScreenActions.mangaLongClick(mangaItem)
                                         }
