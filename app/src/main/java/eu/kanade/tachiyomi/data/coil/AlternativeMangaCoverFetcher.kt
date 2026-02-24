@@ -8,7 +8,6 @@ import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.coil.ArtworkKeyer
 import eu.kanade.tachiyomi.source.online.MangaDex
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
@@ -19,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import okhttp3.CacheControl
+import okhttp3.Call
 import okhttp3.Request
 import okhttp3.Response
 import okio.FileSystem
@@ -37,13 +37,14 @@ class AlternativeMangaCoverFetcher(
     private val sourceLazy: Lazy<MangaDex>,
     private val options: Options,
     private val coverCache: CoverCache,
+    private val callFactoryLazy: Lazy<Call.Factory>,
     private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
 
     private val diskCacheKey: String? by lazy {
         ArtworkKeyer()
             .key(
-                Artwork(cover = url, inLibrary = false, originalCover = "", mangaId = mangaId),
+                Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
                 options,
             )
     }

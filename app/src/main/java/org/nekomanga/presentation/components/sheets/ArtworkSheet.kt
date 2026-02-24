@@ -136,7 +136,7 @@ fun ArtworkSheet(
                         Gap(Size.small)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
                             item { Gap(Size.tiny) }
-                            items(alternativeArtwork, key = { it.cover }) { artwork ->
+                            items(alternativeArtwork, key = { it.url }) { artwork ->
                                 ArtworkThumbnail(
                                     artwork = artwork,
                                     themeColorState = themeColorState,

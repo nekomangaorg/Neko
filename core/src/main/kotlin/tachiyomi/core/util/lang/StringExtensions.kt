@@ -32,10 +32,6 @@ fun String.chop(count: Int, replacement: String = "⋅"): String {
     }
 }
 
-fun String?.orIfBlank(other: String?): String {
-    return if (this.isNullOrBlank()) other ?: "" else this
-}
-
 fun String.removeArticles(): String {
     return when {
         startsWith("a ", true) -> substring(2)

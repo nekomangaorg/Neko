@@ -119,7 +119,6 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             },
                             incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                             preferences = settingsVm.preferences,
-                            libraryPreferences = settingsVm.libraryPreferences,
                             mangaDetailsPreferences = settingsVm.mangaDetailsPreferences,
                         )
                         .Content()

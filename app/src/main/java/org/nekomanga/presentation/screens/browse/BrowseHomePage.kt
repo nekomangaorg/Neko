@@ -47,7 +47,6 @@ import org.nekomanga.presentation.theme.Size
 fun BrowseHomePage(
     browseHomePageManga: PersistentList<HomePageManga>,
     shouldOutlineCover: Boolean,
-    dynamicCovers: Boolean,
     useVividColorHeaders: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
@@ -120,7 +119,6 @@ fun BrowseHomePage(
                                     MangaCover.Square(
                                         artwork = displayManga.currentArtwork,
                                         shouldOutlineCover = shouldOutlineCover,
-                                        dynamicCover = dynamicCovers,
                                         modifier = Modifier.requiredHeight(coverSize),
                                     )
                                     MangaGridTitle(title = displayManga.getTitle())

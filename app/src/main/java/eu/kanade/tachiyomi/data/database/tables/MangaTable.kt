@@ -92,8 +92,6 @@ object MangaTable {
 
     const val COL_REPLIES_COUNT = "replies_count"
 
-    const val COL_DYNAMIC_COVER = "dynamic_cover"
-
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -135,8 +133,7 @@ object MangaTable {
             $COL_USER_COVER TEXT,
             $COL_USER_TITLE TEXT,
             $COL_THREAD_ID TEXT,
-            $COL_REPLIES_COUNT TEXT,
-            $COL_DYNAMIC_COVER TEXT
+            $COL_REPLIES_COUNT TEXT
             )
             """
 
@@ -223,7 +220,4 @@ object MangaTable {
 
     val addLanguageFilterFlag: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE_FILTER_FLAG TEXT DEFAULT NULL"
-
-    val addDynamicCover: String
-        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_DYNAMIC_COVER TEXT DEFAULT NULL"
 }

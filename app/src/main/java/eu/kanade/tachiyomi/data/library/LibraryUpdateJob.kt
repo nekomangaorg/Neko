@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.data.library
 
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -54,6 +56,7 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import eu.kanade.tachiyomi.util.system.jobIsRunning
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
@@ -91,6 +94,7 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -151,6 +155,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
         if (tags.contains(WORK_NAME_AUTO)) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
+                if ((DEVICE_ONLY_ON_WIFI in restrictions) && !context.isConnectedToWifi()) {
+                    return Result.retry()
+                }
+            }
+
             // Find a running manual worker. If exists, try again later
             if (WorkManager.getInstance(context).jobIsRunning(WORK_NAME_MANUAL)) {
                 return Result.retry()
@@ -876,9 +887,21 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         NetworkType.CONNECTED
                     }
 
+                val networkRequestBuilder = NetworkRequest.Builder()
+                if (DEVICE_ONLY_ON_WIFI in restrictions) {
+                    networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                }
+                if (DEVICE_NETWORK_NOT_METERED in restrictions) {
+                    networkRequestBuilder.addCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+                    )
+                }
+
                 val constraints =
                     Constraints.Builder()
-                        .setRequiredNetworkType(networkType)
+                        // 'networkRequest' only applies to Android 9+, otherwise 'networkType' is
+                        // used
+                        .setRequiredNetworkRequest(networkRequestBuilder.build(), networkType)
                         .setRequiresCharging(DEVICE_CHARGING in restrictions)
                         .setRequiresBatteryNotLow(true)
                         .build()

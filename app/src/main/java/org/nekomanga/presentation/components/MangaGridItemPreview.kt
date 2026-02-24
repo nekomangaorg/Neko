@@ -38,7 +38,6 @@ private fun MangaGridItemPreview(
                 MangaGridItem(
                     displayManga = displayManga,
                     shouldOutlineCover = true,
-                    dynamicCover = false,
                     isComfortable = true,
                     showUnreadBadge = true,
                     unreadCount = 12,
@@ -50,7 +49,6 @@ private fun MangaGridItemPreview(
                 MangaGridItem(
                     displayManga = displayManga,
                     shouldOutlineCover = true,
-                    dynamicCover = false,
                     isComfortable = false,
                     showUnreadBadge = false,
                     unreadCount = 0,

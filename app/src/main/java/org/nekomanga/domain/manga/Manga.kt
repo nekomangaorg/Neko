@@ -3,6 +3,7 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import eu.kanade.tachiyomi.data.database.models.Manga as DbManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -21,7 +22,6 @@ data class SourceManga(
 data class LibraryMangaItem(
     val displayManga: DisplayManga,
     val userCover: String?,
-    val dynamicCover: String?,
     val url: String = "",
     val addedToLibraryDate: Long = 0L,
     val latestChapterDate: Long = 0L,
@@ -97,16 +97,22 @@ data class DisplayManga(
     fun getTitle(): String {
         return userTitle.ifEmpty { originalTitle }
     }
+
+    fun toDbManga(): DbManga =
+        DbManga.create(url, originalTitle).apply {
+            id = mangaId
+            favorite = inLibrary
+            thumbnail_url = currentArtwork.url
+        }
 }
 
 data class MergeArtwork(val url: String, val mergeType: MergeType)
 
 data class Artwork(
-    val cover: String = "",
-    val dynamicCover: String = "",
-    val originalCover: String = "",
+    val url: String = "",
     val mangaId: Long,
     val inLibrary: Boolean = false,
+    val originalArtwork: String = "",
     val description: String = "",
     val volume: String = "",
     val active: Boolean = false,

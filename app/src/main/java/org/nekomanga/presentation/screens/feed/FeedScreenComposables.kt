@@ -144,7 +144,6 @@ fun FeedScreenContent(
                     feedScreenType = feedScreenState.feedScreenType,
                     historyGrouping = historyPagingScreenState.historyGrouping,
                     outlineCovers = feedScreenState.outlineCovers,
-                    dynamicCovers = feedScreenState.dynamicCovers,
                     outlineCards = feedScreenState.outlineCards,
                     useVividColorHeaders = feedScreenState.useVividColorHeaders,
                     updatesFetchSort = updatesPagingScreenState.updatesSortedByFetch,

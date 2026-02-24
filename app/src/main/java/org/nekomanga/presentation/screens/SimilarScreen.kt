@@ -205,7 +205,6 @@ private fun SimilarContent(
             MangaListWithHeader(
                 groupedManga = similarScreenState.filteredDisplayManga,
                 shouldOutlineCover = similarScreenState.outlineCovers,
-                dynamicCover = similarScreenState.dynamicCovers,
                 contentPadding = contentPadding,
                 onClick = mangaClick,
                 onLongClick = mangaLongClick,
@@ -214,7 +213,6 @@ private fun SimilarContent(
             MangaGridWithHeader(
                 groupedManga = similarScreenState.filteredDisplayManga,
                 shouldOutlineCover = similarScreenState.outlineCovers,
-                dynamicCover = similarScreenState.dynamicCovers,
                 columns = numberOfColumns(rawValue = similarScreenState.rawColumnCount),
                 isComfortable = similarScreenState.isComfortableGrid,
                 contentPadding = contentPadding,

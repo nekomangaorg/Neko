@@ -17,7 +17,6 @@ import androidx.compose.ui.res.colorResource
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.data.coil.dynamicCover
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
@@ -37,7 +36,6 @@ enum class MangaCover(val ratio: Float) {
         contentDescription: String = "",
         shape: Shape = RoundedCornerShape(Shapes.coverRadius),
         shouldOutlineCover: Boolean = true,
-        dynamicCover: Boolean,
         shoulderOverlayCover: Boolean = false,
     ) {
         val color by remember { mutableIntStateOf(Pastel.getColorLight()) }
@@ -49,11 +47,7 @@ enum class MangaCover(val ratio: Float) {
             }
 
         AsyncImage(
-            model =
-                ImageRequest.Builder(LocalContext.current)
-                    .data(artwork)
-                    .dynamicCover(dynamicCover)
-                    .build(),
+            model = ImageRequest.Builder(LocalContext.current).data(artwork).build(),
             placeholder = ColorPainter(colorResource(color)),
             contentDescription = contentDescription,
             alpha = alpha,

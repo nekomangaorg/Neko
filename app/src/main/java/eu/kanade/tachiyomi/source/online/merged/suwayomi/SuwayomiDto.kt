@@ -36,7 +36,7 @@ data class SuwayomiGraphQLErrorsDto(val errors: List<SuwayomiErrorDto>? = null) 
 data class SuwayomiSeriesDto(
     val id: Long,
     val title: String,
-    val thumbnailUrl: String?,
+    val thumbnailUrl: String,
     val source: SuwayomiSourceDto?,
 )
 

@@ -346,8 +346,6 @@
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
-    <string name="dynamic_cover">Dynamic covers</string>
-    <string name="dynamic_cover_summary">Show current reading volume artwork on cover</string>
     <string name="global_updates">Global updates</string>
     <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
     <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>
@@ -1227,7 +1225,8 @@
     <string name="ok">Ok</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
-    <string name="charging">Only when charging</string>
+    <string name="charging">WHen charging</string>
+    <string name="connected_to_wifi">Only on Wi-Fi</string>
     <string name="network_not_metered">Only on unmetered network</string>
     <string name="clear">Clear</string>
     <string name="clear_filters">Clear filters</string>

@@ -38,7 +38,6 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
@@ -56,7 +55,6 @@ class BrowseViewModel() : ViewModel() {
     private val browseRepository: BrowseRepository = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
-    private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
@@ -67,7 +65,6 @@ class BrowseViewModel() : ViewModel() {
                 isList = preferences.browseAsList().get(),
                 libraryEntryVisibility = preferences.browseDisplayMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
                 isComfortableGrid =
                     libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),

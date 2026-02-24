@@ -28,7 +28,7 @@ import eu.kanade.tachiyomi.AppModule
 import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
-import eu.kanade.tachiyomi.data.coil.coilImageLoader
+import eu.kanade.tachiyomi.data.image.coil.coilImageLoader
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel

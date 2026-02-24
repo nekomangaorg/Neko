@@ -35,7 +35,6 @@ data class LibraryScreenState(
     val allCollapsed: Boolean = false,
     val isRefreshing: Boolean = false,
     val outlineCovers: Boolean = false,
-    val dynamicCovers: Boolean = false,
     val showUnreadBadges: Boolean = false,
     val showDownloadBadges: Boolean = false,
     val incognitoMode: Boolean = false,

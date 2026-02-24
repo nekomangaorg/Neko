@@ -78,11 +78,10 @@ fun Manga.toDisplayManga(
         displayTextRes = displayTextRes,
         currentArtwork =
             Artwork(
-                cover = this.user_cover ?: "",
-                dynamicCover = this.dynamic_cover ?: "",
+                url = this.user_cover ?: "",
                 inLibrary = this.favorite,
                 mangaId = this.id!!,
-                originalCover = this.thumbnail_url ?: MdConstants.noCoverUrl,
+                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
             ),
     )
 }
@@ -165,7 +164,6 @@ fun LibraryManga.toLibraryMangaItem(): LibraryMangaItem {
     return LibraryMangaItem(
         displayManga = displayManga.copy(inLibrary = false),
         userCover = this.user_cover,
-        dynamicCover = this.dynamic_cover,
         url = MdConstants.baseUrl + this.url + "/" + this.getSlug(),
         rating = ((mangaRating * 100).roundToInt() / 100.0),
         addedToLibraryDate = this.date_added,
@@ -233,8 +231,8 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
                     inLibrary = dbManga.favorite,
                     currentArtwork =
                         displayManga.currentArtwork.copy(
-                            cover = dbManga.user_cover ?: "",
-                            originalCover = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                            url = dbManga.user_cover ?: "",
+                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
                         ),
                 )
         }

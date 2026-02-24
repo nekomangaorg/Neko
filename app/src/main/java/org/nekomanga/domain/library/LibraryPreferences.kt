@@ -37,10 +37,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun libraryUpdateIds() = this.preferenceStore.getString("library_update_ids")
 
     fun autoUpdateDeviceRestrictions() =
-        preferenceStore.getStringSet(
-            "library_update_restriction",
-            setOf(DEVICE_NETWORK_NOT_METERED),
-        )
+        preferenceStore.getStringSet("library_update_restriction", setOf(DEVICE_ONLY_ON_WIFI))
 
     fun autoUpdateMangaRestrictions() =
         this.preferenceStore.getStringSet(
@@ -221,6 +218,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
         const val MANGA_TRACKING_PLAN_TO_READ = "manga_tracking_plan_to_read"
 
         // Device
+        const val DEVICE_ONLY_ON_WIFI = "wifi"
         const val DEVICE_NETWORK_NOT_METERED = "network_not_metered"
         const val DEVICE_CHARGING = "ac"
     }

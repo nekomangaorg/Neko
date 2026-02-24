@@ -29,7 +29,6 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
 import uy.kohesive.injekt.Injekt
@@ -47,7 +46,6 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
-    private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
 
     private val _similarScreenState =
@@ -56,7 +54,6 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 isList = preferences.browseAsList().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
-                dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
                 isComfortableGrid =
                     libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),
@@ -257,8 +254,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                                     it.copy(
                                         currentArtwork =
                                             it.currentArtwork.copy(
-                                                cover = dbManga.user_cover ?: "",
-                                                originalCover =
+                                                url = dbManga.user_cover ?: "",
+                                                originalArtwork =
                                                     dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
                                             )
                                     )

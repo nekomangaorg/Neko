@@ -34,7 +34,6 @@ fun FeedHistoryPage(
     contentPadding: PaddingValues = PaddingValues(),
     feedHistoryMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
-    dynamicCovers: Boolean,
     outlineCards: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
@@ -87,7 +86,6 @@ fun FeedHistoryPage(
                 HistoryCard(
                     feedManga = feedManga,
                     outlineCover = outlineCovers,
-                    dynamicCover = dynamicCovers,
                     outlineCard = outlineCards,
                     groupedBySeries = historyGrouping == FeedHistoryGroup.Series,
                     mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },

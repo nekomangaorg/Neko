@@ -49,7 +49,6 @@ import org.nekomanga.presentation.theme.Size
 fun MangaGridWithHeader(
     groupedManga: ImmutableMap<Int, PersistentList<DisplayManga>>,
     shouldOutlineCover: Boolean,
-    dynamicCover: Boolean,
     columns: Int,
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
@@ -88,7 +87,6 @@ fun MangaGridWithHeader(
                         MangaGridItem(
                             displayManga = displayManga,
                             shouldOutlineCover = shouldOutlineCover,
-                            dynamicCover = dynamicCover,
                             isComfortable = isComfortable,
                             onClick = onClick,
                             onLongClick = onLongClick,
@@ -104,7 +102,6 @@ fun MangaGridWithHeader(
 fun MangaGrid(
     mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean,
-    dynamicCover: Boolean,
     columns: Int,
     contentPadding: PaddingValues = PaddingValues(),
     isComfortable: Boolean = true,
@@ -147,7 +144,6 @@ fun MangaGrid(
             MangaGridItem(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
-                dynamicCover = dynamicCover,
                 isComfortable = isComfortable,
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -161,7 +157,6 @@ fun MangaGridItem(
     modifier: Modifier = Modifier,
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
-    dynamicCover: Boolean,
     showUnreadBadge: Boolean = false,
     showDownloadBadge: Boolean = false,
     unreadCount: Int = 0,
@@ -174,6 +169,11 @@ fun MangaGridItem(
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
+    val startReadingClick =
+        remember(onStartReadingClick, displayManga.mangaId) {
+            { onStartReadingClick(displayManga.mangaId) }
+        }
+
     val subtitleText =
         when (displayManga.displayTextRes) {
             null -> displayManga.displayText
@@ -224,23 +224,15 @@ fun MangaGridItem(
                             manga = displayManga,
                             subtitleText = subtitleText,
                             shouldOutlineCover = shouldOutlineCover,
-                            dynamicCover = dynamicCover,
                         )
                     }
                 } else {
-                    Box {
-                        CompactGridItem(
-                            manga = displayManga,
-                            subtitleText = subtitleText,
-                            shouldOutlineCover = shouldOutlineCover,
-                            dynamicCover = dynamicCover,
-                        )
-                    }
+                    Box { CompactGridItem(displayManga, subtitleText, shouldOutlineCover) }
                 }
                 if (showStartReadingButton) {
                     StartReadingButton(
                         modifier = Modifier.align(Alignment.TopEnd),
-                        onStartReadingClick = { onStartReadingClick(displayManga.mangaId) },
+                        onStartReadingClick = startReadingClick,
                     )
                 }
             }
@@ -283,12 +275,10 @@ fun ComfortableGridItem(
     manga: DisplayManga,
     subtitleText: String,
     shouldOutlineCover: Boolean,
-    dynamicCover: Boolean,
 ) {
     MangaCover.Book.invoke(
         artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
-        dynamicCover = dynamicCover,
         modifier = modifier,
     )
     MangaGridTitle(title = manga.getTitle(), hasSubtitle = subtitleText.isNotBlank())
@@ -301,13 +291,11 @@ fun BoxScope.CompactGridItem(
     manga: DisplayManga,
     subtitleText: String,
     shouldOutlineCover: Boolean,
-    dynamicCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
         artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
-        dynamicCover = dynamicCover,
         modifier = modifier,
     )
 

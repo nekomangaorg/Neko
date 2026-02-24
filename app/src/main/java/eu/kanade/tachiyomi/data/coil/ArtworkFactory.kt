@@ -5,37 +5,41 @@ import coil3.disk.DiskCache
 import coil3.fetch.Fetcher
 import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.source.SourceManager
+import okhttp3.Call
 import org.nekomanga.domain.manga.Artwork
 import uy.kohesive.injekt.injectLazy
 
-class ArtworkFactory(private val diskCacheLazy: Lazy<DiskCache>) : Fetcher.Factory<Artwork> {
+class ArtworkFactory(
+    private val callFactoryLazy: Lazy<Call.Factory>,
+    private val diskCacheLazy: Lazy<DiskCache>,
+) : Fetcher.Factory<Artwork> {
 
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
 
     override fun create(data: Artwork, options: Options, imageLoader: ImageLoader): Fetcher {
-        return when (data.cover.isBlank()) {
+        return when (data.url.isBlank()) {
             true ->
                 MangaCoverFetcher(
-                    altUrl = data.dynamicCover,
+                    altUrl = data.url,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
-                    originalThumbnailUrl = data.originalCover,
+                    originalThumbnailUrl = data.originalArtwork,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
+                    callFactoryLazy = callFactoryLazy,
                     diskCacheLazy = diskCacheLazy,
                 )
-            // If 'cover' has a value, it is specific artwork (Priority 1)
             false ->
                 AlternativeMangaCoverFetcher(
-                    url = data.cover,
+                    url = data.url,
                     mangaId = data.mangaId,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
+                    callFactoryLazy = callFactoryLazy,
                     diskCacheLazy = diskCacheLazy,
                 )
         }

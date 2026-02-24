@@ -64,7 +64,6 @@ object MangaConstants {
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
         val themeBasedOffCovers: Boolean = false,
-        val dynamicCovers: Boolean = false,
         val wrapAltTitles: Boolean = false,
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,

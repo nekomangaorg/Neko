@@ -34,7 +34,6 @@ fun AnimatedBackdropContainer(
     themeColorState: ThemeColorState,
     artwork: Artwork,
     showBackdropOverlay: Boolean,
-    dynamicCovers: Boolean,
     generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
 
@@ -131,7 +130,6 @@ fun AnimatedBackdropContainer(
     Box(modifier = heightModifier) {
         BackDrop(
             themeColorState = themeColorState,
-            dynamicCovers = dynamicCovers,
             artwork = artwork,
             backdropOverlayAlpha = animatedOverlayAlpha,
             modifier = Modifier.matchParentSize(),

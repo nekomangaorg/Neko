@@ -47,7 +47,6 @@ data class MangaItem(
     val lastChapterNumber: Int? = null,
     val altTitles: PersistentList<String> = persistentListOf(),
     val userCover: String = "",
-    val dynamicCover: String = "",
     val userTitle: String = "",
     val repliesCount: String = "",
     val threadId: String = "",
@@ -88,7 +87,6 @@ fun MangaItem.toManga(): Manga {
     manga.last_volume_number = this.lastVolumeNumber
     manga.last_chapter_number = this.lastChapterNumber
     manga.alt_titles = MangaUtil.altTitlesToString(this.altTitles)
-    manga.dynamic_cover = this.dynamicCover.takeIf { it.isNotBlank() }
     manga.user_cover = this.userCover.takeIf { it.isNotBlank() }
     manga.user_title = this.userTitle.takeIf { it.isNotBlank() }
     manga.replies_count = this.repliesCount.takeIf { it.isNotBlank() }
@@ -132,7 +130,6 @@ fun Manga.toMangaItem(): MangaItem {
         lastVolumeNumber = this.last_volume_number,
         lastChapterNumber = this.last_chapter_number,
         altTitles = this.getAltTitles().toPersistentList(),
-        dynamicCover = this.dynamic_cover ?: "",
         userCover = this.user_cover ?: "",
         userTitle = this.user_title ?: "",
         repliesCount = this.replies_count ?: "",

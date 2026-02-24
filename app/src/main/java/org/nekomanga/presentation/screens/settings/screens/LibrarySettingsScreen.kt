@@ -22,6 +22,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
@@ -207,6 +208,7 @@ internal class LibrarySettingsScreen(
                         subtitle = stringResource(R.string.restrictions_),
                         entries =
                             persistentMapOf(
+                                DEVICE_ONLY_ON_WIFI to stringResource(R.string.connected_to_wifi),
                                 DEVICE_NETWORK_NOT_METERED to
                                     stringResource(R.string.network_not_metered),
                                 DEVICE_CHARGING to stringResource(R.string.charging),

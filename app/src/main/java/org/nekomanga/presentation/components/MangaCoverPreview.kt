@@ -32,9 +32,9 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
             Row {
-                MangaCover.Book(artwork = artwork, dynamicCover = false)
+                MangaCover.Book(artwork = artwork)
                 Spacer(modifier = Modifier.width(16.dp))
-                MangaCover.Square(artwork = artwork, dynamicCover = false)
+                MangaCover.Square(artwork = artwork)
             }
         }
     }
@@ -51,9 +51,9 @@ private fun MangaCoverPreview(
 private class ArtworkProvider : PreviewParameterProvider<Themed<Artwork>> {
     override val values: Sequence<Themed<Artwork>> =
         sequenceOf(
-                Artwork(cover = "dummy", mangaId = 1L, inLibrary = true, active = true),
-                Artwork(cover = "", mangaId = 2L, inLibrary = false, active = false),
-                Artwork(cover = "dummy", mangaId = 3L, inLibrary = true, active = false),
+                Artwork(url = "dummy", mangaId = 1L, inLibrary = true, active = true),
+                Artwork(url = "", mangaId = 2L, inLibrary = false, active = false),
+                Artwork(url = "dummy", mangaId = 3L, inLibrary = true, active = false),
             )
             .withThemes()
 }

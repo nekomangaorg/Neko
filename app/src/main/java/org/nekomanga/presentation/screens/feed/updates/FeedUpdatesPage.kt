@@ -36,7 +36,6 @@ fun FeedUpdatesPage(
     contentPadding: PaddingValues = PaddingValues(),
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     outlineCovers: Boolean,
-    dynamicCovers: Boolean,
     useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
     loadingResults: Boolean,
@@ -64,7 +63,6 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
-                dynamicCovers = dynamicCovers,
                 headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
@@ -79,7 +77,6 @@ fun FeedUpdatesPage(
                 contentPadding = contentPadding,
                 feedUpdatesMangaList = feedUpdatesMangaList,
                 outlineCovers = outlineCovers,
-                dynamicCovers = dynamicCovers,
                 headerColor = headerColor,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
@@ -98,7 +95,6 @@ private fun Grouped(
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     headerColor: Color,
     outlineCovers: Boolean = false,
-    dynamicCovers: Boolean = false,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
     updatesFetchSort: Boolean,
@@ -208,7 +204,6 @@ private fun Grouped(
                             mangaTitle = feedManga.mangaTitle,
                             artwork = feedManga.artwork,
                             outlineCovers = outlineCovers,
-                            dynamicCovers = dynamicCovers,
                             mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                             chapterClick = { chapterId ->
                                 feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
@@ -237,7 +232,6 @@ private fun Ungrouped(
     feedUpdatesMangaList: PersistentList<FeedManga> = persistentListOf(),
     headerColor: Color,
     outlineCovers: Boolean = false,
-    dynamicCovers: Boolean,
     hasMoreResults: Boolean = false,
     loadingResults: Boolean = false,
     updatesFetchSort: Boolean,
@@ -311,7 +305,6 @@ private fun Ungrouped(
                             mangaTitle = feedManga.mangaTitle,
                             artwork = feedManga.artwork,
                             outlineCovers = outlineCovers,
-                            dynamicCovers = dynamicCovers,
                             mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                             chapterClick = { chapterId ->
                                 feedScreenActions.chapterClick(feedManga.mangaId, chapterId)

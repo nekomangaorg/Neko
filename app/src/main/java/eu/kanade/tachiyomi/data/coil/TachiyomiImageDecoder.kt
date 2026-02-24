@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.coil
+package eu.kanade.tachiyomi.data.image.coil
 
 import android.graphics.Bitmap
 import coil3.ImageLoader
