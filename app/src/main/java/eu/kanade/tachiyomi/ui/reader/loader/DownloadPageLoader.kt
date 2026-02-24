@@ -6,7 +6,6 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -17,7 +16,6 @@ import uy.kohesive.injekt.injectLazy
 class DownloadPageLoader(
     private val chapter: ReaderChapter,
     private val manga: Manga,
-    private val source: Source,
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,
 ) : PageLoader() {
