@@ -1,11 +1,16 @@
 package org.nekomanga.ui.theme
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import org.nekomanga.presentation.theme.NekoTheme
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Themes
 import org.nekomanga.presentation.theme.colorSchemeFromTheme
 
@@ -15,23 +20,40 @@ private fun NekoThemePreview(theme: Themes, isDark: Boolean, content: @Composabl
         colorScheme =
             colorSchemeFromTheme(LocalContext.current, theme = theme, isSystemInDarkTheme = isDark)
     ) {
-        Surface { content() }
+        Surface(modifier = Modifier.padding(Size.tiny)) { content() }
     }
 }
 
-@Preview(name = "All Themes", showBackground = true, widthDp = 720) annotation class ThemePreviews
-
 @Composable
 fun ThemedPreviews(themeConfig: ThemeConfig, content: @Composable (theme: Themes) -> Unit) {
-    NekoThemePreview(themeConfig.theme, themeConfig.isDark) { content(themeConfig.theme) }
+    NekoThemePreview(themeConfig.theme, themeConfig.isDark) {
+        Column {
+            // Renders the theme name at the top of every preview canvas
+            Text(
+                text = themeConfig.displayName, // e.g., "Monet Dark"
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(Size.small),
+            )
+
+            // Renders your actual component below it
+            content(themeConfig.theme)
+        }
+    }
 }
 
 data class ThemeConfig(val theme: Themes, val isDark: Boolean) {
-    override fun toString(): String = "${theme.name} ${if (isDark) "Dark" else "Light"}"
+    val displayName: String
+        get() = "${theme.name} ${if (isDark) "Dark" else "Light"}"
+
+    override fun toString(): String = ""
 }
 
 data class Themed<T>(val value: T, val themeConfig: ThemeConfig) {
-    override fun toString(): String = "$themeConfig - $value"
+    val displayName: String
+        get() = "${themeConfig.theme.name} ${if (themeConfig.isDark) "Dark" else "Light"}"
+
+    override fun toString(): String = ""
 }
 
 class ThemeConfigProvider : PreviewParameterProvider<ThemeConfig> {
