@@ -117,7 +117,7 @@ internal class AppearanceSettingsScreen(
                         title = stringResource(R.string.theme_buttons_based_on_cover),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
-                        pref = libraryPreferences.dynamicCover(),
+                        pref = mangaDetailsPreferences.dynamicCovers(),
                         title = stringResource(R.string.dynamic_cover),
                         subtitle = stringResource(R.string.dynamic_cover_summary),
                     ),

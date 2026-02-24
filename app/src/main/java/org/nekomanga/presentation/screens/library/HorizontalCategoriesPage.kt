@@ -251,6 +251,7 @@ fun HorizontalCategoriesPage(
                                         showDownloadBadge = libraryScreenState.showDownloadBadges,
                                         downloadCount = libraryItem.downloadCount,
                                         shouldOutlineCover = libraryScreenState.outlineCovers,
+                                        dynamicCover = libraryScreenState.dynamicCovers,
                                         isComfortable =
                                             libraryScreenState.libraryDisplayMode
                                                 is LibraryDisplayMode.ComfortableGrid,
@@ -420,6 +421,7 @@ private fun ListItem(
             showDownloadBadge = libraryScreenState.showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
             shouldOutlineCover = libraryScreenState.outlineCovers,
+            dynamicCover = libraryScreenState.dynamicCovers,
         )
     }
 }

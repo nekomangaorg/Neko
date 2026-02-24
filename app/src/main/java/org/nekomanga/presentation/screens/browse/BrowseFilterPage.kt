@@ -30,6 +30,7 @@ fun BrowseFilterPage(
     isList: Boolean,
     isComfortableGrid: Boolean,
     outlineCovers: Boolean,
+    dynamicCovers: Boolean,
     rawColumnCount: Float,
     pageLoading: Boolean,
     lastPage: Boolean,
@@ -49,6 +50,7 @@ fun BrowseFilterPage(
                 MangaList(
                     mangaList = displayMangaHolder.filteredDisplayManga,
                     shouldOutlineCover = outlineCovers,
+                    dynamicCover = dynamicCovers,
                     contentPadding = contentPadding,
                     onClick = onClick,
                     onLongClick = onLongClick,
@@ -59,6 +61,7 @@ fun BrowseFilterPage(
                 MangaGrid(
                     mangaList = displayMangaHolder.filteredDisplayManga,
                     shouldOutlineCover = outlineCovers,
+                    dynamicCover = dynamicCovers,
                     contentPadding = contentPadding,
                     columns = numberOfColumns(rawValue = rawColumnCount),
                     isComfortable = isComfortableGrid,

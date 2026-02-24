@@ -97,7 +97,6 @@ data class DisplayManga(
     fun getTitle(): String {
         return userTitle.ifEmpty { originalTitle }
     }
-
 }
 
 data class MergeArtwork(val url: String, val mergeType: MergeType)

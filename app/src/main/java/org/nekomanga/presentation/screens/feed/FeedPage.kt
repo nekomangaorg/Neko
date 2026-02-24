@@ -49,6 +49,7 @@ fun FeedPage(
     feedMangaList: PersistentList<FeedManga>,
     summaryScreenPagingState: SummaryScreenPagingState,
     outlineCovers: Boolean,
+    dynamicCovers: Boolean,
     outlineCards: Boolean,
     useVividColorHeaders: Boolean,
     hasMoreResults: Boolean,
@@ -67,6 +68,7 @@ fun FeedPage(
                 modifier = modifier,
                 contentPadding = contentPadding,
                 outlineCovers = outlineCovers,
+                dynamicCovers = dynamicCovers,
                 useVividColorHeaders = useVividColorHeaders,
                 feedScreenActions = feedScreenActions,
                 updatingUpdates = summaryScreenPagingState.updatingUpdates,
@@ -83,6 +85,7 @@ fun FeedPage(
                 contentPadding = contentPadding,
                 feedHistoryMangaList = feedMangaList,
                 outlineCovers = outlineCovers,
+                dynamicCovers = dynamicCovers,
                 outlineCards = outlineCards,
                 feedScreenActions = feedScreenActions,
                 hasMoreResults = hasMoreResults,
@@ -98,6 +101,7 @@ fun FeedPage(
                 useVividColorHeaders = useVividColorHeaders,
                 feedUpdatesMangaList = feedMangaList,
                 outlineCovers = outlineCovers,
+                dynamicCovers = dynamicCovers,
                 groupedBySeries = groupedBySeries,
                 hasMoreResults = hasMoreResults,
                 loadingResults = loadingResults,
@@ -128,6 +132,7 @@ fun FeedCover(
     coverSize: Dp,
     modifier: Modifier = Modifier,
     shoulderOverlayCover: Boolean = false,
+    dynamicCover: Boolean,
     onClick: () -> Unit,
 ) {
 
@@ -137,6 +142,7 @@ fun FeedCover(
             shouldOutlineCover = outlined,
             modifier = Modifier.size(coverSize),
             shoulderOverlayCover = shoulderOverlayCover,
+            dynamicCover = dynamicCover,
         )
     }
 }

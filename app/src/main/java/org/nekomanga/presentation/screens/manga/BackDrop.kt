@@ -14,6 +14,7 @@ import coil3.asDrawable
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
+import eu.kanade.tachiyomi.data.coil.dynamicCover
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.theme.ThemeColorState
 
@@ -22,16 +23,22 @@ fun BackDrop(
     themeColorState: ThemeColorState,
     artwork: Artwork,
     backdropOverlayAlpha: Float,
+    dynamicCovers: Boolean,
     modifier: Modifier = Modifier,
     generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
 
+    println(
+        "Artwork Check: ID=${artwork.mangaId}, Dynamic=${artwork.dynamicCover}, Default=${artwork.originalCover}"
+    )
+
     val imageRequest =
-        remember(artwork) {
+        remember(artwork, dynamicCovers) {
             ImageRequest.Builder(context)
                 .data(artwork)
+                .dynamicCover(dynamicCovers)
                 .allowHardware(false) // Necessary for palette generation
                 .build()
         }

@@ -50,6 +50,7 @@ fun ContinueReadingCard(
     modifier: Modifier = Modifier,
     feedManga: FeedManga,
     outlineCover: Boolean,
+    dynamicCover: Boolean,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
     deleteAllHistoryClick: () -> Unit,
@@ -80,6 +81,7 @@ fun ContinueReadingCard(
             outlined = outlineCover,
             coverSize = Size.extraHuge,
             shoulderOverlayCover = chapterItem.chapter.read,
+            dynamicCover = dynamicCover,
             onClick = mangaClick,
         )
         Column(modifier = Modifier.padding(horizontal = Size.small).weight(1f)) {

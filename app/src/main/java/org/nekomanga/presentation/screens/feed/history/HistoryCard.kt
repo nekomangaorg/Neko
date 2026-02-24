@@ -61,6 +61,7 @@ fun HistoryCard(
     feedManga: FeedManga,
     outlineCard: Boolean,
     outlineCover: Boolean,
+    dynamicCover: Boolean,
     groupedBySeries: Boolean,
     mangaClick: () -> Unit,
     chapterClick: (Long) -> Unit,
@@ -114,6 +115,7 @@ fun HistoryCard(
                     artwork = feedManga.artwork,
                     chapterItem = feedManga.chapters.first(),
                     outlineCovers = outlineCover,
+                    dynamicCovers = dynamicCover,
                     mangaClick = mangaClick,
                 )
             }
@@ -229,6 +231,7 @@ private fun HistoryRow(
     artwork: Artwork,
     chapterItem: ChapterItem,
     outlineCovers: Boolean,
+    dynamicCovers: Boolean,
     mangaClick: () -> Unit,
 ) {
     val mediumAlphaColor =
@@ -237,6 +240,7 @@ private fun HistoryRow(
         FeedCover(
             artwork = artwork,
             outlined = outlineCovers,
+            dynamicCover = dynamicCovers,
             coverSize = Size.squareCoverMedium,
             onClick = mangaClick,
         )

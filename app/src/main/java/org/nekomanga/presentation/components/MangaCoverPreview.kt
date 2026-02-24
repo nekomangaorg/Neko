@@ -32,9 +32,9 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
         NekoTheme {
             Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
                 Row {
-                    MangaCover.Book(artwork = artwork)
+                    MangaCover.Book(artwork = artwork, dynamicCover = false)
                     Spacer(modifier = Modifier.width(16.dp))
-                    MangaCover.Square(artwork = artwork)
+                    MangaCover.Square(artwork = artwork, dynamicCover = false)
                 }
             }
         }

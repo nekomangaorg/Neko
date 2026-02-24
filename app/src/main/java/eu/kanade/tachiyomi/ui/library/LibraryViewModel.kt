@@ -68,6 +68,7 @@ import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
@@ -82,6 +83,7 @@ class LibraryViewModel() : ViewModel() {
     val libraryPreferences: LibraryPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     val mangadexPreferences: MangaDexPreferences = Injekt.get()
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
@@ -99,6 +101,7 @@ class LibraryViewModel() : ViewModel() {
             rawColumnCount = libraryPreferences.gridSize().get(),
             libraryDisplayMode = libraryPreferences.layout().get(),
             outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
             showUnreadBadges = libraryPreferences.showUnreadBadge().get(),
             showDownloadBadges = libraryPreferences.showDownloadBadge().get(),
             showStartReadingButton = libraryPreferences.showStartReadingButton().get(),

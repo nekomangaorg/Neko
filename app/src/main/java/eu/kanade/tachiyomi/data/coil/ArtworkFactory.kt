@@ -5,15 +5,12 @@ import coil3.disk.DiskCache
 import coil3.fetch.Fetcher
 import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
+import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.source.SourceManager
-import okhttp3.Call
 import org.nekomanga.domain.manga.Artwork
 import uy.kohesive.injekt.injectLazy
 
-class ArtworkFactory(
-    private val callFactoryLazy: Lazy<Call.Factory>,
-    private val diskCacheLazy: Lazy<DiskCache>,
-) : Fetcher.Factory<Artwork> {
+class ArtworkFactory(private val diskCacheLazy: Lazy<DiskCache>) : Fetcher.Factory<Artwork> {
 
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
@@ -22,16 +19,16 @@ class ArtworkFactory(
         return when (data.cover.isBlank()) {
             true ->
                 MangaCoverFetcher(
-                    altUrl = data.cover,
+                    altUrl = data.dynamicCover,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
                     originalThumbnailUrl = data.originalCover,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
-                    callFactoryLazy = callFactoryLazy,
                     diskCacheLazy = diskCacheLazy,
                 )
+            // If 'cover' has a value, it is specific artwork (Priority 1)
             false ->
                 AlternativeMangaCoverFetcher(
                     url = data.cover,
@@ -39,7 +36,6 @@ class ArtworkFactory(
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
-                    callFactoryLazy = callFactoryLazy,
                     diskCacheLazy = diskCacheLazy,
                 )
         }

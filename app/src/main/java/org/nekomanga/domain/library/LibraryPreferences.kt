@@ -120,8 +120,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun outlineOnCovers() = this.preferenceStore.getBoolean("outline_on_covers", true)
 
-    fun dynamicCover() = this.preferenceStore.getBoolean("dynamic_cover", true)
-
     fun gridSize() = this.preferenceStore.getFloat("grid_size_float", 1f)
 
     fun uniformGrid() = this.preferenceStore.getBoolean("uniform_grid", true)

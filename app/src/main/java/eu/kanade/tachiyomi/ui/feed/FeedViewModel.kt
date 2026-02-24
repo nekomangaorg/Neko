@@ -50,6 +50,7 @@ class FeedViewModel() : ViewModel() {
             FeedScreenState(
                 feedScreenType = preferences.feedViewType().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
+                dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
                 outlineCards = preferences.feedViewOutlineCards().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupUpdateChapters = preferences.groupChaptersUpdates().get(),

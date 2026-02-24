@@ -14,6 +14,7 @@ data class FeedScreenState(
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val showingDownloads: Boolean = false,
     val outlineCovers: Boolean,
+    val dynamicCovers: Boolean,
     val outlineCards: Boolean,
     val groupUpdateChapters: Boolean = false,
     val incognitoMode: Boolean = false,

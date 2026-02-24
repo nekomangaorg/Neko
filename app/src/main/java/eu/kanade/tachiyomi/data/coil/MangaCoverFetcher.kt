@@ -1,6 +1,5 @@
-package eu.kanade.tachiyomi.data.image.coil
+package eu.kanade.tachiyomi.data.coil
 
-import android.webkit.MimeTypeMap
 import coil3.ImageLoader
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
@@ -8,6 +7,7 @@ import coil3.disk.DiskCache
 import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
+import coil3.getExtra
 import coil3.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -18,11 +18,7 @@ import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import okhttp3.CacheControl
-import okhttp3.Call
 import okhttp3.Request
 import okhttp3.Response
 import okio.FileSystem
@@ -44,34 +40,36 @@ class MangaCoverFetcher(
     private val sourceLazy: Lazy<MangaDex>,
     private val options: Options,
     private val coverCache: CoverCache,
-    private val callFactoryLazy: Lazy<Call.Factory>,
     private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
 
-    // For non-custom cover
+    // Prevent the UninitializedPropertyAccessException by passing "" for the cover
     private val diskCacheKey: String? by lazy {
         ArtworkKeyer()
             .key(
                 Artwork(
-                    cover = url,
-                    inLibrary = inLibrary,
+                    cover = "", // Leave blank so Keyer knows this is a main cover
+                    dynamicCover = altUrl,
                     originalCover = originalThumbnailUrl,
                     mangaId = mangaId,
+                    inLibrary = inLibrary,
                 ),
                 options,
             )
     }
 
-    val fileScope = CoroutineScope(Job() + Dispatchers.IO)
-
     lateinit var url: String
 
     override suspend fun fetch(): FetchResult {
-        // diskCacheKey is thumbnail_url
+        val useDynamic = options.getExtra(DynamicCoverKey)
+
+        // Priority 3 & 1: Dynamic vs Default
+        // (Priority 2, the custom user cover, remains safely inside httpLoader)
         url =
-            when (altUrl.isBlank()) {
-                true -> originalThumbnailUrl
-                false -> url
+            if (useDynamic && altUrl.isNotBlank()) {
+                altUrl
+            } else {
+                originalThumbnailUrl
             }
 
         return when (getResourceType(url)) {
@@ -93,7 +91,7 @@ class MangaCoverFetcher(
                 return fileLoader(customCoverFile)
             }
         }
-        val coverFile = coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
+        val coverFile = coverCache.getCoverFile(url, inLibrary)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
             if (!inLibrary) {
                 coverFile.setLastModified(Date().time)
@@ -269,24 +267,6 @@ class MangaCoverFetcher(
         )
     }
 
-    /**
-     * Modified from [MimeTypeMap.getFileExtensionFromUrl] to be more permissive with special
-     * characters.
-     */
-    private fun MimeTypeMap.getMimeTypeFromUrl(url: String?): String? {
-        if (url.isNullOrBlank()) {
-            return null
-        }
-
-        val extension =
-            url.substringBeforeLast('#') // Strip the fragment.
-                .substringBeforeLast('?') // Strip the query.
-                .substringAfterLast('/') // Get the last path segment.
-                .substringAfterLast('.', missingDelimiterValue = "") // Get the file extension.
-
-        return getMimeTypeFromExtension(extension)
-    }
-
     private fun fileLoader(file: File): FetchResult {
         return SourceFetchResult(
             source =
@@ -309,10 +289,7 @@ class MangaCoverFetcher(
         }
     }
 
-    class Factory(
-        private val callFactoryLazy: Lazy<Call.Factory>,
-        private val diskCacheLazy: Lazy<DiskCache>,
-    ) : Fetcher.Factory<Manga> {
+    class Factory(private val diskCacheLazy: Lazy<DiskCache>) : Fetcher.Factory<Manga> {
 
         private val coverCache: CoverCache by injectLazy()
         private val sourceManager: SourceManager by injectLazy()
@@ -326,7 +303,6 @@ class MangaCoverFetcher(
                 sourceLazy = lazy { sourceManager.mangaDex },
                 options = options,
                 coverCache = coverCache,
-                callFactoryLazy = callFactoryLazy,
                 diskCacheLazy = diskCacheLazy,
             )
         }
