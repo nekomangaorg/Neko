@@ -351,6 +351,7 @@ private fun GridItem(
         showDownloadBadge = libraryScreenState.showDownloadBadges,
         downloadCount = libraryItem.downloadCount,
         shouldOutlineCover = libraryScreenState.outlineCovers,
+        dynamicCover = libraryScreenState.dynamicCovers,
         isComfortable = isComfortable,
         isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
         showStartReadingButton =

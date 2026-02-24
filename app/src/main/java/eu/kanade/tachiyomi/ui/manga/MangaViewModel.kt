@@ -380,38 +380,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 artwork = createCurrentArtwork(effectiveManga),
                             )
                         } else {
+
                             if (dynamicCover && effectiveManga.favorite) {
                                 val lastReadChapterId =
                                     history.maxByOrNull { it.last_read }?.chapter_id
 
-                                if (lastReadChapterId != null) {
-                                    val volume =
-                                        staticChapterData.allChapters
-                                            .find { it.chapter.id == lastReadChapterId }
-                                            ?.chapter
-                                            ?.volume
-
-                                    if (!volume.isNullOrBlank()) {
-                                        val dynamicArt =
-                                            artworkList.firstOrNull { it.volume == volume }
-                                        if (dynamicArt != null) {
-                                            val quality = mangaDexPreferences.coverQuality().get()
-                                            val url =
-                                                MdUtil.cdnCoverUrl(
-                                                    effectiveManga.uuid(),
-                                                    dynamicArt.fileName,
-                                                    quality,
-                                                )
-                                            if (url != effectiveManga.dynamicCover) {
-                                                val dbManga =
-                                                    effectiveManga
-                                                        .copy(dynamicCover = url)
-                                                        .toManga()
-                                                db.insertManga(dbManga).executeOnIO()
-                                            }
-                                        }
-                                    }
-                                }
+                                updateDynamicCover(
+                                    effectiveManga = effectiveManga,
+                                    lastReadChapterId = lastReadChapterId,
+                                    allChapters = staticChapterData.allChapters,
+                                    artworkList = artworkList,
+                                )
                             }
 
                             val artwork = createCurrentArtwork(effectiveManga)
@@ -2313,6 +2292,39 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
         this.languages?.let {
             manga.filtered_language = if (it.isEmpty()) null else ChapterUtil.getLanguageString(it)
+        }
+    }
+
+    private suspend fun updateDynamicCover(
+        effectiveManga: MangaItem,
+        lastReadChapterId: Long?,
+        allChapters: List<ChapterItem>,
+        artworkList: List<ArtworkImpl>,
+    ) {
+        val targetVolume =
+            if (lastReadChapterId != null) {
+                allChapters.find { it.chapter.id == lastReadChapterId }?.chapter?.volume
+            } else {
+                "Vol.1"
+            }
+
+        if (targetVolume.isNullOrBlank()) return
+
+        var dynamicArt = artworkList.firstOrNull { it.volume == targetVolume }
+
+        // Safety Fallback: If no history and volume 1 is missing, use the lowest numeric volume
+        if (dynamicArt == null && lastReadChapterId == null) {
+            dynamicArt = artworkList.minByOrNull { it.volume.toFloatOrNull() ?: Float.MAX_VALUE }
+        }
+
+        if (dynamicArt != null) {
+            val quality = mangaDexPreferences.coverQuality().get()
+            val url = MdUtil.cdnCoverUrl(effectiveManga.uuid(), dynamicArt.fileName, quality)
+
+            if (url != effectiveManga.dynamicCover) {
+                val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
+                db.insertManga(dbManga).executeOnIO()
+            }
         }
     }
 }
