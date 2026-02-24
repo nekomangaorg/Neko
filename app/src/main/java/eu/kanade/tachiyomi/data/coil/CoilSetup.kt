@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.image.coil
+package eu.kanade.tachiyomi.data.coil
 
 import android.app.ActivityManager
 import android.content.Context
@@ -14,8 +14,8 @@ import coil3.request.allowHardware
 import coil3.request.allowRgb565
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
-import eu.kanade.tachiyomi.data.coil.BufferedSourceFetcher
-import eu.kanade.tachiyomi.network.NetworkHelper
+import coil3.util.DebugLogger
+import eu.kanade.tachiyomi.data.image.coil.ArtworkFactory
 import org.nekomanga.core.network.NetworkPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -23,7 +23,6 @@ import uy.kohesive.injekt.api.get
 fun coilImageLoader(context: Context) =
     ImageLoader.Builder(context)
         .apply {
-            val callFactoryInit = { Injekt.get<NetworkHelper>().cdnClient }
             val diskCacheInit = { CoilDiskCache.get(context) }
             val isCurrSDKPieOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             components {
@@ -34,8 +33,8 @@ fun coilImageLoader(context: Context) =
                 }
                 add(SvgDecoder.Factory())
                 add(TachiyomiImageDecoder.Factory())
-                add(MangaCoverFactory(lazy(callFactoryInit), lazy(diskCacheInit)))
-                add(ArtworkFactory(lazy(callFactoryInit), lazy(diskCacheInit)))
+                add(MangaCoverFactory(lazy(diskCacheInit)))
+                add(ArtworkFactory(lazy(diskCacheInit)))
                 add(MergeArtworkFactory())
                 add(ArtworkKeyer())
                 add(BufferedSourceFetcher.Factory())
@@ -46,7 +45,7 @@ fun coilImageLoader(context: Context) =
             allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
             allowHardware(isCurrSDKPieOrGreater)
             if (Injekt.get<NetworkPreferences>().verboseLogging().get()) {
-                logger(coil3.util.DebugLogger())
+                logger(DebugLogger())
             }
         }
         .build()

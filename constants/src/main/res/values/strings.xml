@@ -346,6 +346,8 @@
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
+    <string name="dynamic_cover">Dynamic covers</string>
+    <string name="dynamic_cover_summary">Show current reading volume artwork on cover</string>
     <string name="global_updates">Global updates</string>
     <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
     <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>

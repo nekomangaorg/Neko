@@ -21,6 +21,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.presentation.components.theme.ThemeFollowSystemSwitch
 import org.nekomanga.presentation.components.theme.ThemeSelector
 import org.nekomanga.presentation.extensions.collectAsState
@@ -31,6 +32,7 @@ import org.nekomanga.presentation.theme.Size
 internal class AppearanceSettingsScreen(
     incognitoMode: Boolean,
     val mangaDetailsPreferences: MangaDetailsPreferences,
+    val libraryPreferences: LibraryPreferences,
     val preferences: PreferencesHelper,
     onNavigationIconClick: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
@@ -113,6 +115,11 @@ internal class AppearanceSettingsScreen(
                     Preference.PreferenceItem.SwitchPreference(
                         pref = mangaDetailsPreferences.autoThemeByCover(),
                         title = stringResource(R.string.theme_buttons_based_on_cover),
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        pref = mangaDetailsPreferences.dynamicCovers(),
+                        title = stringResource(R.string.dynamic_cover),
+                        subtitle = stringResource(R.string.dynamic_cover_summary),
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         pref = mangaDetailsPreferences.hideButtonText(),
@@ -200,6 +207,11 @@ internal class AppearanceSettingsScreen(
                 ),
                 SearchTerm(
                     title = stringResource(R.string.theme_buttons_based_on_cover),
+                    group = stringResource(R.string.details_page),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.dynamic_cover),
+                    subtitle = stringResource(R.string.dynamic_cover_summary),
                     group = stringResource(R.string.details_page),
                 ),
                 SearchTerm(

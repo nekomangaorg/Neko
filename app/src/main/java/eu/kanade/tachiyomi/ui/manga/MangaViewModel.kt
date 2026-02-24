@@ -192,6 +192,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .map { it.toMangaItem() }
             .distinctUntilChanged()
 
+    val historyFlow = db.getHistoryByMangaId(mangaId).asFlow().distinctUntilChanged()
+
     val artworkFlow = db.getArtwork(mangaId).asFlow().distinctUntilChanged()
 
     val categoriesDataFlow =
@@ -348,23 +350,19 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         observeDownloads()
 
         viewModelScope.launchIO {
-            eu.kanade.tachiyomi.util.system
-                .combine(
-                    mangaFlow,
-                    staticChapterDataFlow,
-                    categoriesDataFlow,
-                    artworkFlow,
-                    tracksFlow,
-                    mergedFlow,
-                    _mangaFilterState,
+            combine(
+                    combine(mangaFlow, staticChapterDataFlow, categoriesDataFlow, ::Triple),
+                    combine(artworkFlow, tracksFlow, mergedFlow, ::Triple),
+                    combine(
+                        _mangaFilterState,
+                        mangaDetailsPreferences.dynamicCovers().changes(),
+                        historyFlow,
+                        ::Triple,
+                    ),
                 ) {
-                    mangaItem,
-                    staticChapterData,
-                    categoriesData,
-                    artworkList,
-                    tracks,
-                    IsMerged,
-                    filterState ->
+                    (mangaItem, staticChapterData, categoriesData),
+                    (artworkList, tracks, IsMerged),
+                    (filterState, dynamicCover, history) ->
                     withContext(Dispatchers.Default) {
                         val effectiveManga =
                             if (filterState != null) {
@@ -376,16 +374,34 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 mangaItem
                             }
 
-                        val artwork = createCurrentArtwork(effectiveManga)
-
                         if (!effectiveManga.initialized) {
                             AllInfo(
                                 mangaItem = MangaItem(title = effectiveManga.title),
-                                artwork = artwork,
+                                artwork = createCurrentArtwork(effectiveManga),
                             )
                         } else {
+
+                            if (dynamicCover && effectiveManga.favorite) {
+                                val lastReadChapterId =
+                                    history.maxByOrNull { it.last_read }?.chapter_id
+
+                                updateDynamicCover(
+                                    effectiveManga = effectiveManga,
+                                    lastReadChapterId = lastReadChapterId,
+                                    allChapters = staticChapterData.allChapters,
+                                    artworkList = artworkList,
+                                )
+                            }
+
+                            val artwork = createCurrentArtwork(effectiveManga)
+
                             val alternativeArtwork =
-                                createAltArtwork(effectiveManga, artwork, artworkList)
+                                createAltArtwork(
+                                    manga = effectiveManga,
+                                    currentArtwork = artwork,
+                                    dbArtwork = artworkList,
+                                    useDynamicCover = dynamicCover,
+                                )
 
                             if (
                                 staticChapterData.allScanlators.size == 1 &&
@@ -461,6 +477,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             AllInfo(
                                 mangaItem = effectiveManga,
                                 isMerged = IsMerged,
+                                dynamicCover = dynamicCover,
                                 chapterDisplay = displayFilter,
                                 chapterSourceFilter = sourceFilter,
                                 chapterScanlatorFilter = scanlatorFilter,
@@ -980,6 +997,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     backdropSize = mangaDetailsPreferences.backdropSize().get(),
                     forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
                     themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
+                    dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
                     wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
                     validMergeTypes = validMergeTypes,
                     loggedInTrackService = loggedInServices,
@@ -991,18 +1009,20 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun createInitialCurrentArtwork(): Artwork {
         val manga = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
         return Artwork(
-            url = manga.userCover,
+            cover = manga.userCover,
+            dynamicCover = manga.dynamicCover,
             inLibrary = manga.favorite,
-            originalArtwork = manga.coverUrl,
+            originalCover = manga.coverUrl,
             mangaId = mangaId,
         )
     }
 
     private fun createCurrentArtwork(manga: MangaItem): Artwork {
         return Artwork(
-            url = manga.userCover,
+            cover = manga.userCover,
+            dynamicCover = manga.dynamicCover,
             inLibrary = manga.favorite,
-            originalArtwork = manga.coverUrl,
+            originalCover = manga.coverUrl,
             mangaId = mangaId,
         )
     }
@@ -1011,6 +1031,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         manga: MangaItem,
         currentArtwork: Artwork,
         dbArtwork: List<ArtworkImpl>,
+        useDynamicCover: Boolean,
     ): PersistentList<Artwork> {
         val quality = mangaDexPreferences.coverQuality().get()
 
@@ -1018,13 +1039,20 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .map { aw ->
                 Artwork(
                     mangaId = aw.mangaId,
-                    url = MdUtil.cdnCoverUrl(manga.uuid(), aw.fileName, quality),
+                    cover = MdUtil.cdnCoverUrl(manga.uuid(), aw.fileName, quality),
                     volume = aw.volume,
                     description = aw.description,
                     active =
-                        currentArtwork.url.contains(aw.fileName) ||
-                            (currentArtwork.url.isBlank() &&
-                                currentArtwork.originalArtwork.contains(aw.fileName)),
+                        when {
+                            // Priority 1: User custom cover
+                            currentArtwork.cover.isNotBlank() ->
+                                currentArtwork.cover.contains(aw.fileName)
+                            // Priority 2: Dynamic cover (if enabled and available)
+                            useDynamicCover && currentArtwork.dynamicCover.isNotBlank() ->
+                                currentArtwork.dynamicCover.contains(aw.fileName)
+                            // Priority 3: Default cover
+                            else -> currentArtwork.originalCover.contains(aw.fileName)
+                        },
                 )
             }
             .toPersistentList()
@@ -1870,11 +1898,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
         val dbManga = db.getManga(mangaId).executeAsBlocking()!!
         val cover =
-            when (artwork.url.isBlank() || dbManga.thumbnail_url == artwork.url) {
+            when (artwork.cover.isBlank() || dbManga.thumbnail_url == artwork.cover) {
                 true ->
                     coverCache.getCustomCoverFile(dbManga).takeIf { it.exists() }
                         ?: coverCache.getCoverFile(dbManga.thumbnail_url, dbManga.favorite)
-                false -> coverCache.getCoverFile(artwork.url)
+                false -> coverCache.getCoverFile(artwork.cover)
             }
 
         val type = ImageUtil.findImageType(cover.inputStream()) ?: throw Exception("Not an image")
@@ -1898,9 +1926,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun setCover(artwork: Artwork) {
         viewModelScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            coverCache.setCustomCoverToCache(dbManga, artwork.url)
+            coverCache.setCustomCoverToCache(dbManga, artwork.cover)
             MangaCoverMetadata.remove(mangaId)
-            dbManga.user_cover = artwork.url
+            dbManga.user_cover = artwork.cover
             db.insertManga(dbManga).executeOnIO()
         }
     }
@@ -2266,11 +2294,45 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             manga.filtered_language = if (it.isEmpty()) null else ChapterUtil.getLanguageString(it)
         }
     }
+
+    private suspend fun updateDynamicCover(
+        effectiveManga: MangaItem,
+        lastReadChapterId: Long?,
+        allChapters: List<ChapterItem>,
+        artworkList: List<ArtworkImpl>,
+    ) {
+        val targetVolume =
+            if (lastReadChapterId != null) {
+                allChapters.find { it.chapter.id == lastReadChapterId }?.chapter?.volume
+            } else {
+                "Vol.1"
+            }
+
+        if (targetVolume.isNullOrBlank()) return
+
+        var dynamicArt = artworkList.firstOrNull { it.volume == targetVolume }
+
+        // Safety Fallback: If no history and volume 1 is missing, use the lowest numeric volume
+        if (dynamicArt == null && lastReadChapterId == null) {
+            dynamicArt = artworkList.minByOrNull { it.volume.toFloatOrNull() ?: Float.MAX_VALUE }
+        }
+
+        if (dynamicArt != null) {
+            val quality = mangaDexPreferences.coverQuality().get()
+            val url = MdUtil.cdnCoverUrl(effectiveManga.uuid(), dynamicArt.fileName, quality)
+
+            if (url != effectiveManga.dynamicCover) {
+                val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
+                db.insertManga(dbManga).executeOnIO()
+            }
+        }
+    }
 }
 
 private data class AllInfo(
     val mangaItem: MangaItem,
     val isMerged: MergeConstants.IsMergedManga = No,
+    val dynamicCover: Boolean = false,
     val isRefreshing: Boolean = false,
     val mangaStatusCompleted: Boolean = false,
     val chapterDisplay: MangaConstants.ChapterDisplay = MangaConstants.ChapterDisplay(),

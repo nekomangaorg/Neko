@@ -26,6 +26,7 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
@@ -44,6 +45,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     private val displayRepository: DisplayRepository = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
+
+    private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
 
@@ -54,6 +57,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                 title = displayScreenType.title,
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
+                dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
                 isComfortableGrid =
                     libraryPreferences.layout().get() != LibraryDisplayMode.CompactGrid,
                 rawColumnCount = libraryPreferences.gridSize().get(),

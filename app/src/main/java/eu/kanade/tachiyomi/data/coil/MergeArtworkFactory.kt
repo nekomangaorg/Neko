@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.image.coil
+package eu.kanade.tachiyomi.data.coil
 
 import coil3.ImageLoader
 import coil3.fetch.Fetcher

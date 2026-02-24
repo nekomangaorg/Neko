@@ -85,6 +85,7 @@ fun MangaDetailsHeader(
                 AnimatedBackdropContainer(
                     isInitialized = isInitialized,
                     themeColorState = themeColorState,
+                    dynamicCovers = mangaDetailScreenState.dynamicCovers,
                     artwork = mangaDetailScreenState.currentArtwork,
                     showBackdropOverlay = mangaDetailScreenState.themeBasedOffCovers,
                     generatePalette = generatePalette,

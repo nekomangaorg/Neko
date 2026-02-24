@@ -27,6 +27,8 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
 
     fun autoThemeByCover() = this.preferenceStore.getBoolean("theme_manga_details", true)
 
+    fun dynamicCovers() = this.preferenceStore.getBoolean("dynamic_cover", true)
+
     fun forcePortrait() = this.preferenceStore.getBoolean("force_portrait", false)
 
     fun coverRatios() = this.preferenceStore.getStringSet("cover_ratio")

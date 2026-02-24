@@ -34,6 +34,7 @@ data class BrowseScreenState(
     val isList: Boolean,
     val libraryEntryVisibility: Int,
     val outlineCovers: Boolean,
+    val dynamicCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,

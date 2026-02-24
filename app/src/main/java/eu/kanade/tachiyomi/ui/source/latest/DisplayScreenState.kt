@@ -21,6 +21,7 @@ data class DisplayScreenState(
     val isList: Boolean,
     val isDisplayResult: Boolean = false,
     val outlineCovers: Boolean,
+    val dynamicCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean = false,

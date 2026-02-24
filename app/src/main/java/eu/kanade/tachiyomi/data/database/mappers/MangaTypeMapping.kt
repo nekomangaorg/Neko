@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DATE_ADDED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DESCRIPTION
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DYNAMIC_COVER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FAVORITE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FOLLOW_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
@@ -65,7 +66,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         UpdateQuery.builder().table(TABLE).where("$COL_ID = ?").whereArgs(obj.id).build()
 
     override fun mapToContentValues(obj: Manga) =
-        ContentValues(39).apply {
+        ContentValues(40).apply {
             put(COL_ID, obj.id)
             put(COL_SOURCE, obj.source)
             put(COL_URL, obj.url)
@@ -105,6 +106,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
             put(COL_USER_COVER, obj.user_cover)
             put(COL_USER_TITLE, obj.user_title)
             put(COL_LANGUAGE_FILTER_FLAG, obj.filtered_language)
+            put(COL_DYNAMIC_COVER, obj.dynamic_cover)
         }
 }
 
@@ -154,6 +156,7 @@ interface BaseMangaGetResolver {
             filtered_language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE_FILTER_FLAG))
             thread_id = cursor.getString(cursor.getColumnIndex(COL_THREAD_ID))
             replies_count = cursor.getString(cursor.getColumnIndex(COL_REPLIES_COUNT))
+            dynamic_cover = cursor.getString(cursor.getColumnIndex(COL_DYNAMIC_COVER))
         }
 }
 
