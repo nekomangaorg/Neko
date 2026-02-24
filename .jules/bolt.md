@@ -1,0 +1,3 @@
+## 2025-02-18 - Hoist Event Callbacks in Compose Lists/Grids
+**Learning:** Inline lambdas inside `items` / `itemsIndexed` blocks create new function instances on every recomposition, breaking skippability of item composables even if their data is unchanged. By hoisting the callback signature to accept the item ID/Model and passing a stable function reference (or a lambda that doesn't capture unstable state), we allow Compose to skip recomposition of individual items.
+**Action:** Always prefer passing `(Id) -> Unit` or `(Item) -> Unit` to list item composables instead of `() -> Unit` that captures the item.

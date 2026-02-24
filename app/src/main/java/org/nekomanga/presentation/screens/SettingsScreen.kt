@@ -190,6 +190,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                             loginEvent = vm.loginEvent,
                             komgaState = vm.komgaMergeScreenState.collectAsState().value,
                             suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
+                            preferences = vm.preferences,
                         )
                         .Content()
                 }

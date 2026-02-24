@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -19,9 +20,9 @@ import coil3.ColorImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.theme.NekoTheme
-import org.nekomanga.ui.theme.ThemePreviews
+import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
+import org.nekomanga.ui.theme.withThemes
 
 @Composable
 private fun MangaCoverPreviewContent(artwork: Artwork) {
@@ -29,29 +30,30 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
 
     val previewHandler = AsyncImagePreviewHandler { ColorImage(Color.Red.toArgb()) }
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
-        NekoTheme {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
-                Row {
-                    MangaCover.Book(artwork = artwork, dynamicCover = false)
-                    Spacer(modifier = Modifier.width(16.dp))
-                    MangaCover.Square(artwork = artwork, dynamicCover = false)
-                }
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
+            Row {
+                MangaCover.Book(artwork = artwork, dynamicCover = false)
+                Spacer(modifier = Modifier.width(16.dp))
+                MangaCover.Square(artwork = artwork, dynamicCover = false)
             }
         }
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun MangaCoverPreview(@PreviewParameter(ArtworkProvider::class) artwork: Artwork) {
-    ThemedPreviews { MangaCoverPreviewContent(artwork) }
+private fun MangaCoverPreview(
+    @PreviewParameter(ArtworkProvider::class) themedArtwork: Themed<Artwork>
+) {
+    ThemedPreviews(themedArtwork.themeConfig) { MangaCoverPreviewContent(themedArtwork.value) }
 }
 
-private class ArtworkProvider : PreviewParameterProvider<Artwork> {
-    override val values: Sequence<Artwork> =
+private class ArtworkProvider : PreviewParameterProvider<Themed<Artwork>> {
+    override val values: Sequence<Themed<Artwork>> =
         sequenceOf(
-            Artwork(cover = "dummy", mangaId = 1L, inLibrary = true, active = true),
-            Artwork(cover = "", mangaId = 2L, inLibrary = false, active = false),
-            Artwork(cover = "dummy", mangaId = 3L, inLibrary = true, active = false),
-        )
+                Artwork(cover = "dummy", mangaId = 1L, inLibrary = true, active = true),
+                Artwork(cover = "", mangaId = 2L, inLibrary = false, active = false),
+                Artwork(cover = "dummy", mangaId = 3L, inLibrary = true, active = false),
+            )
+            .withThemes()
 }

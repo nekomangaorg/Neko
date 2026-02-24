@@ -62,16 +62,7 @@ object ImageUtil {
 
     fun findImageType(stream: InputStream): ImageType? {
         return try {
-            when (getImageType(stream)?.format) {
-                Format.Avif -> ImageType.AVIF
-                Format.Gif -> ImageType.GIF
-                Format.Heif -> ImageType.HEIF
-                Format.Jpeg -> ImageType.JPEG
-                Format.Jxl -> ImageType.JXL
-                Format.Png -> ImageType.PNG
-                Format.Webp -> ImageType.WEBP
-                else -> null
-            }
+            getImageType(stream)?.toImageUtilType()
         } catch (e: Exception) {
             TimberKt.e(e) { "Error getting image type from stream" }
             null
@@ -80,16 +71,7 @@ object ImageUtil {
 
     fun findImageType(stream: BufferedSource): ImageType? {
         return try {
-            when (getImageType(stream)?.format) {
-                Format.Avif -> ImageType.AVIF
-                Format.Gif -> ImageType.GIF
-                Format.Heif -> ImageType.HEIF
-                Format.Jpeg -> ImageType.JPEG
-                Format.Jxl -> ImageType.JXL
-                Format.Png -> ImageType.PNG
-                Format.Webp -> ImageType.WEBP
-                else -> null
-            }
+            getImageType(stream)?.toImageUtilType()
         } catch (e: Exception) {
             TimberKt.e(e) { "Error getting image type from stream" }
             null
@@ -105,15 +87,7 @@ object ImageUtil {
     fun isAnimatedAndSupported(stream: InputStream): Boolean {
         try {
             val type = getImageType(stream) ?: return false
-            return when (type.format) {
-                Format.Gif -> true
-                // https://coil-kt.github.io/coil/getting_started/#supported-image-formats
-                // Animated WebP support on Android 9+
-                Format.Webp -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-                // Animated HEIF support on Android 11+
-                Format.Heif -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                else -> false
-            }
+            return type.isAnimatedAndSupported()
         } catch (e: Exception) {
             TimberKt.e(e) { "Error is animated image type" }
         }
@@ -123,19 +97,38 @@ object ImageUtil {
     fun isAnimatedAndSupported(stream: BufferedSource): Boolean {
         try {
             val type = getImageType(stream) ?: return false
-            return when (type.format) {
-                Format.Gif -> true
-                // https://coil-kt.github.io/coil/getting_started/#supported-image-formats
-                // Animated WebP support on Android 9+
-                Format.Webp -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-                // Animated HEIF support on Android 11+
-                Format.Heif -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                else -> false
-            }
+            return type.isAnimatedAndSupported()
         } catch (e: Exception) {
             TimberKt.e(e) { "Error is animated image type" }
         }
         return false
+    }
+
+    internal fun tachiyomi.decoder.ImageType.toImageUtilType(): ImageType? {
+        return when (format) {
+            Format.Avif -> ImageType.AVIF
+            Format.Gif -> ImageType.GIF
+            Format.Heif -> ImageType.HEIF
+            Format.Jpeg -> ImageType.JPEG
+            Format.Jxl -> ImageType.JXL
+            Format.Png -> ImageType.PNG
+            Format.Webp -> ImageType.WEBP
+            else -> null
+        }
+    }
+
+    internal fun tachiyomi.decoder.ImageType.isAnimatedAndSupported(
+        sdkInt: Int = Build.VERSION.SDK_INT
+    ): Boolean {
+        return when (format) {
+            Format.Gif -> true
+            // https://coil-kt.github.io/coil/getting_started/#supported-image-formats
+            // Animated WebP support on Android 9+
+            Format.Webp -> isAnimated && sdkInt >= Build.VERSION_CODES.P
+            // Animated HEIF support on Android 11+
+            Format.Heif -> isAnimated && sdkInt >= Build.VERSION_CODES.R
+            else -> false
+        }
     }
 
     enum class ImageType(val mime: String, val extension: String) {

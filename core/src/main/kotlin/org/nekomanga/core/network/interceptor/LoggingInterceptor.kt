@@ -29,5 +29,7 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
                 false -> HttpLoggingInterceptor.Level.BASIC
             }
         redactHeader(HttpHeaders.AUTHORIZATION)
+        redactHeader(HttpHeaders.COOKIE)
+        redactHeader(HttpHeaders.SET_COOKIE)
     }
 }

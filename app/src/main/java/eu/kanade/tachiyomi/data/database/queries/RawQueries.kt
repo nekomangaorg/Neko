@@ -76,7 +76,7 @@ fun getRecentsQuery(offset: Int, limit: Int, sortByDateFetched: Boolean): String
         }
 
     return """
-    SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
+    SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Chapter.TABLE}.${Chapter.COL_ID} as chapter_id, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
     WHERE ${Manga.COL_FAVORITE} = 1
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}

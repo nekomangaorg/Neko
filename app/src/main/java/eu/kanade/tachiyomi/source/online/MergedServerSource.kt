@@ -4,8 +4,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 
 abstract class MergedServerSource : ReducedHttpSource() {
 
-    open fun requiresCredentials(): Boolean = true
-
     abstract fun hostUrl(): String
 
     override fun getMangaUrl(url: String): String = hostUrl() + url

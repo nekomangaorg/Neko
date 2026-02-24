@@ -325,7 +325,7 @@ private fun TrackRowOne(
             IconButton(onClick = onRemoveClick) {
                 Icon(
                     imageVector = Icons.Default.Cancel,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.remove),
                     modifier = Modifier.padding(end = Size.small).size(24.dp),
                     tint = themeColor.primaryColor,
                 )
@@ -477,7 +477,7 @@ private fun Logo(service: TrackServiceItem, track: TrackItem?, onClick: (String,
     ) {
         Image(
             painter = painterResource(id = service.logoRes),
-            contentDescription = null,
+            contentDescription = stringResource(id = service.nameRes),
             modifier = Modifier.align(Alignment.Center),
         )
     }
@@ -488,7 +488,7 @@ private fun RowScope.TrackingBox(clickable: () -> Unit, content: @Composable () 
     Box(
         Modifier.weight(1f)
             .clickable { clickable() }
-            .padding(horizontal = Size.small, vertical = 16.dp),
+            .padding(horizontal = Size.small, vertical = Size.medium),
         contentAlignment = Alignment.Center,
     ) {
         content()

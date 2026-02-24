@@ -6,11 +6,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.merged.suwayomi.LoginMode
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.MergeScreenState
 import eu.kanade.tachiyomi.ui.setting.MergeScreenType
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharedFlow
 import org.nekomanga.R
 import org.nekomanga.presentation.components.dialog.LoginDialog
@@ -26,6 +30,7 @@ internal class MergeSettingsScreen(
     val logout: (MergeScreenType) -> Unit,
     val login: (MergeScreenType, String, String, String) -> Unit,
     val loginEvent: SharedFlow<MergeLoginEvent>,
+    val preferences: PreferencesHelper,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.merge_source_settings
@@ -69,10 +74,15 @@ internal class MergeSettingsScreen(
         var showLoginDialog by rememberSaveable { mutableStateOf(false) }
 
         if (showLoginDialog) {
+            val suwayomi = stringResource(R.string.suwayomi)
             LoginDialog(
                 sourceName,
                 showUrlField = true,
-                requiresCredential = mergeState.requiresCredentials,
+                showCredentialsField = {
+                    if (sourceName == suwayomi) {
+                        preferences.suwayomiLoginMode().get() != LoginMode.None
+                    } else true
+                },
                 onDismiss = { showLoginDialog = false },
                 onConfirm = login,
                 loginEvent = loginEvent,
@@ -92,16 +102,27 @@ internal class MergeSettingsScreen(
         return Preference.PreferenceGroup(
             title = sourceName,
             preferenceItems =
-                persistentListOf(
-                    Preference.PreferenceItem.SitePreference(
-                        title = loginText,
-                        subtitle = mergeState.currentUrl.ifBlank { null },
-                        isLoggedIn = mergeState.isLoggedIn,
-                        login = { showLoginDialog = true },
-                        logout = { showLogoutDialog = true },
-                    ),
-                    Preference.PreferenceItem.InfoPreference(title = infoText),
-                ),
+                listOfNotNull(
+                        Preference.PreferenceItem.SitePreference(
+                            title = loginText,
+                            subtitle = mergeState.currentUrl.ifBlank { null },
+                            isLoggedIn = mergeState.isLoggedIn,
+                            login = { showLoginDialog = true },
+                            logout = { showLogoutDialog = true },
+                        ),
+                        if (sourceName == stringResource(R.string.suwayomi)) {
+                            Preference.PreferenceItem.ListPreference(
+                                pref = preferences.suwayomiLoginMode(),
+                                title = stringResource(R.string.suwayomi_login_mode),
+                                entries =
+                                    LoginMode.entries
+                                        .associateWith { stringResource(it.titleResId) }
+                                        .toImmutableMap(),
+                            )
+                        } else null,
+                        Preference.PreferenceItem.InfoPreference(title = infoText),
+                    )
+                    .toPersistentList(),
         )
     }
 

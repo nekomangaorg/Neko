@@ -39,6 +39,7 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toImmutableMap
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Shapes
@@ -56,10 +57,13 @@ fun MangaGridWithHeader(
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
-    // Optimize: Memoize chunking to avoid re-allocating lists on every recomposition.
+    // Optimize: Filter visible items and chunk them, removing empty groups
     val chunkedGroupedManga =
         remember(groupedManga, columns) {
-            groupedManga.mapValues { (_, list) -> list.chunked(columns) }
+            groupedManga
+                .mapValues { (_, list) -> list.filter { it.isVisible }.chunked(columns) }
+                .filterValues { it.isNotEmpty() }
+                .toImmutableMap()
         }
 
     LazyColumn(
@@ -67,32 +71,28 @@ fun MangaGridWithHeader(
         modifier = modifier,
         contentPadding = contentPadding,
     ) {
-        groupedManga.forEach { (stringRes, allGrids) ->
-            val allGrids = allGrids.filter { it.isVisible }
-            if (allGrids.isNotEmpty()) {
-                item(key = "header-$stringRes") {
-                    HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
-                }
+        chunkedGroupedManga.forEach { (stringRes, chunks) ->
+            item(key = "header-$stringRes") {
+                HeaderCard { DefaultHeaderText(stringResource(id = stringRes)) }
+            }
 
-                val chunks = chunkedGroupedManga[stringRes] ?: emptyList()
-                itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
-                    gridIndex,
-                    rowItems ->
-                    VerticalGrid(
-                        columns = SimpleGridCells.Fixed(columns),
-                        modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
-                        horizontalArrangement = Arrangement.spacedBy(Size.small),
-                    ) {
-                        rowItems.forEach { displayManga ->
-                            MangaGridItem(
-                                displayManga = displayManga,
-                                shouldOutlineCover = shouldOutlineCover,
-                                dynamicCover = dynamicCover,
-                                isComfortable = isComfortable,
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            )
-                        }
+            itemsIndexed(items = chunks, key = { index, _ -> "grid-row-$stringRes-$index" }) {
+                _,
+                rowItems ->
+                VerticalGrid(
+                    columns = SimpleGridCells.Fixed(columns),
+                    modifier = modifier.fillMaxWidth().padding(horizontal = Size.small),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                ) {
+                    rowItems.forEach { displayManga ->
+                        MangaGridItem(
+                            displayManga = displayManga,
+                            shouldOutlineCover = shouldOutlineCover,
+                            dynamicCover = dynamicCover,
+                            isComfortable = isComfortable,
+                            onClick = onClick,
+                            onLongClick = onLongClick,
+                        )
                     }
                 }
             }
@@ -149,8 +149,8 @@ fun MangaGrid(
                 shouldOutlineCover = shouldOutlineCover,
                 dynamicCover = dynamicCover,
                 isComfortable = isComfortable,
-                onClick = { onClick(displayManga.mangaId) },
-                onLongClick = { onLongClick(displayManga) },
+                onClick = onClick,
+                onLongClick = onLongClick,
             )
         }
     }
@@ -170,8 +170,9 @@ fun MangaGridItem(
     isSelected: Boolean = false,
     showStartReadingButton: Boolean = false,
     onStartReadingClick: () -> Unit = {},
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    // Optimize: Use stable function references to allow skipping recomposition
+    onClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
 ) {
     val subtitleText =
         when (displayManga.displayTextRes) {
@@ -210,7 +211,10 @@ fun MangaGridItem(
             Box(
                 modifier =
                     Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                        .combinedClickable(
+                            onClick = { onClick(displayManga.mangaId) },
+                            onLongClick = { onLongClick(displayManga) },
+                        )
                         .padding(Size.extraTiny)
                         .semantics { this.contentDescription = contentDescription }
             ) {

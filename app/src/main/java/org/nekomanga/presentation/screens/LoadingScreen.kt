@@ -8,7 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.nekomanga.ui.theme.ThemePreviews
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
@@ -20,8 +23,10 @@ fun LoadingScreen(showLoadingIcon: Boolean = true) {
     }
 }
 
-@ThemePreviews
+@Preview
 @Composable
-private fun LoadingScreenPreview() {
-    ThemedPreviews { LoadingScreen() }
+private fun LoadingScreenPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) { LoadingScreen() }
 }

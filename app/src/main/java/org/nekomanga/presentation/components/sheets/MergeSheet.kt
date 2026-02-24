@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -124,8 +124,8 @@ fun MergeSheet(
             BaseSheet(themeColor = themeColorState) {
                 when (mergeType == null) {
                     true -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = Size.medium),
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             validMergeTypes.forEach { validMergeType ->
@@ -137,6 +137,8 @@ fun MergeSheet(
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                         MergeType.MangaBall -> R.drawable.ic_mangaball_logo
                                         MergeType.WeebDex -> R.drawable.ic_weebdex_logo
+                                        MergeType.ProjectSuki -> R.drawable.ic_projectsuki_logo
+                                        MergeType.Comix -> R.drawable.ic_comix_logo
                                         MergeType.Invalid -> R.drawable.ic_neko_yokai
                                     }
                                 MergeLogo(
@@ -238,7 +240,7 @@ private fun SuccessResults(
         modifier = Modifier.fillMaxWidth(),
         contentPadding =
             PaddingValues(
-                top = 16.dp,
+                top = Size.medium,
                 bottom = Size.huge * 2,
                 start = Size.small,
                 end = Size.small,
@@ -308,7 +310,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Gap(16.dp)
+        Gap(Size.medium)
         when (searchResults) {
             is MergeSearchResult.Loading ->
                 CircularProgressIndicator(
@@ -320,7 +322,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
             is MergeSearchResult.Error -> Text(text = searchResults.errorMessage)
             else -> Unit
         }
-        Gap(16.dp)
+        Gap(Size.medium)
         if (altTitles.isNotEmpty()) {
             val allTitles = listOf(title) + altTitles.sorted()
             val partitioned =

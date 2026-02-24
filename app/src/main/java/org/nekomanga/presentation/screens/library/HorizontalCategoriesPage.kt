@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryActions
@@ -162,71 +163,21 @@ fun HorizontalCategoriesPage(
                             )
                         }
                         Column {
-                            Row(
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .clickable(
-                                            enabled = selectionMode,
-                                            onClick = {
-                                                libraryScreenActions.selectAllLibraryMangaItems(
-                                                    item.libraryItems
-                                                )
-                                            },
-                                        ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                AnimatedVisibility(selectionMode) {
-                                    Row {
-                                        Gap(Size.medium)
-                                        Icon(
-                                            imageVector =
-                                                if (allSelected) Icons.Default.CheckCircleOutline
-                                                else Icons.Outlined.Circle,
-                                            contentDescription = null,
-                                            tint = indicatorColor,
-                                        )
-                                    }
-                                }
-                                if (item.libraryItems.isNotEmpty()) {
-                                    Gap(Size.medium)
-                                    Text(
-                                        text =
-                                            stringResource(
-                                                org.nekomanga.R.string.total_items,
-                                                item.libraryItems.size,
-                                            ),
-                                        color = indicatorColor,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1,
+                            HorizontalCategoryHeader(
+                                selectionMode = selectionMode,
+                                allSelected = allSelected,
+                                indicatorColor = indicatorColor,
+                                totalItems = item.libraryItems.size,
+                                onSelectAll = {
+                                    libraryScreenActions.selectAllLibraryMangaItems(
+                                        item.libraryItems
                                     )
-                                }
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                CategorySortButtons(
-                                    textColor = indicatorColor,
-                                    enabled = true,
-                                    categorySortClick = { categorySortClick(item.categoryItem) },
-                                    sortString =
-                                        stringResource(
-                                            item.categoryItem.sortOrder.stringRes(
-                                                item.categoryItem.isDynamic
-                                            )
-                                        ),
-                                    isAscending = item.categoryItem.isAscending,
-                                    categoryIsRefreshing = item.isRefreshing,
-                                    ascendingClick = {
-                                        libraryCategoryActions.categoryAscendingClick(
-                                            item.categoryItem
-                                        )
-                                    },
-                                    categoryRefreshClick = {
-                                        libraryCategoryActions.categoryRefreshClick(
-                                            item.categoryItem
-                                        )
-                                    },
-                                )
-                            }
+                                },
+                                categoryItem = item.categoryItem,
+                                categorySortClick = categorySortClick,
+                                libraryCategoryActions = libraryCategoryActions,
+                                isRefreshing = item.isRefreshing,
+                            )
                             LazyVerticalGrid(
                                 state = gridState,
                                 columns = GridCells.Fixed(columns),
@@ -244,39 +195,14 @@ fun HorizontalCategoriesPage(
                                         "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
                                     },
                                 ) { index, libraryItem ->
-                                    MangaGridItem(
-                                        displayManga = libraryItem.displayManga,
-                                        showUnreadBadge = libraryScreenState.showUnreadBadges,
-                                        unreadCount = libraryItem.unreadCount,
-                                        showDownloadBadge = libraryScreenState.showDownloadBadges,
-                                        downloadCount = libraryItem.downloadCount,
-                                        shouldOutlineCover = libraryScreenState.outlineCovers,
-                                        dynamicCover = libraryScreenState.dynamicCovers,
+                                    GridItem(
+                                        libraryItem = libraryItem,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryScreenActions = libraryScreenActions,
+                                        selectedIds = selectedIds,
                                         isComfortable =
                                             libraryScreenState.libraryDisplayMode
                                                 is LibraryDisplayMode.ComfortableGrid,
-                                        isSelected =
-                                            selectedIds.contains(libraryItem.displayManga.mangaId),
-                                        showStartReadingButton =
-                                            libraryScreenState.showStartReadingButton &&
-                                                libraryItem.unreadCount > 0,
-                                        onStartReadingClick = {
-                                            libraryScreenActions.mangaStartReadingClick(
-                                                libraryItem.displayManga.mangaId
-                                            )
-                                        },
-                                        onClick = {
-                                            if (libraryScreenState.selectedItems.isNotEmpty()) {
-                                                libraryScreenActions.mangaLongClick(libraryItem)
-                                            } else {
-                                                libraryScreenActions.mangaClick(
-                                                    libraryItem.displayManga.mangaId
-                                                )
-                                            }
-                                        },
-                                        onLongClick = {
-                                            libraryScreenActions.mangaLongClick(libraryItem)
-                                        },
                                     )
                                 }
                             }
@@ -296,54 +222,21 @@ fun HorizontalCategoriesPage(
                             )
                         }
                         Column(modifier = Modifier.fillMaxSize()) {
-                            Row(
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .clickable(
-                                            enabled = selectionMode,
-                                            onClick = {
-                                                libraryScreenActions.selectAllLibraryMangaItems(
-                                                    item.libraryItems
-                                                )
-                                            },
-                                        ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Gap(Size.medium)
-                                AnimatedVisibility(selectionMode) {
-                                    Icon(
-                                        imageVector =
-                                            if (allSelected) Icons.Default.CheckCircleOutline
-                                            else Icons.Outlined.Circle,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.tertiary,
+                            HorizontalCategoryHeader(
+                                selectionMode = selectionMode,
+                                allSelected = allSelected,
+                                indicatorColor = MaterialTheme.colorScheme.tertiary,
+                                totalItems = null,
+                                onSelectAll = {
+                                    libraryScreenActions.selectAllLibraryMangaItems(
+                                        item.libraryItems
                                     )
-                                }
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                CategorySortButtons(
-                                    enabled = true,
-                                    categorySortClick = { categorySortClick(item.categoryItem) },
-                                    sortString =
-                                        stringResource(
-                                            item.categoryItem.sortOrder.stringRes(
-                                                item.categoryItem.isDynamic
-                                            )
-                                        ),
-                                    isAscending = item.categoryItem.isAscending,
-                                    categoryIsRefreshing = item.isRefreshing,
-                                    ascendingClick = {
-                                        libraryCategoryActions.categoryAscendingClick(
-                                            item.categoryItem
-                                        )
-                                    },
-                                    categoryRefreshClick = {
-                                        libraryCategoryActions.categoryRefreshClick(
-                                            item.categoryItem
-                                        )
-                                    },
-                                )
-                            }
+                                },
+                                categoryItem = item.categoryItem,
+                                categorySortClick = categorySortClick,
+                                libraryCategoryActions = libraryCategoryActions,
+                                isRefreshing = item.isRefreshing,
+                            )
                             LazyColumn(
                                 state = listState,
                                 modifier = Modifier.fillMaxSize(),
@@ -373,6 +266,107 @@ fun HorizontalCategoriesPage(
             }
         }
     }
+}
+
+@Composable
+private fun HorizontalCategoryHeader(
+    selectionMode: Boolean,
+    allSelected: Boolean,
+    indicatorColor: Color,
+    totalItems: Int?,
+    onSelectAll: () -> Unit,
+    categoryItem: CategoryItem,
+    categorySortClick: (CategoryItem) -> Unit,
+    libraryCategoryActions: LibraryCategoryActions,
+    isRefreshing: Boolean,
+) {
+    Row(
+        modifier =
+            Modifier.fillMaxWidth().clickable(enabled = selectionMode, onClick = onSelectAll),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (totalItems == null) {
+            Gap(Size.medium)
+            AnimatedVisibility(selectionMode) {
+                Icon(
+                    imageVector =
+                        if (allSelected) Icons.Default.CheckCircleOutline
+                        else Icons.Outlined.Circle,
+                    contentDescription = null,
+                    tint = indicatorColor,
+                )
+            }
+        } else {
+            AnimatedVisibility(selectionMode) {
+                Row {
+                    Gap(Size.medium)
+                    Icon(
+                        imageVector =
+                            if (allSelected) Icons.Default.CheckCircleOutline
+                            else Icons.Outlined.Circle,
+                        contentDescription = null,
+                        tint = indicatorColor,
+                    )
+                }
+            }
+            if (totalItems > 0) {
+                Gap(Size.medium)
+                Text(
+                    text = stringResource(org.nekomanga.R.string.total_items, totalItems),
+                    color = indicatorColor,
+                    style = MaterialTheme.typography.labelLarge,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+
+        CategorySortButtons(
+            textColor =
+                if (totalItems != null) indicatorColor else MaterialTheme.colorScheme.primary,
+            enabled = true,
+            categorySortClick = { categorySortClick(categoryItem) },
+            sortString = stringResource(categoryItem.sortOrder.stringRes(categoryItem.isDynamic)),
+            isAscending = categoryItem.isAscending,
+            categoryIsRefreshing = isRefreshing,
+            ascendingClick = { libraryCategoryActions.categoryAscendingClick(categoryItem) },
+            categoryRefreshClick = { libraryCategoryActions.categoryRefreshClick(categoryItem) },
+        )
+    }
+}
+
+@Composable
+private fun GridItem(
+    libraryItem: LibraryMangaItem,
+    libraryScreenState: LibraryScreenState,
+    libraryScreenActions: LibraryScreenActions,
+    selectedIds: List<Long>,
+    isComfortable: Boolean,
+) {
+    MangaGridItem(
+        displayManga = libraryItem.displayManga,
+        showUnreadBadge = libraryScreenState.showUnreadBadges,
+        unreadCount = libraryItem.unreadCount,
+        showDownloadBadge = libraryScreenState.showDownloadBadges,
+        downloadCount = libraryItem.downloadCount,
+        shouldOutlineCover = libraryScreenState.outlineCovers,
+        isComfortable = isComfortable,
+        isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
+        showStartReadingButton =
+            libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+        onStartReadingClick = {
+            libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
+        },
+        onClick = { _ ->
+            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                libraryScreenActions.mangaLongClick(libraryItem)
+            } else {
+                libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
+            }
+        },
+        onLongClick = { _ -> libraryScreenActions.mangaLongClick(libraryItem) },
+    )
 }
 
 @Composable
