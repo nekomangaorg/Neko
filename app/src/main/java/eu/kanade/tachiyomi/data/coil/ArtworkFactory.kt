@@ -25,7 +25,7 @@ class ArtworkFactory(
                     altUrl = data.url,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
-                    originalThumbnailUrl = data.originalArtwork,
+                    originalThumbnailUrl = data.originalCover,
                     sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,

@@ -55,7 +55,7 @@ class MangaCoverFetcher(
                 Artwork(
                     url = url,
                     inLibrary = inLibrary,
-                    originalArtwork = originalThumbnailUrl,
+                    originalCover = originalThumbnailUrl,
                     mangaId = mangaId,
                 ),
                 options,

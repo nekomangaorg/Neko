@@ -82,7 +82,7 @@ fun Manga.toDisplayManga(
                 url = this.user_cover.orIfBlank(this.dynamic_cover),
                 inLibrary = this.favorite,
                 mangaId = this.id!!,
-                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
+                originalCover = this.thumbnail_url ?: MdConstants.noCoverUrl,
             ),
     )
 }
@@ -234,7 +234,7 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
                     currentArtwork =
                         displayManga.currentArtwork.copy(
                             url = dbManga.user_cover ?: "",
-                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                            originalCover = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
                         ),
                 )
         }

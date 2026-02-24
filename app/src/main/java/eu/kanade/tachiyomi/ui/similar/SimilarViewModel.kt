@@ -255,7 +255,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                                         currentArtwork =
                                             it.currentArtwork.copy(
                                                 url = dbManga.user_cover ?: "",
-                                                originalArtwork =
+                                                originalCover =
                                                     dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
                                             )
                                     )

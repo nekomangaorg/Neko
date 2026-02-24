@@ -44,7 +44,7 @@ class AlternativeMangaCoverFetcher(
     private val diskCacheKey: String? by lazy {
         ArtworkKeyer()
             .key(
-                Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
+                Artwork(url = url, inLibrary = false, originalCover = "", mangaId = mangaId),
                 options,
             )
     }

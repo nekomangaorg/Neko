@@ -1031,7 +1031,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         return Artwork(
             url = manga.userCover.ifBlank { manga.dynamicCover },
             inLibrary = manga.favorite,
-            originalArtwork = manga.coverUrl,
+            originalCover = manga.coverUrl,
             mangaId = mangaId,
         )
     }
@@ -1040,7 +1040,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         return Artwork(
             url = manga.userCover.ifBlank { manga.dynamicCover },
             inLibrary = manga.favorite,
-            originalArtwork = manga.coverUrl,
+            originalCover = manga.coverUrl,
             mangaId = mangaId,
         )
     }
@@ -1062,7 +1062,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     active =
                         currentArtwork.url.contains(aw.fileName) ||
                             (currentArtwork.url.isBlank() &&
-                                currentArtwork.originalArtwork.contains(aw.fileName)),
+                                currentArtwork.originalCover.contains(aw.fileName)),
                 )
             }
             .toPersistentList()
