@@ -112,7 +112,7 @@ class DownloadProvider(
                 }
             }
 
-        if (!found) {
+        if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
             found =
                 chapterDirs.any { uniFile ->
                     uniFile.nameWithoutExtension!!.contains(chapter.uuid())

@@ -12,7 +12,7 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -112,7 +112,7 @@ fun DownloadButton(
         val errorDescription = stringResource(R.string.download_error)
 
         val downloadButtonModifier =
-            Modifier.combinedClickable(
+            Modifier.clickable(
                     onClick = {
                         when (downloadState) {
                             Download.State.NOT_DOWNLOADED ->
@@ -120,7 +120,6 @@ fun DownloadButton(
                             else -> showChapterDropdown = true
                         }
                     },
-                    onLongClick = {},
                     role = Role.Button,
                     onClickLabel =
                         when (downloadState) {
