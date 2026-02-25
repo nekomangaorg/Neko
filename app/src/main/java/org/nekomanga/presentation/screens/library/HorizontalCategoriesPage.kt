@@ -29,6 +29,7 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -156,11 +157,13 @@ fun HorizontalCategoriesPage(
                                     libraryScreenState.scrollPositions[page] ?: 0
                             )
 
-                        LaunchedEffect(gridState.firstVisibleItemIndex) {
-                            libraryScreenActions.scrollPositionChanged(
-                                page,
-                                gridState.firstVisibleItemIndex,
-                            )
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                libraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    gridState.firstVisibleItemIndex,
+                                )
+                            }
                         }
                         Column {
                             HorizontalCategoryHeader(
@@ -215,11 +218,13 @@ fun HorizontalCategoriesPage(
                                 initialFirstVisibleItemIndex =
                                     libraryScreenState.scrollPositions[page] ?: 0
                             )
-                        LaunchedEffect(listState.firstVisibleItemIndex) {
-                            libraryScreenActions.scrollPositionChanged(
-                                page,
-                                listState.firstVisibleItemIndex,
-                            )
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                libraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    listState.firstVisibleItemIndex,
+                                )
+                            }
                         }
                         Column(modifier = Modifier.fillMaxSize()) {
                             HorizontalCategoryHeader(
