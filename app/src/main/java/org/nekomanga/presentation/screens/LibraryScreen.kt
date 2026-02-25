@@ -74,14 +74,10 @@ fun LibraryScreen(
 ) {
     val context = LocalContext.current
 
-    LibraryWrapper(
-        navigationRail = navigationRail,
-        bottomBar = bottomBar,
-        mainDropdown = mainDropdown,
-        mainDropdownShowing = mainDropdownShowing,
-        libraryStateFlow = libraryViewModel.libraryScreenState,
-        onSearchLoaded = libraryViewModel::clearInitialSearch,
-        libraryScreenActions =
+    // Optimize: Remember the action objects to prevent unnecessary recompositions of child composables
+    // when LibraryScreen recomposes but these actions (and their dependencies) haven't changed.
+    val libraryScreenActions =
+        remember(libraryViewModel, openManga, onSearchMangaDex, context) {
             LibraryScreenActions(
                 mangaClick = openManga,
                 mangaLongClick = libraryViewModel::libraryItemLongClick,
@@ -123,8 +119,11 @@ fun LibraryScreen(
                         },
                     )
                 },
-            ),
-        librarySheetActions =
+            )
+        }
+
+    val librarySheetActions =
+        remember(libraryViewModel) {
             LibrarySheetActions(
                 groupByClick = libraryViewModel::groupByClick,
                 categoryItemLibrarySortClick = libraryViewModel::categoryItemLibrarySortClick,
@@ -138,8 +137,11 @@ fun LibraryScreen(
                 showLibraryButtonBarToggled = libraryViewModel::showLibraryButtonBarToggled,
                 editCategories = libraryViewModel::editCategories,
                 addNewCategory = libraryViewModel::addNewCategory,
-            ),
-        libraryCategoryActions =
+            )
+        }
+
+    val libraryCategoryActions =
+        remember(libraryViewModel, context) {
             LibraryCategoryActions(
                 categoryItemClick = libraryViewModel::categoryItemClick,
                 categoryAscendingClick = libraryViewModel::categoryAscendingClick,
@@ -160,7 +162,19 @@ fun LibraryScreen(
                             },
                     )
                 },
-            ),
+            )
+        }
+
+    LibraryWrapper(
+        navigationRail = navigationRail,
+        bottomBar = bottomBar,
+        mainDropdown = mainDropdown,
+        mainDropdownShowing = mainDropdownShowing,
+        libraryStateFlow = libraryViewModel.libraryScreenState,
+        onSearchLoaded = libraryViewModel::clearInitialSearch,
+        libraryScreenActions = libraryScreenActions,
+        librarySheetActions = librarySheetActions,
+        libraryCategoryActions = libraryCategoryActions,
         windowSizeClass = windowSizeClass,
     )
 }
