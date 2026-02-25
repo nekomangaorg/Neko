@@ -1,7 +1,6 @@
 package org.nekomanga.domain.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
@@ -122,7 +121,7 @@ data class SimpleChapter(
     }
 
     fun toDbChapter(): Chapter =
-        ChapterImpl().also {
+        Chapter.create().also {
             it.id = id
             it.manga_id = mangaId
             it.url = url
