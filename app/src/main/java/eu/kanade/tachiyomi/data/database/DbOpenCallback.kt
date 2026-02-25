@@ -22,7 +22,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_NAME = "tachiyomi.db"
 
         /** Version of the database. */
-        const val DATABASE_VERSION = 43
+        const val DATABASE_VERSION = 44
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -58,6 +58,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             execSQL(MangaTable.createLibraryIndexQuery)
             execSQL(ChapterTable.createMangaIdIndexQuery)
             execSQL(ChapterTable.createUnreadChaptersIndexQuery)
+            execSQL(ChapterTable.createBookmarkedChaptersIndexQuery)
             execSQL(HistoryTable.createChapterIdIndexQuery)
         }
 
@@ -194,6 +195,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 43) {
             db.execSQL(MangaTable.addDynamicCover)
+        }
+        if (oldVersion < 44) {
+            db.execSQL(ChapterTable.createBookmarkedChaptersIndexQuery)
         }
     }
 }
