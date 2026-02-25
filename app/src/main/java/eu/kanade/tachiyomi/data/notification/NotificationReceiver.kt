@@ -77,7 +77,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             ACTION_START_APP_UPDATE -> {
                 val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
-                val version = intent.getStringExtra(AppDownloadInstallJob.EXTRA_VERSION)
+                val version = intent.getStringExtra(AppDownloadInstallJob.EXTRA_VERSION) ?: return
                 val notifyOnInstall =
                     intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
                 AppDownloadInstallJob.start(context, url, notifyOnInstall, version = version)
@@ -792,7 +792,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun startAppUpdatePendingJob(
             context: Context,
             url: String,
-            version: String? = null,
+            version: String,
             notifyOnInstall: Boolean = false,
         ): PendingIntent {
             val intent =

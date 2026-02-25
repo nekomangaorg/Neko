@@ -74,7 +74,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         tryToSetForeground()
         val idleRun = inputData.getBoolean(IDLE_RUN, false)
         val url: String
-        val version: String?
+        val version: String
         if (idleRun) {
             if (!context.packageManager.canRequestPackageInstalls()) {
                 return Result.failure()
@@ -100,15 +100,13 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
         } else {
             url = inputData.getString(EXTRA_DOWNLOAD_URL) ?: return Result.failure()
-            version = inputData.getString(EXTRA_VERSION)
+            version = inputData.getString(EXTRA_VERSION) ?: return Result.failure()
         }
 
         // Persist the version being downloaded so it survives process death and can be
         // checked by start() when the user tries to trigger another download of the same version.
-        if (version != null) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit {
-                putString(DOWNLOADING_VERSION_KEY, version)
-            }
+        PreferenceManager.getDefaultSharedPreferences(context).edit {
+            putString(DOWNLOADING_VERSION_KEY, version)
         }
 
         instance = WeakReference(this)
@@ -132,7 +130,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
      *
      * @param url url location of file
      */
-    private suspend fun downloadApk(url: String, notifyOnInstall: Boolean, version: String?) =
+    private suspend fun downloadApk(url: String, notifyOnInstall: Boolean, version: String) =
         coroutineScope {
             val progressListener =
                 object : ProgressListener {
@@ -281,12 +279,12 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             url: String?,
             notifyOnInstall: Boolean,
             waitUntilIdle: Boolean = false,
-            version: String? = null,
+            version: String,
         ) {
             // Idempotency guard: if the exact same version is already downloading, do nothing.
             // If a *different* (newer) version is requested we fall through and WorkManager's
             // REPLACE policy will cancel the old job and start a fresh one.
-            if (isRunning(context) && version != null) {
+            if (isRunning(context)) {
                 val downloadingVersion =
                     PreferenceManager.getDefaultSharedPreferences(context)
                         .getString(DOWNLOADING_VERSION_KEY, null)
