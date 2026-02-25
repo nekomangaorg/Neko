@@ -7,24 +7,26 @@ import android.net.NetworkCapabilities
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 
-data class NetworkState(val isConnected: Boolean, val isValidated: Boolean, val isWifi: Boolean) {
+data class NetworkState(
+    val isConnected: Boolean,
+    val isValidated: Boolean,
+    val isUnmetered: Boolean,
+) {
     val isOnline = isConnected && isValidated
 }
 
-@Suppress("DEPRECATION")
 fun Context.activeNetworkState(): NetworkState {
     val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
     return NetworkState(
-        isConnected = connectivityManager.activeNetworkInfo?.isConnected ?: false,
+        isConnected =
+            capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true,
         isValidated =
             capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ?: false,
-        isWifi =
-            wifiManager.isWifiEnabled &&
-                capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ?: false,
+        isUnmetered =
+            capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) ?: false,
     )
 }
 
-@Suppress("DEPRECATION")
 fun Context.networkStateFlow() = callbackFlow {
     val networkCallback =
         object : NetworkCallback() {
@@ -41,5 +43,6 @@ fun Context.networkStateFlow() = callbackFlow {
         }
 
     connectivityManager.registerDefaultNetworkCallback(networkCallback)
+    trySend(activeNetworkState())
     awaitClose { connectivityManager.unregisterNetworkCallback(networkCallback) }
 }

@@ -22,7 +22,7 @@ data class FeedScreenState(
     val swipeRefreshEnabled: Boolean = true,
     val downloads: PersistentList<DownloadItem> = persistentListOf(),
     val downloaderStatus: DownloaderStatus = DownloaderStatus.Paused,
-    val downloadOnlyOnWifi: Boolean,
+    val downloadOnlyOnUnmetered: Boolean,
 )
 
 data class HistoryScreenPagingState(
@@ -80,7 +80,7 @@ data class FeedSettingActions(
     val outlineCoversClick: () -> Unit,
     val outlineCardsClick: () -> Unit,
     val clearDownloadQueueClick: () -> Unit,
-    val toggleDownloadOnlyOnWifi: () -> Unit,
+    val toggleDownloadOnUnmetered: () -> Unit,
     val toggleGroupUpdateChapters: () -> Unit,
     val toggleSwipeRefresh: () -> Unit,
 )

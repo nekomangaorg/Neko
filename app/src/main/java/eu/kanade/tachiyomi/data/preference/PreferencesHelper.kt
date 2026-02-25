@@ -143,7 +143,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun dateFormatPreference() = this.preferenceStore.getString(Keys.dateFormat, "")
 
-    fun downloadOnlyOverWifi() =
+    fun downloadOnlyOverUnmetered() =
         this.preferenceStore.getBoolean("pref_download_only_over_wifi_key", true)
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)

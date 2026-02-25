@@ -1088,12 +1088,12 @@
     <!-- Download Notification -->
     <string name="group_downloader">Downloads</string>
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>
-    <string name="no_wifi_connection">No Wi-Fi connection available</string>
+    <string name="no_unmetered_connection">No Unmetered connection available</string>
     <string name="unable_to_download">Unable to download</string>
     <string name="no_network_connection">No network connection available</string>
 
     <!-- Downloads settings -->
-    <string name="only_download_over_wifi">Only download over Wi-Fi</string>
+    <string name="only_download_over_unmetered">Only download over Unmetered connection</string>
     <string name="remove_when_marked_as_read">Remove when marked as read</string>
     <string name="remove_after_read">Remove after read</string>
     <string name="last_read_chapter">Last read chapter</string>

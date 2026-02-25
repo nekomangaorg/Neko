@@ -54,7 +54,7 @@ class FeedViewModel() : ViewModel() {
                 outlineCards = preferences.feedViewOutlineCards().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupUpdateChapters = preferences.groupChaptersUpdates().get(),
-                downloadOnlyOnWifi = preferences.downloadOnlyOverWifi().get(),
+                downloadOnlyOnUnmetered = preferences.downloadOnlyOverUnmetered().get(),
                 swipeRefreshEnabled = preferences.swipeRefreshFeedScreen().get(),
             )
         )
@@ -207,8 +207,8 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            preferences.downloadOnlyOverWifi().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(downloadOnlyOnWifi = it) }
+            preferences.downloadOnlyOverUnmetered().changes().collectLatest {
+                _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
             }
         }
 
@@ -617,8 +617,8 @@ class FeedViewModel() : ViewModel() {
         }
     }
 
-    fun toggleDownloadOnlyOnWifi() {
-        viewModelScope.launchIO { preferences.downloadOnlyOverWifi().toggle() }
+    fun toggleDownloadOnUnmetered() {
+        viewModelScope.launchIO { preferences.downloadOnlyOverUnmetered().toggle() }
     }
 
     /**
@@ -1046,7 +1046,7 @@ class FeedViewModel() : ViewModel() {
 
         viewModelScope.launchIO {
             combine(
-                    preferences.downloadOnlyOverWifi().changes(),
+                    preferences.downloadOnlyOverUnmetered().changes(),
                     downloadManager.isDownloaderRunning,
                     downloadManager.networkStateFlow(),
                 ) { downloadOnlyOverWifi, downloadRunning, networkStateFlow ->
@@ -1054,7 +1054,7 @@ class FeedViewModel() : ViewModel() {
                 }
                 .collectLatest { results ->
                     val result =
-                        if (!results.third.isWifi && results.first) {
+                        if (!results.third.isUnmetered && results.first) {
                             DownloaderStatus.NetworkPaused
                         } else if (results.second) {
                             DownloaderStatus.Running

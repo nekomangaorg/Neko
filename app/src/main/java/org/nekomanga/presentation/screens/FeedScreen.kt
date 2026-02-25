@@ -105,7 +105,7 @@ fun FeedScreen(
                 outlineCoversClick = feedViewModel::toggleOutlineCovers,
                 outlineCardsClick = feedViewModel::toggleOutlineCards,
                 clearDownloadQueueClick = feedViewModel::clearDownloadQueue,
-                toggleDownloadOnlyOnWifi = feedViewModel::toggleDownloadOnlyOnWifi,
+                toggleDownloadOnUnmetered = feedViewModel::toggleDownloadOnUnmetered,
                 toggleGroupUpdateChapters = feedViewModel::togglerGroupUpdateChapters,
                 toggleSwipeRefresh = feedViewModel::toggleSwipeRefresh,
             ),
@@ -212,7 +212,7 @@ private fun FeedWrapper(
                         FeedBottomSheet(
                             feedScreenType = feedScreenState.feedScreenType,
                             downloadScreenVisible = downloadScreenVisible,
-                            downloadOnlyOnWifi = feedScreenState.downloadOnlyOnWifi,
+                            downloadOnlyOnUnmetered = feedScreenState.downloadOnlyOnUnmetered,
                             historyGrouping = historyPagingScreenState.historyGrouping,
                             sortByFetched = updatesPagingScreenState.updatesSortedByFetch,
                             outlineCovers = feedScreenState.outlineCovers,
@@ -227,8 +227,8 @@ private fun FeedWrapper(
                             sortClick = { feedSettingActions.switchUploadsSortOrder() },
                             outlineCoversClick = { feedSettingActions.outlineCoversClick() },
                             outlineCardsClick = { feedSettingActions.outlineCardsClick() },
-                            toggleDownloadOnWifi = {
-                                feedSettingActions.toggleDownloadOnlyOnWifi()
+                            toggleDownloadOnUnmetered = {
+                                feedSettingActions.toggleDownloadOnUnmetered()
                             },
                             toggleGroupUpdateChapters = {
                                 feedSettingActions.toggleGroupUpdateChapters()

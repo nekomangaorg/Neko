@@ -26,26 +26,41 @@ fun FeedScreenTopBar(
     openSheetClick: () -> Unit,
 ) {
 
+    val isSummaryView =
+        feedScreenState.feedScreenType == FeedScreenType.Summary &&
+            !feedScreenState.showingDownloads
+
     val titleOnlyAppBar =
-        remember(feedScreenState.showingDownloads, feedScreenState.feedScreenType) {
-            feedScreenState.showingDownloads ||
-                feedScreenState.feedScreenType == FeedScreenType.Summary
+        remember(feedScreenState.feedScreenType) {
+            feedScreenState.feedScreenType !in
+                listOf(FeedScreenType.Updates, FeedScreenType.History)
         }
 
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, _, _) = getTopAppBarColor("", false)
 
-    if (titleOnlyAppBar) {
-        TitleTopAppBar(
-            color = color,
-            title =
-                if (feedScreenState.feedScreenType == FeedScreenType.Summary)
-                    stringResource(R.string.summary)
-                else "",
-            incognitoMode = feedScreenState.incognitoMode,
-            actions = { AppBarActions(actions = listOf(mainDropDown)) },
-            scrollBehavior = scrollBehavior,
-        )
-    } else {
+    TitleTopAppBar(
+        color = color,
+        title = if (isSummaryView) stringResource(R.string.summary) else "",
+        incognitoMode = feedScreenState.incognitoMode,
+        actions = {
+            val actionsList = buildList {
+                if (!isSummaryView) {
+                    add(
+                        AppBar.Action(
+                            title = UiText.StringResource(R.string.settings),
+                            icon = Icons.Outlined.Tune,
+                            onClick = openSheetClick,
+                        )
+                    )
+                }
+                add(mainDropDown)
+            }
+
+            AppBarActions(actions = actionsList)
+        },
+        scrollBehavior = scrollBehavior,
+    )
+    if (!titleOnlyAppBar) {
 
         val searchHint =
             when (feedScreenState.feedScreenType) {

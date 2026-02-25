@@ -39,7 +39,7 @@ import org.nekomanga.presentation.theme.Size
 fun FeedBottomSheet(
     feedScreenType: FeedScreenType,
     downloadScreenVisible: Boolean,
-    downloadOnlyOnWifi: Boolean,
+    downloadOnlyOnUnmetered: Boolean,
     historyGrouping: FeedHistoryGroup,
     sortByFetched: Boolean,
     outlineCovers: Boolean,
@@ -53,7 +53,7 @@ fun FeedBottomSheet(
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
     clearDownloadsClick: () -> Unit,
-    toggleDownloadOnWifi: () -> Unit,
+    toggleDownloadOnUnmetered: () -> Unit,
     toggleSwipeRefresh: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
@@ -65,7 +65,11 @@ fun FeedBottomSheet(
         ) {
             when {
                 downloadScreenVisible ->
-                    DownloadsContent(clearDownloadsClick, downloadOnlyOnWifi, toggleDownloadOnWifi)
+                    DownloadsContent(
+                        clearDownloadsClick = clearDownloadsClick,
+                        downloadOnlyOnUnmetered = downloadOnlyOnUnmetered,
+                        toggleDownloadOnUnmetered = toggleDownloadOnUnmetered,
+                    )
                 feedScreenType == FeedScreenType.History ->
                     HistoryContent(
                         historyGrouping = historyGrouping,
@@ -188,11 +192,15 @@ private fun HistoryContent(
 @Composable
 private fun DownloadsContent(
     clearDownloadsClick: () -> Unit,
-    downloadOnlyOnWifi: Boolean,
-    toggleDownloadOnWifi: () -> Unit,
+    downloadOnlyOnUnmetered: Boolean,
+    toggleDownloadOnUnmetered: () -> Unit,
 ) {
 
-    SwitchRow(textRes = R.string.only_download_over_wifi, downloadOnlyOnWifi, toggleDownloadOnWifi)
+    SwitchRow(
+        textRes = R.string.only_download_over_unmetered,
+        downloadOnlyOnUnmetered,
+        toggleDownloadOnUnmetered,
+    )
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         TextButton(onClick = clearDownloadsClick) {

@@ -146,7 +146,7 @@ fun DownloadScreen(
                     Modifier.fillMaxWidth()
                         .align(Alignment.BottomEnd)
                         .padding(
-                            bottom = contentPadding.calculateBottomPadding() - Size.medium,
+                            bottom = contentPadding.calculateBottomPadding() + Size.tiny,
                             start = Size.small,
                             end = Size.small,
                         ),
@@ -159,7 +159,7 @@ fun DownloadScreen(
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(vertical = Size.smedium),
                     textAlign = TextAlign.Center,
-                    text = stringResource(R.string.no_wifi_connection),
+                    text = stringResource(R.string.no_unmetered_connection),
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }

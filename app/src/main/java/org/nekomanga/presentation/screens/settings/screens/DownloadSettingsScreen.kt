@@ -33,8 +33,8 @@ internal class DownloadSettingsScreen(
 
         return persistentListOf(
             Preference.PreferenceItem.SwitchPreference(
-                pref = preferences.downloadOnlyOverWifi(),
-                title = stringResource(R.string.only_download_over_wifi),
+                pref = preferences.downloadOnlyOverUnmetered(),
+                title = stringResource(R.string.only_download_over_unmetered),
             ),
             Preference.PreferenceItem.SwitchPreference(
                 pref = preferences.saveChaptersAsCBZ(),
@@ -191,7 +191,7 @@ internal class DownloadSettingsScreen(
         @Composable
         override fun getSearchTerms(): PersistentList<SearchTerm> {
             return persistentListOf(
-                SearchTerm(title = stringResource(R.string.only_download_over_wifi)),
+                SearchTerm(title = stringResource(R.string.only_download_over_unmetered)),
                 SearchTerm(title = stringResource(R.string.save_chapters_as_cbz)),
                 SearchTerm(title = stringResource(R.string.split_tall_images_summary)),
                 SearchTerm(

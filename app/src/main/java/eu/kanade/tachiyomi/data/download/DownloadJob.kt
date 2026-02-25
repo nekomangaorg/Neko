@@ -48,7 +48,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
         var networkCheck =
             checkNetworkState(
                 applicationContext.activeNetworkState(),
-                preferences.downloadOnlyOverWifi().get(),
+                preferences.downloadOnlyOverUnmetered().get(),
             )
         var active = networkCheck && downloadManager.downloaderStart()
 
@@ -60,7 +60,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
         coroutineScope {
             combineTransform(
                     applicationContext.networkStateFlow(),
-                    preferences.downloadOnlyOverWifi().changes(),
+                    preferences.downloadOnlyOverUnmetered().changes(),
                     transform = { a, b -> emit(checkNetworkState(a, b)) },
                 )
                 .onEach { networkCheck = it }
@@ -75,12 +75,12 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
         return Result.success()
     }
 
-    private fun checkNetworkState(state: NetworkState, requireWifi: Boolean): Boolean {
+    private fun checkNetworkState(state: NetworkState, requireUnmetered: Boolean): Boolean {
         return if (state.isOnline) {
-            val noWifi = requireWifi && !state.isWifi
+            val noWifi = requireUnmetered && !state.isUnmetered
             if (noWifi) {
                 downloadManager.downloaderStop(
-                    applicationContext.getString(R.string.no_wifi_connection)
+                    applicationContext.getString(R.string.no_unmetered_connection)
                 )
             }
             !noWifi
