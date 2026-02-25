@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class GithubRelease(
-    @SerialName("tag_name") val version: String,
+    @SerialName("tag_name") override val version: String,
     @SerialName("body") override val info: String,
     @SerialName("html_url") override val releaseLink: String,
     @SerialName("assets") private val assets: List<Assets>,

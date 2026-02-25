@@ -74,6 +74,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         tryToSetForeground()
         val idleRun = inputData.getBoolean(IDLE_RUN, false)
         val url: String
+        val version: String?
         if (idleRun) {
             if (!context.packageManager.canRequestPackageInstalls()) {
                 return Result.failure()
@@ -93,11 +94,21 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                 AppUpdateNotifier(context).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                 url = result.release.downloadLink
+                version = result.release.version
             } else {
                 return Result.success()
             }
         } else {
             url = inputData.getString(EXTRA_DOWNLOAD_URL) ?: return Result.failure()
+            version = inputData.getString(EXTRA_VERSION)
+        }
+
+        // Persist the version being downloaded so it survives process death and can be
+        // checked by start() when the user tries to trigger another download of the same version.
+        if (version != null) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit {
+                putString(DOWNLOADING_VERSION_KEY, version)
+            }
         }
 
         instance = WeakReference(this)
@@ -105,6 +116,11 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         val notifyOnInstall = inputData.getBoolean(EXTRA_NOTIFY_ON_INSTALL, false)
 
         withIOContext { downloadApk(url, notifyOnInstall) }
+
+        // Clear the downloading version now that the job has finished (success or handled error).
+        PreferenceManager.getDefaultSharedPreferences(context).edit {
+            remove(DOWNLOADING_VERSION_KEY)
+        }
 
         runningCall?.cancel()
         instance = null
@@ -162,6 +178,10 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
         } catch (error: Exception) {
             TimberKt.e(error)
+            // Clear the persisted downloading version so a retry or fresh start is allowed.
+            PreferenceManager.getDefaultSharedPreferences(context).edit {
+                remove(DOWNLOADING_VERSION_KEY)
+            }
             if (
                 error is CancellationException ||
                     isStopped ||
@@ -248,7 +268,9 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         internal const val EXTRA_FILE_URI = "${BuildConfig.APPLICATION_ID}.AppInstaller.FILE_URI"
         internal const val EXTRA_NOTIFY_ON_INSTALL = "ACTION_ON_INSTALL"
         internal const val EXTRA_DOWNLOAD_URL = "DOWNLOAD_URL"
+        internal const val EXTRA_VERSION = "DOWNLOAD_VERSION"
         internal const val NOTIFY_ON_INSTALL_KEY = "notify_on_install_complete"
+        internal const val DOWNLOADING_VERSION_KEY = "downloading_version"
         private const val IDLE_RUN = "idle_run"
 
         const val ALWAYS = 0
@@ -262,10 +284,24 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             url: String?,
             notifyOnInstall: Boolean,
             waitUntilIdle: Boolean = false,
+            version: String? = null,
         ) {
+            // Idempotency guard: if the exact same version is already downloading, do nothing.
+            // If a *different* (newer) version is requested we fall through and WorkManager's
+            // REPLACE policy will cancel the old job and start a fresh one.
+            if (isRunning(context) && version != null) {
+                val downloadingVersion =
+                    PreferenceManager.getDefaultSharedPreferences(context)
+                        .getString(DOWNLOADING_VERSION_KEY, null)
+                if (downloadingVersion != null && downloadingVersion == version) {
+                    return
+                }
+            }
+
             val data = Data.Builder()
             data.putString(EXTRA_DOWNLOAD_URL, url)
             data.putBoolean(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
+            data.putString(EXTRA_VERSION, version)
             val request =
                 OneTimeWorkRequestBuilder<AppDownloadInstallJob>()
                     .addTag(TAG)
@@ -299,6 +335,10 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         fun stop(context: Context) {
             instance?.get()?.runningCall?.cancel()
             WorkManager.getInstance(context).cancelUniqueWork(TAG)
+            // Clear the persisted version so a fresh start is allowed after an explicit stop.
+            PreferenceManager.getDefaultSharedPreferences(context).edit {
+                remove(DOWNLOADING_VERSION_KEY)
+            }
         }
 
         fun isRunning(context: Context) = WorkManager.getInstance(context).jobIsRunning(TAG)

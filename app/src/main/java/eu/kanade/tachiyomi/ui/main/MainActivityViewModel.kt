@@ -44,12 +44,13 @@ class MainActivityViewModel : ViewModel() {
         _mainScreenState.update { it.copy(appUpdateResult = null) }
     }
 
-    fun addAppUpdateResult(url: String, notes: String, releaseLink: String) {
+    fun addAppUpdateResult(url: String, notes: String, releaseLink: String, version: String) {
         _mainScreenState.update {
             it.copy(
                 appUpdateResult =
                     AppUpdateResult.NewUpdate(
                         SimpleGithubRelease(
+                            version = version,
                             downloadLink = url,
                             info = notes,
                             releaseLink = releaseLink,

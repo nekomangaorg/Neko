@@ -75,6 +75,13 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
+            ACTION_START_APP_UPDATE -> {
+                val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
+                val version = intent.getStringExtra(AppDownloadInstallJob.EXTRA_VERSION)
+                val notifyOnInstall =
+                    intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
+                AppDownloadInstallJob.start(context, url, notifyOnInstall, version = version)
+            }
             // Share backup file
             ACTION_SHARE_BACKUP ->
                 shareBackup(
@@ -589,6 +596,7 @@ class NotificationReceiver : BroadcastReceiver() {
             notes: String,
             downloadLink: String,
             releaseLink: String,
+            version: String = "",
         ): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java)
@@ -597,6 +605,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     .putExtra(DeepLinks.Extras.AppUpdateNotes, notes)
                     .putExtra(DeepLinks.Extras.AppUpdateUrl, downloadLink)
                     .putExtra(DeepLinks.Extras.AppUpdateReleaseUrl, releaseLink)
+                    .putExtra(DeepLinks.Extras.AppUpdateVersion, version)
 
             return PendingIntent.getActivity(
                 context,
@@ -783,6 +792,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun startAppUpdatePendingJob(
             context: Context,
             url: String,
+            version: String? = null,
             notifyOnInstall: Boolean = false,
         ): PendingIntent {
             val intent =
@@ -790,6 +800,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     action = ACTION_START_APP_UPDATE
                     putExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL, url)
                     putExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
+                    putExtra(AppDownloadInstallJob.EXTRA_VERSION, version)
                 }
             return PendingIntent.getBroadcast(
                 context,

@@ -11,6 +11,8 @@ object DeepLinks {
         const val AppUpdateUrl = "DownloadUrl"
 
         const val AppUpdateReleaseUrl = "releaseUrl"
+
+        const val AppUpdateVersion = "version"
     }
 
     object Intents {

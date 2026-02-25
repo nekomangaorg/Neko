@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.LATEST_COMMIT_URL
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.data.updater.REPO_URL
+import eu.kanade.tachiyomi.data.updater.Release
 import eu.kanade.tachiyomi.ui.main.ObserveAsEvents
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
@@ -102,9 +103,14 @@ fun AboutScreen(
             val appInfo = context.getString(R.string.app_info)
             clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))
         },
-        onDownloadClicked = { url ->
+        onDownloadClicked = { release ->
             aboutViewModel.hideUpdateDialog()
-            AppDownloadInstallJob.start(context, url, true)
+            AppDownloadInstallJob.start(
+                context,
+                release.downloadLink,
+                true,
+                version = release.version,
+            )
         },
         onClickLicenses = { onNavigateTo(Screens.License) },
         onBackPressed = onBackPressed,
@@ -120,7 +126,7 @@ private fun AboutWrapper(
     notOnlineSnackbar: () -> Unit,
     checkForUpdate: () -> Unit,
     onVersionClicked: (Context) -> Unit,
-    onDownloadClicked: (String) -> Unit,
+    onDownloadClicked: (Release) -> Unit,
     onClickLicenses: () -> Unit,
     onBackPressed: () -> Unit,
     dismissDialog: () -> Unit,
