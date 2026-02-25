@@ -179,10 +179,6 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                 }
             } catch (error: Exception) {
                 TimberKt.e(error)
-                // Clear the persisted downloading version so a retry or fresh start is allowed.
-                PreferenceManager.getDefaultSharedPreferences(context).edit {
-                    remove(DOWNLOADING_VERSION_KEY)
-                }
                 if (
                     error is CancellationException ||
                         isStopped ||
