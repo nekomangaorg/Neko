@@ -26,6 +26,7 @@ class LibraryMangaItemComparatorTest {
         return LibraryMangaItem(
             displayManga = displayManga,
             userCover = null,
+            dynamicCover = null,
             unreadCount = unreadCount,
             downloadCount = downloadCount,
         )
