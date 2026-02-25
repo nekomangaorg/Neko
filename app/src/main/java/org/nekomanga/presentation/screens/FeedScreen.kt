@@ -149,6 +149,7 @@ fun FeedScreen(
                 moveDownloadClick = feedViewModel::moveDownload,
                 moveSeriesClick = feedViewModel::moveDownloadSeries,
                 cancelSeriesClick = feedViewModel::cancelDownloadSeries,
+                cancelSourceClick = feedViewModel::cancelDownloadSource,
             ),
     )
 }

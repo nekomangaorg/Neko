@@ -401,6 +401,7 @@
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
     <string name="clear_history">Clear history</string>
+    <string name="clear_download_source">Clear source</string>
     <string name="clear_download_queue">Clear download queue</string>
     <string name="clear_download_queue_confirmation">Are you sure?</string>
     <string name="clear_download_queue_completed">Download queue cleared</string>

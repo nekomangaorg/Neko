@@ -104,6 +104,7 @@ data class DownloadScreenActions(
     val moveDownloadClick: (DownloadItem, MoveDownloadDirection) -> Unit,
     val moveSeriesClick: (DownloadItem, MoveDownloadDirection) -> Unit,
     val cancelSeriesClick: (DownloadItem) -> Unit,
+    val cancelSourceClick: (String) -> Unit,
 )
 
 enum class MoveDownloadDirection {

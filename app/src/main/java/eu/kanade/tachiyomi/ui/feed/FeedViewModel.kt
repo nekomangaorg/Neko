@@ -617,6 +617,16 @@ class FeedViewModel() : ViewModel() {
         }
     }
 
+    fun cancelDownloadSource(sourceName: String) {
+        viewModelScope.launchIO {
+            val downloadsToDelete =
+                downloadManager.queueState.value.filter { download ->
+                    download.source.name == sourceName
+                }
+            downloadManager.deletePendingDownloads(downloadsToDelete)
+        }
+    }
+
     fun toggleDownloadOnUnmetered() {
         viewModelScope.launchIO { preferences.downloadOnlyOverUnmetered().toggle() }
     }

@@ -1,16 +1,17 @@
 package org.nekomanga.presentation.screens.download
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Pause
@@ -39,7 +40,7 @@ import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
-import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.theme.Size
 import soup.compose.material.motion.MaterialFade
 
@@ -56,7 +57,7 @@ fun DownloadScreen(
     val downloadGroup =
         remember(downloads) {
             downloads.groupBy {
-                MergeType.getMergeTypeFromName(it.chapterItem.chapter.scanlator)?.name
+                MergeType.getMergeTypeFromName(it.chapterItem.chapter.scanlator)?.scanlatorName
                     ?: MdConstants.name
             }
         }
@@ -80,28 +81,30 @@ fun DownloadScreen(
                         onClick = { expanded = !expanded },
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = Size.small),
-                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth().padding(Size.small),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                modifier = Modifier.padding(top = Size.small),
-                                text = "${entry.key} (${entry.value.size})",
-                                color =
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = NekoColors.mediumAlphaHighContrast
-                                    ),
-                            )
-                            Gap(Size.small)
                             Icon(
-                                modifier = Modifier.align(Alignment.Bottom),
                                 imageVector =
                                     if (expanded) Icons.Filled.ExpandLess
                                     else Icons.Filled.ExpandMore,
                                 contentDescription = null,
-                                tint =
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = NekoColors.mediumAlphaHighContrast
-                                    ),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Gap(Size.small)
+
+                            Text(
+                                text = "${entry.key} (${entry.value.size})",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+                            ToolTipButton(
+                                toolTipLabel = stringResource(R.string.clear_download_source),
+                                icon = Icons.Default.ClearAll,
+                                enabledTint = MaterialTheme.colorScheme.primary,
+                                onClick = { downloadScreenActions.cancelSourceClick(entry.key) },
                             )
                         }
 
