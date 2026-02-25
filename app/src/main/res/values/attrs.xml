@@ -30,17 +30,6 @@
         <attr name="summary" format="reference|string" />
     </declare-styleable>
 
-    <declare-styleable name="TriStateCheckBox">
-        <attr name="android:text" format="reference|string" />
-        <attr name="android:maxLines" />
-        <attr name="android:clickable" />
-        <attr name="android:focusable" />
-        <attr name="android:textAppearance" />
-        <attr name="android:textColor" />
-        <attr name="android:drawablePadding" />
-    </declare-styleable>
-
-
     <declare-styleable name="SortTextView">
         <attr name="android:text" format="reference|string" />
         <attr name="android:maxLines" />
