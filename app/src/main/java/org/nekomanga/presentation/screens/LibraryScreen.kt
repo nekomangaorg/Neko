@@ -248,7 +248,19 @@ private fun LibraryWrapper(
             )
         }
 
-        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+        val topAppBarState = rememberTopAppBarState()
+        val scrollBehavior =
+            if (selectionMode) {
+                TopAppBarDefaults.pinnedScrollBehavior(state = topAppBarState)
+            } else {
+                TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
+            }
+
+        LaunchedEffect(selectionMode) {
+            if (selectionMode) {
+                topAppBarState.heightOffset = 0f
+            }
+        }
 
         val refreshState =
             remember(libraryScreenState.isRefreshing, libraryScreenActions.updateLibrary) {
