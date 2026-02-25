@@ -95,6 +95,7 @@ fun ChapterRow(
                 Size.small,
             )
 
+        val onSwipeRead = remember(chapterItem, onRead) { { onRead(chapterItem) } }
         val markReadSwipeAction =
             SwipeAction(
                 icon = {
@@ -105,9 +106,10 @@ fun ChapterRow(
                     )
                 },
                 background = swipeActionBackgroundColor,
-                onSwipe = { onRead(chapterItem) },
+                onSwipe = onSwipeRead,
             )
 
+        val onSwipeBookmark = remember(chapterItem, onBookmark) { { onBookmark(chapterItem) } }
         val markBookmarkAction =
             SwipeAction(
                 icon = {
@@ -118,7 +120,7 @@ fun ChapterRow(
                     )
                 },
                 background = swipeActionBackgroundColor,
-                onSwipe = { onBookmark(chapterItem) },
+                onSwipe = onSwipeBookmark,
             )
 
         ChapterSwipe(
@@ -172,21 +174,31 @@ private fun ChapterRowContent(
             else onSurfaceColor.copy(alpha = NekoColors.mediumAlphaLowContrast)
         }
 
+    val onWebViewAction = remember(chapterItem, onWebView) { { onWebView(chapterItem) } }
+    val onCommentAction =
+        remember(chapterItem, onComment) { { onComment(chapterItem.chapter.mangaDexChapterId) } }
+    val markPreviousAction =
+        remember(chapterItem, markPrevious) { { read: Boolean -> markPrevious(chapterItem, read) } }
+
     val dropdownItems =
         remember(
             chapterItem.chapter.isLocalSource(),
             chapterItem.chapter.isMergedChapter(),
             chapterItem.chapter.scanlator,
             chapterItem.chapter.uploader,
+            onWebViewAction,
+            onCommentAction,
+            markPreviousAction,
+            blockScanlator,
         ) {
             buildChapterDropdownItems(
                 isLocal = chapterItem.chapter.isLocalSource(),
                 isMerged = chapterItem.chapter.isMergedChapter(),
                 scanlator = chapterItem.chapter.scanlator,
                 uploader = chapterItem.chapter.uploader,
-                onWebView = { onWebView(chapterItem) },
-                onComment = { onComment(chapterItem.chapter.mangaDexChapterId) },
-                markPrevious = { read -> markPrevious(chapterItem, read) },
+                onWebView = onWebViewAction,
+                onComment = onCommentAction,
+                markPrevious = markPreviousAction,
                 blockScanlator = blockScanlator,
             )
         }
@@ -200,6 +212,8 @@ private fun ChapterRowContent(
 
     themeColorState.rippleConfiguration
 
+    val onClickAction = remember(chapterItem, onClick) { { onClick(chapterItem) } }
+
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -207,7 +221,7 @@ private fun ChapterRowContent(
                     background(themeColorState.rippleColor.copy(alpha = 0.2f))
                 }
                 .combinedClickable(
-                    onClick = { onClick(chapterItem) },
+                    onClick = onClickAction,
                     onLongClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         isDropdownExpanded = true
@@ -280,12 +294,16 @@ private fun ChapterRowContent(
                 textColor = secondaryTextColor,
             )
         }
+        val onDownloadAction =
+            remember(chapterItem, onDownload) {
+                { action: MangaConstants.DownloadAction -> onDownload(listOf(chapterItem), action) }
+            }
         ChapterDownloadIndicator(
             isUnavailable = chapterItem.chapter.isUnavailable,
             scanlator = chapterItem.chapter.scanlator,
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
-            onDownload = { action -> onDownload(listOf(chapterItem), action) },
+            onDownload = onDownloadAction,
             themeColorState = themeColorState,
         )
     }
