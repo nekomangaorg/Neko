@@ -115,7 +115,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
 
         val notifyOnInstall = inputData.getBoolean(EXTRA_NOTIFY_ON_INSTALL, false)
 
-        withIOContext { downloadApk(url, notifyOnInstall) }
+        withIOContext { downloadApk(url, notifyOnInstall, version) }
 
         // Clear the downloading version now that the job has finished (success or handled error).
         PreferenceManager.getDefaultSharedPreferences(context).edit {
@@ -132,67 +132,68 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
      *
      * @param url url location of file
      */
-    private suspend fun downloadApk(url: String, notifyOnInstall: Boolean) = coroutineScope {
-        val progressListener =
-            object : ProgressListener {
-                // Progress of the download
-                var savedProgress = 0
+    private suspend fun downloadApk(url: String, notifyOnInstall: Boolean, version: String?) =
+        coroutineScope {
+            val progressListener =
+                object : ProgressListener {
+                    // Progress of the download
+                    var savedProgress = 0
 
-                // Keep track of the last notification sent to avoid posting too many.
-                var lastTick = 0L
+                    // Keep track of the last notification sent to avoid posting too many.
+                    var lastTick = 0L
 
-                override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                    val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
-                    val currentTime = System.currentTimeMillis()
-                    if (progress > savedProgress && currentTime - 200 > lastTick) {
-                        savedProgress = progress
-                        lastTick = currentTime
-                        notifier.onProgressChange(progress)
+                    override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
+                        val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
+                        val currentTime = System.currentTimeMillis()
+                        if (progress > savedProgress && currentTime - 200 > lastTick) {
+                            savedProgress = progress
+                            lastTick = currentTime
+                            notifier.onProgressChange(progress)
+                        }
                     }
                 }
-            }
 
-        try {
-            // Download the new update.
-            val call = network.client.newCachelessCallWithProgress(GET(url), progressListener)
-            runningCall = call
-            val response = call.await()
-            if (isStopped) {
-                cancel()
-                return@coroutineScope
-            }
+            try {
+                // Download the new update.
+                val call = network.client.newCachelessCallWithProgress(GET(url), progressListener)
+                runningCall = call
+                val response = call.await()
+                if (isStopped) {
+                    cancel()
+                    return@coroutineScope
+                }
 
-            // File where the apk will be saved.
-            val apkFile = File(context.externalCacheDir, "update.apk")
+                // File where the apk will be saved.
+                val apkFile = File(context.externalCacheDir, "update.apk")
 
-            if (response.isSuccessful) {
-                response.body.source().saveTo(apkFile)
-            } else {
-                response.close()
-                throw Exception("Unsuccessful response")
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                startInstalling(apkFile, notifyOnInstall)
-            } else {
-                notifier.onDownloadFinished(apkFile.getUriCompat(context))
-            }
-        } catch (error: Exception) {
-            TimberKt.e(error)
-            // Clear the persisted downloading version so a retry or fresh start is allowed.
-            PreferenceManager.getDefaultSharedPreferences(context).edit {
-                remove(DOWNLOADING_VERSION_KEY)
-            }
-            if (
-                error is CancellationException ||
-                    isStopped ||
-                    (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
-            ) {
-                notifier.cancel()
-            } else {
-                notifier.onDownloadError(url)
+                if (response.isSuccessful) {
+                    response.body.source().saveTo(apkFile)
+                } else {
+                    response.close()
+                    throw Exception("Unsuccessful response")
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    startInstalling(apkFile, notifyOnInstall)
+                } else {
+                    notifier.onDownloadFinished(apkFile.getUriCompat(context))
+                }
+            } catch (error: Exception) {
+                TimberKt.e(error)
+                // Clear the persisted downloading version so a retry or fresh start is allowed.
+                PreferenceManager.getDefaultSharedPreferences(context).edit {
+                    remove(DOWNLOADING_VERSION_KEY)
+                }
+                if (
+                    error is CancellationException ||
+                        isStopped ||
+                        (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
+                ) {
+                    notifier.cancel()
+                } else {
+                    notifier.onDownloadError(url, version)
+                }
             }
         }
-    }
 
     @RequiresApi(31)
     private suspend fun startInstalling(file: File, notifyOnInstall: Boolean) {
