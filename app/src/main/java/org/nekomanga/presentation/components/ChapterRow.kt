@@ -71,14 +71,14 @@ fun ChapterRow(
     themeColor: ThemeColorState,
     chapterItem: ChapterItem,
     shouldHideChapterTitles: Boolean = false,
-    onClick: () -> Unit,
-    onBookmark: () -> Unit,
-    onRead: () -> Unit,
-    onWebView: () -> Unit,
-    onComment: () -> Unit,
-    onDownload: (MangaConstants.DownloadAction) -> Unit,
+    onClick: (ChapterItem) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
+    onWebView: (ChapterItem) -> Unit,
+    onComment: (String) -> Unit,
+    onDownload: (List<ChapterItem>, MangaConstants.DownloadAction) -> Unit,
     blockScanlator: (MangaConstants.BlockType, String) -> Unit,
-    markPrevious: (Boolean) -> Unit,
+    markPrevious: (ChapterItem, Boolean) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
         val (readIcon, readTextRes) =
@@ -105,7 +105,7 @@ fun ChapterRow(
                     )
                 },
                 background = swipeActionBackgroundColor,
-                onSwipe = onRead,
+                onSwipe = { onRead(chapterItem) },
             )
 
         val markBookmarkAction =
@@ -118,7 +118,7 @@ fun ChapterRow(
                     )
                 },
                 background = swipeActionBackgroundColor,
-                onSwipe = onBookmark,
+                onSwipe = { onBookmark(chapterItem) },
             )
 
         ChapterSwipe(
@@ -145,11 +145,11 @@ private fun ChapterRowContent(
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
     chapterItem: ChapterItem,
-    onClick: () -> Unit,
-    onWebView: () -> Unit,
-    onComment: () -> Unit,
-    onDownload: (MangaConstants.DownloadAction) -> Unit,
-    markPrevious: (Boolean) -> Unit,
+    onClick: (ChapterItem) -> Unit,
+    onWebView: (ChapterItem) -> Unit,
+    onComment: (String) -> Unit,
+    onDownload: (List<ChapterItem>, MangaConstants.DownloadAction) -> Unit,
+    markPrevious: (ChapterItem, Boolean) -> Unit,
     blockScanlator: (MangaConstants.BlockType, String) -> Unit,
 ) {
     var isDropdownExpanded by remember { mutableStateOf(false) }
@@ -184,9 +184,9 @@ private fun ChapterRowContent(
                 isMerged = chapterItem.chapter.isMergedChapter(),
                 scanlator = chapterItem.chapter.scanlator,
                 uploader = chapterItem.chapter.uploader,
-                onWebView = onWebView,
-                onComment = onComment,
-                markPrevious = markPrevious,
+                onWebView = { onWebView(chapterItem) },
+                onComment = { onComment(chapterItem.chapter.mangaDexChapterId) },
+                markPrevious = { read -> markPrevious(chapterItem, read) },
                 blockScanlator = blockScanlator,
             )
         }
@@ -207,7 +207,7 @@ private fun ChapterRowContent(
                     background(themeColorState.rippleColor.copy(alpha = 0.2f))
                 }
                 .combinedClickable(
-                    onClick = onClick,
+                    onClick = { onClick(chapterItem) },
                     onLongClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         isDropdownExpanded = true
@@ -285,7 +285,7 @@ private fun ChapterRowContent(
             scanlator = chapterItem.chapter.scanlator,
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
-            onDownload = onDownload,
+            onDownload = { action -> onDownload(listOf(chapterItem), action) },
             themeColorState = themeColorState,
         )
     }

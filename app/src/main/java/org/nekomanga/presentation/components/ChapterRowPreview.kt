@@ -30,9 +30,9 @@ private fun ChapterRowPreviewContent(chapterItem: ChapterItem) {
             onRead = {},
             onWebView = {},
             onComment = {},
-            onDownload = {},
+            onDownload = { _, _ -> },
             blockScanlator = { _, _ -> },
-            markPrevious = {},
+            markPrevious = { _, _ -> },
         )
     }
 }
