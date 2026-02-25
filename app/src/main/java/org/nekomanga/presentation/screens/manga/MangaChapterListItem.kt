@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import org.nekomanga.domain.chapter.ChapterItem
@@ -22,6 +23,8 @@ fun MangaChapterListItem(
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
     chapterActions: ChapterActions,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
     val listCardType =
         when {
@@ -36,34 +39,40 @@ fun MangaChapterListItem(
         listCardType = listCardType,
         themeColorState = themeColorState,
     ) {
+        val onBookmark: (ChapterItem) -> Unit =
+            remember(chapterActions) {
+                { item ->
+                    chapterActions.mark(
+                        listOf(item),
+                        if (item.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
+                        else ChapterMarkActions.Bookmark(true),
+                    )
+                }
+            }
+
+        val onRead: (ChapterItem) -> Unit =
+            remember(chapterActions) {
+                { item ->
+                    chapterActions.mark(
+                        listOf(item),
+                        if (item.chapter.read) ChapterMarkActions.Unread(true)
+                        else ChapterMarkActions.Read(true),
+                    )
+                }
+            }
+
         ChapterRow(
             themeColor = themeColorState,
             chapterItem = chapterItem,
             shouldHideChapterTitles = shouldHideChapterTitles,
-            onClick = { chapterActions.open(chapterItem) },
-            onBookmark = {
-                chapterActions.mark(
-                    listOf(chapterItem),
-                    if (chapterItem.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
-                    else ChapterMarkActions.Bookmark(true),
-                )
-            },
-            onRead = {
-                chapterActions.mark(
-                    listOf(chapterItem),
-                    if (chapterItem.chapter.read) ChapterMarkActions.Unread(true)
-                    else ChapterMarkActions.Read(true),
-                )
-            },
-            onWebView = { chapterActions.openInBrowser(chapterItem) },
-            onComment = { chapterActions.openComment(chapterItem.chapter.mangaDexChapterId) },
-            onDownload = { downloadAction ->
-                chapterActions.download(listOf(chapterItem), downloadAction)
-            },
-            markPrevious = { read -> chapterActions.markPrevious(chapterItem, read) },
-            blockScanlator = { blockType, blocked ->
-                chapterActions.blockScanlator(blockType, blocked)
-            },
+            onClick = chapterActions.open,
+            onBookmark = onBookmark,
+            onRead = onRead,
+            onWebView = chapterActions.openInBrowser,
+            onComment = chapterActions.openComment,
+            onDownload = chapterActions.download,
+            markPrevious = chapterActions.markPrevious,
+            blockScanlator = chapterActions.blockScanlator,
         )
     }
     if (listCardType != ListCardType.Bottom) {

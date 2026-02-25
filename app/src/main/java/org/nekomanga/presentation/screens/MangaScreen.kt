@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
@@ -292,74 +293,76 @@ fun MangaScreen(
                 setAsGlobal = mangaViewModel::setGlobalOption,
             ),
         chapterActions =
-            ChapterActions(
-                mark = mangaViewModel::markChapters,
-                download = { chapterItems, downloadAction ->
-                    if (
-                        chapterItems.size == 1 &&
-                            MdConstants.UnsupportedOfficialGroupList.contains(
-                                chapterItems[0].chapter.scanlator
-                            )
-                    ) {
-                        context.toast(
-                            "${chapterItems[0].chapter.scanlator} not supported, try WebView"
-                        )
-                    } else {
-                        mangaViewModel.downloadChapters(chapterItems, downloadAction)
-                    }
-                },
-                delete = mangaViewModel::deleteChapters,
-                clearRemoved = mangaViewModel::clearRemovedChapters,
-                openNext = {
-                    mangaViewModel.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
-                        ?.let { simpleChapter ->
-                            val chapter = simpleChapter.toDbChapter()
-                            val manga = mangaViewModel.getManga()
-                            if (
-                                chapter.scanlator != null &&
-                                    MdConstants.UnsupportedOfficialGroupList.contains(
-                                        chapter.scanlator
-                                    )
-                            ) {
-                                context.toast("${chapter.scanlator} not supported, try WebView")
-                            } else if (
-                                !chapter.isAvailable(mangaViewModel.downloadManager, manga)
-                            ) {
-                                context.toast("Chapter is not available")
-                            } else {
-                                context.startActivity(
-                                    ReaderActivity.newIntent(context, manga, chapter)
+            remember(mangaViewModel, context) {
+                ChapterActions(
+                    mark = mangaViewModel::markChapters,
+                    download = { chapterItems, downloadAction ->
+                        if (
+                            chapterItems.size == 1 &&
+                                MdConstants.UnsupportedOfficialGroupList.contains(
+                                    chapterItems[0].chapter.scanlator
                                 )
-                            }
+                        ) {
+                            context.toast(
+                                "${chapterItems[0].chapter.scanlator} not supported, try WebView"
+                            )
+                        } else {
+                            mangaViewModel.downloadChapters(chapterItems, downloadAction)
                         }
-                },
-                open = { chapterItem ->
-                    val chapter = chapterItem.chapter.toDbChapter()
-                    val manga = mangaViewModel.getManga()
-                    if (
-                        chapter.scanlator != null &&
-                            MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
-                    ) {
-                        context.toast("${chapter.scanlator} not supported, try WebView")
-                    } else if (!chapter.isAvailable(mangaViewModel.downloadManager, manga)) {
-                        context.toast("Chapter is not available")
-                    } else {
-                        context.startActivity(ReaderActivity.newIntent(context, manga, chapter))
-                    }
-                },
-                blockScanlator = mangaViewModel::blockScanlator,
-                openComment = { chapterId -> mangaViewModel.openComment(context, chapterId) },
-                createMangaFolder = mangaViewModel::createMangaFolder,
-                openInBrowser = { chapterItem ->
-                    if (chapterItem.chapter.isUnavailable) {
-                        context.toast("Chapter is not available")
-                    } else {
-                        val url = mangaViewModel.getChapterUrl(chapterItem.chapter)
-                        context.openInBrowser(url)
-                    }
-                },
-                markPrevious = mangaViewModel::markPreviousChapters,
-            ),
+                    },
+                    delete = mangaViewModel::deleteChapters,
+                    clearRemoved = mangaViewModel::clearRemovedChapters,
+                    openNext = {
+                        mangaViewModel.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
+                            ?.let { simpleChapter ->
+                                val chapter = simpleChapter.toDbChapter()
+                                val manga = mangaViewModel.getManga()
+                                if (
+                                    chapter.scanlator != null &&
+                                        MdConstants.UnsupportedOfficialGroupList.contains(
+                                            chapter.scanlator
+                                        )
+                                ) {
+                                    context.toast("${chapter.scanlator} not supported, try WebView")
+                                } else if (
+                                    !chapter.isAvailable(mangaViewModel.downloadManager, manga)
+                                ) {
+                                    context.toast("Chapter is not available")
+                                } else {
+                                    context.startActivity(
+                                        ReaderActivity.newIntent(context, manga, chapter)
+                                    )
+                                }
+                            }
+                    },
+                    open = { chapterItem ->
+                        val chapter = chapterItem.chapter.toDbChapter()
+                        val manga = mangaViewModel.getManga()
+                        if (
+                            chapter.scanlator != null &&
+                                MdConstants.UnsupportedOfficialGroupList.contains(chapter.scanlator)
+                        ) {
+                            context.toast("${chapter.scanlator} not supported, try WebView")
+                        } else if (!chapter.isAvailable(mangaViewModel.downloadManager, manga)) {
+                            context.toast("Chapter is not available")
+                        } else {
+                            context.startActivity(ReaderActivity.newIntent(context, manga, chapter))
+                        }
+                    },
+                    blockScanlator = mangaViewModel::blockScanlator,
+                    openComment = { chapterId -> mangaViewModel.openComment(context, chapterId) },
+                    createMangaFolder = mangaViewModel::createMangaFolder,
+                    openInBrowser = { chapterItem ->
+                        if (chapterItem.chapter.isUnavailable) {
+                            context.toast("Chapter is not available")
+                        } else {
+                            val url = mangaViewModel.getChapterUrl(chapterItem.chapter)
+                            context.openInBrowser(url)
+                        }
+                    },
+                    markPrevious = mangaViewModel::markPreviousChapters,
+                )
+            },
         openWebView = { url, title -> onNavigate(Screens.WebView(title = title, url = url)) },
         onBackPressed = onBackPressed,
     )
@@ -519,6 +522,29 @@ private fun MangaScreenWrapper(
             )
         }
 
+    // Hoisted callback creation
+    val onBookmark: (ChapterItem) -> Unit =
+        remember(chapterActions) {
+            { item ->
+                chapterActions.mark(
+                    listOf(item),
+                    if (item.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
+                    else ChapterMarkActions.Bookmark(true),
+                )
+            }
+        }
+
+    val onRead: (ChapterItem) -> Unit =
+        remember(chapterActions) {
+            { item ->
+                chapterActions.mark(
+                    listOf(item),
+                    if (item.chapter.read) ChapterMarkActions.Unread(true)
+                    else ChapterMarkActions.Read(true),
+                )
+            }
+        }
+
     ChildScreenScaffold(
         refreshState = refreshState,
         scrollBehavior = scrollBehavior,
@@ -550,6 +576,8 @@ private fun MangaScreenWrapper(
                 generatePalette = generatePalette,
                 onOpenSheet = ::openSheet,
                 categoryActions = categoryActions,
+                onBookmark = onBookmark,
+                onRead = onRead,
             )
         } else {
             VerticalLayout(
@@ -567,6 +595,8 @@ private fun MangaScreenWrapper(
                 generatePalette = generatePalette,
                 onOpenSheet = ::openSheet,
                 categoryActions = categoryActions,
+                onBookmark = onBookmark,
+                onRead = onRead,
             )
         }
 
@@ -590,6 +620,8 @@ private fun LazyListScope.chapterList(
     themeColorState: ThemeColorState,
     chapterActions: ChapterActions,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
     item(key = "chapter_header") {
         ChapterHeader(
@@ -610,6 +642,8 @@ private fun LazyListScope.chapterList(
             shouldHideChapterTitles =
                 screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
             chapterActions = chapterActions,
+            onBookmark = onBookmark,
+            onRead = onRead,
         )
     }
 }
@@ -630,6 +664,8 @@ private fun VerticalLayout(
     onToggleFavorite: () -> Unit,
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
     val contentPadding = PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
     val listState = rememberLazyListState()
@@ -682,6 +718,8 @@ private fun VerticalLayout(
                     themeColorState = themeColorState,
                     chapterActions = chapterActions,
                     onOpenSheet = onOpenSheet,
+                    onBookmark = onBookmark,
+                    onRead = onRead,
                 )
             }
         }
@@ -704,6 +742,8 @@ private fun SideBySideLayout(
     onToggleFavorite: () -> Unit,
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
 
     val detailsContentPadding =
@@ -771,6 +811,8 @@ private fun SideBySideLayout(
                         themeColorState = themeColorState,
                         chapterActions = chapterActions,
                         onOpenSheet = onOpenSheet,
+                        onBookmark = onBookmark,
+                        onRead = onRead,
                     )
                 }
             }
