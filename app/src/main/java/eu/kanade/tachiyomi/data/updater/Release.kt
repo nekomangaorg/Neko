@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.data.updater
 
 interface Release {
 
+    val version: String
+
     val info: String
 
     /**

@@ -62,13 +62,20 @@ class AppUpdateChecker {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                         preferences.appShouldAutoUpdate().get() != AppDownloadInstallJob.NEVER
                 ) {
-                    AppDownloadInstallJob.start(context, null, false, waitUntilIdle = true)
+                    AppDownloadInstallJob.start(
+                        context,
+                        null,
+                        false,
+                        waitUntilIdle = true,
+                        version = result.release.version,
+                    )
                 }
                 AppUpdateNotifier(context)
                     .promptUpdate(
                         result.release.info,
                         result.release.downloadLink,
                         result.release.releaseLink,
+                        result.release.version,
                     )
             }
 

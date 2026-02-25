@@ -19,9 +19,8 @@ import org.nekomanga.R
 
 /** Dialog that shows when an app update is available */
 @Composable
-fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (String) -> Unit) {
+fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (Release) -> Unit) {
     val body = release.info.substringBeforeLast("Downloads & Checksums")
-    val url = release.downloadLink
     AlertDialog(
         title = { Text(text = stringResource(id = R.string.new_version_available)) },
         modifier = Modifier.fillMaxHeight(.8f),
@@ -38,7 +37,7 @@ fun AppUpdateDialog(release: Release, onDismissRequest: () -> Unit, onConfirm: (
         },
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            TextButton(onClick = { onConfirm(url) }) {
+            TextButton(onClick = { onConfirm(release) }) {
                 val text =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) R.string.update
                     else R.string.download

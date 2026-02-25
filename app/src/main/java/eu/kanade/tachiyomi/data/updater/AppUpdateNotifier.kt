@@ -41,10 +41,10 @@ internal class AppUpdateNotifier(private val context: Context) {
         context.notificationManager.notify(id, build())
     }
 
-    fun promptUpdate(body: String, url: String, releaseUrl: String) {
+    fun promptUpdate(body: String, url: String, releaseUrl: String, version: String) {
 
         val pendingIntent =
-            NotificationReceiver.openUpdatePendingActivity(context, body, url, releaseUrl)
+            NotificationReceiver.openUpdatePendingActivity(context, body, url, releaseUrl, version)
         releasePageUrl = releaseUrl
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.app_name))
@@ -59,7 +59,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 android.R.drawable.stat_sys_download_done,
                 context.getString(if (isOnA12) R.string.update else R.string.download),
-                NotificationReceiver.startAppUpdatePendingJob(context, url, true),
+                NotificationReceiver.startAppUpdatePendingJob(context, url, version, true),
             )
             addReleasePageAction()
         }
@@ -214,7 +214,7 @@ internal class AppUpdateNotifier(private val context: Context) {
      *
      * @param url web location of apk to download.
      */
-    fun onDownloadError(url: String) {
+    fun onDownloadError(url: String, version: String) {
         with(notificationBuilder) {
             setContentText(context.getString(R.string.download_error))
             setSmallIcon(android.R.drawable.stat_sys_warning)
@@ -227,7 +227,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.getString(R.string.retry),
-                NotificationReceiver.startAppUpdatePendingJob(context, url),
+                NotificationReceiver.startAppUpdatePendingJob(context, url, version),
             )
             // Cancel action
             addAction(

@@ -264,7 +264,14 @@ class MainActivity : BaseMainActivity() {
                 AppUpdateDialog(
                     release = mainScreenState.appUpdateResult!!.release,
                     onDismissRequest = { viewModel.consumeAppUpdateResult() },
-                    onConfirm = { url -> AppDownloadInstallJob.start(context, url, true) },
+                    onConfirm = { release ->
+                        AppDownloadInstallJob.start(
+                            context,
+                            release.downloadLink,
+                            true,
+                            version = release.version,
+                        )
+                    },
                 )
             }
         }
@@ -297,8 +304,9 @@ class MainActivity : BaseMainActivity() {
                 val extras = intent.extras ?: return
                 val downloadUrl = extras.getString(DeepLinks.Extras.AppUpdateUrl) ?: return
                 val notes = extras.getString(DeepLinks.Extras.AppUpdateNotes) ?: return
-                val releaseUrl = extras.getString(DeepLinks.Extras.AppUpdateNotes) ?: return
-                viewModel.addAppUpdateResult(downloadUrl, notes, releaseUrl)
+                val releaseUrl = extras.getString(DeepLinks.Extras.AppUpdateReleaseUrl) ?: return
+                val version = extras.getString(DeepLinks.Extras.AppUpdateVersion) ?: ""
+                viewModel.addAppUpdateResult(downloadUrl, notes, releaseUrl, version)
             }
             Intent.ACTION_SEARCH,
             Intent.ACTION_SEND,
