@@ -63,6 +63,7 @@ fun SettingsMainScreen(
     onNavigateClick: (NavKey) -> Unit,
     onNavigationIconClick: () -> Unit,
     incognitoMode: Boolean,
+    developerMode: Boolean = false,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -100,13 +101,21 @@ fun SettingsMainScreen(
                 onNavigateClick(route)
             }
         } else {
-            mainContent(contentPadding = contentPadding, onNavigateClick = onNavigateClick)
+            mainContent(
+                contentPadding = contentPadding,
+                onNavigateClick = onNavigateClick,
+                developerMode = developerMode,
+            )
         }
     }
 }
 
 @Composable
-private fun mainContent(contentPadding: PaddingValues, onNavigateClick: (NavKey) -> Unit) {
+private fun mainContent(
+    contentPadding: PaddingValues,
+    onNavigateClick: (NavKey) -> Unit,
+    developerMode: Boolean,
+) {
     LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
         item {
             IconItem(
@@ -185,7 +194,7 @@ private fun mainContent(contentPadding: PaddingValues, onNavigateClick: (NavKey)
                 onClick = { onNavigateClick(Screens.Settings.Advanced) },
             )
         }
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || developerMode) {
             item {
                 IconItem(
                     labelText = UiText.StringResource(R.string.debug),

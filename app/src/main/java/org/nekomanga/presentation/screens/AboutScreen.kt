@@ -97,7 +97,7 @@ fun AboutScreen(
         checkForUpdate = aboutViewModel::checkForUpdate,
         windowSizeClass = windowSizeClass,
         onVersionClicked = { context ->
-            aboutViewModel.copyToClipboard()
+            aboutViewModel.onVersionClicked()
             val deviceInfo = CrashLogUtil(context).getDebugInfo()
             val clipboard = context.getSystemService<ClipboardManager>()!!
             val appInfo = context.getString(R.string.app_info)

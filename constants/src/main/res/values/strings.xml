@@ -1022,6 +1022,8 @@
 
 
     <!-- About section -->
+    <string name="developer_mode_enabled">Developer mode enabled</string>
+    <string name="developer_mode_disabled">Developer mode disabled</string>
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
     <string name="send_crash_report">Send crash reports</string>

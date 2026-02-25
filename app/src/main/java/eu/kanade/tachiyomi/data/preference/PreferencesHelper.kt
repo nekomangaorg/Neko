@@ -225,4 +225,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)
     }
+
+    fun developerMode() = this.preferenceStore.getBoolean("developer_mode", false)
 }

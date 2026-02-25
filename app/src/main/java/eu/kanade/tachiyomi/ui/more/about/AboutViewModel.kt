@@ -97,7 +97,32 @@ class AboutViewModel : ViewModel() {
         }
     }
 
-    fun copyToClipboard() {
+    private var versionClickCount = 0
+    private var lastVersionClickTime = 0L
+
+    fun onVersionClicked() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastVersionClickTime > 500) {
+            versionClickCount = 0
+        }
+        lastVersionClickTime = currentTime
+        versionClickCount++
+
+        if (versionClickCount == 7) {
+            versionClickCount = 0
+            val newValue = !preferences.developerMode().get()
+            preferences.developerMode().set(newValue)
+            viewModelScope.launch {
+                appSnackbarManager.showSnackbar(
+                    SnackbarState(
+                        messageRes =
+                            if (newValue) R.string.developer_mode_enabled
+                            else R.string.developer_mode_disabled
+                    )
+                )
+            }
+        }
+
         viewModelScope.launch {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 appSnackbarManager.showSnackbar(
