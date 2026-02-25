@@ -51,6 +51,7 @@ fun LibraryScreenTopBar(
             navigationIconLabel = stringResource(id = R.string.back),
             onNavigationIconClicked = { libraryScreenActions.clearSelectedManga() },
             incognitoMode = libraryScreenState.incognitoMode,
+            scrolledContainerColor = color,
             actions = {
                 LibraryAppBarActions(
                     downloadChapters = libraryScreenActions.downloadChapters,

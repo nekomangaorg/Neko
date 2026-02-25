@@ -39,12 +39,13 @@ fun TitleTopAppBar(
     incognitoMode: Boolean,
     onNavigationIconClicked: () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
+    scrolledContainerColor: Color = Color.Transparent,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors =
-            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = Color.Transparent),
+            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = scrolledContainerColor),
     ) {
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
