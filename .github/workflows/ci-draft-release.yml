@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate_gradle_wrapper:
     name: Validate Gradle Wrapper
@@ -20,15 +24,11 @@ jobs:
     name: Build and Update Draft Release
     needs: validate_gradle_wrapper
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: write
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.13.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
@@ -48,9 +48,6 @@ jobs:
         with:
           path: app/google-services.json
           contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
-
-      - name: Install Android Build Tools
-        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.3"
 
       - name: Build App
         run: ./gradlew assembleStandardRelease
