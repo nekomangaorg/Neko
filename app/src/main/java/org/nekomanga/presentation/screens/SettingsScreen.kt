@@ -96,6 +96,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     SettingsMainScreen(
                         onNavigateClick = { screen -> backStack.add(screen) },
                         incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                        developerMode = settingsVm.preferences.developerMode().get(),
                         onNavigationIconClick = onBackPressed,
                     )
                 }
