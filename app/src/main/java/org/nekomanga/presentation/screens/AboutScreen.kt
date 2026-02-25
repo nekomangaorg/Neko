@@ -96,8 +96,9 @@ fun AboutScreen(
         notOnlineSnackbar = aboutViewModel::notOnlineSnackbar,
         checkForUpdate = aboutViewModel::checkForUpdate,
         windowSizeClass = windowSizeClass,
-        onVersionClicked = { context ->
-            aboutViewModel.onVersionClicked()
+        onVersionClicked = { aboutViewModel.onVersionClicked() },
+        onVersionLongClicked = { context ->
+            aboutViewModel.onVersionLongClicked()
             val deviceInfo = CrashLogUtil(context).getDebugInfo()
             val clipboard = context.getSystemService<ClipboardManager>()!!
             val appInfo = context.getString(R.string.app_info)
@@ -125,7 +126,8 @@ private fun AboutWrapper(
     windowSizeClass: WindowSizeClass,
     notOnlineSnackbar: () -> Unit,
     checkForUpdate: () -> Unit,
-    onVersionClicked: (Context) -> Unit,
+    onVersionClicked: () -> Unit,
+    onVersionLongClicked: (Context) -> Unit,
     onDownloadClicked: (Release) -> Unit,
     onClickLicenses: () -> Unit,
     onBackPressed: () -> Unit,
@@ -180,7 +182,8 @@ private fun AboutWrapper(
                                     "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.buildTime})"
                                 }
                             },
-                        onPreferenceClick = { onVersionClicked(context) },
+                        onPreferenceClick = { onVersionClicked() },
+                        onPreferenceLongClick = { onVersionLongClicked(context) },
                     )
                 }
             }
