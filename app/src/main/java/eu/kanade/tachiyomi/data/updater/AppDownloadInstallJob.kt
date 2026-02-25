@@ -26,16 +26,15 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.jobIsRunning
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -225,26 +224,26 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             notifier.onInstalling()
-            withContext(Dispatchers.IO) {
-                data.close()
-                GlobalScope.launchUI {
-                    delay(5000)
-                    val hasNotification =
-                        context.notificationManager.activeNotifications.any {
-                            it.id == Notifications.ID_UPDATER
-                        }
-                    // If the package manager crashes for whatever reason (china phone)
-                    // set a timeout and let the user manually install
-                    if (packageInstaller.getSessionInfo(sessionId) == null && !hasNotification) {
-                        notifier.cancelInstallNotification()
-                        notifier.onDownloadFinished(file.getUriCompat(context))
-                        PreferenceManager.getDefaultSharedPreferences(context).edit {
-                            remove(NOTIFY_ON_INSTALL_KEY)
-                        }
+
+            withContext(Dispatchers.IO) { data.close() }
+            withUIContext {
+                delay(5000)
+                val hasNotification =
+                    context.notificationManager.activeNotifications.any {
+                        it.id == Notifications.ID_UPDATER
+                    }
+                // If the package manager crashes for whatever reason (china phone)
+                // set a timeout and let the user manually install
+                if (packageInstaller.getSessionInfo(sessionId) == null && !hasNotification) {
+                    notifier.cancelInstallNotification()
+                    notifier.onDownloadFinished(file.getUriCompat(context))
+                    PreferenceManager.getDefaultSharedPreferences(context).edit {
+                        remove(NOTIFY_ON_INSTALL_KEY)
                     }
                 }
             }
         } catch (error: Exception) {
+            if (error is CancellationException) throw error
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
             withContext(Dispatchers.Main) { context.toast(error.message) }
