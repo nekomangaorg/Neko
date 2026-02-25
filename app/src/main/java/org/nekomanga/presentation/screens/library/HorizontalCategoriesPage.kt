@@ -29,11 +29,13 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -147,6 +149,9 @@ fun HorizontalCategoriesPage(
                                     .all { id -> id in selectedIds }
                         )
                     }
+
+                val currentLibraryScreenActions by rememberUpdatedState(libraryScreenActions)
+
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
@@ -156,11 +161,13 @@ fun HorizontalCategoriesPage(
                                     libraryScreenState.scrollPositions[page] ?: 0
                             )
 
-                        LaunchedEffect(gridState.firstVisibleItemIndex) {
-                            libraryScreenActions.scrollPositionChanged(
-                                page,
-                                gridState.firstVisibleItemIndex,
-                            )
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                currentLibraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    gridState.firstVisibleItemIndex,
+                                )
+                            }
                         }
                         Column {
                             HorizontalCategoryHeader(
@@ -215,11 +222,13 @@ fun HorizontalCategoriesPage(
                                 initialFirstVisibleItemIndex =
                                     libraryScreenState.scrollPositions[page] ?: 0
                             )
-                        LaunchedEffect(listState.firstVisibleItemIndex) {
-                            libraryScreenActions.scrollPositionChanged(
-                                page,
-                                listState.firstVisibleItemIndex,
-                            )
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                currentLibraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    listState.firstVisibleItemIndex,
+                                )
+                            }
                         }
                         Column(modifier = Modifier.fillMaxSize()) {
                             HorizontalCategoryHeader(
