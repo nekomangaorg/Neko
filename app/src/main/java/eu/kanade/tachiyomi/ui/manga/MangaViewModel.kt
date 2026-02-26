@@ -68,6 +68,7 @@ import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -157,6 +158,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val chapterUseCases: ChapterUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
+
+    private var dynamicCoverUpdateJob: Job? = null
 
     private val _mangaDetailScreenState =
         MutableStateFlow(
@@ -385,15 +388,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 val lastReadChapterId =
                                     history.maxByOrNull { it.last_read }?.chapter_id
 
-                                viewModelScope.launchIO {
-                                    delay(5000)
-                                    updateDynamicCover(
-                                        effectiveManga = effectiveManga,
-                                        lastReadChapterId = lastReadChapterId,
-                                        allChapters = staticChapterData.allChapters,
-                                        artworkList = artworkList,
-                                    )
-                                }
+                                dynamicCoverUpdateJob?.cancel()
+                                dynamicCoverUpdateJob =
+                                    viewModelScope.launchIO {
+                                        delay(5000)
+                                        updateDynamicCover(
+                                            effectiveManga = effectiveManga,
+                                            lastReadChapterId = lastReadChapterId,
+                                            allChapters = staticChapterData.allChapters,
+                                            artworkList = artworkList,
+                                        )
+                                    }
                             }
 
                             val artwork = createCurrentArtwork(effectiveManga)
