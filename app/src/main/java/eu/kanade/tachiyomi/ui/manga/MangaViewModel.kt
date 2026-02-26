@@ -620,6 +620,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             syncChaptersReadStatus()
                             val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
 
+                            refreshTrackersAndSync()
+
                             autoAddTrackers(
                                 mangaItem,
                                 mangaDetailScreenState.value.loggedInTrackService,
@@ -1863,6 +1865,62 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     }
                 }
                 .awaitAll()
+        }
+    }
+
+    /**
+     * Refreshes the trackers and syncs the local read progress to the highest tracked chapter.
+     * Also updates other trackers if they are behind.
+     */
+    private fun refreshTrackersAndSync() {
+        viewModelScope.launchIO {
+            if (!isOnline()) return@launchIO
+
+            val tracks = db.getTracks(mangaId).executeOnIO()
+            if (tracks.isEmpty()) return@launchIO
+
+            // 1. Refresh all trackers from network
+            val updatedTracks = tracks
+                .map { it.toTrackItem() }
+                .mapNotNull { track ->
+                    trackManager.getService(track.trackServiceId)
+                        ?.takeIf { it.isLogged() }
+                        ?.let { service -> track to service }
+                }
+                .mapAsync { (trackItem, service) ->
+                    kotlin.runCatching {
+                        service.refresh(trackItem.toDbTrack())
+                    }.getOrNull()?.also { updatedTrack ->
+                        db.insertTrack(updatedTrack).executeOnIO()
+                    }
+                }
+                .filterNotNull()
+
+            if (updatedTracks.isEmpty()) return@launchIO
+
+            // 2. Find the highest chapter number read among all updated trackers
+            val maxChapterRead = updatedTracks.maxOfOrNull { it.last_chapter_read } ?: 0f
+
+            if (maxChapterRead > 0) {
+                // 3. Mark local chapters as read if they are below the max tracked chapter
+                // Fetch directly from DB to avoid UI state race condition
+                val allChapters =
+                    db.getChapters(mangaId).executeOnIO().mapNotNull {
+                        it.toSimpleChapter()?.toChapterItem()
+                    }
+
+                val chaptersToMark =
+                    allChapters.filter {
+                        !it.chapter.read &&
+                            it.chapter.chapterNumber >= 0f &&
+                            it.chapter.chapterNumber <= maxChapterRead
+                    }
+
+                if (chaptersToMark.isNotEmpty()) {
+                    // markChapters handles updating the DB and syncing to other trackers
+                    markChapters(chaptersToMark, ChapterMarkActions.Read())
+                }
+            }
         }
     }
 
