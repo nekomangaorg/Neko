@@ -385,12 +385,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 val lastReadChapterId =
                                     history.maxByOrNull { it.last_read }?.chapter_id
 
-                                updateDynamicCover(
-                                    effectiveManga = effectiveManga,
-                                    lastReadChapterId = lastReadChapterId,
-                                    allChapters = staticChapterData.allChapters,
-                                    artworkList = artworkList,
-                                )
+                                viewModelScope.launchIO {
+                                    delay(5000)
+                                    updateDynamicCover(
+                                        effectiveManga = effectiveManga,
+                                        lastReadChapterId = lastReadChapterId,
+                                        allChapters = staticChapterData.allChapters,
+                                        artworkList = artworkList,
+                                    )
+                                }
                             }
 
                             val artwork = createCurrentArtwork(effectiveManga)
