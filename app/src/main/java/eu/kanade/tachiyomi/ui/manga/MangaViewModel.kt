@@ -68,6 +68,7 @@ import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -136,6 +137,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
+    companion object {
+        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 3000L
+    }
+
     val preferences: PreferencesHelper = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
@@ -157,6 +162,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val chapterUseCases: ChapterUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
+
+    private var dynamicCoverUpdateJob: Job? = null
 
     private val _mangaDetailScreenState =
         MutableStateFlow(
@@ -385,12 +392,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 val lastReadChapterId =
                                     history.maxByOrNull { it.last_read }?.chapter_id
 
-                                updateDynamicCover(
-                                    effectiveManga = effectiveManga,
-                                    lastReadChapterId = lastReadChapterId,
-                                    allChapters = staticChapterData.allChapters,
-                                    artworkList = artworkList,
-                                )
+                                dynamicCoverUpdateJob?.cancel()
+                                dynamicCoverUpdateJob =
+                                    viewModelScope.launchIO {
+                                        delay(DYNAMIC_COVER_UPDATE_DELAY_MS)
+                                        updateDynamicCover(
+                                            effectiveManga = effectiveManga,
+                                            lastReadChapterId = lastReadChapterId,
+                                            allChapters = staticChapterData.allChapters,
+                                            artworkList = artworkList,
+                                        )
+                                    }
                             }
 
                             val artwork = createCurrentArtwork(effectiveManga)
