@@ -84,7 +84,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun trackMarkedAsRead() = this.preferenceStore.getBoolean("track_marked_as_read", false)
 
-    fun syncTrackersOnRefresh() = this.preferenceStore.getBoolean("sync_trackers_on_refresh", false)
+    fun syncChaptersWithTracker() = this.preferenceStore.getBoolean("sync_chapters_with_tracker", false)
 
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 

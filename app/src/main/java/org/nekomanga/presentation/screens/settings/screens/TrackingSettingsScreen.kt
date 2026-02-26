@@ -53,8 +53,9 @@ internal class TrackingSettingsScreen(
                     title = stringResource(R.string.update_tracking_marked_read),
                 ),
                 Preference.PreferenceItem.SwitchPreference(
-                    pref = preferences.syncTrackersOnRefresh(),
-                    title = stringResource(R.string.sync_trackers_on_refresh),
+                    pref = preferences.syncChaptersWithTracker(),
+                    title = stringResource(R.string.mark_chapters_from_tracker),
+                    subtitle = stringResource(R.string.mark_chapters_from_tracker_subtitle)
                 ),
                 Preference.PreferenceItem.MultiSelectListPreference(
                     pref = preferences.autoTrackContentRatingSelections(),

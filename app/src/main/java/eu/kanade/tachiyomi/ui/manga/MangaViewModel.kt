@@ -967,7 +967,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     .filterNotNull()
 
             if (updatedTracks.isEmpty()) return@launchIO
-            if (!preferences.syncTrackersOnRefresh().get()) return@launchIO
+            if (!preferences.syncChaptersWithTracker().get()) return@launchIO
 
             val maxChapterRead = updatedTracks.maxOfOrNull { it.last_chapter_read } ?: 0f
 
