@@ -52,6 +52,11 @@ internal class TrackingSettingsScreen(
                     pref = preferences.trackMarkedAsRead(),
                     title = stringResource(R.string.update_tracking_marked_read),
                 ),
+                Preference.PreferenceItem.SwitchPreference(
+                    pref = preferences.syncChaptersWithTracker(),
+                    title = stringResource(R.string.mark_chapters_from_tracker),
+                    subtitle = stringResource(R.string.mark_chapters_from_tracker_subtitle)
+                ),
                 Preference.PreferenceItem.MultiSelectListPreference(
                     pref = preferences.autoTrackContentRatingSelections(),
                     title = stringResource(R.string.auto_track_content_rating_title),
@@ -274,6 +279,7 @@ internal class TrackingSettingsScreen(
             return persistentListOf(
                 SearchTerm(title = stringResource(R.string.update_tracking_after_reading)),
                 SearchTerm(title = stringResource(R.string.update_tracking_marked_read)),
+                SearchTerm(title = stringResource(R.string.sync_trackers_on_refresh)),
                 SearchTerm(
                     title = stringResource(R.string.auto_track_content_rating_title),
                     subtitle = stringResource(R.string.auto_track_content_rating_summary),

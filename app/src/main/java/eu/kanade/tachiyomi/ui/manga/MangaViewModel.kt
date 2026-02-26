@@ -939,12 +939,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun initialLoad() {
         // refresh tracking
         viewModelScope.launchIO {
-            val networkState =
-                downloadManager.networkStateFlow().map { it }.distinctUntilChanged().firstOrNull()
-            networkState ?: return@launchIO
-            if (isOnline()) {
-                val tracks = db.getTracks(mangaId).executeOnIO()
+            if (!isOnline()) return@launchIO
 
+            val tracks = db.getTracks(mangaId).executeOnIO()
+            if (tracks.isEmpty()) return@launchIO
+
+            val updatedTracks =
                 tracks
                     .map { it.toTrackItem() }
                     .mapNotNull { track ->
@@ -973,10 +973,35 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     )
                                 }
                             }
-                            .onSuccess { updatedTrack ->
-                                db.insertTrack(updatedTrack).executeOnIO()
-                            }
+                            .getOrNull()
+                            ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
                     }
+                    .filterNotNull()
+
+            if (updatedTracks.isEmpty()) return@launchIO
+            if (!preferences.syncChaptersWithTracker().get()) return@launchIO
+
+            val maxChapterRead = updatedTracks.maxOfOrNull { it.last_chapter_read } ?: 0f
+
+            if (maxChapterRead > 0) {
+                // 3. Mark local chapters as read if they are below the max tracked chapter
+                // Fetch directly from DB to avoid UI state race condition
+                val allChapters =
+                    db.getChapters(mangaId).executeOnIO().mapNotNull {
+                        it.toSimpleChapter()?.toChapterItem()
+                    }
+
+                val chaptersToMark =
+                    allChapters.filter {
+                        !it.chapter.read &&
+                            it.chapter.chapterNumber >= 0f &&
+                            it.chapter.chapterNumber <= maxChapterRead
+                    }
+
+                if (chaptersToMark.isNotEmpty()) {
+                    // markChapters handles updating the DB and syncing to other trackers
+                    markChapters(chaptersToMark, ChapterMarkActions.Read())
+                }
             }
         }
 
