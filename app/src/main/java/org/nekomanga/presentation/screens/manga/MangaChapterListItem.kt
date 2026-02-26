@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
@@ -23,6 +21,8 @@ fun MangaChapterListItem(
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
     chapterActions: ChapterActions,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
     val listCardType =
         when {
@@ -37,28 +37,6 @@ fun MangaChapterListItem(
         listCardType = listCardType,
         themeColorState = themeColorState,
     ) {
-        val onBookmark: (ChapterItem) -> Unit =
-            remember(chapterActions) {
-                { item ->
-                    chapterActions.mark(
-                        listOf(item),
-                        if (item.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
-                        else ChapterMarkActions.Bookmark(true),
-                    )
-                }
-            }
-
-        val onRead: (ChapterItem) -> Unit =
-            remember(chapterActions) {
-                { item ->
-                    chapterActions.mark(
-                        listOf(item),
-                        if (item.chapter.read) ChapterMarkActions.Unread(true)
-                        else ChapterMarkActions.Read(true),
-                    )
-                }
-            }
-
         ChapterRow(
             themeColor = themeColorState,
             chapterItem = chapterItem,

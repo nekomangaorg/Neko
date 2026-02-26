@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
@@ -519,6 +520,28 @@ private fun MangaScreenWrapper(
             )
         }
 
+    val onBookmark: (ChapterItem) -> Unit =
+        remember(chapterActions) {
+            { item ->
+                chapterActions.mark(
+                    listOf(item),
+                    if (item.chapter.bookmark) ChapterMarkActions.UnBookmark(true)
+                    else ChapterMarkActions.Bookmark(true),
+                )
+            }
+        }
+
+    val onRead: (ChapterItem) -> Unit =
+        remember(chapterActions) {
+            { item ->
+                chapterActions.mark(
+                    listOf(item),
+                    if (item.chapter.read) ChapterMarkActions.Unread(true)
+                    else ChapterMarkActions.Read(true),
+                )
+            }
+        }
+
     ChildScreenScaffold(
         refreshState = refreshState,
         scrollBehavior = scrollBehavior,
@@ -550,6 +573,8 @@ private fun MangaScreenWrapper(
                 generatePalette = generatePalette,
                 onOpenSheet = ::openSheet,
                 categoryActions = categoryActions,
+                onBookmark = onBookmark,
+                onRead = onRead,
             )
         } else {
             VerticalLayout(
@@ -567,6 +592,8 @@ private fun MangaScreenWrapper(
                 generatePalette = generatePalette,
                 onOpenSheet = ::openSheet,
                 categoryActions = categoryActions,
+                onBookmark = onBookmark,
+                onRead = onRead,
             )
         }
 
@@ -589,6 +616,8 @@ private fun LazyListScope.chapterList(
     screenState: MangaConstants.MangaDetailScreenState,
     themeColorState: ThemeColorState,
     chapterActions: ChapterActions,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     item(key = "chapter_header") {
@@ -610,6 +639,8 @@ private fun LazyListScope.chapterList(
             shouldHideChapterTitles =
                 screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
             chapterActions = chapterActions,
+            onBookmark = onBookmark,
+            onRead = onRead,
         )
     }
 }
@@ -630,6 +661,8 @@ private fun VerticalLayout(
     onToggleFavorite: () -> Unit,
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
     val contentPadding = PaddingValues(bottom = incomingContentPadding.calculateBottomPadding())
     val listState = rememberLazyListState()
@@ -681,6 +714,8 @@ private fun VerticalLayout(
                     screenState = screenState,
                     themeColorState = themeColorState,
                     chapterActions = chapterActions,
+                    onBookmark = onBookmark,
+                    onRead = onRead,
                     onOpenSheet = onOpenSheet,
                 )
             }
@@ -704,6 +739,8 @@ private fun SideBySideLayout(
     onToggleFavorite: () -> Unit,
     generatePalette: (Drawable) -> Unit,
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
+    onBookmark: (ChapterItem) -> Unit,
+    onRead: (ChapterItem) -> Unit,
 ) {
 
     val detailsContentPadding =
@@ -770,6 +807,8 @@ private fun SideBySideLayout(
                         screenState = screenState,
                         themeColorState = themeColorState,
                         chapterActions = chapterActions,
+                        onBookmark = onBookmark,
+                        onRead = onRead,
                         onOpenSheet = onOpenSheet,
                     )
                 }
