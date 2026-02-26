@@ -137,6 +137,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
+    companion object {
+        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 5000L
+    }
+
     val preferences: PreferencesHelper = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
@@ -391,7 +395,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 dynamicCoverUpdateJob?.cancel()
                                 dynamicCoverUpdateJob =
                                     viewModelScope.launchIO {
-                                        delay(5000)
+                                        delay(DYNAMIC_COVER_UPDATE_DELAY_MS)
                                         updateDynamicCover(
                                             effectiveManga = effectiveManga,
                                             lastReadChapterId = lastReadChapterId,
