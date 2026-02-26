@@ -45,7 +45,10 @@ fun TitleTopAppBar(
     FlexibleTopBar(
         scrollBehavior = scrollBehavior,
         colors =
-            FlexibleTopBarColors(containerColor = color, scrolledContainerColor = scrolledContainerColor),
+            FlexibleTopBarColors(
+                containerColor = color,
+                scrolledContainerColor = scrolledContainerColor,
+            ),
     ) {
         Box(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Size.small)
