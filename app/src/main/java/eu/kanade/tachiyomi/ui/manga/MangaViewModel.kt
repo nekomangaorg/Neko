@@ -138,7 +138,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     companion object {
-        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 5000L
+        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 3000L
     }
 
     val preferences: PreferencesHelper = Injekt.get()
