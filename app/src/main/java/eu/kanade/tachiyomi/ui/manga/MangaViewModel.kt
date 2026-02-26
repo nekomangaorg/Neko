@@ -1873,6 +1873,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
      * Also updates other trackers if they are behind.
      */
     private fun refreshTrackersAndSync() {
+        if (!preferences.syncTrackersOnRefresh().get()) return
+
         viewModelScope.launchIO {
             if (!isOnline()) return@launchIO
 
@@ -1889,10 +1891,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
                 .mapAsync { (trackItem, service) ->
                     kotlin.runCatching {
-                        val updatedTrack = service.refresh(trackItem.toDbTrack())
+                        service.refresh(trackItem.toDbTrack())
+                    }.getOrNull()?.also { updatedTrack ->
                         db.insertTrack(updatedTrack).executeOnIO()
-                        updatedTrack
-                    }.getOrNull()
+                    }
                 }
                 .filterNotNull()
 

@@ -727,6 +727,7 @@
     <string name="enhanced_services">Enhanced services</string>
     <string name="enhanced_tracking_info">Services that provide enhanced features for specific sources. Manga are automatically tracked when added to your library.</string>
     <string name="update_tracking_after_reading">Update tracking after reading</string>
+    <string name="sync_trackers_on_refresh">Sync tracker progress on refresh</string>
     <string name="update_tracking_marked_read">Update tracking when marked as read</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
