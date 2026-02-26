@@ -218,7 +218,7 @@ fun HorizontalCategoriesPage(
                                 initialFirstVisibleItemIndex =
                                     libraryScreenState.scrollPositions[page] ?: 0
                             )
-                        DisposableEffect(Unit) {
+                        DisposableEffect(libraryScreenActions, page) {
                             onDispose {
                                 libraryScreenActions.scrollPositionChanged(
                                     page,
