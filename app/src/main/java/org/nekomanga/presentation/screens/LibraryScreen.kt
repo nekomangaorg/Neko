@@ -74,7 +74,8 @@ fun LibraryScreen(
 ) {
     val context = LocalContext.current
 
-    // Optimize: Remember the action objects to prevent unnecessary recompositions of child composables
+    // Optimize: Remember the action objects to prevent unnecessary recompositions of child
+    // composables
     // when LibraryScreen recomposes but these actions (and their dependencies) haven't changed.
     val libraryScreenActions =
         remember(libraryViewModel, openManga, onSearchMangaDex, context) {

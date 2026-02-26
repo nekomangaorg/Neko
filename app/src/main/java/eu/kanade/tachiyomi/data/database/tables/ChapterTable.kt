@@ -86,6 +86,16 @@ object ChapterTable {
             "CREATE INDEX ${TABLE}_unread_by_manga_index ON $TABLE($COL_MANGA_ID, $COL_READ) " +
                 "WHERE $COL_READ = 0"
 
+    val createBookmarkedChaptersIndexQuery: String
+        get() =
+            "CREATE INDEX ${TABLE}_bookmarked_by_manga_index ON $TABLE($COL_MANGA_ID) " +
+                "WHERE $COL_BOOKMARK = 1"
+
+    val createUnavailableChaptersIndexQuery: String
+        get() =
+            "CREATE INDEX ${TABLE}_unavailable_by_manga_index ON $TABLE($COL_MANGA_ID) " +
+                "WHERE $COL_UNAVAILABLE = 1"
+
     val addChapterCol: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_CHP_TXT TEXT DEFAULT ''"
 
