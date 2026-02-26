@@ -1889,10 +1889,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
                 .mapAsync { (trackItem, service) ->
                     kotlin.runCatching {
-                        service.refresh(trackItem.toDbTrack())
-                    }.getOrNull()?.also { updatedTrack ->
+                        val updatedTrack = service.refresh(trackItem.toDbTrack())
                         db.insertTrack(updatedTrack).executeOnIO()
-                    }
+                        updatedTrack
+                    }.getOrNull()
                 }
                 .filterNotNull()
 
