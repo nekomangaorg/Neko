@@ -1,6 +1,6 @@
 [versions]
 coroutinesVersion = "1.10.2"
-kotlinVersion = "2.2.10"
+kotlinVersion = "2.3.10"
 serializationVersion = "1.10.0"
 
 [libraries]
