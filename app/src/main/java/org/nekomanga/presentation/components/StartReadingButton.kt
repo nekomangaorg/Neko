@@ -19,9 +19,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.ui.theme.ThemeConfig
+import org.nekomanga.ui.theme.ThemeConfigProvider
+import org.nekomanga.ui.theme.ThemedPreviews
 
 @Composable
 fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () -> Unit) {
@@ -62,4 +67,12 @@ fun StartReadingButton(modifier: Modifier = Modifier, onStartReadingClick: () ->
             tint = MaterialTheme.colorScheme.onSecondary,
         )
     }
+}
+
+@Preview
+@Composable
+private fun StartReadingButtonPreview(
+    @PreviewParameter(ThemeConfigProvider::class) themeConfig: ThemeConfig
+) {
+    ThemedPreviews(themeConfig) { StartReadingButton(onStartReadingClick = {}) }
 }
