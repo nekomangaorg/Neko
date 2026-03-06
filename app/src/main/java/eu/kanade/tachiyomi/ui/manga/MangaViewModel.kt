@@ -2340,7 +2340,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     ) {
         val targetVolume =
             if (lastReadChapterId != null) {
-                allChapters.find { it.chapter.id == lastReadChapterId }?.chapter?.volume
+                val volume =
+                    allChapters.find { it.chapter.id == lastReadChapterId }?.chapter?.volume
+                if (!volume.isNullOrBlank() && !volume.startsWith("Vol", ignoreCase = true)) {
+                    "Vol.$volume"
+                } else if (volume.isNullOrBlank()) {
+                    "Vol.1"
+                } else {
+                    volume
+                }
             } else {
                 "Vol.1"
             }
