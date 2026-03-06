@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resync
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.manga.updateVisibility
+import eu.kanade.tachiyomi.util.system.activeNetworkState
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.PersistentList
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -767,20 +769,19 @@ class BrowseViewModel() : ViewModel() {
 
     /** Check if can access internet */
     private fun isOnline(): Boolean {
-        // TODO use networkstate  return if (view?.activity?.isOnline() == true) {
-        _browseScreenState.update { it.copy(hideFooterButton = false) }
-        return true
-        /* } else {
-            viewModelScope.launch {
-                _browseScreenState.update {
-                    it.copy(
-                        initialLoading = false,
-                        hideFooterButton = true,
-                        error = UiText.StringResource(R.string.no_network_connection),
-                    )
-                }
+        val isOnline = preferences.context.activeNetworkState().isOnline
+        if (isOnline) {
+            _browseScreenState.update { it.copy(hideFooterButton = false) }
+            return true
+        } else {
+            _browseScreenState.update {
+                it.copy(
+                    initialLoading = false,
+                    hideFooterButton = true,
+                    error = UiText.StringResource(R.string.no_network_connection),
+                )
             }
-            false
-        }*/
+            return false
+        }
     }
 }
