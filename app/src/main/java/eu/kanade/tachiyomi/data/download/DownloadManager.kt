@@ -43,7 +43,7 @@ import uy.kohesive.injekt.injectLazy
  */
 class DownloadManager(
     val context: Context,
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
