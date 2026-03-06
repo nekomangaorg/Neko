@@ -299,7 +299,7 @@ fun getAllRecentsType(
 
 fun getHistoryByMangaId() =
     """
-    SELECT ${History.TABLE}.*
+    SELECT ${History.TABLE}.${History.COL_ID} AS ${History.COL_ID}, ${History.TABLE}.${History.COL_CHAPTER_ID} AS ${History.COL_CHAPTER_ID}, ${History.TABLE}.${History.COL_LAST_READ} AS ${History.COL_LAST_READ}, ${History.TABLE}.${History.COL_TIME_READ} AS ${History.COL_TIME_READ}
     FROM ${History.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${History.TABLE}.${History.COL_CHAPTER_ID} = ${Chapter.TABLE}.${Chapter.COL_ID}
@@ -308,7 +308,7 @@ fun getHistoryByMangaId() =
 
 fun getHistoryByChapterUrl() =
     """
-    SELECT ${History.TABLE}.*
+    SELECT ${History.TABLE}.${History.COL_ID} AS ${History.COL_ID}, ${History.TABLE}.${History.COL_CHAPTER_ID} AS ${History.COL_CHAPTER_ID}, ${History.TABLE}.${History.COL_LAST_READ} AS ${History.COL_LAST_READ}, ${History.TABLE}.${History.COL_TIME_READ} AS ${History.COL_TIME_READ}
     FROM ${History.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${History.TABLE}.${History.COL_CHAPTER_ID} = ${Chapter.TABLE}.${Chapter.COL_ID}
