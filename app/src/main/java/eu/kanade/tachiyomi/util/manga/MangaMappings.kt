@@ -5,8 +5,6 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 
 /**
  * This class provides operations to manage the database through its interfaces.
@@ -32,15 +30,15 @@ class MangaMappings(context: Context) {
 
     @Throws(IOException::class)
     private fun copyDatabase(context: Context, dbFile: File, dbPath: String) {
-        val `is`: InputStream = context.assets.open(dbPath)
-        val os: OutputStream = FileOutputStream(dbFile)
-        val buffer = ByteArray(1024)
-        while (`is`.read(buffer) > 0) {
-            os.write(buffer)
+        context.assets.open(dbPath).use { `is` ->
+            FileOutputStream(dbFile).use { os ->
+                val buffer = ByteArray(1024)
+                while (`is`.read(buffer) > 0) {
+                    os.write(buffer)
+                }
+                os.flush()
+            }
         }
-        os.flush()
-        os.close()
-        `is`.close()
     }
 
     fun getMangadexUUID(id: String, service: String): String? {
