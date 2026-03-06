@@ -64,8 +64,9 @@ class StatsViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
-                _simpleState.value =
+                _simpleState.update {
                     StatsConstants.SimpleState(screenState = StatsConstants.ScreenState.NoResults)
+                }
             } else {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
@@ -91,7 +92,7 @@ class StatsViewModel() : ViewModel() {
                     .map { it.key to it.value.size }
                     .toPersistentList()
 
-                _simpleState.value =
+                _simpleState.update {
                     StatsConstants.SimpleState(
                         screenState = StatsConstants.ScreenState.Simple,
                         mangaCount = libraryList.count(),
@@ -123,6 +124,7 @@ class StatsViewModel() : ViewModel() {
                             if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
                         lastLibraryUpdateDuration = lastUpdateDuration,
                     )
+                }
             }
         }
     }
@@ -174,32 +176,26 @@ class StatsViewModel() : ViewModel() {
                         }
                         .awaitAll()
                         .sortedBy { it.title }
-                _detailState.value =
-                    DetailedState(
-                        isLoading = false,
-                        manga = detailedStatMangaList.toPersistentList(),
-                        categories =
-                            (db.getCategories().executeAsBlocking().map { it.name } +
-                                    listOf(prefs.context.getString(R.string.default_value)))
-                                .toPersistentList(),
-                        tags =
-                            detailedStatMangaList
-                                .asSequence()
-                                .map { it.tags }
-                                .flatten()
-                                .distinct()
-                                .filter { !it.contains("content rating:", true) }
-                                .sortedBy { it }
-                                .toPersistentList(),
-                    )
+
+                val manga = detailedStatMangaList.toPersistentList()
+                val categories =
+                    (db.getCategories().executeAsBlocking().map { it.name } +
+                            listOf(prefs.context.getString(R.string.default_value)))
+                        .toPersistentList()
+                val tags =
+                    manga
+                        .asSequence()
+                        .map { it.tags }
+                        .flatten()
+                        .distinct()
+                        .filter { !it.contains("content rating:", true) }
+                        .sortedBy { it }
+                        .toPersistentList()
 
                 val sortedSeries =
-                    _detailState.value.tags
+                    tags
                         .map { tag ->
-                            tag to
-                                _detailState.value.manga
-                                    .filter { it.tags.contains(tag) }
-                                    .toPersistentList()
+                            tag to manga.filter { it.tags.contains(tag) }.toPersistentList()
                         }
                         .sortedByDescending { it.second.count() }
                         .toPersistentList()
@@ -208,13 +204,17 @@ class StatsViewModel() : ViewModel() {
                     sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
 
                 _detailState.update {
-                    it.copy(
+                    DetailedState(
+                        isLoading = false,
+                        manga = manga,
+                        categories = categories,
+                        tags = tags,
                         detailTagState =
                             StatsConstants.DetailedTagState(
                                 totalReadDuration = totalDuration,
                                 totalChapters = totalCount,
                                 sortedTagPairs = sortedSeries,
-                            )
+                            ),
                     )
                 }
             }
@@ -233,7 +233,7 @@ class StatsViewModel() : ViewModel() {
                     }
                 }
 
-            _simpleState.value = simpleState.value.copy(screenState = newState)
+            _simpleState.update { it.copy(screenState = newState) }
         }
     }
 
