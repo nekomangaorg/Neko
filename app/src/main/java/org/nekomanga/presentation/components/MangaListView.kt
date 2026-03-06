@@ -229,11 +229,11 @@ fun MangaRow(
                 StartReadingButton(onStartReadingClick = onStartReadingClick)
             }
         }
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = isSelected,
-            modifier = modifier.matchParentSize(),
-            enter = androidx.compose.animation.fadeIn(),
-            exit = androidx.compose.animation.fadeOut(),
+            modifier = Modifier.matchParentSize(),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
             Box(
                 modifier =
