@@ -11,12 +11,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import coil3.ColorImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
 import org.nekomanga.ui.theme.withThemes
@@ -31,8 +31,8 @@ private fun MangaGridItemPreview(
         ThemedPreviews(themedDisplayManga.themeConfig) {
             val displayManga = themedDisplayManga.value
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(Size.medium),
+                verticalArrangement = Arrangement.spacedBy(Size.medium),
             ) {
                 // Comfortable Item
                 MangaGridItem(
