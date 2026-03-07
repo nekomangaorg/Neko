@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.similar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -32,6 +34,7 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -115,7 +118,21 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     )
                 }
 
-                val list = repo.fetchSimilar(mangaUUID, forceRefresh)
+                val fetchResult = repo.fetchSimilar(mangaUUID, forceRefresh)
+
+                fetchResult.onFailure { resultError ->
+                    val errorString =
+                        when (resultError) {
+                            is ResultError.Generic -> resultError.errorString
+                            else -> (resultError as ResultError.HttpError).message
+                        }
+                    _similarScreenState.update {
+                        it.copy(isRefreshing = false, error = errorString)
+                    }
+                }
+
+                val list = fetchResult.getOrElse { emptyList() }
+
                 val allDisplayManga =
                     list
                         .associate { group -> group.type to group.manga.toPersistentList() }
