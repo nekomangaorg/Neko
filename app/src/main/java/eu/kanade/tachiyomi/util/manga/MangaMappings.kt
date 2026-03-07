@@ -31,13 +31,7 @@ class MangaMappings(context: Context) {
     @Throws(IOException::class)
     private fun copyDatabase(context: Context, dbFile: File, dbPath: String) {
         context.assets.open(dbPath).use { `is` ->
-            FileOutputStream(dbFile).use { os ->
-                val buffer = ByteArray(1024)
-                while (`is`.read(buffer) > 0) {
-                    os.write(buffer)
-                }
-                os.flush()
-            }
+            FileOutputStream(dbFile).use { os -> `is`.copyTo(os) }
         }
     }
 
