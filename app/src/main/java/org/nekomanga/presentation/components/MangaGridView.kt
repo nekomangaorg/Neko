@@ -141,7 +141,7 @@ fun MangaGrid(
         modifier = Modifier.fillMaxSize().padding(Size.tiny),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(Size.medium),
     ) {
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
             MangaGridItem(
