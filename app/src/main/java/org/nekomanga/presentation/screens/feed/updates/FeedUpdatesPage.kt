@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -106,8 +105,8 @@ private fun Grouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val now = Date().time
-    var timeSpan by remember { mutableStateOf("") }
+    val now = remember { Date().time }
+
     val groupedBySeries =
         remember(feedUpdatesMangaList) {
             feedUpdatesMangaList
@@ -125,53 +124,34 @@ private fun Grouped(
                 .flatten()
         }
 
+    val renderedGroups =
+        remember(groupedBySeries) { groupedBySeries.groupBy { getDateString(it.date, now) } }
+
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
+        var globalIndex = 0
 
-        // 1. Group the already processed list by date string for rendering
-        val renderedGroups = groupedBySeries.groupBy { getDateString(it.date, now) }
-
-        // 2. Iterate through the date groups
         renderedGroups.forEach { (dateString, seriesListForDate) ->
-
-            // 3. Date Header Logic
             if (dateString.isNotEmpty()) {
-                // Find the global index of the first item in this date group
-                // to correctly trigger the header display once per date.
-                val firstItem = seriesListForDate.first()
-                val globalIndex = groupedBySeries.indexOf(firstItem)
-
-                // The 'timeSpan' state needs to track the date string globally to prevent duplicate
-                // headers
-                if (globalIndex == 0) timeSpan = "" // Reset tracker at the start
-
-                if (timeSpan != dateString) {
-                    timeSpan = dateString
-
-                    val prefix =
-                        when (updatesFetchSort) {
-                            true -> R.string.fetched_
-                            false -> R.string.updated_
-                        }
-
-                    item(key = dateString) {
-                        Text(
-                            text = stringResource(id = prefix, dateString),
-                            color = headerColor,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier =
-                                Modifier.padding(
-                                    start = Size.small,
-                                    top = Size.small,
-                                    end = Size.small,
-                                ),
-                        )
+                val prefix =
+                    when (updatesFetchSort) {
+                        true -> R.string.fetched_
+                        false -> R.string.updated_
                     }
+
+                item(key = dateString) {
+                    Text(
+                        text = stringResource(id = prefix, dateString),
+                        color = headerColor,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier =
+                            Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
+                    )
                 }
             }
 
-            // 4. Iterate through the series within the current date group
             seriesListForDate.forEachIndexed { groupIndex, feedManga ->
                 val latestChapter = feedManga.chapters.first()
+                val currentIndex = globalIndex
 
                 val listCardType =
                     when {
@@ -182,13 +162,10 @@ private fun Grouped(
                         else -> ListCardType.Center
                     }
 
-                // 6. Pagination Logic (needs the global index)
-                val globalIndex = groupedBySeries.indexOf(feedManga)
-
                 item(key = "${groupIndex}-${feedManga.mangaId}-${latestChapter.chapter.id}") {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
-                            globalIndex >= groupedBySeries.size - 5 &&
+                            currentIndex >= groupedBySeries.size - 5 &&
                                 hasMoreResults &&
                                 !loadingResults
                         ) {
@@ -196,10 +173,9 @@ private fun Grouped(
                         }
                     }
 
-                    // 7. Wrap UpdatesCard with ExpressiveListCard
                     ExpressiveListCard(
                         modifier = Modifier.padding(horizontal = Size.small),
-                        listCardType = listCardType, // Pass the calculated shape
+                        listCardType = listCardType,
                     ) {
                         UpdatesCard(
                             chapterItem = latestChapter,
@@ -220,11 +196,11 @@ private fun Grouped(
                         )
                     }
 
-                    // Add Gap only if it's not the last card in the date group
                     if (groupIndex != seriesListForDate.size - 1) {
                         Gap(Size.tiny)
                     }
                 }
+                globalIndex++
             }
         }
     }
@@ -245,16 +221,21 @@ private fun Ungrouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val now = Date().time
-    var timeSpan by remember { mutableStateOf("") }
+    val now = remember { Date().time }
+
+    val groupedManga =
+        remember(feedUpdatesMangaList) {
+            feedUpdatesMangaList.groupBy { getDateString(it.date, now) }
+        }
+
+    val totalChapterCount =
+        remember(feedUpdatesMangaList) { feedUpdatesMangaList.sumOf { it.chapters.size } }
 
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
-        val groupedManga = feedUpdatesMangaList.groupBy { getDateString(it.date, now) }
+        var globalIndex = 0
 
         groupedManga.forEach { (dateString, mangaListForDate) ->
-            if (dateString.isNotEmpty() && timeSpan != dateString) {
-                timeSpan = dateString
-
+            if (dateString.isNotEmpty()) {
                 val prefix =
                     when (updatesFetchSort) {
                         true -> R.string.fetched_
@@ -278,6 +259,7 @@ private fun Ungrouped(
                 }
 
             chaptersForDate.forEachIndexed { chapterIndex, (feedManga, chapterItem) ->
+                val currentIndex = globalIndex
                 val listCardType =
                     when {
                         chapterIndex == 0 && chaptersForDate.size > 1 -> ListCardType.Top
@@ -287,15 +269,12 @@ private fun Ungrouped(
                         else -> ListCardType.Center
                     }
 
-                val globalIndex =
-                    feedUpdatesMangaList.indexOf(feedManga) // Used for pagination only
-
                 item(
                     key = "$dateString-$chapterIndex-${feedManga.mangaId}-${chapterItem.chapter.id}"
                 ) {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
-                            globalIndex >= feedUpdatesMangaList.size - 5 &&
+                            currentIndex >= totalChapterCount - 5 &&
                                 hasMoreResults &&
                                 !loadingResults
                         ) {
@@ -304,7 +283,7 @@ private fun Ungrouped(
                     }
                     ExpressiveListCard(
                         modifier = Modifier.padding(horizontal = Size.small),
-                        listCardType = listCardType, // Pass the correct type
+                        listCardType = listCardType,
                     ) {
                         UpdatesCard(
                             chapterItem = chapterItem,
@@ -328,6 +307,7 @@ private fun Ungrouped(
                         Gap(Size.tiny)
                     }
                 }
+                globalIndex++
             }
         }
     }

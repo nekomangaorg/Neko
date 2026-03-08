@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -50,20 +49,23 @@ fun FeedHistoryPage(
     }
     val scrollState = rememberLazyListState()
 
-    val now = Date().time
-    var timeSpan by remember { mutableStateOf("") }
+    val now = remember { Date().time }
+
+    val groupedHistory =
+        remember(feedHistoryMangaList, historyGrouping) {
+            feedHistoryMangaList.groupBy { feedManga ->
+                getDateString(feedManga.chapters.first().chapter.lastRead, now, historyGrouping)
+            }
+        }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = scrollState,
         contentPadding = contentPadding,
     ) {
-        feedHistoryMangaList.forEachIndexed { index, feedManga ->
-            val dateString =
-                getDateString(feedManga.chapters.first().chapter.lastRead, now, historyGrouping)
-            if (dateString.isNotEmpty() && timeSpan != dateString) {
-                timeSpan = dateString
-
+        var globalIndex = 0
+        groupedHistory.forEach { (dateString, mangaListForDate) ->
+            if (dateString.isNotEmpty()) {
                 item(key = "header-$dateString") {
                     Text(
                         text = dateString,
@@ -73,33 +75,41 @@ fun FeedHistoryPage(
                     )
                 }
             } else {
-                item(key = "gap-$index") { Gap(Size.small) }
+                item(key = "gap-group-$globalIndex") { Gap(Size.small) }
             }
 
-            item(key = "$index-${feedManga.mangaId}") {
-                LaunchedEffect(scrollState, loadingResults) {
-                    if (
-                        index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults
-                    ) {
-                        loadNextPage()
+            mangaListForDate.forEachIndexed { indexInGroup, feedManga ->
+                val currentIndex = globalIndex
+                item(key = "$currentIndex-${feedManga.mangaId}") {
+                    LaunchedEffect(scrollState, loadingResults) {
+                        if (
+                            currentIndex >= feedHistoryMangaList.size - 5 &&
+                                hasMoreResults &&
+                                !loadingResults
+                        ) {
+                            loadNextPage()
+                        }
                     }
+                    HistoryCard(
+                        feedManga = feedManga,
+                        outlineCover = outlineCovers,
+                        dynamicCover = dynamicCovers,
+                        outlineCard = outlineCards,
+                        groupedBySeries = historyGrouping == FeedHistoryGroup.Series,
+                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                        chapterClick = { chapterId ->
+                            feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
+                        },
+                        deleteAllHistoryClick = {
+                            feedScreenActions.deleteAllHistoryClick(feedManga)
+                        },
+                        deleteHistoryClick = { chp ->
+                            feedScreenActions.deleteHistoryClick(feedManga, chp)
+                        },
+                    )
+                    Gap(Size.tiny)
                 }
-                HistoryCard(
-                    feedManga = feedManga,
-                    outlineCover = outlineCovers,
-                    dynamicCover = dynamicCovers,
-                    outlineCard = outlineCards,
-                    groupedBySeries = historyGrouping == FeedHistoryGroup.Series,
-                    mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                    chapterClick = { chapterId ->
-                        feedScreenActions.chapterClick(feedManga.mangaId, chapterId)
-                    },
-                    deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
-                    deleteHistoryClick = { chp ->
-                        feedScreenActions.deleteHistoryClick(feedManga, chp)
-                    },
-                )
-                Gap(Size.tiny)
+                globalIndex++
             }
         }
     }
