@@ -799,7 +799,7 @@ private fun rememberThemeColorState(
 
     val defaultColorState = defaultThemeColorState()
 
-    return remember(themeBasedOffCovers, vibrantColor, isDark) {
+    return remember(themeBasedOffCovers, vibrantColor, isDark, surfaceColor, onSurfaceColor, defaultColorState) {
         if (themeBasedOffCovers && vibrantColor != null) {
             val color = getButtonThemeColor(Color(vibrantColor), isDark)
             val containerColor =
