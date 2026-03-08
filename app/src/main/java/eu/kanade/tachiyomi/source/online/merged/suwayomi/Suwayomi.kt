@@ -104,7 +104,7 @@ class Suwayomi : MergedServerSource() {
                     val err =
                         result.body.string().replace(
                             ".*<div class=\"error\">([^<]*)</div>.*"
-                                .toRegex(RegexOption.DOT_MATCHES_ALL),
+                                .toRegex(RegexOption.DOT_MATCHES_ALL)
                         ) {
                             it.groups[1]!!.value
                         }
@@ -121,13 +121,13 @@ class Suwayomi : MergedServerSource() {
                                 POST(
                                     "${url ?: hostUrl()}/api/graphql",
                                     body = refreshTokenFormBuilder(),
-                                ),
+                                )
                             )
                             .execute()
                             .body
                             .use {
                                 json.decodeFromString<SuwayomiGraphQLDto<SuwayomiRefreshTokenDto>>(
-                                    it.string(),
+                                    it.string()
                                 )
                             }
 
@@ -147,7 +147,7 @@ class Suwayomi : MergedServerSource() {
                                 "${url ?: hostUrl()}/api/graphql",
                                 baseHeaders,
                                 loginFormBuilder(user, pass),
-                            ),
+                            )
                         )
                         .execute()
                         .body
@@ -173,17 +173,17 @@ class Suwayomi : MergedServerSource() {
             put("input", buildJsonObject { put("refreshToken", JsonPrimitive(refreshToken)) })
         }
         return buildJsonObject {
-            put("operationName", JsonPrimitive("REFRESH_LOGIN_TOKEN"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "mutation REFRESH_LOGIN_TOKEN(\$input RefreshTokenInput!) {" +
-                        "refreshToken(input: \$input) {" +
-                        "accessToken}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("REFRESH_LOGIN_TOKEN"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation REFRESH_LOGIN_TOKEN(\$input RefreshTokenInput!) {" +
+                            "refreshToken(input: \$input) {" +
+                            "accessToken}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
@@ -199,17 +199,17 @@ class Suwayomi : MergedServerSource() {
             )
         }
         return buildJsonObject {
-            put("operationName", JsonPrimitive("GET_LOGIN_TOKEN"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "mutation GET_LOGIN_TOKEN (\$input: LoginInput!) {" +
-                        "login(input: \$input) {" +
-                        "accessToken refreshToken}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("GET_LOGIN_TOKEN"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation GET_LOGIN_TOKEN (\$input: LoginInput!) {" +
+                            "login(input: \$input) {" +
+                            "accessToken refreshToken}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
@@ -313,8 +313,7 @@ class Suwayomi : MergedServerSource() {
 
         return responseBody.use { body ->
             with(json.decodeFromString<SuwayomiGraphQLDto<SuwayomiSearchMangaDto>>(body.string())) {
-                (data ?: throw Exception("Failed to search manga")).mangas.nodes.mapNotNull {
-                        manga,
+                (data ?: throw Exception("Failed to search manga")).mangas.nodes.mapNotNull { manga
                     ->
                     manga.source ?: return@mapNotNull null
                     SManga.create().apply {
@@ -329,24 +328,27 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    fun searchMangaFormBuilder(query: String): RequestBody =
-        buildJsonObject {
-            put("operationName", JsonPrimitive("SEARCH_MANGA"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "query SEARCH_MANGA{" +
-                        "mangas(condition:{inLibrary:true}," +
-                        "filter:{title:{includesInsensitive:\"${query}\"}}){" +
-                        "nodes{id title thumbnailUrl source{name lang}}}}",
-                ),
-            )
-        }
+    fun searchMangaFormBuilder(query: String): RequestBody {
+        val variables = buildJsonObject { put("input", JsonPrimitive(query)) }
+        return buildJsonObject {
+                put("operationName", JsonPrimitive("SEARCH_MANGA"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "query SEARCH_MANGA(\$input:String){" +
+                            "mangas(condition:{inLibrary:true}," +
+                            "filter:{title:{includesInsensitive:\$input}}){" +
+                            "nodes{id title thumbnailUrl source{name lang}}}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
+    }
 
     override suspend fun fetchChapters(
-        mangaUrl: String,
+        mangaUrl: String
     ): Result<List<SChapterStatusPair>, ResultError> {
         val separator = if (mangaUrl.contains(Constants.SEPARATOR)) Constants.SEPARATOR else " "
         val parts = mangaUrl.split(separator, limit = 3)
@@ -374,16 +376,16 @@ class Suwayomi : MergedServerSource() {
                                         apiUrl,
                                         headers,
                                         fetchChaptersFormBuilder(mangaId.toLong()),
-                                    ),
+                                    )
                                 )
                                 .await()
                                 .body
                                 .use {
                                     json
                                         .decodeFromString<
-                                            SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>,
-                                            >(
-                                            it.string(),
+                                            SuwayomiGraphQLDto<SuwayomiFetchChaptersDto>
+                                        >(
+                                            it.string()
                                         )
                                         .data
                                         ?.fetchChapters
@@ -399,16 +401,16 @@ class Suwayomi : MergedServerSource() {
                         chapters =
                             client
                                 .newCall(
-                                    POST(apiUrl, headers, getChaptersFormBuilder(mangaId.toLong())),
+                                    POST(apiUrl, headers, getChaptersFormBuilder(mangaId.toLong()))
                                 )
                                 .await()
                                 .body
                                 .use {
                                     json
                                         .decodeFromString<
-                                            SuwayomiGraphQLDto<SuwayomiGetChaptersDto>,
-                                            >(
-                                            it.string(),
+                                            SuwayomiGraphQLDto<SuwayomiGetChaptersDto>
+                                        >(
+                                            it.string()
                                         )
                                         .data
                                         ?.chapters
@@ -483,10 +485,10 @@ class Suwayomi : MergedServerSource() {
                 if (vol != previous.volume) chapter else -1f
             } else if (
                 next == null ||
-                previous.chapter == null ||
-                next <= previous.chapter ||
-                next <= 0 ||
-                chapter <= next
+                    previous.chapter == null ||
+                    next <= previous.chapter ||
+                    next <= 0 ||
+                    chapter <= next
             )
                 chapter
             else -1f
@@ -495,8 +497,8 @@ class Suwayomi : MergedServerSource() {
         val edgeCases = edgeCases.toMutableList()
         if (
             previous.chapter != null &&
-            previous.chapter > chaperNumber &&
-            edgeCases.any { rawName.contains(it, true) }
+                previous.chapter > chaperNumber &&
+                edgeCases.any { rawName.contains(it, true) }
         ) {
             var chapterNumber = previous.chapter.toLong()
             val half =
@@ -561,7 +563,6 @@ class Suwayomi : MergedServerSource() {
 
         val chapterName = mutableListOf<String>()
 
-
         if (vol.isEmpty())
             title.sanitizeVolume(volumePrefixes).apply {
                 vol = first
@@ -588,8 +589,8 @@ class Suwayomi : MergedServerSource() {
                         chapterPrefixes.forEach {
                             if (
                                 title.contains(ch) &&
-                                title.contains(it) &&
-                                title.substringAfter(it).substringBefore(ch).trim().isEmpty()
+                                    title.contains(it) &&
+                                    title.substringAfter(it).substringBefore(ch).trim().isEmpty()
                             ) {
                                 val pre = title.substringBefore(it).trimEnd()
                                 val pos = title.substringAfter(it).substringAfter(ch).trimStart()
@@ -640,8 +641,8 @@ class Suwayomi : MergedServerSource() {
                 if (prefix == "Ep" && title.startsWith("Epilogue")) return@any false
                 if (
                     prefix == "Season" &&
-                    title.contains("Announcement") &&
-                    Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)
+                        title.contains("Announcement") &&
+                        Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)
                 )
                     return@any false
                 val delimiter =
@@ -680,17 +681,17 @@ class Suwayomi : MergedServerSource() {
             put("input", buildJsonObject { put("mangaId", JsonPrimitive(mangaId)) })
         }
         return buildJsonObject {
-            put("operationName", JsonPrimitive("FETCH_MANGA_CHAPTERS"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "mutation FETCH_MANGA_CHAPTERS(\$input: FetchChaptersInput!){" +
-                        "fetchChapters(input: \$input) { chapters{" +
-                        "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("FETCH_MANGA_CHAPTERS"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation FETCH_MANGA_CHAPTERS(\$input: FetchChaptersInput!){" +
+                            "fetchChapters(input: \$input) { chapters{" +
+                            "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
@@ -703,17 +704,17 @@ class Suwayomi : MergedServerSource() {
         val variables = buildJsonObject { put("filter", filter) }
 
         return buildJsonObject {
-            put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "query GET_MANGA_CHAPTERS(\$filter: ChapterFilterInput!) {" +
-                        "chapters(filter: \$filter) { nodes {" +
-                        "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("GET_MANGA_CHAPTERS"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "query GET_MANGA_CHAPTERS(\$filter: ChapterFilterInput!) {" +
+                            "chapters(filter: \$filter) { nodes {" +
+                            "id name chapterNumber sourceOrder uploadDate isRead scanlator}}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
@@ -745,16 +746,16 @@ class Suwayomi : MergedServerSource() {
             put("input", buildJsonObject { put("chapterId", JsonPrimitive(chapterId)) })
         }
         return buildJsonObject {
-            put("operationName", JsonPrimitive("GET_CHAPTER_PAGES_FETCH"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "mutation GET_CHAPTER_PAGES_FETCH(\$input:FetchChapterPagesInput!){" +
-                        "fetchChapterPages(input:\$input){pages}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("GET_CHAPTER_PAGES_FETCH"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation GET_CHAPTER_PAGES_FETCH(\$input:FetchChapterPagesInput!){" +
+                            "fetchChapterPages(input:\$input){pages}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
@@ -785,16 +786,16 @@ class Suwayomi : MergedServerSource() {
             )
         }
         return buildJsonObject {
-            put("operationName", JsonPrimitive("UPDATE_CHAPTERS"))
-            put(
-                "query",
-                JsonPrimitive(
-                    "mutation UPDATE_CHAPTERS(\$input:UpdateChaptersInput!){" +
-                        "updateChapters(input:\$input){__typename}}",
-                ),
-            )
-            put("variables", variables)
-        }
+                put("operationName", JsonPrimitive("UPDATE_CHAPTERS"))
+                put(
+                    "query",
+                    JsonPrimitive(
+                        "mutation UPDATE_CHAPTERS(\$input:UpdateChaptersInput!){" +
+                            "updateChapters(input:\$input){__typename}}"
+                    ),
+                )
+                put("variables", variables)
+            }
             .toString()
             .toRequestBody("application/json".toMediaType())
     }
