@@ -16,7 +16,7 @@ import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ColumnScope.sheetHandle() {
-    Gap(16.dp)
+    Gap(Size.medium)
     Box(
         modifier =
             Modifier.width(50.dp)

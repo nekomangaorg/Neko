@@ -78,7 +78,7 @@ fun EditCategorySheet(
 
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
-            Gap(16.dp)
+            Gap(Size.medium)
             Row(
                 modifier = paddingModifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -100,7 +100,7 @@ fun EditCategorySheet(
                     )
                 }
             }
-            Gap(16.dp)
+            Gap(Size.medium)
             Divider()
 
             LazyColumn(
