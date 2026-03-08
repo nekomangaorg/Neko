@@ -97,12 +97,7 @@ class SimilarHandler {
             val recommendedMangaList =
                 mangaList.data
                     .sortedByDescending { mangaIdMap[it.id] }
-                    .map {
-                        it.toRelatedMangaDto(
-                            thumbQuality,
-                            "%.2f".format(100 * (mangaIdMap[it.id] ?: 0f)) + "% match",
-                        )
-                    }
+                    .map { it.toRelatedMangaDto(thumbQuality, "") }
 
             // Update the Manga Similar database
             val mangaDb = db.getSimilar(dexId).executeAsBlocking()

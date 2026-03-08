@@ -9,7 +9,6 @@ import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -26,9 +25,6 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
     private val trackingSyncService: TrackSyncProcessor by injectLazy()
-
-    // List containing failed updates
-    private val failedUpdates = mutableMapOf<Manga, String?>()
 
     private val progressNotification =
         with(applicationContext.notificationBuilder(Notifications.Channel.Tracking)) {
@@ -88,10 +84,6 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
             Notifications.Id.Tracking.Complete,
             notification,
         )
-    }
-
-    private fun failed(manga: Manga, error: String) {
-        failedUpdates[manga] = error
     }
 
     companion object {

@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.ui.theme.ThemeConfig
 import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
@@ -51,7 +52,7 @@ fun SortRow(
                         changeSortState(sortState, sortChanged)
                     }
                 }
-                .padding(horizontal = 12.dp, vertical = 16.dp),
+                .padding(horizontal = Size.smedium, vertical = Size.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (sortState) {
@@ -75,7 +76,7 @@ fun SortRow(
                 Gap(24.dp)
             }
         }
-        Gap(16.dp)
+        Gap(Size.medium)
         Text(text = rowText, style = rowTextStyle, color = textColor)
     }
 }

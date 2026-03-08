@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.ui.theme.ThemeConfig
 import org.nekomanga.ui.theme.ThemeConfigProvider
 import org.nekomanga.ui.theme.ThemedPreviews
@@ -220,7 +221,7 @@ private fun PreviewNumberPicker(
             value = selectedNumber,
             items = numberItems,
             onValueChange = { newValue -> selectedNumber = newValue },
-            modifier = Modifier.width(150.dp).padding(bottom = 16.dp),
+            modifier = Modifier.width(150.dp).padding(bottom = Size.medium),
             visibleItemsCount = 5,
         )
     }
