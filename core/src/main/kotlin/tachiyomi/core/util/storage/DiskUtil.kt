@@ -2,6 +2,7 @@ package tachiyomi.core.util.storage
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
 import android.os.StatFs
@@ -87,15 +88,17 @@ object DiskUtil {
 
     /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, file: File) {
-        scanMedia(context, Uri.fromFile(file))
+        MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
     }
 
     /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, uri: Uri) {
-        val action = Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
-        val mediaScanIntent = Intent(action)
-        mediaScanIntent.data = uri
-        context.sendBroadcast(mediaScanIntent)
+        if (uri.scheme == "file" && uri.path != null) {
+            MediaScannerConnection.scanFile(context, arrayOf(uri.path!!), null, null)
+        } else {
+            @Suppress("DEPRECATION")
+            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+        }
     }
 
     /**
