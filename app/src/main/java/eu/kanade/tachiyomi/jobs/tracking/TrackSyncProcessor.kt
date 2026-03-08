@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,13 +18,13 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class TrackSyncProcessor {
+class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
     val db: DatabaseHelper = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
 
-    val scope = CoroutineScope(Dispatchers.IO)
+    val scope = CoroutineScope(dispatcher)
 
     suspend fun process(
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
