@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,7 +53,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                 loggedServices
                                     .firstOrNull { it.id == autoAddTrackerId }
                                     ?.let { trackService ->
-                                        scope.launchIO {
+                                        scope.launch {
                                             try {
                                                 val trackServiceItem =
                                                     trackService.toTrackServiceItem()
@@ -104,7 +103,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
             tracks.forEach { track ->
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service in loggedServices) {
-                    scope.launchIO {
+                    scope.launch {
                         try {
                             val newTrack = service.refresh(track)
                             db.insertTrack(newTrack).executeOnIO()
