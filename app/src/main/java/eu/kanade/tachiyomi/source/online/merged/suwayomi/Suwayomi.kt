@@ -415,7 +415,7 @@ class Suwayomi : MergedServerSource() {
                                 }
                     }
                     chapters = chapters.sortedBy { it.sourceOrder }
-                    var previous: Pair<Float?, Boolean> = null to false
+                    var previous = Previous()
                     val chapterPairs =
                         chapters
                             .mapIndexed { index, chapter ->
@@ -437,7 +437,12 @@ class Suwayomi : MergedServerSource() {
                                         chapter_txt = sanitized.chapter_txt
                                         chapter_title = sanitized.chapter_title
                                         // For next
-                                        previous = chapter_number to sanitized.premiere
+                                        previous =
+                                            Previous(
+                                                chapter_number,
+                                                sanitized.premiere,
+                                                sanitized.vol,
+                                            )
                                     } else {
                                         name = chapter.name
                                         chapter_number = chapter.chapterNumber
@@ -465,105 +470,7 @@ class Suwayomi : MergedServerSource() {
         }
     }
 
-    fun sanitizeName(
-        rawName: String,
-        chapter: Float,
-        previous: Pair<Float?, Boolean>,
-        next: Float?,
-    ): Name {
-        val edgeCases =
-            mutableListOf(
-                "season",
-                "end",
-                "epilogue",
-                "original story",
-                "side story",
-                "special episode",
-                "episode special",
-                "finale",
-            )
-        val chapter =
-            if (
-                (next != null &&
-                    previous.first != null &&
-                    next > previous.first!! &&
-                    next > 0 &&
-                    chapter > next) ||
-                    (previous.first != null && chapter < previous.first!! && chapter > 0)
-            ) {
-                // Assume that the source order is correct and the match was a false positive
-                -1f
-            } else {
-                chapter
-            }
-        if (chapter < 0) {
-            if (rawName.contains("prologue", true)) {
-                return Name.Sanitized("Ch.0 - $rawName", "", 0f, "Ch.0", rawName)
-            }
-            if (next != null && previous.first != null) {
-                if (next <= previous.first!! + 1) {
-                    val chnum = previous.first!! + 0.1f
-                    val title = rawName.trimEnd('.')
-                    return Name.Sanitized(
-                        "Ch.${chnum.formatFloat()} - $title",
-                        "",
-                        chnum,
-                        "Ch.${chnum.formatFloat()}",
-                        title,
-                    )
-                } else if (previous.first == next - 2) {
-                    return Name.Sanitized(
-                        "Ch.${next - 1} - $rawName",
-                        "",
-                        next - 1,
-                        "Ch.0",
-                        rawName,
-                    )
-                }
-            }
-            // Source info is not sane enough, sanitizing won't work
-            if (!rawName.contains("end", true)) return Name.NotSane
-        }
-
-        // This is for bato.to normalization
-        if (
-            previous.first != null &&
-                previous.first!! > chapter &&
-                edgeCases.any { rawName.contains(it, true) }
-        ) {
-            var chapterNumber = previous.first!!.toLong()
-            val half =
-                if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
-                    edgeCases.add("announcement")
-                    ".5"
-                } else {
-                    if (!previous.second) chapterNumber += 1
-                    ""
-                }
-            val chtxt = "Ch.$chapterNumber$half"
-            val title = removeEndTag(rawName)
-            val name = listOf(chtxt, "-", title).joinToString(" ")
-            edgeCases.remove("season")
-            return Name.Sanitized(
-                name,
-                "",
-                chapterNumber.toFloat(),
-                chtxt,
-                rawName,
-                !edgeCases.any { rawName.contains(it, true) },
-            )
-        }
-
-        var vol = ""
-        val ch =
-            if (chapter == chapter.toLong().toFloat()) {
-                chapter.toLong().toString()
-            } else {
-                chapter.formatFloat()
-            }
-
-        var title = rawName.replaceFirst(emojiRegex, "").trimStart()
-        val chapterName = mutableListOf<String>()
+    fun sanitizeName(rawName: String, chapter: Float, previous: Previous, next: Float?): Name {
         val volumePrefixes =
             arrayOf(
                 "Volume",
@@ -579,6 +486,106 @@ class Suwayomi : MergedServerSource() {
                 "(s",
                 "[s",
             )
+        var title = rawName.replaceFirst(emojiRegex, "").trimStart()
+        var vol = ""
+        val chapter =
+            if (previous.chapter != null && chapter < previous.chapter && chapter > 0) {
+                title.sanitizeVolume(volumePrefixes).apply {
+                    vol = first
+                    title = second
+                }
+                if (vol != previous.volume) chapter else -1f
+            } else if (
+                next == null ||
+                    previous.chapter == null ||
+                    next <= previous.chapter ||
+                    next <= 0 ||
+                    chapter <= next
+            )
+                chapter
+            else -1f
+
+        // This is for bato.to normalization, and some other sources
+        val edgeCases =
+            mutableListOf(
+                "season",
+                "end",
+                "epilogue",
+                "original story",
+                "side story",
+                "special episode",
+                "episode special",
+                "finale",
+                "spin-off",
+                "afterword",
+            )
+        if (
+            previous.chapter != null &&
+                previous.chapter > chapter &&
+                edgeCases.any { rawName.contains(it, true) }
+        ) {
+            var chapterNumber = previous.chapter.toLong()
+            val half =
+                if (rawName.contains("season", true) && rawName.contains("announcement", true)) {
+                    edgeCases.add("announcement")
+                    ".5"
+                } else if (rawName.contains("afterword", true)) {
+                    ".5"
+                } else {
+                    if (!previous.premiere) chapterNumber += 1
+                    ""
+                }
+            val chtxt = "Ch.$chapterNumber$half"
+            val title = removeEndTag(rawName)
+            val name = listOf(chtxt, "-", title).joinToString(" ")
+            edgeCases.remove("season")
+            return Name.Sanitized(
+                name,
+                previous.volume,
+                chapterNumber.toFloat(),
+                chtxt,
+                rawName,
+                !edgeCases.any { rawName.contains(it, true) },
+            )
+        }
+
+        if (chapter < 0) {
+            if (rawName.contains("prologue", true)) {
+                return Name.Sanitized("Ch.0 - $rawName", "", 0f, "Ch.0", rawName)
+            }
+            if (next != null && previous.chapter != null) {
+                if (next <= previous.chapter + 1) {
+                    val chnum = previous.chapter + 0.1f
+                    val title = rawName.trimEnd('.')
+                    return Name.Sanitized(
+                        "Ch.${chnum.formatFloat()} - $title",
+                        "",
+                        chnum,
+                        "Ch.${chnum.formatFloat()}",
+                        title,
+                    )
+                } else if (previous.chapter == next - 2) {
+                    return Name.Sanitized(
+                        "Ch.${next - 1} - $rawName",
+                        "",
+                        next - 1,
+                        "Ch.${next - 1}",
+                        rawName,
+                    )
+                }
+            }
+            // Source info is not sane enough, sanitizing won't work
+            if (!rawName.contains("end", true)) return Name.NotSane
+        }
+
+        val ch =
+            if (chapter == chapter.toLong().toFloat()) {
+                chapter.toLong().toString()
+            } else {
+                chapter.formatFloat()
+            }
+
+        val chapterName = mutableListOf<String>()
         val chapterPrefixes =
             arrayOf(
                 "Chapter",
@@ -599,30 +606,13 @@ class Suwayomi : MergedServerSource() {
                 "ep",
             )
 
-        volumePrefixes.any { prefix ->
-            if (title.startsWith(prefix)) {
-                if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
-                if (prefix == "Ep" && title.startsWith("Epilogue")) return@any false
-                if (
-                    prefix == "Season" &&
-                        title.contains("Announcement") &&
-                        Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)
-                )
-                    return@any false
-                val delimiter =
-                    when (prefix[0]) {
-                        '(' -> ")"
-                        '[' -> "]"
-                        else -> " "
-                    }
-                title = title.replaceFirst(prefix, "").trimStart()
-                vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
-                title = title.substringAfter(delimiter).trimStart()
-                if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
-                return@any true
+        if (vol.isEmpty())
+            title.sanitizeVolume(volumePrefixes).apply {
+                vol = first
+                title = second
             }
-            false
-        }
+        if (vol.isNotEmpty()) chapterName.add("Vol.$vol")
+
         val chtxt = "Ch.$ch"
         chapterName.add(chtxt)
         var matched =
@@ -683,6 +673,35 @@ class Suwayomi : MergedServerSource() {
         df.maximumFractionDigits = 3
         df.isGroupingUsed = false
         return df.format(this.toBigDecimal().stripTrailingZeros())
+    }
+
+    fun String.sanitizeVolume(volumePrefixes: Array<String>): Pair<String, String> {
+        var title = this
+        var vol = ""
+        volumePrefixes.any { prefix ->
+            if (title.startsWith(prefix)) {
+                if (prefix == "S" && !Regex("[Ss]\\d+.*").matches(title)) return@any false
+                if (prefix == "Ep" && title.startsWith("Epilogue")) return@any false
+                if (
+                    prefix == "Season" &&
+                        title.contains("Announcement") &&
+                        Regex(".*\\(ch\\. \\d+\\.?\\d*\\).*").matches(title)
+                )
+                    return@any false
+                val delimiter =
+                    when (prefix[0]) {
+                        '(' -> ")"
+                        '[' -> "]"
+                        else -> " "
+                    }
+                title = title.replaceFirst(prefix, "").trimStart()
+                vol = title.trimStart('0').substringBefore(delimiter, "").trimEnd(',', '.', ';')
+                title = title.substringAfter(delimiter).trimStart()
+                return@any true
+            }
+            false
+        }
+        return vol to title
     }
 
     fun removeEndTag(title: String): String {
@@ -842,6 +861,12 @@ sealed class Name {
 
     data object NotSane : Name()
 }
+
+data class Previous(
+    val chapter: Float? = null,
+    val premiere: Boolean = false,
+    val volume: String = "",
+)
 
 enum class LoginMode(val titleResId: Int) {
     None(R.string.suwayomi_login_mode_none),
