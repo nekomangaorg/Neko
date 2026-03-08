@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.jobs.tracking
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -91,7 +93,17 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>().addTag(TAG).build()
+            val constraints =
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
+                    .build()
+
+            val request =
+                OneTimeWorkRequestBuilder<TrackingSyncJob>()
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
