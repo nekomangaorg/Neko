@@ -52,7 +52,7 @@ fun SortRow(
                         changeSortState(sortState, sortChanged)
                     }
                 }
-                .padding(horizontal = 12.dp, vertical = Size.medium),
+                .padding(horizontal = Size.smedium, vertical = Size.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (sortState) {
