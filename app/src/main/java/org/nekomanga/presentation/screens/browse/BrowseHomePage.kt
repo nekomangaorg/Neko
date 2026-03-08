@@ -104,8 +104,7 @@ fun BrowseHomePage(
                     horizontalArrangement = Arrangement.spacedBy(Size.small),
                     contentPadding = PaddingValues(horizontal = Size.small),
                 ) {
-                    // Bolt ⚡ perf: Reuse pre-filtered `mangaList` to avoid O(N) allocation and
-                    // filtering on every recomposition
+                    // Bolt ⚡ perf: Reuse pre-filtered mangaList to avoid duplicate filtering.
                     items(items = mangaList, key = { displayManga -> displayManga.mangaId }) {
                         displayManga ->
                         Box {
