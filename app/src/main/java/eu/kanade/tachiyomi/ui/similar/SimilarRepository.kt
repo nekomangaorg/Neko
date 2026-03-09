@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -42,89 +44,53 @@ class SimilarRepository {
                     false -> forceRefresh
                 }
 
-            val relatedAsync = async {
-                logTimeTaken(" Related Rec:") {
-                    similarHandler
-                        .fetchRelated(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.related_type, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get related: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val relatedAsync =
+                fetchSimilarGroupAsync(
+                    " Related Rec:",
+                    { similarHandler.fetchRelated(dexId, actualRefresh) },
+                    R.string.related_type,
+                    "Failed to get related",
+                )
 
-            val recommendedAsync = async {
-                logTimeTaken(" Recommended Rec:") {
-                    similarHandler
-                        .fetchRecommended(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.recommended_type, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get recommended: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val recommendedAsync =
+                fetchSimilarGroupAsync(
+                    " Recommended Rec:",
+                    { similarHandler.fetchRecommended(dexId, actualRefresh) },
+                    R.string.recommended_type,
+                    "Failed to get recommended",
+                )
 
-            val similarAsync = async {
-                logTimeTaken("Similar Recs:") {
-                    similarHandler
-                        .fetchSimilar(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.similar_type, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get similar: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val similarAsync =
+                fetchSimilarGroupAsync(
+                    "Similar Recs:",
+                    { similarHandler.fetchSimilar(dexId, actualRefresh) },
+                    R.string.similar_type,
+                    "Failed to get similar",
+                )
 
-            val muAsync = async {
-                logTimeTaken("MU Recs:") {
-                    similarHandler
-                        .fetchSimilarExternalMUManga(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.manga_updates, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get MU recs: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val muAsync =
+                fetchSimilarGroupAsync(
+                    "MU Recs:",
+                    { similarHandler.fetchSimilarExternalMUManga(dexId, actualRefresh) },
+                    R.string.manga_updates,
+                    "Failed to get MU recs",
+                )
 
-            val anilistAsync = async {
-                logTimeTaken("Anilist Recs:") {
-                    similarHandler
-                        .fetchAnilist(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.anilist, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get anilist recs: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val anilistAsync =
+                fetchSimilarGroupAsync(
+                    "Anilist Recs:",
+                    { similarHandler.fetchAnilist(dexId, actualRefresh) },
+                    R.string.anilist,
+                    "Failed to get anilist recs",
+                )
 
-            val malAsync = async {
-                logTimeTaken("Mal Recs:") {
-                    similarHandler
-                        .fetchSimilarExternalMalManga(dexId, actualRefresh)
-                        .mapBoth(
-                            success = { createGroup(R.string.myanimelist, it) },
-                            failure = {
-                                TimberKt.e { "Failed to get mal recs: ${it}" }
-                                it
-                            },
-                        )
-                }
-            }
+            val malAsync =
+                fetchSimilarGroupAsync(
+                    "Mal Recs:",
+                    { similarHandler.fetchSimilarExternalMalManga(dexId, actualRefresh) },
+                    R.string.myanimelist,
+                    "Failed to get mal recs",
+                )
 
             val rawResults =
                 listOfNotNull(
@@ -147,7 +113,28 @@ class SimilarRepository {
         }
     }
 
+    private fun CoroutineScope.fetchSimilarGroupAsync(
+        logMessage: String,
+        fetchCall: suspend () -> Result<List<SourceManga>, ResultError>,
+        @StringRes titleRes: Int,
+        errorLogMessage: String,
+    ): Deferred<Any?> {
+        return async {
+            logTimeTaken(logMessage) {
+                fetchCall()
+                    .mapBoth(
+                        success = { createGroup(titleRes, it) },
+                        failure = {
+                            TimberKt.e { "$errorLogMessage: $it" }
+                            it
+                        },
+                    )
+            }
+        }
+    }
+
     private fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
+
         return if (manga.isEmpty()) {
             null
         } else {

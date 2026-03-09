@@ -124,7 +124,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     val errorString =
                         when (resultError) {
                             is ResultError.Generic -> resultError.errorString
-                            else -> (resultError as ResultError.HttpError).message
+                            is ResultError.HttpError -> resultError.message
                         }
                     _similarScreenState.update {
                         it.copy(isRefreshing = false, error = errorString)

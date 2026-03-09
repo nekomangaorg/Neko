@@ -7,6 +7,7 @@ import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
@@ -48,23 +49,12 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         if (forceRefresh) {
-            val relatedResponse = withIOContext { networkServices.service.relatedManga(dexId) }
-            if (relatedResponse is ApiResponse.Failure) {
-                TimberKt.e { "trying to get related manga, $relatedResponse" }
-                return when (relatedResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                relatedResponse.statusCode.code,
-                                "HTTP Error ${relatedResponse.statusCode.code}"
-                                    ?: "HTTP Error ${relatedResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(relatedResponse.message ?: "Network Exception"))
-                }
+            val related = withIOContext {
+                networkServices.service
+                    .relatedManga(dexId)
+                    .onFailure { TimberKt.e { "trying to get related manga, $this" } }
+                    .getOrNull()
             }
-            val related = relatedResponse.getOrNull()
             related ?: return Err(ResultError.Generic("Failed to get related manga"))
 
             val mangaIdMap =
@@ -97,25 +87,12 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         if (forceRefresh) {
-            val recommendedResponse = withIOContext {
-                networkServices.service.recommendedManga(dexId)
+            val recommended = withIOContext {
+                networkServices.service
+                    .recommendedManga(dexId)
+                    .onFailure { TimberKt.e { "trying to get recommended manga, $this" } }
+                    .getOrNull()
             }
-            if (recommendedResponse is ApiResponse.Failure) {
-                TimberKt.e { "trying to get recommended manga, $recommendedResponse" }
-                return when (recommendedResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                recommendedResponse.statusCode.code,
-                                "HTTP Error ${recommendedResponse.statusCode.code}"
-                                    ?: "HTTP Error ${recommendedResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(recommendedResponse.message ?: "Network Exception"))
-                }
-            }
-            val recommended = recommendedResponse.getOrNull()
             recommended ?: return Err(ResultError.Generic("Failed to get recommended manga"))
 
             val mangaIdMap =
@@ -195,27 +172,11 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         if (forceRefresh) {
-            val apiResponse =
-                networkServices.similarService.getSimilarMangaString(
-                    dexId.substring(0, 2),
-                    dexId.substring(0, 3),
-                )
-            if (apiResponse is ApiResponse.Failure) {
-                TimberKt.e { "trying to get similar manga, $apiResponse" }
-                return when (apiResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                apiResponse.statusCode.code,
-                                "HTTP Error ${apiResponse.statusCode.code}"
-                                    ?: "HTTP Error ${apiResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(apiResponse.message ?: "Network Exception"))
-                }
-            }
-            val response = apiResponse.getOrNull()
+            val response =
+                networkServices.similarService
+                    .getSimilarMangaString(dexId.substring(0, 2), dexId.substring(0, 3))
+                    .onFailure { TimberKt.e { "trying to get similar manga, $this" } }
+                    .getOrNull()
 
             val dto =
                 response?.split("\n")?.firstNotNullOfOrNull { line ->
@@ -244,7 +205,7 @@ class SimilarHandler {
                         }
                     }
                     double
-                } ?: emptyList()
+                } ?: emptyList<SourceManga>()
         )
     }
 
@@ -295,30 +256,26 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         // See if we have a valid mapping for our Anlist service
-        val anilistId = mappings.getExternalID(dexId, "al") ?: return Ok(emptyList())
+        val anilistId = mappings.getExternalID(dexId, "al") ?: return Ok(emptyList<SourceManga>())
 
         if (forceRefresh) {
             // Main network request
             val graphql =
                 """{ Media(id: $anilistId, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-            val apiResponse = networkServices.thirdPartySimilarService.getAniListGraphql(graphql)
-            if (apiResponse is ApiResponse.Failure) {
-                val type = "trying to get Anilist recommendations"
-                apiResponse.log(type)
-                return when (apiResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                apiResponse.statusCode.code,
-                                "HTTP Error ${apiResponse.statusCode.code}"
-                                    ?: "HTTP Error ${apiResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(apiResponse.message ?: "Network Exception"))
-                }
-            }
-            val response = apiResponse.getOrNull()
+            val response =
+                networkServices.thirdPartySimilarService
+                    .getAniListGraphql(graphql)
+                    .onFailure {
+                        val type = "trying to get Anilist recommendations"
+                        this.log(type)
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
+                            this.throws(type)
+                        }
+                    }
+                    .getOrNull()
             anilistRecommendationParse(dexId, response)
         }
 
@@ -328,7 +285,8 @@ class SimilarHandler {
         return Ok(
             dbDto.aniListManga
                 ?.map { it.toSourceManga() }
-                ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() } ?: emptyList()
+                ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() }
+                ?: emptyList<SourceManga>()
         )
     }
 
@@ -377,27 +335,23 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         // See if we have a valid mapping for our MAL service
-        val malId = mappings.getExternalID(dexId, "mal") ?: return Ok(emptyList())
+        val malId = mappings.getExternalID(dexId, "mal") ?: return Ok(emptyList<SourceManga>())
 
         if (forceRefresh) {
-            val apiResponse = networkServices.thirdPartySimilarService.getSimilarMalManga(malId)
-            if (apiResponse is ApiResponse.Failure) {
-                val type = "trying to get MAL similar manga"
-                apiResponse.log(type)
-                return when (apiResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                apiResponse.statusCode.code,
-                                "HTTP Error ${apiResponse.statusCode.code}"
-                                    ?: "HTTP Error ${apiResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(apiResponse.message ?: "Network Exception"))
-                }
-            }
-            val response = apiResponse.getOrNull()
+            val response =
+                networkServices.thirdPartySimilarService
+                    .getSimilarMalManga(malId)
+                    .onFailure {
+                        val type = "trying to get MAL similar manga"
+                        this.log(type)
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
+                            this.throws(type)
+                        }
+                    }
+                    .getOrNull()
             similarMangaExternalMalParse(dexId, response)
         }
 
@@ -407,7 +361,8 @@ class SimilarHandler {
         return Ok(
             dbDto.myAnimeListManga
                 ?.map { it.toSourceManga() }
-                ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() } ?: emptyList()
+                ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() }
+                ?: emptyList<SourceManga>()
         )
     }
 
@@ -451,27 +406,23 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): Result<List<SourceManga>, ResultError> {
         // See if we have a valid mapping for our MU service
-        val muId = mappings.getExternalID(dexId, "mu_new") ?: return Ok(emptyList())
+        val muId = mappings.getExternalID(dexId, "mu_new") ?: return Ok(emptyList<SourceManga>())
 
         if (forceRefresh) {
-            val apiResponse = networkServices.thirdPartySimilarService.getSimilarMUManga(muId)
-            if (apiResponse is ApiResponse.Failure) {
-                val type = "trying to get MU similar manga"
-                apiResponse.log(type)
-                return when (apiResponse) {
-                    is ApiResponse.Failure.Error ->
-                        Err(
-                            ResultError.HttpError(
-                                apiResponse.statusCode.code,
-                                "HTTP Error ${apiResponse.statusCode.code}"
-                                    ?: "HTTP Error ${apiResponse.statusCode.code}",
-                            )
-                        )
-                    is ApiResponse.Failure.Exception ->
-                        Err(ResultError.Generic(apiResponse.message ?: "Network Exception"))
-                }
-            }
-            val response = apiResponse.getOrNull()
+            val response =
+                networkServices.thirdPartySimilarService
+                    .getSimilarMUManga(muId)
+                    .onFailure {
+                        val type = "trying to get MU similar manga"
+                        this.log(type)
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
+                            this.throws(type)
+                        }
+                    }
+                    .getOrNull()
             similarMangaExternalMUParse(dexId, response)
         }
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
@@ -485,7 +436,7 @@ class SimilarHandler {
                         true -> -1.0
                         false -> it.displayText.split(" ")[0].toDouble()
                     }
-                } ?: emptyList()
+                } ?: emptyList<SourceManga>()
         )
     }
 
@@ -562,5 +513,22 @@ class SimilarHandler {
             )
         }
         return responseBody
+    }
+
+    private fun <T> ApiResponse<T>.toResultOrLog(logMessage: String): Result<T, ResultError> {
+        if (this !is ApiResponse.Failure) return Ok((this as ApiResponse.Success).data)
+
+        TimberKt.e { "$logMessage, $this" }
+        return when (this) {
+            is ApiResponse.Failure.Error ->
+                Err(
+                    ResultError.HttpError(
+                        this.statusCode.code,
+                        "HTTP Error ${this.statusCode.code}",
+                    )
+                )
+            is ApiResponse.Failure.Exception ->
+                Err(ResultError.Generic(this.message ?: "Network Exception"))
+        }
     }
 }
