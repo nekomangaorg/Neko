@@ -14,29 +14,30 @@ OUTPUT=$(curl -s -f -H "Authorization: token $GITHUB_TOKEN" \
 
     def get_normalized_line:
       (.message[0]? // "" | select(type == "string") // "")
-      # 1. Fix double colons: consume the optional colon in the match
-      | sub("^fix\\(deps\\):?"; "chore:")
-      | sub("^chore\\(deps\\):?"; "chore:")
-      | sub("^feature/"; "feat:")
-      # 2. Handle "Fix:" (capitalized with colon) explicitly
-      | sub("^(fix|Fix):"; "fix:")
-      | sub("^(fix|Fix)/"; "fix:")
-      | sub("^(fix|Fix)\\s"; "fix: "; "i")
-      | sub("^chore/"; "chore:")
-      | sub("^opt/"; "opt:")
+      # 1. Standardize common prefixes and handle agent-specific ones (opt, perf, ref)
+      | sub("^feat(ure)?/"; "feat:")
+      | sub("^(fix|Fix)[:/ ]*"; "fix: ")
+      | sub("^opt/"; "perf:")
+      | sub("^perf/"; "perf:")
       | sub("^ref/"; "ref:")
-      # 3. Fix corruption: Use named capture group (?<p>...) instead of \1
-      | sub("^(?<p>feat|fix|opt|ref|chore):\\s*"; "\(.p): ")
+      | sub("^(chore|fix)\\(deps\\):?"; "chore: ")
+      | sub("^chore/"; "chore:")
+      | sub("^style/"; "style:")
+      | sub("^test/"; "test:")
+      # 2. Cleanup: Ensure a single space after the colon and remove leading whitespace
+      | sub("^(?<p>feat|fix|perf|ref|chore|style|test):\\s*"; "\(.p): ")
       | sub("^\\s*"; "");
 
     def get_sort_priority:
       get_normalized_line as $line |
-      if ($line | startswith("feat:")) then 0
-      elif ($line | startswith("fix:")) then 1
-      elif ($line | startswith("opt:")) then 2
-      elif ($line | startswith("ref:")) then 3
-      elif ($line | startswith("chore:")) then 4
-      else 5
+      if ($line | startswith("feat:")) then 0      # New Capabilities
+      elif ($line | startswith("fix:")) then 1     # Bug Fixes / Security
+      elif ($line | startswith("perf:")) then 2    # Performance
+      elif ($line | startswith("ref:")) then 3     # Structural
+      elif ($line | startswith("style:")) then 4   # Formatting
+      elif ($line | startswith("test:")) then 5    # Coverage
+      elif ($line | startswith("chore:")) then 6   # Maintenance
+      else 7
       end;
 
     def is_merge_commit:
