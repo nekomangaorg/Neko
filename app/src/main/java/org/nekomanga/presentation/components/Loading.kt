@@ -23,9 +23,7 @@ fun Loading(modifier: Modifier = Modifier) {
     ) {
         CircularProgressIndicator(
             modifier =
-                Modifier.size(Size.largePlus)
-                    .padding(Size.extraTiny)
-                    .align(Alignment.Center),
+                Modifier.size(Size.largePlus).padding(Size.extraTiny).align(Alignment.Center),
             color = MaterialTheme.colorScheme.onSecondary,
             strokeWidth = Size.extraTiny,
         )
