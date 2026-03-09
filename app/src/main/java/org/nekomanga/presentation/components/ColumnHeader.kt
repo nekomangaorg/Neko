@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.R
 import org.nekomanga.presentation.components.Divider
@@ -28,7 +27,7 @@ fun ColumnScope.Header(text: String, cancelClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = stringResource(id = R.string.close),
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(Size.largePlus),
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }

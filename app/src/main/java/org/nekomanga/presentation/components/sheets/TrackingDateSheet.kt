@@ -81,7 +81,7 @@ fun TrackingDateSheet(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(Size.largePlus),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
