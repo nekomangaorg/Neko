@@ -290,7 +290,7 @@ class LibraryViewModel() : ViewModel() {
                                 )
                             }
                         }
-                        .applyFilters(libraryFilters, trackMap)
+                        .applyFilters(libraryFilters)
                 }
             }
             .distinctUntilChanged()
