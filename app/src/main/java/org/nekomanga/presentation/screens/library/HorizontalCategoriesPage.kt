@@ -151,160 +151,123 @@ fun HorizontalCategoriesPage(
                 when (libraryScreenState.libraryDisplayMode) {
                     is LibraryDisplayMode.ComfortableGrid,
                     is LibraryDisplayMode.CompactGrid -> {
-                        HorizontalGridDisplay(
-                            page = page,
-                            item = item,
-                            selectionMode = selectionMode,
-                            allSelected = allSelected,
-                            indicatorColor = indicatorColor,
-                            columns = columns,
-                            contentPadding = contentPadding,
-                            selectedIds = selectedIds,
-                            categorySortClick = categorySortClick,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            libraryCategoryActions = libraryCategoryActions,
-                        )
+                        val gridState =
+                            rememberLazyGridState(
+                                initialFirstVisibleItemIndex =
+                                    libraryScreenState.scrollPositions[page] ?: 0
+                            )
+
+                        DisposableEffect(libraryScreenActions, page) {
+                            onDispose {
+                                libraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    gridState.firstVisibleItemIndex,
+                                )
+                            }
+                        }
+                        Column {
+                            HorizontalCategoryHeader(
+                                selectionMode = selectionMode,
+                                allSelected = allSelected,
+                                indicatorColor = indicatorColor,
+                                totalItems = item.libraryItems.size,
+                                onSelectAll = {
+                                    libraryScreenActions.selectAllLibraryMangaItems(
+                                        item.libraryItems
+                                    )
+                                },
+                                categoryItem = item.categoryItem,
+                                categorySortClick = categorySortClick,
+                                libraryCategoryActions = libraryCategoryActions,
+                                isRefreshing = item.isRefreshing,
+                            )
+                            LazyVerticalGrid(
+                                state = gridState,
+                                columns = GridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
+                                horizontalArrangement = Arrangement.spacedBy(Size.small),
+                                contentPadding =
+                                    PaddingValues(
+                                        bottom = contentPadding.calculateBottomPadding(),
+                                        top = Size.small,
+                                    ),
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
+                                    key = { _, libraryItem ->
+                                        "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
+                                    },
+                                ) { index, libraryItem ->
+                                    GridItem(
+                                        libraryItem = libraryItem,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryScreenActions = libraryScreenActions,
+                                        selectedIds = selectedIds,
+                                        isComfortable =
+                                            libraryScreenState.libraryDisplayMode
+                                                is LibraryDisplayMode.ComfortableGrid,
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     is LibraryDisplayMode.List -> {
-                        HorizontalListDisplay(
-                            page = page,
-                            item = item,
-                            selectionMode = selectionMode,
-                            allSelected = allSelected,
-                            contentPadding = contentPadding,
-                            selectedIds = selectedIds,
-                            categorySortClick = categorySortClick,
-                            libraryScreenState = libraryScreenState,
-                            libraryScreenActions = libraryScreenActions,
-                            libraryCategoryActions = libraryCategoryActions,
-                        )
+                        val listState =
+                            rememberLazyListState(
+                                initialFirstVisibleItemIndex =
+                                    libraryScreenState.scrollPositions[page] ?: 0
+                            )
+                        DisposableEffect(libraryScreenActions, page) {
+                            onDispose {
+                                libraryScreenActions.scrollPositionChanged(
+                                    page,
+                                    listState.firstVisibleItemIndex,
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            HorizontalCategoryHeader(
+                                selectionMode = selectionMode,
+                                allSelected = allSelected,
+                                indicatorColor = MaterialTheme.colorScheme.tertiary,
+                                totalItems = null,
+                                onSelectAll = {
+                                    libraryScreenActions.selectAllLibraryMangaItems(
+                                        item.libraryItems
+                                    )
+                                },
+                                categoryItem = item.categoryItem,
+                                categorySortClick = categorySortClick,
+                                libraryCategoryActions = libraryCategoryActions,
+                                isRefreshing = item.isRefreshing,
+                            )
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+                            ) {
+                                itemsIndexed(
+                                    items = item.libraryItems,
+                                    key = { _, libraryItem ->
+                                        "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
+                                    },
+                                ) { index, libraryItem ->
+                                    ListItem(
+                                        index = index,
+                                        totalSize = item.libraryItems.size,
+                                        selectedIds = selectedIds,
+                                        libraryScreenState = libraryScreenState,
+                                        libraryItem = libraryItem,
+                                        libraryScreenActions = libraryScreenActions,
+                                    )
+                                    Gap(Size.tiny)
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HorizontalGridDisplay(
-    page: Int,
-    item: eu.kanade.tachiyomi.ui.library.LibraryCategoryItem,
-    selectionMode: Boolean,
-    allSelected: Boolean,
-    indicatorColor: Color,
-    columns: Int,
-    contentPadding: PaddingValues,
-    selectedIds: List<Long>,
-    categorySortClick: (CategoryItem) -> Unit,
-    libraryScreenState: LibraryScreenState,
-    libraryScreenActions: LibraryScreenActions,
-    libraryCategoryActions: LibraryCategoryActions,
-) {
-    val gridState =
-        rememberLazyGridState(
-            initialFirstVisibleItemIndex = libraryScreenState.scrollPositions[page] ?: 0
-        )
-
-    DisposableEffect(libraryScreenActions, page) {
-        onDispose {
-            libraryScreenActions.scrollPositionChanged(page, gridState.firstVisibleItemIndex)
-        }
-    }
-    Column {
-        HorizontalCategoryHeader(
-            selectionMode = selectionMode,
-            allSelected = allSelected,
-            indicatorColor = indicatorColor,
-            totalItems = item.libraryItems.size,
-            onSelectAll = { libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems) },
-            categoryItem = item.categoryItem,
-            categorySortClick = categorySortClick,
-            libraryCategoryActions = libraryCategoryActions,
-            isRefreshing = item.isRefreshing,
-        )
-        LazyVerticalGrid(
-            state = gridState,
-            columns = GridCells.Fixed(columns),
-            modifier = Modifier.fillMaxSize().padding(horizontal = Size.small),
-            horizontalArrangement = Arrangement.spacedBy(Size.small),
-            contentPadding =
-                PaddingValues(bottom = contentPadding.calculateBottomPadding(), top = Size.small),
-        ) {
-            itemsIndexed(
-                items = item.libraryItems,
-                key = { _, libraryItem ->
-                    "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
-                },
-            ) { index, libraryItem ->
-                GridItem(
-                    libraryItem = libraryItem,
-                    libraryScreenState = libraryScreenState,
-                    libraryScreenActions = libraryScreenActions,
-                    selectedIds = selectedIds,
-                    isComfortable =
-                        libraryScreenState.libraryDisplayMode is LibraryDisplayMode.ComfortableGrid,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HorizontalListDisplay(
-    page: Int,
-    item: eu.kanade.tachiyomi.ui.library.LibraryCategoryItem,
-    selectionMode: Boolean,
-    allSelected: Boolean,
-    contentPadding: PaddingValues,
-    selectedIds: List<Long>,
-    categorySortClick: (CategoryItem) -> Unit,
-    libraryScreenState: LibraryScreenState,
-    libraryScreenActions: LibraryScreenActions,
-    libraryCategoryActions: LibraryCategoryActions,
-) {
-    val listState =
-        rememberLazyListState(
-            initialFirstVisibleItemIndex = libraryScreenState.scrollPositions[page] ?: 0
-        )
-    DisposableEffect(libraryScreenActions, page) {
-        onDispose {
-            libraryScreenActions.scrollPositionChanged(page, listState.firstVisibleItemIndex)
-        }
-    }
-    Column(modifier = Modifier.fillMaxSize()) {
-        HorizontalCategoryHeader(
-            selectionMode = selectionMode,
-            allSelected = allSelected,
-            indicatorColor = MaterialTheme.colorScheme.tertiary,
-            totalItems = null,
-            onSelectAll = { libraryScreenActions.selectAllLibraryMangaItems(item.libraryItems) },
-            categoryItem = item.categoryItem,
-            categorySortClick = categorySortClick,
-            libraryCategoryActions = libraryCategoryActions,
-            isRefreshing = item.isRefreshing,
-        )
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
-        ) {
-            itemsIndexed(
-                items = item.libraryItems,
-                key = { _, libraryItem ->
-                    "${item.categoryItem.id}-${libraryItem.displayManga.mangaId}"
-                },
-            ) { index, libraryItem ->
-                ListItem(
-                    index = index,
-                    totalSize = item.libraryItems.size,
-                    selectedIds = selectedIds,
-                    libraryScreenState = libraryScreenState,
-                    libraryItem = libraryItem,
-                    libraryScreenActions = libraryScreenActions,
-                )
-                Gap(Size.tiny)
             }
         }
     }

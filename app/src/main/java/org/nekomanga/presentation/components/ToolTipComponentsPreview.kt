@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import org.nekomanga.presentation.theme.Size
+import androidx.compose.ui.unit.dp
 import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
 import org.nekomanga.ui.theme.withThemes
@@ -40,7 +40,7 @@ private fun ToolTipButtonPreview(
 ) {
     ThemedPreviews(themedData.themeConfig) {
         val data = themedData.value
-        Box(modifier = Modifier.padding(Size.medium)) {
+        Box(modifier = Modifier.padding(16.dp)) {
             ToolTipButton(
                 toolTipLabel = data.label,
                 isEnabled = data.isEnabled,
