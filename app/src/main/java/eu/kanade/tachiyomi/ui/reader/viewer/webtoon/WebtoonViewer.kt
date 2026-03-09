@@ -31,7 +31,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
     val downloadManager: DownloadManager by injectLazy()
 
-    private val scope = MainScope()
+    val scope = MainScope()
 
     /** Recycler view used by this viewer. */
     val recycler = WebtoonRecyclerView(activity)
