@@ -78,7 +78,9 @@ private fun LinkCard(
                 Image(
                     painter = painterResource(id = externalLink.logo),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp).padding(top = Size.tiny, bottom = Size.tiny),
+                    modifier =
+                        Modifier.size(Size.largePlus)
+                            .padding(top = Size.tiny, bottom = Size.tiny),
                 )
                 Gap(Size.small)
             } else {

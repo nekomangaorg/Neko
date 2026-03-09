@@ -17,6 +17,7 @@ object Size {
     val medium = 16.dp
     val mediumLarge = 20.dp
     val large = 24.dp
+    val largePlus = 28.dp
     val extraLarge = 32.dp
     val huge = 48.dp
     val extraHuge = 56.dp
