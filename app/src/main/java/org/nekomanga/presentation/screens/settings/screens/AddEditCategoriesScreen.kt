@@ -184,7 +184,8 @@ internal class AddEditCategoriesScreen(
                                         IconButton(onClick = { editCategoryName = category.name }) {
                                             Icon(
                                                 imageVector = Icons.Filled.Edit,
-                                                contentDescription = null,
+                                                contentDescription =
+                                                    stringResource(id = R.string.edit),
                                             )
                                         }
                                         IconButton(
@@ -192,7 +193,8 @@ internal class AddEditCategoriesScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Filled.Delete,
-                                                contentDescription = null,
+                                                contentDescription =
+                                                    stringResource(id = R.string.delete),
                                             )
                                         }
                                     }
