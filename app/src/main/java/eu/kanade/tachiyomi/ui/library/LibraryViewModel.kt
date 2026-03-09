@@ -286,13 +286,9 @@ class LibraryViewModel() : ViewModel() {
                                 item.downloadCount == newDownloadCount &&
                                     item.trackCount == newTrackCount
                             ) {
-                                item
-                            } else {
-                                item.copy(
-                                    downloadCount = newDownloadCount,
-                                    trackCount = newTrackCount,
-                                )
+                                return@map item
                             }
+                            item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
                         }
                         .applyFilters(libraryFilters, trackMap)
                 }
