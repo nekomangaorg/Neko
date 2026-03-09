@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -24,6 +23,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.ChapterItemSort
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter

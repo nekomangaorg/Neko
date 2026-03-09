@@ -42,7 +42,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
-import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -71,6 +70,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
+import org.nekomanga.domain.chapter.ChapterItemSort
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences

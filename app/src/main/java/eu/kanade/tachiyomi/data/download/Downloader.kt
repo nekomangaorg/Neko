@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -52,6 +51,7 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.chapter.ChapterItemSort
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt

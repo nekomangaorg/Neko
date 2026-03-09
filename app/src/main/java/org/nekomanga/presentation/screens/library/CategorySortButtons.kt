@@ -26,8 +26,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable

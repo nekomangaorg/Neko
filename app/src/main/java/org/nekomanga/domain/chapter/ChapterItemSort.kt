@@ -1,9 +1,9 @@
-package eu.kanade.tachiyomi.util.chapter
+package org.nekomanga.domain.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

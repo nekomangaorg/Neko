@@ -47,13 +47,13 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseMainActivity
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.R
+import org.nekomanga.domain.chapter.ChapterItemSort
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
