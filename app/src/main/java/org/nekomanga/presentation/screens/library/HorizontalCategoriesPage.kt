@@ -110,6 +110,23 @@ fun HorizontalCategoriesPage(
             MaterialTheme.colorScheme.onSurface
         }
 
+    val displayOptions =
+        remember(
+            libraryScreenState.showUnreadBadges,
+            libraryScreenState.showDownloadBadges,
+            libraryScreenState.showStartReadingButton,
+            libraryScreenState.outlineCovers,
+            libraryScreenState.dynamicCovers,
+        ) {
+            LibraryItemDisplayOptions(
+                showUnreadBadges = libraryScreenState.showUnreadBadges,
+                showDownloadBadges = libraryScreenState.showDownloadBadges,
+                showStartReadingButton = libraryScreenState.showStartReadingButton,
+                outlineCovers = libraryScreenState.outlineCovers,
+                dynamicCovers = libraryScreenState.dynamicCovers,
+            )
+        }
+
     Column(modifier = Modifier.fillMaxSize().padding(contentPadding).padding(top = Size.tiny)) {
         if (isValidState) {
             SecondaryScrollableTabRow(
@@ -200,7 +217,7 @@ fun HorizontalCategoriesPage(
                                 ) { index, libraryItem ->
                                     GridItem(
                                         libraryItem = libraryItem,
-                                        libraryScreenState = libraryScreenState,
+                                        displayOptions = displayOptions,
                                         libraryScreenActions = libraryScreenActions,
                                         selectedIds = selectedIds,
                                         isComfortable =
@@ -258,7 +275,7 @@ fun HorizontalCategoriesPage(
                                         index = index,
                                         totalSize = item.libraryItems.size,
                                         selectedIds = selectedIds,
-                                        libraryScreenState = libraryScreenState,
+                                        displayOptions = displayOptions,
                                         libraryItem = libraryItem,
                                         libraryScreenActions = libraryScreenActions,
                                     )
@@ -344,28 +361,28 @@ private fun HorizontalCategoryHeader(
 @Composable
 private fun GridItem(
     libraryItem: LibraryMangaItem,
-    libraryScreenState: LibraryScreenState,
+    displayOptions: LibraryItemDisplayOptions,
     libraryScreenActions: LibraryScreenActions,
     selectedIds: List<Long>,
     isComfortable: Boolean,
 ) {
     MangaGridItem(
         displayManga = libraryItem.displayManga,
-        showUnreadBadge = libraryScreenState.showUnreadBadges,
+        showUnreadBadge = displayOptions.showUnreadBadges,
         unreadCount = libraryItem.unreadCount,
-        showDownloadBadge = libraryScreenState.showDownloadBadges,
+        showDownloadBadge = displayOptions.showDownloadBadges,
         downloadCount = libraryItem.downloadCount,
-        shouldOutlineCover = libraryScreenState.outlineCovers,
-        dynamicCover = libraryScreenState.dynamicCovers,
+        shouldOutlineCover = displayOptions.outlineCovers,
+        dynamicCover = displayOptions.dynamicCovers,
         isComfortable = isComfortable,
         isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
         showStartReadingButton =
-            libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+            displayOptions.showStartReadingButton && libraryItem.unreadCount > 0,
         onStartReadingClick = {
             libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
         },
         onClick = { _ ->
-            if (libraryScreenState.selectedItems.isNotEmpty()) {
+            if (selectedIds.isNotEmpty()) {
                 libraryScreenActions.mangaLongClick(libraryItem)
             } else {
                 libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
@@ -381,7 +398,7 @@ private fun ListItem(
     index: Int,
     totalSize: Int,
     selectedIds: List<Long>,
-    libraryScreenState: LibraryScreenState,
+    displayOptions: LibraryItemDisplayOptions,
     libraryItem: LibraryMangaItem,
     libraryScreenActions: LibraryScreenActions,
 ) {
@@ -401,7 +418,7 @@ private fun ListItem(
                 Modifier.fillMaxWidth()
                     .combinedClickable(
                         onClick = {
-                            if (libraryScreenState.selectedItems.isNotEmpty()) {
+                            if (selectedIds.isNotEmpty()) {
                                 libraryScreenActions.mangaLongClick(libraryItem)
                             } else {
                                 libraryScreenActions.mangaClick(libraryItem.displayManga.mangaId)
@@ -411,17 +428,17 @@ private fun ListItem(
                     ),
             displayManga = libraryItem.displayManga,
             isSelected = selectedIds.contains(libraryItem.displayManga.mangaId),
-            showUnreadBadge = libraryScreenState.showUnreadBadges,
+            showUnreadBadge = displayOptions.showUnreadBadges,
             showStartReadingButton =
-                libraryScreenState.showStartReadingButton && libraryItem.unreadCount > 0,
+                displayOptions.showStartReadingButton && libraryItem.unreadCount > 0,
             onStartReadingClick = {
                 libraryScreenActions.mangaStartReadingClick(libraryItem.displayManga.mangaId)
             },
             unreadCount = libraryItem.unreadCount,
-            showDownloadBadge = libraryScreenState.showDownloadBadges,
+            showDownloadBadge = displayOptions.showDownloadBadges,
             downloadCount = libraryItem.downloadCount,
-            shouldOutlineCover = libraryScreenState.outlineCovers,
-            dynamicCover = libraryScreenState.dynamicCovers,
+            shouldOutlineCover = displayOptions.outlineCovers,
+            dynamicCover = displayOptions.dynamicCovers,
         )
     }
 }

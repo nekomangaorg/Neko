@@ -13,3 +13,5 @@
 ## 2026-03-09 - Move string parsing out of inner filter loop
 **Learning:** Found an unintentional O(n) loop optimization block where the `searchQuery` string was split on every iteration in the `LibraryMangaItem.matches` checking function. Since a comma query dynamically checks genre splits per item, a huge user library of thousands of manga resulted in thousands of list allocations.
 **Action:** Lift the parsing logic outside the iterative filter, and modify the data signature so `splitQuery` is passed down, eliminating massive loop overhead for filtered rendering.
+
+## 2024-05-19 - [Avoid Recomposition via Data Class Memoization] **Learning:** Passing multiple primitive state values from a main `State` object directly to list item composables triggers recomposition for all items whenever any unrelated property in that parent `State` changes (e.g. `pagerIndex`). **Action:** Group primitive display flags into a single `@Immutable` data class (like `LibraryItemDisplayOptions`) and memoize its instantiation using `remember` (with the primitive fields as keys). Pass this single object to child items instead of the parent `State`.
