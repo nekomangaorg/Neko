@@ -1,0 +1,25 @@
+--- app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryViewModel.kt
++++ app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryViewModel.kt
+@@ -277,11 +277,16 @@
+
+                     mangaList
+                         .map { item ->
+-                            // Enrich item with volatile data needed for filtering
+-                            item.copy(
+-                                downloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0,
+-                                trackCount = trackMap[item.displayManga.mangaId]?.size ?: 0,
+-                            )
++                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
++                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
++
++                            if (item.downloadCount == newDownloadCount && item.trackCount == newTrackCount) {
++                                item
++                            } else {
++                                item.copy(
++                                    downloadCount = newDownloadCount,
++                                    trackCount = newTrackCount,
++                                )
++                            }
+                         }
+                         .applyFilters(libraryFilters, trackMap)
+                 }
