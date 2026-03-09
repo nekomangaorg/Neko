@@ -97,40 +97,39 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.titleParam] = actualQuery
             }
 
-            val contentRating = filters.contentRatings.filter { it.state }.map { it.rating.key }
+            val contentRating = filters.contentRatings.mapNotNull { if (it.state) it.rating.key else null }
 
             if (contentRating.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.contentRatingParam] = contentRating
             }
 
             val originalLanguage =
-                filters.originalLanguage.filter { it.state }.map { it.language.lang }
+                filters.originalLanguage.mapNotNull { if (it.state) it.language.lang else null }
             if (originalLanguage.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.originalLanguageParam] =
                     originalLanguage
             }
 
             val demographics =
-                filters.publicationDemographics.filter { it.state }.map { it.demographic.key }
+                filters.publicationDemographics.mapNotNull { if (it.state) it.demographic.key else null }
             if (demographics.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.publicationDemographicParam] =
                     demographics
             }
 
-            val status = filters.statuses.filter { it.state }.map { it.status.key }
+            val status = filters.statuses.mapNotNull { if (it.state) it.status.key else null }
             if (status.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.statusParam] = status
             }
             val tagsToInclude =
-                filters.tags.filter { it.state == ToggleableState.On }.map { it.tag.uuid }
+                filters.tags.mapNotNull { if (it.state == ToggleableState.On) it.tag.uuid else null }
             if (tagsToInclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.includedTagsParam] = tagsToInclude
             }
 
             val tagsToExclude =
                 filters.tags
-                    .filter { it.state == ToggleableState.Indeterminate }
-                    .map { it.tag.uuid }
+                    .mapNotNull { if (it.state == ToggleableState.Indeterminate) it.tag.uuid else null }
             if (tagsToExclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.excludedTagsParam] = tagsToExclude
             }
