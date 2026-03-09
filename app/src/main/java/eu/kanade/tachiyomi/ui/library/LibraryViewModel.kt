@@ -1093,8 +1093,10 @@ class LibraryViewModel() : ViewModel() {
                         val amount = downloadAction.numberToDownload
                         val unreadDbChapters =
                             chapterItems
+                                .asSequence()
                                 .mapNotNull { if (!it.chapter.read) it.chapter.toDbChapter() else null }
                                 .take(amount)
+                                .toList()
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
