@@ -1,7 +1,6 @@
 package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
-import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
@@ -51,7 +50,7 @@ data class LibraryMangaItem(
     val hasStarted
         get() = readCount > 0
 
-    fun matches(searchQuery: String?): Boolean {
+    fun matches(searchQuery: String?, searchQuerySplit: List<String>? = null): Boolean {
         return if (searchQuery == null) {
             true
         } else {
@@ -59,8 +58,12 @@ data class LibraryMangaItem(
                 this.altTitles.fastAny { altTitle -> altTitle.contains(searchQuery, true) } ||
                 this.author.fastAny { author -> author.contains(searchQuery, true) } ||
                 if (searchQuery.contains(",")) {
-                    this.genre.fastAll { genre -> genre.contains(searchQuery) }
-                    searchQuery.split(",").all { splitQuery ->
+                    val split =
+                        searchQuerySplit
+                            ?: searchQuery.split(",").mapNotNull {
+                                it.trim().takeIf { it.isNotBlank() }
+                            }
+                    split.all { splitQuery ->
                         this.genre.fastAny { genre ->
                             if (splitQuery.startsWith("-")) {
                                 !genre.contains(splitQuery.substringAfter("-"), true)

@@ -9,3 +9,7 @@
 ## 2025-02-24 - Missing Partial Indexes on Frequently Filtered Booleans
 **Learning:** The application frequently queries `chapters` table filtering by boolean flags like `bookmark=1` or `unavailable=1` inside complex library refresh queries. Without specific partial indexes (e.g., `WHERE bookmark=1`), these queries rely on wider indexes (like `manga_id`) or full table scans, causing significant IO overhead during library updates, especially for users with large libraries but few bookmarks.
 **Action:** Always verify execution plans for queries involving boolean flags on large tables. Use partial indexes (e.g., `CREATE INDEX ... WHERE flag=1`) to drastically reduce index size and lookup time for sparse attributes.
+
+## 2026-03-09 - Move string parsing out of inner filter loop
+**Learning:** Found an unintentional O(n) loop optimization block where the `searchQuery` string was split on every iteration in the `LibraryMangaItem.matches` checking function. Since a comma query dynamically checks genre splits per item, a huge user library of thousands of manga resulted in thousands of list allocations.
+**Action:** Lift the parsing logic outside the iterative filter, and modify the data signature so `splitQuery` is passed down, eliminating massive loop overhead for filtered rendering.
