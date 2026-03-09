@@ -253,7 +253,9 @@ class MangaCoverFetcher(
         } catch (e: Exception) {
             try {
                 editor.abort()
-            } catch (ignored: Exception) {}
+            } catch (ignored: Exception) {
+                TimberKt.e(ignored) { "Failed to abort editor" }
+            }
             throw e
         }
     }
