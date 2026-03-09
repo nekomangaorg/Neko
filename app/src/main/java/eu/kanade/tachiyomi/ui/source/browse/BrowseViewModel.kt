@@ -770,18 +770,17 @@ class BrowseViewModel() : ViewModel() {
     /** Check if can access internet */
     private fun isOnline(): Boolean {
         val isOnline = preferences.context.activeNetworkState().isOnline
-        if (isOnline) {
-            _browseScreenState.update { it.copy(hideFooterButton = false) }
-            return true
-        } else {
-            _browseScreenState.update {
+        _browseScreenState.update {
+            if (isOnline) {
+                it.copy(hideFooterButton = false)
+            } else {
                 it.copy(
                     initialLoading = false,
                     hideFooterButton = true,
                     error = UiText.StringResource(R.string.no_network_connection),
                 )
             }
-            return false
         }
+        return isOnline
     }
 }
