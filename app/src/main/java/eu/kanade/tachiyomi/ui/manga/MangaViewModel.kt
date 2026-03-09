@@ -1667,18 +1667,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
-    private fun updateMangaScanlator(manga: Manga, filteredScanlators: Set<String>) {
-        viewModelScope.launchIO {
-            manga.filtered_scanlators =
-                when (filteredScanlators.isEmpty()) {
-                    true -> null
-                    false -> ChapterUtil.getScanlatorString(filteredScanlators)
-                }
-
-            db.insertManga(manga).executeOnIO()
-        }
-    }
-
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun changeLanguageOption(languageOptions: MangaConstants.LanguageOption?) {
         viewModelScope.launchIO {
@@ -1703,19 +1691,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 (current ?: MangaFilterState()).copy(languages = newFilteredLanguages)
             }
             _persistFilterChannel.trySend(Unit)
-        }
-    }
-
-    /** Updates the filtered scanlators */
-    private fun updateMangaFilteredLanguages(manga: Manga, filteredLanguages: Set<String>) {
-        viewModelScope.launchIO {
-            manga.filtered_language =
-                when (filteredLanguages.isEmpty()) {
-                    true -> null
-                    false -> ChapterUtil.getLanguageString(filteredLanguages)
-                }
-
-            db.insertManga(manga).executeOnIO()
         }
     }
 
