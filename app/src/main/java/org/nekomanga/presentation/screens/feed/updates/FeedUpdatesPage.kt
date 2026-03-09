@@ -228,8 +228,10 @@ private fun Ungrouped(
             feedUpdatesMangaList.groupBy { getDateString(it.date, now) }
         }
 
-    val totalChapterCount =
-        remember(feedUpdatesMangaList) { feedUpdatesMangaList.sumOf { it.chapters.size } }
+    val mangaIndexMap =
+        remember(feedUpdatesMangaList) {
+            feedUpdatesMangaList.withIndex().associate { it.value.mangaId to it.index }
+        }
 
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         var globalIndex = 0
@@ -269,12 +271,15 @@ private fun Ungrouped(
                         else -> ListCardType.Center
                     }
 
+                val mangaIndex = mangaIndexMap[feedManga.mangaId] ?: -1
+
                 item(
                     key = "$dateString-$chapterIndex-${feedManga.mangaId}-${chapterItem.chapter.id}"
                 ) {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
-                            currentIndex >= totalChapterCount - 5 &&
+                            mangaIndex >= 0 &&
+                                mangaIndex >= feedUpdatesMangaList.size - 5 &&
                                 hasMoreResults &&
                                 !loadingResults
                         ) {
