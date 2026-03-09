@@ -275,11 +275,20 @@ class LibraryViewModel() : ViewModel() {
 
                     mangaList
                         .map { item ->
-                            // Enrich item with volatile data needed for filtering
-                            item.copy(
-                                downloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0,
-                                trackCount = trackMap[item.displayManga.mangaId]?.size ?: 0,
-                            )
+                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
+                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
+                            if (
+                                item.downloadCount == newDownloadCount &&
+                                    item.trackCount == newTrackCount
+                            ) {
+                                item
+                            } else {
+                                // Enrich item with volatile data needed for filtering
+                                item.copy(
+                                    downloadCount = newDownloadCount,
+                                    trackCount = newTrackCount,
+                                )
+                            }
                         }
                         .applyFilters(libraryFilters, trackMap)
                 }
@@ -565,6 +574,8 @@ class LibraryViewModel() : ViewModel() {
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
     ): List<LibraryMangaItem> {
+        if (!libraryFilters.hasActiveFilter()) return this
+
         return this.filter { libraryMangaItem ->
             // Check Unread first (most common filter)
             if (!libraryFilters.filterUnread.matches(libraryMangaItem)) return@filter false
@@ -577,19 +588,9 @@ class LibraryViewModel() : ViewModel() {
             if (!libraryFilters.filterCompleted.matches(libraryMangaItem)) return@filter false
             if (!libraryFilters.filterMangaType.matches(libraryMangaItem)) return@filter false
             if (!libraryFilters.filterMerged.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterMissingChapters.matches(libraryMangaItem)) return@filter false
             if (!libraryFilters.filterUnavailable.matches(libraryMangaItem)) return@filter false
             if (!libraryFilters.filterTracked.matches(libraryMangaItem)) return@filter false
-
-            // Special handling for Tracking logic preserved from original code
-            val displayManga = libraryMangaItem.displayManga
-            val missingChaptersCondition =
-                when (libraryFilters.filterTracked) {
-                    FilterTracked.Inactive -> true
-                    FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
-                    FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
-                }
-
-            if (!missingChaptersCondition) return@filter false
 
             true // passed all checks
         }
