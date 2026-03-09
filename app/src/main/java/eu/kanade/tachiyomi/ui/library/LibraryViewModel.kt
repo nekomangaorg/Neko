@@ -279,10 +279,16 @@ class LibraryViewModel() : ViewModel() {
                     mangaList
                         .map { item ->
                             // Enrich item with volatile data needed for filtering
-                            item.copy(
-                                downloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0,
-                                trackCount = trackMap[item.displayManga.mangaId]?.size ?: 0,
-                            )
+                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
+                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
+
+                            if (
+                                item.downloadCount == newDownloadCount &&
+                                    item.trackCount == newTrackCount
+                            ) {
+                                return@map item
+                            }
+                            item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
                         }
                         .applyFilters(libraryFilters, trackMap)
                 }
