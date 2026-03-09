@@ -1440,7 +1440,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     /** Register tracker with service */
-    fun registerTracking(trackAndService: TrackAndService, skipTrackFlowUpdate: Boolean = false) {
+    fun registerTracking(trackAndService: TrackAndService) {
         viewModelScope.launchIO {
             val trackingUpdate = trackingCoordinator.registerTracking(trackAndService, mangaId)
             handleTrackingUpdate(trackingUpdate)
