@@ -93,11 +93,13 @@ object DiskUtil {
 
     /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, uri: Uri) {
-        if (uri.scheme == "file" && uri.path != null) {
-            MediaScannerConnection.scanFile(context, arrayOf(uri.path!!), null, null)
-        } else {
-            @Suppress("DEPRECATION")
-            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+        uri.path.let { path ->
+            if (uri.scheme == "file" && path != null) {
+                MediaScannerConnection.scanFile(context, arrayOf(path), null, null)
+            } else {
+                @Suppress("DEPRECATION")
+                context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+            }
         }
     }
 

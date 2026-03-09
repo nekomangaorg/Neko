@@ -8,12 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
 import org.nekomanga.ui.theme.withThemes
@@ -21,7 +21,7 @@ import org.nekomanga.ui.theme.withThemes
 @Composable
 private fun ChapterRowPreviewContent(chapterItem: ChapterItem) {
     val themeColorState = defaultThemeColorState()
-    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(Size.medium)) {
+    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(16.dp)) {
         ChapterRow(
             themeColor = themeColorState,
             chapterItem = chapterItem,

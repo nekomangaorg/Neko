@@ -9,7 +9,3 @@
 ## 2025-05-24 - ThemedPreviews Annotation vs Composable
 **Learning:** The `@ThemePreviews` annotation exists but its usage is discouraged in favor of the `ThemedPreviews` composable within a standard `@Preview`. This provides more control and avoids dependency issues with custom annotations.
 **Action:** Use standard `@Preview` and wrap content with `ThemedPreviews { ... }`.
-
-## 2025-06-25 - ThemedPreviews and ThemeConfigProvider
-**Learning:** This app heavily uses a custom composable `ThemedPreviews(themeConfig: ThemeConfig)` along with `@PreviewParameter(ThemeConfigProvider::class)` to render standard previews across all supported themes.
-**Action:** Always inject `ThemeConfig` via parameter and wrap previews in `ThemedPreviews { ... }`.

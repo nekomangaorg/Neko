@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -304,7 +305,7 @@ private fun ChapterTitle(
             Icon(
                 imageVector = Icons.Filled.Bookmark,
                 contentDescription = null,
-                modifier = Modifier.size(Size.medium),
+                modifier = Modifier.size(16.dp),
                 tint = themeColor,
             )
             Gap(Size.tiny)
