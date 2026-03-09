@@ -49,9 +49,11 @@ class DownloadCache(
 
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
+    private var renewJob: Job? = null
+
     init {
         storageManager.baseDirChanges.onEach { forceRenewCache() }.launchIn(scope)
-        scope.launch { renew() }
+        renew()
     }
 
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
@@ -134,51 +136,58 @@ class DownloadCache(
     private fun checkRenew() {
         if (lastRenew + renewInterval < System.currentTimeMillis()) {
             renew()
-            lastRenew = System.currentTimeMillis()
         }
     }
 
     fun forceRenewCache() {
         renew()
-        lastRenew = System.currentTimeMillis()
     }
 
     /** Renews the downloads cache. */
     @Synchronized
     private fun renew() {
-        TimberKt.d { "Renewing cache" }
+        if (renewJob?.isActive == true) return
 
-        // Map Source ID to the directory on disk
-        val sourceDir =
-            storageManager.getDownloadsDirectory()?.listFiles()?.find {
-                it.name == provider.getSourceDirName()
-            } ?: return
+        renewJob =
+            scope.launch {
+                TimberKt.d { "Renewing cache" }
 
-        val db: DatabaseHelper by injectLazy()
-        // Optimization: Fetch once
-        val allManga = db.getMangaList().executeAsBlocking()
+                // Map Source ID to the directory on disk
+                val sourceDir =
+                    storageManager.getDownloadsDirectory()?.listFiles()?.find {
+                        it.name == provider.getSourceDirName()
+                    } ?: return@launch
 
-        // 3. Create lookup map for O(1) access
-        val mangaLookup =
-            allManga.associateBy {
-                DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
-            }
+                val db: DatabaseHelper by injectLazy()
+                // Optimization: Fetch once
+                val allManga = db.getMangaList().executeAsBlocking()
 
-        // 4. Iterate over the folders on disk
-        sourceDir.listFiles().orEmpty().forEach { mangaDir ->
-            val dirName = mangaDir.name ?: return@forEach
-            val manga = mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
-            val id = manga.id ?: return@forEach
+                // 3. Create lookup map for O(1) access
+                val mangaLookup =
+                    allManga.associateBy {
+                        DiskUtil.buildValidFilename(it.displayTitle())
+                            .lowercase(Locale.getDefault())
+                    }
 
-            val files =
-                mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                    it.name?.substringBeforeLast(".cbz")
+                // 4. Iterate over the folders on disk
+                sourceDir.listFiles().orEmpty().forEach { mangaDir ->
+                    val dirName = mangaDir.name ?: return@forEach
+                    val manga =
+                        mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
+                    val id = manga.id ?: return@forEach
+
+                    val files =
+                        mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
+                            it.name?.substringBeforeLast(".cbz")
+                        }
+
+                    val mangadexIds =
+                        files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
+
+                    mangaFiles[id] = MangaFiles(files, mangadexIds)
                 }
-
-            val mangadexIds = files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
-
-            mangaFiles[id] = MangaFiles(files, mangadexIds)
-        }
+                lastRenew = System.currentTimeMillis()
+            }
     }
 
     @Synchronized
