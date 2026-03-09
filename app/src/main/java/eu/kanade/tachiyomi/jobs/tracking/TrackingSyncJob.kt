@@ -3,14 +3,13 @@ package eu.kanade.tachiyomi.jobs.tracking
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -27,6 +26,9 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
     private val trackingSyncService: TrackSyncProcessor by injectLazy()
+
+    // List containing failed updates
+    private val failedUpdates = mutableMapOf<Manga, String?>()
 
     private val progressNotification =
         with(applicationContext.notificationBuilder(Notifications.Channel.Tracking)) {
@@ -88,22 +90,16 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
         )
     }
 
+    private fun failed(manga: Manga, error: String) {
+        failedUpdates[manga] = error
+    }
+
     companion object {
 
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
-            val constraints =
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .setRequiresBatteryNotLow(true)
-                    .build()
-
-            val request =
-                OneTimeWorkRequestBuilder<TrackingSyncJob>()
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .build()
+            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>().addTag(TAG).build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

@@ -1,15 +1,15 @@
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.4/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build
 Reusing configuration cache.
-> Task :app:ktfmtFormatAndroidTestStandard NO-SOURCE
 > Task :app:ktfmtFormatAndroidTest NO-SOURCE
-> Task :app:ktfmtFormatAndroidTestRelease NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandard NO-SOURCE
 > Task :app:ktfmtFormatAndroidTestDebug NO-SOURCE
-> Task :app:ktfmtFormatAndroidTestStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestRelease NO-SOURCE
 > Task :app:ktfmtFormatDebug NO-SOURCE
+> Task :app:ktfmtFormatAndroidTestStandardDebug NO-SOURCE
 > Task :app:ktfmtFormatRelease NO-SOURCE
-> Task :app:ktfmtFormatStandard NO-SOURCE
 > Task :app:ktfmtFormatStandardDebug NO-SOURCE
+> Task :app:ktfmtFormatStandard NO-SOURCE
 > Task :app:ktfmtFormatStandardRelease NO-SOURCE
 > Task :app:ktfmtFormatTestDebug NO-SOURCE
 > Task :app:ktfmtFormatTestFixtures NO-SOURCE
@@ -46,9 +46,9 @@ Reusing configuration cache.
 > Task :app:mergeStandardDebugResources
 > Task :app:checkStandardDebugAarMetadata
 > Task :app:checkStandardDebugAarMetadata UP-TO-DATE
-> Task :constants:processDebugNavigationResources UP-TO-DATE
-> Task :core:processDebugNavigationResources UP-TO-DATE
 > Task :app:mergeStandardDebugResources UP-TO-DATE
+> Task :core:processDebugNavigationResources UP-TO-DATE
+> Task :constants:processDebugNavigationResources UP-TO-DATE
 > Task :app:mapStandardDebugSourceSetPaths UP-TO-DATE
 > Task :app:createStandardDebugCompatibleScreenManifests UP-TO-DATE
 > Task :app:extractDeepLinksStandardDebug UP-TO-DATE
@@ -59,11 +59,11 @@ Reusing configuration cache.
 > Task :app:ktfmtFormat
 > Task :constants:compileDebugLibraryResources UP-TO-DATE
 > Task :constants:parseDebugLocalResources UP-TO-DATE
-> Task :constants:generateDebugRFile UP-TO-DATE
-> Task :core:compileDebugLibraryResources UP-TO-DATE
-> Task :core:parseDebugLocalResources UP-TO-DATE
 > Task :app:processStandardDebugNavigationResources UP-TO-DATE
 > Task :app:compileStandardDebugNavigationResources UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsStandardDebug UP-TO-DATE
+> Task :core:compileDebugLibraryResources UP-TO-DATE
+> Task :core:parseDebugLocalResources UP-TO-DATE
 > Task :constants:ktfmtFormatAndroidTest NO-SOURCE
 > Task :constants:ktfmtFormatAndroidTestDebug NO-SOURCE
 > Task :constants:ktfmtFormatAndroidTestRelease NO-SOURCE
@@ -80,7 +80,6 @@ Reusing configuration cache.
 > Task :constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :constants:generateDebugBuildConfig UP-TO-DATE
 > Task :constants:ktfmtFormat UP-TO-DATE
-> Task :core:generateDebugRFile UP-TO-DATE
 > Task :constants:javaPreCompileDebug UP-TO-DATE
 > Task :core:ktfmtFormatAndroidTest NO-SOURCE
 > Task :core:ktfmtFormatAndroidTestDebug NO-SOURCE
@@ -91,8 +90,6 @@ Reusing configuration cache.
 > Task :core:ktfmtFormatScripts UP-TO-DATE
 > Task :core:ktfmtFormatTest NO-SOURCE
 > Task :core:ktfmtFormatTestDebug NO-SOURCE
-> Task :app:dataBindingMergeDependencyArtifactsStandardDebug UP-TO-DATE
-> Task :app:processStandardDebugMainManifest UP-TO-DATE
 > Task :core:ktfmtFormatTestFixtures NO-SOURCE
 > Task :core:ktfmtFormatTestFixturesDebug NO-SOURCE
 > Task :core:ktfmtFormatTestFixturesRelease NO-SOURCE
@@ -100,11 +97,11 @@ Reusing configuration cache.
 > Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :core:generateDebugBuildConfig UP-TO-DATE
 > Task :core:ktfmtFormat UP-TO-DATE
-> Task :app:processStandardDebugManifest UP-TO-DATE
 > Task :core:javaPreCompileDebug UP-TO-DATE
-> Task :app:javaPreCompileStandardDebug UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesStandardDebug UP-TO-DATE
 > Task :app:preStandardDebugUnitTestBuild UP-TO-DATE
-> Task :app:processStandardDebugManifestForPackage UP-TO-DATE
+> Task :constants:generateDebugRFile UP-TO-DATE
+> Task :app:javaPreCompileStandardDebug UP-TO-DATE
 > Task :app:javaPreCompileStandardDebugUnitTest UP-TO-DATE
 > Task :app:buildKotlinToolingMetadata UP-TO-DATE
 > Task :app:preStandardReleaseBuild UP-TO-DATE
@@ -120,30 +117,33 @@ Reusing configuration cache.
 > Task :core:generateReleaseResValues UP-TO-DATE
 > Task :core:generateReleaseResources UP-TO-DATE
 > Task :core:packageReleaseResources UP-TO-DATE
-> Task :app:dataBindingGenBaseClassesStandardDebug UP-TO-DATE
+> Task :core:generateDebugRFile UP-TO-DATE
 > Task :app:generateStandardReleaseBuildConfig UP-TO-DATE
 > Task :constants:writeReleaseAarMetadata UP-TO-DATE
-> Task :constants:compileDebugKotlin UP-TO-DATE
 > Task :core:writeReleaseAarMetadata UP-TO-DATE
-> Task :constants:compileDebugJavaWithJavac UP-TO-DATE
-> Task :constants:processDebugJavaRes UP-TO-DATE
-> Task :constants:bundleLibCompileToJarDebug UP-TO-DATE
-> Task :constants:bundleLibRuntimeToJarDebug UP-TO-DATE
-> Task :app:checkStandardReleaseAarMetadata UP-TO-DATE
+> Task :app:processStandardDebugMainManifest UP-TO-DATE
+> Task :app:mergeStandardReleaseResources UP-TO-DATE
+> Task :app:processStandardDebugManifest UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesStandardRelease UP-TO-DATE
+> Task :app:processStandardDebugManifestForPackage UP-TO-DATE
 > Task :constants:processReleaseNavigationResources UP-TO-DATE
 > Task :core:processReleaseNavigationResources UP-TO-DATE
-> Task :app:mergeStandardReleaseResources UP-TO-DATE
-> Task :app:dataBindingGenBaseClassesStandardRelease UP-TO-DATE
+> Task :app:checkStandardReleaseAarMetadata UP-TO-DATE
+> Task :constants:compileDebugKotlin UP-TO-DATE
 > Task :app:mapStandardReleaseSourceSetPaths UP-TO-DATE
-> Task :app:createStandardReleaseCompatibleScreenManifests UP-TO-DATE
-> Task :app:extractDeepLinksStandardRelease UP-TO-DATE
-> Task :constants:extractDeepLinksRelease UP-TO-DATE
-> Task :constants:processReleaseManifest UP-TO-DATE
-> Task :core:extractDeepLinksRelease UP-TO-DATE
-> Task :core:processReleaseManifest UP-TO-DATE
 > Task :app:processStandardReleaseNavigationResources UP-TO-DATE
 > Task :app:compileStandardReleaseNavigationResources UP-TO-DATE
+> Task :constants:processDebugJavaRes UP-TO-DATE
+> Task :app:createStandardReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :constants:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:extractDeepLinksStandardRelease UP-TO-DATE
+> Task :constants:extractDeepLinksRelease UP-TO-DATE
+> Task :constants:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :constants:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :constants:processReleaseManifest UP-TO-DATE
+> Task :core:extractDeepLinksRelease UP-TO-DATE
 > Task :constants:parseReleaseLocalResources UP-TO-DATE
+> Task :core:processReleaseManifest UP-TO-DATE
 > Task :constants:generateReleaseRFile UP-TO-DATE
 > Task :core:parseReleaseLocalResources UP-TO-DATE
 > Task :core:generateReleaseRFile UP-TO-DATE
@@ -154,40 +154,38 @@ Reusing configuration cache.
 > Task :constants:bundleLibCompileToJarRelease UP-TO-DATE
 > Task :core:generateReleaseBuildConfig UP-TO-DATE
 > Task :app:processStandardReleaseMainManifest UP-TO-DATE
-> Task :app:processStandardReleaseManifest UP-TO-DATE
-> Task :app:processStandardReleaseManifestForPackage UP-TO-DATE
+> Task :core:compileReleaseKotlin UP-TO-DATE
 > Task :core:compileDebugKotlin UP-TO-DATE
-> Task :core:compileDebugJavaWithJavac UP-TO-DATE
-> Task :core:bundleLibCompileToJarDebug UP-TO-DATE
-> Task :core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:processStandardReleaseManifest UP-TO-DATE
 > Task :core:processDebugJavaRes UP-TO-DATE
 > Task :core:javaPreCompileRelease UP-TO-DATE
-> Task :app:processStandardReleaseResources UP-TO-DATE
-> Task :app:preStandardReleaseUnitTestBuild UP-TO-DATE
-> Task :core:compileReleaseKotlin UP-TO-DATE
+> Task :app:processStandardReleaseManifestForPackage UP-TO-DATE
+> Task :core:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :core:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :app:javaPreCompileStandardRelease UP-TO-DATE
+> Task :app:preStandardReleaseUnitTestBuild UP-TO-DATE
+> Task :core:bundleLibCompileToJarRelease UP-TO-DATE
 > Task :app:javaPreCompileStandardReleaseUnitTest UP-TO-DATE
 > Task :constants:bundleLibRuntimeToJarRelease UP-TO-DATE
-> Task :core:processReleaseJavaRes UP-TO-DATE
 > Task :constants:processReleaseJavaRes UP-TO-DATE
-> Task :core:compileReleaseJavaWithJavac UP-TO-DATE
-> Task :constants:preReleaseUnitTestBuild UP-TO-DATE
-> Task :constants:preDebugUnitTestBuild UP-TO-DATE
-> Task :core:bundleLibCompileToJarRelease UP-TO-DATE
 > Task :core:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :constants:preDebugUnitTestBuild UP-TO-DATE
+> Task :core:processReleaseJavaRes UP-TO-DATE
 > Task :constants:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :constants:preReleaseUnitTestBuild UP-TO-DATE
 > Task :constants:generateReleaseUnitTestStubRFile UP-TO-DATE
 > Task :constants:generateDebugUnitTestStubRFile UP-TO-DATE
 > Task :constants:compileDebugUnitTestKotlin NO-SOURCE
 > Task :constants:compileReleaseUnitTestKotlin NO-SOURCE
-> Task :constants:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :constants:processDebugUnitTestJavaRes NO-SOURCE
-> Task :app:processStandardDebugResources UP-TO-DATE
+> Task :constants:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :constants:javaPreCompileReleaseUnitTest UP-TO-DATE
 > Task :constants:compileReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :constants:processReleaseUnitTestJavaRes NO-SOURCE
 > Task :constants:testDebugUnitTest NO-SOURCE
 > Task :core:preDebugUnitTestBuild UP-TO-DATE
-> Task :constants:processReleaseUnitTestJavaRes NO-SOURCE
 > Task :constants:testReleaseUnitTest NO-SOURCE
 > Task :constants:test UP-TO-DATE
 > Task :core:javaPreCompileDebugUnitTest UP-TO-DATE
@@ -196,14 +194,16 @@ Reusing configuration cache.
 > Task :core:generateDebugUnitTestStubRFile UP-TO-DATE
 > Task :core:compileReleaseUnitTestKotlin NO-SOURCE
 > Task :core:compileDebugUnitTestKotlin NO-SOURCE
-> Task :core:javaPreCompileReleaseUnitTest UP-TO-DATE
-> Task :core:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :core:processDebugUnitTestJavaRes NO-SOURCE
-> Task :core:compileReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :core:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :core:testDebugUnitTest NO-SOURCE
+> Task :core:javaPreCompileReleaseUnitTest UP-TO-DATE
 > Task :core:processReleaseUnitTestJavaRes NO-SOURCE
+> Task :core:compileReleaseUnitTestJavaWithJavac NO-SOURCE
 > Task :core:testReleaseUnitTest NO-SOURCE
 > Task :core:test UP-TO-DATE
+> Task :app:processStandardReleaseResources UP-TO-DATE
+> Task :app:processStandardDebugResources UP-TO-DATE
 
 > Task :app:compileStandardReleaseKotlin
 w: Opt-in requirement marker kotlin.Experimental is unresolved. Please make sure it's present in the module dependencies
@@ -215,16 +215,16 @@ w: Opt-in requirement marker kotlin.Experimental is unresolved. Please make sure
 > Task :app:processStandardDebugJavaRes UP-TO-DATE
 > Task :app:compileStandardDebugJavaWithJavac UP-TO-DATE
 > Task :app:compileStandardReleaseJavaWithJavac UP-TO-DATE
-> Task :app:bundleStandardReleaseClassesToRuntimeJar
 > Task :app:bundleStandardReleaseClassesToCompileJar
+> Task :app:bundleStandardReleaseClassesToRuntimeJar
 > Task :app:bundleStandardDebugClassesToRuntimeJar
 > Task :app:bundleStandardDebugClassesToCompileJar
-> Task :app:compileStandardReleaseUnitTestKotlin
-> Task :app:compileStandardDebugUnitTestKotlin
-> Task :app:compileStandardReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :app:compileStandardDebugUnitTestKotlin UP-TO-DATE
 > Task :app:compileStandardDebugUnitTestJavaWithJavac NO-SOURCE
-> Task :app:processStandardReleaseUnitTestJavaRes UP-TO-DATE
 > Task :app:processStandardDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:compileStandardReleaseUnitTestKotlin UP-TO-DATE
+> Task :app:compileStandardReleaseUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processStandardReleaseUnitTestJavaRes UP-TO-DATE
 OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 
@@ -266,6 +266,6 @@ ImageUtilTest > testToImageUtilType PASSED
 
 > Task :app:test
 
-BUILD SUCCESSFUL in 1m 31s
-136 actionable tasks: 11 executed, 125 up-to-date
+BUILD SUCCESSFUL in 1m 32s
+136 actionable tasks: 9 executed, 127 up-to-date
 Configuration cache entry reused.

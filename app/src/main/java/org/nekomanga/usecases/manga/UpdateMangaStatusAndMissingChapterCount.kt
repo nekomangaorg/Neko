@@ -56,15 +56,20 @@ class UpdateMangaStatusAndMissingChapterCount(
         val cancelledOrCompleted =
             manga.status == SManga.PUBLICATION_COMPLETE || manga.status == SManga.CANCELLED
 
-        return cancelledOrCompleted &&
-            manga.last_chapter_number != null &&
-            chapters.any { chapter ->
-                val volumeNum = getVolumeNum(chapter)
-                chapter.isAvailable(downloadManager, manga) &&
-                    getChapterNum(chapter)?.toInt() == manga.last_chapter_number &&
-                    (volumeNum == manga.last_volume_number ||
-                        volumeNum == null ||
-                        manga.last_volume_number == null)
+        if (cancelledOrCompleted && manga.last_chapter_number != null) {
+            val final =
+                chapters
+                    .filter { it.isAvailable(downloadManager, manga) }
+                    .filter { getChapterNum(it)?.toInt() == manga.last_chapter_number }
+                    .filter {
+                        getVolumeNum(it) == manga.last_volume_number ||
+                            getVolumeNum(it) == null ||
+                            manga.last_volume_number == null
+                    }
+            if (final.isNotEmpty()) {
+                return true
             }
+        }
+        return false
     }
 }

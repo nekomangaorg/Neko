@@ -50,13 +50,10 @@ open class WebViewActivity : AppCompatActivity() {
 
         title = intent.extras?.getString(TITLE_KEY) ?: ""
 
-        val extras = intent.extras ?: return
+        val url = intent.extras!!.getString(URL_KEY) ?: return
 
-        val url = extras.getString(URL_KEY) ?: return
-
-        val source = sourceManager.get(extras.getLong(SOURCE_KEY)) as? HttpSource ?: return
+        val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
         val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
-
         setContent {
             NekoTheme {
                 WebViewScreen(title = title.toString(), url = url, onBackPressed = { finish() })

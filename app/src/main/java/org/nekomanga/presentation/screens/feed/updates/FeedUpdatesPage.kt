@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -105,10 +106,18 @@ private fun Grouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val now = remember { Date().time }
+
+    var now by remember { mutableStateOf(Date().time) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(DateUtils.MINUTE_IN_MILLIS)
+            now = Date().time
+        }
+    }
 
     val groupedBySeries =
-        remember(feedUpdatesMangaList) {
+        remember(feedUpdatesMangaList, now) {
             feedUpdatesMangaList
                 .groupBy { getDateString(it.date, now) }
                 .map {
@@ -125,7 +134,7 @@ private fun Grouped(
         }
 
     val renderedGroups =
-        remember(groupedBySeries) { groupedBySeries.groupBy { getDateString(it.date, now) } }
+        remember(groupedBySeries, now) { groupedBySeries.groupBy { getDateString(it.date, now) } }
 
     LazyColumn(modifier = modifier, state = scrollState, contentPadding = contentPadding) {
         var globalIndex = 0
@@ -162,7 +171,7 @@ private fun Grouped(
                         else -> ListCardType.Center
                     }
 
-                item(key = "${groupIndex}-${feedManga.mangaId}-${latestChapter.chapter.id}") {
+                item(key = "${currentIndex}-${feedManga.mangaId}-${latestChapter.chapter.id}") {
                     LaunchedEffect(scrollState, loadingResults) {
                         if (
                             currentIndex >= groupedBySeries.size - 5 &&
@@ -221,10 +230,18 @@ private fun Ungrouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val now = remember { Date().time }
+
+    var now by remember { mutableStateOf(Date().time) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(DateUtils.MINUTE_IN_MILLIS)
+            now = Date().time
+        }
+    }
 
     val groupedManga =
-        remember(feedUpdatesMangaList) {
+        remember(feedUpdatesMangaList, now) {
             feedUpdatesMangaList.groupBy { getDateString(it.date, now) }
         }
 

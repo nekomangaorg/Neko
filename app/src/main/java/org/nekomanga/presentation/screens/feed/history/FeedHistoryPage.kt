@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -49,10 +50,17 @@ fun FeedHistoryPage(
     }
     val scrollState = rememberLazyListState()
 
-    val now = remember { Date().time }
+    var now by remember { mutableStateOf(Date().time) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(DateUtils.MINUTE_IN_MILLIS)
+            now = Date().time
+        }
+    }
 
     val groupedHistory =
-        remember(feedHistoryMangaList, historyGrouping) {
+        remember(feedHistoryMangaList, historyGrouping, now) {
             feedHistoryMangaList.groupBy { feedManga ->
                 getDateString(feedManga.chapters.first().chapter.lastRead, now, historyGrouping)
             }

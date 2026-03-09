@@ -25,9 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import jp.wasabeef.gap.Gap
-import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -74,7 +72,7 @@ fun RowScope.CategorySortButtons(
                     isAscending -> Icons.Default.ArrowDownward
                     else -> Icons.Default.ArrowUpward
                 },
-            contentDescription = stringResource(id = R.string.sort),
+            contentDescription = null,
             modifier = Modifier.size(Size.mediumLarge),
         )
     }
@@ -117,7 +115,7 @@ fun RowScope.CategorySortButtons(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(id = R.string.refresh),
+                        contentDescription = null,
                         modifier = Modifier.size(Size.mediumLarge),
                     )
                 }
