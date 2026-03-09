@@ -206,7 +206,10 @@ class LibraryViewModel() : ViewModel() {
                 if (searchQuery.isNullOrBlank()) {
                     mangaList
                 } else {
-                    mangaList.filter { libraryMangaItem -> libraryMangaItem.matches(searchQuery) }
+                    val splitQuery = if (searchQuery.contains(",")) searchQuery.split(",") else null
+                    mangaList.filter { libraryMangaItem ->
+                        libraryMangaItem.matches(searchQuery, splitQuery)
+                    }
                 }
             }
             .conflate()
