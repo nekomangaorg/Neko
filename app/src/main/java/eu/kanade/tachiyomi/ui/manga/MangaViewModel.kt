@@ -885,7 +885,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
                             .mapNotNull {
-                                if (!it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable) it.chapter.toDbChapter() else null
+                                if (!it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable) it.chapter.toDbChapter() else null
                             }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
