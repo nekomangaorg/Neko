@@ -859,18 +859,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        mangaDetailScreenState.value.activeChapters.mapNotNull {
-                            if (!it.isDownloaded) it.chapter.toDbChapter() else null
-                        },
+                        mangaDetailScreenState.value.activeChapters
+                            .mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.Download -> {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        chapterItems.mapNotNull {
-                            if (!it.isDownloaded) it.chapter.toDbChapter() else null
-                        },
+                        chapterItems.mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.DownloadNextUnread -> {
@@ -886,11 +883,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
-                        mangaDetailScreenState.value.activeChapters.mapNotNull {
-                            if (!it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable)
-                                it.chapter.toDbChapter()
-                            else null
-                        }
+                        mangaDetailScreenState.value.activeChapters
+                            .mapNotNull {
+                                if (!it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable) it.chapter.toDbChapter() else null
+                            }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
                 is DownloadAction.Remove ->
