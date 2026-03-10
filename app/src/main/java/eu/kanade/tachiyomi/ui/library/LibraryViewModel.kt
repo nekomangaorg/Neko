@@ -1099,16 +1099,16 @@ class LibraryViewModel() : ViewModel() {
                         val amount = downloadAction.numberToDownload
                         val unreadDbChapters =
                             chapterItems
-                                .filterNot { it.chapter.read }
+                                .asSequence()
+                                .mapNotNull { if (!it.chapter.read) it.chapter.toDbChapter() else null }
                                 .take(amount)
-                                .map { it.chapter.toDbChapter() }
+                                .toList()
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
                         val unreadDbChapters =
                             chapterItems
-                                .filterNot { it.chapter.read }
-                                .map { it.chapter.toDbChapter() }
+                                .mapNotNull { if (!it.chapter.read) it.chapter.toDbChapter() else null }
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
@@ -1119,7 +1119,7 @@ class LibraryViewModel() : ViewModel() {
                     }
                     DownloadAction.RemoveRead -> {
                         val readDbChapters =
-                            chapterItems.filter { it.chapter.read }.map { it.chapter.toDbChapter() }
+                            chapterItems.mapNotNull { if (it.chapter.read) it.chapter.toDbChapter() else null }
                         downloadManager.deleteChapters(dbManga, readDbChapters)
                     }
                     else -> Unit

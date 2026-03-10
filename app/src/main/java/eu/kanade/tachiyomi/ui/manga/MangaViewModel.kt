@@ -860,15 +860,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     downloadManager.downloadChapters(
                         dbManga,
                         mangaDetailScreenState.value.activeChapters
-                            .filter { !it.isDownloaded }
-                            .map { it.chapter.toDbChapter() },
+                            .mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.Download -> {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
+                        chapterItems.mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.DownloadNextUnread -> {
@@ -885,10 +884,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.activeChapters
-                            .filter {
-                                !it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable
+                            .mapNotNull {
+                                if (!it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable) it.chapter.toDbChapter() else null
                             }
-                            .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
                 is DownloadAction.Remove ->
