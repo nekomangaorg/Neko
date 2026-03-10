@@ -69,11 +69,10 @@ class ChapterDto(
 
         val scanlatorList = mutableListOf(WeebDex.name)
 
-        relationships?.groups
+        relationships
+            ?.groups
             ?.ifEmpty { null } // Converts empty list to null to trigger the Elvis operator
-            ?.forEach { scanlatorList.add(it.name) }
-            ?: scanlatorList.add(Constants.NO_GROUP)
-
+            ?.forEach { scanlatorList.add(it.name) } ?: scanlatorList.add(Constants.NO_GROUP)
 
         return SChapter.create().apply {
             url = "/chapter/$id"
