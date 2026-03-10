@@ -860,7 +860,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     downloadManager.downloadChapters(
                         dbManga,
                         mangaDetailScreenState.value.activeChapters
-                            .mapNotNull { if (it.isNotDownloaded) it.chapter.toDbChapter() else null },
+                            .mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.Download -> {
