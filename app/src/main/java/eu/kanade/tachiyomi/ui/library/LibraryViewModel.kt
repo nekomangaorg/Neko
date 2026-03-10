@@ -291,18 +291,18 @@ class LibraryViewModel() : ViewModel() {
 
                         val updatedItem =
                             if (
-                                item.downloadCount == newDownloadCount &&
-                                    item.trackCount == newTrackCount
+                                item.downloadCount != newDownloadCount ||
+                                    item.trackCount != newTrackCount
                             ) {
-                                item
-                            } else {
                                 item.copy(
                                     downloadCount = newDownloadCount,
                                     trackCount = newTrackCount,
                                 )
+                            } else {
+                                item
                             }
-                        if (updatedItem.matchesFilters(libraryFilters, trackMap)) updatedItem
-                        else null
+
+                        updatedItem.takeIf { it.matchesFilters(libraryFilters, trackMap) }
                     }
                 }
             }
@@ -600,17 +600,6 @@ class LibraryViewModel() : ViewModel() {
         if (!libraryFilters.filterMerged.matches(this)) return false
         if (!libraryFilters.filterUnavailable.matches(this)) return false
         if (!libraryFilters.filterTracked.matches(this)) return false
-
-        // Special handling for Tracking logic preserved from original code
-        val displayManga = this.displayManga
-        val missingChaptersCondition =
-            when (libraryFilters.filterTracked) {
-                FilterTracked.Inactive -> true
-                FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
-                FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
-            }
-
-        if (!missingChaptersCondition) return false
 
         return true // passed all checks
     }
