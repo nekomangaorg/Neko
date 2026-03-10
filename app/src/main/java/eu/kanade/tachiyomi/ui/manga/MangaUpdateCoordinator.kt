@@ -207,8 +207,7 @@ class MangaUpdateCoordinator {
                 .flatten()
                 .sortedWith(compareBy { getChapterNum(it.first) })
 
-        val readFromMerged =
-            mergedChapterPairs.mapNotNull { if (it.second) it.first.url else null }.toSet()
+        val readFromMerged = mergedChapterPairs.mapNotNull { if (it.second) it.first.url else null }.toSet()
         val mergedChapters =
             mergedChapterPairs.map { (sChapter, _) ->
                 val lastChapterNum = manga.last_chapter_number?.toFloat()

@@ -97,8 +97,7 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.titleParam] = actualQuery
             }
 
-            val contentRating =
-                filters.contentRatings.mapNotNull { if (it.state) it.rating.key else null }
+            val contentRating = filters.contentRatings.mapNotNull { if (it.state) it.rating.key else null }
 
             if (contentRating.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.contentRatingParam] = contentRating
@@ -112,9 +111,7 @@ class SearchHandler {
             }
 
             val demographics =
-                filters.publicationDemographics.mapNotNull {
-                    if (it.state) it.demographic.key else null
-                }
+                filters.publicationDemographics.mapNotNull { if (it.state) it.demographic.key else null }
             if (demographics.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.publicationDemographicParam] =
                     demographics
@@ -125,17 +122,14 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.statusParam] = status
             }
             val tagsToInclude =
-                filters.tags.mapNotNull {
-                    if (it.state == ToggleableState.On) it.tag.uuid else null
-                }
+                filters.tags.mapNotNull { if (it.state == ToggleableState.On) it.tag.uuid else null }
             if (tagsToInclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.includedTagsParam] = tagsToInclude
             }
 
             val tagsToExclude =
-                filters.tags.mapNotNull {
-                    if (it.state == ToggleableState.Indeterminate) it.tag.uuid else null
-                }
+                filters.tags
+                    .mapNotNull { if (it.state == ToggleableState.Indeterminate) it.tag.uuid else null }
             if (tagsToExclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.excludedTagsParam] = tagsToExclude
             }
