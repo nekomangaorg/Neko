@@ -493,7 +493,7 @@ class FeedViewModel() : ViewModel() {
             viewModelScope.launchIO {
                 if (searchQuery.isNullOrBlank()) {
                     when (_feedScreenState.value.feedScreenType) {
-                        FeedScreenType.Summary -> TODO()
+                        FeedScreenType.Summary -> Unit
                         FeedScreenType.History ->
                             _historyScreenPagingState.update {
                                 it.copy(
