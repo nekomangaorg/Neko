@@ -1,0 +1,105 @@
+--- app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryViewModel.kt
++++ app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryViewModel.kt
+@@ -276,21 +276,22 @@
+                             mangaList.map { it.displayManga.mangaId }
+                         )
+
+-                    mangaList
+-                        .map { item ->
+-                            // Enrich item with volatile data needed for filtering
+-                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
+-                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
+-
+-                            if (
+-                                item.downloadCount == newDownloadCount &&
+-                                    item.trackCount == newTrackCount
+-                            ) {
+-                                return@map item
+-                            }
+-                            item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+-                        }
+-                        .applyFilters(libraryFilters, trackMap)
++                    mangaList.mapNotNull { item ->
++                        // Enrich item with volatile data needed for filtering
++                        val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
++                        val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
++
++                        val updatedItem =
++                            if (
++                                item.downloadCount == newDownloadCount &&
++                                    item.trackCount == newTrackCount
++                            ) {
++                                item
++                            } else {
++                                item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
++                            }
++                        if (updatedItem.matchesFilters(libraryFilters, trackMap)) updatedItem else null
++                    }
+                 }
+             }
+             .distinctUntilChanged()
+@@ -570,36 +571,34 @@
+         }
+     }
+
+-    private fun List<LibraryMangaItem>.applyFilters(
++    private fun LibraryMangaItem.matchesFilters(
+         libraryFilters: LibraryFilters,
+         trackMap: Map<Long, List<String>>,
+-    ): List<LibraryMangaItem> {
+-        return this.filter { libraryMangaItem ->
+-            // Check Unread first (most common filter)
+-            if (!libraryFilters.filterUnread.matches(libraryMangaItem)) return@filter false
+-
+-            // Check Downloaded second (common and quick)
+-            if (!libraryFilters.filterDownloaded.matches(libraryMangaItem)) return@filter false
+-
+-            // Check the rest
+-            if (!libraryFilters.filterBookmarked.matches(libraryMangaItem)) return@filter false
+-            if (!libraryFilters.filterCompleted.matches(libraryMangaItem)) return@filter false
+-            if (!libraryFilters.filterMangaType.matches(libraryMangaItem)) return@filter false
+-            if (!libraryFilters.filterMerged.matches(libraryMangaItem)) return@filter false
+-            if (!libraryFilters.filterUnavailable.matches(libraryMangaItem)) return@filter false
+-            if (!libraryFilters.filterTracked.matches(libraryMangaItem)) return@filter false
+-
+-            // Special handling for Tracking logic preserved from original code
+-            val displayManga = libraryMangaItem.displayManga
+-            val missingChaptersCondition =
+-                when (libraryFilters.filterTracked) {
+-                    FilterTracked.Inactive -> true
+-                    FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
+-                    FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
+-                }
+-
+-            if (!missingChaptersCondition) return@filter false
+-
+-            true // passed all checks
+-        }
++    ): Boolean {
++        // Check Unread first (most common filter)
++        if (!libraryFilters.filterUnread.matches(this)) return false
++
++        // Check Downloaded second (common and quick)
++        if (!libraryFilters.filterDownloaded.matches(this)) return false
++
++        // Check the rest
++        if (!libraryFilters.filterBookmarked.matches(this)) return false
++        if (!libraryFilters.filterCompleted.matches(this)) return false
++        if (!libraryFilters.filterMangaType.matches(this)) return false
++        if (!libraryFilters.filterMerged.matches(this)) return false
++        if (!libraryFilters.filterUnavailable.matches(this)) return false
++        if (!libraryFilters.filterTracked.matches(this)) return false
++
++        // Special handling for Tracking logic preserved from original code
++        val displayManga = this.displayManga
++        val missingChaptersCondition =
++            when (libraryFilters.filterTracked) {
++                FilterTracked.Inactive -> true
++                FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
++                FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
++            }
++
++        if (!missingChaptersCondition) return false
++
++        return true // passed all checks
+     }

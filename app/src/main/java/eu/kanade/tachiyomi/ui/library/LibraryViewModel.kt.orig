@@ -276,34 +276,21 @@ class LibraryViewModel() : ViewModel() {
                             mangaList.map { it.displayManga.mangaId }
                         )
 
-                    mangaList.mapNotNull { item ->
-                        // ⚡ BOLT OPTIMIZATION:
-                        // Replaced .map {}.applyFilters() with a single .mapNotNull {} to avoid
-                        // creating
-                        // an intermediate list of LibraryMangaItems.
-                        // Impact: Skips creating an N-sized list in memory during StateFlow
-                        // emissions,
-                        // leading to faster flow processing and reduced GC overhead.
+                    mangaList
+                        .map { item ->
+                            // Enrich item with volatile data needed for filtering
+                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
+                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
 
-                        // Enrich item with volatile data needed for filtering
-                        val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
-                        val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
-
-                        val updatedItem =
                             if (
                                 item.downloadCount == newDownloadCount &&
                                     item.trackCount == newTrackCount
                             ) {
-                                item
-                            } else {
-                                item.copy(
-                                    downloadCount = newDownloadCount,
-                                    trackCount = newTrackCount,
-                                )
+                                return@map item
                             }
-                        if (updatedItem.matchesFilters(libraryFilters, trackMap)) updatedItem
-                        else null
-                    }
+                            item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                        }
+                        .applyFilters(libraryFilters, trackMap)
                 }
             }
             .distinctUntilChanged()
@@ -583,36 +570,38 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    private fun LibraryMangaItem.matchesFilters(
+    private fun List<LibraryMangaItem>.applyFilters(
         libraryFilters: LibraryFilters,
         trackMap: Map<Long, List<String>>,
-    ): Boolean {
-        // Check Unread first (most common filter)
-        if (!libraryFilters.filterUnread.matches(this)) return false
+    ): List<LibraryMangaItem> {
+        return this.filter { libraryMangaItem ->
+            // Check Unread first (most common filter)
+            if (!libraryFilters.filterUnread.matches(libraryMangaItem)) return@filter false
 
-        // Check Downloaded second (common and quick)
-        if (!libraryFilters.filterDownloaded.matches(this)) return false
+            // Check Downloaded second (common and quick)
+            if (!libraryFilters.filterDownloaded.matches(libraryMangaItem)) return@filter false
 
-        // Check the rest
-        if (!libraryFilters.filterBookmarked.matches(this)) return false
-        if (!libraryFilters.filterCompleted.matches(this)) return false
-        if (!libraryFilters.filterMangaType.matches(this)) return false
-        if (!libraryFilters.filterMerged.matches(this)) return false
-        if (!libraryFilters.filterUnavailable.matches(this)) return false
-        if (!libraryFilters.filterTracked.matches(this)) return false
+            // Check the rest
+            if (!libraryFilters.filterBookmarked.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterCompleted.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterMangaType.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterMerged.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterUnavailable.matches(libraryMangaItem)) return@filter false
+            if (!libraryFilters.filterTracked.matches(libraryMangaItem)) return@filter false
 
-        // Special handling for Tracking logic preserved from original code
-        val displayManga = this.displayManga
-        val missingChaptersCondition =
-            when (libraryFilters.filterTracked) {
-                FilterTracked.Inactive -> true
-                FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
-                FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
-            }
+            // Special handling for Tracking logic preserved from original code
+            val displayManga = libraryMangaItem.displayManga
+            val missingChaptersCondition =
+                when (libraryFilters.filterTracked) {
+                    FilterTracked.Inactive -> true
+                    FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
+                    FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
+                }
 
-        if (!missingChaptersCondition) return false
+            if (!missingChaptersCondition) return@filter false
 
-        return true // passed all checks
+            true // passed all checks
+        }
     }
 
     fun categoryItemClick(category: CategoryItem) {
