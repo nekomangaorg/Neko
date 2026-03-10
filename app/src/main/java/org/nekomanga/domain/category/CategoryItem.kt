@@ -1,5 +1,6 @@
 package org.nekomanga.domain.category
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.ui.library.LibrarySort
@@ -7,6 +8,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
+@Immutable
 data class CategoryItem(
     val id: Int,
     val name: String,
