@@ -867,7 +867,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        chapterItems.mapNotNull { if (it.isNotDownloaded) it.chapter.toDbChapter() else null },
+                        chapterItems.mapNotNull { if (!it.isDownloaded) it.chapter.toDbChapter() else null },
                     )
                 }
                 is DownloadAction.DownloadNextUnread -> {
