@@ -211,9 +211,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 MangaConstants.CategoriesData(
                     all = allCategories.map { it.toCategoryItem() },
                     current =
-                        allCategories
-                            .filter { it.id != null && it.id in mangaCategorySet }
-                            .map { it.toCategoryItem() },
+                        allCategories.mapNotNull {
+                            if (it.id != null && it.id in mangaCategorySet) it.toCategoryItem()
+                            else null
+                        },
                 )
             }
             .distinctUntilChanged()
@@ -450,8 +451,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                             val loggedInTrackerService =
                                 trackManager.services
-                                    .filter { it.value.isLogged() }
-                                    .map { it.value.toTrackServiceItem() }
+                                    .mapNotNull {
+                                        if (it.value.isLogged()) it.value.toTrackServiceItem()
+                                        else null
+                                    }
                                     .toPersistentList()
 
                             val trackCount =
@@ -684,9 +687,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             chapterItems.map { it.chapter.toDbChapter() },
                         )
                         val localDbChapters =
-                            chapterItems
-                                .filter { it.chapter.isLocalSource() }
-                                .map { it.chapter.toDbChapter() }
+                            chapterItems.mapNotNull {
+                                if (it.chapter.isLocalSource()) it.chapter.toDbChapter() else null
+                            }
                         if (localDbChapters.isNotEmpty()) {
                             db.deleteChapters(localDbChapters).executeAsBlocking()
                         }
@@ -781,9 +784,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(
-                            updatedChapterList
-                                .filter { it.chapter.canDeleteChapter() }
-                                .map { ChapterItem(chapter = it.chapter) },
+                            updatedChapterList.mapNotNull {
+                                if (it.chapter.canDeleteChapter()) ChapterItem(chapter = it.chapter)
+                                else null
+                            },
                             updatedChapterList.size == mangaDetailScreenState.value.allChapters.size,
                         )
                     }
@@ -1024,8 +1028,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             val loggedInServices =
                 trackManager.services
-                    .filter { service -> service.value.isLogged() }
-                    .map { service -> service.value.toTrackServiceItem() }
+                    .mapNotNull { service ->
+                        if (service.value.isLogged()) service.value.toTrackServiceItem() else null
+                    }
                     .toPersistentList()
 
             _mangaDetailScreenState.update {
@@ -1919,7 +1924,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 false -> coverCache.getCoverFile(artwork.cover)
             }
 
-        val type = ImageUtil.findImageType(cover.inputStream()) ?: throw Exception("Not an image")
+        val type =
+            cover.inputStream().use { ImageUtil.findImageType(it) }
+                ?: throw Exception("Not an image")
 
         // Build destination file.
         val fileNameNoExtension =
