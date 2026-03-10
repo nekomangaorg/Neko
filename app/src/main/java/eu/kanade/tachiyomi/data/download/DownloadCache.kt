@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -148,46 +151,55 @@ class DownloadCache(
     private fun renew() {
         if (renewJob?.isActive == true) return
 
-        renewJob =
-            scope.launch {
-                TimberKt.d { "Renewing cache" }
+        renewJob = scope.launch { renewCache() }
+    }
 
-                // Map Source ID to the directory on disk
-                val sourceDir =
-                    storageManager.getDownloadsDirectory()?.listFiles()?.find {
-                        it.name == provider.getSourceDirName()
-                    } ?: return@launch
+    private suspend fun renewCache() {
+        TimberKt.d { "Renewing cache" }
 
-                val db: DatabaseHelper by injectLazy()
-                // Optimization: Fetch once
-                val allManga = db.getMangaList().executeAsBlocking()
+        // Map Source ID to the directory on disk
+        val sourceDir =
+            storageManager.getDownloadsDirectory()?.listFiles()?.find {
+                it.name == provider.getSourceDirName()
+            } ?: return
 
-                // 3. Create lookup map for O(1) access
-                val mangaLookup =
-                    allManga.associateBy {
-                        DiskUtil.buildValidFilename(it.displayTitle())
-                            .lowercase(Locale.getDefault())
-                    }
+        val db: DatabaseHelper by injectLazy()
+        // Optimization: Fetch once
+        val allManga = db.getMangaList().executeAsBlocking()
 
-                // 4. Iterate over the folders on disk
-                sourceDir.listFiles().orEmpty().forEach { mangaDir ->
-                    val dirName = mangaDir.name ?: return@forEach
-                    val manga =
-                        mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
-                    val id = manga.id ?: return@forEach
-
-                    val files =
-                        mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                            it.name?.substringBeforeLast(".cbz")
-                        }
-
-                    val mangadexIds =
-                        files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
-
-                    mangaFiles[id] = MangaFiles(files, mangadexIds)
-                }
-                lastRenew = System.currentTimeMillis()
+        // 3. Create lookup map for O(1) access
+        val mangaLookup =
+            allManga.associateBy {
+                DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
             }
+
+        // 4. Iterate over the folders on disk
+        coroutineScope {
+            sourceDir
+                .listFiles()
+                .orEmpty()
+                .map { mangaDir ->
+                    async {
+                        val dirName = mangaDir.name ?: return@async
+                        val manga =
+                            mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
+                        val id = manga.id ?: return@async
+
+                        val files =
+                            mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
+                                it.name?.substringBeforeLast(".cbz")
+                            }
+
+                        val mangadexIds =
+                            files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
+
+                        mangaFiles[id] = MangaFiles(files, mangadexIds)
+                    }
+                }
+                .awaitAll()
+        }
+
+        lastRenew = System.currentTimeMillis()
     }
 
     @Synchronized
