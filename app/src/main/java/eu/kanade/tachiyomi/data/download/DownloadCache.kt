@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -50,7 +51,7 @@ class DownloadCache(
         val mangadexIds: MutableSet<String>,
     )
 
-    val scope = CoroutineScope(Job() + Dispatchers.IO)
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var renewJob: Job? = null
 
@@ -151,7 +152,14 @@ class DownloadCache(
     private fun renew() {
         if (renewJob?.isActive == true) return
 
-        renewJob = scope.launch { renewCache() }
+        renewJob =
+            scope.launch {
+                try {
+                    renewCache()
+                } catch (e: Exception) {
+                    TimberKt.e(e) { "Failed to renew cache" }
+                }
+            }
     }
 
     private suspend fun renewCache() {
