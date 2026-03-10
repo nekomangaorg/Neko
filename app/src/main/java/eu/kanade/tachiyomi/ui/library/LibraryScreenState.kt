@@ -104,6 +104,7 @@ data class LibraryViewItem(
     val userCategories: PersistentList<CategoryItem>,
 )
 
+@Immutable
 data class LibraryCategoryItem(
     val categoryItem: CategoryItem,
     val isRefreshing: Boolean = false,

@@ -1,6 +1,7 @@
 package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -8,8 +9,9 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import org.nekomanga.domain.category.CategoryItem
 
-data class SimpleManga(val title: String, val id: Long)
+@Immutable data class SimpleManga(val title: String, val id: Long)
 
+@Immutable
 data class SourceManga(
     val currentThumbnail: String,
     val url: String,
@@ -18,6 +20,7 @@ data class SourceManga(
     @param:StringRes val displayTextRes: Int? = null,
 )
 
+@Immutable
 data class LibraryMangaItem(
     val displayManga: DisplayManga,
     val userCover: String?,
@@ -83,6 +86,7 @@ data class LibraryMangaItem(
     }
 }
 
+@Immutable
 data class DisplayManga(
     val mangaId: Long,
     val inLibrary: Boolean,
@@ -100,8 +104,9 @@ data class DisplayManga(
     }
 }
 
-data class MergeArtwork(val url: String, val mergeType: MergeType)
+@Immutable data class MergeArtwork(val url: String, val mergeType: MergeType)
 
+@Immutable
 data class Artwork(
     val cover: String = "",
     val dynamicCover: String = "",
