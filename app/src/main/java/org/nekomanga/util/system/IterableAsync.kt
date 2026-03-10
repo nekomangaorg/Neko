@@ -43,5 +43,5 @@ suspend fun <T, R : Any> Iterable<T>.mapAsyncNotNull(transform: suspend (T) -> R
 suspend fun <T> Iterable<T>.filterAsync(predicate: suspend (T) -> Boolean): List<T> =
     coroutineScope {
         val deferred = map { item -> async { item to predicate(item) } }
-        deferred.awaitAll().filter { it.second }.map { it.first }
+        deferred.awaitAll().mapNotNull { if (it.second) it.first else null }
     }
