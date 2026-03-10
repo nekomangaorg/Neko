@@ -394,6 +394,6 @@ fun Context.createFileInCacheDir(name: String): File {
 
 fun Context.sharedCacheDir(): UniFile? {
     val uniFile = UniFile.fromFile(this.cacheDir)?.createDirectory("shared_image")
-    uniFile?.listFiles()?.filter { it.isFile }?.map { it.delete() }
+    uniFile?.listFiles()?.forEach { if (it.isFile) it.delete() }
     return uniFile
 }
