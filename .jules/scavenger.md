@@ -1,1 +1,0 @@
-## 2024-05-24 - [BrowseViewModel Network Check] **Learning:** When replacing a TODO for network checking with actual implementation, you can use `preferences.context.activeNetworkState().isOnline` to query network state. Remember to remove stray `patch.diff` files after using patch commands! **Action:** I will delete temporary patch files after patching instead of leaving them.
