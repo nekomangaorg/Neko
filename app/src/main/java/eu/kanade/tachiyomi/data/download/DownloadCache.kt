@@ -14,6 +14,10 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -47,11 +51,13 @@ class DownloadCache(
         val mangadexIds: MutableSet<String>,
     )
 
-    val scope = CoroutineScope(Job() + Dispatchers.IO)
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private var renewJob: Job? = null
 
     init {
         storageManager.baseDirChanges.onEach { forceRenewCache() }.launchIn(scope)
-        scope.launch { renew() }
+        renew()
     }
 
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
@@ -98,7 +104,10 @@ class DownloadCache(
                 it.name?.substringBeforeLast(".cbz")
             }
 
-        val mangadexIds = fileNames.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
+        val mangadexIds =
+            fileNames.mapNotNullTo(mutableSetOf()) {
+                it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
+            }
 
         mangaFiles[id] = MangaFiles(fileNames, mangadexIds)
     }
@@ -134,18 +143,29 @@ class DownloadCache(
     private fun checkRenew() {
         if (lastRenew + renewInterval < System.currentTimeMillis()) {
             renew()
-            lastRenew = System.currentTimeMillis()
         }
     }
 
     fun forceRenewCache() {
         renew()
-        lastRenew = System.currentTimeMillis()
     }
 
     /** Renews the downloads cache. */
     @Synchronized
     private fun renew() {
+        if (renewJob?.isActive == true) return
+
+        renewJob =
+            scope.launch {
+                try {
+                    renewCache()
+                } catch (e: Exception) {
+                    TimberKt.e(e) { "Failed to renew cache" }
+                }
+            }
+    }
+
+    private suspend fun renewCache() {
         TimberKt.d { "Renewing cache" }
 
         // Map Source ID to the directory on disk
@@ -165,20 +185,37 @@ class DownloadCache(
             }
 
         // 4. Iterate over the folders on disk
-        sourceDir.listFiles().orEmpty().forEach { mangaDir ->
-            val dirName = mangaDir.name ?: return@forEach
-            val manga = mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@forEach
-            val id = manga.id ?: return@forEach
+        val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()
+        coroutineScope {
+            sourceDir
+                .listFiles()
+                .orEmpty()
+                .map { mangaDir ->
+                    async {
+                        val dirName = mangaDir.name ?: return@async
+                        val manga =
+                            mangaLookup[dirName.lowercase(Locale.getDefault())] ?: return@async
+                        val id = manga.id ?: return@async
 
-            val files =
-                mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
-                    it.name?.substringBeforeLast(".cbz")
+                        val files =
+                            mangaDir.listFiles().orEmpty().mapNotNullTo(mutableSetOf()) {
+                                it.name?.substringBeforeLast(".cbz")
+                            }
+
+                        val mangadexIds =
+                            files.mapNotNullTo(mutableSetOf()) {
+                                it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
+                            }
+
+                        newMangaFiles[id] = MangaFiles(files, mangadexIds)
+                    }
                 }
-
-            val mangadexIds = files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
-
-            mangaFiles[id] = MangaFiles(files, mangadexIds)
+                .awaitAll()
         }
+        mangaFiles.clear()
+        mangaFiles.putAll(newMangaFiles)
+
+        lastRenew = System.currentTimeMillis()
     }
 
     @Synchronized
