@@ -253,7 +253,9 @@ class MangaCoverFetcher(
         } catch (e: Exception) {
             try {
                 editor.abort()
-            } catch (ignored: Exception) {}
+            } catch (abortException: Exception) {
+                e.addSuppressed(abortException)
+            }
             throw e
         }
     }
