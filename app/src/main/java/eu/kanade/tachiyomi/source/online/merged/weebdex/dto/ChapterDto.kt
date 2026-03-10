@@ -73,6 +73,8 @@ class ChapterDto(
             ?.ifEmpty { null } // Converts empty list to null to trigger the Elvis operator
             ?.forEach { scanlatorList.add(it.name) }
             ?: scanlatorList.add(Constants.NO_GROUP)
+
+
         return SChapter.create().apply {
             url = "/chapter/$id"
             name = Parser.unescapeEntities(chapterName.joinToString(" "), false)
