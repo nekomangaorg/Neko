@@ -104,7 +104,10 @@ class DownloadCache(
                 it.name?.substringBeforeLast(".cbz")
             }
 
-        val mangadexIds = fileNames.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
+        val mangadexIds =
+            fileNames.mapNotNullTo(mutableSetOf()) {
+                it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
+            }
 
         mangaFiles[id] = MangaFiles(fileNames, mangadexIds)
     }
@@ -182,6 +185,7 @@ class DownloadCache(
             }
 
         // 4. Iterate over the folders on disk
+        val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()
         coroutineScope {
             sourceDir
                 .listFiles()
@@ -199,13 +203,17 @@ class DownloadCache(
                             }
 
                         val mangadexIds =
-                            files.map { it.takeLast(36) }.filterTo(mutableSetOf()) { it.isUUID() }
+                            files.mapNotNullTo(mutableSetOf()) {
+                                it.takeLast(36).takeIf { uuid -> uuid.isUUID() }
+                            }
 
-                        mangaFiles[id] = MangaFiles(files, mangadexIds)
+                        newMangaFiles[id] = MangaFiles(files, mangadexIds)
                     }
                 }
                 .awaitAll()
         }
+        mangaFiles.clear()
+        mangaFiles.putAll(newMangaFiles)
 
         lastRenew = System.currentTimeMillis()
     }
