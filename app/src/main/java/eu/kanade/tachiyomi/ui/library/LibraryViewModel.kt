@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -140,6 +141,7 @@ class LibraryViewModel() : ViewModel() {
             .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
             .distinctUntilChanged()
             .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val categoryListFlow: Flow<List<CategoryItem>> =
         combine(
@@ -156,6 +158,7 @@ class LibraryViewModel() : ViewModel() {
                     .sortedBy { it.order }
             }
             .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val trackMapFlow: Flow<Map<Long, List<String>>> =
         db.getAllTracks()
@@ -174,18 +177,21 @@ class LibraryViewModel() : ViewModel() {
                     .groupBy({ it.first }, { it.second })
             }
             .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val lastReadMangaFlow =
         db.getLastReadManga()
             .asFlow()
             .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
             .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val lastFetchMangaFlow =
         db.getLastFetchedManga()
             .asFlow()
             .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
             .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val filteredMangaListFlow =
         combine(
@@ -213,6 +219,7 @@ class LibraryViewModel() : ViewModel() {
                 }
             }
             .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     @Suppress("UNCHECKED_CAST")
     val libraryViewFlow: Flow<LibraryViewPreferences> =
@@ -236,31 +243,33 @@ class LibraryViewModel() : ViewModel() {
                 )
             }
             .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val filterPreferencesFlow: Flow<LibraryFilters> =
         combine(
-            libraryPreferences.filterBookmarked().changes(),
-            libraryPreferences.filterCompleted().changes(),
-            libraryPreferences.filterDownloaded().changes(),
-            libraryPreferences.filterMangaType().changes(),
-            libraryPreferences.filterMerged().changes(),
-            libraryPreferences.filterMissingChapters().changes(),
-            libraryPreferences.filterTracked().changes(),
-            libraryPreferences.filterUnavailable().changes(),
-            libraryPreferences.filterUnread().changes(),
-        ) {
-            LibraryFilters(
-                filterBookmarked = it[0] as FilterBookmarked,
-                filterCompleted = it[1] as FilterCompleted,
-                filterDownloaded = it[2] as FilterDownloaded,
-                filterMangaType = it[3] as FilterMangaType,
-                filterMerged = it[4] as FilterMerged,
-                filterMissingChapters = it[5] as FilterMissingChapters,
-                filterTracked = it[6] as FilterTracked,
-                filterUnavailable = it[7] as FilterUnavailable,
-                filterUnread = it[8] as FilterUnread,
-            )
-        }
+                libraryPreferences.filterBookmarked().changes(),
+                libraryPreferences.filterCompleted().changes(),
+                libraryPreferences.filterDownloaded().changes(),
+                libraryPreferences.filterMangaType().changes(),
+                libraryPreferences.filterMerged().changes(),
+                libraryPreferences.filterMissingChapters().changes(),
+                libraryPreferences.filterTracked().changes(),
+                libraryPreferences.filterUnavailable().changes(),
+                libraryPreferences.filterUnread().changes(),
+            ) {
+                LibraryFilters(
+                    filterBookmarked = it[0] as FilterBookmarked,
+                    filterCompleted = it[1] as FilterCompleted,
+                    filterDownloaded = it[2] as FilterDownloaded,
+                    filterMangaType = it[3] as FilterMangaType,
+                    filterMerged = it[4] as FilterMerged,
+                    filterMissingChapters = it[5] as FilterMissingChapters,
+                    filterTracked = it[6] as FilterTracked,
+                    filterUnavailable = it[7] as FilterUnavailable,
+                    filterUnread = it[8] as FilterUnread,
+                )
+            }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
         combine(
@@ -1100,15 +1109,18 @@ class LibraryViewModel() : ViewModel() {
                         val unreadDbChapters =
                             chapterItems
                                 .asSequence()
-                                .mapNotNull { if (!it.chapter.read) it.chapter.toDbChapter() else null }
+                                .mapNotNull {
+                                    if (!it.chapter.read) it.chapter.toDbChapter() else null
+                                }
                                 .take(amount)
                                 .toList()
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
                         val unreadDbChapters =
-                            chapterItems
-                                .mapNotNull { if (!it.chapter.read) it.chapter.toDbChapter() else null }
+                            chapterItems.mapNotNull {
+                                if (!it.chapter.read) it.chapter.toDbChapter() else null
+                            }
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
@@ -1119,7 +1131,9 @@ class LibraryViewModel() : ViewModel() {
                     }
                     DownloadAction.RemoveRead -> {
                         val readDbChapters =
-                            chapterItems.mapNotNull { if (it.chapter.read) it.chapter.toDbChapter() else null }
+                            chapterItems.mapNotNull {
+                                if (it.chapter.read) it.chapter.toDbChapter() else null
+                            }
                         downloadManager.deleteChapters(dbManga, readDbChapters)
                     }
                     else -> Unit
