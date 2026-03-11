@@ -289,20 +289,15 @@ class LibraryViewModel() : ViewModel() {
                         val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
                         val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
 
-                        val updatedItem =
-                            if (
-                                item.downloadCount != newDownloadCount ||
-                                    item.trackCount != newTrackCount
-                            ) {
-                                item.copy(
-                                    downloadCount = newDownloadCount,
-                                    trackCount = newTrackCount,
-                                )
-                            } else {
-                                item
-                            }
-
-                        updatedItem.takeIf { it.matchesFilters(libraryFilters, trackMap) }
+                        if (
+                            item.downloadCount == newDownloadCount &&
+                                item.trackCount == newTrackCount
+                        ) {
+                            return@mapNotNull item.takeIf { it.matchesFilters(libraryFilters) }
+                        }
+                        item
+                            .copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                            .takeIf { it.matchesFilters(libraryFilters) }
                     }
                 }
             }
@@ -583,10 +578,7 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    private fun LibraryMangaItem.matchesFilters(
-        libraryFilters: LibraryFilters,
-        trackMap: Map<Long, List<String>>,
-    ): Boolean {
+    private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
         // Check Unread first (most common filter)
         if (!libraryFilters.filterUnread.matches(this)) return false
 
