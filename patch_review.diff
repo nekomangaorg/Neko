@@ -1,0 +1,16 @@
+--- ./app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupCreator.kt
++++ ./app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupCreator.kt
+@@ -194,11 +194,10 @@
+         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
+             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
+             if (historyForManga.isNotEmpty()) {
+-                val historyChapters = chapters.associateBy { it.id }
++                val historyChapters = chapters.associate { it.id to it.url }
+                 val history =
+                     historyForManga.mapNotNull { history ->
+-                        historyChapters[history.chapter_id]
+-                            ?.url
++                        historyChapters[history.chapter_id]
+                             ?.let { BackupHistory(it, history.last_read, history.time_read) }
+                     }
+                 if (history.isNotEmpty()) {
