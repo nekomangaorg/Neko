@@ -135,14 +135,6 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        db.getLibraryMangaList()
-            .asFlow()
-            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
-            .distinctUntilChanged()
-            .conflate()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
-
     val categoryListFlow: Flow<List<CategoryItem>> =
         combine(
                 libraryPreferences.sortingMode().changes(),
@@ -177,6 +169,50 @@ class LibraryViewModel() : ViewModel() {
                     .groupBy({ it.first }, { it.second })
             }
             .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * Flow that tracks download counts for all manga in the library. By mapping only the manga IDs
+     * and using distinctUntilChanged(), we ensure that download counts are only re-queried when the
+     * actual library composition changes (e.g., adding/removing manga), or when a download
+     * explicitly triggers a refresh. This prevents redundant, heavy disk IO and DB lookups during
+     * normal state updates like reading a chapter.
+     */
+    val downloadCountMapFlow: Flow<Map<Long, Int>> =
+        combine(
+                db.getLibraryMangaList()
+                    .asFlow()
+                    .map { list -> list.mapNotNull { it.id } }
+                    .distinctUntilChanged(),
+                _downloadRefreshTrigger,
+            ) { mangaIds, _ ->
+                downloadManager.getDownloadCountsById(mangaIds)
+            }
+            .distinctUntilChanged()
+            .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * The core data list flow. Architectural optimization: We combine the raw database list, track
+     * mapping, and download counts here *once*. This avoids O(N) object allocations and dictionary
+     * lookups further down the pipeline (e.g., inside activeMangaFlow) that used to happen on every
+     * search keystroke or filter toggle. This structural change ensures filtering operates strictly
+     * on immutable, pre-enriched models, saving significant CPU and memory during rapid UI updates.
+     */
+    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
+        combine(db.getLibraryMangaList().asFlow(), trackMapFlow, downloadCountMapFlow) {
+                dbMangaList,
+                trackMap,
+                downloadCountMap ->
+                dbMangaList.map { dbManga ->
+                    val item = dbManga.toLibraryMangaItem()
+                    val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
+                    val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
+                    item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                }
+            }
+            .distinctUntilChanged()
+            .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val lastReadMangaFlow =
@@ -272,34 +308,12 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
-        combine(
-                filteredMangaListFlow,
-                filterPreferencesFlow,
-                trackMapFlow,
-                _downloadRefreshTrigger,
-            ) { mangaList, libraryFilters, trackMap, _ ->
+        combine(filteredMangaListFlow, filterPreferencesFlow, trackMapFlow) {
+                mangaList,
+                libraryFilters,
+                trackMap ->
                 withContext(Dispatchers.Default) {
-                    // Get download counts for the whole list so we can filter by 'Downloaded'
-                    val downloadCountMap =
-                        downloadManager.getDownloadCountsById(
-                            mangaList.map { it.displayManga.mangaId }
-                        )
-
-                    mangaList
-                        .map { item ->
-                            // Enrich item with volatile data needed for filtering
-                            val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
-                            val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
-
-                            if (
-                                item.downloadCount == newDownloadCount &&
-                                    item.trackCount == newTrackCount
-                            ) {
-                                return@map item
-                            }
-                            item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
-                        }
-                        .applyFilters(libraryFilters, trackMap)
+                    mangaList.applyFilters(libraryFilters, trackMap)
                 }
             }
             .distinctUntilChanged()
