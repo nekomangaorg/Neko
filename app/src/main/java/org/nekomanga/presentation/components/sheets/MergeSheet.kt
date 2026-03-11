@@ -5,7 +5,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,6 +66,8 @@ import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.theme.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun MergeSheet(
@@ -119,6 +120,7 @@ fun MergeSheet(
                 Gap(Size.tiny)
             }
         }
+
         is IsMergedManga.No -> {
             var mergeType: MergeType? by remember { mutableStateOf(null) }
             BaseSheet(themeColor = themeColorState) {
@@ -157,6 +159,7 @@ fun MergeSheet(
                             }
                         }
                     }
+
                     false -> {
                         LaunchedEffect(key1 = mergeType) { search(title, mergeType!!) }
                         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
@@ -174,6 +177,11 @@ fun MergeSheet(
                                     mergeMangaList = mergeSearchResults.mergeMangaList,
                                     mergeType = mergeType!!,
                                     mergeMangaClick = mergeMangaClick,
+                                    mergeMangaLongClick = { item ->
+                                        val source = MergeType.getSource(mergeType!!, Injekt.get())
+                                        val url = source.getMangaUrl(item.url)
+                                        openMergeSource(url, item.title)
+                                    },
                                 )
                             }
                             NonSuccessResultsAndChips(
@@ -234,6 +242,7 @@ private fun SuccessResults(
     mergeMangaList: List<SourceMergeManga>,
     mergeType: MergeType,
     mergeMangaClick: (SourceMergeManga) -> Unit,
+    mergeMangaLongClick: (SourceMergeManga) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
@@ -254,7 +263,10 @@ private fun SuccessResults(
                     Modifier.aspectRatio(3f / 4f)
                         .fillMaxWidth(.25f)
                         .clip(RoundedCornerShape(Shapes.coverRadius))
-                        .clickable { mergeMangaClick(item) }
+                        .combinedClickable(
+                            onClick = { mergeMangaClick(item) },
+                            onLongClick = { mergeMangaLongClick(item) },
+                        )
             ) {
                 AsyncImage(
                     model =
@@ -317,8 +329,10 @@ private fun BoxScope.NonSuccessResultsAndChips(
                     color = themeColorState.primaryColor,
                     modifier = Modifier.size(32.dp),
                 )
+
             is MergeSearchResult.NoResult ->
                 Text(text = stringResource(id = R.string.no_results_found))
+
             is MergeSearchResult.Error -> Text(text = searchResults.errorMessage)
             else -> Unit
         }
