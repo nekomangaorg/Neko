@@ -23,7 +23,7 @@ class InvalidHttpSource : ReducedHttpSource() {
     }
 
     override val headers: Headers
-        get() = TODO("Not yet implemented")
+        get() = Headers.Builder().build()
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return ""
