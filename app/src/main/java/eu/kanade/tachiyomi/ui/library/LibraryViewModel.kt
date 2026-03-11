@@ -171,6 +171,11 @@ class LibraryViewModel() : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    private val rawLibraryMangaListFlow =
+        db.getLibraryMangaList()
+            .asFlow()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
     /**
      * Flow that tracks download counts for all manga in the library. By mapping only the manga IDs
      * and using distinctUntilChanged(), we ensure that download counts are only re-queried when the
@@ -180,8 +185,7 @@ class LibraryViewModel() : ViewModel() {
      */
     val downloadCountMapFlow: Flow<Map<Long, Int>> =
         combine(
-                db.getLibraryMangaList()
-                    .asFlow()
+                rawLibraryMangaListFlow
                     .map { list -> list.mapNotNull { it.id } }
                     .distinctUntilChanged(),
                 _downloadRefreshTrigger,
@@ -200,7 +204,7 @@ class LibraryViewModel() : ViewModel() {
      * on immutable, pre-enriched models, saving significant CPU and memory during rapid UI updates.
      */
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        combine(db.getLibraryMangaList().asFlow(), trackMapFlow, downloadCountMapFlow) {
+        combine(rawLibraryMangaListFlow, trackMapFlow, downloadCountMapFlow) {
                 dbMangaList,
                 trackMap,
                 downloadCountMap ->
