@@ -174,6 +174,7 @@ class LibraryViewModel() : ViewModel() {
     private val rawLibraryMangaListFlow =
         db.getLibraryMangaList()
             .asFlow()
+            .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     /**
