@@ -317,7 +317,7 @@ class LibraryViewModel() : ViewModel() {
                 libraryFilters,
                 trackMap ->
                 withContext(Dispatchers.Default) {
-                    mangaList.applyFilters(libraryFilters, trackMap)
+                    mangaList.filter { it.matchesFilters(libraryFilters) }
                 }
             }
             .distinctUntilChanged()
