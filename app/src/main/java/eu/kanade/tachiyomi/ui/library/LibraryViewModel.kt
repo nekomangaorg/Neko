@@ -222,12 +222,11 @@ class LibraryViewModel() : ViewModel() {
                     val newTrackCount = trackMap[mangaId]?.size ?: 0
 
                     if (
-                        item.downloadCount != newDownloadCount || item.trackCount != newTrackCount
+                        item.downloadCount == newDownloadCount && item.trackCount == newTrackCount
                     ) {
-                        item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
-                    } else {
-                        item
+                        return@map item
                     }
+                    item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
                 }
             }
             .distinctUntilChanged()
