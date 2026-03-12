@@ -1,10 +1,26 @@
 package org.nekomanga.presentation.components.icons
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.nekomanga.R
+import org.nekomanga.presentation.theme.Size
+
+@Composable
+fun IncognitoIcon(modifier: Modifier = Modifier) {
+    Icon(
+        imageVector = IncognitoCircleIcon,
+        modifier = modifier.size(Size.extraLarge),
+        contentDescription = stringResource(id = R.string.incognito_mode),
+    )
+}
 
 val IncognitoCircleIcon: ImageVector by
     lazy(LazyThreadSafetyMode.NONE) {
