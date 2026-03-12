@@ -89,7 +89,7 @@ fun SearchTopAppBar(
                         Icon(
                             imageVector = IncognitoCircleIcon,
                             modifier = Modifier.size(Size.extraLarge),
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.incognito_mode),
                         )
                         Gap(Size.small)
                     }
