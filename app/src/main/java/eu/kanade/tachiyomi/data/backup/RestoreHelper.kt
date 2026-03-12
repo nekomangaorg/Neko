@@ -323,9 +323,11 @@ class RestoreHelper(val context: Context) {
         // Fix foreign keys with the current manga id
         val needToUpdate = tracks.any { it.manga_id != manga.id!! }
 
-        tracks.map { it.manga_id = manga.id!! }
-
-        val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
+        val validTracks =
+            tracks.mapNotNull { track ->
+                track.manga_id = manga.id!!
+                track.takeIf { TrackManager.isValidTracker(it.sync_id) }
+            }
 
         // Get tracks from database
         val dbTracks = db.getTracks(manga).executeAsBlocking()
