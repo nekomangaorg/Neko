@@ -325,7 +325,8 @@ class RestoreHelper(val context: Context) {
 
         val validTracks =
             tracks.mapNotNull { track ->
-                track.manga_id = manga.id!!
+                val mangaId = manga.id ?: return@mapNotNull null
+                track.manga_id = mangaId
                 track.takeIf { TrackManager.isValidTracker(it.sync_id) }
             }
 
