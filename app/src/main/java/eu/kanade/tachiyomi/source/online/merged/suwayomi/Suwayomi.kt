@@ -295,6 +295,7 @@ class Suwayomi : MergedServerSource() {
 
                 if (response.isUnauthorized()) {
                     refresh()
+                    response.close()
                     response = chain.proceed(chain.request().newBuilder().headers(headers).build())
                 }
 
