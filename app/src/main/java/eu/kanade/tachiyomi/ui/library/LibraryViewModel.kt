@@ -312,10 +312,7 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
-        combine(filteredMangaListFlow, filterPreferencesFlow, trackMapFlow) {
-                mangaList,
-                libraryFilters,
-                trackMap ->
+        combine(filteredMangaListFlow, filterPreferencesFlow) { mangaList, libraryFilters ->
                 withContext(Dispatchers.Default) {
                     mangaList.filter { it.matchesFilters(libraryFilters) }
                 }
