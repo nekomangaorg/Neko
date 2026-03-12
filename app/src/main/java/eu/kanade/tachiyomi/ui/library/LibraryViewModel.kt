@@ -597,38 +597,22 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    private fun List<LibraryMangaItem>.applyFilters(
-        libraryFilters: LibraryFilters,
-        trackMap: Map<Long, List<String>>,
-    ): List<LibraryMangaItem> {
-        return this.filter { libraryMangaItem ->
-            // Check Unread first (most common filter)
-            if (!libraryFilters.filterUnread.matches(libraryMangaItem)) return@filter false
+    private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
+        // Check Unread first (most common filter)
+        if (!libraryFilters.filterUnread.matches(this)) return false
 
-            // Check Downloaded second (common and quick)
-            if (!libraryFilters.filterDownloaded.matches(libraryMangaItem)) return@filter false
+        // Check Downloaded second (common and quick)
+        if (!libraryFilters.filterDownloaded.matches(this)) return false
 
-            // Check the rest
-            if (!libraryFilters.filterBookmarked.matches(libraryMangaItem)) return@filter false
-            if (!libraryFilters.filterCompleted.matches(libraryMangaItem)) return@filter false
-            if (!libraryFilters.filterMangaType.matches(libraryMangaItem)) return@filter false
-            if (!libraryFilters.filterMerged.matches(libraryMangaItem)) return@filter false
-            if (!libraryFilters.filterUnavailable.matches(libraryMangaItem)) return@filter false
-            if (!libraryFilters.filterTracked.matches(libraryMangaItem)) return@filter false
+        // Check the rest
+        if (!libraryFilters.filterBookmarked.matches(this)) return false
+        if (!libraryFilters.filterCompleted.matches(this)) return false
+        if (!libraryFilters.filterMangaType.matches(this)) return false
+        if (!libraryFilters.filterMerged.matches(this)) return false
+        if (!libraryFilters.filterUnavailable.matches(this)) return false
+        if (!libraryFilters.filterTracked.matches(this)) return false
 
-            // Special handling for Tracking logic preserved from original code
-            val displayManga = libraryMangaItem.displayManga
-            val missingChaptersCondition =
-                when (libraryFilters.filterTracked) {
-                    FilterTracked.Inactive -> true
-                    FilterTracked.NotTracked -> trackMap[displayManga.mangaId] == null
-                    FilterTracked.Tracked -> trackMap[displayManga.mangaId] != null
-                }
-
-            if (!missingChaptersCondition) return@filter false
-
-            true // passed all checks
-        }
+        return true // passed all checks
     }
 
     fun categoryItemClick(category: CategoryItem) {
