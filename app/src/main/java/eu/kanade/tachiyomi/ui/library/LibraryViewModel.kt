@@ -197,22 +197,37 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     /**
-     * The core data list flow. Architectural optimization: We combine the raw database list, track
-     * mapping, and download counts here *once*. This avoids O(N) object allocations and dictionary
-     * lookups further down the pipeline (e.g., inside activeMangaFlow) that used to happen on every
-     * search keystroke or filter toggle. This structural change ensures filtering operates strictly
-     * on immutable, pre-enriched models, saving significant CPU and memory during rapid UI updates.
+     * Flow that performs the initial, expensive conversion from DB entities to UI models. This is
+     * shared to ensure the conversion only happens once when the DB emits.
+     */
+    private val initialLibraryItemsFlow =
+        rawLibraryMangaListFlow
+            .map { dbMangaList -> dbMangaList.map { it.toLibraryMangaItem() } }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * The core data list flow. It combines the pre-converted UI models with dynamic data like track
+     * and download counts. This is much more efficient as the expensive conversion is decoupled
+     * from frequent updates of counts.
      */
     val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        combine(rawLibraryMangaListFlow, trackMapFlow, downloadCountMapFlow) {
-                dbMangaList,
+        combine(initialLibraryItemsFlow, trackMapFlow, downloadCountMapFlow) {
+                items,
                 trackMap,
                 downloadCountMap ->
-                dbMangaList.map { dbManga ->
-                    val item = dbManga.toLibraryMangaItem()
-                    val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
-                    val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
-                    item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                items.map { item ->
+                    val mangaId = item.displayManga.mangaId
+                    val newDownloadCount = downloadCountMap[mangaId] ?: 0
+                    val newTrackCount = trackMap[mangaId]?.size ?: 0
+
+                    if (
+                        item.downloadCount != newDownloadCount || item.trackCount != newTrackCount
+                    ) {
+                        item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                    } else {
+                        item
+                    }
                 }
             }
             .distinctUntilChanged()
