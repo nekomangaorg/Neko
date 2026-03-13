@@ -188,9 +188,9 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         val jsonObject = buildJsonObject { put("params", "query=$query$algoliaFilter") }
         return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let {
             it["hits"]!!.jsonArray.mapNotNull {
-                KitsuSearchManga(it.jsonObject).let { manga ->
-                    if (manga.subType != "novel") manga.toTrack() else null
-                }
+                val manga = KitsuSearchManga(it.jsonObject)
+                if (manga.subType == "novel") return@mapNotNull null
+                manga.toTrack()
             }
         }
     }
