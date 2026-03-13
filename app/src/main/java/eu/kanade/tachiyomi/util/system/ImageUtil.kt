@@ -661,18 +661,18 @@ object ImageUtil {
     /** Splits tall images to improve performance of reader */
     fun splitTallImage(tmpDir: UniFile, imageFile: UniFile, fileName: String): Boolean {
         if (
-            isAnimatedAndSupported(imageFile.openInputStream()) ||
-                !isTallImage(imageFile.openInputStream())
+            imageFile.openInputStream().use { isAnimatedAndSupported(it) } ||
+                imageFile.openInputStream().use { !isTallImage(it) }
         ) {
             return true
         }
 
         val bitmapRegionDecoder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                BitmapRegionDecoder.newInstance(imageFile.openInputStream())
+                imageFile.openInputStream().use { BitmapRegionDecoder.newInstance(it) }
             } else {
                 @Suppress("DEPRECATION")
-                BitmapRegionDecoder.newInstance(imageFile.openInputStream(), false)
+                imageFile.openInputStream().use { BitmapRegionDecoder.newInstance(it, false) }
             }
 
         if (bitmapRegionDecoder == null) {
@@ -681,8 +681,10 @@ object ImageUtil {
         }
 
         val options =
-            extractImageOptions(imageFile.openInputStream(), resetAfterExtraction = false).apply {
-                inJustDecodeBounds = false
+            imageFile.openInputStream().use {
+                extractImageOptions(it, resetAfterExtraction = false).apply {
+                    inJustDecodeBounds = false
+                }
             }
         val splitDataList = options.splitData
 
