@@ -279,9 +279,10 @@ class MangaHandler {
         return results
             .asSequence()
             .flatMap { chapter ->
-                chapter.relationships.takeUnless { relationships ->
-                    relationships.any { groups.containsKey(it.id) }
-                } ?: emptyList()
+                if (chapter.relationships.any { groups.containsKey(it.id) }) {
+                    return@flatMap emptyList()
+                }
+                chapter.relationships
             }
             .filter { it.type == MdConstants.Types.uploader }
             .distinctBy { it.id }
