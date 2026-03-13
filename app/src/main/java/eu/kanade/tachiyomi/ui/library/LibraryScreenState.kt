@@ -23,6 +23,11 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.presentation.components.UiText
 
+/**
+ * ⚡ BOLT OPTIMIZATION: Added @Immutable to mark this large data class containing standard Map types
+ * as stable for Compose, preventing severe recomposition issues across the entire Library screen.
+ */
+@Immutable
 data class LibraryScreenState(
     val searchQuery: String? = null,
     val initialSearch: String = "",
