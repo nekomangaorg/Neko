@@ -17,7 +17,7 @@ import org.nekomanga.presentation.theme.Size
 fun IncognitoIcon(modifier: Modifier = Modifier) {
     Icon(
         imageVector = IncognitoCircleIcon,
-        modifier = modifier.size(Size.extraLarge),
+        modifier = Modifier.size(Size.extraLarge).then(modifier),
         contentDescription = stringResource(id = R.string.incognito_mode),
     )
 }
