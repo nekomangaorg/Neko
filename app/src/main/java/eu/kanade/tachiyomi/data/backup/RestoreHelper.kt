@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -259,20 +260,19 @@ class RestoreHelper(val context: Context) {
         manga: Manga,
         categories: List<Int>,
         backupCategories: List<BackupCategory>,
+        dbCategories: List<Category> = db.getCategories().executeAsBlocking(),
     ) {
-        val dbCategories = db.getCategories().executeAsBlocking()
-        val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
-        categories.forEach { backupCategoryOrder ->
-            backupCategories
-                .firstOrNull { it.order == backupCategoryOrder }
-                ?.let { backupCategory ->
-                    dbCategories
-                        .firstOrNull { dbCategory -> dbCategory.name == backupCategory.name }
-                        ?.let { dbCategory ->
-                            mangaCategoriesToUpdate += MangaCategory.create(manga, dbCategory)
-                        }
+        val backupCategoriesByOrder = backupCategories.associateBy { it.order }
+        val dbCategoriesByName = dbCategories.associateBy { it.name }
+
+        val mangaCategoriesToUpdate =
+            categories.mapNotNull { backupCategoryOrder ->
+                backupCategoriesByOrder[backupCategoryOrder]?.let { backupCategory ->
+                    dbCategoriesByName[backupCategory.name]?.let { dbCategory ->
+                        MangaCategory.create(manga, dbCategory)
+                    }
                 }
-        }
+            }
 
         // Update database
         if (mangaCategoriesToUpdate.isNotEmpty()) {
