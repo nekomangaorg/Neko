@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -25,7 +23,7 @@ import org.nekomanga.presentation.components.AutoSizeText
 import org.nekomanga.presentation.components.FlexibleTopBar
 import org.nekomanga.presentation.components.FlexibleTopBarColors
 import org.nekomanga.presentation.components.ToolTipButton
-import org.nekomanga.presentation.components.icons.IncognitoCircleIcon
+import org.nekomanga.presentation.components.icons.IncognitoIcon
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -91,11 +89,7 @@ fun TitleTopAppBar(
                     )
                 if (incognitoMode) {
                     Gap(Size.smedium)
-                    Icon(
-                        imageVector = IncognitoCircleIcon,
-                        modifier = Modifier.size(Size.extraLarge),
-                        contentDescription = null,
-                    )
+                    IncognitoIcon()
                 }
             }
             Row(
