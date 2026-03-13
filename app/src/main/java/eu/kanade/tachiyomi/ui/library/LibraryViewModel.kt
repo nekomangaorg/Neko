@@ -187,7 +187,7 @@ class LibraryViewModel() : ViewModel() {
     val downloadCountMapFlow: Flow<Map<Long, Int>> =
         combine(
                 rawLibraryMangaListFlow
-                    .map { list -> list.mapNotNull { it.id } }
+                    .map { list -> list.asSequence().mapNotNull { it.id }.toList() }
                     .distinctUntilChanged(),
                 _downloadRefreshTrigger,
             ) { mangaIds, _ ->
