@@ -135,14 +135,6 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
-        db.getLibraryMangaList()
-            .asFlow()
-            .map { dbManga -> dbManga.map { it.toLibraryMangaItem() } }
-            .distinctUntilChanged()
-            .conflate()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
-
     val categoryListFlow: Flow<List<CategoryItem>> =
         combine(
                 libraryPreferences.sortingMode().changes(),
@@ -177,6 +169,69 @@ class LibraryViewModel() : ViewModel() {
                     .groupBy({ it.first }, { it.second })
             }
             .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    private val rawLibraryMangaListFlow =
+        db.getLibraryMangaList()
+            .asFlow()
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * Flow that tracks download counts for all manga in the library. By mapping only the manga IDs
+     * and using distinctUntilChanged(), we ensure that download counts are only re-queried when the
+     * actual library composition changes (e.g., adding/removing manga), or when a download
+     * explicitly triggers a refresh. This prevents redundant, heavy disk IO and DB lookups during
+     * normal state updates like reading a chapter.
+     */
+    val downloadCountMapFlow: Flow<Map<Long, Int>> =
+        combine(
+                rawLibraryMangaListFlow
+                    .map { list -> list.asSequence().mapNotNull { it.id }.toList() }
+                    .distinctUntilChanged(),
+                _downloadRefreshTrigger,
+            ) { mangaIds, _ ->
+                downloadManager.getDownloadCountsById(mangaIds)
+            }
+            .distinctUntilChanged()
+            .conflate()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * Flow that performs the initial, expensive conversion from DB entities to UI models. This is
+     * shared to ensure the conversion only happens once when the DB emits.
+     */
+    private val initialLibraryItemsFlow =
+        rawLibraryMangaListFlow
+            .map { dbMangaList -> dbMangaList.map { it.toLibraryMangaItem() } }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * The core data list flow. It combines the pre-converted UI models with dynamic data like track
+     * and download counts. This is much more efficient as the expensive conversion is decoupled
+     * from frequent updates of counts.
+     */
+    val libraryMangaListFlow: Flow<List<LibraryMangaItem>> =
+        combine(initialLibraryItemsFlow, trackMapFlow, downloadCountMapFlow) {
+                items,
+                trackMap,
+                downloadCountMap ->
+                items.map { item ->
+                    val mangaId = item.displayManga.mangaId
+                    val newDownloadCount = downloadCountMap[mangaId] ?: 0
+                    val newTrackCount = trackMap[mangaId]?.size ?: 0
+
+                    if (
+                        item.downloadCount == newDownloadCount && item.trackCount == newTrackCount
+                    ) {
+                        return@map item
+                    }
+                    item.copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
+                }
+            }
+            .distinctUntilChanged()
+            .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val lastReadMangaFlow =
@@ -272,42 +327,9 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
-        combine(
-                filteredMangaListFlow,
-                filterPreferencesFlow,
-                trackMapFlow,
-                _downloadRefreshTrigger,
-            ) { mangaList, libraryFilters, trackMap, _ ->
+        combine(filteredMangaListFlow, filterPreferencesFlow) { mangaList, libraryFilters ->
                 withContext(Dispatchers.Default) {
-                    // Get download counts for the whole list so we can filter by 'Downloaded'
-                    val downloadCountMap =
-                        downloadManager.getDownloadCountsById(
-                            mangaList.map { it.displayManga.mangaId }
-                        )
-
-                    mangaList.mapNotNull { item ->
-                        // ⚡ BOLT OPTIMIZATION:
-                        // Replaced .map {}.applyFilters() with a single .mapNotNull {} to avoid
-                        // creating
-                        // an intermediate list of LibraryMangaItems.
-                        // Impact: Skips creating an N-sized list in memory during StateFlow
-                        // emissions,
-                        // leading to faster flow processing and reduced GC overhead.
-
-                        // Enrich item with volatile data needed for filtering
-                        val newDownloadCount = downloadCountMap[item.displayManga.mangaId] ?: 0
-                        val newTrackCount = trackMap[item.displayManga.mangaId]?.size ?: 0
-
-                        if (
-                            item.downloadCount == newDownloadCount &&
-                                item.trackCount == newTrackCount
-                        ) {
-                            return@mapNotNull item.takeIf { it.matchesFilters(libraryFilters) }
-                        }
-                        item
-                            .copy(downloadCount = newDownloadCount, trackCount = newTrackCount)
-                            .takeIf { it.matchesFilters(libraryFilters) }
-                    }
+                    mangaList.filter { it.matchesFilters(libraryFilters) }
                 }
             }
             .distinctUntilChanged()

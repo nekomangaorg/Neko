@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -41,7 +39,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.FlexibleTopBar
 import org.nekomanga.presentation.components.FlexibleTopBarColors
 import org.nekomanga.presentation.components.ToolTipButton
-import org.nekomanga.presentation.components.icons.IncognitoCircleIcon
+import org.nekomanga.presentation.components.icons.IncognitoIcon
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -145,11 +143,7 @@ fun SearchOutlineTopAppBar(
                                 }
                                 if (incognitoMode) {
                                     Gap(Size.small)
-                                    Icon(
-                                        imageVector = IncognitoCircleIcon,
-                                        modifier = Modifier.size(Size.extraLarge),
-                                        contentDescription = null,
-                                    )
+                                    IncognitoIcon()
                                     Gap(Size.small)
                                 }
                             }
