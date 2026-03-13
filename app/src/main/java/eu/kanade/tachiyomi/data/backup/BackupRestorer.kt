@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
@@ -146,9 +147,11 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 val itemsWithCovers = mutableListOf<RestorableItem>()
                 try {
                     db.inTransaction {
+                        // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
+                        val dbCategories = db.getCategories().executeAsBlocking()
                         preparedItems.forEach { item ->
                             val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]
-                            writeMangaToDb(item, existingManga)
+                            writeMangaToDb(item, existingManga, dbCategories)
 
                             // Collect items that need covers, but don't process yet
                             if (!item.manga.user_cover.isNullOrBlank()) {
@@ -254,7 +257,11 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     }
 
     /** Writes data to DB. Must be called inside a transaction */
-    private fun writeMangaToDb(item: RestorableItem, existingDbManga: Manga?) {
+    private fun writeMangaToDb(
+        item: RestorableItem,
+        existingDbManga: Manga?,
+        dbCategories: List<Category>,
+    ) {
         try {
             val manga = item.manga
 
@@ -269,7 +276,12 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
             // Restore related data using helper (Blocking calls are fine inside transaction)
             restoreHelper.restoreChaptersForMangaOffline(manga, item.chapters)
             restoreHelper.restoreMergeMangaForManga(manga, item.mergeMangaList)
-            restoreHelper.restoreCategoriesForManga(manga, item.categories, item.backupCategories)
+            restoreHelper.restoreCategoriesForManga(
+                manga,
+                item.categories,
+                item.backupCategories,
+                dbCategories,
+            )
             restoreHelper.restoreHistoryForManga(item.history)
             restoreHelper.restoreTrackForManga(manga, item.tracks)
         } catch (e: Exception) {
