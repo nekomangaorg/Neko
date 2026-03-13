@@ -320,12 +320,12 @@ class RestoreHelper(val context: Context) {
      * @param tracks the track list to restore.
      */
     internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
+        val mangaId = manga.id ?: return
         // Fix foreign keys with the current manga id
-        val needToUpdate = tracks.any { it.manga_id != manga.id!! }
+        val needToUpdate = tracks.any { it.manga_id != mangaId }
 
         val validTracks =
             tracks.mapNotNull { track ->
-                val mangaId = manga.id ?: return@mapNotNull null
                 track.manga_id = mangaId
                 track.takeIf { TrackManager.isValidTracker(it.sync_id) }
             }

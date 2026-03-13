@@ -154,10 +154,21 @@ class BackupCreator(val context: Context) {
             mangaObject.mergeMangaList = mergeMangaList.map { BackupMergeManga.copyFrom(it) }
         }
 
+        // [OPTIMIZATION] Pre-fetch all chapters for the manga to avoid N+1 query problems
+        // when backing up history, which previously queried the database per history entry.
+        val chapters =
+            if (
+                options and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER ||
+                    options and BACKUP_HISTORY_MASK == BACKUP_HISTORY
+            ) {
+                databaseHelper.getChapters(manga).executeAsBlocking()
+            } else {
+                emptyList()
+            }
+
         // Check if user wants chapter information in backup
         if (options and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER) {
             // Backup all the chapters
-            val chapters = databaseHelper.getChapters(manga).executeAsBlocking()
             if (chapters.isNotEmpty()) {
                 mangaObject.chapters = chapters.map { BackupChapter.copyFrom(it) }
             }
@@ -184,13 +195,12 @@ class BackupCreator(val context: Context) {
         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
+                val historyChapters = chapters.associateBy { it.id }
                 val history =
                     historyForManga.mapNotNull { history ->
-                        databaseHelper
-                            .getChapter(history.chapter_id)
-                            .executeAsBlocking()
-                            ?.url
-                            ?.let { BackupHistory(it, history.last_read, history.time_read) }
+                        historyChapters[history.chapter_id]?.url?.let {
+                            BackupHistory(it, history.last_read, history.time_read)
+                        }
                     }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
