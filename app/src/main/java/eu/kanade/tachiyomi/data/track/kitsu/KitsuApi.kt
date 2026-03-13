@@ -187,12 +187,11 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     private suspend fun algoliaSearch(key: String, query: String): List<TrackSearch> {
         val jsonObject = buildJsonObject { put("params", "query=$query$algoliaFilter") }
         return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let {
-            it["hits"]!!
-                .jsonArray
-                .mapNotNull {
-                    KitsuSearchManga(it.jsonObject).takeIf { manga -> manga.subType != "novel" }
+            it["hits"]!!.jsonArray.mapNotNull {
+                KitsuSearchManga(it.jsonObject).let { manga ->
+                    if (manga.subType != "novel") manga.toTrack() else null
                 }
-                .map { it.toTrack() }
+            }
         }
     }
 
