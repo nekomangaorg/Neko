@@ -278,8 +278,11 @@ class MangaHandler {
     ): Map<String, String> {
         return results
             .asSequence()
-            .map { chapter -> chapter.relationships }
-            .filter { relationships -> !relationships.any { groups.containsKey(it.id) } }
+            .mapNotNull { chapter ->
+                chapter.relationships.takeUnless { relationships ->
+                    relationships.any { groups.containsKey(it.id) }
+                }
+            }
             .flatten()
             .filter { it.type == MdConstants.Types.uploader }
             .distinctBy { it.id }
