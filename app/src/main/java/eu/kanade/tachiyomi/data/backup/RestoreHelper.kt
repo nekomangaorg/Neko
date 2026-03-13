@@ -259,12 +259,9 @@ class RestoreHelper(val context: Context) {
     internal fun restoreCategoriesForManga(
         manga: Manga,
         categories: List<Int>,
-        backupCategories: List<BackupCategory>,
-        dbCategories: List<Category> = db.getCategories().executeAsBlocking(),
+        dbCategoriesByName: Map<String, Category>,
+        backupCategoriesByOrder: Map<Int, BackupCategory>,
     ) {
-        val backupCategoriesByOrder = backupCategories.associateBy { it.order }
-        val dbCategoriesByName = dbCategories.associateBy { it.name }
-
         val mangaCategoriesToUpdate =
             categories.mapNotNull { backupCategoryOrder ->
                 backupCategoriesByOrder[backupCategoryOrder]?.let { backupCategory ->

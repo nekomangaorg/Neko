@@ -148,10 +148,19 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 try {
                     db.inTransaction {
                         // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
-                        val dbCategories = db.getCategories().executeAsBlocking()
+                        val dbCategoriesByName =
+                            db.getCategories().executeAsBlocking().associateBy { it.name }
+                        val backupCategoriesByOrder =
+                            preparedItems.firstOrNull()?.backupCategories?.associateBy { it.order }
+                                ?: emptyMap()
                         preparedItems.forEach { item ->
                             val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]
-                            writeMangaToDb(item, existingManga, dbCategories)
+                            writeMangaToDb(
+                                item,
+                                existingManga,
+                                dbCategoriesByName,
+                                backupCategoriesByOrder,
+                            )
 
                             // Collect items that need covers, but don't process yet
                             if (!item.manga.user_cover.isNullOrBlank()) {
@@ -260,7 +269,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private fun writeMangaToDb(
         item: RestorableItem,
         existingDbManga: Manga?,
-        dbCategories: List<Category>,
+        dbCategoriesByName: Map<String, Category>,
+        backupCategoriesByOrder: Map<Int, BackupCategory>,
     ) {
         try {
             val manga = item.manga
@@ -279,8 +289,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
             restoreHelper.restoreCategoriesForManga(
                 manga,
                 item.categories,
-                item.backupCategories,
-                dbCategories,
+                dbCategoriesByName,
+                backupCategoriesByOrder,
             )
             restoreHelper.restoreHistoryForManga(item.history)
             restoreHelper.restoreTrackForManga(manga, item.tracks)
