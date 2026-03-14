@@ -285,44 +285,46 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 mangaDexPreferences.blockedUploaders().changes(),
             ) { dbChapters, blockedGroups, blockedUploaders ->
                 val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-                dbChapters
-                    .mapNotNull { it.toSimpleChapter() }
-                    .filter { chapter ->
-                        val scanlators = chapter.scanlatorList()
-                        scanlators.none { scanlator -> blockedGroups.contains(scanlator) } &&
-                            (Constants.NO_GROUP !in scanlators ||
-                                chapter.uploader !in blockedUploaders)
-                    }
-                    .map { chapter ->
-                        val downloadState =
-                            when {
-                                downloadManager.isChapterDownloaded(
-                                    chapter.toDbChapter(),
-                                    dbManga,
-                                ) -> Download.State.DOWNLOADED
-                                else -> {
-                                    val download =
-                                        downloadManager.getQueuedDownloadOrNull(chapter.id)
-                                    when (download == null) {
-                                        true -> Download.State.NOT_DOWNLOADED
-                                        false -> download.status
+                dbChapters.mapNotNull { dbChapter ->
+                    dbChapter
+                        .toSimpleChapter()
+                        ?.takeIf { chapter ->
+                            val scanlators = chapter.scanlatorList()
+                            scanlators.none { scanlator -> blockedGroups.contains(scanlator) } &&
+                                (Constants.NO_GROUP !in scanlators ||
+                                    chapter.uploader !in blockedUploaders)
+                        }
+                        ?.let { chapter ->
+                            val downloadState =
+                                when {
+                                    downloadManager.isChapterDownloaded(
+                                        chapter.toDbChapter(),
+                                        dbManga,
+                                    ) -> Download.State.DOWNLOADED
+                                    else -> {
+                                        val download =
+                                            downloadManager.getQueuedDownloadOrNull(chapter.id)
+                                        when (download == null) {
+                                            true -> Download.State.NOT_DOWNLOADED
+                                            false -> download.status
+                                        }
                                     }
                                 }
-                            }
 
-                        ChapterItem(
-                            chapter = chapter,
-                            downloadState = downloadState,
-                            downloadProgress =
-                                when (downloadState == Download.State.DOWNLOADING) {
-                                    true ->
-                                        downloadManager
-                                            .getQueuedDownloadOrNull(chapter.id)!!
-                                            .progress
-                                    false -> 0
-                                },
-                        )
-                    }
+                            ChapterItem(
+                                chapter = chapter,
+                                downloadState = downloadState,
+                                downloadProgress =
+                                    when (downloadState == Download.State.DOWNLOADING) {
+                                        true ->
+                                            downloadManager
+                                                .getQueuedDownloadOrNull(chapter.id)!!
+                                                .progress
+                                        false -> 0
+                                    },
+                            )
+                        }
+                }
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
