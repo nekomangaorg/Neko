@@ -189,15 +189,9 @@ class FeedRepository(
                     val processedEntries =
                         groupedEntries.map { entry ->
                             val feedMangaFiltered =
-                                entry.value.mapNotNull { feedManga ->
-                                    if (
-                                        feedManga.chapters.isNotEmpty() &&
-                                            feedManga.chapters.none { it.chapter.read }
-                                    ) {
-                                        feedManga
-                                    } else {
-                                        null
-                                    }
+                                entry.value.filter { feedManga ->
+                                    feedManga.chapters.isNotEmpty() &&
+                                        feedManga.chapters.none { it.chapter.read }
                                 }
                             entry to feedMangaFiltered
                         }
