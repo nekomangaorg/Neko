@@ -285,44 +285,39 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 mangaDexPreferences.blockedUploaders().changes(),
             ) { dbChapters, blockedGroups, blockedUploaders ->
                 val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-                dbChapters
-                    .mapNotNull { it.toSimpleChapter() }
-                    .filter { chapter ->
-                        val scanlators = chapter.scanlatorList()
-                        scanlators.none { scanlator -> blockedGroups.contains(scanlator) } &&
-                            (Constants.NO_GROUP !in scanlators ||
-                                chapter.uploader !in blockedUploaders)
-                    }
-                    .map { chapter ->
-                        val downloadState =
-                            when {
-                                downloadManager.isChapterDownloaded(
-                                    chapter.toDbChapter(),
-                                    dbManga,
-                                ) -> Download.State.DOWNLOADED
-                                else -> {
-                                    val download =
-                                        downloadManager.getQueuedDownloadOrNull(chapter.id)
-                                    when (download == null) {
-                                        true -> Download.State.NOT_DOWNLOADED
-                                        false -> download.status
-                                    }
-                                }
-                            }
+                dbChapters.mapNotNull { dbChapter ->
+                    val chapter = dbChapter.toSimpleChapter() ?: return@mapNotNull null
 
-                        ChapterItem(
-                            chapter = chapter,
-                            downloadState = downloadState,
-                            downloadProgress =
-                                when (downloadState == Download.State.DOWNLOADING) {
-                                    true ->
-                                        downloadManager
-                                            .getQueuedDownloadOrNull(chapter.id)!!
-                                            .progress
-                                    false -> 0
-                                },
-                        )
+                    val scanlators = chapter.scanlatorList()
+                    if (scanlators.any { blockedGroups.contains(it) }) {
+                        return@mapNotNull null
                     }
+                    if (Constants.NO_GROUP in scanlators && chapter.uploader in blockedUploaders) {
+                        return@mapNotNull null
+                    }
+
+                    val download = downloadManager.getQueuedDownloadOrNull(chapter.id)
+                    val downloadState =
+                        when {
+                            downloadManager.isChapterDownloaded(chapter.toDbChapter(), dbManga) ->
+                                Download.State.DOWNLOADED
+                            download != null -> download.status
+                            else -> Download.State.NOT_DOWNLOADED
+                        }
+
+                    val downloadProgress =
+                        if (downloadState == Download.State.DOWNLOADING) {
+                            download!!.progress
+                        } else {
+                            0
+                        }
+
+                    ChapterItem(
+                        chapter = chapter,
+                        downloadState = downloadState,
+                        downloadProgress = downloadProgress,
+                    )
+                }
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
