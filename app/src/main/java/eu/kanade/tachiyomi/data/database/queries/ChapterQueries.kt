@@ -35,8 +35,17 @@ interface ChapterQueries : DbProvider {
             .withQuery(
                 Query.builder()
                     .table(ChapterTable.TABLE)
-                    .where("${ChapterTable.COL_MANGA_ID} IN (${mangaIds.joinToString { "?" }})")
-                    .whereArgs(*mangaIds.toTypedArray())
+                    .let { builder ->
+                        if (mangaIds.isEmpty()) {
+                            builder.where("1 = 0")
+                        } else {
+                            builder
+                                .where(
+                                    "${ChapterTable.COL_MANGA_ID} IN (${mangaIds.joinToString { "?" }})"
+                                )
+                                .whereArgs(*mangaIds.toTypedArray())
+                        }
+                    }
                     .build()
             )
             .prepare()

@@ -64,8 +64,15 @@ interface MangaQueries : DbProvider {
             .withQuery(
                 Query.builder()
                     .table(MangaTable.TABLE)
-                    .where("${MangaTable.COL_ID} IN (${ids.joinToString { "?" }})")
-                    .whereArgs(*ids.toTypedArray())
+                    .let { builder ->
+                        if (ids.isEmpty()) {
+                            builder.where("1 = 0")
+                        } else {
+                            builder
+                                .where("${MangaTable.COL_ID} IN (${ids.joinToString { "?" }})")
+                                .whereArgs(*ids.toTypedArray())
+                        }
+                    }
                     .build()
             )
             .prepare()

@@ -239,7 +239,7 @@ class FeedRepository(
 
                             FeedManga(
                                 mangaId = manga.id!!,
-                                mangaTitle = manga.user_title ?: manga.title,
+                                mangaTitle = manga.displayTitle(),
                                 date = 0L,
                                 artwork = manga.toDisplayManga().currentArtwork,
                                 lastReadChapter = lastReadChapter,
@@ -366,8 +366,7 @@ class FeedRepository(
 
                                     FeedManga(
                                         mangaId = history.manga.id!!,
-                                        mangaTitle =
-                                            history.manga.user_title ?: history.manga.title,
+                                        mangaTitle = history.manga.displayTitle(),
                                         date = history.history.last_read,
                                         artwork = history.manga.toDisplayManga().currentArtwork,
                                         chapters = chapterItems,
@@ -410,7 +409,7 @@ class FeedRepository(
                                             .toPersistentList()
                                     FeedManga(
                                         mangaId = manga.first.id!!,
-                                        mangaTitle = manga.first.user_title ?: manga.first.title,
+                                        mangaTitle = manga.first.displayTitle(),
                                         date = 0L,
                                         artwork = manga.first.toDisplayManga().currentArtwork,
                                         chapters = chapterItems,
@@ -436,7 +435,7 @@ class FeedRepository(
                                     it.history.last_read
                                     FeedManga(
                                         mangaId = it.manga.id!!,
-                                        mangaTitle = it.manga.user_title ?: it.manga.title,
+                                        mangaTitle = it.manga.displayTitle(),
                                         date = it.history.last_read,
                                         artwork = it.manga.toDisplayManga().currentArtwork,
                                         chapters = persistentListOf(chapterItem),
@@ -496,7 +495,7 @@ class FeedRepository(
 
                             FeedManga(
                                 mangaId = chapterItem.chapter.mangaId,
-                                mangaTitle = it.manga.user_title ?: it.manga.title,
+                                mangaTitle = it.manga.displayTitle(),
                                 date = date,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
                                 chapters = persistentListOf(chapterItem),
