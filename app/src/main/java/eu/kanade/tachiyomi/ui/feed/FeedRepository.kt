@@ -146,43 +146,42 @@ class FeedRepository(
         return com.github.michaelbull.result
             .runCatching {
                 suspend fun lookup(current: List<Long>, offset: Int, limit: Int): List<FeedManga> {
-                    return db.getRecentMangaLimit(
-                            offset = offset,
-                            limit = limit,
-                            isResuming = false,
-                        )
-                        .executeOnIO()
-                        .filterNot { current.contains(it.manga.id) }
-                        .mapNotNull { history ->
-                            history.manga.id ?: return@mapNotNull null
-                            history.chapter.id ?: return@mapNotNull null
+                    val groupedEntries =
+                        db.getRecentMangaLimit(offset = offset, limit = limit, isResuming = false)
+                            .executeOnIO()
+                            .filterNot { current.contains(it.manga.id) }
+                            .mapNotNull { history ->
+                                history.manga.id ?: return@mapNotNull null
+                                history.chapter.id ?: return@mapNotNull null
 
-                            val chapter =
-                                getChapterItem(
-                                    history.manga,
-                                    history.chapter.toSimpleChapter(history.history.last_read)!!,
+                                val chapter =
+                                    getChapterItem(
+                                        history.manga,
+                                        history.chapter.toSimpleChapter(history.history.last_read)!!,
+                                    )
+
+                                val scanlators = chapter.chapter.scanlatorList()
+                                if (
+                                    scanlators.fastAny { scanlator ->
+                                        scanlator in blockedGroups
+                                    } ||
+                                        (Constants.NO_GROUP in scanlators &&
+                                            chapter.chapter.uploader in blockedUploaders)
+                                ) {
+                                    return@mapNotNull null
+                                }
+
+                                FeedManga(
+                                    mangaId = history.manga.id!!,
+                                    mangaTitle = history.manga.displayTitle(),
+                                    date = history.history.last_read,
+                                    artwork = history.manga.toDisplayManga().currentArtwork,
+                                    chapters = persistentListOf(chapter),
                                 )
-
-                            val scanlators = chapter.chapter.scanlatorList()
-                            if (
-                                scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
-                                    (Constants.NO_GROUP in scanlators &&
-                                        chapter.chapter.uploader in blockedUploaders)
-                            ) {
-                                return@mapNotNull null
                             }
-
-                            FeedManga(
-                                mangaId = history.manga.id!!,
-                                mangaTitle = history.manga.displayTitle(),
-                                date = history.history.last_read,
-                                artwork = history.manga.toDisplayManga().currentArtwork,
-                                chapters = persistentListOf(chapter),
-                            )
-                        }
-                        .groupBy { it.mangaId }
-                        .entries
-                        .toList()
+                            .groupBy { it.mangaId }
+                            .entries
+                            .toList()
 
                     if (groupedEntries.isEmpty()) return emptyList()
 
