@@ -186,23 +186,24 @@ class FeedRepository(
 
                     if (groupedEntries.isEmpty()) return emptyList()
 
-                    val mangaIdsToFetch =
-                        groupedEntries
-                            .filter { entry ->
-                                val feedMangaFiltered =
-                                    entry.value.mapNotNull { feedManga ->
-                                        if (
-                                            feedManga.chapters.isNotEmpty() &&
-                                                feedManga.chapters.none { it.chapter.read }
-                                        ) {
-                                            feedManga
-                                        } else {
-                                            null
-                                        }
+                    val processedEntries =
+                        groupedEntries.map { entry ->
+                            val feedMangaFiltered =
+                                entry.value.mapNotNull { feedManga ->
+                                    if (
+                                        feedManga.chapters.isNotEmpty() &&
+                                            feedManga.chapters.none { it.chapter.read }
+                                    ) {
+                                        feedManga
+                                    } else {
+                                        null
                                     }
-                                feedMangaFiltered.isEmpty()
-                            }
-                            .map { it.key }
+                                }
+                            entry to feedMangaFiltered
+                        }
+
+                    val mangaIdsToFetch =
+                        processedEntries.filter { it.second.isEmpty() }.map { it.first.key }
 
                     val mangasMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
@@ -218,18 +219,7 @@ class FeedRepository(
                             emptyMap()
                         }
 
-                    return groupedEntries.mapNotNull { entry ->
-                        val feedMangaFiltered =
-                            entry.value.mapNotNull { feedManga ->
-                                if (
-                                    feedManga.chapters.isNotEmpty() &&
-                                        feedManga.chapters.none { it.chapter.read }
-                                ) {
-                                    feedManga
-                                } else {
-                                    null
-                                }
-                            }
+                    return processedEntries.mapNotNull { (entry, feedMangaFiltered) ->
                         if (feedMangaFiltered.isNotEmpty()) {
                             feedMangaFiltered.last()
                         } else {
