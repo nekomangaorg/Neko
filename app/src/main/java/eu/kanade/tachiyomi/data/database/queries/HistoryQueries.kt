@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import com.pushtorefresh.storio.Queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
@@ -8,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryUpsertResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 
 interface HistoryQueries : DbProvider {
@@ -127,6 +129,20 @@ interface HistoryQueries : DbProvider {
                 RawQuery.builder()
                     .query(getHistoryByMangaId())
                     .args(mangaId)
+                    .observesTables(HistoryTable.TABLE)
+                    .build()
+            )
+            .prepare()
+
+    fun getHistoryByMangaIds(mangaIds: List<Long>) =
+        db.get()
+            .listOfObjects(History::class.java)
+            .withQuery(
+                RawQuery.builder()
+                    .query(
+                        "SELECT ${HistoryTable.TABLE}.* FROM ${HistoryTable.TABLE} JOIN ${ChapterTable.TABLE} ON ${HistoryTable.COL_CHAPTER_ID} = ${ChapterTable.TABLE}.${ChapterTable.COL_ID} WHERE ${ChapterTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})"
+                    )
+                    .args(*mangaIds.toTypedArray())
                     .observesTables(HistoryTable.TABLE)
                     .build()
             )
