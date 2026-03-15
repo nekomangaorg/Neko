@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.resolvers
 
 import android.annotation.SuppressLint
 import android.database.Cursor
+import androidx.compose.ui.util.fastAny
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
