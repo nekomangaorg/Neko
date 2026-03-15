@@ -1,0 +1,63 @@
+--- app/src/main/java/eu/kanade/tachiyomi/data/database/queries/HistoryQueries.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/database/queries/HistoryQueries.kt
+@@ -1,5 +1,6 @@
+ package eu.kanade.tachiyomi.data.database.queries
+
++import com.pushtorefresh.storio.Queries
+ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
+ import com.pushtorefresh.storio.sqlite.queries.RawQuery
+ import eu.kanade.tachiyomi.data.database.DbProvider
+@@ -134,6 +135,21 @@
+             )
+             .prepare()
+
++    fun getHistoryByMangaIds(mangaIds: List<Long>) =
++        db.get()
++            .listOfObjects(History::class.java)
++            .withQuery(
++                RawQuery.builder()
++                    .query(
++                        "SELECT ${HistoryTable.TABLE}.* FROM ${HistoryTable.TABLE} " +
++                            "JOIN ${ChapterTable.TABLE} ON ${HistoryTable.COL_CHAPTER_ID} = ${ChapterTable.TABLE}.${ChapterTable.COL_ID} " +
++                            "WHERE ${ChapterTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})"
++                    )
++                    .args(*mangaIds.toTypedArray())
++                    .observesTables(HistoryTable.TABLE)
++                    .build()
++            )
++            .prepare()
++
+     fun getHistoryByChapterUrl(chapterUrl: String) =
+         db.get()
+             .`object`(History::class.java)
+--- app/src/main/java/eu/kanade/tachiyomi/data/database/queries/MergeMangaQueries.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/database/queries/MergeMangaQueries.kt
+@@ -1,5 +1,6 @@
+ package eu.kanade.tachiyomi.data.database.queries
+
++import com.pushtorefresh.storio.Queries
+ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
+ import com.pushtorefresh.storio.sqlite.queries.Query
+ import eu.kanade.tachiyomi.data.database.DbProvider
+@@ -23,6 +24,21 @@
+             )
+             .prepare()
+
++    fun getMergeMangaList(mangaIds: List<Long>) =
++        db.get()
++            .listOfObjects(MergeMangaImpl::class.java)
++            .withQuery(
++                Query.builder()
++                    .table(MergeMangaTable.TABLE)
++                    .let { builder ->
++                        if (mangaIds.isEmpty()) builder.where("1 = 0")
++                        else builder.where("${MergeMangaTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})")
++                            .whereArgs(*mangaIds.toTypedArray())
++                    }
++                    .build()
++            )
++            .prepare()
++
+     fun getAllMergeManga() =
+         db.get()
+             .listOfObjects(MergeMangaImpl::class.java)

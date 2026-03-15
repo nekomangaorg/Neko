@@ -1,0 +1,17 @@
+--- app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
+@@ -156,13 +156,13 @@
+                         val dbChaptersMap = if (existingMangaIds.isNotEmpty()) db.getChapters(existingMangaIds).executeAsBlocking().groupBy { it.manga_id } else emptyMap()
+                         val dbMergeMangaMap = if (existingMangaIds.isNotEmpty()) db.getMergeMangaList(existingMangaIds).executeAsBlocking().groupBy { it.mangaId } else emptyMap()
+                         val dbTracksMap = if (existingMangaIds.isNotEmpty()) db.getTracks(existingMangaIds).executeAsBlocking().groupBy { it.manga_id } else emptyMap()
+-                        val dbHistoryMap = if (existingMangaIds.isNotEmpty()) db.getHistoryByMangaIds(existingMangaIds).executeAsBlocking().groupBy { it.manga_id } else emptyMap() // wait, History doesn't have manga_id directly, wait HistoryQuery returns History
+
+                         preparedItems.forEach { item ->
+                             val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]
+                             val mangaId = existingManga?.id
+                             val dbChapters = dbChaptersMap[mangaId] ?: emptyList()
+                             val dbMergeMangaList = dbMergeMangaMap[mangaId] ?: emptyList()
+                             val dbTracks = dbTracksMap[mangaId] ?: emptyList()
+-                            // Note: History model doesn't have manga_id, but the query we wrote does... wait! Let me verify History model.
++
++                            writeMangaToDb(item, existingManga, dbCategories, dbChapters, dbMergeMangaList, dbTracks)
