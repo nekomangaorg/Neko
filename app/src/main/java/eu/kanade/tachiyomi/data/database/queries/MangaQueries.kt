@@ -42,7 +42,7 @@ interface MangaQueries : DbProvider {
                     )
                     .build()
             )
-            .withGetResolver(LibraryMangaGetResolver.INSTANCE)
+            .withGetResolver(LibraryMangaGetResolver())
             .prepare()
 
     fun getFavoriteMangaList() =
