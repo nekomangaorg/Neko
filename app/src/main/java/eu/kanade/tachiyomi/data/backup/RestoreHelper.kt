@@ -205,10 +205,11 @@ class RestoreHelper(val context: Context) {
     }
 
     fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+        val backupFavorite = manga.favorite
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.initialized = false
-        manga.favorite = dbManga.favorite || manga.favorite
+        manga.favorite = dbManga.favorite || backupFavorite
         db.insertManga(manga).executeAsBlocking()
     }
 

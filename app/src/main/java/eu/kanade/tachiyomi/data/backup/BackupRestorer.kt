@@ -182,8 +182,16 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                             val dbChapters = dbChaptersMap[mangaId] ?: emptyList()
                             val dbMergeMangaList = dbMergeMangaMap[mangaId] ?: emptyList()
                             val dbTracks = dbTracksMap[mangaId] ?: emptyList()
-                            // Note: History model doesn't have manga_id, but the query we wrote
-                            // does... wait! Let me verify History model.
+
+                            writeMangaToDb(
+                                item = item,
+                                existingDbManga = existingManga,
+                                dbCategories = dbCategories,
+                                dbChapters = dbChapters,
+                                dbMergeMangaList = dbMergeMangaList,
+                                dbTracks = dbTracks,
+                            )
+
                             if (!item.manga.user_cover.isNullOrBlank()) {
                                 itemsWithCovers.add(item)
                             }
