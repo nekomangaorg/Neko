@@ -27,14 +27,12 @@ class LibraryManga : MangaImpl() {
         if (other !is LibraryManga) return false
         if (!super.equals(other)) return false
 
-        if (unread != other.unread) return false
-        if (read != other.read) return false
-        if (category != other.category) return false
-        if (bookmarkCount != other.bookmarkCount) return false
-        if (unavailableCount != other.unavailableCount) return false
-        if (isMerged != other.isMerged) return false
-
-        return true
+        return unread == other.unread &&
+            read == other.read &&
+            category == other.category &&
+            bookmarkCount == other.bookmarkCount &&
+            unavailableCount == other.unavailableCount &&
+            isMerged == other.isMerged
     }
 
     override fun hashCode(): Int {
