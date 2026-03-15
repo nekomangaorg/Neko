@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.database.resolvers
 
 import android.annotation.SuppressLint
 import android.database.Cursor
-import androidx.compose.ui.util.fastAny
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -73,6 +72,26 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
     private fun String.filterChaptersByScanlators(manga: LibraryManga): Int {
         if (isEmpty()) return 0
+
+        // Fast path: No blocked scanlators/uploaders and no manga-specific filter
+        if (
+            blockedGroups.isNullOrEmpty() &&
+                blockedUploaders.isNullOrEmpty() &&
+                manga.filtered_scanlators == null
+        ) {
+            var count = 1
+            var index = indexOf(Constants.RAW_CHAPTER_SEPARATOR)
+            while (index != -1) {
+                count++
+                index =
+                    indexOf(
+                        Constants.RAW_CHAPTER_SEPARATOR,
+                        index + Constants.RAW_CHAPTER_SEPARATOR.length,
+                    )
+            }
+            return count
+        }
+
         val list = split(Constants.RAW_CHAPTER_SEPARATOR)
 
         val chapterList =
@@ -84,8 +103,8 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     scanlators,
                     uploader,
                     false,
-                    blockedGroups!!,
-                    blockedUploaders!!,
+                    blockedGroups ?: emptySet(),
+                    blockedUploaders ?: emptySet(),
                 )
             }
 
