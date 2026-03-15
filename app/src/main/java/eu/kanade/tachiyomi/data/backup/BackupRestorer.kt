@@ -282,7 +282,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 item.backupCategories,
                 dbCategories,
             )
-            restoreHelper.restoreHistoryForManga(item.history)
+            restoreHelper.restoreHistoryForManga(item.history, manga)
             restoreHelper.restoreTrackForManga(manga, item.tracks)
         } catch (e: Exception) {
             TimberKt.e(e)
