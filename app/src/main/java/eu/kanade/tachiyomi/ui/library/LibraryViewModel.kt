@@ -1034,7 +1034,7 @@ class LibraryViewModel() : ViewModel() {
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
 
-            dbMangas.forEach { dbManga ->
+            for (dbManga in dbMangas) {
                 try {
                     coverCache.deleteFromCache(dbManga)
                     downloadManager.deleteManga(dbManga)
