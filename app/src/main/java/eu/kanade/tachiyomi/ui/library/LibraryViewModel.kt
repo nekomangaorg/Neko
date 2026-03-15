@@ -1181,12 +1181,13 @@ class LibraryViewModel() : ViewModel() {
             // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
             // to avoid allocating an intermediate list of available chapters,
             // reducing GC overhead when the user quickly jumps to reading.
-                        it.toSimpleChapter()?.toChapterItem()
-                chapters.mapNotNull {
-                    if (it.isAvailable(downloadManager, manga))
-                        it.toSimpleChapter()!!.toChapterItem()
-                    else null
+            val availableChapters = chapters.mapNotNull { chapter ->
+                if (chapter.isAvailable(downloadManager, manga)) {
+                    chapter.toSimpleChapter()?.toChapterItem()
+                } else {
+                    null
                 }
+            }
 
             val chapter = ChapterItemSort().getNextUnreadChapter(manga, availableChapters)
             chapter ?: return@launchIO
