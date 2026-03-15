@@ -235,7 +235,6 @@ class LibraryViewModel() : ViewModel() {
             .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
-    @Suppress("UNCHECKED_CAST")
     val libraryViewFlow: Flow<LibraryViewPreferences> =
         combine(
                 libraryPreferences.collapsedCategories().changes(),
@@ -245,15 +244,21 @@ class LibraryViewModel() : ViewModel() {
                 libraryPreferences.groupBy().changes(),
                 libraryPreferences.showDownloadBadge().changes(),
             ) {
-                val librarySort = LibrarySort.valueOf(it[2] as Int)
+                collapsedCategories,
+                collapsedDynamicCategories,
+                sortingMode,
+                sortAscending,
+                groupBy,
+                showDownloadBadges ->
+                val librarySort = LibrarySort.valueOf(sortingMode)
 
                 LibraryViewPreferences(
-                    collapsedCategories = it[0] as Set<String>,
-                    collapsedDynamicCategories = it[1] as Set<String>,
+                    collapsedCategories = collapsedCategories,
+                    collapsedDynamicCategories = collapsedDynamicCategories,
                     sortingMode = librarySort,
-                    sortAscending = it[3] as Boolean,
-                    groupBy = it[4] as LibraryGroup,
-                    showDownloadBadges = it[5] as Boolean,
+                    sortAscending = sortAscending,
+                    groupBy = groupBy,
+                    showDownloadBadges = showDownloadBadges,
                 )
             }
             .distinctUntilChanged()
@@ -268,19 +273,24 @@ class LibraryViewModel() : ViewModel() {
      * empty map via `flatMapLatest`, completely bypassing the expensive `db.getLastReadManga()`
      * query (which scans `History` and `Chapter` tables).
      */
-    val lastReadMangaFlow =
-        combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
+    private fun getSortFlow(
+        sortType: LibrarySort,
+        queryFlow: () -> Flow<List<Manga>>,
+    ): Flow<Map<Long, Int>> {
+        return combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
                 if (viewPrefs.groupBy == LibraryGroup.ByCategory) {
-                    categories.fastAny { it.sortOrder == LibrarySort.LastRead }
+                    categories.fastAny { it.sortOrder == sortType }
                 } else {
-                    viewPrefs.sortingMode == LibrarySort.LastRead
+                    viewPrefs.sortingMode == sortType
                 }
             }
             .distinctUntilChanged()
-            .flatMapLatest { needsLastRead ->
-                if (needsLastRead) {
-                    db.getLastReadManga().asFlow().map { list ->
-                        list.mapIndexed { index, manga -> manga.id!! to index }.toMap()
+            .flatMapLatest { needsSort ->
+                if (needsSort) {
+                    queryFlow().map { list ->
+                        list
+                            .mapIndexedNotNull { index, manga -> manga.id?.let { it to index } }
+                            .toMap()
                     }
                 } else {
                     kotlinx.coroutines.flow.flowOf(emptyMap())
@@ -288,6 +298,9 @@ class LibraryViewModel() : ViewModel() {
             }
             .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+    }
+
+    val lastReadMangaFlow = getSortFlow(LibrarySort.LastRead) { db.getLastReadManga().asFlow() }
 
     /**
      * Flow that tracks the last fetched manga to be used for sorting.
@@ -297,25 +310,7 @@ class LibraryViewModel() : ViewModel() {
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
-                if (viewPrefs.groupBy == LibraryGroup.ByCategory) {
-                    categories.fastAny { it.sortOrder == LibrarySort.LatestChapter }
-                } else {
-                    viewPrefs.sortingMode == LibrarySort.LatestChapter
-                }
-            }
-            .distinctUntilChanged()
-            .flatMapLatest { needsLastFetch ->
-                if (needsLastFetch) {
-                    db.getLastFetchedManga().asFlow().map { list ->
-                        list.mapIndexed { index, manga -> manga.id!! to index }.toMap()
-                    }
-                } else {
-                    kotlinx.coroutines.flow.flowOf(emptyMap())
-                }
-            }
-            .conflate()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+        getSortFlow(LibrarySort.LatestChapter) { db.getLastFetchedManga().asFlow() }
 
     val filteredMangaListFlow =
         combine(
