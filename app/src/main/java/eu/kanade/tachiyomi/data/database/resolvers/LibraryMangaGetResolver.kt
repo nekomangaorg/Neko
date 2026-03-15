@@ -22,12 +22,18 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
 
-    companion object {
-        val INSTANCE = LibraryMangaGetResolver()
-    }
+    private var blockedGroups: Set<String>? = null
+    private var blockedUploaders: Set<String>? = null
+    private var scanlatorFilterOption: Int? = null
 
     @SuppressLint("Range")
     override fun mapFromCursor(cursor: Cursor): LibraryManga {
+        if (blockedGroups == null) {
+            blockedGroups = mangaDexPreferences.blockedGroups().get()
+            blockedUploaders = mangaDexPreferences.blockedUploaders().get()
+            scanlatorFilterOption = libraryPreferences.chapterScanlatorFilterOption().get()
+        }
+
         val manga = LibraryManga()
 
         mapBaseFromCursor(manga, cursor)
@@ -69,9 +75,6 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         if (isEmpty()) return 0
         val list = split(Constants.RAW_CHAPTER_SEPARATOR)
 
-        val blockedGroups = mangaDexPreferences.blockedGroups().get()
-        val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
-
         val chapterList =
             list.filterNot {
                 val (scanlator, uploader) = it.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
@@ -81,8 +84,8 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     scanlators,
                     uploader,
                     false,
-                    blockedGroups,
-                    blockedUploaders,
+                    blockedGroups!!,
+                    blockedUploaders!!,
                 )
             }
 
@@ -91,7 +94,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
             false -> {
                 // Filtered sources, groups and uploaders
                 val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
-                val scanlatorMatchAll = libraryPreferences.chapterScanlatorFilterOption().get() == 0
+                val scanlatorMatchAll = scanlatorFilterOption == 0
                 val sources = SourceManager.mergeSourceNames + MdConstants.name
                 chapterList
                     .filterNot { scanlators ->
