@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.map
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.mapSuccess
 import eu.kanade.tachiyomi.data.database.models.ScanlatorGroup
@@ -36,7 +37,6 @@ import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
@@ -198,64 +198,50 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             coroutineBinding {
                 val seasonal = async {
-                    fetchList(
-                            networkServices.service.getSeasonalList().mapSuccess { id }.getOrNull()
-                                ?: return@async null
+                    val id =
+                        networkServices.service.getSeasonalList().mapSuccess { id }.getOrNull()
+                            ?: return@async Ok(null)
+                    fetchList(id).map { listResults ->
+                        listResults.copy(
+                            sourceManga = listResults.sourceManga.shuffled().toPersistentList()
                         )
-                        .andThen { listResults ->
-                            Ok(
-                                listResults.copy(
-                                    sourceManga =
-                                        listResults.sourceManga.shuffled().toPersistentList()
-                                )
-                            )
-                        }
-                        .bind()
+                    }
                 }
 
                 val staffPick = async {
-                    fetchList(MdConstants.staffPicksId)
-                        .andThen { listResults ->
-                            Ok(
-                                listResults.copy(
-                                    sourceManga =
-                                        listResults.sourceManga.shuffled().toPersistentList()
-                                )
+                    fetchList(MdConstants.staffPicksId).andThen { listResults ->
+                        Ok(
+                            listResults.copy(
+                                sourceManga = listResults.sourceManga.shuffled().toPersistentList()
                             )
-                        }
-                        .bind()
+                        )
+                    }
                 }
 
                 val nekoDevPicks = async {
-                    fetchList(MdConstants.nekoDevPicksId)
-                        .andThen { listResults ->
-                            Ok(
-                                listResults.copy(
-                                    sourceManga =
-                                        listResults.sourceManga.shuffled().toPersistentList()
-                                )
+                    fetchList(MdConstants.nekoDevPicksId).andThen { listResults ->
+                        Ok(
+                            listResults.copy(
+                                sourceManga = listResults.sourceManga.shuffled().toPersistentList()
                             )
-                        }
-                        .bind()
+                        )
+                    }
                 }
 
                 val popularNewTitles = async {
-                    searchHandler
-                        .popularNewTitles(1)
-                        .andThen { mangaListPage ->
-                            Ok(
-                                ListResults(
-                                    displayScreenType = DisplayScreenType.PopularNewTitles,
-                                    sourceManga =
-                                        mangaListPage.sourceManga.shuffled().toPersistentList(),
-                                )
+                    searchHandler.popularNewTitles(1).andThen { mangaListPage ->
+                        Ok(
+                            ListResults(
+                                displayScreenType = DisplayScreenType.PopularNewTitles,
+                                sourceManga =
+                                    mangaListPage.sourceManga.shuffled().toPersistentList(),
                             )
-                        }
-                        .bind()
+                        )
+                    }
                 }
 
                 val latestFeed = async {
-                    if (!loginHelper.isLoggedIn()) return@async null
+                    if (!loginHelper.isLoggedIn()) return@async Ok(null)
                     feedUpdatesHandler
                         .getPage(
                             blockedGroupUUIDs = blockedGroupUUIDs,
@@ -270,7 +256,6 @@ open class MangaDex : HttpSource() {
                                 )
                             )
                         }
-                        .bind()
                 }
 
                 val latestChapter = async {
@@ -288,21 +273,17 @@ open class MangaDex : HttpSource() {
                                 )
                             )
                         }
-                        .bind()
                 }
 
                 val recentlyAdded = async {
-                    searchHandler
-                        .recentlyAdded(1)
-                        .andThen { mangaListPage ->
-                            Ok(
-                                ListResults(
-                                    displayScreenType = DisplayScreenType.RecentlyAdded,
-                                    sourceManga = mangaListPage.sourceManga,
-                                )
+                    searchHandler.recentlyAdded(1).andThen { mangaListPage ->
+                        Ok(
+                            ListResults(
+                                displayScreenType = DisplayScreenType.RecentlyAdded,
+                                sourceManga = mangaListPage.sourceManga,
                             )
-                        }
-                        .bind()
+                        )
+                    }
                 }
 
                 listOfNotNull(
