@@ -746,11 +746,13 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val dbCategories = categories.map { it.toDbCategory() }
 
-            mangaList.mapAsync { manga ->
-                val dbManga = db.getManga(manga.mangaId).executeOnIO()!!
-                val mangaCategories = dbCategories.map { MangaCategory.create(dbManga, it) }
-                db.setMangaCategories(mangaCategories, listOf(dbManga))
+            val mangaIds = mangaList.map { it.mangaId }
+            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+            val mangaCategories = dbMangas.flatMap { dbManga ->
+                dbCategories.map { MangaCategory.create(dbManga, it) }
             }
+            db.setMangaCategories(mangaCategories, dbMangas)
+
             clearSelectedManga()
             if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
                 libraryPreferences.groupBy().set(LibraryGroup.Ungrouped)
@@ -1027,12 +1029,13 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchNonCancellable {
             val currentSelected = libraryScreenState.value.selectedItems.toList()
             clearSelectedManga()
-            val dbMangas =
-                currentSelected.mapAsync { libraryMangaItem ->
-                    val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
-                    dbManga.favorite = false
-                    dbManga
-                }
+
+            val mangaIds = currentSelected.map { it.displayManga.mangaId }
+            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+
+            dbMangas.forEach { dbManga ->
+                dbManga.favorite = false
+            }
 
             db.insertMangaList(dbMangas).executeOnIO()
 
@@ -1072,12 +1075,17 @@ class LibraryViewModel() : ViewModel() {
             val selectedItems = libraryScreenState.value.selectedItems
             _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
+            val mangaIds = selectedItems.map { it.displayManga.mangaId }
+            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+
             selectedItems.mapAsync { selectedItem ->
-                val dbManga = db.getManga(selectedItem.displayManga.mangaId).executeOnIO()!!
+                val mangaId = selectedItem.displayManga.mangaId
+                val dbManga = mangasMap[mangaId] ?: return@mapAsync
                 val chapterItems =
-                    db.getChapters(selectedItem.displayManga.mangaId).executeOnIO().map {
-                        it.toSimpleChapter()!!.toChapterItem()
-                    }
+                    chaptersMap[mangaId]?.mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                        ?: emptyList()
+
                 chapterUseCases.markChapters(markAction, chapterItems)
                 chapterUseCases.markChaptersRemote(markAction, dbManga.uuid(), chapterItems)
             }
@@ -1097,14 +1105,20 @@ class LibraryViewModel() : ViewModel() {
                 return@launchIO
             }
 
+            val mangaIds = displayMangaList.map { it.mangaId }
+            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+
             displayMangaList.mapAsync { displayManga ->
-                val dbManga = db.getManga(displayManga.mangaId).executeOnIO()!!
+                val dbManga = mangasMap[displayManga.mangaId] ?: return@mapAsync
+                val rawChapters =
+                    chaptersMap[displayManga.mangaId]?.mapNotNull {
+                        it.toSimpleChapter()?.toChapterItem()
+                    } ?: emptyList()
                 val chapterItems =
                     chapterItemFilter
                         .filterChaptersByScanlatorsAndLanguage(
-                            db.getChapters(dbManga).executeOnIO().mapNotNull {
-                                it.toSimpleChapter()?.toChapterItem()
-                            },
+                            rawChapters,
                             dbManga,
                             mangadexPreferences,
                             libraryPreferences,
