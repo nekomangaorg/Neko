@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.NetworkState
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.networkStateFlow
 import kotlinx.coroutines.GlobalScope
@@ -411,8 +410,8 @@ class DownloadManager(val context: Context) {
      * @param manga the manga to delete.
      * @param source the source of the manga.
      */
-    fun deleteManga(manga: Manga, removeQueued: Boolean = true) {
-        launchIO {
+    suspend fun deleteManga(manga: Manga, removeQueued: Boolean = true) {
+        withContext(Dispatchers.IO) {
             if (removeQueued) {
                 downloader.removeFromQueue(manga)
             }

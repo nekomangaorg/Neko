@@ -390,9 +390,10 @@ class RestoreHelper(val context: Context) {
 
     internal fun restoreChaptersForMangaOffline(manga: Manga, chapters: List<Chapter>) {
         val dbChapters = db.getChapters(manga).executeAsBlocking()
+        val dbChaptersByUrl = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
-            val dbChapter = dbChapters.find { it.url == chapter.url }
+            val dbChapter = dbChaptersByUrl[chapter.url]
 
             if (dbChapter != null) {
                 chapter.id = dbChapter.id
