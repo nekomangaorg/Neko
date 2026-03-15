@@ -1,0 +1,23 @@
+--- app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
+@@ -237,12 +237,12 @@
+             }
+
+             // Restore related data using helper (Blocking calls are fine inside transaction)
+-            restoreHelper.restoreChaptersForMangaOffline(manga, item.chapters)
+-            restoreHelper.restoreMergeMangaForManga(manga, item.mergeMangaList)
++            val updatedChapters = restoreHelper.restoreChaptersForMangaOffline(manga, item.chapters, dbChapters)
++            restoreHelper.restoreMergeMangaForManga(manga, item.mergeMangaList, dbMergeMangaList)
+             restoreHelper.restoreCategoriesForManga(
+                 manga,
+                 item.categories,
+                 item.backupCategories,
+                 dbCategories,
+             )
+-            restoreHelper.restoreHistoryForManga(item.history, manga)
+-            restoreHelper.restoreTrackForManga(manga, item.tracks)
++            restoreHelper.restoreHistoryForManga(item.history, manga, updatedChapters, dbHistory)
++            restoreHelper.restoreTrackForManga(manga, item.tracks, dbTracks)
+         } catch (e: Exception) {
+             TimberKt.e(e)
+             errors.add("${item.manga.title} - Write Error: ${e.message}")

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.queries
 
-import com.pushtorefresh.storio.Queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.Query
 import eu.kanade.tachiyomi.data.database.DbProvider
@@ -23,25 +22,6 @@ interface MergeMangaQueries : DbProvider {
                     .table(MergeMangaTable.TABLE)
                     .where("${MergeMangaTable.COL_MANGA_ID} = ?")
                     .whereArgs(mangaId)
-                    .build()
-            )
-            .prepare()
-
-    fun getMergeMangaList(mangaIds: List<Long>) =
-        db.get()
-            .listOfObjects(MergeMangaImpl::class.java)
-            .withQuery(
-                Query.builder()
-                    .table(MergeMangaTable.TABLE)
-                    .let { builder ->
-                        if (mangaIds.isEmpty()) builder.where("1 = 0")
-                        else
-                            builder
-                                .where(
-                                    "${MergeMangaTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})"
-                                )
-                                .whereArgs(*mangaIds.toTypedArray())
-                    }
                     .build()
             )
             .prepare()

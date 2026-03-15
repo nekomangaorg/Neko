@@ -748,9 +748,10 @@ class LibraryViewModel() : ViewModel() {
 
             val mangaIds = mangaList.map { it.mangaId }
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
-            val mangaCategories = dbMangas.flatMap { dbManga ->
-                dbCategories.map { MangaCategory.create(dbManga, it) }
-            }
+            val mangaCategories =
+                dbMangas.flatMap { dbManga ->
+                    dbCategories.map { MangaCategory.create(dbManga, it) }
+                }
             db.setMangaCategories(mangaCategories, dbMangas)
 
             clearSelectedManga()
@@ -1033,9 +1034,7 @@ class LibraryViewModel() : ViewModel() {
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
 
-            dbMangas.forEach { dbManga ->
-                dbManga.favorite = false
-            }
+            dbMangas.forEach { dbManga -> dbManga.favorite = false }
 
             db.insertMangaList(dbMangas).executeOnIO()
 

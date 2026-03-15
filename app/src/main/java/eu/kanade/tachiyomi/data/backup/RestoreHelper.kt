@@ -287,20 +287,24 @@ class RestoreHelper(val context: Context) {
      *
      * @param history list containing history to be restored
      */
-    internal fun restoreHistoryForManga(history: List<BackupHistory>, manga: Manga) {
+    internal fun restoreHistoryForManga(
+        history: List<BackupHistory>,
+        manga: Manga,
+        updatedChapters: List<Chapter>,
+    ) {
         val mangaId = manga.id ?: return
 
         // List containing history to be updated
         val historyToBeUpdated = ArrayList<History>(history.size)
 
-        // [OPTIMIZATION] Pre-fetch all db histories and chapters for this manga to avoid N queries
-        // inside loop
+        // [OPTIMIZATION] Pre-fetch all db histories for this manga to avoid N queries
+        // inside loop. Chapters are pre-fetched from updatedChapters parameter.
         val dbHistories =
             db.getHistoryByMangaId(mangaId).executeAsBlocking().associateBy { it.chapter_id }
-        val dbChapters = db.getChapters(mangaId).executeAsBlocking().associateBy { it.url }
+        val dbChaptersMap = updatedChapters.associateBy { it.url }
 
         for ((url, lastRead, readDuration) in history) {
-            val chapter = dbChapters[url] ?: continue
+            val chapter = dbChaptersMap[url] ?: continue
             val dbHistory = dbHistories[chapter.id]
             // Check if history already in database and update
             if (dbHistory != null) {
@@ -331,7 +335,11 @@ class RestoreHelper(val context: Context) {
      * @param manga the manga whose sync have to be restored.
      * @param tracks the track list to restore.
      */
-    internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
+    internal fun restoreTrackForManga(
+        manga: Manga,
+        tracks: List<Track>,
+        preFetchedDbTracks: List<Track>? = null,
+    ) {
         // Fix foreign keys with the current manga id
         val needToUpdate = tracks.any { it.manga_id != manga.id!! }
 
@@ -340,7 +348,7 @@ class RestoreHelper(val context: Context) {
         val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
 
         // Get tracks from database
-        val dbTracks = db.getTracks(manga).executeAsBlocking()
+        val dbTracks = preFetchedDbTracks ?: db.getTracks(manga).executeAsBlocking()
         val trackToUpdate = mutableListOf<Track>()
 
         validTracks.forEach { track ->
@@ -373,12 +381,16 @@ class RestoreHelper(val context: Context) {
         // Update database
         if (trackToUpdate.isNotEmpty() || needToUpdate) {
             db.insertTracks(trackToUpdate).executeAsBlocking()
-            db.getTracks(manga).executeAsBlocking()
         }
     }
 
-    fun restoreMergeMangaForManga(manga: Manga, mergeMangaList: List<MergeMangaImpl>) {
-        val dbMergeMangaList = db.getMergeMangaList(manga).executeAsBlocking()
+    fun restoreMergeMangaForManga(
+        manga: Manga,
+        mergeMangaList: List<MergeMangaImpl>,
+        preFetchedDbMergeMangaList: List<MergeMangaImpl>? = null,
+    ) {
+        val dbMergeMangaList =
+            preFetchedDbMergeMangaList ?: db.getMergeMangaList(manga).executeAsBlocking()
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
@@ -388,11 +400,16 @@ class RestoreHelper(val context: Context) {
         }
     }
 
-    internal fun restoreChaptersForMangaOffline(manga: Manga, chapters: List<Chapter>) {
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+    internal fun restoreChaptersForMangaOffline(
+        manga: Manga,
+        chapters: List<Chapter>,
+        preFetchedDbChapters: List<Chapter>? = null,
+    ): List<Chapter> {
+        val dbChapters = preFetchedDbChapters ?: db.getChapters(manga).executeAsBlocking()
+        val dbChaptersMap = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
-            val dbChapter = dbChapters.find { it.url == chapter.url }
+            val dbChapter = dbChaptersMap[chapter.url]
 
             if (dbChapter != null) {
                 chapter.id = dbChapter.id
@@ -415,6 +432,15 @@ class RestoreHelper(val context: Context) {
 
         val newChapters = chapters.groupBy { it.id != null }
         newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
-        newChapters[false]?.let { db.insertChapters(it).executeAsBlocking() }
+
+        // Populate chapter.id from the put results to correctly process History later
+        newChapters[false]?.let { newChaps ->
+            val results = db.insertChapters(newChaps).executeAsBlocking()
+            results.results().entries.forEach { (insertedChap, result) ->
+                insertedChap.id = result.insertedId()
+            }
+        }
+
+        return chapters
     }
 }

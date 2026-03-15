@@ -1,0 +1,10 @@
+--- app/src/main/java/eu/kanade/tachiyomi/data/database/queries/HistoryQueries.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/database/queries/HistoryQueries.kt
+@@ -3,6 +3,7 @@
+ import com.pushtorefresh.storio.Queries
+ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
+ import com.pushtorefresh.storio.sqlite.queries.RawQuery
++import eu.kanade.tachiyomi.data.database.tables.ChapterTable
+ import eu.kanade.tachiyomi.data.database.DbProvider
+ import eu.kanade.tachiyomi.data.database.models.History
+ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory

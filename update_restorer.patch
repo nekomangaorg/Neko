@@ -1,0 +1,68 @@
+--- app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
++++ app/src/main/java/eu/kanade/tachiyomi/data/backup/BackupRestorer.kt
+@@ -87,7 +87,7 @@
+             }
+
+             // Batch parameters
+-            val batchSize = 10 // Safe size for SQLite transactions
++            val batchSize = 100 // Safe size for SQLite transactions
+             val chunks = dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.entries.chunked(batchSize)
+             val semaphore = Semaphore(8) // concurrency limit for CPU prep
+
+@@ -109,11 +109,24 @@
+                 val itemsWithCovers = mutableListOf<RestorableItem>()
+                 try {
+                     db.inTransaction {
+-                        // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
+                         val dbCategories = db.getCategories().executeAsBlocking()
++
++                        // Pre-fetch related data for all existing manga in this chunk to prevent N+1 queries
++                        val existingMangaIds = preparedItems.mapNotNull { item -> dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]?.id }
++
++                        val dbChaptersMap = if (existingMangaIds.isNotEmpty()) db.getChapters(existingMangaIds).executeAsBlocking().groupBy { it.manga_id } else emptyMap()
++                        val dbMergeMangaMap = if (existingMangaIds.isNotEmpty()) db.getMergeMangaList(existingMangaIds).executeAsBlocking().groupBy { it.mangaId } else emptyMap()
++                        val dbTracksMap = if (existingMangaIds.isNotEmpty()) db.getTracks(existingMangaIds).executeAsBlocking().groupBy { it.manga_id } else emptyMap()
++                        val dbHistoryMap = if (existingMangaIds.isNotEmpty()) db.getHistoryByMangaIds(existingMangaIds).executeAsBlocking().groupBy { it.mangaId() } else emptyMap()
++
+                         preparedItems.forEach { item ->
+                             val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]
+-                            writeMangaToDb(item, existingManga, dbCategories)
++                            val mangaId = existingManga?.id
++                            val dbChapters = dbChaptersMap[mangaId] ?: emptyList()
++                            val dbMergeMangaList = dbMergeMangaMap[mangaId] ?: emptyList()
++                            val dbTracks = dbTracksMap[mangaId] ?: emptyList()
++                            val dbHistory = dbHistoryMap[mangaId] ?: emptyList()
++                            writeMangaToDb(item, existingManga, dbCategories, dbChapters, dbMergeMangaList, dbTracks, dbHistory)
+
+                             // Collect items that need covers, but don't process yet
+                             if (!item.manga.user_cover.isNullOrBlank()) {
+@@ -216,6 +229,10 @@
+         item: RestorableItem,
+         existingDbManga: Manga?,
+         dbCategories: List<Category>,
++        dbChapters: List<Chapter>,
++        dbMergeMangaList: List<MergeMangaImpl>,
++        dbTracks: List<Track>,
++        dbHistory: List<History>
+     ) {
+         try {
+             val manga = item.manga
+@@ -230,14 +247,15 @@
+             }
+
+             // Restore related data using helper (Blocking calls are fine inside transaction)
+-            restoreHelper.restoreChaptersForMangaOffline(manga, item.chapters)
+-            restoreHelper.restoreMergeMangaForManga(manga, item.mergeMangaList)
++            val updatedChapters = restoreHelper.restoreChaptersForMangaOffline(manga, item.chapters, dbChapters)
++            restoreHelper.restoreMergeMangaForManga(manga, item.mergeMangaList, dbMergeMangaList)
+             restoreHelper.restoreCategoriesForManga(
+                 manga,
+                 item.categories,
+                 item.backupCategories,
+                 dbCategories,
+             )
+-            restoreHelper.restoreHistoryForManga(item.history, manga)
+-            restoreHelper.restoreTrackForManga(manga, item.tracks)
++            restoreHelper.restoreHistoryForManga(item.history, manga, updatedChapters, dbHistory)
++            restoreHelper.restoreTrackForManga(manga, item.tracks, dbTracks)
+         } catch (e: Exception) {
