@@ -86,4 +86,37 @@ class MarkChapterUseCaseTest {
             updatedChapter.last_page_read shouldBe expectedLastRead
             updatedChapter.pages_left shouldBe expectedPagesLeft
         }
+
+    @Test
+    fun `given unread action with null parameters when marking chapters then chapters are updated with defaults`() =
+        runTest {
+            // Arrange
+            val markAction = ChapterMarkActions.Unread()
+
+            val simpleChapter =
+                SimpleChapter.create()
+                    .copy(id = 1L, mangaId = 100L, read = true, lastPageRead = 20, pagesLeft = 10)
+            val chapterItem = ChapterItem(chapter = simpleChapter)
+
+            val mockPreparedPut = mockk<PreparedPutCollectionOfObjects<Chapter>>()
+            val capturedChapters = slot<List<Chapter>>()
+
+            every { db.updateChaptersProgress(capture(capturedChapters)) } returns mockPreparedPut
+            coEvery { mockPreparedPut.executeOnIO() } returns mockk()
+
+            // Act
+            markChapterUseCase(markAction, listOf(chapterItem))
+
+            // Assert
+            coVerify(exactly = 1) { db.updateChaptersProgress(any()) }
+            coVerify(exactly = 1) { mockPreparedPut.executeOnIO() }
+
+            val updatedChapters = capturedChapters.captured
+            updatedChapters.size shouldBe 1
+
+            val updatedChapter = updatedChapters.first()
+            updatedChapter.read shouldBe false
+            updatedChapter.last_page_read shouldBe 0
+            updatedChapter.pages_left shouldBe 0
+        }
 }
