@@ -287,11 +287,19 @@ class RestoreHelper(val context: Context) {
      *
      * @param history list containing history to be restored
      */
-    internal fun restoreHistoryForManga(history: List<BackupHistory>) {
+    internal fun restoreHistoryForManga(history: List<BackupHistory>, manga: Manga) {
         // List containing history to be updated
         val historyToBeUpdated = ArrayList<History>(history.size)
+
+        // [OPTIMIZATION] Pre-fetch all db histories and chapters for this manga to avoid N queries
+        // inside loop
+        val dbHistories =
+            db.getHistoryByMangaId(manga.id!!).executeAsBlocking().associateBy { it.chapter_id }
+        val dbChapters = db.getChapters(manga.id!!).executeAsBlocking().associateBy { it.url }
+
         for ((url, lastRead, readDuration) in history) {
-            val dbHistory = db.getHistoryByChapterUrl(url).executeAsBlocking()
+            val chapter = dbChapters[url] ?: continue
+            val dbHistory = dbHistories[chapter.id]
             // Check if history already in database and update
             if (dbHistory != null) {
                 dbHistory.apply {
@@ -301,17 +309,18 @@ class RestoreHelper(val context: Context) {
                 historyToBeUpdated.add(dbHistory)
             } else {
                 // If not in database create
-                db.getChapter(url).executeAsBlocking()?.let {
-                    val historyToAdd =
-                        History.create(it).apply {
-                            last_read = lastRead
-                            time_read = readDuration
-                        }
-                    historyToBeUpdated.add(historyToAdd)
-                }
+                val historyToAdd =
+                    History.create(chapter).apply {
+                        last_read = lastRead
+                        time_read = readDuration
+                    }
+                historyToBeUpdated.add(historyToAdd)
             }
         }
-        db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+
+        if (historyToBeUpdated.isNotEmpty()) {
+            db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+        }
     }
 
     /**
