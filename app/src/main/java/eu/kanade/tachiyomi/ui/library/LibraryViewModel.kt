@@ -1035,8 +1035,12 @@ class LibraryViewModel() : ViewModel() {
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
 
             dbMangas.forEach { dbManga ->
-                coverCache.deleteFromCache(dbManga)
-                downloadManager.deleteManga(dbManga)
+                try {
+                    coverCache.deleteFromCache(dbManga)
+                    downloadManager.deleteManga(dbManga)
+                } catch (e: Exception) {
+                    TimberKt.e(e)
+                }
                 dbManga.favorite = false
             }
 
