@@ -205,10 +205,11 @@ class RestoreHelper(val context: Context) {
     }
 
     fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+        val backupFavorite = manga.favorite
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.initialized = false
-        manga.favorite = dbManga.favorite || manga.favorite
+        manga.favorite = dbManga.favorite || backupFavorite
         db.insertManga(manga).executeAsBlocking()
     }
 
@@ -287,11 +288,25 @@ class RestoreHelper(val context: Context) {
      *
      * @param history list containing history to be restored
      */
-    internal fun restoreHistoryForManga(history: List<BackupHistory>) {
+    internal fun restoreHistoryForManga(
+        history: List<BackupHistory>,
+        manga: Manga,
+        updatedChapters: List<Chapter>,
+        preFetchedDbHistories: List<History>? = null,
+    ) {
+        val mangaId = manga.id ?: return
+
         // List containing history to be updated
         val historyToBeUpdated = ArrayList<History>(history.size)
+
+        val dbHistories =
+            (preFetchedDbHistories ?: db.getHistoryByMangaId(mangaId).executeAsBlocking())
+                .associateBy { it.chapter_id }
+        val dbChaptersMap = updatedChapters.associateBy { it.url }
+
         for ((url, lastRead, readDuration) in history) {
-            val dbHistory = db.getHistoryByChapterUrl(url).executeAsBlocking()
+            val chapter = dbChaptersMap[url] ?: continue
+            val dbHistory = dbHistories[chapter.id]
             // Check if history already in database and update
             if (dbHistory != null) {
                 dbHistory.apply {
@@ -301,17 +316,18 @@ class RestoreHelper(val context: Context) {
                 historyToBeUpdated.add(dbHistory)
             } else {
                 // If not in database create
-                db.getChapter(url).executeAsBlocking()?.let {
-                    val historyToAdd =
-                        History.create(it).apply {
-                            last_read = lastRead
-                            time_read = readDuration
-                        }
-                    historyToBeUpdated.add(historyToAdd)
-                }
+                val historyToAdd =
+                    History.create(chapter).apply {
+                        last_read = lastRead
+                        time_read = readDuration
+                    }
+                historyToBeUpdated.add(historyToAdd)
             }
         }
-        db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+
+        if (historyToBeUpdated.isNotEmpty()) {
+            db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+        }
     }
 
     /**
@@ -320,7 +336,11 @@ class RestoreHelper(val context: Context) {
      * @param manga the manga whose sync have to be restored.
      * @param tracks the track list to restore.
      */
-    internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
+    internal fun restoreTrackForManga(
+        manga: Manga,
+        tracks: List<Track>,
+        preFetchedDbTracks: List<Track>? = null,
+    ) {
         // Fix foreign keys with the current manga id
         val needToUpdate = tracks.any { it.manga_id != manga.id!! }
 
@@ -329,7 +349,7 @@ class RestoreHelper(val context: Context) {
         val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
 
         // Get tracks from database
-        val dbTracks = db.getTracks(manga).executeAsBlocking()
+        val dbTracks = preFetchedDbTracks ?: db.getTracks(manga).executeAsBlocking()
         val trackToUpdate = mutableListOf<Track>()
 
         validTracks.forEach { track ->
@@ -362,12 +382,16 @@ class RestoreHelper(val context: Context) {
         // Update database
         if (trackToUpdate.isNotEmpty() || needToUpdate) {
             db.insertTracks(trackToUpdate).executeAsBlocking()
-            db.getTracks(manga).executeAsBlocking()
         }
     }
 
-    fun restoreMergeMangaForManga(manga: Manga, mergeMangaList: List<MergeMangaImpl>) {
-        val dbMergeMangaList = db.getMergeMangaList(manga).executeAsBlocking()
+    fun restoreMergeMangaForManga(
+        manga: Manga,
+        mergeMangaList: List<MergeMangaImpl>,
+        preFetchedDbMergeMangaList: List<MergeMangaImpl>? = null,
+    ) {
+        val dbMergeMangaList =
+            preFetchedDbMergeMangaList ?: db.getMergeMangaList(manga).executeAsBlocking()
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
@@ -377,11 +401,16 @@ class RestoreHelper(val context: Context) {
         }
     }
 
-    internal fun restoreChaptersForMangaOffline(manga: Manga, chapters: List<Chapter>) {
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+    internal fun restoreChaptersForMangaOffline(
+        manga: Manga,
+        chapters: List<Chapter>,
+        preFetchedDbChapters: List<Chapter>? = null,
+    ): List<Chapter> {
+        val dbChapters = preFetchedDbChapters ?: db.getChapters(manga).executeAsBlocking()
+        val dbChaptersMap = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
-            val dbChapter = dbChapters.find { it.url == chapter.url }
+            val dbChapter = dbChaptersMap[chapter.url]
 
             if (dbChapter != null) {
                 chapter.id = dbChapter.id
@@ -404,6 +433,15 @@ class RestoreHelper(val context: Context) {
 
         val newChapters = chapters.groupBy { it.id != null }
         newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
-        newChapters[false]?.let { db.insertChapters(it).executeAsBlocking() }
+
+        // Populate chapter.id from the put results to correctly process History later
+        newChapters[false]?.let { newChaps ->
+            val results = db.insertChapters(newChaps).executeAsBlocking()
+            results.results().entries.forEach { (insertedChap, result) ->
+                insertedChap.id = result.insertedId()
+            }
+        }
+
+        return chapters
     }
 }

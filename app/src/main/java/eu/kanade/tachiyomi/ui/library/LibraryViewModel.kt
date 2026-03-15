@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
@@ -234,19 +235,82 @@ class LibraryViewModel() : ViewModel() {
             .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
-    val lastReadMangaFlow =
-        db.getLastReadManga()
-            .asFlow()
-            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
-            .conflate()
+    val libraryViewFlow: Flow<LibraryViewPreferences> =
+        combine(
+                libraryPreferences.collapsedCategories().changes(),
+                libraryPreferences.collapsedDynamicCategories().changes(),
+                libraryPreferences.sortingMode().changes(),
+                libraryPreferences.sortAscending().changes(),
+                libraryPreferences.groupBy().changes(),
+                libraryPreferences.showDownloadBadge().changes(),
+            ) {
+                collapsedCategories,
+                collapsedDynamicCategories,
+                sortingMode,
+                sortAscending,
+                groupBy,
+                showDownloadBadges ->
+                val librarySort = LibrarySort.valueOf(sortingMode)
+
+                LibraryViewPreferences(
+                    collapsedCategories = collapsedCategories,
+                    collapsedDynamicCategories = collapsedDynamicCategories,
+                    sortingMode = librarySort,
+                    sortAscending = sortAscending,
+                    groupBy = groupBy,
+                    showDownloadBadges = showDownloadBadges,
+                )
+            }
+            .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
-    val lastFetchMangaFlow =
-        db.getLastFetchedManga()
-            .asFlow()
-            .map { list -> list.mapIndexed { index, manga -> manga.id!! to index }.toMap() }
+    /**
+     * Flow that tracks the last read manga to be used for sorting.
+     *
+     * Optimization: To prevent multi-second blocking operations on startup for large libraries
+     * (e.g. 1000+ items), we first check if the current global sorting mode or any individual
+     * category's sorting mode actually requires the "Last Read" data. If not needed, we emit an
+     * empty map via `flatMapLatest`, completely bypassing the expensive `db.getLastReadManga()`
+     * query (which scans `History` and `Chapter` tables).
+     */
+    private fun getSortFlow(
+        sortType: LibrarySort,
+        queryFlow: () -> Flow<List<Manga>>,
+    ): Flow<Map<Long, Int>> {
+        return combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
+                if (viewPrefs.groupBy == LibraryGroup.ByCategory) {
+                    categories.fastAny { it.sortOrder == sortType }
+                } else {
+                    viewPrefs.sortingMode == sortType
+                }
+            }
+            .distinctUntilChanged()
+            .flatMapLatest { needsSort ->
+                if (needsSort) {
+                    queryFlow().map { list ->
+                        list
+                            .mapIndexedNotNull { index, manga -> manga.id?.let { it to index } }
+                            .toMap()
+                    }
+                } else {
+                    kotlinx.coroutines.flow.flowOf(emptyMap())
+                }
+            }
             .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+    }
+
+    val lastReadMangaFlow = getSortFlow(LibrarySort.LastRead) { db.getLastReadManga().asFlow() }
+
+    /**
+     * Flow that tracks the last fetched manga to be used for sorting.
+     *
+     * Optimization: Similar to `lastReadMangaFlow`, this uses `flatMapLatest` to skip the expensive
+     * `db.getLastFetchedManga()` query if the "Latest Chapter" sorting mode is not actively used
+     * globally or by any category. This prevents massive blocking DB reads during UI state updates.
+     */
+    val lastFetchMangaFlow =
+        getSortFlow(LibrarySort.LatestChapter) { db.getLastFetchedManga().asFlow() }
 
     val filteredMangaListFlow =
         combine(
@@ -274,30 +338,6 @@ class LibraryViewModel() : ViewModel() {
                 }
             }
             .conflate()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
-
-    @Suppress("UNCHECKED_CAST")
-    val libraryViewFlow: Flow<LibraryViewPreferences> =
-        combine(
-                libraryPreferences.collapsedCategories().changes(),
-                libraryPreferences.collapsedDynamicCategories().changes(),
-                libraryPreferences.sortingMode().changes(),
-                libraryPreferences.sortAscending().changes(),
-                libraryPreferences.groupBy().changes(),
-                libraryPreferences.showDownloadBadge().changes(),
-            ) {
-                val librarySort = LibrarySort.valueOf(it[2] as Int)
-
-                LibraryViewPreferences(
-                    collapsedCategories = it[0] as Set<String>,
-                    collapsedDynamicCategories = it[1] as Set<String>,
-                    sortingMode = librarySort,
-                    sortAscending = it[3] as Boolean,
-                    groupBy = it[4] as LibraryGroup,
-                    showDownloadBadges = it[5] as Boolean,
-                )
-            }
-            .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val filterPreferencesFlow: Flow<LibraryFilters> =
@@ -746,11 +786,14 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val dbCategories = categories.map { it.toDbCategory() }
 
-            mangaList.mapAsync { manga ->
-                val dbManga = db.getManga(manga.mangaId).executeOnIO()!!
-                val mangaCategories = dbCategories.map { MangaCategory.create(dbManga, it) }
-                db.setMangaCategories(mangaCategories, listOf(dbManga))
-            }
+            val mangaIds = mangaList.map { it.mangaId }
+            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+            val mangaCategories =
+                dbMangas.flatMap { dbManga ->
+                    dbCategories.map { MangaCategory.create(dbManga, it) }
+                }
+            db.setMangaCategories(mangaCategories, dbMangas)
+
             clearSelectedManga()
             if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
                 libraryPreferences.groupBy().set(LibraryGroup.Ungrouped)
@@ -1027,19 +1070,21 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchNonCancellable {
             val currentSelected = libraryScreenState.value.selectedItems.toList()
             clearSelectedManga()
-            val dbMangas =
-                currentSelected.mapAsync { libraryMangaItem ->
-                    val dbManga = db.getManga(libraryMangaItem.displayManga.mangaId).executeOnIO()!!
-                    dbManga.favorite = false
-                    dbManga
+
+            val mangaIds = currentSelected.map { it.displayManga.mangaId }
+            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+
+            for (dbManga in dbMangas) {
+                try {
+                    coverCache.deleteFromCache(dbManga)
+                    downloadManager.deleteManga(dbManga)
+                } catch (e: Exception) {
+                    TimberKt.e(e)
                 }
+                dbManga.favorite = false
+            }
 
             db.insertMangaList(dbMangas).executeOnIO()
-
-            dbMangas.forEach { dbManga ->
-                coverCache.deleteFromCache(dbManga)
-                downloadManager.deleteManga(dbManga)
-            }
         }
     }
 
@@ -1072,12 +1117,17 @@ class LibraryViewModel() : ViewModel() {
             val selectedItems = libraryScreenState.value.selectedItems
             _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
+            val mangaIds = selectedItems.map { it.displayManga.mangaId }
+            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+
             selectedItems.mapAsync { selectedItem ->
-                val dbManga = db.getManga(selectedItem.displayManga.mangaId).executeOnIO()!!
+                val mangaId = selectedItem.displayManga.mangaId
+                val dbManga = mangasMap[mangaId] ?: return@mapAsync
                 val chapterItems =
-                    db.getChapters(selectedItem.displayManga.mangaId).executeOnIO().map {
-                        it.toSimpleChapter()!!.toChapterItem()
-                    }
+                    chaptersMap[mangaId]?.mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                        ?: emptyList()
+
                 chapterUseCases.markChapters(markAction, chapterItems)
                 chapterUseCases.markChaptersRemote(markAction, dbManga.uuid(), chapterItems)
             }
@@ -1097,14 +1147,20 @@ class LibraryViewModel() : ViewModel() {
                 return@launchIO
             }
 
+            val mangaIds = displayMangaList.map { it.mangaId }
+            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+
             displayMangaList.mapAsync { displayManga ->
-                val dbManga = db.getManga(displayManga.mangaId).executeOnIO()!!
+                val dbManga = mangasMap[displayManga.mangaId] ?: return@mapAsync
+                val rawChapters =
+                    chaptersMap[displayManga.mangaId]?.mapNotNull {
+                        it.toSimpleChapter()?.toChapterItem()
+                    } ?: emptyList()
                 val chapterItems =
                     chapterItemFilter
                         .filterChaptersByScanlatorsAndLanguage(
-                            db.getChapters(dbManga).executeOnIO().mapNotNull {
-                                it.toSimpleChapter()?.toChapterItem()
-                            },
+                            rawChapters,
                             dbManga,
                             mangadexPreferences,
                             libraryPreferences,
@@ -1161,13 +1217,20 @@ class LibraryViewModel() : ViewModel() {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
-            val availableChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
-            val chapter =
-                ChapterItemSort()
-                    .getNextUnreadChapter(
-                        manga,
-                        availableChapters.map { it.toSimpleChapter()!!.toChapterItem() },
-                    )
+
+            // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
+            // to avoid allocating an intermediate list of available chapters,
+            // reducing GC overhead when the user quickly jumps to reading.
+            val availableChapters =
+                chapters.mapNotNull { chapter ->
+                    if (chapter.isAvailable(downloadManager, manga)) {
+                        chapter.toSimpleChapter()?.toChapterItem()
+                    } else {
+                        null
+                    }
+                }
+
+            val chapter = ChapterItemSort().getNextUnreadChapter(manga, availableChapters)
             chapter ?: return@launchIO
             openChapter(manga, chapter.chapter.toDbChapter())
         }
