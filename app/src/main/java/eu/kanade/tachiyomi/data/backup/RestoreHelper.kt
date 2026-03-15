@@ -288,14 +288,16 @@ class RestoreHelper(val context: Context) {
      * @param history list containing history to be restored
      */
     internal fun restoreHistoryForManga(history: List<BackupHistory>, manga: Manga) {
+        val mangaId = manga.id ?: return
+
         // List containing history to be updated
         val historyToBeUpdated = ArrayList<History>(history.size)
 
         // [OPTIMIZATION] Pre-fetch all db histories and chapters for this manga to avoid N queries
         // inside loop
         val dbHistories =
-            db.getHistoryByMangaId(manga.id!!).executeAsBlocking().associateBy { it.chapter_id }
-        val dbChapters = db.getChapters(manga.id!!).executeAsBlocking().associateBy { it.url }
+            db.getHistoryByMangaId(mangaId).executeAsBlocking().associateBy { it.chapter_id }
+        val dbChapters = db.getChapters(mangaId).executeAsBlocking().associateBy { it.url }
 
         for ((url, lastRead, readDuration) in history) {
             val chapter = dbChapters[url] ?: continue
