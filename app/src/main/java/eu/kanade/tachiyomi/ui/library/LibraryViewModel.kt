@@ -1177,13 +1177,18 @@ class LibraryViewModel() : ViewModel() {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
-            val availableChapters = chapters.filter { it.isAvailable(downloadManager, manga) }
-            val chapter =
-                ChapterItemSort()
-                    .getNextUnreadChapter(
-                        manga,
-                        availableChapters.map { it.toSimpleChapter()!!.toChapterItem() },
-                    )
+
+            // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
+            // to avoid allocating an intermediate list of available chapters,
+            // reducing GC overhead when the user quickly jumps to reading.
+                        it.toSimpleChapter()?.toChapterItem()
+                chapters.mapNotNull {
+                    if (it.isAvailable(downloadManager, manga))
+                        it.toSimpleChapter()!!.toChapterItem()
+                    else null
+                }
+
+            val chapter = ChapterItemSort().getNextUnreadChapter(manga, availableChapters)
             chapter ?: return@launchIO
             openChapter(manga, chapter.chapter.toDbChapter())
         }
