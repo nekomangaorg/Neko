@@ -719,7 +719,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchNonCancellable {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             if (chapterItems.isNotEmpty()) {
-                val delete = {
+                val delete: suspend () -> Unit = {
                     if (isEverything) {
                         downloadManager.deleteManga(dbManga)
                     } else {
@@ -743,7 +743,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             messageRes = R.string.deleted_downloads,
                             actionLabelRes = R.string.undo,
                             action = {},
-                            dismissAction = { delete() },
+                            dismissAction = { viewModelScope.launch { delete() } },
                             snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                         )
                     )
