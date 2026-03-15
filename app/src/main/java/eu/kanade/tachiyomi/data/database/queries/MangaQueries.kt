@@ -58,6 +58,25 @@ interface MangaQueries : DbProvider {
             )
             .prepare()
 
+    fun getMangas(ids: List<Long>) =
+        db.get()
+            .listOfObjects(Manga::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(MangaTable.TABLE)
+                    .let { builder ->
+                        if (ids.isEmpty()) {
+                            builder.where("1 = 0")
+                        } else {
+                            builder
+                                .where("${MangaTable.COL_ID} IN (${ids.joinToString { "?" }})")
+                                .whereArgs(*ids.toTypedArray())
+                        }
+                    }
+                    .build()
+            )
+            .prepare()
+
     fun getManga(url: String, sourceId: Long) =
         db.get()
             .`object`(Manga::class.java)
