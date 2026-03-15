@@ -743,7 +743,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             messageRes = R.string.deleted_downloads,
                             actionLabelRes = R.string.undo,
                             action = {},
-                            dismissAction = { delete() },
+                            dismissAction = { viewModelScope.launch { delete() } },
                             snackBarColor = _mangaDetailScreenState.value.snackbarColor,
                         )
                     )
