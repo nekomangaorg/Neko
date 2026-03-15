@@ -748,9 +748,10 @@ class LibraryViewModel() : ViewModel() {
 
             val mangaIds = mangaList.map { it.mangaId }
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
-            val mangaCategories = dbMangas.flatMap { dbManga ->
-                dbCategories.map { MangaCategory.create(dbManga, it) }
-            }
+            val mangaCategories =
+                dbMangas.flatMap { dbManga ->
+                    dbCategories.map { MangaCategory.create(dbManga, it) }
+                }
             db.setMangaCategories(mangaCategories, dbMangas)
 
             clearSelectedManga()
@@ -1034,15 +1035,12 @@ class LibraryViewModel() : ViewModel() {
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
 
             dbMangas.forEach { dbManga ->
+                coverCache.deleteFromCache(dbManga)
+                downloadManager.deleteManga(dbManga)
                 dbManga.favorite = false
             }
 
             db.insertMangaList(dbMangas).executeOnIO()
-
-            dbMangas.forEach { dbManga ->
-                coverCache.deleteFromCache(dbManga)
-                downloadManager.deleteManga(dbManga)
-            }
         }
     }
 
