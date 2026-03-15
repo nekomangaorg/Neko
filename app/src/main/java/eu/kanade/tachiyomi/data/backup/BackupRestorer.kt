@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -176,12 +177,27 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                                 }
                             else emptyMap()
 
+                        // 1. Create a bridge map linking chapter_id -> manga_id
+                        val chapterToMangaMap =
+                            dbChaptersMap.values.flatten().associate { it.id to it.manga_id }
+
+                        // 2. Fetch the bulk histories (use whatever plural name the dev gave the
+                        // query)
+                        // and group them using our bridge map!
+                        val dbHistoriesMap =
+                            if (existingMangaIds.isNotEmpty())
+                                db.getHistoryByMangaIds(existingMangaIds)
+                                    .executeAsBlocking()
+                                    .groupBy { history -> chapterToMangaMap[history.chapter_id] }
+                            else emptyMap()
+
                         preparedItems.forEach { item ->
                             val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]
                             val mangaId = existingManga?.id
                             val dbChapters = dbChaptersMap[mangaId] ?: emptyList()
                             val dbMergeMangaList = dbMergeMangaMap[mangaId] ?: emptyList()
                             val dbTracks = dbTracksMap[mangaId] ?: emptyList()
+                            val dbHistories = dbHistoriesMap[mangaId] ?: emptyList() // <-- Add this
 
                             writeMangaToDb(
                                 item = item,
@@ -190,6 +206,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                                 dbChapters = dbChapters,
                                 dbMergeMangaList = dbMergeMangaList,
                                 dbTracks = dbTracks,
+                                dbHistories = dbHistories,
                             )
 
                             if (!item.manga.user_cover.isNullOrBlank()) {
@@ -302,6 +319,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
         dbChapters: List<Chapter>,
         dbMergeMangaList: List<MergeMangaImpl>,
         dbTracks: List<Track>,
+        dbHistories: List<History>,
     ) {
         try {
             val manga = item.manga
@@ -324,7 +342,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 item.backupCategories,
                 dbCategories,
             )
-            restoreHelper.restoreHistoryForManga(item.history, manga, updatedChapters)
+            restoreHelper.restoreHistoryForManga(item.history, manga, updatedChapters, dbHistories)
             restoreHelper.restoreTrackForManga(manga, item.tracks, dbTracks)
         } catch (e: Exception) {
             TimberKt.e(e)
