@@ -310,7 +310,7 @@ class LibraryViewModel() : ViewModel() {
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        getSortFlow(LibrarySort.LatestChapter) { db.getLastFetchedManga().asFlow() }
+        getSortFlow(LibrarySort.DateFetched) { db.getLastFetchedManga().asFlow() }
 
     val filteredMangaListFlow =
         combine(
