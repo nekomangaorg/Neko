@@ -20,7 +20,6 @@ import coil3.ColorImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.ui.theme.Themed
 import org.nekomanga.ui.theme.ThemedPreviews
 import org.nekomanga.ui.theme.withThemes
@@ -34,7 +33,7 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
             Row {
                 MangaCover.Book(artwork = artwork, dynamicCover = false)
-                Spacer(modifier = Modifier.width(Size.medium))
+                Spacer(modifier = Modifier.width(16.dp))
                 MangaCover.Square(artwork = artwork, dynamicCover = false)
             }
         }

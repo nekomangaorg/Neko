@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
-import kotlin.time.Duration.Companion.milliseconds
+import java.util.concurrent.TimeUnit
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
@@ -139,9 +139,12 @@ class BackupNotifier(private val context: Context) {
         context.notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
 
         val timeString =
-            time.milliseconds.toComponents { minutes, seconds, _ ->
-                context.getString(R.string.restore_duration, minutes, seconds)
-            }
+            context.getString(
+                R.string.restore_duration,
+                TimeUnit.MILLISECONDS.toMinutes(time),
+                TimeUnit.MILLISECONDS.toSeconds(time) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time)),
+            )
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_completed))

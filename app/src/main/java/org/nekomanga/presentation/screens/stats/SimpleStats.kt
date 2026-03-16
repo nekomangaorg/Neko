@@ -114,7 +114,7 @@ fun SimpleStats(
     ) {
         val axisPadding =
             when (isTablet) {
-                true -> Size.medium
+                true -> 16.dp
                 false -> Size.small
             }
 

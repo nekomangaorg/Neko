@@ -60,7 +60,7 @@ data class RelatedMangaDto(
 data class SimilarMangaMatchListDto(
     val id: String,
     val title: Map<String, String>,
-    val contentRating: String = "",
+    val contentRating: String,
     val score: Double,
     val languages: List<String> = emptyList(),
 )

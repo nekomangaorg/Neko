@@ -30,6 +30,10 @@ fun BackDrop(
     val context = LocalContext.current
     val resources = LocalResources.current
 
+    println(
+        "Artwork Check: ID=${artwork.mangaId}, Dynamic=${artwork.dynamicCover}, Default=${artwork.originalCover}"
+    )
+
     val imageRequest =
         remember(artwork, dynamicCovers) {
             ImageRequest.Builder(context)

@@ -14,20 +14,19 @@ object BackupUtil {
     fun decodeBackup(context: Context, uri: Uri): Backup {
         val backupCreator = BackupCreator(context)
 
-        return context.contentResolver.openInputStream(uri)!!.source().buffer().use {
-            backupStringSource ->
-            val peeked = backupStringSource.peek()
-            peeked.require(2)
-            val id1id2 = peeked.readShort()
-            val backupString =
-                if (id1id2.toInt() == 0x1f8b) { // 0x1f8b is gzip magic bytes
-                        backupStringSource.gzip().buffer()
-                    } else {
-                        backupStringSource
-                    }
-                    .use { it.readByteArray() }
+        val backupStringSource = context.contentResolver.openInputStream(uri)!!.source().buffer()
 
-            backupCreator.parser.decodeFromByteArray(Backup.serializer(), backupString)
-        }
+        val peeked = backupStringSource.peek()
+        peeked.require(2)
+        val id1id2 = peeked.readShort()
+        val backupString =
+            if (id1id2.toInt() == 0x1f8b) { // 0x1f8b is gzip magic bytes
+                    backupStringSource.gzip().buffer()
+                } else {
+                    backupStringSource
+                }
+                .use { it.readByteArray() }
+
+        return backupCreator.parser.decodeFromByteArray(Backup.serializer(), backupString)
     }
 }

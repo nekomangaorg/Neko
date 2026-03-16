@@ -104,8 +104,8 @@ fun BrowseHomePage(
                     horizontalArrangement = Arrangement.spacedBy(Size.small),
                     contentPadding = PaddingValues(horizontal = Size.small),
                 ) {
-                    // Bolt ⚡ perf: Reuse pre-filtered mangaList to avoid duplicate filtering.
-                    items(items = mangaList, key = { displayManga -> displayManga.mangaId }) {
+                    val manga = homePageManga.displayManga.filter { it.isVisible }
+                    items(items = manga, key = { displayManga -> displayManga.mangaId }) {
                         displayManga ->
                         Box {
                             Box(

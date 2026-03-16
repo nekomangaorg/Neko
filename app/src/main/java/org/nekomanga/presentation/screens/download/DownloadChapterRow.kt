@@ -158,10 +158,7 @@ private fun ChapterRow(
             onClick = { dropdown = !dropdown },
             modifier = Modifier.padding(end = Size.medium),
         ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(id = R.string.options),
-            )
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
             SimpleDropdownMenu(
                 expanded = dropdown,
                 themeColorState = defaultThemeColorState(),

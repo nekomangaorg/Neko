@@ -232,12 +232,12 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         readImageHeaderSubscription =
             scope.launch(Dispatchers.IO) {
+                var openStream: BufferedSource? = null
                 try {
                     val stream = streamFn().source().buffer()
+                    openStream = stream
                     val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
                     openStream = process(stream)
-
-                    val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
 
                     withContext(Dispatchers.Main) {
                         openStream?.let {

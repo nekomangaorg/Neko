@@ -6,25 +6,24 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class TrackSyncProcessor {
 
     val db: DatabaseHelper = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
 
-    val scope = CoroutineScope(dispatcher)
+    val scope = CoroutineScope(Dispatchers.IO)
 
     suspend fun process(
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
@@ -54,7 +53,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                 loggedServices
                                     .firstOrNull { it.id == autoAddTrackerId }
                                     ?.let { trackService ->
-                                        scope.launch {
+                                        scope.launchIO {
                                             try {
                                                 val trackServiceItem =
                                                     trackService.toTrackServiceItem()
@@ -104,7 +103,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
             tracks.forEach { track ->
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service in loggedServices) {
-                    scope.launch {
+                    scope.launchIO {
                         try {
                             val newTrack = service.refresh(track)
                             db.insertTrack(newTrack).executeOnIO()
