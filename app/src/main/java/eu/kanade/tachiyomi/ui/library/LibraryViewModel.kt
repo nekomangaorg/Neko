@@ -306,11 +306,11 @@ class LibraryViewModel() : ViewModel() {
      * Flow that tracks the last fetched manga to be used for sorting.
      *
      * Optimization: Similar to `lastReadMangaFlow`, this uses `flatMapLatest` to skip the expensive
-     * `db.getLastFetchedManga()` query if the "Latest Chapter" sorting mode is not actively used
+     * `db.getLastFetchedManga()` query if the "Date Fetched" sorting mode is not actively used
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        getSortFlow(LibrarySort.LatestChapter) { db.getLastFetchedManga().asFlow() }
+        getSortFlow(LibrarySort.DateFetched) { db.getLastFetchedManga().asFlow() }
 
     val filteredMangaListFlow =
         combine(
