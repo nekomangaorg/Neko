@@ -240,30 +240,31 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
                     val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
 
                     withContext(Dispatchers.Main) {
-                        frame.setImage(
-                            openStream!!,
-                            isAnimated,
-                            ReaderPageImageView.Config(
-                                zoomDuration = viewer.config.doubleTapAnimDuration,
-                                minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
-                                cropBorders =
-                                    if (viewer.hasMargins) {
-                                        viewer.config.verticalCropBorders
-                                    } else {
-                                        viewer.config.webtoonCropBorders
-                                    },
-                            ),
-                        )
+                        openStream?.let {
+                            frame.setImage(
+                                it,
+                                isAnimated,
+                                ReaderPageImageView.Config(
+                                    zoomDuration = viewer.config.doubleTapAnimDuration,
+                                    minimumScaleType =
+                                        SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
+                                    cropBorders =
+                                        if (viewer.hasMargins) {
+                                            viewer.config.verticalCropBorders
+                                        } else {
+                                            viewer.config.webtoonCropBorders
+                                        },
+                                ),
+                            )
+                        }
                     }
 
                     // Keep the coroutine alive to close the input stream only when cancelled
                     awaitCancellation()
                 } catch (e: Exception) {
-                    // Ignore
+                    org.nekomanga.logging.TimberKt.e(e) { "Error loading webtoon page" }
                 } finally {
-                    try {
-                        openStream?.close()
-                    } catch (e: Exception) {}
+                    runCatching { openStream?.close() }
                 }
             }
     }
