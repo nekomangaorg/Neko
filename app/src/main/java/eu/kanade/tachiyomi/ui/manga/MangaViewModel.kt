@@ -278,13 +278,26 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     *
+     * Why: Previously, this flow was performing a blocking database query
+     * `db.getManga(mangaId).executeAsBlocking()!!` inside the `combine` block. Because this is a
+     * hot flow observed by the UI, it forced the reactive pipeline to block the thread on every
+     * emission of chapters or preferences, leading to stuttering, CPU spikes, and frame drops.
+     *
+     * Architecture: We injected the `mangaFlow` directly into this `combine` operator. By using the
+     * emitted `mangaItem` instead of performing a synchronous query, the flow becomes fully
+     * reactive and avoids I/O operations on the main flow dispatcher.
+     */
     val allChapterFlow =
         combine(
                 db.getChapters(mangaId).asFlow(),
+                mangaFlow,
                 mangaDexPreferences.blockedGroups().changes(),
                 mangaDexPreferences.blockedUploaders().changes(),
-            ) { dbChapters, blockedGroups, blockedUploaders ->
-                val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            ) { dbChapters, mangaItem, blockedGroups, blockedUploaders ->
+                val dbManga = mangaItem.toManga()
                 dbChapters.mapNotNull { dbChapter ->
                     dbChapter
                         .toSimpleChapter()
