@@ -195,8 +195,11 @@ class FeedRepository(
                             entry to feedMangaFiltered
                         }
 
+                    // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
                     val mangaIdsToFetch =
-                        processedEntries.filter { it.second.isEmpty() }.map { it.first.key }
+                        processedEntries.mapNotNull {
+                            if (it.second.isEmpty()) it.first.key else null
+                        }
 
                     val mangasMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
