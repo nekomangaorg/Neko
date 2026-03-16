@@ -157,7 +157,10 @@ fun TrackingSearchSheet(
 
 @Composable
 private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: TrackSearchResult) {
-    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(Size.medium),
+        contentAlignment = Alignment.Center,
+    ) {
         when (trackSearchResult) {
             is TrackSearchResult.Loading ->
                 CircularProgressIndicator(

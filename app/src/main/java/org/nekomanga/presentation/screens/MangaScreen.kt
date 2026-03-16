@@ -392,41 +392,12 @@ private fun MangaScreenWrapper(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val isDark = isSystemInDarkTheme()
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-
-    val defaultColorState = defaultThemeColorState()
 
     val themeColorState =
-        remember(screenState.themeBasedOffCovers, screenState.vibrantColor, isDark) {
-            // 3. The logic inside here is now non-composable.
-            if (screenState.themeBasedOffCovers && screenState.vibrantColor != null) {
-                val color = getButtonThemeColor(Color(screenState.vibrantColor), isDark)
-                val containerColor =
-                    Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f))
-                val onContainerColor =
-                    Color(ColorUtils.blendARGB(color.toArgb(), onSurfaceColor.toArgb(), .706f))
-
-                ThemeColorState(
-                    primaryColor = color,
-                    rippleColor = color.copy(alpha = NekoColors.mediumAlphaLowContrast),
-                    rippleConfiguration = nekoRippleConfiguration(color),
-                    textSelectionColors = dynamicTextSelectionColor(color),
-                    containerColor = containerColor,
-                    onContainerColor = onContainerColor,
-                    altContainerColor =
-                        surfaceColor.surfaceColorAtElevationCustomColor(
-                            surfaceColor,
-                            color,
-                            Size.small,
-                        ),
-                    onAltContainerColor = color,
-                )
-            } else {
-                defaultColorState
-            }
-        }
+        rememberThemeColorState(
+            themeBasedOffCovers = screenState.themeBasedOffCovers,
+            vibrantColor = screenState.vibrantColor,
+        )
 
     LaunchedEffect(themeColorState) {
         updateSnackbarColor(
@@ -813,6 +784,53 @@ private fun SideBySideLayout(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun rememberThemeColorState(
+    themeBasedOffCovers: Boolean,
+    vibrantColor: Int?,
+): ThemeColorState {
+    val isDark = isSystemInDarkTheme()
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
+    val defaultColorState = defaultThemeColorState()
+
+    return remember(
+        themeBasedOffCovers,
+        vibrantColor,
+        isDark,
+        surfaceColor,
+        onSurfaceColor,
+        defaultColorState,
+    ) {
+        if (themeBasedOffCovers && vibrantColor != null) {
+            val color = getButtonThemeColor(Color(vibrantColor), isDark)
+            val containerColor =
+                Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f))
+            val onContainerColor =
+                Color(ColorUtils.blendARGB(color.toArgb(), onSurfaceColor.toArgb(), .706f))
+
+            ThemeColorState(
+                primaryColor = color,
+                rippleColor = color.copy(alpha = NekoColors.mediumAlphaLowContrast),
+                rippleConfiguration = nekoRippleConfiguration(color),
+                textSelectionColors = dynamicTextSelectionColor(color),
+                containerColor = containerColor,
+                onContainerColor = onContainerColor,
+                altContainerColor =
+                    surfaceColor.surfaceColorAtElevationCustomColor(
+                        surfaceColor,
+                        color,
+                        Size.small,
+                    ),
+                onAltContainerColor = color,
+            )
+        } else {
+            defaultColorState
         }
     }
 }

@@ -312,6 +312,10 @@
     <string name="library_update_device_restriction">Library device auto update restrictions</string>
     <string name="library_update__device_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
+    <string name="data_saver_warning">Warning</string>
+    <string name="data_saver_warning_summary">When using a metered connection, the Android system may block this app from running background updates to save data. You can bypass this by whitelisting the app in your device\'s Data Saver settings.</string>
+    <string name="data_saver_warning_button">Open settings</string>
+
     <string name="smart_library_update_restrictions">Smart library update restrictions</string>
     <string name="smart_library_has_unread">Skip manga with unread chapter(s)</string>
     <string name="smart_library_has_not_started">Skip unstarted manga</string>
@@ -940,7 +944,7 @@
     <string name="backup_info">Automatic backups are enabled by default. A backup is created every 24 hours, up to 6 backups will saved. For best results  You should manually keep copies in other places as well.</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
-    <string name="restore_duration">%02d min, %02d sec</string>
+    <string name="restore_duration">%1$02d min, %2$02d sec</string>
     <string name="restore_miui_warning">Backup/Restore may not function properly if MIUI Optimization is disabled.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>

@@ -1,5 +1,8 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -141,7 +144,7 @@ fun MangaGrid(
         modifier = Modifier.fillMaxSize().padding(Size.tiny),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(Size.medium),
     ) {
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
             MangaGridItem(
@@ -245,10 +248,15 @@ fun MangaGridItem(
                 }
             }
 
-            if (isSelected) {
+            AnimatedVisibility(
+                visible = isSelected,
+                modifier = Modifier.matchParentSize(),
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
                 Box(
                     modifier =
-                        Modifier.matchParentSize()
+                        Modifier.fillMaxSize()
                             .clip(RoundedCornerShape(Shapes.coverRadius))
                             .background(
                                 MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)

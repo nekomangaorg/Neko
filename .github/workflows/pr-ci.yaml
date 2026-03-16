@@ -3,6 +3,10 @@ name: Pull Request CI
 on:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pr_check_wrapper:
     name: Validate Gradle Wrapper
@@ -23,7 +27,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: 17
 
       - name: Install Android Build Tools

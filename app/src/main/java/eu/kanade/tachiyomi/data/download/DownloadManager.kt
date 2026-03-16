@@ -13,6 +13,10 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.networkStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asFlow
@@ -38,7 +42,12 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context the application context.
  */
-class DownloadManager(val context: Context) {
+class DownloadManager(
+    val context: Context,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
+
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     val isRunning: Boolean
         get() = downloader.isRunning
@@ -280,7 +289,7 @@ class DownloadManager(val context: Context) {
      * @param source the source of the chapters.
      */
     fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
-        GlobalScope.launchNonCancellable {
+        scope.launchNonCancellable {
             launchNonCancellable { cache.removeChapters(chapters, manga) }
             launchNonCancellable { removeFromDownloadQueue(chapters) }
 
