@@ -11,7 +11,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.util.system.isBackgroundDataRestricted
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openDataSaverSettings
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -29,6 +32,7 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.presentation.components.dialog.DataSaverDialog
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.screens.settings.Preference
 import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
@@ -150,6 +154,7 @@ internal class LibrarySettingsScreen(
         val excludedCategories by libraryPreferences.whichCategoriesToExclude().collectAsState()
 
         var showCategoriesDialog by rememberSaveable { mutableStateOf(false) }
+        var showDatasaverDialog by rememberSaveable { mutableStateOf(false) }
         if (showCategoriesDialog) {
             TriStateListDialog(
                 title = stringResource(R.string.categories),
@@ -171,6 +176,16 @@ internal class LibrarySettingsScreen(
                     libraryPreferences
                         .whichCategoriesToExclude()
                         .set(newExcluded.map { it.id.toString() }.toSet())
+                    showCategoriesDialog = false
+                },
+            )
+        }
+
+        if (showDatasaverDialog) {
+            DataSaverDialog(
+                onDismissRequest = { showDatasaverDialog = false },
+                onConfirm = {
+                    context.openDataSaverSettings()
                     showCategoriesDialog = false
                 },
             )
@@ -215,6 +230,15 @@ internal class LibrarySettingsScreen(
                             viewModelScope.launchNonCancellable {
                                 LibraryUpdateJob.setupTask(context)
                             }
+                            viewModelScope.launchUI {
+                                if (
+                                    it.contains(DEVICE_NETWORK_NOT_METERED) &&
+                                        context.isBackgroundDataRestricted()
+                                ) {
+                                    showDatasaverDialog = true
+                                }
+                            }
+
                             true
                         },
                     ),

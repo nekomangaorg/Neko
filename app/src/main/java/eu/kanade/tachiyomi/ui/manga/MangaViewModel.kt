@@ -278,13 +278,26 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     *
+     * Why: Previously, this flow was performing a blocking database query
+     * `db.getManga(mangaId).executeAsBlocking()!!` inside the `combine` block. Because this is a
+     * hot flow observed by the UI, it forced the reactive pipeline to block the thread on every
+     * emission of chapters or preferences, leading to stuttering, CPU spikes, and frame drops.
+     *
+     * Architecture: We injected the `mangaFlow` directly into this `combine` operator. By using the
+     * emitted `mangaItem` instead of performing a synchronous query, the flow becomes fully
+     * reactive and avoids I/O operations on the main flow dispatcher.
+     */
     val allChapterFlow =
         combine(
                 db.getChapters(mangaId).asFlow(),
+                mangaFlow,
                 mangaDexPreferences.blockedGroups().changes(),
                 mangaDexPreferences.blockedUploaders().changes(),
-            ) { dbChapters, blockedGroups, blockedUploaders ->
-                val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            ) { dbChapters, mangaItem, blockedGroups, blockedUploaders ->
+                val dbManga = mangaItem.toManga()
                 dbChapters.mapNotNull { dbChapter ->
                     dbChapter
                         .toSimpleChapter()
@@ -431,13 +444,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         } else {
 
                             if (dynamicCover && effectiveManga.favorite) {
-                                val lastReadChapterId =
-                                    history.maxByOrNull { it.last_read }?.chapter_id
-
                                 dynamicCoverUpdateJob?.cancel()
                                 dynamicCoverUpdateJob =
                                     viewModelScope.launchIO {
                                         delay(DYNAMIC_COVER_UPDATE_DELAY_MS)
+                                        val lastReadChapterId =
+                                            history.maxByOrNull { it.last_read }?.chapter_id
                                         updateDynamicCover(
                                             effectiveManga = effectiveManga,
                                             lastReadChapterId = lastReadChapterId,
@@ -2363,30 +2375,46 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         allChapters: List<ChapterItem>,
         artworkList: List<ArtworkImpl>,
     ) {
+        if (artworkList.isEmpty()) return
+
+        // 1. Flatten the target volume derivation
         val targetVolume =
-            if (lastReadChapterId != null) {
-                allChapters.find { it.chapter.id == lastReadChapterId }?.chapter?.volume
-            } else {
-                "Vol.1"
-            }
+            lastReadChapterId?.let { chapterId ->
+                val volume = allChapters.find { it.chapter.id == chapterId }?.chapter?.volume
 
-        if (targetVolume.isNullOrBlank()) return
+                when {
+                    volume.isNullOrBlank() -> "Vol.1"
+                    volume.startsWith("Vol", ignoreCase = true) -> volume
+                    else -> "Vol.$volume"
+                }
+            } ?: "Vol.1"
 
-        var dynamicArt = artworkList.firstOrNull { it.volume == targetVolume }
+        val matchedArt = artworkList.firstOrNull { it.volume == targetVolume }
 
-        // Safety Fallback: If no history and volume 1 is missing, use the lowest numeric volume
-        if (dynamicArt == null && lastReadChapterId == null) {
-            dynamicArt = artworkList.minByOrNull { it.volume.toFloatOrNull() ?: Float.MAX_VALUE }
-        }
+        val dynamicArt =
+            matchedArt
+                ?: run {
+                    // Fallback: If no read history and "Vol.1" is missing, find the lowest numeric
+                    // volume
+                    if (lastReadChapterId == null) {
+                        artworkList.minByOrNull { art ->
+                            // Strip non-numeric characters (like "Vol.") so toFloatOrNull() works
+                            art.volume.replace(Regex("[^0-9.]"), "").toFloatOrNull()
+                                ?: Float.MAX_VALUE
+                        }
+                    } else {
+                        null
+                    }
+                }
+                ?: return // Exit entirely if we still have no artwork to apply
 
-        if (dynamicArt != null) {
-            val quality = mangaDexPreferences.coverQuality().get()
-            val url = MdUtil.cdnCoverUrl(effectiveManga.uuid(), dynamicArt.fileName, quality)
+        // 3. Apply the update
+        val quality = mangaDexPreferences.coverQuality().get()
+        val url = MdUtil.cdnCoverUrl(effectiveManga.uuid(), dynamicArt.fileName, quality)
 
-            if (url != effectiveManga.dynamicCover) {
-                val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
-                db.insertManga(dbManga).executeOnIO()
-            }
+        if (url != effectiveManga.dynamicCover) {
+            val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
+            db.insertManga(dbManga).executeOnIO()
         }
     }
 }

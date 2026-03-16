@@ -328,6 +328,33 @@ fun Context.getActivity(): AppCompatActivity? {
     return null
 }
 
+fun Context.isBackgroundDataRestricted(): Boolean {
+    val connectivityManager = getSystemService(ConnectivityManager::class.java)
+    return when (connectivityManager.restrictBackgroundStatus) {
+        // Data Saver is ON and this app is NOT whitelisted. Background jobs will fail.
+        ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED -> true
+        // Data Saver is ON, but the user explicitly exempted this app. Safe to proceed.
+        ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED -> false
+        // Data Saver is completely OFF. Safe to proceed.
+        ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED -> false
+        else -> false
+    }
+}
+
+fun Context.openDataSaverSettings() {
+    try {
+        val intent =
+            Intent(Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS).apply {
+                data = "package:$packageName".toUri()
+            }
+        startActivity(intent)
+    } catch (e: Exception) {
+        // Fallback to standard network settings if the device manufacturer
+        // heavily modified the Android OS and removed this specific screen.
+        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS))
+    }
+}
+
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())

@@ -64,8 +64,9 @@ class StatsViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
-                _simpleState.value =
+                _simpleState.update {
                     StatsConstants.SimpleState(screenState = StatsConstants.ScreenState.NoResults)
+                }
             } else {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
@@ -91,7 +92,7 @@ class StatsViewModel() : ViewModel() {
                     .map { it.key to it.value.size }
                     .toPersistentList()
 
-                _simpleState.value =
+                _simpleState.update {
                     StatsConstants.SimpleState(
                         screenState = StatsConstants.ScreenState.Simple,
                         mangaCount = libraryList.count(),
@@ -123,6 +124,7 @@ class StatsViewModel() : ViewModel() {
                             if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
                         lastLibraryUpdateDuration = lastUpdateDuration,
                     )
+                }
             }
         }
     }
@@ -174,7 +176,7 @@ class StatsViewModel() : ViewModel() {
                         }
                         .awaitAll()
                         .sortedBy { it.title }
-                _detailState.value =
+                _detailState.update {
                     DetailedState(
                         isLoading = false,
                         manga = detailedStatMangaList.toPersistentList(),
@@ -192,6 +194,7 @@ class StatsViewModel() : ViewModel() {
                                 .sortedBy { it }
                                 .toPersistentList(),
                     )
+                }
 
                 val sortedSeries =
                     _detailState.value.tags
@@ -233,7 +236,7 @@ class StatsViewModel() : ViewModel() {
                     }
                 }
 
-            _simpleState.value = simpleState.value.copy(screenState = newState)
+            _simpleState.update { it.copy(screenState = newState) }
         }
     }
 
