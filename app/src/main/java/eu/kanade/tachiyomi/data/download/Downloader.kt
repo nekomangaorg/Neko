@@ -626,17 +626,20 @@ class Downloader(
     }
 
     private inline fun removeFromQueueIf(predicate: (Download) -> Boolean) {
-        val downloads = _queueState.value.filter { predicate(it) }
-        store.removeAll(downloads)
-        downloads.forEach { download ->
-            if (
-                download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE
-            ) {
-                download.status = Download.State.NOT_DOWNLOADED
+        val removed =
+            _queueState.getAndUpdate { queue -> queue.filterNot(predicate) }.filter(predicate)
+
+        if (removed.isNotEmpty()) {
+            store.removeAll(removed)
+            removed.forEach { download ->
+                if (
+                    download.status == Download.State.DOWNLOADING ||
+                        download.status == Download.State.QUEUE
+                ) {
+                    download.status = Download.State.NOT_DOWNLOADED
+                }
             }
         }
-        _queueState.update { queue -> queue - downloads.toSet() }
     }
 
     fun removeFromQueue(chapters: List<Chapter>) {
@@ -649,7 +652,9 @@ class Downloader(
     }
 
     private fun clearQueueState() {
-        _queueState.value.forEach { download ->
+        val downloadsToClear = _queueState.getAndUpdate { emptyList() }
+
+        downloadsToClear.forEach { download ->
             if (
                 download.status == Download.State.DOWNLOADING ||
                     download.status == Download.State.QUEUE
@@ -658,7 +663,6 @@ class Downloader(
             }
         }
         store.clear()
-        _queueState.update { emptyList() }
     }
 
     fun updateQueue(downloads: List<Download>) {
