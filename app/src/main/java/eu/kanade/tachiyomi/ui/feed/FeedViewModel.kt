@@ -1,3 +1,6 @@
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.distinctUntilChanged
 package eu.kanade.tachiyomi.ui.feed
 
 import androidx.lifecycle.ViewModel
@@ -201,37 +204,37 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
+            securityPreferences.incognitoMode().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(incognitoMode = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.downloadOnlyOverUnmetered().changes().distinctUntilChanged().collectLatest {
+            preferences.downloadOnlyOverUnmetered().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.feedViewOutlineCards().changes().distinctUntilChanged().collectLatest {
+            preferences.feedViewOutlineCards().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(outlineCards = it) }
             }
         }
 
         viewModelScope.launch {
-            libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
+            libraryPreferences.outlineOnCovers().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(outlineCovers = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.groupChaptersUpdates().changes().distinctUntilChanged().collectLatest {
+            preferences.groupChaptersUpdates().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.historyChapterGrouping().changes().distinctUntilChanged().collectLatest {
+            preferences.historyChapterGrouping().changes().collectLatest {
                 _historyScreenPagingState.update { state ->
                     state.copy(
                         historyGrouping = it,
@@ -245,7 +248,7 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            preferences.feedViewType().changes().distinctUntilChanged().collectLatest { type ->
+            preferences.feedViewType().changes().collectLatest { type ->
                 when (type) {
                     FeedScreenType.Summary -> Unit
                     FeedScreenType.History -> {
@@ -277,13 +280,13 @@ class FeedViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            preferences.swipeRefreshFeedScreen().changes().distinctUntilChanged().collectLatest {
+            preferences.swipeRefreshFeedScreen().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.sortFetchedTime().changes().distinctUntilChanged().collectLatest {
+            preferences.sortFetchedTime().changes().collectLatest {
                 _updatesScreenPagingState.update { state ->
                     state.copy(
                         updatesSortedByFetch = it,

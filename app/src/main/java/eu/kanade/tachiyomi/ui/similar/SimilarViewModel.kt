@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
@@ -84,14 +83,13 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             }
         }
         viewModelScope.launch {
-            preferences.browseAsList().changes().distinctUntilChanged().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _similarScreenState.update { state -> state.copy(isList = it) }
             }
         }
 
         viewModelScope.launch {
-            preferences.browseDisplayMode().changes().distinctUntilChanged().collectLatest {
-                visibility ->
+            preferences.browseDisplayMode().changes().collectLatest { visibility ->
                 _similarScreenState.update {
                     it.copy(
                         libraryEntryVisibility = visibility,
