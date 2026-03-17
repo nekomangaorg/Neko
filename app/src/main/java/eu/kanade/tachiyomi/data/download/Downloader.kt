@@ -626,8 +626,8 @@ class Downloader(
     }
 
     private inline fun removeFromQueueIf(predicate: (Download) -> Boolean) {
-        val removed =
-            _queueState.getAndUpdate { queue -> queue.filterNot(predicate) }.filter(predicate)
+        val queueBeforeUpdate = _queueState.getAndUpdate { queue -> queue.filterNot(predicate) }
+        val removed = queueBeforeUpdate.filter(predicate)
 
         if (removed.isNotEmpty()) {
             store.removeAll(removed)
