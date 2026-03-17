@@ -6,7 +6,8 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.nekomanga.domain.track.TrackServiceItem
@@ -50,7 +51,7 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertEquals(true, result)
+        assertTrue(result)
     }
 
     @Test
@@ -59,7 +60,7 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertEquals(false, result)
+        assertFalse(result)
     }
 
     @Test
@@ -68,6 +69,6 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertEquals(false, result)
+        assertFalse(result)
     }
 }
