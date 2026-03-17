@@ -466,8 +466,7 @@ class PagerPageHolder(
                     val stream2 = streamFn2?.invoke()?.source()?.buffer()
                     val isAnimated =
                         ImageUtil.isAnimatedAndSupported(stream) ||
-                            if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2)
-                            else false
+                            (stream2 != null && ImageUtil.isAnimatedAndSupported(stream2))
 
                     openStream =
                         when (
