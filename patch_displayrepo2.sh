@@ -1,3 +1,4 @@
+cat << 'INNEREOF' > app/src/main/java/eu/kanade/tachiyomi/ui/source/latest/DisplayRepository.kt
 package eu.kanade.tachiyomi.ui.source.latest
 
 import androidx.compose.ui.state.ToggleableState
@@ -297,3 +298,4 @@ class DisplayRepository(
             )
     }
 }
+INNEREOF

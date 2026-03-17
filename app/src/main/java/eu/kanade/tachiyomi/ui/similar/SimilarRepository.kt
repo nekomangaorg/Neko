@@ -131,7 +131,7 @@ class SimilarRepository {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(id, manga.map { it.toDisplayManga(db, mangaDex.id) })
+            SimilarMangaGroup(id, manga.toDisplayManga(db, mangaDex.id))
         }
     }
 }

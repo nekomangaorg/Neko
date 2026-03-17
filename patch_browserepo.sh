@@ -1,3 +1,4 @@
+cat << 'INNEREOF' > app/src/main/java/eu/kanade/tachiyomi/ui/source/browse/BrowseRepository.kt
 package eu.kanade.tachiyomi.ui.source.browse
 
 import com.github.michaelbull.result.Ok
@@ -81,11 +82,7 @@ class BrowseRepository(
                 listResults.map { listResult ->
                     HomePageManga(
                         displayScreenType = listResult.displayScreenType,
-                        displayManga =
-                            listResult.sourceManga
-                                .toDisplayManga(db, mangaDex.id)
-                                .distinctBy { it.url }
-                                .toPersistentList(),
+                        displayManga = listResult.sourceManga.toDisplayManga(db, mangaDex.id).distinctBy { it.url }.toPersistentList(),
                     )
                 }
             )
@@ -98,3 +95,4 @@ class BrowseRepository(
         }
     }
 }
+INNEREOF
