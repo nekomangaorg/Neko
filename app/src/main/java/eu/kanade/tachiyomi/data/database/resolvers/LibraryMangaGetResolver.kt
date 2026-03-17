@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.database.resolvers
 
 import android.annotation.SuppressLint
 import android.database.Cursor
-import androidx.compose.ui.util.fastAny
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -67,8 +66,31 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
     }
 
     private fun String.filterMerged(): Boolean {
-        val list = split(Constants.RAW_CHAPTER_SEPARATOR)
-        return list.fastAny { scanlator -> MergeType.containsMergeSourceName(scanlator) }
+        var startIndex = 0
+        val length = this.length
+
+        while (startIndex < length) {
+            var endIndex = indexOf(Constants.RAW_CHAPTER_SEPARATOR, startIndex)
+            if (endIndex == -1) {
+                endIndex = length
+            }
+
+            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
+
+            val scanlator =
+                if (typeSeparatorIndex != -1 && typeSeparatorIndex < endIndex) {
+                    substring(startIndex, typeSeparatorIndex)
+                } else {
+                    substring(startIndex, endIndex)
+                }
+
+            if (MergeType.containsMergeSourceName(scanlator)) {
+                return true
+            }
+
+            startIndex = endIndex + Constants.RAW_CHAPTER_SEPARATOR.length
+        }
+        return false
     }
 
     private fun String.filterChaptersByScanlators(manga: LibraryManga): Int {
@@ -93,13 +115,45 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
             return count
         }
 
-        val list = split(Constants.RAW_CHAPTER_SEPARATOR)
+        var validChapterCount = 0
+        var startIndex = 0
+        val length = this.length
 
-        val chapterList =
-            list.filterNot {
-                val (scanlator, uploader) = it.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
-                val scanlators = ChapterUtil.getScanlators(scanlator)
+        val filtered =
+            if (manga.filtered_scanlators != null) {
+                ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
+            } else {
+                null
+            }
+        val scanlatorMatchAll = scanlatorFilterOption == 0
+        val sources =
+            if (filtered != null) SourceManager.mergeSourceNames + MdConstants.name else emptyList()
 
+        while (startIndex < length) {
+            var endIndex = indexOf(Constants.RAW_CHAPTER_SEPARATOR, startIndex)
+            if (endIndex == -1) {
+                endIndex = length
+            }
+
+            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
+
+            val scanlator: String
+            val uploader: String
+            if (typeSeparatorIndex != -1 && typeSeparatorIndex < endIndex) {
+                scanlator = substring(startIndex, typeSeparatorIndex)
+                uploader =
+                    substring(
+                        typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
+                        endIndex,
+                    )
+            } else {
+                scanlator = substring(startIndex, endIndex)
+                uploader = ""
+            }
+
+            val scanlators = ChapterUtil.getScanlators(scanlator)
+
+            val isBlocked =
                 ChapterUtil.filterByScanlator(
                     scanlators,
                     uploader,
@@ -107,52 +161,59 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     blockedGroups ?: emptySet(),
                     blockedUploaders ?: emptySet(),
                 )
-            }
 
-        return when (manga.filtered_scanlators == null) {
-            true -> chapterList.size
-            false -> {
-                // Filtered sources, groups and uploaders
-                val filtered = ChapterUtil.getScanlators(manga.filtered_scanlators).toSet()
-                val scanlatorMatchAll = scanlatorFilterOption == 0
-                val sources = SourceManager.mergeSourceNames + MdConstants.name
-                chapterList
-                    .filterNot { scanlators ->
-                        sources.any { source ->
-                            var (scanlators, _) =
-                                scanlators.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
-                            scanlators =
-                                scanlators.replace(
-                                    Constants.RAW_CHAPTER_SEPARATOR,
-                                    Constants.SCANLATOR_SEPARATOR,
-                                )
+            if (!isBlocked) {
+                if (filtered == null) {
+                    validChapterCount++
+                } else {
+                    // Check if the chapter passes the manga-specific filter
+                    var isFilteredOut = false
 
-                            val scanlatorList = ChapterUtil.getScanlators(scanlators)
+                    // First check the sources
+                    for (source in sources) {
+                        val replacedScanlator =
+                            scanlator.replace(
+                                Constants.RAW_CHAPTER_SEPARATOR,
+                                Constants.SCANLATOR_SEPARATOR,
+                            )
+                        val replacedScanlatorList = ChapterUtil.getScanlators(replacedScanlator)
 
+                        if (
                             ChapterUtil.filteredBySource(
                                 source,
-                                scanlatorList,
-                                MergeType.containsMergeSourceName(scanlators),
-                                scanlators == Constants.LOCAL_SOURCE,
+                                replacedScanlatorList,
+                                MergeType.containsMergeSourceName(replacedScanlator),
+                                replacedScanlator == Constants.LOCAL_SOURCE,
                                 filtered,
                             )
+                        ) {
+                            isFilteredOut = true
+                            break
                         }
                     }
-                    .filterNot { pairs ->
-                        val (scanlator, uploader) =
-                            pairs.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
 
-                        val scanlatorList = ChapterUtil.getScanlators(scanlator)
-
-                        ChapterUtil.filterByScanlator(
-                            scanlatorList,
-                            uploader,
-                            scanlatorMatchAll,
-                            filtered,
-                        )
+                    if (!isFilteredOut) {
+                        if (
+                            ChapterUtil.filterByScanlator(
+                                scanlators,
+                                uploader,
+                                scanlatorMatchAll,
+                                filtered,
+                            )
+                        ) {
+                            isFilteredOut = true
+                        }
                     }
-                    .size
+
+                    if (!isFilteredOut) {
+                        validChapterCount++
+                    }
+                }
             }
+
+            startIndex = endIndex + Constants.RAW_CHAPTER_SEPARATOR.length
         }
+
+        return validChapterCount
     }
 }
