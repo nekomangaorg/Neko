@@ -1,6 +1,3 @@
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.distinctUntilChanged
 package eu.kanade.tachiyomi.ui.feed
 
 import androidx.lifecycle.ViewModel
@@ -203,35 +200,42 @@ class FeedViewModel() : ViewModel() {
             }
         }
 
-        viewModelScope.launch {
-            securityPreferences.incognitoMode().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(incognitoMode = it) }
-            }
-        }
+        securityPreferences
+            .incognitoMode()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(incognitoMode = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.downloadOnlyOverUnmetered().changes().collectLatest {
+        preferences
+            .downloadOnlyOverUnmetered()
+            .changes()
+            .distinctUntilChanged()
+            .onEach {
                 _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.feedViewOutlineCards().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(outlineCards = it) }
-            }
-        }
+        preferences
+            .feedViewOutlineCards()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(outlineCards = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            libraryPreferences.outlineOnCovers().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(outlineCovers = it) }
-            }
-        }
+        libraryPreferences
+            .outlineOnCovers()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(outlineCovers = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.groupChaptersUpdates().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
-            }
-        }
+        preferences
+            .groupChaptersUpdates()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) } }
+            .launchIn(viewModelScope)
 
         viewModelScope.launch {
             preferences.historyChapterGrouping().changes().collectLatest {
