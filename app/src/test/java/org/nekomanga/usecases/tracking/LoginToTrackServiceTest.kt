@@ -50,7 +50,7 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertTrue(result)
+        assertEquals(true, result)
     }
 
     @Test
@@ -59,7 +59,7 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertFalse(result)
+        assertEquals(false, result)
     }
 
     @Test
@@ -68,6 +68,6 @@ class LoginToTrackServiceTest {
 
         val result = loginToTrackService(trackServiceItem, "user", "pass")
 
-        assertFalse(result)
+        assertEquals(false, result)
     }
 }
