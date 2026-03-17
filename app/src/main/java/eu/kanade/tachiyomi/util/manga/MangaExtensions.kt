@@ -53,7 +53,7 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
     var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
-        newManga.apply { this.thumbnail_url = sourceManga.currentThumbnail }
+        newManga.thumbnail_url = sourceManga.currentThumbnail
         val result = db.insertManga(newManga).executeAsBlocking()
         newManga.id = result.insertedId()
         localManga = newManga
@@ -300,7 +300,7 @@ fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): Li
             var localManga = localMangas[sourceManga.url]
             if (localManga == null) {
                 val newManga = Manga.create(sourceManga.url, sourceManga.title, sourceId)
-                newManga.apply { this.thumbnail_url = sourceManga.currentThumbnail }
+                newManga.thumbnail_url = sourceManga.currentThumbnail
                 newMangasToInsert.add(newManga)
                 localManga = newManga
             } else if (localManga.title.isBlank()) {

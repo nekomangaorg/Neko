@@ -1,0 +1,2 @@
+cat app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt | sed 's/newManga.apply { this.thumbnail_url = sourceManga.currentThumbnail }/newManga.thumbnail_url = sourceManga.currentThumbnail/g' > app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp
+mv app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt
