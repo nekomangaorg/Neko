@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toTrackServiceItem
+import org.nekomanga.usecases.tracking.TrackUseCases
 import uy.kohesive.injekt.injectLazy
 
 class TrackingSettingsViewModel : ViewModel() {
@@ -26,6 +27,8 @@ class TrackingSettingsViewModel : ViewModel() {
     val preferences: PreferencesHelper by injectLazy()
 
     private val trackManager: TrackManager by injectLazy()
+
+    private val trackUseCases: TrackUseCases by injectLazy()
 
     private val _loginEvent = MutableSharedFlow<MergeLoginEvent>()
     val loginEvent = _loginEvent.asSharedFlow()
@@ -103,7 +106,7 @@ class TrackingSettingsViewModel : ViewModel() {
     fun login(trackServiceItem: TrackServiceItem, username: String, password: String) {
         viewModelScope.launchIO {
             val loginSuccessful =
-                trackManager.getService(trackServiceItem.id)?.login(username, password) ?: false
+                trackUseCases.loginToTrackService(trackServiceItem, username, password)
 
             when (loginSuccessful) {
                 true -> {
