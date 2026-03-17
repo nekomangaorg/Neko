@@ -1,0 +1,6 @@
+cat app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt | sed 's/newManga.apply { this.thumbnail_url = currentThumbnail }/newManga.apply { this.thumbnail_url = sourceManga.currentThumbnail }/g' > app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp
+mv app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt
+cat app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt | sed 's/insertResults.results().entries.forEachIndexed { index, entry ->/insertResults.results().entries.forEach { entry ->/g' > app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp
+mv app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt
+cat app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt | sed 's/newMangasToInsert\[index\].id = entry.value.insertedId()/entry.key.id = entry.value.insertedId()/g' > app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp
+mv app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt.tmp app/src/main/java/eu/kanade/tachiyomi/util/manga/MangaExtensions.kt
