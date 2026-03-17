@@ -170,14 +170,13 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     var isFilteredOut = false
 
                     // First check the sources
+                    val replacedScanlator =
+                        scanlator.replace(
+                            Constants.RAW_CHAPTER_SEPARATOR,
+                            Constants.SCANLATOR_SEPARATOR,
+                        )
+                    val replacedScanlatorList = ChapterUtil.getScanlators(replacedScanlator)
                     for (source in sources) {
-                        val replacedScanlator =
-                            scanlator.replace(
-                                Constants.RAW_CHAPTER_SEPARATOR,
-                                Constants.SCANLATOR_SEPARATOR,
-                            )
-                        val replacedScanlatorList = ChapterUtil.getScanlators(replacedScanlator)
-
                         if (
                             ChapterUtil.filteredBySource(
                                 source,
