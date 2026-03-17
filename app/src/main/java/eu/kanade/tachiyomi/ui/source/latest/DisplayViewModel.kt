@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.security.SecurityPreferences
@@ -143,12 +144,13 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         }
 
         viewModelScope.launch {
-            preferences.browseAsList().changes().collectLatest {
+            preferences.browseAsList().changes().distinctUntilChanged().collectLatest {
                 _displayScreenState.update { state -> state.copy(isList = it) }
             }
         }
         viewModelScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+            preferences.browseDisplayMode().changes().distinctUntilChanged().collectLatest {
+                visibility ->
                 _displayScreenState.update {
                     it.copy(
                         libraryEntryVisibility = visibility,

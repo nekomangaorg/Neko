@@ -192,7 +192,7 @@ class BrowseViewModel() : ViewModel() {
             }
         }
         viewModelScope.launch {
-            preferences.browseAsList().changes().collectLatest {
+            preferences.browseAsList().changes().distinctUntilChanged().collectLatest {
                 _browseScreenState.update { state -> state.copy(isList = it) }
             }
         }
@@ -205,7 +205,7 @@ class BrowseViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            securityPreferences.incognitoMode().changes().collectLatest {
+            securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
                 _browseScreenState.update { state -> state.copy(incognitoMode = it) }
             }
         }
@@ -217,7 +217,8 @@ class BrowseViewModel() : ViewModel() {
         }
 
         viewModelScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+            preferences.browseDisplayMode().changes().distinctUntilChanged().collectLatest {
+                visibility ->
                 _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
                 viewModelScope.launch {
                     _browseScreenState.update {
