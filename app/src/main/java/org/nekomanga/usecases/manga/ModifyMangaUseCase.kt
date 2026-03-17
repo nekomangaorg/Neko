@@ -1,0 +1,60 @@
+package org.nekomanga.usecases.manga
+
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import java.util.Date
+import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.storage.StorageManager
+
+class ModifyMangaUseCase(
+    private val db: DatabaseHelper,
+    private val preferences: PreferencesHelper,
+    private val downloadManager: DownloadManager,
+    private val storageManager: StorageManager,
+) {
+    suspend fun addNewCategory(newCategory: String, order: Int) {
+        val category = Category.create(newCategory)
+        category.order = order
+        db.insertCategory(category).executeAsBlocking()
+    }
+
+    suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
+        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return
+        val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
+        db.setMangaCategories(categories, listOf(dbManga))
+    }
+
+    suspend fun setAltTitle(mangaId: Long, title: String?) {
+        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return
+        val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
+        dbManga.user_title = title ?: dbManga.title
+        val newEffectiveTitle = dbManga.user_title ?: dbManga.title
+        db.insertManga(dbManga).executeOnIO()
+        if (previousEffectiveTitle != newEffectiveTitle) {
+            val provider = DownloadProvider(preferences.context)
+            provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
+            downloadManager.updateDownloadCacheForManga(dbManga)
+            storageManager.renamePagesAndCoverDirectory(previousEffectiveTitle, newEffectiveTitle)
+        }
+    }
+
+    suspend fun toggleFavorite(mangaId: Long): Boolean {
+        val editManga = db.getManga(mangaId).executeAsBlocking() ?: return false
+        editManga.apply {
+            favorite = !favorite
+            date_added =
+                when (favorite) {
+                    true -> Date().time
+                    false -> 0
+                }
+        }
+        db.insertManga(editManga).executeAsBlocking()
+        return editManga.favorite
+    }
+}

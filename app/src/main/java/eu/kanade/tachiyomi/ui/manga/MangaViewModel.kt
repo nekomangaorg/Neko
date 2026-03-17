@@ -14,14 +14,11 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -57,7 +54,6 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
-import java.util.Date
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentSet
@@ -98,7 +94,6 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -1359,19 +1354,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     fun addNewCategory(newCategory: String) {
         viewModelScope.launchIO {
-            val category = Category.create(newCategory)
-            category.order =
+            val order =
                 (_mangaDetailScreenState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
+            mangaUseCases.modifyManga.addNewCategory(newCategory, order)
         }
     }
 
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            val categories =
-                enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
-            db.setMangaCategories(categories, listOf(dbManga))
+            mangaUseCases.modifyManga.updateMangaCategories(mangaId, enabledCategories)
         }
     }
 
@@ -1392,21 +1383,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun setAltTitle(title: String?) {
         viewModelScope.launchNonCancellable {
             val previousTitle = mangaDetailScreenState.value.currentTitle
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
 
-            val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
-            dbManga.user_title = title ?: dbManga.title
+            mangaUseCases.modifyManga.setAltTitle(mangaId, title)
+
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             val newEffectiveTitle = dbManga.user_title ?: dbManga.title
-            db.insertManga(dbManga).executeOnIO()
-            if (previousEffectiveTitle != newEffectiveTitle) {
-                val provider = DownloadProvider(preferences.context)
-                provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
-                downloadManager.updateDownloadCacheForManga(dbManga)
-                storageManager.renamePagesAndCoverDirectory(
-                    previousEffectiveTitle,
-                    newEffectiveTitle,
-                )
-            }
+
             appSnackbarManager.showSnackbar(
                 SnackbarState(
                     messageRes = R.string.updated_title_to_,
@@ -1422,19 +1404,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Toggle a manga as favorite */
     fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
         viewModelScope.launchIO {
+            val isFavorite = mangaUseCases.modifyManga.toggleFavorite(mangaId)
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
-            editManga.apply {
-                favorite = !favorite
-                date_added =
-                    when (favorite) {
-                        true -> Date().time
-                        false -> 0
-                    }
-            }
 
-            db.insertManga(editManga).executeAsBlocking()
             // Add to trackers if it was added to favorites
-            if (editManga.favorite) {
+            if (isFavorite) {
                 autoAddTrackers(
                     editManga.toMangaItem(),
                     mangaDetailScreenState.value.loggedInTrackService,
