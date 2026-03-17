@@ -610,25 +610,19 @@ class Downloader(
     }
 
     private fun addAllToQueue(downloads: List<Download>) {
-        _queueState.update {
-            // TODO make this not gross mutable
-            downloads.forEach { download -> download.status = Download.State.QUEUE }
-            store.addAll(downloads)
-            it + downloads
-        }
+        downloads.forEach { download -> download.status = Download.State.QUEUE }
+        store.addAll(downloads)
+        _queueState.update { it + downloads }
     }
 
     private fun removeFromQueue(download: Download) {
-        _queueState.update {
-            store.remove(download)
-            if (
-                download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE
-            ) {
-                download.status = Download.State.NOT_DOWNLOADED
-            }
-            it - download
+        store.remove(download)
+        if (
+            download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE
+        ) {
+            download.status = Download.State.NOT_DOWNLOADED
         }
+        _queueState.update { it - download }
     }
 
     private inline fun removeFromQueueIf(predicate: (Download) -> Boolean) {
@@ -643,7 +637,7 @@ class Downloader(
                     download.status = Download.State.NOT_DOWNLOADED
                 }
             }
-            queue - downloads
+            queue - downloads.toSet()
         }
     }
 
@@ -657,8 +651,8 @@ class Downloader(
     }
 
     private fun clearQueueState() {
-        _queueState.update {
-            it.forEach { download ->
+        _queueState.update { queue ->
+            queue.forEach { download ->
                 if (
                     download.status == Download.State.DOWNLOADING ||
                         download.status == Download.State.QUEUE
