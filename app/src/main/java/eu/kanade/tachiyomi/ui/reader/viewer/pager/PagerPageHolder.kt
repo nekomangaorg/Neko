@@ -459,12 +459,16 @@ class PagerPageHolder(
         val streamFn2 = extraPage?.stream
 
         var openStream: BufferedSource? = null
-
         readImageHeaderSubscription =
             Observable.fromCallable {
                     val stream = streamFn().source().buffer()
 
                     val stream2 = streamFn2?.invoke()?.source()?.buffer()
+                    val isAnimated =
+                        ImageUtil.isAnimatedAndSupported(stream) ||
+                            if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2)
+                            else false
+
                     openStream =
                         when (
                             viewer.config.doublePageRotate &&
@@ -479,8 +483,7 @@ class PagerPageHolder(
                             false -> this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
                         }
 
-                    ImageUtil.isAnimatedAndSupported(stream) ||
-                        if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
+                    isAnimated
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
