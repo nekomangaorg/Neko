@@ -157,7 +157,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(MangaUseCases())
 
-        addSingleton(org.nekomanga.usecases.tracking.TrackUseCases())
+        addSingleton(TrackUseCases())
 
         addSingleton(FeedRepository())
 
