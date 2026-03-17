@@ -38,8 +38,10 @@ import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.conscrypt.Conscrypt
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
@@ -105,7 +107,10 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-        MangaCoverMetadata.load()
+        ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
+            MangaCoverMetadata.load()
+        }
+
         preferences
             .nightMode()
             .changes()

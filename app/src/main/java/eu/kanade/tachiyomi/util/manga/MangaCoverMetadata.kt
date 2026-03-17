@@ -7,7 +7,8 @@ import uy.kohesive.injekt.injectLazy
 
 /** Object that holds info about a covers size ratio + dominant colors */
 object MangaCoverMetadata {
-    private var coverVibrantColorMap = ConcurrentHashMap<Long, Int>()
+    private val coverVibrantColorMap = ConcurrentHashMap<Long, Int>()
+    private val mapLock = Any()
 
     private val mangaDetailsPreferences by injectLazy<MangaDetailsPreferences>()
 
@@ -16,26 +17,31 @@ object MangaCoverMetadata {
         mangaDetailsPreferences.coverColors().delete()
 
         val vibrantColors = mangaDetailsPreferences.coverVibrantColors().get()
-        coverVibrantColorMap =
-            ConcurrentHashMap(
-                vibrantColors
-                    .mapNotNull {
-                        it.split('|').let { parts ->
-                            parts.firstOrNull()?.toLongOrNull()?.let { id ->
-                                parts.lastOrNull()?.toIntOrNull()?.let { color -> id to color }
-                            }
+        val parsedColors =
+            vibrantColors
+                .mapNotNull {
+                    it.split('|').let { parts ->
+                        parts.firstOrNull()?.toLongOrNull()?.let { id ->
+                            parts.lastOrNull()?.toIntOrNull()?.let { color -> id to color }
                         }
                     }
-                    .toMap()
-            )
+                }
+                .toMap()
+
+        synchronized(mapLock) {
+            val existing = coverVibrantColorMap.toMap()
+            coverVibrantColorMap.clear()
+            coverVibrantColorMap.putAll(parsedColors)
+            coverVibrantColorMap.putAll(existing)
+        }
     }
 
     fun remove(mangaId: Long) {
-        coverVibrantColorMap.remove(mangaId)
+        synchronized(mapLock) { coverVibrantColorMap.remove(mangaId) }
     }
 
     fun addVibrantColor(mangaId: Long, @ColorInt color: Int) {
-        coverVibrantColorMap[mangaId] = color
+        synchronized(mapLock) { coverVibrantColorMap[mangaId] = color }
     }
 
     fun getVibrantColor(mangaId: Long): Int? {
