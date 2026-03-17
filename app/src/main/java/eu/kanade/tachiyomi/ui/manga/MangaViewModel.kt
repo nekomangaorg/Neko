@@ -1384,10 +1384,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchNonCancellable {
             val previousTitle = mangaDetailScreenState.value.currentTitle
 
-            mangaUseCases.modifyManga.setAltTitle(mangaId, title)
-
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            val newEffectiveTitle = dbManga.user_title ?: dbManga.title
+            val dbManga =
+                mangaUseCases.modifyManga.setAltTitle(mangaId, title) ?: return@launchNonCancellable
 
             appSnackbarManager.showSnackbar(
                 SnackbarState(
@@ -1404,11 +1402,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Toggle a manga as favorite */
     fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
         viewModelScope.launchIO {
-            val isFavorite = mangaUseCases.modifyManga.toggleFavorite(mangaId)
-            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+            val editManga = mangaUseCases.modifyManga.toggleFavorite(mangaId) ?: return@launchIO
 
             // Add to trackers if it was added to favorites
-            if (isFavorite) {
+            if (editManga.favorite) {
                 autoAddTrackers(
                     editManga.toMangaItem(),
                     mangaDetailScreenState.value.loggedInTrackService,

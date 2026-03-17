@@ -30,8 +30,11 @@ class ModifyMangaUseCase(
         db.setMangaCategories(categories, listOf(dbManga))
     }
 
-    suspend fun setAltTitle(mangaId: Long, title: String?) {
-        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return
+    suspend fun setAltTitle(
+        mangaId: Long,
+        title: String?,
+    ): eu.kanade.tachiyomi.data.database.models.Manga? {
+        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return null
         val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
         dbManga.user_title = title ?: dbManga.title
         val newEffectiveTitle = dbManga.user_title ?: dbManga.title
@@ -42,10 +45,11 @@ class ModifyMangaUseCase(
             downloadManager.updateDownloadCacheForManga(dbManga)
             storageManager.renamePagesAndCoverDirectory(previousEffectiveTitle, newEffectiveTitle)
         }
+        return dbManga
     }
 
-    suspend fun toggleFavorite(mangaId: Long): Boolean {
-        val editManga = db.getManga(mangaId).executeAsBlocking() ?: return false
+    suspend fun toggleFavorite(mangaId: Long): eu.kanade.tachiyomi.data.database.models.Manga? {
+        val editManga = db.getManga(mangaId).executeAsBlocking() ?: return null
         editManga.apply {
             favorite = !favorite
             date_added =
@@ -55,6 +59,6 @@ class ModifyMangaUseCase(
                 }
         }
         db.insertManga(editManga).executeAsBlocking()
-        return editManga.favorite
+        return editManga
     }
 }
