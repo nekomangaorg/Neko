@@ -559,67 +559,50 @@ class LibraryViewModel() : ViewModel() {
 
     fun preferenceUpdates() {
 
-        preferences.useVividColorHeaders().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(useVividColorHeaders = value)
+        preferences.useVividColorHeaders().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(useVividColorHeaders = value) }
         }
 
-        libraryPreferences.showStartReadingButton().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(showStartReadingButton = value)
+        libraryPreferences.showStartReadingButton().changes().observeAndUpdate(viewModelScope) {
+            value ->
+            _internalLibraryScreenState.update { state ->
+                state.copy(showStartReadingButton = value)
+            }
         }
 
         mangadexPreferences.includeUnavailableChapters().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(showUnavailableFilter = value)
+            viewModelScope
+        ) { value ->
+            _internalLibraryScreenState.update { state ->
+                state.copy(showUnavailableFilter = value)
+            }
         }
 
-        securityPreferences.incognitoMode().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(incognitoMode = value)
+        securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(incognitoMode = value) }
         }
 
-        libraryPreferences.outlineOnCovers().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(outlineCovers = value)
+        libraryPreferences.outlineOnCovers().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(outlineCovers = value) }
         }
 
-        libraryPreferences.showDownloadBadge().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(showDownloadBadges = value)
+        libraryPreferences.showDownloadBadge().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(showDownloadBadges = value) }
         }
 
-        libraryPreferences.showUnreadBadge().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(showUnreadBadges = value)
+        libraryPreferences.showUnreadBadge().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(showUnreadBadges = value) }
         }
 
         libraryPreferences.libraryHorizontalCategories().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(horizontalCategories = value)
+            viewModelScope
+        ) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(horizontalCategories = value) }
         }
 
-        libraryPreferences.showLibraryButtonBar().changes().observeAndUpdate(
-            _internalLibraryScreenState,
-            viewModelScope,
-        ) { state, value ->
-            state.copy(showLibraryButtonBar = value)
+        libraryPreferences.showLibraryButtonBar().changes().observeAndUpdate(viewModelScope) { value
+            ->
+            _internalLibraryScreenState.update { state -> state.copy(showLibraryButtonBar = value) }
         }
 
         combine(libraryPreferences.gridSize().changes(), libraryPreferences.layout().changes()) {
@@ -627,8 +610,10 @@ class LibraryViewModel() : ViewModel() {
                 layout ->
                 gridSize to layout
             }
-            .observeAndUpdate(_internalLibraryScreenState, viewModelScope) { state, value ->
-                state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
+            .observeAndUpdate(viewModelScope) { value ->
+                _internalLibraryScreenState.update { state ->
+                    state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
+                }
             }
     }
 
