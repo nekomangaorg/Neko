@@ -19,8 +19,7 @@ class ModifyMangaUseCase(
     private val storageManager: StorageManager,
 ) {
     suspend fun addNewCategory(newCategory: String, order: Int) {
-        val category = Category.create(newCategory)
-        category.order = order
+        val category = Category.create(newCategory).apply { this.order = order }
         db.insertCategory(category).executeOnIO()
     }
 
@@ -36,15 +35,18 @@ class ModifyMangaUseCase(
     ): eu.kanade.tachiyomi.data.database.models.Manga? {
         val dbManga = db.getManga(mangaId).executeOnIO() ?: return null
         val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
-        dbManga.user_title = title ?: dbManga.title
-        val newEffectiveTitle = dbManga.user_title ?: dbManga.title
-        db.insertManga(dbManga).executeOnIO()
+        val newEffectiveTitle = title ?: dbManga.title
+
         if (previousEffectiveTitle != newEffectiveTitle) {
+            dbManga.user_title = title
+            db.insertManga(dbManga).executeOnIO()
+
             val provider = DownloadProvider(preferences.context)
             provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
             downloadManager.updateDownloadCacheForManga(dbManga)
             storageManager.renamePagesAndCoverDirectory(previousEffectiveTitle, newEffectiveTitle)
         }
+
         return dbManga
     }
 
