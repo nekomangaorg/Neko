@@ -7,12 +7,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
+import org.nekomanga.core.preferences.observeAndUpdate
 import tachiyomi.core.util.storage.DiskUtil
 
 class StorageManager(private val context: Context, storagePreferences: StoragePreferences) {
@@ -25,26 +23,20 @@ class StorageManager(private val context: Context, storagePreferences: StoragePr
     val baseDirChanges = _changes.receiveAsFlow().shareIn(scope, SharingStarted.Lazily, 1)
 
     init {
-        storagePreferences
-            .baseStorageDirectory()
-            .changes()
-            .drop(1)
-            .distinctUntilChanged()
-            .onEach { uri ->
-                baseDir = getBaseDir(uri)
-                baseDir?.let { parent ->
-                    parent.createDirectory(BACKUP_DIR).also { it!!.createDirectory(AUTOMATIC_DIR) }
-                    parent.createDirectory(SAVED_DIR).also {
-                        it!!.createDirectory(COVER_DIR)
-                        it.createDirectory(PAGES_DIR)
-                    }
-                    parent.createDirectory(DOWNLOADS_DIR).also {
-                        DiskUtil.createNoMediaFile(it, context)
-                    }
+        storagePreferences.baseStorageDirectory().changes().drop(1).observeAndUpdate(scope) { uri ->
+            baseDir = getBaseDir(uri)
+            baseDir?.let { parent ->
+                parent.createDirectory(BACKUP_DIR).also { it!!.createDirectory(AUTOMATIC_DIR) }
+                parent.createDirectory(SAVED_DIR).also {
+                    it!!.createDirectory(COVER_DIR)
+                    it.createDirectory(PAGES_DIR)
                 }
-                _changes.send(Unit)
+                parent.createDirectory(DOWNLOADS_DIR).also {
+                    DiskUtil.createNoMediaFile(it, context)
+                }
             }
-            .launchIn(scope)
+            _changes.send(Unit)
+        }
     }
 
     private fun getBaseDir(uri: String): UniFile? {

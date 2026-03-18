@@ -136,6 +136,7 @@ import kotlinx.coroutines.withContext
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.databinding.ReaderActivityBinding
 import org.nekomanga.logging.TimberKt
@@ -303,9 +304,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         viewModel.state
             .map { it.isLoadingAdjacentChapter }
-            .distinctUntilChanged()
-            .onEach(::setProgressDialog)
-            .launchIn(lifecycleScope)
+            .observeAndUpdate(lifecycleScope, ::setProgressDialog)
 
         viewModel.state
             .map { it.manga }
