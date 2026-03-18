@@ -628,10 +628,10 @@ class Downloader(
     }
 
     private inline fun removeFromQueueIf(predicate: (Download) -> Boolean) {
-        val downloads = _queueState.value.filter { predicate(it) }
-        store.removeAll(downloads)
-        downloads.forEach { download -> download.resetStatus() }
-        _queueState.update { queue -> queue - downloads }
+        val previousQueue = _queueState.getAndUpdate { it.filterNot(predicate) }
+        val removedDownloads = previousQueue.filter(predicate)
+        store.removeAll(removedDownloads)
+        removedDownloads.forEach { it.resetStatus() }
     }
 
     fun removeFromQueue(chapters: List<Chapter>) {
@@ -644,9 +644,9 @@ class Downloader(
     }
 
     private fun clearQueueState() {
-        _queueState.value.forEach { download -> download.resetStatus() }
+        val oldQueue = _queueState.getAndUpdate { emptyList() }
+        oldQueue.forEach { download -> download.resetStatus() }
         store.clear()
-        _queueState.update { emptyList() }
     }
 
     fun updateQueue(downloads: List<Download>) {
