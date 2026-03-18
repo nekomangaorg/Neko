@@ -88,7 +88,9 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             .browseAsList()
             .changes()
             .distinctUntilChanged()
-.onEach { isList -> _similarScreenState.update { state -> state.copy(isList = isList) } }
+            .onEach { isList ->
+                _similarScreenState.update { state -> state.copy(isList = isList) }
+            }
             .launchIn(viewModelScope)
 
         preferences

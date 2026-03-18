@@ -29,7 +29,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -191,33 +190,40 @@ class BrowseViewModel() : ViewModel() {
                 )
             }
         }
-        viewModelScope.launch {
-            preferences.browseAsList().changes().collectLatest {
-                _browseScreenState.update { state -> state.copy(isList = it) }
-            }
-        }
+        preferences
+            .browseAsList()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _browseScreenState.update { state -> state.copy(isList = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        preferences
+            .useVividColorHeaders()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _browseScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            securityPreferences.incognitoMode().changes().collectLatest {
-                _browseScreenState.update { state -> state.copy(incognitoMode = it) }
-            }
-        }
+        securityPreferences
+            .incognitoMode()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _browseScreenState.update { state -> state.copy(incognitoMode = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            browseRepository.loginHelper.isLoggedInFlow().collectLatest {
-                _browseScreenState.update { state -> state.copy(isLoggedIn = it) }
-            }
-        }
+        browseRepository.loginHelper
+            .isLoggedInFlow()
+            .distinctUntilChanged()
+            .onEach { _browseScreenState.update { state -> state.copy(isLoggedIn = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+        preferences
+            .browseDisplayMode()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { visibility ->
                 _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
                 viewModelScope.launch {
                     _browseScreenState.update {
@@ -248,7 +254,7 @@ class BrowseViewModel() : ViewModel() {
                     }
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     fun loadNextItems() {
