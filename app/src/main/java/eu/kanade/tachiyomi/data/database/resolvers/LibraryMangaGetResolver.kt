@@ -65,6 +65,45 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         return manga
     }
 
+    private data class ChapterGroup(val scanlator: String, val uploader: String, val count: Int)
+
+    private fun String.parseChapterGroup(startIndex: Int, endIndex: Int): ChapterGroup {
+        val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
+        val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
+
+        val scanlator: String
+        val uploader: String
+        val count: Int
+
+        val infoEndIndex =
+            if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) countSeparatorIndex
+            else endIndex
+
+        if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
+            val countStr =
+                substring(
+                    countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
+                    endIndex,
+                )
+            count = countStr.toIntOrNull() ?: 1
+        } else {
+            count = 1
+        }
+
+        if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
+            scanlator = substring(startIndex, typeSeparatorIndex)
+            uploader =
+                substring(
+                    typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
+                    infoEndIndex,
+                )
+        } else {
+            scanlator = substring(startIndex, infoEndIndex)
+            uploader = ""
+        }
+        return ChapterGroup(scanlator, uploader, count)
+    }
+
     private fun String.filterMerged(): Boolean {
         var startIndex = 0
         val length = this.length
@@ -75,21 +114,9 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 endIndex = length
             }
 
-            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
-            val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
+            val group = parseChapterGroup(startIndex, endIndex)
 
-            val infoEndIndex =
-                if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) countSeparatorIndex
-                else endIndex
-
-            val scanlator =
-                if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
-                    substring(startIndex, typeSeparatorIndex)
-                } else {
-                    substring(startIndex, infoEndIndex)
-                }
-
-            if (MergeType.containsMergeSourceName(scanlator)) {
+            if (MergeType.containsMergeSourceName(group.scanlator)) {
                 return true
             }
 
@@ -117,17 +144,8 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     endIndex = length
                 }
 
-                val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
-                if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
-                    val countStr =
-                        substring(
-                            countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
-                            endIndex,
-                        )
-                    totalCount += countStr.toIntOrNull() ?: 1
-                } else {
-                    totalCount++
-                }
+                val group = parseChapterGroup(startIndex, endIndex)
+                totalCount += group.count
 
                 startIndex = endIndex + Constants.RAW_CHAPTER_SEPARATOR.length
             }
@@ -154,39 +172,10 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 endIndex = length
             }
 
-            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
-            val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
-
-            val scanlator: String
-            val uploader: String
-            val currentGroupCount: Int
-
-            val infoEndIndex =
-                if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) countSeparatorIndex
-                else endIndex
-
-            if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
-                val countStr =
-                    substring(
-                        countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
-                        endIndex,
-                    )
-                currentGroupCount = countStr.toIntOrNull() ?: 1
-            } else {
-                currentGroupCount = 1
-            }
-
-            if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
-                scanlator = substring(startIndex, typeSeparatorIndex)
-                uploader =
-                    substring(
-                        typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
-                        infoEndIndex,
-                    )
-            } else {
-                scanlator = substring(startIndex, infoEndIndex)
-                uploader = ""
-            }
+            val group = parseChapterGroup(startIndex, endIndex)
+            val scanlator = group.scanlator
+            val uploader = group.uploader
+            val currentGroupCount = group.count
 
             val scanlators = ChapterUtil.getScanlators(scanlator)
 
