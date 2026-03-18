@@ -34,7 +34,7 @@ class ModifyMangaUseCase(
         mangaId: Long,
         title: String?,
     ): eu.kanade.tachiyomi.data.database.models.Manga? {
-        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return null
+        val dbManga = db.getManga(mangaId).executeOnIO() ?: return null
         val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
         dbManga.user_title = title ?: dbManga.title
         val newEffectiveTitle = dbManga.user_title ?: dbManga.title
@@ -49,7 +49,7 @@ class ModifyMangaUseCase(
     }
 
     suspend fun toggleFavorite(mangaId: Long): eu.kanade.tachiyomi.data.database.models.Manga? {
-        val editManga = db.getManga(mangaId).executeAsBlocking() ?: return null
+        val editManga = db.getManga(mangaId).executeOnIO() ?: return null
         editManga.apply {
             favorite = !favorite
             date_added =
