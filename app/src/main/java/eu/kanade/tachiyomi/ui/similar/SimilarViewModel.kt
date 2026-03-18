@@ -88,7 +88,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             .browseAsList()
             .changes()
             .distinctUntilChanged()
-            .onEach { _similarScreenState.update { state -> state.copy(isList = it) } }
+.onEach { isList -> _similarScreenState.update { state -> state.copy(isList = isList) } }
             .launchIn(viewModelScope)
 
         preferences
@@ -96,10 +96,10 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             .changes()
             .distinctUntilChanged()
             .onEach { visibility ->
-                _similarScreenState.update {
-                    it.copy(
+                _similarScreenState.update { state ->
+                    state.copy(
                         libraryEntryVisibility = visibility,
-                        filteredDisplayManga = it.allDisplayManga.filterByVisibility(preferences),
+                        filteredDisplayManga = state.allDisplayManga.filterByVisibility(preferences),
                     )
                 }
             }
