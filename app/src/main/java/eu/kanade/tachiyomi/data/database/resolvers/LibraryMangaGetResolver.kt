@@ -68,39 +68,33 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
     private data class ChapterGroup(val scanlator: String, val uploader: String, val count: Int)
 
     private fun String.parseChapterGroup(startIndex: Int, endIndex: Int): ChapterGroup {
-        val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
         val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
 
-        val scanlator: String
-        val uploader: String
-        val count: Int
+        val (infoEndIndex, count) =
+            if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
+                val countStr =
+                    substring(
+                        countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
+                        endIndex,
+                    )
+                countSeparatorIndex to (countStr.toIntOrNull() ?: 1)
+            } else {
+                endIndex to 1
+            }
 
-        val infoEndIndex =
-            if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) countSeparatorIndex
-            else endIndex
+        val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
 
-        if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
-            val countStr =
-                substring(
-                    countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
-                    endIndex,
-                )
-            count = countStr.toIntOrNull() ?: 1
-        } else {
-            count = 1
-        }
+        val (scanlator, uploader) =
+            if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
+                substring(startIndex, typeSeparatorIndex) to
+                    substring(
+                        typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
+                        infoEndIndex,
+                    )
+            } else {
+                substring(startIndex, infoEndIndex) to ""
+            }
 
-        if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
-            scanlator = substring(startIndex, typeSeparatorIndex)
-            uploader =
-                substring(
-                    typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
-                    infoEndIndex,
-                )
-        } else {
-            scanlator = substring(startIndex, infoEndIndex)
-            uploader = ""
-        }
         return ChapterGroup(scanlator, uploader, count)
     }
 
