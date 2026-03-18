@@ -21,26 +21,36 @@ val libraryQuery =
         LEFT JOIN (
             SELECT ${Chapter.COL_MANGA_ID},
                 GROUP_CONCAT(
-                    IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A')
-                        || '${Constants.RAW_SCANLATOR_TYPE_SEPARATOR}'
-                        || IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A'),
+                    agg_scanlator || '${Constants.RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${Constants.RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
                     '${Constants.RAW_CHAPTER_SEPARATOR}'
                 ) AS unread
-            FROM ${Chapter.TABLE}
-            WHERE ${Chapter.COL_READ} = 0
+            FROM (
+                SELECT ${Chapter.COL_MANGA_ID},
+                       IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A') AS agg_scanlator,
+                       IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A') AS agg_uploader,
+                       COUNT(*) AS agg_count
+                FROM ${Chapter.TABLE}
+                WHERE ${Chapter.COL_READ} = 0
+                GROUP BY ${Chapter.COL_MANGA_ID}, agg_scanlator, agg_uploader
+            )
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS C
         ON ${Manga.COL_ID} = C.${Chapter.COL_MANGA_ID}
         LEFT JOIN (
             SELECT ${Chapter.COL_MANGA_ID},
                 GROUP_CONCAT(
-                    IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A')
-                        || '${Constants.RAW_SCANLATOR_TYPE_SEPARATOR}'
-                        || IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A'),
+                    agg_scanlator || '${Constants.RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${Constants.RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
                     '${Constants.RAW_CHAPTER_SEPARATOR}'
                 ) AS hasread
-            FROM ${Chapter.TABLE}
-            WHERE ${Chapter.COL_READ} = 1
+            FROM (
+                SELECT ${Chapter.COL_MANGA_ID},
+                       IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A') AS agg_scanlator,
+                       IFNULL(${Chapter.TABLE}.${Chapter.COL_UPLOADER}, 'N/A') AS agg_uploader,
+                       COUNT(*) AS agg_count
+                FROM ${Chapter.TABLE}
+                WHERE ${Chapter.COL_READ} = 1
+                GROUP BY ${Chapter.COL_MANGA_ID}, agg_scanlator, agg_uploader
+            )
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS R
         ON ${Manga.COL_ID} = R.${Chapter.COL_MANGA_ID}
