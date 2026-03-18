@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
@@ -610,41 +611,28 @@ class Downloader(
     }
 
     private fun addAllToQueue(downloads: List<Download>) {
-        _queueState.update {
-            // TODO make this not gross mutable
-            downloads.forEach { download -> download.status = Download.State.QUEUE }
-            store.addAll(downloads)
-            it + downloads
+        downloads.forEach { download -> download.status = Download.State.QUEUE }
+        store.addAll(downloads)
+        _queueState.update { it + downloads }
+    }
+
+    private fun Download.resetStatus() {
+        if (status == Download.State.DOWNLOADING || status == Download.State.QUEUE) {
+            status = Download.State.NOT_DOWNLOADED
         }
     }
 
     private fun removeFromQueue(download: Download) {
-        _queueState.update {
-            store.remove(download)
-            if (
-                download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE
-            ) {
-                download.status = Download.State.NOT_DOWNLOADED
-            }
-            it - download
-        }
+        store.remove(download)
+        download.resetStatus()
+        _queueState.update { it - download }
     }
 
     private inline fun removeFromQueueIf(predicate: (Download) -> Boolean) {
-        _queueState.update { queue ->
-            val downloads = queue.filter { predicate(it) }
-            store.removeAll(downloads)
-            downloads.forEach { download ->
-                if (
-                    download.status == Download.State.DOWNLOADING ||
-                        download.status == Download.State.QUEUE
-                ) {
-                    download.status = Download.State.NOT_DOWNLOADED
-                }
-            }
-            queue - downloads
-        }
+        val previousQueue = _queueState.getAndUpdate { it.filterNot(predicate) }
+        val removedDownloads = previousQueue.filter(predicate)
+        store.removeAll(removedDownloads)
+        removedDownloads.forEach { it.resetStatus() }
     }
 
     fun removeFromQueue(chapters: List<Chapter>) {
@@ -657,18 +645,9 @@ class Downloader(
     }
 
     private fun clearQueueState() {
-        _queueState.update {
-            it.forEach { download ->
-                if (
-                    download.status == Download.State.DOWNLOADING ||
-                        download.status == Download.State.QUEUE
-                ) {
-                    download.status = Download.State.NOT_DOWNLOADED
-                }
-            }
-            store.clear()
-            emptyList()
-        }
+        val oldQueue = _queueState.getAndUpdate { emptyList() }
+        oldQueue.forEach { download -> download.resetStatus() }
+        store.clear()
     }
 
     fun updateQueue(downloads: List<Download>) {
