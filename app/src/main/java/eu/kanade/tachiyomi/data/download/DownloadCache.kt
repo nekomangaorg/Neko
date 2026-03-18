@@ -60,7 +60,7 @@ class DownloadCache(
     private var renewJob: Job? = null
 
     private val _changes: MutableSharedFlow<Unit> =
-        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val changes: SharedFlow<Unit> = _changes.asSharedFlow()
 
     init {
