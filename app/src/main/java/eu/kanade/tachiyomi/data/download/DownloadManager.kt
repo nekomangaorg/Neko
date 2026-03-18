@@ -480,6 +480,9 @@ class DownloadManager(
         cache.forceRenewCache()
     }
 
+    val downloadCacheUpdatedFlow: Flow<Unit>
+        get() = cache.changes
+
     fun statusFlow(): Flow<Download> =
         queueState
             .flatMapLatest { downloads ->
