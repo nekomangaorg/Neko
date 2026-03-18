@@ -21,7 +21,7 @@ class ModifyMangaUseCase(
     suspend fun addNewCategory(newCategory: String, order: Int) {
         val category = Category.create(newCategory)
         category.order = order
-        db.insertCategory(category).executeAsBlocking()
+        db.insertCategory(category).executeOnIO()
     }
 
     suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
