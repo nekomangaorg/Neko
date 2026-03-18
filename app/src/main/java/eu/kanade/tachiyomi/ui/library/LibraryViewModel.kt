@@ -557,96 +557,99 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun preferenceUpdates() {
-
-        viewModelScope.launchIO {
-            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        preferences
+            .useVividColorHeaders()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _internalLibraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences
-                .showStartReadingButton()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showStartReadingButton = enabled) }
-                }
-        }
+        libraryPreferences
+            .showStartReadingButton()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                _internalLibraryScreenState.update { it.copy(showStartReadingButton = enabled) }
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            mangadexPreferences
-                .includeUnavailableChapters()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
-                }
-        }
+        mangadexPreferences
+            .includeUnavailableChapters()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                _internalLibraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        securityPreferences
+            .incognitoMode()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _internalLibraryScreenState.update { it.copy(incognitoMode = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        libraryPreferences
+            .outlineOnCovers()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _internalLibraryScreenState.update { it.copy(outlineCovers = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences.showDownloadBadge().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        libraryPreferences
+            .showDownloadBadge()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _internalLibraryScreenState.update { it.copy(showDownloadBadges = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences.showUnreadBadge().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        libraryPreferences
+            .showUnreadBadge()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _internalLibraryScreenState.update { it.copy(showUnreadBadges = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences
-                .libraryHorizontalCategories()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(horizontalCategories = enabled) }
-                }
-        }
+        libraryPreferences
+            .libraryHorizontalCategories()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                _internalLibraryScreenState.update { it.copy(horizontalCategories = enabled) }
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            libraryPreferences
-                .showLibraryButtonBar()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
-                }
-        }
+        libraryPreferences
+            .showLibraryButtonBar()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                _internalLibraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launchIO {
-            combine(
-                    libraryPreferences.gridSize().changes(),
-                    libraryPreferences.layout().changes(),
-                ) { gridSize, layout ->
-                    gridSize to layout
+        combine(libraryPreferences.gridSize().changes(), libraryPreferences.layout().changes()) {
+                gridSize,
+                layout ->
+                gridSize to layout
+            }
+            .distinctUntilChanged()
+            .onEach { pair ->
+                _internalLibraryScreenState.update {
+                    it.copy(libraryDisplayMode = pair.second, rawColumnCount = pair.first)
                 }
-                .distinctUntilChanged()
-                .collectLatest { pair ->
-                    _internalLibraryScreenState.update {
-                        it.copy(libraryDisplayMode = pair.second, rawColumnCount = pair.first)
-                    }
-                }
-        }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
