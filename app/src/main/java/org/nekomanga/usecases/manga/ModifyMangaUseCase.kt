@@ -58,7 +58,7 @@ class ModifyMangaUseCase(
                     false -> 0
                 }
         }
-        db.insertManga(editManga).executeAsBlocking()
+        db.insertManga(editManga).executeOnIO()
         return editManga
     }
 }
