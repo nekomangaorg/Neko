@@ -206,7 +206,9 @@ class FeedViewModel() : ViewModel() {
             .incognitoMode()
             .changes()
             .distinctUntilChanged()
-.onEach { incognito -> _feedScreenState.update { state -> state.copy(incognitoMode = incognito) } }
+            .onEach { incognito ->
+                _feedScreenState.update { state -> state.copy(incognitoMode = incognito) }
+            }
             .launchIn(viewModelScope)
 
         preferences

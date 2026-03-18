@@ -21,7 +21,9 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
@@ -82,14 +84,18 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 )
             }
         }
-        viewModelScope.launch {
-            preferences.browseAsList().changes().collectLatest {
-                _similarScreenState.update { state -> state.copy(isList = it) }
-            }
-        }
+        preferences
+            .browseAsList()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _similarScreenState.update { state -> state.copy(isList = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.browseDisplayMode().changes().collectLatest { visibility ->
+        preferences
+            .browseDisplayMode()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { visibility ->
                 _similarScreenState.update {
                     it.copy(
                         libraryEntryVisibility = visibility,
@@ -97,7 +103,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     )
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     fun refresh() {
