@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -194,7 +196,7 @@ class BrowseViewModel() : ViewModel() {
             .browseAsList()
             .changes()
             .distinctUntilChanged()
-            .onEach { _browseScreenState.update { state -> state.copy(isList = it) } }
+            .onEach { isList -> _browseScreenState.update { state -> state.copy(isList = isList) } }
             .launchIn(viewModelScope)
 
         preferences
