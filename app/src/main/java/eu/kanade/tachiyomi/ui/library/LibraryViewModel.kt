@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
@@ -557,49 +558,67 @@ class LibraryViewModel() : ViewModel() {
     }
 
     fun preferenceUpdates() {
-        fun <T> Flow<T>.observeAndUpdate(update: (LibraryScreenState, T) -> LibraryScreenState) {
-            this.distinctUntilChanged()
-                .onEach { value ->
-                    _internalLibraryScreenState.update { state -> update(state, value) }
-                }
-                .launchIn(viewModelScope)
-        }
 
-        preferences.useVividColorHeaders().changes().observeAndUpdate { state, value ->
+        preferences.useVividColorHeaders().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(useVividColorHeaders = value)
         }
 
-        libraryPreferences.showStartReadingButton().changes().observeAndUpdate { state, value ->
+        libraryPreferences.showStartReadingButton().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(showStartReadingButton = value)
         }
 
-        mangadexPreferences.includeUnavailableChapters().changes().observeAndUpdate { state, value
-            ->
+        mangadexPreferences.includeUnavailableChapters().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(showUnavailableFilter = value)
         }
 
-        securityPreferences.incognitoMode().changes().observeAndUpdate { state, value ->
+        securityPreferences.incognitoMode().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(incognitoMode = value)
         }
 
-        libraryPreferences.outlineOnCovers().changes().observeAndUpdate { state, value ->
+        libraryPreferences.outlineOnCovers().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(outlineCovers = value)
         }
 
-        libraryPreferences.showDownloadBadge().changes().observeAndUpdate { state, value ->
+        libraryPreferences.showDownloadBadge().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(showDownloadBadges = value)
         }
 
-        libraryPreferences.showUnreadBadge().changes().observeAndUpdate { state, value ->
+        libraryPreferences.showUnreadBadge().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(showUnreadBadges = value)
         }
 
-        libraryPreferences.libraryHorizontalCategories().changes().observeAndUpdate { state, value
-            ->
+        libraryPreferences.libraryHorizontalCategories().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(horizontalCategories = value)
         }
 
-        libraryPreferences.showLibraryButtonBar().changes().observeAndUpdate { state, value ->
+        libraryPreferences.showLibraryButtonBar().changes().observeAndUpdate(
+            _internalLibraryScreenState,
+            viewModelScope,
+        ) { state, value ->
             state.copy(showLibraryButtonBar = value)
         }
 
@@ -608,7 +627,7 @@ class LibraryViewModel() : ViewModel() {
                 layout ->
                 gridSize to layout
             }
-            .observeAndUpdate { state, value ->
+            .observeAndUpdate(_internalLibraryScreenState, viewModelScope) { state, value ->
                 state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
             }
     }
