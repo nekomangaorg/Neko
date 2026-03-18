@@ -65,6 +65,45 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
         return manga
     }
 
+    private data class ChapterGroup(val scanlator: String, val uploader: String, val count: Int)
+
+    private fun String.parseChapterGroup(startIndex: Int, endIndex: Int): ChapterGroup {
+        val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
+        val countSeparatorIndex = indexOf(Constants.RAW_CHAPTER_COUNT_SEPARATOR, startIndex)
+
+        val scanlator: String
+        val uploader: String
+        val count: Int
+
+        val infoEndIndex =
+            if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) countSeparatorIndex
+            else endIndex
+
+        if (countSeparatorIndex != -1 && countSeparatorIndex < endIndex) {
+            val countStr =
+                substring(
+                    countSeparatorIndex + Constants.RAW_CHAPTER_COUNT_SEPARATOR.length,
+                    endIndex,
+                )
+            count = countStr.toIntOrNull() ?: 1
+        } else {
+            count = 1
+        }
+
+        if (typeSeparatorIndex != -1 && typeSeparatorIndex < infoEndIndex) {
+            scanlator = substring(startIndex, typeSeparatorIndex)
+            uploader =
+                substring(
+                    typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
+                    infoEndIndex,
+                )
+        } else {
+            scanlator = substring(startIndex, infoEndIndex)
+            uploader = ""
+        }
+        return ChapterGroup(scanlator, uploader, count)
+    }
+
     private fun String.filterMerged(): Boolean {
         var startIndex = 0
         val length = this.length
@@ -75,16 +114,9 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 endIndex = length
             }
 
-            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
+            val group = parseChapterGroup(startIndex, endIndex)
 
-            val scanlator =
-                if (typeSeparatorIndex != -1 && typeSeparatorIndex < endIndex) {
-                    substring(startIndex, typeSeparatorIndex)
-                } else {
-                    substring(startIndex, endIndex)
-                }
-
-            if (MergeType.containsMergeSourceName(scanlator)) {
+            if (MergeType.containsMergeSourceName(group.scanlator)) {
                 return true
             }
 
@@ -102,17 +134,22 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 blockedUploaders.isNullOrEmpty() &&
                 manga.filtered_scanlators == null
         ) {
-            var count = 1
-            var index = indexOf(Constants.RAW_CHAPTER_SEPARATOR)
-            while (index != -1) {
-                count++
-                index =
-                    indexOf(
-                        Constants.RAW_CHAPTER_SEPARATOR,
-                        index + Constants.RAW_CHAPTER_SEPARATOR.length,
-                    )
+            var totalCount = 0
+            var startIndex = 0
+            val length = this.length
+
+            while (startIndex < length) {
+                var endIndex = indexOf(Constants.RAW_CHAPTER_SEPARATOR, startIndex)
+                if (endIndex == -1) {
+                    endIndex = length
+                }
+
+                val group = parseChapterGroup(startIndex, endIndex)
+                totalCount += group.count
+
+                startIndex = endIndex + Constants.RAW_CHAPTER_SEPARATOR.length
             }
-            return count
+            return totalCount
         }
 
         var validChapterCount = 0
@@ -135,21 +172,10 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                 endIndex = length
             }
 
-            val typeSeparatorIndex = indexOf(Constants.RAW_SCANLATOR_TYPE_SEPARATOR, startIndex)
-
-            val scanlator: String
-            val uploader: String
-            if (typeSeparatorIndex != -1 && typeSeparatorIndex < endIndex) {
-                scanlator = substring(startIndex, typeSeparatorIndex)
-                uploader =
-                    substring(
-                        typeSeparatorIndex + Constants.RAW_SCANLATOR_TYPE_SEPARATOR.length,
-                        endIndex,
-                    )
-            } else {
-                scanlator = substring(startIndex, endIndex)
-                uploader = ""
-            }
+            val group = parseChapterGroup(startIndex, endIndex)
+            val scanlator = group.scanlator
+            val uploader = group.uploader
+            val currentGroupCount = group.count
 
             val scanlators = ChapterUtil.getScanlators(scanlator)
 
@@ -164,7 +190,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
             if (!isBlocked) {
                 if (filtered == null) {
-                    validChapterCount++
+                    validChapterCount += currentGroupCount
                 } else {
                     // Check if the chapter passes the manga-specific filter
                     var isFilteredOut = false
@@ -199,7 +225,7 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
                     }
 
                     if (!isFilteredOut) {
-                        validChapterCount++
+                        validChapterCount += currentGroupCount
                     }
                 }
             }
