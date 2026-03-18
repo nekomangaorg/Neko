@@ -193,45 +193,57 @@ class FeedViewModel() : ViewModel() {
             viewModelScope.launchIO { loadNextPage() }
         }
 
-        viewModelScope.launchIO {
-            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
-                enabled ->
+        preferences
+            .useVividColorHeaders()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
                 _feedScreenState.update { it.copy(useVividColorHeaders = enabled) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            securityPreferences.incognitoMode().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(incognitoMode = it) }
-            }
-        }
+        securityPreferences
+            .incognitoMode()
+            .changes()
+            .distinctUntilChanged()
+.onEach { incognito -> _feedScreenState.update { state -> state.copy(incognitoMode = incognito) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.downloadOnlyOverUnmetered().changes().collectLatest {
+        preferences
+            .downloadOnlyOverUnmetered()
+            .changes()
+            .distinctUntilChanged()
+            .onEach {
                 _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.feedViewOutlineCards().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(outlineCards = it) }
-            }
-        }
+        preferences
+            .feedViewOutlineCards()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(outlineCards = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            libraryPreferences.outlineOnCovers().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(outlineCovers = it) }
-            }
-        }
+        libraryPreferences
+            .outlineOnCovers()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(outlineCovers = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.groupChaptersUpdates().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
-            }
-        }
+        preferences
+            .groupChaptersUpdates()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.historyChapterGrouping().changes().collectLatest {
+        preferences
+            .historyChapterGrouping()
+            .changes()
+            .distinctUntilChanged()
+            .onEach {
                 _historyScreenPagingState.update { state ->
                     state.copy(
                         historyGrouping = it,
@@ -242,10 +254,13 @@ class FeedViewModel() : ViewModel() {
                 historyPaginator.reset()
                 loadNextPage()
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.feedViewType().changes().collectLatest { type ->
+        preferences
+            .feedViewType()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { type ->
                 when (type) {
                     FeedScreenType.Summary -> Unit
                     FeedScreenType.History -> {
@@ -274,16 +289,20 @@ class FeedViewModel() : ViewModel() {
                 _feedScreenState.update { state -> state.copy(feedScreenType = type) }
                 loadNextPage()
             }
-        }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.swipeRefreshFeedScreen().changes().collectLatest {
-                _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) }
-            }
-        }
+        preferences
+            .swipeRefreshFeedScreen()
+            .changes()
+            .distinctUntilChanged()
+            .onEach { _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) } }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            preferences.sortFetchedTime().changes().collectLatest {
+        preferences
+            .sortFetchedTime()
+            .changes()
+            .distinctUntilChanged()
+            .onEach {
                 _updatesScreenPagingState.update { state ->
                     state.copy(
                         updatesSortedByFetch = it,
@@ -296,7 +315,7 @@ class FeedViewModel() : ViewModel() {
                 updatesPaginator.reset()
                 loadNextPage()
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     fun loadNextPage() {
@@ -1056,7 +1075,7 @@ class FeedViewModel() : ViewModel() {
 
         viewModelScope.launchIO {
             combine(
-                    preferences.downloadOnlyOverUnmetered().changes(),
+                    preferences.downloadOnlyOverUnmetered().changes().distinctUntilChanged(),
                     downloadManager.isDownloaderRunning,
                     downloadManager.networkStateFlow(),
                 ) { downloadOnlyOverWifi, downloadRunning, networkStateFlow ->
