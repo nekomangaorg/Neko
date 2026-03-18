@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
@@ -558,95 +559,62 @@ class LibraryViewModel() : ViewModel() {
 
     fun preferenceUpdates() {
 
-        viewModelScope.launchIO {
-            preferences.useVividColorHeaders().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _internalLibraryScreenState.update { it.copy(useVividColorHeaders = enabled) }
+        preferences.useVividColorHeaders().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(useVividColorHeaders = value) }
+        }
+
+        libraryPreferences.showStartReadingButton().changes().observeAndUpdate(viewModelScope) {
+            value ->
+            _internalLibraryScreenState.update { state ->
+                state.copy(showStartReadingButton = value)
             }
         }
 
-        viewModelScope.launchIO {
-            libraryPreferences
-                .showStartReadingButton()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showStartReadingButton = enabled) }
-                }
-        }
-
-        viewModelScope.launchIO {
-            mangadexPreferences
-                .includeUnavailableChapters()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showUnavailableFilter = enabled) }
-                }
-        }
-
-        viewModelScope.launchIO {
-            securityPreferences.incognitoMode().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _internalLibraryScreenState.update { it.copy(incognitoMode = enabled) }
+        mangadexPreferences.includeUnavailableChapters().changes().observeAndUpdate(
+            viewModelScope
+        ) { value ->
+            _internalLibraryScreenState.update { state ->
+                state.copy(showUnavailableFilter = value)
             }
         }
 
-        viewModelScope.launchIO {
-            libraryPreferences.outlineOnCovers().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _internalLibraryScreenState.update { it.copy(outlineCovers = enabled) }
+        securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(incognitoMode = value) }
+        }
+
+        libraryPreferences.outlineOnCovers().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(outlineCovers = value) }
+        }
+
+        libraryPreferences.showDownloadBadge().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(showDownloadBadges = value) }
+        }
+
+        libraryPreferences.showUnreadBadge().changes().observeAndUpdate(viewModelScope) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(showUnreadBadges = value) }
+        }
+
+        libraryPreferences.libraryHorizontalCategories().changes().observeAndUpdate(
+            viewModelScope
+        ) { value ->
+            _internalLibraryScreenState.update { state -> state.copy(horizontalCategories = value) }
+        }
+
+        libraryPreferences.showLibraryButtonBar().changes().observeAndUpdate(viewModelScope) { value
+            ->
+            _internalLibraryScreenState.update { state -> state.copy(showLibraryButtonBar = value) }
+        }
+
+        combine(libraryPreferences.gridSize().changes(), libraryPreferences.layout().changes()) {
+                gridSize,
+                layout ->
+                gridSize to layout
             }
-        }
-
-        viewModelScope.launchIO {
-            libraryPreferences.showDownloadBadge().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _internalLibraryScreenState.update { it.copy(showDownloadBadges = enabled) }
+            .observeAndUpdate(viewModelScope) { value ->
+                _internalLibraryScreenState.update { state ->
+                    state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
+                }
             }
-        }
-
-        viewModelScope.launchIO {
-            libraryPreferences.showUnreadBadge().changes().distinctUntilChanged().collectLatest {
-                enabled ->
-                _internalLibraryScreenState.update { it.copy(showUnreadBadges = enabled) }
-            }
-        }
-
-        viewModelScope.launchIO {
-            libraryPreferences
-                .libraryHorizontalCategories()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(horizontalCategories = enabled) }
-                }
-        }
-
-        viewModelScope.launchIO {
-            libraryPreferences
-                .showLibraryButtonBar()
-                .changes()
-                .distinctUntilChanged()
-                .collectLatest { enabled ->
-                    _internalLibraryScreenState.update { it.copy(showLibraryButtonBar = enabled) }
-                }
-        }
-
-        viewModelScope.launchIO {
-            combine(
-                    libraryPreferences.gridSize().changes(),
-                    libraryPreferences.layout().changes(),
-                ) { gridSize, layout ->
-                    gridSize to layout
-                }
-                .distinctUntilChanged()
-                .collectLatest { pair ->
-                    _internalLibraryScreenState.update {
-                        it.copy(libraryDisplayMode = pair.second, rawColumnCount = pair.first)
-                    }
-                }
-        }
     }
 
     private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
