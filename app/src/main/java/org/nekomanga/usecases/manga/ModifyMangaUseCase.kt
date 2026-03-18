@@ -25,7 +25,7 @@ class ModifyMangaUseCase(
     }
 
     suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
-        val dbManga = db.getManga(mangaId).executeAsBlocking() ?: return
+        val dbManga = db.getManga(mangaId).executeOnIO() ?: return
         val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
         db.setMangaCategories(categories, listOf(dbManga))
     }
