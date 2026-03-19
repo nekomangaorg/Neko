@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.nekomanga.core.preferences.observeAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
