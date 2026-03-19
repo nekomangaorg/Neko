@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.presentation.components.UiText
@@ -50,45 +48,49 @@ class DataStorageSettingsViewModel : ViewModel() {
     val cacheData = _cacheData.asStateFlow()
 
     init {
-        DiskUtil.observeDiskSpace(applicationContext.cacheDir, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(parentCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+        DiskUtil.observeDiskSpace(applicationContext.cacheDir, applicationContext).observeAndUpdate(
+            viewModelScope
+        ) { newSize ->
+            _cacheData.update { it.copy(parentCacheSize = newSize) }
+        }
 
-        DiskUtil.observeDiskSpace(chapterCache.cacheDir, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(chapterDiskCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+        DiskUtil.observeDiskSpace(chapterCache.cacheDir, applicationContext).observeAndUpdate(
+            viewModelScope
+        ) { newSize ->
+            _cacheData.update { it.copy(chapterDiskCacheSize = newSize) }
+        }
 
-        DiskUtil.observeDiskSpace(coverCache.cacheDir, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(coverCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+        DiskUtil.observeDiskSpace(coverCache.cacheDir, applicationContext).observeAndUpdate(
+            viewModelScope
+        ) { newSize ->
+            _cacheData.update { it.copy(coverCacheSize = newSize) }
+        }
 
         DiskUtil.observeDiskSpace(coverCache.customCoverCacheDir, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(customCoverCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+            .observeAndUpdate(viewModelScope) { newSize ->
+                _cacheData.update { it.copy(customCoverCacheSize = newSize) }
+            }
         DiskUtil.observeDiskSpace(coverCache.onlineCoverDirectory, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(onlineCoverCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+            .observeAndUpdate(viewModelScope) { newSize ->
+                _cacheData.update { it.copy(onlineCoverCacheSize = newSize) }
+            }
         DiskUtil.observeDiskSpace(
                 File(applicationContext.cacheDir, CoilDiskCache.FOLDER_NAME),
                 applicationContext,
             )
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(imageCacheSize = newSize) } }
-            .launchIn(viewModelScope)
-        DiskUtil.observeDiskSpace(network.cacheDir, applicationContext)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(networkCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+            .observeAndUpdate(viewModelScope) { newSize ->
+                _cacheData.update { it.copy(imageCacheSize = newSize) }
+            }
+        DiskUtil.observeDiskSpace(network.cacheDir, applicationContext).observeAndUpdate(
+            viewModelScope
+        ) { newSize ->
+            _cacheData.update { it.copy(networkCacheSize = newSize) }
+        }
 
         DiskUtil.observeDiskSpace(applicationContext.cacheDir, applicationContext, true)
-            .distinctUntilChanged()
-            .onEach { newSize -> _cacheData.update { it.copy(tempFileCacheSize = newSize) } }
-            .launchIn(viewModelScope)
+            .observeAndUpdate(viewModelScope) { newSize ->
+                _cacheData.update { it.copy(tempFileCacheSize = newSize) }
+            }
     }
 
     fun clearParentCache(cacheType: CacheType) {

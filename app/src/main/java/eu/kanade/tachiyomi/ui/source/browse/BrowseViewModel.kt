@@ -29,14 +29,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -192,71 +190,53 @@ class BrowseViewModel() : ViewModel() {
                 )
             }
         }
-        preferences
-            .browseAsList()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { isList -> _browseScreenState.update { state -> state.copy(isList = isList) } }
-            .launchIn(viewModelScope)
+        preferences.browseAsList().changes().observeAndUpdate(viewModelScope) { isList ->
+            _browseScreenState.update { state -> state.copy(isList = isList) }
+        }
 
-        preferences
-            .useVividColorHeaders()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { enabled ->
-                _browseScreenState.update { it.copy(useVividColorHeaders = enabled) }
-            }
-            .launchIn(viewModelScope)
+        preferences.useVividColorHeaders().changes().observeAndUpdate(viewModelScope) { enabled ->
+            _browseScreenState.update { it.copy(useVividColorHeaders = enabled) }
+        }
 
-        securityPreferences
-            .incognitoMode()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { _browseScreenState.update { state -> state.copy(incognitoMode = it) } }
-            .launchIn(viewModelScope)
+        securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) {
+            _browseScreenState.update { state -> state.copy(incognitoMode = it) }
+        }
 
-        browseRepository.loginHelper
-            .isLoggedInFlow()
-            .distinctUntilChanged()
-            .onEach { _browseScreenState.update { state -> state.copy(isLoggedIn = it) } }
-            .launchIn(viewModelScope)
+        browseRepository.loginHelper.isLoggedInFlow().observeAndUpdate(viewModelScope) {
+            _browseScreenState.update { state -> state.copy(isLoggedIn = it) }
+        }
 
-        preferences
-            .browseDisplayMode()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { visibility ->
-                _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
-                viewModelScope.launch {
-                    _browseScreenState.update {
-                        it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
-                    }
-                }
-                viewModelScope.launch {
-                    _browseScreenState.update {
-                        it.copy(
-                            displayMangaHolder =
-                                it.displayMangaHolder.copy(
-                                    filteredDisplayManga =
-                                        it.displayMangaHolder.allDisplayManga
-                                            .filterVisibility(preferences)
-                                            .toPersistentList(),
-                                    groupedDisplayManga =
-                                        it.displayMangaHolder.groupedDisplayManga
-                                            .map { (stringRes, mangaList) ->
-                                                stringRes to
-                                                    mangaList
-                                                        .updateVisibility(preferences)
-                                                        .toPersistentList()
-                                            }
-                                            .toMap()
-                                            .toImmutableMap(),
-                                )
-                        )
-                    }
+        preferences.browseDisplayMode().changes().observeAndUpdate(viewModelScope) { visibility ->
+            _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
+            viewModelScope.launch {
+                _browseScreenState.update {
+                    it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
                 }
             }
-            .launchIn(viewModelScope)
+            viewModelScope.launch {
+                _browseScreenState.update {
+                    it.copy(
+                        displayMangaHolder =
+                            it.displayMangaHolder.copy(
+                                filteredDisplayManga =
+                                    it.displayMangaHolder.allDisplayManga
+                                        .filterVisibility(preferences)
+                                        .toPersistentList(),
+                                groupedDisplayManga =
+                                    it.displayMangaHolder.groupedDisplayManga
+                                        .map { (stringRes, mangaList) ->
+                                            stringRes to
+                                                mangaList
+                                                    .updateVisibility(preferences)
+                                                    .toPersistentList()
+                                        }
+                                        .toMap()
+                                        .toImmutableMap(),
+                            )
+                    )
+                }
+            }
+        }
     }
 
     fun loadNextItems() {

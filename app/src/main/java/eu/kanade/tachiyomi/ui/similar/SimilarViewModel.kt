@@ -21,12 +21,10 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -84,28 +82,18 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                 )
             }
         }
-        preferences
-            .browseAsList()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { isList ->
-                _similarScreenState.update { state -> state.copy(isList = isList) }
-            }
-            .launchIn(viewModelScope)
+        preferences.browseAsList().changes().observeAndUpdate(viewModelScope) { isList ->
+            _similarScreenState.update { state -> state.copy(isList = isList) }
+        }
 
-        preferences
-            .browseDisplayMode()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { visibility ->
-                _similarScreenState.update { state ->
-                    state.copy(
-                        libraryEntryVisibility = visibility,
-                        filteredDisplayManga = state.allDisplayManga.filterByVisibility(preferences),
-                    )
-                }
+        preferences.browseDisplayMode().changes().observeAndUpdate(viewModelScope) { visibility ->
+            _similarScreenState.update { state ->
+                state.copy(
+                    libraryEntryVisibility = visibility,
+                    filteredDisplayManga = state.allDisplayManga.filterByVisibility(preferences),
+                )
             }
-            .launchIn(viewModelScope)
+        }
     }
 
     fun refresh() {

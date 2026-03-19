@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.ChapterItem
@@ -193,131 +194,90 @@ class FeedViewModel() : ViewModel() {
             viewModelScope.launchIO { loadNextPage() }
         }
 
-        preferences
-            .useVividColorHeaders()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { enabled ->
-                _feedScreenState.update { it.copy(useVividColorHeaders = enabled) }
+        preferences.useVividColorHeaders().changes().observeAndUpdate(viewModelScope) { enabled ->
+            _feedScreenState.update { it.copy(useVividColorHeaders = enabled) }
+        }
+
+        securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) { incognito
+            ->
+            _feedScreenState.update { state -> state.copy(incognitoMode = incognito) }
+        }
+
+        preferences.downloadOnlyOverUnmetered().changes().observeAndUpdate(viewModelScope) {
+            _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
+        }
+
+        preferences.feedViewOutlineCards().changes().observeAndUpdate(viewModelScope) {
+            _feedScreenState.update { state -> state.copy(outlineCards = it) }
+        }
+
+        libraryPreferences.outlineOnCovers().changes().observeAndUpdate(viewModelScope) {
+            _feedScreenState.update { state -> state.copy(outlineCovers = it) }
+        }
+
+        preferences.groupChaptersUpdates().changes().observeAndUpdate(viewModelScope) {
+            _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) }
+        }
+
+        preferences.historyChapterGrouping().changes().observeAndUpdate(viewModelScope) {
+            _historyScreenPagingState.update { state ->
+                state.copy(
+                    historyGrouping = it,
+                    offset = 0,
+                    historyFeedMangaList = persistentListOf(),
+                )
             }
-            .launchIn(viewModelScope)
+            historyPaginator.reset()
+            loadNextPage()
+        }
 
-        securityPreferences
-            .incognitoMode()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { incognito ->
-                _feedScreenState.update { state -> state.copy(incognitoMode = incognito) }
-            }
-            .launchIn(viewModelScope)
-
-        preferences
-            .downloadOnlyOverUnmetered()
-            .changes()
-            .distinctUntilChanged()
-            .onEach {
-                _feedScreenState.update { state -> state.copy(downloadOnlyOnUnmetered = it) }
-            }
-            .launchIn(viewModelScope)
-
-        preferences
-            .feedViewOutlineCards()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { _feedScreenState.update { state -> state.copy(outlineCards = it) } }
-            .launchIn(viewModelScope)
-
-        libraryPreferences
-            .outlineOnCovers()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { _feedScreenState.update { state -> state.copy(outlineCovers = it) } }
-            .launchIn(viewModelScope)
-
-        preferences
-            .groupChaptersUpdates()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { _feedScreenState.update { state -> state.copy(groupUpdateChapters = it) } }
-            .launchIn(viewModelScope)
-
-        preferences
-            .historyChapterGrouping()
-            .changes()
-            .distinctUntilChanged()
-            .onEach {
-                _historyScreenPagingState.update { state ->
-                    state.copy(
-                        historyGrouping = it,
-                        offset = 0,
-                        historyFeedMangaList = persistentListOf(),
-                    )
-                }
-                historyPaginator.reset()
-                loadNextPage()
-            }
-            .launchIn(viewModelScope)
-
-        preferences
-            .feedViewType()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { type ->
-                when (type) {
-                    FeedScreenType.Summary -> Unit
-                    FeedScreenType.History -> {
-                        _historyScreenPagingState.update { state ->
-                            state.copy(
-                                offset = 0,
-                                searchHistoryFeedMangaList = persistentListOf(),
-                                searchQuery = "",
-                            )
-                        }
-                        historyPaginator.reset()
+        preferences.feedViewType().changes().observeAndUpdate(viewModelScope) { type ->
+            when (type) {
+                FeedScreenType.Summary -> Unit
+                FeedScreenType.History -> {
+                    _historyScreenPagingState.update { state ->
+                        state.copy(
+                            offset = 0,
+                            searchHistoryFeedMangaList = persistentListOf(),
+                            searchQuery = "",
+                        )
                     }
-                    FeedScreenType.Updates -> {
-                        _updatesScreenPagingState.update { state ->
-                            state.copy(
-                                offset = 0,
-                                searchUpdatesFeedMangaList = persistentListOf(),
-                                searchQuery = "",
-                            )
-                        }
-                        updatesPaginator.reset()
-                        loadNextPage()
+                    historyPaginator.reset()
+                }
+                FeedScreenType.Updates -> {
+                    _updatesScreenPagingState.update { state ->
+                        state.copy(
+                            offset = 0,
+                            searchUpdatesFeedMangaList = persistentListOf(),
+                            searchQuery = "",
+                        )
                     }
+                    updatesPaginator.reset()
+                    loadNextPage()
                 }
-
-                _feedScreenState.update { state -> state.copy(feedScreenType = type) }
-                loadNextPage()
             }
-            .launchIn(viewModelScope)
 
-        preferences
-            .swipeRefreshFeedScreen()
-            .changes()
-            .distinctUntilChanged()
-            .onEach { _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) } }
-            .launchIn(viewModelScope)
+            _feedScreenState.update { state -> state.copy(feedScreenType = type) }
+            loadNextPage()
+        }
 
-        preferences
-            .sortFetchedTime()
-            .changes()
-            .distinctUntilChanged()
-            .onEach {
-                _updatesScreenPagingState.update { state ->
-                    state.copy(
-                        updatesSortedByFetch = it,
-                        offset = 0,
-                        updatesFeedMangaList = persistentListOf(),
-                        searchQuery = "",
-                        searchUpdatesFeedMangaList = persistentListOf(),
-                    )
-                }
-                updatesPaginator.reset()
-                loadNextPage()
+        preferences.swipeRefreshFeedScreen().changes().observeAndUpdate(viewModelScope) {
+            _feedScreenState.update { state -> state.copy(swipeRefreshEnabled = it) }
+        }
+
+        preferences.sortFetchedTime().changes().observeAndUpdate(viewModelScope) {
+            _updatesScreenPagingState.update { state ->
+                state.copy(
+                    updatesSortedByFetch = it,
+                    offset = 0,
+                    updatesFeedMangaList = persistentListOf(),
+                    searchQuery = "",
+                    searchUpdatesFeedMangaList = persistentListOf(),
+                )
             }
-            .launchIn(viewModelScope)
+            updatesPaginator.reset()
+            loadNextPage()
+        }
     }
 
     fun loadNextPage() {
