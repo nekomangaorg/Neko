@@ -476,7 +476,7 @@ class LibraryViewModel() : ViewModel() {
                     val updatedItems =
                         if (mangaRefreshingState.isEmpty()) {
                             // Fast path: nothing is refreshing
-                            sortedItems.map { it.copy(isRefreshing = false) }.toPersistentList()
+                            sortedItems
                         } else {
                             sortedItems
                                 .mapAsync { libraryCategoryItem ->
