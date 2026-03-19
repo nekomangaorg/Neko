@@ -72,10 +72,9 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                                                 .searchTrackerNonFlow(
                                                                     "",
                                                                     trackManager
-                                                                        .getService(
-                                                                            trackService.id
-                                                                        )!!
-                                                                        .toTrackServiceItem(),
+                                                                        .getService(trackService.id)
+                                                                        ?.toTrackServiceItem()
+                                                                        ?: return@async,
                                                                     manga,
                                                                     false,
                                                                 )
