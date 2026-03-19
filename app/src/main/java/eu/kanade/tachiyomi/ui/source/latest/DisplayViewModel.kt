@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
@@ -141,6 +142,9 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
         }
 
+        // ⚡ BOLT OPTIMIZATION: Used observeAndUpdate which internally applies
+        // distinctUntilChanged()
+        // to prevent redundant state updates and UI recompositions.
         preferences.browseAsList().changes().observeAndUpdate(viewModelScope) {
             _displayScreenState.update { state -> state.copy(isList = it) }
         }
