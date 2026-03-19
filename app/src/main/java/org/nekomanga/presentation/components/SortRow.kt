@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -55,26 +56,24 @@ fun SortRow(
                 .padding(horizontal = Size.smedium, vertical = Size.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        when (sortState) {
-            MangaConstants.SortState.Ascending -> {
-                Icon(
-                    imageVector = Icons.Filled.ArrowUpward,
-                    contentDescription = null,
-                    tint = tintColor,
-                    modifier = Modifier.size(24.dp),
-                )
+        val iconData =
+            when (sortState) {
+                MangaConstants.SortState.Ascending ->
+                    Icons.Filled.ArrowUpward to org.nekomanga.R.string.ascending
+                MangaConstants.SortState.Descending ->
+                    Icons.Filled.ArrowDownward to org.nekomanga.R.string.descending
+                MangaConstants.SortState.None -> null
             }
-            MangaConstants.SortState.Descending -> {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDownward,
-                    contentDescription = null,
-                    tint = tintColor,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            MangaConstants.SortState.None -> {
-                Gap(24.dp)
-            }
+
+        if (iconData != null) {
+            Icon(
+                imageVector = iconData.first,
+                contentDescription = stringResource(id = iconData.second),
+                tint = tintColor,
+                modifier = Modifier.size(24.dp),
+            )
+        } else {
+            Gap(24.dp)
         }
         Gap(Size.medium)
         Text(text = rowText, style = rowTextStyle, color = textColor)
