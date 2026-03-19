@@ -42,9 +42,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
@@ -56,6 +54,7 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -171,14 +170,18 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
-        CoroutineScope(Dispatchers.Default).launch {
-            get<NetworkHelper>()
+        launchIO {
+            try {
+                get<NetworkHelper>()
 
-            get<SourceManager>()
+                get<SourceManager>()
 
-            get<DatabaseHelper>()
+                get<DatabaseHelper>()
 
-            get<DownloadManager>()
+                get<DownloadManager>()
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to initialize components" }
+            }
         }
     }
 }
