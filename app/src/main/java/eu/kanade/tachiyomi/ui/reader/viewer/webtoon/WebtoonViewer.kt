@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.graphics.Color
 import android.graphics.PointF
+import android.view.GestureDetector
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -40,7 +42,20 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
         get() = noWebtoonTag && !config.disableGaps
 
     /** Frame containing the recycler view. */
-    private val frame = WebtoonFrame(activity)
+    private val frame =
+        object : android.widget.FrameLayout(activity) {
+            /** Scale detector, either with pinch or quick scale. */
+            private val scaleDetector = ScaleGestureDetector(activity, ScaleListener())
+
+            /** Fling detector. */
+            private val flingDetector = GestureDetector(activity, FlingListener())
+
+            override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+                scaleDetector.onTouchEvent(ev)
+                flingDetector.onTouchEvent(ev)
+                return super.dispatchTouchEvent(ev)
+            }
+        }
 
     /** Layout manager of the recycler view. */
     private val layoutManager = WebtoonLayoutManager(activity)
@@ -123,7 +138,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
         config.reloadViewerListener = { activity.viewModel.reloadViewer() }
 
-        config.zoomPropertyChangedListener = { frame.enableZoomOut = it }
+        config.zoomPropertyChangedListener = { recycler.canZoomOut = it }
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
@@ -135,6 +150,39 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
+    }
+
+    /** Scale listener used to delegate events to the recycler view. */
+    inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            recycler.onScaleBegin()
+            return true
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            recycler.onScale(detector.scaleFactor)
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            recycler.onScaleEnd()
+        }
+    }
+
+    /** Fling listener used to delegate events to the recycler view. */
+    inner class FlingListener : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean {
+            return true
+        }
+
+        override fun onFling(
+            e: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float,
+        ): Boolean {
+            return recycler.zoomFling(velocityX.toInt(), velocityY.toInt())
+        }
     }
 
     private fun checkAllowPreload(page: ReaderPage?): Boolean {
