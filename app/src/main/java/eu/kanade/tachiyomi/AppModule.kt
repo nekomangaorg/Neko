@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
-import androidx.core.content.ContextCompat
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -43,6 +42,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
+import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
@@ -54,6 +54,7 @@ import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -169,14 +170,18 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
-        ContextCompat.getMainExecutor(app).execute {
-            get<NetworkHelper>()
+        launchIO {
+            try {
+                get<NetworkHelper>()
 
-            get<SourceManager>()
+                get<SourceManager>()
 
-            get<DatabaseHelper>()
+                get<DatabaseHelper>()
 
-            get<DownloadManager>()
+                get<DownloadManager>()
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to initialize components" }
+            }
         }
     }
 }
