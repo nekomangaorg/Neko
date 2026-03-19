@@ -7,12 +7,11 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
@@ -47,79 +46,87 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                 val trackSyncIds = tracks.map { it.sync_id }.toSet()
 
                 coroutineScope {
-                    if (autoAddTrackerIds.size > 1) {
+                    if (autoAddTrackerIds.isNotEmpty()) {
                         val contentRating = manga.getContentRating()
                         if (
                             contentRating == null ||
                                 validContentRatings.contains(contentRating.lowercase())
                         ) {
-                            autoAddTrackerIds.forEach { autoAddTrackerId ->
-                                if (!trackSyncIds.contains(autoAddTrackerId)) {
-                                    val trackService = loggedServicesMap[autoAddTrackerId]
-                                    if (trackService != null) {
-                                        launch {
-                                            try {
-                                                val trackServiceItem =
-                                                    trackService.toTrackServiceItem()
-                                                val id =
-                                                    trackManager.getIdFromManga(
-                                                        trackServiceItem,
-                                                        manga,
-                                                    )
-                                                if (id != null) {
-                                                    val trackResult =
-                                                        trackingCoordinator.searchTrackerNonFlow(
-                                                            "",
-                                                            trackManager
-                                                                .getService(trackService.id)!!
-                                                                .toTrackServiceItem(),
+                            autoAddTrackerIds
+                                .mapNotNull { autoAddTrackerId ->
+                                    if (!trackSyncIds.contains(autoAddTrackerId)) {
+                                        val trackService = loggedServicesMap[autoAddTrackerId]
+                                        if (trackService != null) {
+                                            async {
+                                                try {
+                                                    val trackServiceItem =
+                                                        trackService.toTrackServiceItem()
+                                                    val id =
+                                                        trackManager.getIdFromManga(
+                                                            trackServiceItem,
                                                             manga,
-                                                            false,
                                                         )
-                                                    when (trackResult) {
-                                                        is TrackingConstants.TrackSearchResult.Success -> {
-                                                            val trackSearchItem =
-                                                                trackResult.trackSearchResult[0]
-                                                            trackingCoordinator.registerTracking(
-                                                                TrackingConstants.TrackAndService(
-                                                                    trackSearchItem.trackItem,
-                                                                    trackServiceItem,
-                                                                ),
-                                                                manga.id!!,
-                                                            )
+                                                    if (id != null) {
+                                                        val trackResult =
+                                                            trackingCoordinator
+                                                                .searchTrackerNonFlow(
+                                                                    "",
+                                                                    trackManager
+                                                                        .getService(
+                                                                            trackService.id
+                                                                        )!!
+                                                                        .toTrackServiceItem(),
+                                                                    manga,
+                                                                    false,
+                                                                )
+                                                        when (trackResult) {
+                                                            is TrackingConstants.TrackSearchResult.Success -> {
+                                                                val trackSearchItem =
+                                                                    trackResult.trackSearchResult[0]
+                                                                trackingCoordinator
+                                                                    .registerTracking(
+                                                                        TrackingConstants
+                                                                            .TrackAndService(
+                                                                                trackSearchItem
+                                                                                    .trackItem,
+                                                                                trackServiceItem,
+                                                                            ),
+                                                                        manga.id!!,
+                                                                    )
+                                                            }
+                                                            else -> Unit
                                                         }
-                                                        else -> Unit
+                                                    }
+                                                } catch (e: Exception) {
+                                                    if (e !is CancellationException) {
+                                                        TimberKt.e(e)
                                                     }
                                                 }
-                                            } catch (e: Exception) {
-                                                if (e !is CancellationException) {
-                                                    TimberKt.e(e)
-                                                }
                                             }
-                                        }
-                                        delay(1.seconds)
-                                    }
+                                        } else null
+                                    } else null
                                 }
-                            }
+                                .awaitAll()
                         }
                     }
 
-                    tracks.forEach { track ->
-                        val service = trackManager.getService(track.sync_id)
-                        if (service != null && service in loggedServices) {
-                            launch {
-                                try {
-                                    val newTrack = service.refresh(track)
-                                    db.insertTrack(newTrack).executeOnIO()
-                                } catch (e: Exception) {
-                                    if (e !is CancellationException) {
-                                        TimberKt.e(e)
+                    tracks
+                        .mapNotNull { track ->
+                            val service = trackManager.getService(track.sync_id)
+                            if (service != null && service in loggedServices) {
+                                async {
+                                    try {
+                                        val newTrack = service.refresh(track)
+                                        db.insertTrack(newTrack).executeOnIO()
+                                    } catch (e: Exception) {
+                                        if (e !is CancellationException) {
+                                            TimberKt.e(e)
+                                        }
                                     }
                                 }
-                            }
-                            delay(1.seconds)
+                            } else null
                         }
-                    }
+                        .awaitAll()
                 }
             }
             completeNotification()
