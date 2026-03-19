@@ -236,31 +236,56 @@ class LibraryViewModel() : ViewModel() {
             .conflate()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     *
+     * Why: Previously, this flow included `collapsedCategories()` and
+     * `collapsedDynamicCategories()`. These preferences are toggled at a high frequency when users
+     * simply expand or collapse a UI section. By including them in `libraryViewFlow`, every single
+     * toggle triggered the downstream `groupedMangaFlow` and `sortedMangaFlow` to completely
+     * regroup and re-sort (O(N log N)) the entire 1000+ item library, causing massive CPU spikes
+     * and stuttering.
+     *
+     * Architecture: We decoupled the structural sorting/grouping preferences (which require heavy
+     * recalculation) from the high-frequency UI toggle state (`collapsedCategories`). This
+     * `libraryViewFlow` now only emits when the user fundamentally changes *how* the list is sorted
+     * or grouped.
+     */
     val libraryViewFlow: Flow<LibraryViewPreferences> =
         combine(
-                libraryPreferences.collapsedCategories().changes(),
-                libraryPreferences.collapsedDynamicCategories().changes(),
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
                 libraryPreferences.groupBy().changes(),
                 libraryPreferences.showDownloadBadge().changes(),
-            ) {
-                collapsedCategories,
-                collapsedDynamicCategories,
-                sortingMode,
-                sortAscending,
-                groupBy,
-                showDownloadBadges ->
+            ) { sortingMode, sortAscending, groupBy, showDownloadBadges ->
                 val librarySort = LibrarySort.valueOf(sortingMode)
 
                 LibraryViewPreferences(
-                    collapsedCategories = collapsedCategories,
-                    collapsedDynamicCategories = collapsedDynamicCategories,
                     sortingMode = librarySort,
                     sortAscending = sortAscending,
                     groupBy = groupBy,
                     showDownloadBadges = showDownloadBadges,
                 )
+            }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     *
+     * Why: See `libraryViewFlow`. This isolates the high-frequency UI toggles into their own
+     * lightweight stream.
+     *
+     * Architecture: This flow is combined downstream in `itemsWithRefreshingFlow` so we can rapidly
+     * flip the `isHidden` boolean on categories without forcing the entire library to be regrouped
+     * and re-sorted.
+     */
+    val collapsedStateFlow =
+        combine(
+                libraryPreferences.collapsedCategories().changes(),
+                libraryPreferences.collapsedDynamicCategories().changes(),
+            ) { collapsedCategories, collapsedDynamicCategories ->
+                Pair(collapsedCategories, collapsedDynamicCategories)
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
@@ -383,14 +408,9 @@ class LibraryViewModel() : ViewModel() {
                 categoryList,
                 trackMap ->
                 withContext(Dispatchers.Default) {
-                    val collapsedCategorySet =
-                        libraryViewPreferences.collapsedCategories
-                            .mapNotNull { it.toIntOrNull() }
-                            .toSet()
-
                     when (libraryViewPreferences.groupBy) {
                         LibraryGroup.ByCategory -> {
-                            groupByCategory(activeMangaList, categoryList, collapsedCategorySet)
+                            groupByCategory(activeMangaList, categoryList)
                         }
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,
@@ -400,8 +420,6 @@ class LibraryViewModel() : ViewModel() {
                         LibraryGroup.ByTrackStatus -> {
                             groupByDynamic(
                                 libraryMangaList = activeMangaList,
-                                collapsedDynamicCategorySet =
-                                    libraryViewPreferences.collapsedDynamicCategories,
                                 currentLibraryGroup = libraryViewPreferences.groupBy,
                                 sortOrder = libraryViewPreferences.sortingMode,
                                 sortAscending = libraryViewPreferences.sortAscending,
@@ -430,15 +448,9 @@ class LibraryViewModel() : ViewModel() {
                 libraryPreferences.removeArticles().changes(),
             ) { groupedItems, libraryViewPreferences, lastReadMap, lastFetchMap, removeArticles ->
                 withContext(Dispatchers.Default) {
-                    var allCollapsed = true
-
                     val sortedItems =
                         groupedItems
                             .mapAsync { libraryCategoryItem ->
-                                if (!libraryCategoryItem.categoryItem.isHidden) {
-                                    allCollapsed = false
-                                }
-
                                 // Create the comparator
                                 val comparator =
                                     libraryMangaItemComparator(
@@ -461,34 +473,66 @@ class LibraryViewModel() : ViewModel() {
                             }
                             .toPersistentList()
 
-                    // Return a lightweight object or Pair to pass to the collector
-                    Triple(sortedItems, allCollapsed, libraryViewPreferences)
+                    Pair(sortedItems, libraryViewPreferences)
                 }
             }
             .distinctUntilChanged()
 
-    // 4. REFRESHING FLOW: Applies the high-frequency refreshing state to the sorted items
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     * 4. FINAL STATE FLOW: Applies high-frequency states like refreshing and collapsed categories.
+     *
+     * Why: See `libraryViewFlow`. By separating the high-frequency UI updates into this final,
+     * decoupled pipeline layer, the app no longer recalculates groupings or executes O(N log N)
+     * sorting just because a user toggled a category's visibility or a manga changed its refreshing
+     * state. The heavy lifting happens upstream and is cached, while these O(N) simple iterations
+     * happen quickly.
+     *
+     * Architecture: We combine the cached, sorted arrays with the `collapsedStateFlow`. We use
+     * `mapAsync` (with `Dispatchers.Default`) to quickly compute `isHidden` and `isRefreshing` on
+     * all categories. `allCollapsed` is evaluated functionally after the map operation completes to
+     * ensure thread-safety.
+     */
     private val itemsWithRefreshingFlow =
-        combine(sortedMangaFlow, _mangaRefreshingState.asStateFlow()) {
-                (sortedItems, allCollapsed, libraryViewPreferences),
-                mangaRefreshingState ->
+        combine(sortedMangaFlow, _mangaRefreshingState.asStateFlow(), collapsedStateFlow) {
+                (sortedItems, libraryViewPreferences),
+                mangaRefreshingState,
+                (collapsedCategories, collapsedDynamicCategories) ->
                 withContext(Dispatchers.Default) {
+                    val collapsedCategorySet =
+                        collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
+
                     val updatedItems =
-                        if (mangaRefreshingState.isEmpty()) {
-                            // Fast path: nothing is refreshing
-                            sortedItems
-                        } else {
-                            sortedItems
-                                .mapAsync { libraryCategoryItem ->
-                                    val isRefreshing =
+                        sortedItems
+                            .mapAsync { libraryCategoryItem ->
+                                val isHidden =
+                                    if (libraryCategoryItem.categoryItem.isDynamic) {
+                                        dynamicCategoryName(
+                                            libraryViewPreferences.groupBy.type,
+                                            libraryCategoryItem.categoryItem.name,
+                                        ) in collapsedDynamicCategories
+                                    } else {
+                                        libraryCategoryItem.categoryItem.id in collapsedCategorySet
+                                    }
+
+                                val isRefreshing =
+                                    if (mangaRefreshingState.isEmpty()) false
+                                    else
                                         libraryCategoryItem.libraryItems.fastAny {
                                             it.displayManga.mangaId in mangaRefreshingState
                                         }
-                                    libraryCategoryItem.copy(isRefreshing = isRefreshing)
-                                }
-                                .toPersistentList()
-                        }
-                    Triple(updatedItems, allCollapsed, libraryViewPreferences)
+
+                                libraryCategoryItem.copy(
+                                    isRefreshing = isRefreshing,
+                                    categoryItem =
+                                        libraryCategoryItem.categoryItem.copy(isHidden = isHidden),
+                                )
+                            }
+                            .toPersistentList()
+
+                    val allCollapsed = updatedItems.all { it.categoryItem.isHidden }
+
+                    Pair(updatedItems, allCollapsed)
                 }
             }
             .distinctUntilChanged()
@@ -512,7 +556,7 @@ class LibraryViewModel() : ViewModel() {
                 uiSettingsFlow,
             ) {
                 state,
-                (itemsWithRefreshing, allCollapsed, _),
+                (itemsWithRefreshing, allCollapsed),
                 trackMap,
                 categories,
                 viewPrefs,
@@ -806,7 +850,6 @@ class LibraryViewModel() : ViewModel() {
 
     fun groupByDynamic(
         libraryMangaList: List<LibraryMangaItem>,
-        collapsedDynamicCategorySet: Set<String>,
         currentLibraryGroup: LibraryGroup,
         sortOrder: LibrarySort,
         sortAscending: Boolean,
@@ -814,7 +857,6 @@ class LibraryViewModel() : ViewModel() {
     ): PersistentList<LibraryCategoryItem> {
         val groupedMap = mutableMapOf<String, MutableList<LibraryMangaItem>>()
         val notTrackedList = listOf("Not tracked")
-        val groupTypeStr = currentLibraryGroup.type.toString()
 
         val distinctMangaList = libraryMangaList.distinctBy { it.displayManga.mangaId }
 
@@ -849,9 +891,7 @@ class LibraryViewModel() : ViewModel() {
                         sortOrder = sortOrder,
                         isAscending = sortAscending,
                         name = categoryName,
-                        isHidden =
-                            (groupTypeStr + dynamicCategorySplitter + categoryName) in
-                                collapsedDynamicCategorySet,
+                        isHidden = false,
                         isDynamic = true,
                     )
                 LibraryCategoryItem(
@@ -893,7 +933,6 @@ class LibraryViewModel() : ViewModel() {
     fun groupByCategory(
         libraryMangaList: List<LibraryMangaItem>,
         categoryList: List<CategoryItem>,
-        collapsedCategorySet: Set<Int>,
     ): List<LibraryCategoryItem> {
         if (libraryMangaList.isEmpty()) {
             return emptyList()
@@ -908,11 +947,8 @@ class LibraryViewModel() : ViewModel() {
                 return@mapNotNull null
             }
 
-            val updatedCategoryItem =
-                categoryItem.copy(isHidden = categoryItem.id in collapsedCategorySet)
-
             LibraryCategoryItem(
-                categoryItem = updatedCategoryItem,
+                categoryItem = categoryItem,
                 libraryItems = unsortedMangaList.toPersistentList(),
             )
         }

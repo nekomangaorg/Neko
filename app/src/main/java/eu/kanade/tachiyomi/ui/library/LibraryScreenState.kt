@@ -118,8 +118,6 @@ data class LibraryCategoryItem(
 
 @Immutable
 data class LibraryViewPreferences(
-    val collapsedCategories: Set<String>,
-    val collapsedDynamicCategories: Set<String>,
     val sortingMode: LibrarySort,
     val sortAscending: Boolean,
     val groupBy: LibraryGroup,
