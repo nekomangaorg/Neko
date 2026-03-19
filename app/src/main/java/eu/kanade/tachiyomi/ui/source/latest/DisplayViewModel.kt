@@ -165,7 +165,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+            val editManga = db.getManga(mangaId).executeAsBlocking() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =

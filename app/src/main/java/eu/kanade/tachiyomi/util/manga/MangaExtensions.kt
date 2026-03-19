@@ -66,7 +66,7 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
 
 /** Takes a list of SourceManga and converts to a list of display manga in bulk */
 fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): List<DisplayManga> {
-    if (!this.iterator().hasNext()) return emptyList()
+    if (!any()) return emptyList()
 
     val sourceMangas = this.toList()
     val urls = sourceMangas.map { it.url }.distinct()
