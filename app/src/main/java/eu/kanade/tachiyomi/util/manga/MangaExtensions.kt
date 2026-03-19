@@ -64,6 +64,53 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
     return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
+/** Takes a list of SourceManga and converts to a list of display manga in bulk */
+fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): List<DisplayManga> {
+    if (!any()) return emptyList()
+
+    val sourceMangas = this.toList()
+    val urls = sourceMangas.map { it.url }.distinct()
+
+    // Fetch existing mangas from database by URLs in chunks to avoid SQLite parameter limit
+    val existingMangas =
+        urls
+            .chunked(900)
+            .flatMap { chunk -> db.getMangasByUrl(chunk).executeAsBlocking() }
+            .associateBy { it.url }
+
+    val newMangasList = mutableListOf<Manga>()
+    val updateMangasList = mutableListOf<Manga>()
+
+    val mappedMangas =
+        sourceMangas.map { sourceManga ->
+            var localManga = existingMangas[sourceManga.url]
+            if (localManga == null) {
+                val newManga =
+                    Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
+                        this.thumbnail_url = sourceManga.currentThumbnail
+                    }
+                newMangasList.add(newManga)
+                localManga = newManga
+            } else if (localManga.title.isBlank()) {
+                localManga.title = sourceManga.title
+                updateMangasList.add(localManga)
+            }
+            sourceManga to localManga
+        }
+
+    if (newMangasList.isNotEmpty()) {
+        val results = db.insertMangaList(newMangasList).executeAsBlocking()
+        results.results().forEach { (manga, result) -> manga.id = result.insertedId() }
+    }
+    if (updateMangasList.isNotEmpty()) {
+        db.insertMangaList(updateMangasList).executeAsBlocking()
+    }
+
+    return mappedMangas.map { (sourceManga, localManga) ->
+        localManga.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
+    }
+}
+
 fun Manga.toDisplayManga(
     displayText: String = "",
     @StringRes displayTextRes: Int? = null,

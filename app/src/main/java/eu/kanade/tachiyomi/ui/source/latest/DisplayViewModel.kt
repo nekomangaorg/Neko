@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -127,7 +126,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         }
         loadNextItems()
 
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val categories =
                 db.getCategories()
                     .executeAsBlocking()
@@ -142,12 +141,12 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             preferences.browseAsList().changes().collectLatest {
                 _displayScreenState.update { state -> state.copy(isList = it) }
             }
         }
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             preferences.browseDisplayMode().changes().collectLatest { visibility ->
                 _displayScreenState.update {
                     it.copy(
@@ -161,12 +160,12 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     }
 
     fun loadNextItems() {
-        viewModelScope.launch { paginator.loadNextItems() }
+        viewModelScope.launchIO { paginator.loadNextItems() }
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
-        viewModelScope.launch {
-            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+        viewModelScope.launchIO {
+            val editManga = db.getManga(mangaId).executeAsBlocking() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -200,7 +199,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     }
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val index =
                 _displayScreenState.value.allDisplayManga.indexOfFirst { it.mangaId == mangaId }
             val tempDisplayManga =
@@ -261,7 +260,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     }
 
     fun updateMangaForChanges() {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val newDisplayManga =
                 _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
             _displayScreenState.update {

@@ -89,6 +89,25 @@ interface MangaQueries : DbProvider {
             )
             .prepare()
 
+    fun getMangasByUrl(urls: List<String>) =
+        db.get()
+            .listOfObjects(Manga::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(MangaTable.TABLE)
+                    .let { builder ->
+                        if (urls.isEmpty()) {
+                            builder.where("1 = 0")
+                        } else {
+                            builder
+                                .where("${MangaTable.COL_URL} IN (${urls.joinToString { "?" }})")
+                                .whereArgs(*urls.toTypedArray())
+                        }
+                    }
+                    .build()
+            )
+            .prepare()
+
     fun getMangadexManga(url: String) =
         db.get()
             .`object`(Manga::class.java)
