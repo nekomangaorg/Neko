@@ -153,7 +153,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     }
 
     /** Scale listener used to delegate events to the recycler view. */
-    inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             recycler.onScaleBegin()
             return true
@@ -170,7 +170,7 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     }
 
     /** Fling listener used to delegate events to the recycler view. */
-    inner class FlingListener : GestureDetector.SimpleOnGestureListener() {
+    private inner class FlingListener : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
