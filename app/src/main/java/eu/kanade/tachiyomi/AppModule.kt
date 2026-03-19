@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
-import androidx.core.content.ContextCompat
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -43,6 +42,9 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
@@ -169,7 +171,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
-        ContextCompat.getMainExecutor(app).execute {
+        CoroutineScope(Dispatchers.Default).launch {
             get<NetworkHelper>()
 
             get<SourceManager>()
