@@ -9,6 +9,6 @@ import tachiyomi.core.preference.Preference
 
 fun Preference<Boolean>.toggle() = set(!get())
 
-fun <T> Flow<T>.observeAndUpdate(scope: CoroutineScope, update: (T) -> Unit) {
+fun <T> Flow<T>.observeAndUpdate(scope: CoroutineScope, update: suspend (T) -> Unit) {
     this.distinctUntilChanged().onEach { value -> update(value) }.launchIn(scope)
 }
