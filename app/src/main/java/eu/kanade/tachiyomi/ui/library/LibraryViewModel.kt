@@ -427,15 +427,8 @@ class LibraryViewModel() : ViewModel() {
                 libraryViewFlow,
                 lastReadMangaFlow,
                 lastFetchMangaFlow,
-                _mangaRefreshingState.asStateFlow(),
                 libraryPreferences.removeArticles().changes(),
-            ) {
-                groupedItems,
-                libraryViewPreferences,
-                lastReadMap,
-                lastFetchMap,
-                mangaRefreshingState,
-                removeArticles ->
+            ) { groupedItems, libraryViewPreferences, lastReadMap, lastFetchMap, removeArticles ->
                 withContext(Dispatchers.Default) {
                     var allCollapsed = true
 
@@ -464,20 +457,38 @@ class LibraryViewModel() : ViewModel() {
                                         .sortedWith(comparator)
                                         .toPersistentList()
 
-                                val isRefreshing =
-                                    libraryCategoryItem.libraryItems.fastAny {
-                                        it.displayManga.mangaId in mangaRefreshingState
-                                    }
-
-                                libraryCategoryItem.copy(
-                                    libraryItems = sortedList,
-                                    isRefreshing = isRefreshing,
-                                )
+                                libraryCategoryItem.copy(libraryItems = sortedList)
                             }
                             .toPersistentList()
 
                     // Return a lightweight object or Pair to pass to the collector
                     Triple(sortedItems, allCollapsed, libraryViewPreferences)
+                }
+            }
+            .distinctUntilChanged()
+
+    // 4. REFRESHING FLOW: Applies the high-frequency refreshing state to the sorted items
+    private val itemsWithRefreshingFlow =
+        combine(sortedMangaFlow, _mangaRefreshingState.asStateFlow()) {
+                (sortedItems, allCollapsed, libraryViewPreferences),
+                mangaRefreshingState ->
+                withContext(Dispatchers.Default) {
+                    val updatedItems =
+                        if (mangaRefreshingState.isEmpty()) {
+                            // Fast path: nothing is refreshing
+                            sortedItems.map { it.copy(isRefreshing = false) }.toPersistentList()
+                        } else {
+                            sortedItems
+                                .mapAsync { libraryCategoryItem ->
+                                    val isRefreshing =
+                                        libraryCategoryItem.libraryItems.fastAny {
+                                            it.displayManga.mangaId in mangaRefreshingState
+                                        }
+                                    libraryCategoryItem.copy(isRefreshing = isRefreshing)
+                                }
+                                .toPersistentList()
+                        }
+                    Triple(updatedItems, allCollapsed, libraryViewPreferences)
                 }
             }
             .distinctUntilChanged()
@@ -494,20 +505,20 @@ class LibraryViewModel() : ViewModel() {
     val libraryScreenState: StateFlow<LibraryScreenState> =
         combine(
                 _internalLibraryScreenState,
-                sortedMangaFlow,
+                itemsWithRefreshingFlow,
                 trackMapFlow,
                 categoryListFlow,
                 libraryViewFlow,
                 uiSettingsFlow,
             ) {
                 state,
-                (sortedItems, allCollapsed, _),
+                (itemsWithRefreshing, allCollapsed, _),
                 trackMap,
                 categories,
                 viewPrefs,
                 (gridSize, layout, filters) ->
                 state.copy(
-                    items = sortedItems,
+                    items = itemsWithRefreshing,
                     allCollapsed = allCollapsed,
                     libraryDisplayMode = layout,
                     rawColumnCount = gridSize,
