@@ -117,10 +117,9 @@ class PageHandler {
             }
         val now = Date().time
 
-        val pages =
-            pageArray.mapIndexed { pos, imgUrl ->
-                Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
-            }
+        val pages = pageArray.mapIndexed { pos, imgUrl ->
+            Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
+        }
 
         imageHandler.updateTokenTracker(chapterId, now)
 

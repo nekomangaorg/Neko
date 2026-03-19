@@ -6,21 +6,20 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.nekomanga.logging.TimberKt
 
 fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpLoggingInterceptor {
-    val logger: HttpLoggingInterceptor.Logger =
-        HttpLoggingInterceptor.Logger { message ->
-            try {
-                if (message.contains("grant_type=") || message.contains("""access_token:""")) {
-                    TimberKt.d {
-                        "Not logging request because it contained sessionToken || refreshToken"
-                    }
-                } else {
-                    val element = json.parseToJsonElement(message)
-                    TimberKt.d { json.encodeToString(element) }
+    val logger: HttpLoggingInterceptor.Logger = HttpLoggingInterceptor.Logger { message ->
+        try {
+            if (message.contains("grant_type=") || message.contains("""access_token:""")) {
+                TimberKt.d {
+                    "Not logging request because it contained sessionToken || refreshToken"
                 }
-            } catch (ex: Exception) {
-                TimberKt.d { message }
+            } else {
+                val element = json.parseToJsonElement(message)
+                TimberKt.d { json.encodeToString(element) }
             }
+        } catch (ex: Exception) {
+            TimberKt.d { message }
         }
+    }
 
     return HttpLoggingInterceptor(logger).apply {
         level =

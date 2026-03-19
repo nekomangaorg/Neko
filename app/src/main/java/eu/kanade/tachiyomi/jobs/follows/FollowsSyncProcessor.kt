@@ -76,46 +76,41 @@ class FollowsSyncProcessor {
                             .filter { it.favorite }
                             .map { it.uuid() to it }
 
-                    val mangaIdsToUpdate =
-                        listManga.mapNotNull { networkManga ->
-                            updateNotification(
-                                networkManga.title,
-                                count.andIncrement,
-                                listManga.size,
-                            )
+                    val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
+                        updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
-                            var dbManga =
+                        var dbManga =
+                            db.getManga(networkManga.url, sourceManager.mangaDex.id)
+                                .executeAsBlocking()
+                        if (dbManga == null) {
+                            dbManga =
+                                Manga.create(
+                                    networkManga.url,
+                                    networkManga.title,
+                                    sourceManager.mangaDex.id,
+                                )
+                            dbManga.date_added = Date().time
+                        }
+
+                        // Increment and update if it is not already favorited
+                        if (!dbManga.favorite) {
+                            countOfAdded.incrementAndGet()
+                            dbManga.favorite = true
+
+                            db.insertManga(dbManga).executeAsBlocking()
+
+                            dbManga =
                                 db.getManga(networkManga.url, sourceManager.mangaDex.id)
                                     .executeAsBlocking()
-                            if (dbManga == null) {
-                                dbManga =
-                                    Manga.create(
-                                        networkManga.url,
-                                        networkManga.title,
-                                        sourceManager.mangaDex.id,
-                                    )
-                                dbManga.date_added = Date().time
+                            if (defaultCategory != null) {
+                                val mc = MangaCategory.create(dbManga!!, defaultCategory)
+                                db.setMangaCategories(listOf(mc), listOf(dbManga))
                             }
 
-                            // Increment and update if it is not already favorited
-                            if (!dbManga.favorite) {
-                                countOfAdded.incrementAndGet()
-                                dbManga.favorite = true
-
-                                db.insertManga(dbManga).executeAsBlocking()
-
-                                dbManga =
-                                    db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                                        .executeAsBlocking()
-                                if (defaultCategory != null) {
-                                    val mc = MangaCategory.create(dbManga!!, defaultCategory)
-                                    db.setMangaCategories(listOf(mc), listOf(dbManga))
-                                }
-
-                                return@mapNotNull dbManga?.id
-                            }
-                            return@mapNotNull null
+                            return@mapNotNull dbManga?.id
                         }
+                        return@mapNotNull null
+                    }
                     updateManga(mangaIdsToUpdate)
                 }
 

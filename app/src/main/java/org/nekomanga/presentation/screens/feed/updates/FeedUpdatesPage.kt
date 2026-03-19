@@ -272,10 +272,9 @@ private fun Ungrouped(
                 }
             }
 
-            val chaptersForDate =
-                mangaListForDate.flatMap { feedManga ->
-                    feedManga.chapters.map { chapter -> Pair(feedManga, chapter) }
-                }
+            val chaptersForDate = mangaListForDate.flatMap { feedManga ->
+                feedManga.chapters.map { chapter -> Pair(feedManga, chapter) }
+            }
 
             chaptersForDate.forEachIndexed { chapterIndex, (feedManga, chapterItem) ->
                 val listCardType =

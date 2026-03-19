@@ -200,10 +200,9 @@ interface HistoryQueries : DbProvider {
      *
      * @param historyList history object list
      */
-    fun upsertHistoryLastRead(historyList: List<History>) =
-        db.inTransactionReturn {
-            db.put().objects(historyList).withPutResolver(HistoryUpsertResolver()).prepare()
-        }
+    fun upsertHistoryLastRead(historyList: List<History>) = db.inTransactionReturn {
+        db.put().objects(historyList).withPutResolver(HistoryUpsertResolver()).prepare()
+    }
 
     fun deleteHistory() =
         db.delete().byQuery(DeleteQuery.builder().table(HistoryTable.TABLE).build()).prepare()

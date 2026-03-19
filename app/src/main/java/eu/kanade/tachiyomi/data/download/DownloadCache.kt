@@ -155,14 +155,13 @@ class DownloadCache(
     private fun renew() {
         if (renewJob?.isActive == true) return
 
-        renewJob =
-            scope.launch {
-                try {
-                    renewCache()
-                } catch (e: Exception) {
-                    TimberKt.e(e) { "Failed to renew cache" }
-                }
+        renewJob = scope.launch {
+            try {
+                renewCache()
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to renew cache" }
             }
+        }
     }
 
     private suspend fun renewCache() {
@@ -179,10 +178,9 @@ class DownloadCache(
         val allManga = db.getMangaList().executeAsBlocking()
 
         // 3. Create lookup map for O(1) access
-        val mangaLookup =
-            allManga.associateBy {
-                DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
-            }
+        val mangaLookup = allManga.associateBy {
+            DiskUtil.buildValidFilename(it.displayTitle()).lowercase(Locale.getDefault())
+        }
 
         // 4. Iterate over the folders on disk
         val newMangaFiles = ConcurrentHashMap<Long, MangaFiles>()

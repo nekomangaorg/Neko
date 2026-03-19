@@ -322,10 +322,9 @@ constructor(
                     ) {
                         sortedChapterItems
                     } else {
-                        val selectedChapterItem =
-                            allChapterItems.first {
-                                it.chapter.id == (currentReaderChapter?.chapter?.id ?: chapterId)
-                            }
+                        val selectedChapterItem = allChapterItems.first {
+                            it.chapter.id == (currentReaderChapter?.chapter?.id ?: chapterId)
+                        }
                         (sortedChapterItems + selectedChapterItem).sortedWith(
                             chapterItemSort.sortComparator(manga, true)
                         )
@@ -379,8 +378,9 @@ constructor(
 
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-                val currentChapter =
-                    newChapters.find { it.url == MdConstants.chapterSuffix + urlChapterId }
+                val currentChapter = newChapters.find {
+                    it.url == MdConstants.chapterSuffix + urlChapterId
+                }
                 if (currentChapter?.id != null) {
                     withContext(Dispatchers.Main) { init(manga.id!!, currentChapter.id!!) }
                 } else {

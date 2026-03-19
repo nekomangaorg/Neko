@@ -114,14 +114,13 @@ constructor(
         }
     }
 
-    fun recycle() =
-        pageView?.let {
-            when (it) {
-                is SubsamplingScaleImageView -> it.recycle()
-                is AppCompatImageView -> it.dispose()
-            }
-            it.isVisible = false
+    fun recycle() = pageView?.let {
+        when (it) {
+            is SubsamplingScaleImageView -> it.recycle()
+            is AppCompatImageView -> it.dispose()
         }
+        it.isVisible = false
+    }
 
     private fun prepareNonAnimatedImageView() {
         if (pageView is SubsamplingScaleImageView) return

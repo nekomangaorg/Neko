@@ -767,10 +767,9 @@ class LibraryViewModel() : ViewModel() {
 
             val mangaIds = mangaList.map { it.mangaId }
             val dbMangas = db.getMangas(mangaIds).executeOnIO()
-            val mangaCategories =
-                dbMangas.flatMap { dbManga ->
-                    dbCategories.map { MangaCategory.create(dbManga, it) }
-                }
+            val mangaCategories = dbMangas.flatMap { dbManga ->
+                dbCategories.map { MangaCategory.create(dbManga, it) }
+            }
             db.setMangaCategories(mangaCategories, dbMangas)
 
             clearSelectedManga()
@@ -1029,12 +1028,14 @@ class LibraryViewModel() : ViewModel() {
 
             if (allSelected) {
                 // Unselect all
-                newSelectedItems =
-                    currentSelected.filter { it.displayManga.mangaId !in categoryItemIds }
+                newSelectedItems = currentSelected.filter {
+                    it.displayManga.mangaId !in categoryItemIds
+                }
             } else {
                 // Select all
-                val itemsToAdd =
-                    libraryMangaItems.filter { it.displayManga.mangaId !in selectedItemIds }
+                val itemsToAdd = libraryMangaItems.filter {
+                    it.displayManga.mangaId !in selectedItemIds
+                }
 
                 newSelectedItems = currentSelected + itemsToAdd
             }
@@ -1166,10 +1167,9 @@ class LibraryViewModel() : ViewModel() {
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
-                        val unreadDbChapters =
-                            chapterItems.mapNotNull {
-                                if (!it.chapter.read) it.chapter.toDbChapter() else null
-                            }
+                        val unreadDbChapters = chapterItems.mapNotNull {
+                            if (!it.chapter.read) it.chapter.toDbChapter() else null
+                        }
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
@@ -1179,10 +1179,9 @@ class LibraryViewModel() : ViewModel() {
                         )
                     }
                     DownloadAction.RemoveRead -> {
-                        val readDbChapters =
-                            chapterItems.mapNotNull {
-                                if (it.chapter.read) it.chapter.toDbChapter() else null
-                            }
+                        val readDbChapters = chapterItems.mapNotNull {
+                            if (it.chapter.read) it.chapter.toDbChapter() else null
+                        }
                         downloadManager.deleteChapters(dbManga, readDbChapters)
                     }
                     else -> Unit
@@ -1200,14 +1199,13 @@ class LibraryViewModel() : ViewModel() {
             // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
             // to avoid allocating an intermediate list of available chapters,
             // reducing GC overhead when the user quickly jumps to reading.
-            val availableChapters =
-                chapters.mapNotNull { chapter ->
-                    if (chapter.isAvailable(downloadManager, manga)) {
-                        chapter.toSimpleChapter()?.toChapterItem()
-                    } else {
-                        null
-                    }
+            val availableChapters = chapters.mapNotNull { chapter ->
+                if (chapter.isAvailable(downloadManager, manga)) {
+                    chapter.toSimpleChapter()?.toChapterItem()
+                } else {
+                    null
                 }
+            }
 
             val chapter = ChapterItemSort().getNextUnreadChapter(manga, availableChapters)
             chapter ?: return@launchIO

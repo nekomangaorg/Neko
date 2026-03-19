@@ -85,13 +85,12 @@ class ChapterItemFilter(
         selectedChapterItem: ChapterItem? = null,
     ): List<ChapterItem> {
         // 1. Filter by isAvailable
-        var filteredChapters =
-            chapters.filter {
-                val dbChapter = it.chapter.toDbChapter()
-                val isDownloaded = downloadManager.isChapterDownloaded(dbChapter, manga)
-                // Use the extension function for Chapter
-                dbChapter.isAvailable(isDownloaded)
-            }
+        var filteredChapters = chapters.filter {
+            val dbChapter = it.chapter.toDbChapter()
+            val isDownloaded = downloadManager.isChapterDownloaded(dbChapter, manga)
+            // Use the extension function for Chapter
+            dbChapter.isAvailable(isDownloaded)
+        }
 
         // 2. Filter by scanlators/language
         filteredChapters =
@@ -103,10 +102,9 @@ class ChapterItemFilter(
             )
 
         // 3. Filter out unsupported groups
-        filteredChapters =
-            filteredChapters.filter {
-                it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList
-            }
+        filteredChapters = filteredChapters.filter {
+            it.chapter.scanlator !in MdConstants.UnsupportedOfficialGroupList
+        }
 
         // 4. Check if reader filters are enabled
         if (
@@ -194,16 +192,15 @@ class ChapterItemFilter(
             val scanlators = ChapterUtil.getScanlators(chapterItem.chapter.scanlator)
             val languages = ChapterUtil.getLanguages(chapterItem.chapter.language)
 
-            val sourceFiltered =
-                sources.any { sourceName ->
-                    ChapterUtil.filteredBySource(
-                        sourceName,
-                        scanlators,
-                        chapterItem.chapter.isMergedChapter(),
-                        chapterItem.chapter.isLocalSource(),
-                        filteredScanlators,
-                    )
-                }
+            val sourceFiltered = sources.any { sourceName ->
+                ChapterUtil.filteredBySource(
+                    sourceName,
+                    scanlators,
+                    chapterItem.chapter.isMergedChapter(),
+                    chapterItem.chapter.isLocalSource(),
+                    filteredScanlators,
+                )
+            }
 
             val languageFiltered = ChapterUtil.filterByLanguage(languages, filteredLanguages)
 

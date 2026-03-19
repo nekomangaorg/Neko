@@ -67,23 +67,22 @@ fun <T> runAsObservable(
 ): Observable<T> {
     return Observable.create(
         { emitter ->
-            val job =
-                scope.launchIO {
-                    try {
-                        emitter.onNext(block())
+            val job = scope.launchIO {
+                try {
+                    emitter.onNext(block())
+                    emitter.onCompleted()
+                } catch (e: Throwable) {
+                    // Ignore `CancellationException` as error, since it indicates "normal
+                    // cancellation"
+                    if (e !is CancellationException) {
+                        TimberKt.e(e) { "Error in coroutine bridge" }
+                        emitter.onError(e)
+                    } else {
+                        TimberKt.d { "Coroutine cancelled" }
                         emitter.onCompleted()
-                    } catch (e: Throwable) {
-                        // Ignore `CancellationException` as error, since it indicates "normal
-                        // cancellation"
-                        if (e !is CancellationException) {
-                            TimberKt.e(e) { "Error in coroutine bridge" }
-                            emitter.onError(e)
-                        } else {
-                            TimberKt.d { "Coroutine cancelled" }
-                            emitter.onCompleted()
-                        }
                     }
                 }
+            }
             emitter.setCancellation { job.cancel() }
         },
         backpressureMode,

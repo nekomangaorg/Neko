@@ -440,18 +440,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                             if (dynamicCover && effectiveManga.favorite) {
                                 dynamicCoverUpdateJob?.cancel()
-                                dynamicCoverUpdateJob =
-                                    viewModelScope.launchIO {
-                                        delay(DYNAMIC_COVER_UPDATE_DELAY_MS)
-                                        val lastReadChapterId =
-                                            history.maxByOrNull { it.last_read }?.chapter_id
-                                        updateDynamicCover(
-                                            effectiveManga = effectiveManga,
-                                            lastReadChapterId = lastReadChapterId,
-                                            allChapters = staticChapterData.allChapters,
-                                            artworkList = artworkList,
-                                        )
-                                    }
+                                dynamicCoverUpdateJob = viewModelScope.launchIO {
+                                    delay(DYNAMIC_COVER_UPDATE_DELAY_MS)
+                                    val lastReadChapterId =
+                                        history.maxByOrNull { it.last_read }?.chapter_id
+                                    updateDynamicCover(
+                                        effectiveManga = effectiveManga,
+                                        lastReadChapterId = lastReadChapterId,
+                                        allChapters = staticChapterData.allChapters,
+                                        artworkList = artworkList,
+                                    )
+                                }
                             }
 
                             val artwork = createCurrentArtwork(effectiveManga)
@@ -505,14 +504,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     }
                                     .toPersistentList()
 
-                            val trackCount =
-                                loggedInTrackerService.count { service ->
-                                    tracks.any { track ->
-                                        service.id == track.trackServiceId &&
-                                            (!service.isMdList ||
-                                                !FollowStatus.isUnfollowed(track.status))
-                                    }
+                            val trackCount = loggedInTrackerService.count { service ->
+                                tracks.any { track ->
+                                    service.id == track.trackServiceId &&
+                                        (!service.isMdList ||
+                                            !FollowStatus.isUnfollowed(track.status))
                                 }
+                            }
 
                             val displayFilter = getChapterDisplay(effectiveManga)
                             val sortFilter = getSortFilter(effectiveManga)
@@ -734,10 +732,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             dbManga,
                             chapterItems.map { it.chapter.toDbChapter() },
                         )
-                        val localDbChapters =
-                            chapterItems.mapNotNull {
-                                if (it.chapter.isLocalSource()) it.chapter.toDbChapter() else null
-                            }
+                        val localDbChapters = chapterItems.mapNotNull {
+                            if (it.chapter.isLocalSource()) it.chapter.toDbChapter() else null
+                        }
                         if (localDbChapters.isNotEmpty()) {
                             db.deleteChapters(localDbChapters).executeAsBlocking()
                         }
@@ -1045,12 +1042,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         it.toSimpleChapter()?.toChapterItem()
                     }
 
-                val chaptersToMark =
-                    allChapters.filter {
-                        !it.chapter.read &&
-                            it.chapter.chapterNumber >= 0f &&
-                            it.chapter.chapterNumber <= maxChapterRead
-                    }
+                val chaptersToMark = allChapters.filter {
+                    !it.chapter.read &&
+                        it.chapter.chapterNumber >= 0f &&
+                        it.chapter.chapterNumber <= maxChapterRead
+                }
 
                 if (chaptersToMark.isNotEmpty()) {
                     // markChapters handles updating the DB and syncing to other trackers

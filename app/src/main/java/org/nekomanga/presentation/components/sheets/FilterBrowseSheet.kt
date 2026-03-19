@@ -641,8 +641,9 @@ fun SavedFilters(
         Column(modifier = Modifier.fillMaxWidth()) {
             val sortedFilters by
                 remember(nameOfEnabledFilter) {
-                    val enabledFilterIndex =
-                        savedFilters.indexOfFirst { nameOfEnabledFilter.equals(it.name, true) }
+                    val enabledFilterIndex = savedFilters.indexOfFirst {
+                        nameOfEnabledFilter.equals(it.name, true)
+                    }
                     if (enabledFilterIndex == -1) {
                         mutableStateOf(savedFilters)
                     } else {

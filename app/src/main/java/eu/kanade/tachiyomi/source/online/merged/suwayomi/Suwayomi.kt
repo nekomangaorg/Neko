@@ -729,14 +729,13 @@ class Suwayomi : MergedServerSource() {
             client.newCall(POST(apiUrl, headers, fetchPagesFormBuilder(chapterId))).await()
         val responseBody = response.body
 
-        val pages =
-            responseBody.use {
-                json
-                    .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChapterPagesDto>>(it.string())
-                    .data
-                    ?.fetchChapterPages
-                    ?.pages ?: throw Exception("Failed to get pages")
-            }
+        val pages = responseBody.use {
+            json
+                .decodeFromString<SuwayomiGraphQLDto<SuwayomiFetchChapterPagesDto>>(it.string())
+                .data
+                ?.fetchChapterPages
+                ?.pages ?: throw Exception("Failed to get pages")
+        }
         return pages.withIndex().map { (index, page) ->
             Page(index, imageUrl = "${hostUrl()}${page}")
         }

@@ -108,88 +108,85 @@ class Toonily : ReducedHttpSource() {
 
         val elements = document.select("li.wp-manga-chapter").reversed()
 
-        val chapters =
-            elements.map { element ->
-                val chapter = SChapter.create()
-                val chapterName = mutableListOf<String>()
+        val chapters = elements.map { element ->
+            val chapter = SChapter.create()
+            val chapterName = mutableListOf<String>()
 
-                var toonilyChapterName = ""
-                element.select("a").first()?.let { urlElement ->
-                    chapter.url =
-                        urlElement.attr("abs:href").let {
-                            it.substringBefore("?style=paged") +
-                                if (!it.endsWith("?style=list")) "?style=list" else ""
-                        }
-                    toonilyChapterName = urlElement.text()
-                }
-
-                if (toonilyChapterName.startsWith("S${currentVolume + 1}")) {
-                    currentVolume++
-                }
-
-                // edge case where there is a Season finale then an epilogue after it in the same
-                // season
-                if (toonilyChapterName.endsWith("Season ${currentVolume - 1} Epilogue")) {
-                    val previousVolume = currentVolume - 1
-                    chapterName.add("Vol.$previousVolume")
-                    chapter.vol = previousVolume.toString()
-                } else {
-                    chapterName.add("Vol.$currentVolume")
-                    chapter.vol = currentVolume.toString()
-                }
-
-                val endingList = listOf("Season $currentVolume END", "Season $currentVolume Finale")
-
-                if (endingList.any { toonilyChapterName.endsWith(it, true) }) {
-                    currentVolume++
-                }
-
-                val chapterNumber =
-                    toonilyChapterName.substringAfter("Chapter ", "").substringBefore("-")
-
-                val actualChapterNumberToUse =
-                    when (chapterNumber.isBlank()) {
-                        true -> {
-                            currentExtraNumber++
-                            "$previousChapterNumber.$currentExtraNumber"
-                        }
-                        false -> {
-                            previousChapterNumber = chapterNumber.trim()
-                            currentExtraNumber = 0
-                            previousChapterNumber
-                        }
+            var toonilyChapterName = ""
+            element.select("a").first()?.let { urlElement ->
+                chapter.url =
+                    urlElement.attr("abs:href").let {
+                        it.substringBefore("?style=paged") +
+                            if (!it.endsWith("?style=list")) "?style=list" else ""
                     }
-                val chpText = "Ch.$actualChapterNumberToUse"
-                chapterName.add(chpText)
-                chapter.chapter_txt = chpText
+                toonilyChapterName = urlElement.text()
+            }
 
-                val chpName =
-                    toonilyChapterName
-                        .substringAfter("Chapter $chapterNumber")
-                        .substringAfterLast("-")
+            if (toonilyChapterName.startsWith("S${currentVolume + 1}")) {
+                currentVolume++
+            }
 
-                if (chpName.isNotBlank()) {
-                    chapterName.add("-")
-                    chapterName.add(chpName)
+            // edge case where there is a Season finale then an epilogue after it in the same
+            // season
+            if (toonilyChapterName.endsWith("Season ${currentVolume - 1} Epilogue")) {
+                val previousVolume = currentVolume - 1
+                chapterName.add("Vol.$previousVolume")
+                chapter.vol = previousVolume.toString()
+            } else {
+                chapterName.add("Vol.$currentVolume")
+                chapter.vol = currentVolume.toString()
+            }
+
+            val endingList = listOf("Season $currentVolume END", "Season $currentVolume Finale")
+
+            if (endingList.any { toonilyChapterName.endsWith(it, true) }) {
+                currentVolume++
+            }
+
+            val chapterNumber =
+                toonilyChapterName.substringAfter("Chapter ", "").substringBefore("-")
+
+            val actualChapterNumberToUse =
+                when (chapterNumber.isBlank()) {
+                    true -> {
+                        currentExtraNumber++
+                        "$previousChapterNumber.$currentExtraNumber"
+                    }
+                    false -> {
+                        previousChapterNumber = chapterNumber.trim()
+                        currentExtraNumber = 0
+                        previousChapterNumber
+                    }
                 }
+            val chpText = "Ch.$actualChapterNumberToUse"
+            chapterName.add(chpText)
+            chapter.chapter_txt = chpText
 
-                chapter.name = chapterName.joinToString(" ")
+            val chpName =
+                toonilyChapterName.substringAfter("Chapter $chapterNumber").substringAfterLast("-")
 
-                chapter.scanlator = Toonily.name
+            if (chpName.isNotBlank()) {
+                chapterName.add("-")
+                chapterName.add(chpName)
+            }
 
-                chapter.date_upload =
-                    element.select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let {
+            chapter.name = chapterName.joinToString(" ")
+
+            chapter.scanlator = Toonily.name
+
+            chapter.date_upload =
+                element.select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let {
+                    parseChapterDate(it)
+                }
+                    ?: element.select("span a").firstOrNull()?.attr("title")?.let {
                         parseChapterDate(it)
                     }
-                        ?: element.select("span a").firstOrNull()?.attr("title")?.let {
-                            parseChapterDate(it)
-                        }
-                        ?: parseChapterDate(
-                            element.select("span.chapter-release-date").firstOrNull()?.text()
-                        )
+                    ?: parseChapterDate(
+                        element.select("span.chapter-release-date").firstOrNull()?.text()
+                    )
 
-                chapter to false
-            }
+            chapter to false
+        }
         return Ok(chapters.reversed())
     }
 

@@ -262,13 +262,12 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val manga = db.getManga(mangaId).executeAsBlocking() ?: return
 
-        val dbChapters =
-            chapterUrls.map { chapterUrl ->
-                val chapter = db.getChapter(chapterUrl, mangaId).executeAsBlocking() ?: return
-                chapter.read = true
-                db.updateChapterProgress(chapter).executeAsBlocking()
-                chapter
-            }
+        val dbChapters = chapterUrls.map { chapterUrl ->
+            val chapter = db.getChapter(chapterUrl, mangaId).executeAsBlocking() ?: return
+            chapter.read = true
+            db.updateChapterProgress(chapter).executeAsBlocking()
+            chapter
+        }
         if (preferences.removeAfterMarkedAsRead().get()) {
             val chaptersToDelete = dbChapters.filter { it.canDeleteChapter() }
             downloadManager.deleteChapters(manga, chaptersToDelete)

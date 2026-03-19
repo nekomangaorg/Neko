@@ -164,58 +164,55 @@ class Downloader(
     private fun launchDownloaderJob() {
         if (isRunning) return
 
-        downloaderJob =
-            scope.launch {
-                val activeDownloadsFlow =
-                    queueState
-                        .transformLatest { queue ->
-                            while (true) {
-                                val activeDownloads =
-                                    queue
-                                        .asSequence()
-                                        .apply {
-                                            removeFromQueueIf { it.chapterItem.isUnavailable }
-                                        }
-                                        .filter {
-                                            it.status.value <= Download.State.DOWNLOADING.value &&
-                                                !it.chapterItem.isUnavailable
-                                        } // Ignore completed downloads, leave them in the queue
-                                        .groupBy { it.source }
-                                        .toList()
-                                        .map { (_, downloads) -> downloads.take(2) }
-                                        .flatten()
-                                emit(activeDownloads)
+        downloaderJob = scope.launch {
+            val activeDownloadsFlow =
+                queueState
+                    .transformLatest { queue ->
+                        while (true) {
+                            val activeDownloads =
+                                queue
+                                    .asSequence()
+                                    .apply { removeFromQueueIf { it.chapterItem.isUnavailable } }
+                                    .filter {
+                                        it.status.value <= Download.State.DOWNLOADING.value &&
+                                            !it.chapterItem.isUnavailable
+                                    } // Ignore completed downloads, leave them in the queue
+                                    .groupBy { it.source }
+                                    .toList()
+                                    .map { (_, downloads) -> downloads.take(2) }
+                                    .flatten()
+                            emit(activeDownloads)
 
-                                if (activeDownloads.isEmpty()) break
-                                // Suspend until a download enters the ERROR state
-                                val activeDownloadsErroredFlow =
-                                    combine(activeDownloads.map(Download::statusFlow)) { states ->
-                                            states.contains(Download.State.ERROR)
-                                        }
-                                        .filter { it }
-                                activeDownloadsErroredFlow.first()
-                            }
+                            if (activeDownloads.isEmpty()) break
+                            // Suspend until a download enters the ERROR state
+                            val activeDownloadsErroredFlow =
+                                combine(activeDownloads.map(Download::statusFlow)) { states ->
+                                        states.contains(Download.State.ERROR)
+                                    }
+                                    .filter { it }
+                            activeDownloadsErroredFlow.first()
                         }
-                        .distinctUntilChanged()
+                    }
+                    .distinctUntilChanged()
 
-                // Use supervisorScope to cancel child jobs when the downloader job is cancelled
-                supervisorScope {
-                    val downloadJobs = mutableMapOf<Download, Job>()
+            // Use supervisorScope to cancel child jobs when the downloader job is cancelled
+            supervisorScope {
+                val downloadJobs = mutableMapOf<Download, Job>()
 
-                    activeDownloadsFlow.collectLatest { activeDownloads ->
-                        val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
-                        downloadJobsToStop.forEach { (download, job) ->
-                            job.cancel()
-                            downloadJobs.remove(download)
-                        }
+                activeDownloadsFlow.collectLatest { activeDownloads ->
+                    val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
+                    downloadJobsToStop.forEach { (download, job) ->
+                        job.cancel()
+                        downloadJobs.remove(download)
+                    }
 
-                        val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
-                        downloadsToStart.forEach { download ->
-                            downloadJobs[download] = launchDownloadJob(download)
-                        }
+                    val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
+                    downloadsToStart.forEach { download ->
+                        downloadJobs[download] = launchDownloadJob(download)
                     }
                 }
             }
+        }
     }
 
     private fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
@@ -334,10 +331,9 @@ class Downloader(
                             throw Exception(context.getString(R.string.no_pages_found))
                         }
                         // Don't trust index from source
-                        val reIndexedPages =
-                            pages.mapIndexed { index, page ->
-                                Page(index, page.url, page.imageUrl, uri = page.uri)
-                            }
+                        val reIndexedPages = pages.mapIndexed { index, page ->
+                            Page(index, page.url, page.imageUrl, uri = page.uri)
+                        }
                         download.pages = reIndexedPages
                         reIndexedPages
                     }

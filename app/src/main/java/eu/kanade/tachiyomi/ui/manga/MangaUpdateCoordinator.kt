@@ -209,14 +209,13 @@ class MangaUpdateCoordinator {
 
         val readFromMerged =
             mergedChapterPairs.mapNotNull { if (it.second) it.first.url else null }.toSet()
-        val mergedChapters =
-            mergedChapterPairs.map { (sChapter, _) ->
-                val lastChapterNum = manga.last_chapter_number?.toFloat()
-                if (lastChapterNum != null && sChapter.chapter_number == lastChapterNum) {
-                    sChapter.name += " [END]"
-                }
-                sChapter
+        val mergedChapters = mergedChapterPairs.map { (sChapter, _) ->
+            val lastChapterNum = manga.last_chapter_number?.toFloat()
+            if (lastChapterNum != null && sChapter.chapter_number == lastChapterNum) {
+                sChapter.name += " [END]"
             }
+            sChapter
+        }
 
         val allChapters = (dexChapters + mergedChapters).sortedWith(compareBy { getChapterNum(it) })
         Triple(allChapters, readFromMerged, mergedSourceError)

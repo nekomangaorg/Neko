@@ -16,14 +16,13 @@ class MangaFlagsPutResolver(
     private val updateAll: Boolean = false,
 ) : PutResolver<Manga>() {
 
-    override fun performPut(db: StorIOSQLite, manga: Manga) =
-        db.inTransactionReturn {
-            val updateQuery = mapToUpdateQuery(manga)
-            val contentValues = mapToContentValues(manga)
+    override fun performPut(db: StorIOSQLite, manga: Manga) = db.inTransactionReturn {
+        val updateQuery = mapToUpdateQuery(manga)
+        val contentValues = mapToContentValues(manga)
 
-            val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
-            PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
-        }
+        val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
+        PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
+    }
 
     fun mapToUpdateQuery(manga: Manga): UpdateQuery {
         val builder = UpdateQuery.builder()

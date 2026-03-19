@@ -185,21 +185,19 @@ class FeedRepository(
 
                     if (groupedEntries.isEmpty()) return emptyList()
 
-                    val processedEntries =
-                        groupedEntries.map { entry ->
-                            val feedMangaFiltered =
-                                entry.value.filter { feedManga ->
-                                    feedManga.chapters.isNotEmpty() &&
-                                        feedManga.chapters.none { it.chapter.read }
-                                }
-                            entry to feedMangaFiltered
-                        }
+                    val processedEntries = groupedEntries.map { entry ->
+                        val feedMangaFiltered =
+                            entry.value.filter { feedManga ->
+                                feedManga.chapters.isNotEmpty() &&
+                                    feedManga.chapters.none { it.chapter.read }
+                            }
+                        entry to feedMangaFiltered
+                    }
 
                     // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
-                    val mangaIdsToFetch =
-                        processedEntries.mapNotNull {
-                            if (it.second.isEmpty()) it.first.key else null
-                        }
+                    val mangaIdsToFetch = processedEntries.mapNotNull {
+                        if (it.second.isEmpty()) it.first.key else null
+                    }
 
                     val mangasMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
@@ -230,8 +228,9 @@ class FeedRepository(
                             val manga = mangasMap[mangaId] ?: return@mapNotNull null
                             val rawChapters = chaptersMap[mangaId] ?: emptyList()
 
-                            val chapters =
-                                rawChapters.filter { it.isAvailable(downloadManager, manga) }
+                            val chapters = rawChapters.filter {
+                                it.isAvailable(downloadManager, manga)
+                            }
                             val chapter =
                                 ChapterItemSort()
                                     .getNextUnreadChapter(

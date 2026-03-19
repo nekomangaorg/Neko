@@ -113,8 +113,9 @@ internal class AddEditCategoriesScreen(
                 confirmButton = stringResource(R.string.delete),
                 onDismiss = { deleteCategoryName = "" },
                 onConfirm = {
-                    val category =
-                        nonSystemCategories.firstOrNull { it.name.equals(deleteCategoryName, true) }
+                    val category = nonSystemCategories.firstOrNull {
+                        it.name.equals(deleteCategoryName, true)
+                    }
                     if (category != null) {
                         deleteCategory(category.id)
                     }

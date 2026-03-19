@@ -153,10 +153,9 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
                         // [OVERCLOCK] Pre-fetch related data for all existing manga in this chunk
                         // to prevent N+1 queries
-                        val existingMangaIds =
-                            preparedItems.mapNotNull { item ->
-                                dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]?.id
-                            }
+                        val existingMangaIds = preparedItems.mapNotNull { item ->
+                            dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]?.id
+                        }
 
                         val dbChaptersMap =
                             if (existingMangaIds.isNotEmpty())

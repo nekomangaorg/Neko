@@ -207,8 +207,9 @@ class StatsViewModel() : ViewModel() {
                         .sortedByDescending { it.second.count() }
                         .toPersistentList()
                 val totalCount = sortedSeries.sumOf { it.second.size }
-                val totalDuration =
-                    sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
+                val totalDuration = sortedSeries.sumOf { pair ->
+                    pair.second.sumOf { it.readDuration }
+                }
 
                 _detailState.update {
                     it.copy(

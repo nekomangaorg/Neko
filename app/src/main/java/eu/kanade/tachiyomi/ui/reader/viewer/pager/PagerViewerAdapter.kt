@@ -139,18 +139,16 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     /** Returns the current position of the given [view] on the adapter. */
     override fun getItemPosition(view: Any): Int {
         if (view is PositionableView) {
-            val position =
-                joinedItems.indexOfFirst {
-                    if (it.first is InsertPage && view.item is Pair<*, *>) {
-                        ((view.item as? Pair<*, *>?)?.first as? InsertPage)?.let { viewPage ->
-                            return@indexOfFirst (it.first as? InsertPage)?.isFromSamePage(
-                                viewPage
-                            ) == true && (it.first as? InsertPage)?.firstHalf == viewPage.firstHalf
-                        }
+            val position = joinedItems.indexOfFirst {
+                if (it.first is InsertPage && view.item is Pair<*, *>) {
+                    ((view.item as? Pair<*, *>?)?.first as? InsertPage)?.let { viewPage ->
+                        return@indexOfFirst (it.first as? InsertPage)?.isFromSamePage(viewPage) ==
+                            true && (it.first as? InsertPage)?.firstHalf == viewPage.firstHalf
                     }
-                    val secondPage = it.second as? ReaderPage
-                    view.item == it.first to secondPage
                 }
+                val secondPage = it.second as? ReaderPage
+                view.item == it.first to secondPage
+            }
             if (position != -1) {
                 return position
             } else {
@@ -362,19 +360,18 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                     (oldCurrent.second ?: oldCurrent.first)
                 else -> oldCurrent?.first ?: return
             }
-        var index =
-            joinedItems.indexOfFirst {
-                val readerPage = it.first as? ReaderPage
-                val readerPage2 = it.second as? ReaderPage
-                val newReaderPage = newPage as? ReaderPage
-                it.first == newPage ||
-                    it.second == newPage ||
-                    (readerPage != null &&
-                        newReaderPage != null &&
-                        (readerPage.isFromSamePage(newReaderPage) ||
-                            readerPage2?.isFromSamePage(newReaderPage) == true) &&
-                        (readerPage.firstHalf == !useSecondPage || readerPage.firstHalf == null))
-            }
+        var index = joinedItems.indexOfFirst {
+            val readerPage = it.first as? ReaderPage
+            val readerPage2 = it.second as? ReaderPage
+            val newReaderPage = newPage as? ReaderPage
+            it.first == newPage ||
+                it.second == newPage ||
+                (readerPage != null &&
+                    newReaderPage != null &&
+                    (readerPage.isFromSamePage(newReaderPage) ||
+                        readerPage2?.isFromSamePage(newReaderPage) == true) &&
+                    (readerPage.firstHalf == !useSecondPage || readerPage.firstHalf == null))
+        }
         if (newPage is ChapterTransition && index == -1 && !forceTransition) {
             val newerPage =
                 if (newPage is ChapterTransition.Next) {

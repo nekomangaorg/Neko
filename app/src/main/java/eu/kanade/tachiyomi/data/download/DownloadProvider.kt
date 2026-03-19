@@ -113,10 +113,9 @@ class DownloadProvider(
             }
 
         if (!found && chapter.mangadex_chapter_id.isNotEmpty()) {
-            found =
-                chapterDirs.any { uniFile ->
-                    uniFile.nameWithoutExtension!!.contains(chapter.uuid())
-                }
+            found = chapterDirs.any { uniFile ->
+                uniFile.nameWithoutExtension!!.contains(chapter.uuid())
+            }
         }
 
         return !found

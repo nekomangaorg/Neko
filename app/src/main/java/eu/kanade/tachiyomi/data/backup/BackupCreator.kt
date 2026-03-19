@@ -196,12 +196,11 @@ class BackupCreator(val context: Context) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
                 val historyChapters = chapters.associateBy { it.id }
-                val history =
-                    historyForManga.mapNotNull { history ->
-                        historyChapters[history.chapter_id]?.url?.let {
-                            BackupHistory(it, history.last_read, history.time_read)
-                        }
+                val history = historyForManga.mapNotNull { history ->
+                    historyChapters[history.chapter_id]?.url?.let {
+                        BackupHistory(it, history.last_read, history.time_read)
                     }
+                }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
                 }

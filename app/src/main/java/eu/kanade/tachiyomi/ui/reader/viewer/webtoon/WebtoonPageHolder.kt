@@ -145,10 +145,9 @@ class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonV
 
         val page = page ?: return
 
-        progressJob =
-            scope.launch {
-                page.progressFlow.collectLatest { value -> progressBar.setProgress(value) }
-            }
+        progressJob = scope.launch {
+            page.progressFlow.collectLatest { value -> progressBar.setProgress(value) }
+        }
     }
 
     /**

@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
@@ -191,8 +190,9 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                             db.setMangaCategories(categories, listOf(editManga))
                         }
                 } else if (categoryItems.isNotEmpty()) {
-                    val categories =
-                        categoryItems.map { MangaCategory.create(editManga, it.toDbCategory()) }
+                    val categories = categoryItems.map {
+                        MangaCategory.create(editManga, it.toDbCategory())
+                    }
                     db.setMangaCategories(categories, listOf(editManga))
                 }
             }

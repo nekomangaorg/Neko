@@ -124,10 +124,9 @@ class AdvancedSettingsViewModel : ViewModel() {
                     if (categories.size > 1) {
                         val oldest = categories.minBy { it.id!! }
                         val others = categories.filter { it.id != oldest.id }
-                        val mangaCategoryToMove =
-                            others.flatMap {
-                                db.getMangaCategoryForCategory(it).executeAsBlocking()
-                            }
+                        val mangaCategoryToMove = others.flatMap {
+                            db.getMangaCategoryForCategory(it).executeAsBlocking()
+                        }
                         if (mangaCategoryToMove.isNotEmpty()) {
                             mangaCategoryToMove.forEach {
                                 it.category_id = oldest.id!!

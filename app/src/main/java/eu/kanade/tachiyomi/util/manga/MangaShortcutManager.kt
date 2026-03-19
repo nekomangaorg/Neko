@@ -55,39 +55,33 @@ class MangaShortcutManager(
                     shortcutManager.maxShortcutCountPerActivity
                 )
 
-            val shortcuts =
-                recents.map { item ->
-                    val request =
-                        ImageRequest.Builder(context)
-                            .data(item.toDisplayManga().currentArtwork)
-                            .build()
-                    val bitmap = context.imageLoader.execute(request).image?.toBitmap()
+            val shortcuts = recents.map { item ->
+                val request =
+                    ImageRequest.Builder(context).data(item.toDisplayManga().currentArtwork).build()
+                val bitmap = context.imageLoader.execute(request).image?.toBitmap()
 
-                    ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
-                        .setShortLabel(
-                            item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga)
-                        )
-                        .setLongLabel(
-                            item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga)
-                        )
-                        .setIcon(
-                            if (bitmap != null) {
-                                Icon.createWithAdaptiveBitmap(bitmap.toSquare())
-                            } else {
-                                Icon.createWithResource(context, R.drawable.ic_book_24dp)
-                            }
-                        )
-                        .setIntent(
-                            MainActivity.openMangaIntent(context, item.id!!, true)
-                                .addFlags(
-                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                )
-                        )
-                        .build()
-                }
+                ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
+                    .setShortLabel(
+                        item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga)
+                    )
+                    .setLongLabel(
+                        item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga)
+                    )
+                    .setIcon(
+                        if (bitmap != null) {
+                            Icon.createWithAdaptiveBitmap(bitmap.toSquare())
+                        } else {
+                            Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                        }
+                    )
+                    .setIntent(
+                        MainActivity.openMangaIntent(context, item.id!!, true)
+                            .addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            )
+                    )
+                    .build()
+            }
 
             TimberKt.d { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
             shortcutManager.dynamicShortcuts = shortcuts

@@ -59,8 +59,9 @@ fun AddEditCategoryDialog(
                         value = categoryText,
                         onValueChange = { newCategory ->
                             categoryText = newCategory
-                            validCategory =
-                                currentCategories.none { it.name.equals(categoryText.text, true) }
+                            validCategory = currentCategories.none {
+                                it.name.equals(categoryText.text, true)
+                            }
                         },
                         singleLine = true,
                         maxLines = 1,

@@ -51,17 +51,13 @@ fun syncChaptersWithSource(
             .filterNot { it.isLocalSource() || it.isMergedChapter() }
             .map { MdUtil.getChapterUUID(it.url) }
             .toHashSet()
-    dbChapters =
-        dbChapters.mapNotNull { dbChapter ->
-            if (
-                dbChapter.isLocalSource() &&
-                    dbChapter.name.substringAfterLast(" - ") in chapterUUIDs
-            ) {
-                db.deleteChapter(dbChapter).executeAsBlocking()
-                return@mapNotNull null
-            }
-            dbChapter
+    dbChapters = dbChapters.mapNotNull { dbChapter ->
+        if (dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs) {
+            db.deleteChapter(dbChapter).executeAsBlocking()
+            return@mapNotNull null
         }
+        dbChapter
+    }
 
     val localChapterLookupEnabled = libraryPreferences.enableLocalChapters().get()
     var finalRawSourceChapters = rawSourceChapters
@@ -168,14 +164,13 @@ fun syncChaptersWithSource(
             }
     }
 
-    val sourceChapters =
-        finalRawSourceChapters.mapIndexed { i, sChapter ->
-            Chapter.create().apply {
-                copyFrom(sChapter)
-                manga_id = manga.id
-                source_order = i
-            }
+    val sourceChapters = finalRawSourceChapters.mapIndexed { i, sChapter ->
+        Chapter.create().apply {
+            copyFrom(sChapter)
+            manga_id = manga.id
+            source_order = i
         }
+    }
 
     dbChapters = db.getChapters(manga).executeAsBlocking()
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
@@ -267,17 +262,16 @@ fun syncChaptersWithSource(
     toAdd.forEach { ChapterRecognition.parseChapterNumber(it, manga) }
 
     // Chapters from the db not in the source.
-    var toDelete =
-        dbChapters.filterNot { dbChapter ->
-            // ignore to delete when there is a site error
-            if (dbChapter.isMergedChapter() && errorFromMerged) {
-                true
-            } else if (dbChapter.isLocalSource()) {
-                downloadManager.isChapterDownloaded(dbChapter, manga, true)
-            } else {
-                sourceChaptersByUrl[dbChapter.url] != null
-            }
+    var toDelete = dbChapters.filterNot { dbChapter ->
+        // ignore to delete when there is a site error
+        if (dbChapter.isMergedChapter() && errorFromMerged) {
+            true
+        } else if (dbChapter.isLocalSource()) {
+            downloadManager.isChapterDownloaded(dbChapter, manga, true)
+        } else {
+            sourceChaptersByUrl[dbChapter.url] != null
         }
+    }
 
     val dupes =
         dbChapters

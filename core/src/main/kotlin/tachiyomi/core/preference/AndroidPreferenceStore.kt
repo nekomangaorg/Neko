@@ -81,8 +81,9 @@ class AndroidPreferenceStore(context: Context) : PreferenceStore {
 
 private val SharedPreferences.keyFlow
     get() = callbackFlow {
-        val listener =
-            SharedPreferences.OnSharedPreferenceChangeListener { _, key: String? -> trySend(key) }
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key: String? ->
+            trySend(key)
+        }
         registerOnSharedPreferenceChangeListener(listener)
         awaitClose { unregisterOnSharedPreferenceChangeListener(listener) }
     }

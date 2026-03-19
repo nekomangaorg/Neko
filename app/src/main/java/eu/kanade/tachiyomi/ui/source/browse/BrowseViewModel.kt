@@ -434,8 +434,9 @@ class BrowseViewModel() : ViewModel() {
                             db.setMangaCategories(categories, listOf(editManga))
                         }
                 } else if (categoryItems.isNotEmpty()) {
-                    val categories =
-                        categoryItems.map { MangaCategory.create(editManga, it.toDbCategory()) }
+                    val categories = categoryItems.map {
+                        MangaCategory.create(editManga, it.toDbCategory())
+                    }
                     db.setMangaCategories(categories, listOf(editManga))
                 }
             }

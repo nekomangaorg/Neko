@@ -470,68 +470,67 @@ class FeedViewModel() : ViewModel() {
 
     fun search(searchQuery: String?) {
         searchJob?.cancel()
-        searchJob =
-            viewModelScope.launchIO {
-                if (searchQuery.isNullOrBlank()) {
-                    when (_feedScreenState.value.feedScreenType) {
-                        FeedScreenType.Summary -> Unit
-                        FeedScreenType.History ->
-                            _historyScreenPagingState.update {
-                                it.copy(
-                                    searchHistoryFeedMangaList = persistentListOf(),
-                                    searchQuery = "",
-                                )
-                            }
-                        FeedScreenType.Updates ->
-                            _updatesScreenPagingState.update {
-                                it.copy(
-                                    searchUpdatesFeedMangaList = persistentListOf(),
-                                    searchQuery = "",
-                                )
+        searchJob = viewModelScope.launchIO {
+            if (searchQuery.isNullOrBlank()) {
+                when (_feedScreenState.value.feedScreenType) {
+                    FeedScreenType.Summary -> Unit
+                    FeedScreenType.History ->
+                        _historyScreenPagingState.update {
+                            it.copy(
+                                searchHistoryFeedMangaList = persistentListOf(),
+                                searchQuery = "",
+                            )
+                        }
+                    FeedScreenType.Updates ->
+                        _updatesScreenPagingState.update {
+                            it.copy(
+                                searchUpdatesFeedMangaList = persistentListOf(),
+                                searchQuery = "",
+                            )
+                        }
+                }
+            } else {
+                when (_feedScreenState.value.feedScreenType) {
+                    FeedScreenType.Summary -> Unit
+                    FeedScreenType.History -> {
+                        feedRepository
+                            .getHistoryPage(
+                                searchQuery,
+                                offset = 0,
+                                limit = 100,
+                                _historyScreenPagingState.value.historyGrouping,
+                            )
+                            .onSuccess { results ->
+                                _historyScreenPagingState.update {
+                                    it.copy(
+                                        searchQuery = searchQuery,
+                                        searchHistoryFeedMangaList =
+                                            (results.second).toPersistentList(),
+                                    )
+                                }
                             }
                     }
-                } else {
-                    when (_feedScreenState.value.feedScreenType) {
-                        FeedScreenType.Summary -> Unit
-                        FeedScreenType.History -> {
-                            feedRepository
-                                .getHistoryPage(
-                                    searchQuery,
-                                    offset = 0,
-                                    limit = 100,
-                                    _historyScreenPagingState.value.historyGrouping,
-                                )
-                                .onSuccess { results ->
-                                    _historyScreenPagingState.update {
-                                        it.copy(
-                                            searchQuery = searchQuery,
-                                            searchHistoryFeedMangaList =
-                                                (results.second).toPersistentList(),
-                                        )
-                                    }
+                    FeedScreenType.Updates -> {
+                        feedRepository
+                            .getUpdatesPage(
+                                searchQuery,
+                                offset = 0,
+                                limit = 100,
+                                _updatesScreenPagingState.value.updatesSortedByFetch,
+                            )
+                            .onSuccess { results ->
+                                _updatesScreenPagingState.update {
+                                    it.copy(
+                                        searchQuery = searchQuery,
+                                        searchUpdatesFeedMangaList =
+                                            (results.second).toPersistentList(),
+                                    )
                                 }
-                        }
-                        FeedScreenType.Updates -> {
-                            feedRepository
-                                .getUpdatesPage(
-                                    searchQuery,
-                                    offset = 0,
-                                    limit = 100,
-                                    _updatesScreenPagingState.value.updatesSortedByFetch,
-                                )
-                                .onSuccess { results ->
-                                    _updatesScreenPagingState.update {
-                                        it.copy(
-                                            searchQuery = searchQuery,
-                                            searchUpdatesFeedMangaList =
-                                                (results.second).toPersistentList(),
-                                        )
-                                    }
-                                }
-                        }
+                            }
                     }
                 }
             }
+        }
     }
 
     fun downloadChapter(
@@ -665,18 +664,17 @@ class FeedViewModel() : ViewModel() {
         feedManga: List<FeedManga>,
     ): Pair<Boolean, List<FeedManga>> {
         var wasUpdated: Boolean = false
-        val updatedFeedManga =
-            feedManga.mapIndexed { index, manga ->
-                if (
-                    manga.mangaId == updatedChapterItem.chapter.mangaId &&
-                        manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
-                ) {
-                    wasUpdated = true
-                    manga.copy(chapters = persistentListOf(updatedChapterItem))
-                } else {
-                    manga
-                }
+        val updatedFeedManga = feedManga.mapIndexed { index, manga ->
+            if (
+                manga.mangaId == updatedChapterItem.chapter.mangaId &&
+                    manga.chapters.firstOrNull()?.chapter?.id == updatedChapterItem.chapter.id
+            ) {
+                wasUpdated = true
+                manga.copy(chapters = persistentListOf(updatedChapterItem))
+            } else {
+                manga
             }
+        }
         return wasUpdated to updatedFeedManga
     }
 
@@ -996,8 +994,9 @@ class FeedViewModel() : ViewModel() {
 
     private fun updateDownloadQueue(download: Download) {
         val mutableList = _feedScreenState.value.downloads.toMutableList()
-        val indexOfDownload =
-            mutableList.indexOfFirst { it.chapterItem.chapter.id == download.chapterItem.id }
+        val indexOfDownload = mutableList.indexOfFirst {
+            it.chapterItem.chapter.id == download.chapterItem.id
+        }
         if (indexOfDownload >= 0) {
             if (download.status == Download.State.DOWNLOADED) {
                 mutableList.removeAt(indexOfDownload)

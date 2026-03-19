@@ -551,22 +551,20 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 .toMutableSet()
 
                                         // only download scanlators not filtered out
-                                        chaptersToDl =
-                                            chaptersToDl.filterNot {
-                                                val scanlators =
-                                                    ChapterUtil.getScanlators(it.scanlator)
+                                        chaptersToDl = chaptersToDl.filterNot {
+                                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
 
-                                                val scanlatorMatchAll =
-                                                    libraryPreferences
-                                                        .chapterScanlatorFilterOption()
-                                                        .get() == 0
-                                                ChapterUtil.filterByScanlator(
-                                                    scanlators,
-                                                    it.uploader ?: "",
-                                                    scanlatorMatchAll,
-                                                    toIgnore,
-                                                )
-                                            }
+                                            val scanlatorMatchAll =
+                                                libraryPreferences
+                                                    .chapterScanlatorFilterOption()
+                                                    .get() == 0
+                                            ChapterUtil.filterByScanlator(
+                                                scanlators,
+                                                it.uploader ?: "",
+                                                scanlatorMatchAll,
+                                                toIgnore,
+                                            )
+                                        }
                                     }
 
                                     downloadChapters(manga, chaptersToDl)
@@ -814,18 +812,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         mangaToUpdate.addAll(distinctManga)
         extraScope.launch {
-            val jobs =
-                distinctManga.map { manga ->
-                    async(Dispatchers.IO) {
-                        val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
-                        val hasDLs = updateMangaChapters(manga, shouldDownload)
+            val jobs = distinctManga.map { manga ->
+                async(Dispatchers.IO) {
+                    val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
+                    val hasDLs = updateMangaChapters(manga, shouldDownload)
 
-                        if (hasDLs && !hasDownloads) {
-                            hasDownloads = true
-                        }
-                        return@async hasDLs
+                    if (hasDLs && !hasDownloads) {
+                        hasDownloads = true
                     }
+                    return@async hasDLs
                 }
+            }
 
             extraDeferredJobs.addAll(jobs)
         }

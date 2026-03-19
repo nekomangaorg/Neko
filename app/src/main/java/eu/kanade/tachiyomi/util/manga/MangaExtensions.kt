@@ -81,22 +81,21 @@ fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): Li
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
 
-    val mappedMangas =
-        sourceMangas.map { sourceManga ->
-            var localManga = existingMangas[sourceManga.url]
-            if (localManga == null) {
-                val newManga =
-                    Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
-                        this.thumbnail_url = sourceManga.currentThumbnail
-                    }
-                newMangasList.add(newManga)
-                localManga = newManga
-            } else if (localManga.title.isBlank()) {
-                localManga.title = sourceManga.title
-                updateMangasList.add(localManga)
-            }
-            sourceManga to localManga
+    val mappedMangas = sourceMangas.map { sourceManga ->
+        var localManga = existingMangas[sourceManga.url]
+        if (localManga == null) {
+            val newManga =
+                Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
+                    this.thumbnail_url = sourceManga.currentThumbnail
+                }
+            newMangasList.add(newManga)
+            localManga = newManga
+        } else if (localManga.title.isBlank()) {
+            localManga.title = sourceManga.title
+            updateMangasList.add(localManga)
         }
+        sourceManga to localManga
+    }
 
     if (newMangasList.isNotEmpty()) {
         val results = db.insertMangaList(newMangasList).executeAsBlocking()

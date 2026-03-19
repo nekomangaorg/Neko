@@ -153,26 +153,22 @@ class Komga : MergedServerSource() {
                     val response = customClient().newCall(GET(apiUrl, headers)).await()
                     val responseBody = response.body
 
-                    val page =
-                        responseBody.use {
-                            json
-                                .decodeFromString<KomgaPaginatedResponseDto<KomgaBookDto>>(
-                                    it.string()
-                                )
-                                .content
-                        }
-                    val r =
-                        page.map { book ->
-                            SChapter.create().apply {
-                                chapter_number = book.metadata.numberSort
-                                name = "${book.metadata.number} - ${book.metadata.title}"
-                                url = "/api/v1/books/${book.id}"
-                                scanlator = this@Komga.name
-                                date_upload =
-                                    book.metadata.releaseDate?.toDate()
-                                        ?: book.fileLastModified.toDateTime()
-                            } to (book.readProgress?.completed ?: false)
-                        }
+                    val page = responseBody.use {
+                        json
+                            .decodeFromString<KomgaPaginatedResponseDto<KomgaBookDto>>(it.string())
+                            .content
+                    }
+                    val r = page.map { book ->
+                        SChapter.create().apply {
+                            chapter_number = book.metadata.numberSort
+                            name = "${book.metadata.number} - ${book.metadata.title}"
+                            url = "/api/v1/books/${book.id}"
+                            scanlator = this@Komga.name
+                            date_upload =
+                                book.metadata.releaseDate?.toDate()
+                                    ?: book.fileLastModified.toDateTime()
+                        } to (book.readProgress?.completed ?: false)
+                    }
                     return@runCatching r.sortedByDescending { it.first.chapter_number }
                 }
                 .mapError {
@@ -190,8 +186,9 @@ class Komga : MergedServerSource() {
         val response = customClient().newCall(GET(chapterUrl, headers)).await()
         val responseBody = response.body
 
-        val pages =
-            responseBody.use { body -> json.decodeFromString<List<KomgaPageDto>>(body.string()) }
+        val pages = responseBody.use { body ->
+            json.decodeFromString<List<KomgaPageDto>>(body.string())
+        }
         return pages.map { page ->
             Page(
                 index = page.number - 1,

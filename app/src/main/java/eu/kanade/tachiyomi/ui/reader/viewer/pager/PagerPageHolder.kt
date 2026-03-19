@@ -196,31 +196,27 @@ class PagerPageHolder(
 
     private fun launchProgressJob() {
         progressJob?.cancel()
-        progressJob =
-            scope.launch {
-                page.progressFlow.collectLatest { value ->
-                    progress = value
-                    if (extraPage == null) {
-                        progressBar.setProgress(progress)
-                    } else {
-                        progressBar.setProgress(
-                            ((progress + extraProgress) / 2 * 0.95f).roundToInt()
-                        )
-                    }
+        progressJob = scope.launch {
+            page.progressFlow.collectLatest { value ->
+                progress = value
+                if (extraPage == null) {
+                    progressBar.setProgress(progress)
+                } else {
+                    progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
                 }
             }
+        }
     }
 
     private fun launchProgressJob2() {
         val extraPage = extraPage ?: return
         extraProgressJob?.cancel()
-        extraProgressJob =
-            scope.launch {
-                extraPage.progressFlow.collectLatest { value ->
-                    extraProgress = value
-                    progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
-                }
+        extraProgressJob = scope.launch {
+            extraPage.progressFlow.collectLatest { value ->
+                extraProgress = value
+                progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
             }
+        }
     }
 
     fun onPageSelected(forward: Boolean?) {

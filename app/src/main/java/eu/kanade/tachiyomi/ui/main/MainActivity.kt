@@ -353,8 +353,9 @@ class MainActivity : BaseMainActivity() {
                         val downloadManager = Injekt.get<DownloadManager>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
                         db.getManga(mangaId).executeAsBlocking()?.let { manga ->
-                            val availableChapters =
-                                chapters.filter { it.isAvailable(downloadManager, manga) }
+                            val availableChapters = chapters.filter {
+                                it.isAvailable(downloadManager, manga)
+                            }
                             val nextUnreadChapter =
                                 ChapterItemSort()
                                     .getNextUnreadChapter(
