@@ -100,7 +100,7 @@ fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): Li
 
     if (newMangasList.isNotEmpty()) {
         val results = db.insertMangaList(newMangasList).executeAsBlocking()
-        results.forEachIndexed { index, result -> newMangasList[index].id = result.insertedId() }
+        results.results().forEach { (manga, result) -> manga.id = result.insertedId() }
     }
     if (updateMangasList.isNotEmpty()) {
         db.insertMangaList(updateMangasList).executeAsBlocking()
