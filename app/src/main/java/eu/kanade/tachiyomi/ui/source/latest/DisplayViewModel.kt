@@ -19,8 +19,8 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
@@ -141,20 +141,17 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
         }
 
-        viewModelScope.launchIO {
-            preferences.browseAsList().changes().collectLatest {
-                _displayScreenState.update { state -> state.copy(isList = it) }
-            }
+        preferences.browseAsList().changes().observeAndUpdate(viewModelScope) {
+            _displayScreenState.update { state -> state.copy(isList = it) }
         }
-        viewModelScope.launchIO {
-            preferences.browseDisplayMode().changes().collectLatest { visibility ->
-                _displayScreenState.update {
-                    it.copy(
-                        libraryEntryVisibility = visibility,
-                        filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toPersistentList(),
-                    )
-                }
+
+        preferences.browseDisplayMode().changes().observeAndUpdate(viewModelScope) { visibility ->
+            _displayScreenState.update {
+                it.copy(
+                    libraryEntryVisibility = visibility,
+                    filteredDisplayManga =
+                        it.allDisplayManga.filterVisibility(preferences).toPersistentList(),
+                )
             }
         }
     }

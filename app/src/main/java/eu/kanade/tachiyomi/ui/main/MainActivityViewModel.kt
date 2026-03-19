@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
@@ -71,22 +72,18 @@ class MainActivityViewModel : ViewModel() {
     }
 
     init {
-        viewModelScope.launchIO {
-            securityPreferences.incognitoMode().changes().collect { incognitoMode ->
-                _mainScreenState.update { it.copy(incognitoMode = incognitoMode) }
-            }
+        securityPreferences.incognitoMode().changes().observeAndUpdate(viewModelScope) {
+            incognitoMode ->
+            _mainScreenState.update { it.copy(incognitoMode = incognitoMode) }
         }
 
-        viewModelScope.launchIO {
-            preferences.sideNavIconAlignment().changes().collect { sideNavAlignment ->
-                _mainScreenState.update { it.copy(sideNavAlignment = sideNavAlignment) }
-            }
+        preferences.sideNavIconAlignment().changes().observeAndUpdate(viewModelScope) {
+            sideNavAlignment ->
+            _mainScreenState.update { it.copy(sideNavAlignment = sideNavAlignment) }
         }
 
-        viewModelScope.launchIO {
-            preferences.sideNavMode().changes().collect { sideNavMode ->
-                _mainScreenState.update { it.copy(sideNavMode = sideNavMode) }
-            }
+        preferences.sideNavMode().changes().observeAndUpdate(viewModelScope) { sideNavMode ->
+            _mainScreenState.update { it.copy(sideNavMode = sideNavMode) }
         }
 
         viewModelScope.launchIO {
