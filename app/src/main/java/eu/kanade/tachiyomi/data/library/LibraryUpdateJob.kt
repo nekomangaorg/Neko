@@ -603,14 +603,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             .collect { chapterIds ->
                                                 val markRead =
                                                     nonMergedChapters
-                                                        // ⚡ BOLT OPTIMIZATION: Replaced .filter
-                                                        // {}.filter {}.map {} chain with
-                                                        // .mapNotNull {}
-                                                        // This prevents the allocation of multiple
-                                                        // intermediate lists when filtering and
-                                                        // transforming large lists of chapters,
-                                                        // reducing memory pressure and GC pauses
-                                                        // during the update job.
+// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
                                                         .mapNotNull {
                                                             if (
                                                                 chapterIds.contains(
@@ -637,13 +630,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 .map { Pair(it.first.scanlator, it.first.url) }
                                         val markRead =
                                             mergedChapters
-                                                // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.filter
-                                                // {}.map {} chain with .mapNotNull {}
-                                                // This prevents the allocation of multiple
-                                                // intermediate lists when filtering and
-                                                // transforming large lists of chapters, reducing
-                                                // memory pressure and GC pauses during the update
-                                                // job.
+// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
                                                 .mapNotNull {
                                                     if (
                                                         readChapters.contains(
