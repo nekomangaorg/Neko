@@ -603,17 +603,20 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             .collect { chapterIds ->
                                                 val markRead =
                                                     nonMergedChapters
-                                                        .filter {
-                                                            chapterIds.contains(
-                                                                it.mangadex_chapter_id
-                                                            )
-                                                        }
-                                                        .filter { !it.read }
-                                                        .map {
-                                                            it.read = true
-                                                            it.last_page_read = 0
-                                                            it.pages_left = 0
-                                                            it
+// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
+                                                        .mapNotNull {
+                                                            if (
+                                                                chapterIds.contains(
+                                                                    it.mangadex_chapter_id
+                                                                ) && !it.read
+                                                            ) {
+                                                                it.read = true
+                                                                it.last_page_read = 0
+                                                                it.pages_left = 0
+                                                                it
+                                                            } else {
+                                                                null
+                                                            }
                                                         }
                                                         .toList()
                                                 db.updateChaptersProgress(markRead).executeOnIO()
@@ -627,17 +630,20 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 .map { Pair(it.first.scanlator, it.first.url) }
                                         val markRead =
                                             mergedChapters
-                                                .filter {
-                                                    readChapters.contains(
-                                                        Pair(it.scanlator, it.url)
-                                                    )
-                                                }
-                                                .filter { !it.read }
-                                                .map {
-                                                    it.read = true
-                                                    it.last_page_read = 0
-                                                    it.pages_left = 0
-                                                    it
+// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
+                                                .mapNotNull {
+                                                    if (
+                                                        readChapters.contains(
+                                                            Pair(it.scanlator, it.url)
+                                                        ) && !it.read
+                                                    ) {
+                                                        it.read = true
+                                                        it.last_page_read = 0
+                                                        it.pages_left = 0
+                                                        it
+                                                    } else {
+                                                        null
+                                                    }
                                                 }
                                                 .toList()
                                         db.updateChaptersProgress(markRead).executeOnIO()
