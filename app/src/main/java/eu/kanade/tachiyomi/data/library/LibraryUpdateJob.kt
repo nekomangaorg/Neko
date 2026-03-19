@@ -603,17 +603,27 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             .collect { chapterIds ->
                                                 val markRead =
                                                     nonMergedChapters
-                                                        .filter {
-                                                            chapterIds.contains(
-                                                                it.mangadex_chapter_id
-                                                            )
-                                                        }
-                                                        .filter { !it.read }
-                                                        .map {
-                                                            it.read = true
-                                                            it.last_page_read = 0
-                                                            it.pages_left = 0
-                                                            it
+                                                        // ⚡ BOLT OPTIMIZATION: Replaced .filter
+                                                        // {}.filter {}.map {} chain with
+                                                        // .mapNotNull {}
+                                                        // This prevents the allocation of multiple
+                                                        // intermediate lists when filtering and
+                                                        // transforming large lists of chapters,
+                                                        // reducing memory pressure and GC pauses
+                                                        // during the update job.
+                                                        .mapNotNull {
+                                                            if (
+                                                                chapterIds.contains(
+                                                                    it.mangadex_chapter_id
+                                                                ) && !it.read
+                                                            ) {
+                                                                it.read = true
+                                                                it.last_page_read = 0
+                                                                it.pages_left = 0
+                                                                it
+                                                            } else {
+                                                                null
+                                                            }
                                                         }
                                                         .toList()
                                                 db.updateChaptersProgress(markRead).executeOnIO()
@@ -627,17 +637,26 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 .map { Pair(it.first.scanlator, it.first.url) }
                                         val markRead =
                                             mergedChapters
-                                                .filter {
-                                                    readChapters.contains(
-                                                        Pair(it.scanlator, it.url)
-                                                    )
-                                                }
-                                                .filter { !it.read }
-                                                .map {
-                                                    it.read = true
-                                                    it.last_page_read = 0
-                                                    it.pages_left = 0
-                                                    it
+                                                // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.filter
+                                                // {}.map {} chain with .mapNotNull {}
+                                                // This prevents the allocation of multiple
+                                                // intermediate lists when filtering and
+                                                // transforming large lists of chapters, reducing
+                                                // memory pressure and GC pauses during the update
+                                                // job.
+                                                .mapNotNull {
+                                                    if (
+                                                        readChapters.contains(
+                                                            Pair(it.scanlator, it.url)
+                                                        ) && !it.read
+                                                    ) {
+                                                        it.read = true
+                                                        it.last_page_read = 0
+                                                        it.pages_left = 0
+                                                        it
+                                                    } else {
+                                                        null
+                                                    }
                                                 }
                                                 .toList()
                                         db.updateChaptersProgress(markRead).executeOnIO()

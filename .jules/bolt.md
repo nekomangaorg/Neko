@@ -6,3 +6,6 @@
 ## 2026-03-19 - Prevent Redundant State Updates in ViewModels
 **Learning:** Flow `changes()` from preferences without `distinctUntilChanged()` causes redundant state updates and UI recompositions when preferences emit the same value.
 **Action:** When observing preferences, use `changes().observeAndUpdate(viewModelScope)` instead of `changes().collect { ... }` to automatically apply `distinctUntilChanged()` and handle lifecycle collection efficiently.
+## 2026-03-19 - Optimize LibraryUpdateJob List Operations
+**Learning:** Chaining `.filter {}.filter {}.map {}` on collections creates multiple intermediate lists, which is inefficient.
+**Action:** Use `.mapNotNull {}` to combine filtering and mapping in a single pass to reduce memory allocations and improve performance, especially when handling large datasets like chapter updates.
