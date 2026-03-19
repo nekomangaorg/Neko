@@ -41,10 +41,7 @@ class BrowseRepository(
         filters: DexFilters,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search(page, filters).andThen { mangaListPage ->
-            val displayMangaList =
-                mangaListPage.sourceManga.map { sourceManga ->
-                    sourceManga.toDisplayManga(db, mangaDex.id)
-                }
+            val displayMangaList = mangaListPage.sourceManga.toDisplayManga(db, mangaDex.id)
             Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
         }
     }
@@ -86,7 +83,7 @@ class BrowseRepository(
                         displayScreenType = listResult.displayScreenType,
                         displayManga =
                             listResult.sourceManga
-                                .map { it.toDisplayManga(db, mangaDex.id) }
+                                .toDisplayManga(db, mangaDex.id)
                                 .distinctBy { it.url }
                                 .toPersistentList(),
                     )
@@ -97,7 +94,7 @@ class BrowseRepository(
 
     suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList())
+            Ok(sourceManga.toDisplayManga(db, mangaDex.id).toPersistentList())
         }
     }
 }

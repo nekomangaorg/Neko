@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.observeAndUpdate
@@ -175,7 +174,7 @@ class BrowseViewModel() : ViewModel() {
 
         updateBrowseFilters(_browseScreenState.value.firstLoad)
 
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val categories =
                 db.getCategories()
                     .executeAsBlocking()
@@ -208,12 +207,12 @@ class BrowseViewModel() : ViewModel() {
 
         preferences.browseDisplayMode().changes().observeAndUpdate(viewModelScope) { visibility ->
             _browseScreenState.update { it.copy(libraryEntryVisibility = visibility) }
-            viewModelScope.launch {
+            viewModelScope.launchIO {
                 _browseScreenState.update {
                     it.copy(homePageManga = it.homePageManga.updateVisibility(preferences))
                 }
             }
-            viewModelScope.launch {
+            viewModelScope.launchIO {
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =
@@ -240,7 +239,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun loadNextItems() {
-        viewModelScope.launch { paginator.loadNextItems() }
+        viewModelScope.launchIO { paginator.loadNextItems() }
     }
 
     private fun getHomepage() {
@@ -392,7 +391,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun randomManga() {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             _browseScreenState.update { it.copy(initialLoading = true) }
             browseRepository
                 .getRandomManga()
@@ -409,7 +408,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
                 favorite = !favorite
@@ -444,7 +443,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val tempList =
                 _browseScreenState.value.homePageManga
                     .map { homePageManga ->
@@ -461,7 +460,7 @@ class BrowseViewModel() : ViewModel() {
                     .toPersistentList()
             _browseScreenState.update { it.copy(homePageManga = tempList) }
         }
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val index =
                 _browseScreenState.value.displayMangaHolder.allDisplayManga.indexOfFirst {
                     it.mangaId == mangaId
@@ -503,7 +502,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun saveFilter(name: String) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val browseFilter =
                 BrowseFilterImpl(
                     name = name,
@@ -515,14 +514,14 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun loadFilter(browseFilterImpl: BrowseFilterImpl) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val dexFilters = Json.decodeFromString<DexFilters>(browseFilterImpl.dexFilters)
             _browseScreenState.update { it.copy(filters = dexFilters) }
         }
     }
 
     fun markFilterAsDefault(name: String, makeDefault: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val updatedFilters =
                 browseScreenState.value.savedFilters.map {
                     if (it.name == name) {
@@ -537,21 +536,21 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun deleteFilter(name: String) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             db.deleteBrowseFilter(name).executeAsBlocking()
             updateBrowseFilters()
         }
     }
 
     fun resetFilter() {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val resetFilters = createInitialDexFilter("")
             _browseScreenState.update { it.copy(filters = resetFilters) }
         }
     }
 
     fun filterChanged(newFilter: Filter) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val updatedFilters =
                 when (newFilter) {
                     is Filter.ContentRating -> {
@@ -702,7 +701,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             when (browseScreenType) {
                 BrowseScreenType.Follows -> getFollows(forceUpdate)
                 BrowseScreenType.Filter -> getSearchPage()
@@ -717,7 +716,7 @@ class BrowseViewModel() : ViewModel() {
     }
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
             val filters = db.getBrowseFilters().executeAsBlocking().toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
@@ -733,12 +732,12 @@ class BrowseViewModel() : ViewModel() {
 
     fun updateMangaForChanges() {
         if (!_browseScreenState.value.firstLoad) {
-            viewModelScope.launch {
+            viewModelScope.launchIO {
                 val newHomePageManga =
                     _browseScreenState.value.homePageManga.resync(db).updateVisibility(preferences)
                 _browseScreenState.update { it.copy(homePageManga = newHomePageManga) }
             }
-            viewModelScope.launch {
+            viewModelScope.launchIO {
                 val allDisplayManga =
                     _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db).unique()
                 _browseScreenState.update {
