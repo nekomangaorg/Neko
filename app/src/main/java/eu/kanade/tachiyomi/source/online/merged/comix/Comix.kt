@@ -128,7 +128,7 @@ class Comix : ReducedHttpSource() {
     }
 
     override fun getChapterUrl(simpleChapter: org.nekomanga.domain.chapter.SimpleChapter): String {
-        return baseUrl + simpleChapter.url
+        return "$baseUrl/${simpleChapter.url}"
     }
 
     companion object {
