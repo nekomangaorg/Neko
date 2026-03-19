@@ -16,7 +16,10 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -66,9 +69,7 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
             TimberKt.e(e) { "error refreshing tracking metadata" }
             return@coroutineScope Result.failure()
         } finally {
-            kotlinx.coroutines.withContext(
-                kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.IO
-            ) {
+            withContext(NonCancellable + Dispatchers.IO) {
                 context.notificationManager.cancel(Notifications.Id.Tracking.Progress)
             }
         }
