@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
@@ -72,19 +73,23 @@ class MainActivityViewModel : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            securityPreferences.incognitoMode().changes().collect { incognitoMode ->
+            // ⚡ BOLT OPTIMIZATION: Added distinctUntilChanged() to prevent redundant state updates
+            // and UI recompositions when preferences emit the same value.
+            securityPreferences.incognitoMode().changes().distinctUntilChanged().collect {
+                incognitoMode ->
                 _mainScreenState.update { it.copy(incognitoMode = incognitoMode) }
             }
         }
 
         viewModelScope.launchIO {
-            preferences.sideNavIconAlignment().changes().collect { sideNavAlignment ->
+            preferences.sideNavIconAlignment().changes().distinctUntilChanged().collect {
+                sideNavAlignment ->
                 _mainScreenState.update { it.copy(sideNavAlignment = sideNavAlignment) }
             }
         }
 
         viewModelScope.launchIO {
-            preferences.sideNavMode().changes().collect { sideNavMode ->
+            preferences.sideNavMode().changes().distinctUntilChanged().collect { sideNavMode ->
                 _mainScreenState.update { it.copy(sideNavMode = sideNavMode) }
             }
         }
