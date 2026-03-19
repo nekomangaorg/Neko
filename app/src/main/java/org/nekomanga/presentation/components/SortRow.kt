@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -59,7 +60,7 @@ fun SortRow(
             MangaConstants.SortState.Ascending -> {
                 Icon(
                     imageVector = Icons.Filled.ArrowUpward,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.nekomanga.R.string.ascending),
                     tint = tintColor,
                     modifier = Modifier.size(24.dp),
                 )
@@ -67,7 +68,7 @@ fun SortRow(
             MangaConstants.SortState.Descending -> {
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.nekomanga.R.string.descending),
                     tint = tintColor,
                     modifier = Modifier.size(24.dp),
                 )
