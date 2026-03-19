@@ -988,6 +988,14 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             downloadManager.removedChaptersFlow.collect { id -> updateDownloadBadges(id) }
         }
+
+        viewModelScope.launchIO {
+            downloadManager.downloadCacheUpdatedFlow.collect {
+                // Pass 0L as the mangaId is currently unused and we just need to trigger a global
+                // refresh
+                updateDownloadBadges(0L)
+            }
+        }
     }
 
     fun updateDownloadBadges(mangaId: Long) {

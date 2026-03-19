@@ -17,7 +17,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -54,6 +58,10 @@ class DownloadCache(
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var renewJob: Job? = null
+
+    private val _changes: MutableSharedFlow<Unit> =
+        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val changes: SharedFlow<Unit> = _changes.asSharedFlow()
 
     init {
         storageManager.baseDirChanges.onEach { forceRenewCache() }.launchIn(scope)
@@ -110,6 +118,7 @@ class DownloadCache(
             }
 
         mangaFiles[id] = MangaFiles(fileNames, mangadexIds)
+        _changes.tryEmit(Unit)
     }
 
     fun getDownloadCount(manga: Manga, forceCheckFolder: Boolean = false): Int {
@@ -214,6 +223,7 @@ class DownloadCache(
         mangaFiles.putAll(newMangaFiles)
 
         lastRenew = System.currentTimeMillis()
+        _changes.tryEmit(Unit)
     }
 
     @Synchronized
