@@ -13,7 +13,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
@@ -67,7 +66,11 @@ class TrackingSyncJob(val context: Context, params: WorkerParameters) :
             TimberKt.e(e) { "error refreshing tracking metadata" }
             return@coroutineScope Result.failure()
         } finally {
-            launchIO { context.notificationManager.cancel(Notifications.Id.Tracking.Progress) }
+            kotlinx.coroutines.withContext(
+                kotlinx.coroutines.NonCancellable + kotlinx.coroutines.Dispatchers.IO
+            ) {
+                context.notificationManager.cancel(Notifications.Id.Tracking.Progress)
+            }
         }
     }
 
