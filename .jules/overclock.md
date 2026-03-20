@@ -12,3 +12,7 @@
 ## 2026-05-24 - [Overclock: Decouple High-Frequency UI State from Expensive Re-sorts/Re-groups]
 **Learning:** Combining high-frequency UI state elements (like collapsing/expanding categories) into the same Coroutine `combine` block as heavy data processing operations (like grouping a large list and performing O(N log N) sorting on each group) causes the app to execute massive redundant calculations on every minor UI interaction, leading to stuttering and CPU spikes.
 **Action:** Always decouple distinct operational layers. Remove the fast-updating UI state (e.g., `collapsedCategories`) from the upstream flow that triggers grouping and sorting. Instead, map the heavy operation in a pure upstream flow, and apply the lightweight UI toggle (e.g., setting `isHidden = true`) in a downstream `combine` right before it reaches the View state.
+
+## 2026-03-20 - Refactoring massive UiState data classes into distinct StateFlows
+**Learning:** In Compose UI architectures, massive single `UiState` data classes cause full-screen recompositions when minor fields (like `isRefreshing`) are updated. This forces the entire layout (e.g., `MangaScreen`) to re-evaluate.
+**Action:** Always refactor massive `UiState` data classes into smaller, distinct `StateFlow`s inside the ViewModel (e.g., separating `generalState` from `chapterState`). In Compose, collect each `StateFlow` separately and pass the specific state data classes to individual Composables to ensure precise and efficient recomposition scoping.

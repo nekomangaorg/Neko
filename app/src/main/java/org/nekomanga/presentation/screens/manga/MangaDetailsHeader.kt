@@ -67,8 +67,8 @@ fun MangaDetailsHeader(
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         var isDescriptionManuallyExpanded by
-            rememberSaveable(mangaDetailScreenState.inLibrary) {
-                mutableStateOf(!mangaDetailScreenState.inLibrary)
+            rememberSaveable(mangaDetailScreenState.manga.inLibrary) {
+                mutableStateOf(!mangaDetailScreenState.manga.inLibrary)
             }
 
         val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
@@ -85,33 +85,36 @@ fun MangaDetailsHeader(
                 AnimatedBackdropContainer(
                     isInitialized = isInitialized,
                     themeColorState = themeColorState,
-                    dynamicCovers = mangaDetailScreenState.dynamicCovers,
-                    artwork = mangaDetailScreenState.currentArtwork,
-                    showBackdropOverlay = mangaDetailScreenState.themeBasedOffCovers,
+                    dynamicCovers = mangaDetailScreenState.manga.dynamicCovers,
+                    artwork = mangaDetailScreenState.manga.currentArtwork,
+                    showBackdropOverlay = mangaDetailScreenState.general.themeBasedOffCovers,
                     generatePalette = generatePalette,
-                    isSearching = mangaDetailScreenState.isSearching,
-                    backdropSize = mangaDetailScreenState.backdropSize,
+                    isSearching = mangaDetailScreenState.general.isSearching,
+                    backdropSize = mangaDetailScreenState.general.backdropSize,
                 )
                 Column(
                     modifier = Modifier.align(Alignment.BottomStart).graphicsLayer(alpha = alpha)
                 ) {
                     InformationBlock(
                         themeColorState = themeColorState,
-                        title = mangaDetailScreenState.currentTitle,
-                        author = mangaDetailScreenState.author,
-                        artist = mangaDetailScreenState.artist,
-                        stats = mangaDetailScreenState.stats,
-                        langFlag = mangaDetailScreenState.langFlag,
-                        status = mangaDetailScreenState.status,
+                        title = mangaDetailScreenState.manga.currentTitle,
+                        author = mangaDetailScreenState.manga.author,
+                        artist = mangaDetailScreenState.manga.artist,
+                        stats = mangaDetailScreenState.manga.stats,
+                        langFlag = mangaDetailScreenState.manga.langFlag,
+                        status = mangaDetailScreenState.manga.status,
                         lastChapter =
-                            mangaDetailScreenState.lastVolume to mangaDetailScreenState.lastChapter,
-                        isPornographic = mangaDetailScreenState.isPornographic,
-                        missingChapters = mangaDetailScreenState.missingChapters,
-                        estimatedMissingChapters = mangaDetailScreenState.estimatedMissingChapters,
+                            mangaDetailScreenState.manga.lastVolume to
+                                mangaDetailScreenState.manga.lastChapter,
+                        isPornographic = mangaDetailScreenState.manga.isPornographic,
+                        missingChapters = mangaDetailScreenState.manga.missingChapters,
+                        estimatedMissingChapters =
+                            mangaDetailScreenState.manga.estimatedMissingChapters,
                         isExpanded = isDescriptionExpanded,
                         showMergedIcon =
-                            mangaDetailScreenState.isMerged is MergeConstants.IsMergedManga.Yes &&
-                                !mangaDetailScreenState.hideButtonText,
+                            mangaDetailScreenState.manga.isMerged is
+                                MergeConstants.IsMergedManga.Yes &&
+                                !mangaDetailScreenState.general.hideButtonText,
                         modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
                         titleLongClick = informationActions.titleLongClick,
                         creatorCopyClick = informationActions.creatorCopy,
@@ -119,21 +122,21 @@ fun MangaDetailsHeader(
                     )
 
                     AnimatedVisibility(
-                        visible = !mangaDetailScreenState.isSearching,
+                        visible = !mangaDetailScreenState.general.isSearching,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically(),
                     ) {
                         Column(modifier = Modifier.padding(bottom = Size.medium)) {
                             Gap(Size.medium)
                             ButtonBlock(
-                                hideButtonText = mangaDetailScreenState.hideButtonText,
-                                isInitialized = mangaDetailScreenState.initialized,
+                                hideButtonText = mangaDetailScreenState.general.hideButtonText,
+                                isInitialized = mangaDetailScreenState.manga.initialized,
                                 isMerged =
-                                    mangaDetailScreenState.isMerged
+                                    mangaDetailScreenState.manga.isMerged
                                         is MergeConstants.IsMergedManga.Yes,
-                                inLibrary = mangaDetailScreenState.inLibrary,
+                                inLibrary = mangaDetailScreenState.manga.inLibrary,
                                 loggedIntoTrackers = isLoggedIntoTrackers,
-                                trackServiceCount = mangaDetailScreenState.trackServiceCount,
+                                trackServiceCount = mangaDetailScreenState.track.trackServiceCount,
                                 themeColorState = themeColorState,
                                 toggleFavorite = toggleFavorite,
                                 trackingClick = onTrackingClick,
@@ -149,7 +152,9 @@ fun MangaDetailsHeader(
                 }
             }
             AnimatedVisibility(
-                visible = mangaDetailScreenState.initialized && !mangaDetailScreenState.isSearching,
+                visible =
+                    mangaDetailScreenState.manga.initialized &&
+                        !mangaDetailScreenState.general.isSearching,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -157,7 +162,7 @@ fun MangaDetailsHeader(
                     if (isTablet) {
                         QuickReadButton(
                             quickReadText =
-                                mangaDetailScreenState.nextUnreadChapter.text.asString(),
+                                mangaDetailScreenState.chapters.nextUnreadChapter.text.asString(),
                             themeColorState = themeColorState,
                             onClick = onQuickReadClick,
                         )
@@ -165,14 +170,14 @@ fun MangaDetailsHeader(
                     }
                     DescriptionBlock(
                         windowSizeClass = windowSizeClass,
-                        title = mangaDetailScreenState.currentTitle,
-                        description = mangaDetailScreenState.currentDescription,
-                        isInitialized = mangaDetailScreenState.initialized,
-                        altTitles = mangaDetailScreenState.alternativeTitles,
-                        genres = mangaDetailScreenState.genres,
+                        title = mangaDetailScreenState.manga.currentTitle,
+                        description = mangaDetailScreenState.manga.currentDescription,
+                        isInitialized = mangaDetailScreenState.manga.initialized,
+                        altTitles = mangaDetailScreenState.manga.alternativeTitles,
+                        genres = mangaDetailScreenState.manga.genres,
                         themeColorState = themeColorState,
                         isExpanded = isDescriptionExpanded,
-                        wrapAltTitles = mangaDetailScreenState.wrapAltTitles,
+                        wrapAltTitles = mangaDetailScreenState.general.wrapAltTitles,
                         expandCollapseClick = {
                             isDescriptionManuallyExpanded = !isDescriptionManuallyExpanded
                         },
@@ -181,7 +186,7 @@ fun MangaDetailsHeader(
                     if (!isTablet) {
                         QuickReadButton(
                             quickReadText =
-                                mangaDetailScreenState.nextUnreadChapter.text.asString(),
+                                mangaDetailScreenState.chapters.nextUnreadChapter.text.asString(),
                             themeColorState = themeColorState,
                             onClick = onQuickReadClick,
                         )

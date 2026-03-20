@@ -68,8 +68,8 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.CategoriesSheet ->
             EditCategorySheet(
                 addingToLibrary = currentScreen.addingToLibrary,
-                categories = mangaDetailScreenState.allCategories,
-                mangaCategories = mangaDetailScreenState.currentCategories,
+                categories = mangaDetailScreenState.category.allCategories,
+                mangaCategories = mangaDetailScreenState.category.currentCategories,
                 themeColorState = themeColorState,
                 cancelClick = { onNavigate(null) },
                 addNewCategory = addNewCategory,
@@ -79,9 +79,9 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.TrackingSheet ->
             TrackingSheet(
                 themeColor = themeColorState,
-                inLibrary = mangaDetailScreenState.inLibrary,
-                servicesProvider = { mangaDetailScreenState.loggedInTrackService },
-                tracksProvider = { mangaDetailScreenState.tracks },
+                inLibrary = mangaDetailScreenState.manga.inLibrary,
+                servicesProvider = { mangaDetailScreenState.track.loggedInTrackService },
+                tracksProvider = { mangaDetailScreenState.track.tracks },
                 dateFormat = dateFormat,
                 onLogoClick = openInWebView,
                 onSearchTrackClick = { service, track ->
@@ -96,7 +96,7 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            mangaDetailScreenState.trackingSuggestedDates,
+                            mangaDetailScreenState.track.trackingSuggestedDates,
                         )
                     )
                 },
@@ -105,7 +105,7 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            mangaDetailScreenState.trackingSuggestedDates,
+                            mangaDetailScreenState.track.trackingSuggestedDates,
                         )
                     )
                 },
@@ -115,15 +115,15 @@ fun DetailsBottomSheet(
             // closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
                 trackActions.search(
-                    mangaDetailScreenState.originalTitle,
+                    mangaDetailScreenState.manga.originalTitle,
                     currentScreen.trackingService,
                 )
             }
 
             TrackingSearchSheet(
                 themeColorState = themeColorState,
-                title = mangaDetailScreenState.originalTitle,
-                trackSearchResult = mangaDetailScreenState.trackSearchResult,
+                title = mangaDetailScreenState.manga.originalTitle,
+                trackSearchResult = mangaDetailScreenState.track.trackSearchResult,
                 alreadySelectedTrack = currentScreen.alreadySelectedTrack,
                 service = currentScreen.trackingService,
                 cancelClick = { onNavigate(DetailsBottomSheetScreen.TrackingSheet) },
@@ -159,7 +159,7 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
                 themeColorState = themeColorState,
-                externalLinks = mangaDetailScreenState.externalLinks,
+                externalLinks = mangaDetailScreenState.manga.externalLinks,
                 onLinkClick = { url, title ->
                     onNavigate(null)
                     openInWebView(url, title)
@@ -169,10 +169,10 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.MergeSheet -> {
             MergeSheet(
                 themeColorState = themeColorState,
-                isMergedManga = mangaDetailScreenState.isMerged,
-                title = mangaDetailScreenState.originalTitle,
-                altTitles = mangaDetailScreenState.alternativeTitles,
-                mergeSearchResults = mangaDetailScreenState.mergeSearchResult,
+                isMergedManga = mangaDetailScreenState.manga.isMerged,
+                title = mangaDetailScreenState.manga.originalTitle,
+                altTitles = mangaDetailScreenState.manga.alternativeTitles,
+                mergeSearchResults = mangaDetailScreenState.merge.mergeSearchResult,
                 openMergeSource = { url, title ->
                     onNavigate(null)
                     openInWebView(url, title)
@@ -187,14 +187,14 @@ fun DetailsBottomSheet(
                     onNavigate(null)
                     mergeActions.add(mergeManga)
                 },
-                validMergeTypes = mangaDetailScreenState.validMergeTypes,
+                validMergeTypes = mangaDetailScreenState.merge.validMergeTypes,
             )
         }
         is DetailsBottomSheetScreen.ArtworkSheet -> {
             ArtworkSheet(
                 themeColorState = themeColorState,
-                alternativeArtwork = mangaDetailScreenState.alternativeArtwork,
-                inLibrary = mangaDetailScreenState.inLibrary,
+                alternativeArtwork = mangaDetailScreenState.manga.alternativeArtwork,
+                inLibrary = mangaDetailScreenState.manga.inLibrary,
                 saveClick = { artwork ->
                     onNavigate(null)
                     coverActions.save(artwork)
@@ -213,13 +213,13 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.FilterChapterSheet -> {
             FilterChapterSheet(
                 themeColorState = themeColorState,
-                sortFilter = mangaDetailScreenState.chapterSortFilter,
+                sortFilter = mangaDetailScreenState.chapters.chapterSortFilter,
                 changeSort = chapterFilterActions.changeSort,
                 changeFilter = chapterFilterActions.changeFilter,
-                filter = mangaDetailScreenState.chapterFilter,
-                scanlatorFilter = mangaDetailScreenState.chapterScanlatorFilter,
-                sourceFilter = mangaDetailScreenState.chapterSourceFilter,
-                languageFilter = mangaDetailScreenState.chapterLanguageFilter,
+                filter = mangaDetailScreenState.chapters.chapterFilter,
+                scanlatorFilter = mangaDetailScreenState.chapters.chapterScanlatorFilter,
+                sourceFilter = mangaDetailScreenState.chapters.chapterSourceFilter,
+                languageFilter = mangaDetailScreenState.chapters.chapterLanguageFilter,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
                 changeLanguageFilter = chapterFilterActions.changeLanguage,
                 setAsGlobal = chapterFilterActions.setAsGlobal,

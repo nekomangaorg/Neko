@@ -141,7 +141,7 @@ fun MangaScreen(
         snackbarHost = {
             NekoSnackbarHost(
                 snackbarHostState = snackbarHostState,
-                snackbarColor = screenState.snackbarColor,
+                snackbarColor = screenState.general.snackbarColor,
             )
         },
         categoryActions =
@@ -220,7 +220,7 @@ fun MangaScreen(
                 val cover =
                     mangaViewModel.shareCover(
                         dir,
-                        mangaViewModel.mangaDetailScreenState.value.currentArtwork,
+                        mangaViewModel.mangaDetailScreenState.value.manga.currentArtwork,
                     )
                 val manga = mangaViewModel.getManga()
                 val sharableCover = cover?.getUriWithAuthority(context)
@@ -312,7 +312,8 @@ fun MangaScreen(
                 delete = mangaViewModel::deleteChapters,
                 clearRemoved = mangaViewModel::clearRemovedChapters,
                 openNext = {
-                    mangaViewModel.mangaDetailScreenState.value.nextUnreadChapter.simpleChapter
+                    mangaViewModel.mangaDetailScreenState.value.chapters.nextUnreadChapter
+                        .simpleChapter
                         ?.let { simpleChapter ->
                             val chapter = simpleChapter.toDbChapter()
                             val manga = mangaViewModel.getManga()
@@ -395,8 +396,8 @@ private fun MangaScreenWrapper(
 
     val themeColorState =
         rememberThemeColorState(
-            themeBasedOffCovers = screenState.themeBasedOffCovers,
-            vibrantColor = screenState.vibrantColor,
+            themeBasedOffCovers = screenState.general.themeBasedOffCovers,
+            vibrantColor = screenState.general.vibrantColor,
         )
 
     LaunchedEffect(themeColorState) {
@@ -447,13 +448,19 @@ private fun MangaScreenWrapper(
 
     val isTablet =
         windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-            !screenState.forcePortrait
+            !screenState.general.forcePortrait
 
     val onToggleFavoriteAction =
-        remember(screenState.inLibrary, screenState.allCategories, screenState.hasDefaultCategory) {
+        remember(
+            screenState.manga.inLibrary,
+            screenState.category.allCategories,
+            screenState.general.hasDefaultCategory,
+        ) {
             {
-                if (!screenState.inLibrary && screenState.allCategories.isNotEmpty()) {
-                    if (screenState.hasDefaultCategory) {
+                if (
+                    !screenState.manga.inLibrary && screenState.category.allCategories.isNotEmpty()
+                ) {
+                    if (screenState.general.hasDefaultCategory) {
                         onToggleFavorite(true)
                     } else {
                         openSheet(
@@ -472,8 +479,8 @@ private fun MangaScreenWrapper(
 
     var isInitialized by remember { mutableStateOf(false) }
 
-    LaunchedEffect(screenState.initialized, screenState.firstLoad) {
-        if (screenState.initialized && !screenState.firstLoad) {
+    LaunchedEffect(screenState.manga.initialized, screenState.general.firstLoad) {
+        if (screenState.manga.initialized && !screenState.general.firstLoad) {
             delay(250L)
             isInitialized = true
         } else {
@@ -482,10 +489,10 @@ private fun MangaScreenWrapper(
     }
 
     val refreshState =
-        remember(screenState.isRefreshing, themeColorState) {
+        remember(screenState.general.isRefreshing, themeColorState) {
             RefreshState(
                 enabled = true,
-                isRefreshing = screenState.isRefreshing,
+                isRefreshing = screenState.general.isRefreshing,
                 onRefresh = onRefresh,
                 trackColor = themeColorState.primaryColor,
             )
@@ -568,12 +575,12 @@ private fun MangaScreenWrapper(
             )
         }
 
-        if (screenState.removedChapters.isNotEmpty()) {
+        if (screenState.general.removedChapters.isNotEmpty()) {
             RemovedChaptersDialog(
                 themeColorState = themeColorState,
-                chapters = screenState.removedChapters,
+                chapters = screenState.general.removedChapters,
                 onConfirm = {
-                    chapterActions.delete(screenState.removedChapters)
+                    chapterActions.delete(screenState.general.removedChapters)
                     chapterActions.clearRemoved()
                 },
                 onDismiss = { chapterActions.clearRemoved() },
@@ -595,7 +602,7 @@ private fun LazyListScope.chapterList(
         ChapterHeader(
             themeColor = themeColorState,
             numberOfChapters = chapters.size,
-            filterText = screenState.chapterFilterText,
+            filterText = screenState.chapters.chapterFilterText,
             onClick = { onOpenSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
         )
     }
@@ -608,7 +615,7 @@ private fun LazyListScope.chapterList(
             count = chapters.size,
             themeColorState = themeColorState,
             shouldHideChapterTitles =
-                screenState.chapterFilter.hideChapterTitles == ToggleableState.On,
+                screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
             chapterActions = chapterActions,
             onBookmark = onBookmark,
             onRead = onRead,
@@ -655,7 +662,7 @@ private fun VerticalLayout(
                     mangaDetailScreenState = screenState,
                     isInitialized = isInitialized,
                     windowSizeClass = windowSizeClass,
-                    isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
+                    isLoggedIntoTrackers = screenState.track.loggedInTrackService.isNotEmpty(),
                     themeColorState = themeColorState,
                     generatePalette = generatePalette,
                     toggleFavorite = onToggleFavorite,
@@ -680,8 +687,8 @@ private fun VerticalLayout(
             if (isInitialized) {
                 chapterList(
                     chapters =
-                        if (screenState.isSearching) screenState.searchChapters
-                        else screenState.activeChapters,
+                        if (screenState.general.isSearching) screenState.general.searchChapters
+                        else screenState.chapters.activeChapters,
                     screenState = screenState,
                     themeColorState = themeColorState,
                     chapterActions = chapterActions,
@@ -733,7 +740,7 @@ private fun SideBySideLayout(
                     mangaDetailScreenState = screenState,
                     isInitialized = isInitialized,
                     windowSizeClass = windowSizeClass,
-                    isLoggedIntoTrackers = screenState.loggedInTrackService.isNotEmpty(),
+                    isLoggedIntoTrackers = screenState.track.loggedInTrackService.isNotEmpty(),
                     themeColorState = themeColorState,
                     generatePalette = generatePalette,
                     toggleFavorite = onToggleFavorite,
@@ -773,8 +780,8 @@ private fun SideBySideLayout(
                 if (isInitialized) {
                     chapterList(
                         chapters =
-                            if (screenState.isSearching) screenState.searchChapters
-                            else screenState.activeChapters,
+                            if (screenState.general.isSearching) screenState.general.searchChapters
+                            else screenState.chapters.activeChapters,
                         screenState = screenState,
                         themeColorState = themeColorState,
                         chapterActions = chapterActions,
