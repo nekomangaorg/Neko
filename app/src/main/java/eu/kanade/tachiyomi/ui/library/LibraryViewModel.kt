@@ -1242,7 +1242,6 @@ class LibraryViewModel() : ViewModel() {
             manga ?: return@launchIO
             val chapters = db.getChapters(manga).executeAsBlocking()
 
-            // ⚡ BOLT OPTIMIZATION: Replaced .filter {}.map {} chain with .mapNotNull {}
             // to avoid allocating an intermediate list of available chapters,
             // reducing GC overhead when the user quickly jumps to reading.
             val availableChapters = chapters.mapNotNull { chapter ->

@@ -66,9 +66,13 @@ fun SimpleStats(
             }
 
         val mergeCounts =
-            statsState.mergeCounts
-                .filter { it.second > 0 }
-                .map { (it.first.scanlatorName + " merged") to it.second.toString() }
+            statsState.mergeCounts.mapNotNull {
+                if (it.second > 0) {
+                    (it.first.scanlatorName + " merged") to it.second.toString()
+                } else {
+                    null
+                }
+            }
 
         (listOf(
                 numberFormat.format(statsState.mangaCount).toString() to

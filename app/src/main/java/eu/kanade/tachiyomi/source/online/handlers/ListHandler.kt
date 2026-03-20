@@ -43,9 +43,13 @@ class ListHandler {
         return withContext(Dispatchers.IO) {
             service.viewList(listUUID).getOrResultError("Error getting list").andThen { listDto ->
                 val allMangaIds =
-                    listDto.data.relationships
-                        .filter { it.type == MdConstants.Types.manga }
-                        .map { it.id }
+                    listDto.data.relationships.mapNotNull { relationship ->
+                        if (relationship.type == MdConstants.Types.manga) {
+                            relationship.id
+                        } else {
+                            null
+                        }
+                    }
                 when (
                     allMangaIds.isEmpty() || allMangaIds.size <= MdUtil.getMangaListOffset(page)
                 ) {
@@ -76,10 +80,15 @@ class ListHandler {
 
                         val enabledContentRatings =
                             mangaDexPreferences.visibleContentRatings().get()
+
                         val contentRatings =
-                            MangaContentRating.getOrdered()
-                                .filter { enabledContentRatings.contains(it.key) }
-                                .map { it.key }
+                            MangaContentRating.getOrdered().mapNotNull { rating ->
+                                if (enabledContentRatings.contains(rating.key)) {
+                                    rating.key
+                                } else {
+                                    null
+                                }
+                            }
 
                         val queryParameters =
                             mutableMapOf(

@@ -276,8 +276,13 @@ fun syncChaptersWithSource(
     val dupes =
         dbChapters
             .groupBy { it.url }
-            .filter { entry -> entry.value.size > 1 }
-            .map { entry -> entry.value.firstOrNull { !it.read } ?: entry.value.first() }
+            .mapNotNull { entry ->
+                if (entry.value.size > 1) {
+                    entry.value.firstOrNull { !it.read } ?: entry.value.first()
+                } else {
+                    null
+                }
+            }
             .toMutableList()
     if (dupes.isNotEmpty()) {
         dupes.addAll(toDelete)

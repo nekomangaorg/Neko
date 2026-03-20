@@ -141,7 +141,6 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
         }
 
-        // ⚡ BOLT OPTIMIZATION: Used observeAndUpdate which internally applies
         // distinctUntilChanged()
         // to prevent redundant state updates and UI recompositions.
         preferences.browseAsList().changes().observeAndUpdate(viewModelScope) {

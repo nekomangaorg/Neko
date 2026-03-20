@@ -226,10 +226,13 @@ class MangaUpdateCoordinator {
         val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-        val chaptersToDownload =
-            chapters
-                .filter { isChapterDownloadable(it, blockedGroups, blockedUploaders) }
-                .map { it.chapter.toDbChapter() }
+        val chaptersToDownload = chapters.mapNotNull { item ->
+            if (isChapterDownloadable(item, blockedGroups, blockedUploaders)) {
+                item.chapter.toDbChapter()
+            } else {
+                null
+            }
+        }
 
         downloadManager.downloadChapters(manga, chaptersToDownload)
     }

@@ -181,8 +181,13 @@ class ApiMangaParser {
 
         val uploaderName =
             networkChapter.relationships
-                .filter { it.type == MdConstants.Types.uploader }
-                .map { uploaders[it.id] }
+                .mapNotNull { relationship ->
+                    if (relationship.type == MdConstants.Types.uploader) {
+                        uploaders[relationship.id]
+                    } else {
+                        null
+                    }
+                }
                 .firstOrNull()
 
         if (scanlatorName.isEmpty()) {

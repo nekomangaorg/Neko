@@ -73,7 +73,7 @@ class MainActivityViewModel : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            // ⚡ BOLT OPTIMIZATION: Added distinctUntilChanged() to prevent redundant state updates
+
             // and UI recompositions when preferences emit the same value.
             securityPreferences.incognitoMode().changes().distinctUntilChanged().collect {
                 incognitoMode ->

@@ -357,10 +357,16 @@ private fun StartYearView(
             .sortedBy { it.key }
             .toPersistentList()
     }
+
     val lineData = remember {
         sortedSeries
-            .filter { it.key != notStartedString }
-            .map { LineData(xValue = it.key, yValue = it.value.size.toFloat()) }
+            .mapNotNull {
+                if (it.key != notStartedString) {
+                    LineData(xValue = it.key, yValue = it.value.size.toFloat())
+                } else {
+                    null
+                }
+            }
             .toPersistentList()
     }
     val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toImmutableMap() }
