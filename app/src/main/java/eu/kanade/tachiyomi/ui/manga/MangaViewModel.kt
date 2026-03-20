@@ -1120,16 +1120,22 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             _mangaDetailScreenState.update {
                 it.copy(
-                    incognitoMode = securityPreferences.incognitoMode().get(),
-                    hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
-                    hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
-                    backdropSize = mangaDetailsPreferences.backdropSize().get(),
-                    forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
-                    themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
-                    dynamicCovers = mangaDetailsPreferences.dynamicCovers().get(),
-                    wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
-                    validMergeTypes = validMergeTypes,
-                    loggedInTrackService = loggedInServices,
+                    general =
+                        it.general.copy(
+                            incognitoMode = securityPreferences.incognitoMode().get(),
+                            hasDefaultCategory = libraryPreferences.defaultCategory().get() != -1,
+                            hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
+                            backdropSize = mangaDetailsPreferences.backdropSize().get(),
+                            forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
+                            themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
+                            wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
+                        ),
+                    track = it.track.copy(loggedInTrackService = loggedInServices),
+                    manga =
+                        it.manga.copy(
+                            dynamicCovers = mangaDetailsPreferences.dynamicCovers().get()
+                        ),
+                    merge = it.merge.copy(validMergeTypes = validMergeTypes),
                 )
             }
         }
@@ -2185,26 +2191,32 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
             _mangaDetailScreenState.update { state ->
                 state.copy(
-                    allChapters =
-                        updateChapterListForDownloadState(
-                            chapterId = download.chapterItem.id,
-                            downloadStatus = download.status,
-                            downloadProgress = download.progress,
-                            chapters = state.allChapters,
+                    chapters =
+                        state.chapters.copy(
+                            allChapters =
+                                updateChapterListForDownloadState(
+                                    chapterId = download.chapterItem.id,
+                                    downloadStatus = download.status,
+                                    downloadProgress = download.progress,
+                                    chapters = state.chapters.allChapters,
+                                ),
+                            activeChapters =
+                                updateChapterListForDownloadState(
+                                    chapterId = download.chapterItem.id,
+                                    downloadStatus = download.status,
+                                    downloadProgress = download.progress,
+                                    chapters = state.chapters.activeChapters,
+                                ),
                         ),
-                    activeChapters =
-                        updateChapterListForDownloadState(
-                            chapterId = download.chapterItem.id,
-                            downloadStatus = download.status,
-                            downloadProgress = download.progress,
-                            chapters = state.activeChapters,
-                        ),
-                    searchChapters =
-                        updateChapterListForDownloadState(
-                            chapterId = download.chapterItem.id,
-                            downloadStatus = download.status,
-                            downloadProgress = download.progress,
-                            chapters = state.searchChapters,
+                    general =
+                        state.general.copy(
+                            searchChapters =
+                                updateChapterListForDownloadState(
+                                    chapterId = download.chapterItem.id,
+                                    downloadStatus = download.status,
+                                    downloadProgress = download.progress,
+                                    chapters = state.general.searchChapters,
+                                )
                         ),
                 )
             }
@@ -2235,26 +2247,32 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             chapterItems.forEach { chapterItem ->
                 _mangaDetailScreenState.update { state ->
                     state.copy(
-                        allChapters =
-                            updateChapterListForDownloadState(
-                                chapterId = chapterItem.chapter.id,
-                                downloadStatus = Download.State.NOT_DOWNLOADED,
-                                downloadProgress = 0,
-                                chapters = state.allChapters,
+                        chapters =
+                            state.chapters.copy(
+                                allChapters =
+                                    updateChapterListForDownloadState(
+                                        chapterId = chapterItem.chapter.id,
+                                        downloadStatus = Download.State.NOT_DOWNLOADED,
+                                        downloadProgress = 0,
+                                        chapters = state.chapters.allChapters,
+                                    ),
+                                activeChapters =
+                                    updateChapterListForDownloadState(
+                                        chapterId = chapterItem.chapter.id,
+                                        downloadStatus = Download.State.NOT_DOWNLOADED,
+                                        downloadProgress = 0,
+                                        chapters = state.chapters.activeChapters,
+                                    ),
                             ),
-                        activeChapters =
-                            updateChapterListForDownloadState(
-                                chapterId = chapterItem.chapter.id,
-                                downloadStatus = Download.State.NOT_DOWNLOADED,
-                                downloadProgress = 0,
-                                chapters = state.activeChapters,
-                            ),
-                        searchChapters =
-                            updateChapterListForDownloadState(
-                                chapterId = chapterItem.chapter.id,
-                                downloadStatus = Download.State.NOT_DOWNLOADED,
-                                downloadProgress = 0,
-                                chapters = state.searchChapters,
+                        general =
+                            state.general.copy(
+                                searchChapters =
+                                    updateChapterListForDownloadState(
+                                        chapterId = chapterItem.chapter.id,
+                                        downloadStatus = Download.State.NOT_DOWNLOADED,
+                                        downloadProgress = 0,
+                                        chapters = state.general.searchChapters,
+                                    )
                             ),
                     )
                 }
