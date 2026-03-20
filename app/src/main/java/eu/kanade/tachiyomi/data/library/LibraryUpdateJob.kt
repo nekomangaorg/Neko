@@ -603,7 +603,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             .collect { chapterIds ->
                                                 val markRead =
                                                     nonMergedChapters
-// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
+                                                        // Optimized by replacing chained filters
+                                                        // and map with mapNotNull to avoid
+                                                        // intermediate list allocations.
                                                         .mapNotNull {
                                                             if (
                                                                 chapterIds.contains(
@@ -623,14 +625,21 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                             }
                                     }
                                     if (mergedChapters.isNotEmpty()) {
+
+                                        // with .mapNotNull {}
                                         val readChapters =
-                                            mergedList
-                                                .flatten()
-                                                .filter { it.second }
-                                                .map { Pair(it.first.scanlator, it.first.url) }
+                                            mergedList.flatten().mapNotNull {
+                                                if (it.second) {
+                                                    Pair(it.first.scanlator, it.first.url)
+                                                } else {
+                                                    null
+                                                }
+                                            }
                                         val markRead =
                                             mergedChapters
-// Optimized by replacing chained filters and map with mapNotNull to avoid intermediate list allocations.
+                                                // Optimized by replacing chained filters and map
+                                                // with mapNotNull to avoid intermediate list
+                                                // allocations.
                                                 .mapNotNull {
                                                     if (
                                                         readChapters.contains(

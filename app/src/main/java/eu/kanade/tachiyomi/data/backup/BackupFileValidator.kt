@@ -45,8 +45,13 @@ class BackupFileValidator(private val trackManager: TrackManager = Injekt.get())
         val missingTrackers =
             trackers
                 .mapNotNull { trackManager.getService(it) }
-                .filter { !it.isLogged() }
-                .map { context.getString(it.nameRes()) }
+                .mapNotNull { service ->
+                    if (!service.isLogged()) {
+                        context.getString(service.nameRes())
+                    } else {
+                        null
+                    }
+                }
                 .sorted()
 
         return Results(missingTrackers, !hasDexEntries)

@@ -270,13 +270,16 @@ class Downloader(
                 .map { it.toSimpleChapter()!!.toChapterItem() }
                 .sortedWith(ChapterItemSort().sortComparator(manga, true))
                 .map { it.chapter }
+
                 // Add chapters to queue from the start.
-                // Filter out those already enqueued.
-                .filter { chapter -> queueState.value.none { it.chapterItem.id == chapter.id } }
-                // Create a download for each one.
-                .map {
-                    val source = it.getHttpSource(sourceManager)
-                    Download(source, manga.toSimpleManga(), it)
+                // Filter out those already enqueued and create a download for each one.
+                .mapNotNull { chapter ->
+                    if (queueState.value.none { it.chapterItem.id == chapter.id }) {
+                        val source = chapter.getHttpSource(sourceManager)
+                        Download(source, manga.toSimpleManga(), chapter)
+                    } else {
+                        null
+                    }
                 }
                 .toList()
 
