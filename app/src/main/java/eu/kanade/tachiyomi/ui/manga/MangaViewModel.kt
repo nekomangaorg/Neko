@@ -164,7 +164,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     private val _mangaDetailScreenState =
         MutableStateFlow(
-            MangaConstants.MangaDetailScreenState(currentArtwork = createInitialCurrentArtwork())
+            MangaConstants.MangaDetailScreenState(
+                general = MangaConstants.MangaScreenGeneralState(),
+                manga =
+                    MangaConstants.MangaScreenMangaState(
+                        currentArtwork = createInitialCurrentArtwork()
+                    ),
+            )
         )
 
     val mangaDetailScreenState: StateFlow<MangaConstants.MangaDetailScreenState> =
@@ -561,67 +567,89 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 .collectLatest { allInfo ->
                     _mangaDetailScreenState.update {
                         it.copy(
-                            vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
-                            alternativeTitles = allInfo.mangaItem.altTitles,
-                            artist = allInfo.mangaItem.artist,
-                            author = allInfo.mangaItem.author,
-                            alternativeArtwork = allInfo.altArtwork,
-                            currentArtwork = allInfo.artwork,
-                            currentDescription = allInfo.mangaItem.getDescription(),
-                            currentTitle =
-                                allInfo.mangaItem.userTitle.ifEmpty { allInfo.mangaItem.title },
-                            externalLinks = allInfo.mangaItem.externalLinks,
-                            genres = allInfo.mangaItem.genre,
-                            initialized = allInfo.mangaItem.initialized,
-                            inLibrary = allInfo.mangaItem.favorite,
-                            isMerged = allInfo.isMerged,
-                            isPornographic =
-                                allInfo.mangaItem.contentRating.equals(
-                                    MdConstants.ContentRating.pornographic,
-                                    ignoreCase = true,
+                            general =
+                                it.general.copy(
+                                    vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
+                                    isRefreshing = allInfo.isRefreshing,
                                 ),
-                            langFlag = allInfo.mangaItem.langFlag,
-                            missingChapters = allInfo.mangaItem.missingChapters,
-                            originalTitle = allInfo.mangaItem.title,
-                            stats =
-                                Stats(
-                                    rating = allInfo.mangaItem.rating,
-                                    follows = allInfo.mangaItem.users,
-                                    threadId = allInfo.mangaItem.threadId,
-                                    repliesCount = allInfo.mangaItem.repliesCount,
+                            manga =
+                                it.manga.copy(
+                                    alternativeTitles = allInfo.mangaItem.altTitles,
+                                    artist = allInfo.mangaItem.artist,
+                                    author = allInfo.mangaItem.author,
+                                    alternativeArtwork = allInfo.altArtwork,
+                                    currentArtwork = allInfo.artwork,
+                                    currentDescription = allInfo.mangaItem.getDescription(),
+                                    currentTitle =
+                                        allInfo.mangaItem.userTitle.ifEmpty {
+                                            allInfo.mangaItem.title
+                                        },
+                                    externalLinks = allInfo.mangaItem.externalLinks,
+                                    genres = allInfo.mangaItem.genre,
+                                    initialized = allInfo.mangaItem.initialized,
+                                    inLibrary = allInfo.mangaItem.favorite,
+                                    isMerged = allInfo.isMerged,
+                                    isPornographic =
+                                        allInfo.mangaItem.contentRating.equals(
+                                            MdConstants.ContentRating.pornographic,
+                                            ignoreCase = true,
+                                        ),
+                                    langFlag = allInfo.mangaItem.langFlag,
+                                    missingChapters = allInfo.mangaItem.missingChapters,
+                                    originalTitle = allInfo.mangaItem.title,
+                                    stats =
+                                        Stats(
+                                            rating = allInfo.mangaItem.rating,
+                                            follows = allInfo.mangaItem.users,
+                                            threadId = allInfo.mangaItem.threadId,
+                                            repliesCount = allInfo.mangaItem.repliesCount,
+                                        ),
+                                    status = allInfo.mangaItem.status,
+                                    lastVolume = allInfo.mangaItem.lastVolumeNumber,
+                                    lastChapter = allInfo.mangaItem.lastChapterNumber,
+                                    estimatedMissingChapters =
+                                        allInfo.allChapterInfo.missingChapters.estimatedChapters,
                                 ),
-                            status = allInfo.mangaItem.status,
-                            lastVolume = allInfo.mangaItem.lastVolumeNumber,
-                            lastChapter = allInfo.mangaItem.lastChapterNumber,
-                            isRefreshing = allInfo.isRefreshing,
-                            activeChapters = allInfo.allChapterInfo.activeChapters,
-                            nextUnreadChapter = allInfo.allChapterInfo.nextUnread,
-                            estimatedMissingChapters =
-                                allInfo.allChapterInfo.missingChapters.estimatedChapters,
-                            chapterFilter = allInfo.chapterDisplay,
-                            chapterFilterText = allInfo.chapterFilterText,
-                            chapterSortFilter = allInfo.chapterSortFilter,
-                            chapterScanlatorFilter = allInfo.chapterScanlatorFilter,
-                            chapterSourceFilter = allInfo.chapterSourceFilter,
-                            chapterLanguageFilter = allInfo.chapterLanguageFilter,
-                            allChapters = allInfo.allChapterInfo.allChapters,
-                            allSources = allInfo.allChapterInfo.allSources,
-                            allCategories = allInfo.allCategories,
-                            currentCategories = allInfo.mangaCategories,
-                            tracks = allInfo.tracks,
-                            loggedInTrackService = allInfo.loggedInTrackerService,
-                            trackServiceCount = allInfo.trackServiceCount,
+                            chapters =
+                                it.chapters.copy(
+                                    activeChapters = allInfo.allChapterInfo.activeChapters,
+                                    nextUnreadChapter = allInfo.allChapterInfo.nextUnread,
+                                    chapterFilter = allInfo.chapterDisplay,
+                                    chapterFilterText = allInfo.chapterFilterText,
+                                    chapterSortFilter = allInfo.chapterSortFilter,
+                                    chapterScanlatorFilter = allInfo.chapterScanlatorFilter,
+                                    chapterSourceFilter = allInfo.chapterSourceFilter,
+                                    chapterLanguageFilter = allInfo.chapterLanguageFilter,
+                                    allChapters = allInfo.allChapterInfo.allChapters,
+                                    allSources = allInfo.allChapterInfo.allSources,
+                                    allScanlators = allInfo.allChapterInfo.allScanlators,
+                                    allUploaders = allInfo.allChapterInfo.allUploaders,
+                                    allLanguages = allInfo.allChapterInfo.allLanguages,
+                                ),
+                            category =
+                                it.category.copy(
+                                    allCategories = allInfo.allCategories,
+                                    currentCategories = allInfo.mangaCategories,
+                                ),
+                            track =
+                                it.track.copy(
+                                    tracks = allInfo.tracks,
+                                    loggedInTrackService = allInfo.loggedInTrackerService,
+                                    trackServiceCount = allInfo.trackServiceCount,
+                                ),
                         )
                     }
 
-                    if (_mangaDetailScreenState.value.firstLoad) {
+                    if (_mangaDetailScreenState.value.general.firstLoad) {
                         syncChaptersReadStatus()
                         autoAddTrackers(
                             allInfo.mangaItem,
                             allInfo.loggedInTrackerService,
                             allInfo.tracks,
                         )
-                        _mangaDetailScreenState.update { it.copy(firstLoad = false) }
+                        _mangaDetailScreenState.update {
+                            it.copy(general = it.general.copy(firstLoad = false))
+                        }
                     }
 
                     if (allInfo.mangaItem.initialized) {
@@ -642,25 +670,31 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = R.string.no_network_connection,
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
                 return@launchIO
             }
 
-            _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(isRefreshing = true))
+            }
 
             val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
 
             mangaUpdateCoordinator
                 .update(mangaItem = mangaItem, isMerging = isMerging)
-                .onCompletion { _mangaDetailScreenState.update { it.copy(isRefreshing = false) } }
+                .onCompletion {
+                    _mangaDetailScreenState.update {
+                        it.copy(general = it.general.copy(isRefreshing = false))
+                    }
+                }
                 .catch { e ->
                     e.message?.let {
                         appSnackbarManager.showSnackbar(
                             SnackbarState(
                                 message = it,
-                                snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                                snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                             )
                         )
                     }
@@ -672,7 +706,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 SnackbarState(
                                     message = result.text,
                                     messageRes = result.id,
-                                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                                    snackBarColor =
+                                        _mangaDetailScreenState.value.general.snackbarColor,
                                 )
                             )
                         }
@@ -683,14 +718,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                             autoAddTrackers(
                                 mangaItem,
-                                mangaDetailScreenState.value.loggedInTrackService,
-                                mangaDetailScreenState.value.tracks,
+                                mangaDetailScreenState.value.track.loggedInTrackService,
+                                mangaDetailScreenState.value.track.tracks,
                             )
                         }
 
                         is MangaResult.ChaptersRemoved -> {
                             val removedChapters =
-                                mangaDetailScreenState.value.allChapters.filter {
+                                mangaDetailScreenState.value.chapters.allChapters.filter {
                                     it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
                                 }
 
@@ -701,7 +736,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     else -> {
                                         _mangaDetailScreenState.update {
                                             it.copy(
-                                                removedChapters = removedChapters.toPersistentList()
+                                                general =
+                                                    it.general.copy(
+                                                        removedChapters =
+                                                            removedChapters.toPersistentList()
+                                                    )
                                             )
                                         }
                                     }
@@ -748,7 +787,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             actionLabelRes = R.string.undo,
                             action = {},
                             dismissAction = { viewModelScope.launch { delete() } },
-                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 } else {
@@ -758,7 +797,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = R.string.no_chapters_to_delete,
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             }
@@ -771,10 +810,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     fun markPreviousChapters(chapterItem: ChapterItem, read: Boolean) {
         val chapterList =
-            if (mangaDetailScreenState.value.isSearching) {
-                mangaDetailScreenState.value.searchChapters
+            if (mangaDetailScreenState.value.general.isSearching) {
+                mangaDetailScreenState.value.general.searchChapters
             } else {
-                mangaDetailScreenState.value.activeChapters
+                mangaDetailScreenState.value.chapters.activeChapters
             }
         val chapterIndex = chapterList.indexOf(chapterItem)
         if (chapterIndex == -1) return
@@ -833,7 +872,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 if (it.chapter.canDeleteChapter()) ChapterItem(chapter = it.chapter)
                                 else null
                             },
-                            updatedChapterList.size == mangaDetailScreenState.value.allChapters.size,
+                            updatedChapterList.size ==
+                                mangaDetailScreenState.value.chapters.allChapters.size,
                         )
                     }
                     // get the highest chapter number and update tracking for it
@@ -856,7 +896,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                             SnackbarState(
                                                 "Error trying to update tracked chapter marked as read ${it.message}",
                                                 snackBarColor =
-                                                    _mangaDetailScreenState.value.snackbarColor,
+                                                    _mangaDetailScreenState.value.general
+                                                        .snackbarColor,
                                             )
                                         )
                                     }
@@ -885,7 +926,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
                         },
                         dismissAction = { viewModelScope.launchIO { finalizeChapters() } },
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             } else {
@@ -898,7 +939,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         viewModelScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            val allChapterSize = mangaDetailScreenState.value.allChapters.size
+            val allChapterSize = mangaDetailScreenState.value.chapters.allChapters.size
             when (downloadAction) {
                 is DownloadAction.ImmediateDownload -> {
                     addToLibrarySnack()
@@ -908,7 +949,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     addToLibrarySnack()
                     downloadManager.downloadChapters(
                         dbManga,
-                        mangaDetailScreenState.value.activeChapters.mapNotNull {
+                        mangaDetailScreenState.value.chapters.activeChapters.mapNotNull {
                             if (!it.isDownloaded) it.chapter.toDbChapter() else null
                         },
                     )
@@ -924,7 +965,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
-                        mangaDetailScreenState.value.activeChapters
+                        mangaDetailScreenState.value.chapters.activeChapters
                             .filter {
                                 !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable
                             }
@@ -935,7 +976,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
-                        mangaDetailScreenState.value.activeChapters.mapNotNull {
+                        mangaDetailScreenState.value.chapters.activeChapters.mapNotNull {
                             if (!it.chapter.read && !it.isDownloaded && !it.chapter.isUnavailable)
                                 it.chapter.toDbChapter()
                             else null
@@ -946,13 +987,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     deleteChapters(chapterItems, chapterItems.size == allChapterSize)
                 is DownloadAction.RemoveAll ->
                     deleteChapters(
-                        mangaDetailScreenState.value.activeChapters,
-                        mangaDetailScreenState.value.activeChapters.size == allChapterSize,
+                        mangaDetailScreenState.value.chapters.activeChapters,
+                        mangaDetailScreenState.value.chapters.activeChapters.size == allChapterSize,
                         true,
                     )
                 is DownloadAction.RemoveRead -> {
                     val filteredChapters =
-                        mangaDetailScreenState.value.activeChapters.filter {
+                        mangaDetailScreenState.value.chapters.activeChapters.filter {
                             it.chapter.read && it.isDownloaded
                         }
                     deleteChapters(filteredChapters, filteredChapters.size == allChapterSize, true)
@@ -966,13 +1007,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Checks if a manga is favorited, if not then snack action to add to library */
     private fun addToLibrarySnack() {
         viewModelScope.launchIO {
-            if (!_mangaDetailScreenState.value.inLibrary) {
+            if (!_mangaDetailScreenState.value.manga.inLibrary) {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = R.string.add_to_library,
                         actionLabelRes = R.string.add,
                         action = { toggleFavorite(true) },
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             }
@@ -1019,7 +1060,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                             fieldRes = service.nameRes(),
                                             messageRes = R.string.error_refreshing_,
                                             snackBarColor =
-                                                _mangaDetailScreenState.value.snackbarColor,
+                                                _mangaDetailScreenState.value.general.snackbarColor,
                                         )
                                     )
                                 }
@@ -1328,12 +1369,14 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             val searchActive = searchQuery != null
 
-            _mangaDetailScreenState.update { it.copy(isSearching = searchActive) }
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(isSearching = searchActive))
+            }
 
             val filteredChapters =
                 when (searchActive) {
                     true -> {
-                        mangaDetailScreenState.value.activeChapters.filter {
+                        mangaDetailScreenState.value.chapters.activeChapters.filter {
                             it.chapter.chapterTitle.contains(searchQuery, true) ||
                                 it.chapter.scanlator.contains(searchQuery, true) ||
                                 it.chapter.name.contains(searchQuery, true)
@@ -1343,7 +1386,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
 
             _mangaDetailScreenState.update {
-                it.copy(searchChapters = filteredChapters.toPersistentList())
+                it.copy(
+                    general = it.general.copy(searchChapters = filteredChapters.toPersistentList())
+                )
             }
         }
     }
@@ -1351,7 +1396,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun addNewCategory(newCategory: String) {
         viewModelScope.launchIO {
             val order =
-                (_mangaDetailScreenState.value.allCategories.maxOfOrNull { it.order } ?: 0) + 1
+                (_mangaDetailScreenState.value.category.allCategories.maxOfOrNull { it.order }
+                    ?: 0) + 1
             mangaUseCases.modifyManga.addNewCategory(newCategory, order)
         }
     }
@@ -1369,7 +1415,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     SnackbarState(
                         messageRes = R.string._copied_to_clipboard,
                         message = message,
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             }
@@ -1378,7 +1424,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     fun setAltTitle(title: String?) {
         viewModelScope.launchNonCancellable {
-            val previousTitle = mangaDetailScreenState.value.currentTitle
+            val previousTitle = mangaDetailScreenState.value.manga.currentTitle
 
             val dbManga =
                 mangaUseCases.modifyManga.setAltTitle(mangaId, title) ?: return@launchNonCancellable
@@ -1389,7 +1435,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     message = dbManga.user_title,
                     actionLabelRes = R.string.undo,
                     action = { setAltTitle(previousTitle) },
-                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                 )
             )
         }
@@ -1404,14 +1450,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             if (editManga.favorite) {
                 autoAddTrackers(
                     editManga.toMangaItem(),
-                    mangaDetailScreenState.value.loggedInTrackService,
-                    mangaDetailScreenState.value.tracks,
+                    mangaDetailScreenState.value.track.loggedInTrackService,
+                    mangaDetailScreenState.value.track.tracks,
                 )
             }
             // add to the default category if it exists and the user has the option set
-            if (shouldAddToDefaultCategory && mangaDetailScreenState.value.hasDefaultCategory) {
+            if (
+                shouldAddToDefaultCategory &&
+                    mangaDetailScreenState.value.general.hasDefaultCategory
+            ) {
                 val defaultCategoryId = libraryPreferences.defaultCategory().get()
-                mangaDetailScreenState.value.allCategories
+                mangaDetailScreenState.value.category.allCategories
                     .firstOrNull { defaultCategoryId == it.id }
                     ?.let { updateMangaCategories(listOf(it)) }
             }
@@ -1456,13 +1505,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             val previouslyTracked =
-                mangaDetailScreenState.value.tracks.firstOrNull {
+                mangaDetailScreenState.value.track.tracks.firstOrNull {
                     service.id == it.trackServiceId
                 } != null
 
             val result =
                 trackingCoordinator.searchTrackerNonFlow(title, service, dbManga, previouslyTracked)
-            _mangaDetailScreenState.update { it.copy(trackSearchResult = result) }
+            _mangaDetailScreenState.update {
+                it.copy(track = it.track.copy(trackSearchResult = result))
+            }
         }
     }
 
@@ -1490,7 +1541,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             appSnackbarManager.showSnackbar(
                 SnackbarState(
                     message = trackingUpdate.message,
-                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                 )
             )
         }
@@ -1515,7 +1566,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun searchMergedManga(query: String, mergeType: MergeType) {
         viewModelScope.launchIO {
             _mangaDetailScreenState.update {
-                it.copy(mergeSearchResult = MergeSearchResult.Loading)
+                it.copy(merge = it.merge.copy(mergeSearchResult = MergeSearchResult.Loading))
             }
 
             runCatching {
@@ -1532,11 +1583,20 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                     _mangaDetailScreenState.update {
                         when (mergedMangaResults.isEmpty()) {
-                            true -> it.copy(mergeSearchResult = MergeSearchResult.NoResult)
+                            true ->
+                                it.copy(
+                                    merge =
+                                        it.merge.copy(
+                                            mergeSearchResult = MergeSearchResult.NoResult
+                                        )
+                                )
                             false ->
                                 it.copy(
-                                    mergeSearchResult =
-                                        MergeSearchResult.Success(mergedMangaResults)
+                                    merge =
+                                        it.merge.copy(
+                                            mergeSearchResult =
+                                                MergeSearchResult.Success(mergedMangaResults)
+                                        )
                                 )
                         }
                     }
@@ -1545,9 +1605,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     TimberKt.e(error) { "Error searching merged manga" }
                     _mangaDetailScreenState.update {
                         it.copy(
-                            mergeSearchResult =
-                                MergeSearchResult.Error(
-                                    error.message ?: "Error looking up information"
+                            merge =
+                                it.merge.copy(
+                                    mergeSearchResult =
+                                        MergeSearchResult.Error(
+                                            error.message ?: "Error looking up information"
+                                        )
                                 )
                         )
                     }
@@ -1597,7 +1660,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         // 1. Update UI state optimistically
         if (filterOption != null) {
             _mangaDetailScreenState.update { state ->
-                state.copy(chapterFilter = calculateNewFilter(state.chapterFilter, filterOption))
+                state.copy(
+                    chapters =
+                        state.chapters.copy(
+                            chapterFilter =
+                                calculateNewFilter(state.chapters.chapterFilter, filterOption)
+                        )
+                )
             }
         }
 
@@ -1751,14 +1820,19 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             MangaCoverMetadata.addVibrantColor(mangaId, vibrantColor)
             _mangaDetailScreenState.update {
-                it.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
+                it.copy(
+                    general =
+                        it.general.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
+                )
             }
         }
     }
 
     fun clearRemovedChapters() {
         viewModelScope.launchIO {
-            _mangaDetailScreenState.update { it.copy(removedChapters = persistentListOf()) }
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(removedChapters = persistentListOf()))
+            }
         }
     }
 
@@ -1827,7 +1901,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     appSnackbarManager.showSnackbar(
                         SnackbarState(
                             message = "No network connection, cannot autolink tracker",
-                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 }
@@ -1892,7 +1966,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                             message =
                                                 " error trying to autolink tracking. ${trackResult.errorMessage}",
                                             snackBarColor =
-                                                _mangaDetailScreenState.value.snackbarColor,
+                                                _mangaDetailScreenState.value.general.snackbarColor,
                                         )
                                     )
                                 }
@@ -1917,7 +1991,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     appSnackbarManager.showSnackbar(
                         SnackbarState(
                             messageRes = R.string.cover_saved,
-                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 }
@@ -1926,7 +2000,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         messageRes = R.string.error_saving_cover,
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             }
@@ -2012,17 +2086,21 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     appSnackbarManager.showSnackbar(
                         SnackbarState(
                             message = "No network connection, cannot open comments",
-                            snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 false -> {
-                    _mangaDetailScreenState.update { it.copy(isRefreshing = true) }
+                    _mangaDetailScreenState.update {
+                        it.copy(general = it.general.copy(isRefreshing = true))
+                    }
                     val threadId =
                         sourceManager.mangaDex
                             .getChapterCommentId(chapterId)
                             .onFailure { TimberKt.e { it.message() } }
                             .getOrElse { null }
-                    _mangaDetailScreenState.update { it.copy(isRefreshing = false) }
+                    _mangaDetailScreenState.update {
+                        it.copy(general = it.general.copy(isRefreshing = false))
+                    }
                     if (threadId == null) {
                         appSnackbarManager.showSnackbar(
                             SnackbarState(messageRes = R.string.comments_unavailable)
@@ -2047,7 +2125,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     val dbManga = db.getManga(mangaId).executeAsBlocking()!!
                     statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
                         val chaptersToMarkRead =
-                            mangaDetailScreenState.value.allChapters
+                            mangaDetailScreenState.value.chapters.allChapters
                                 .asSequence()
                                 .filter { !it.chapter.isMergedChapter() }
                                 .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
@@ -2068,7 +2146,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         appSnackbarManager.showSnackbar(
                             SnackbarState(
                                 "Error trying to mark chapters read from MangaDex $it",
-                                snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                                snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                             )
                         )
                     }
@@ -2101,7 +2179,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 appSnackbarManager.showSnackbar(
                     SnackbarState(
                         message = download.errorMessage,
-                        snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                        snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                     )
                 )
             }
@@ -2241,7 +2319,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             }
                         }
                     },
-                    snackBarColor = _mangaDetailScreenState.value.snackbarColor,
+                    snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                 )
             )
         }
@@ -2249,7 +2327,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     fun updateSnackbarColor(snackbarColor: SnackbarColor) {
         viewModelScope.launch {
-            _mangaDetailScreenState.update { it.copy(snackbarColor = snackbarColor) }
+            _mangaDetailScreenState.update {
+                it.copy(general = it.general.copy(snackbarColor = snackbarColor))
+            }
         }
     }
 

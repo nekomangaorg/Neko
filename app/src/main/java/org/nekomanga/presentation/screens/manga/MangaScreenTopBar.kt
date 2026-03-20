@@ -26,13 +26,13 @@ fun MangaScreenTopBar(
         color = Color.Transparent,
         navigationIconLabel = stringResource(R.string.back),
         navigationIcon = Icons.AutoMirrored.Default.ArrowBack,
-        incognitoMode = screenState.incognitoMode,
+        incognitoMode = screenState.general.incognitoMode,
         onNavigationIconClicked = onNavigationIconClick,
         actions = {
             MangaDetailsAppBarActions(
                 chapterActions = chapterActions,
                 themeColorState = themeColorState,
-                chapters = screenState.activeChapters,
+                chapters = screenState.chapters.activeChapters,
             )
         },
         scrollBehavior = scrollBehavior,

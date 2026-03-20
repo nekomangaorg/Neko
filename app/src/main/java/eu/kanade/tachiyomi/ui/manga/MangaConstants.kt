@@ -35,67 +35,91 @@ object MangaConstants {
         val allLanguages: PersistentSet<String>,
     )
 
-    data class MangaDetailScreenState(
+    data class MangaScreenGeneralState(
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
         val firstLoad: Boolean = true,
         val snackbarColor: SnackbarColor? = null,
-        val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
+        val incognitoMode: Boolean = false,
+        val forcePortrait: Boolean = false,
+        val themeBasedOffCovers: Boolean = false,
+        val vibrantColor: Int? = null,
+        val hasDefaultCategory: Boolean = false,
+        val hideButtonText: Boolean = false,
+        val backdropSize: BackdropSize = BackdropSize.Default,
+        val wrapAltTitles: Boolean = false,
         val searchChapters: PersistentList<ChapterItem> = persistentListOf(),
-        val allCategories: PersistentList<CategoryItem> = persistentListOf(),
+        val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
+    )
+
+    data class MangaScreenMangaState(
+        val initialized: Boolean = false,
+        val inLibrary: Boolean = false,
+        val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
+        val currentTitle: String = "",
+        val originalTitle: String = "",
+        val alternativeTitles: PersistentList<String> = persistentListOf(),
+        val artist: String = "",
+        val author: String = "",
+        val currentDescription: String = "",
+        val genres: PersistentList<String> = persistentListOf(),
+        val status: Int = 0,
+        val isPornographic: Boolean = false,
+        val langFlag: String? = null,
+        val missingChapters: String = "",
+        val estimatedMissingChapters: String = "",
+        val stats: Stats? = null,
+        val lastVolume: Int? = null,
+        val lastChapter: Int? = null,
+        val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
+        val currentArtwork: Artwork,
+        val alternativeArtwork: PersistentList<Artwork> = persistentListOf(),
+        val dynamicCovers: Boolean = false,
+    )
+
+    data class MangaScreenChapterState(
+        val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allChapters: PersistentList<ChapterItem> = persistentListOf(),
-        val allScanlators: ImmutableSet<String> = persistentSetOf(),
-        val allUploaders: ImmutableSet<String> = persistentSetOf(),
-        val allSources: ImmutableSet<String> = persistentSetOf(),
-        val allLanguages: ImmutableSet<String> = persistentSetOf(),
-        val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
+        val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val chapterFilter: ChapterDisplay = ChapterDisplay(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterSourceFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
-        val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
-        val hasDefaultCategory: Boolean = false,
-        val hideButtonText: Boolean = false,
-        val backdropSize: BackdropSize = BackdropSize.Default,
-        val forcePortrait: Boolean = false,
-        val incognitoMode: Boolean = false,
-        val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
-        val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
-        val themeBasedOffCovers: Boolean = false,
-        val dynamicCovers: Boolean = false,
-        val wrapAltTitles: Boolean = false,
+        val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val allUploaders: ImmutableSet<String> = persistentSetOf(),
+        val allSources: ImmutableSet<String> = persistentSetOf(),
+        val allLanguages: ImmutableSet<String> = persistentSetOf(),
+    )
+
+    data class MangaScreenTrackState(
+        val tracks: PersistentList<TrackItem> = persistentListOf(),
+        val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
-        val vibrantColor: Int? = null,
-        val alternativeArtwork: PersistentList<Artwork> = persistentListOf(),
-        val alternativeTitles: PersistentList<String> = persistentListOf(),
-        val artist: String = "",
-        val author: String = "",
-        val currentArtwork: Artwork,
-        val currentDescription: String = "",
-        val currentTitle: String = "",
-        val externalLinks: PersistentList<ExternalLink> = persistentListOf(),
-        val genres: PersistentList<String> = persistentListOf(),
-        val initialized: Boolean = false,
-        val inLibrary: Boolean = false,
-        val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
-        val isPornographic: Boolean = false,
-        val langFlag: String? = null,
-        val missingChapters: String = "",
-        val estimatedMissingChapters: String = "",
-        val originalTitle: String = "",
-        val stats: Stats? = null,
-        val status: Int = 0,
-        val lastVolume: Int? = null,
-        val lastChapter: Int? = null,
-        val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
-        val tracks: PersistentList<TrackItem> = persistentListOf(),
         val trackSearchResult: TrackingConstants.TrackSearchResult =
             TrackingConstants.TrackSearchResult.Loading,
+    )
+
+    data class MangaScreenCategoryState(
+        val allCategories: PersistentList<CategoryItem> = persistentListOf(),
+        val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
+    )
+
+    data class MangaScreenMergeState(
+        val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
         val mergeSearchResult: MergeConstants.MergeSearchResult =
             MergeConstants.MergeSearchResult.Loading,
+    )
+
+    data class MangaDetailScreenState(
+        val general: MangaScreenGeneralState,
+        val manga: MangaScreenMangaState,
+        val chapters: MangaScreenChapterState = MangaScreenChapterState(),
+        val track: MangaScreenTrackState = MangaScreenTrackState(),
+        val merge: MangaScreenMergeState = MangaScreenMergeState(),
+        val category: MangaScreenCategoryState = MangaScreenCategoryState(),
     )
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
