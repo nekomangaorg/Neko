@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config xmlns:tools="http://schemas.android.com/tools">
-    <!-- Need to allow cleartext traffic for some sources -->
+    <!-- Cleartext traffic is disabled by default -->
     <base-config
-        cleartextTrafficPermitted="true"
+        cleartextTrafficPermitted="false"
         tools:ignore="InsecureBaseConfiguration">
         <trust-anchors>
             <!-- Trust preinstalled CAs -->
