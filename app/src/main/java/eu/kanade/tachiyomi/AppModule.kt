@@ -55,6 +55,7 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -155,6 +156,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(BrowseRepository())
 
+        addSingleton(CalculateChapterFilterUseCase())
         addSingleton(ChapterUseCases())
 
         addSingleton(MangaUseCases())
