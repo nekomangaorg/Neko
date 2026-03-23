@@ -16,3 +16,7 @@
 ## 2026-03-20 - Refactoring massive UiState data classes into distinct StateFlows
 **Learning:** In Compose UI architectures, massive single `UiState` data classes cause full-screen recompositions when minor fields (like `isRefreshing`) are updated. This forces the entire layout (e.g., `MangaScreen`) to re-evaluate.
 **Action:** Always refactor massive `UiState` data classes into smaller, distinct `StateFlow`s inside the ViewModel (e.g., separating `generalState` from `chapterState`). In Compose, collect each `StateFlow` separately and pass the specific state data classes to individual Composables to ensure precise and efficient recomposition scoping.
+
+## 2026-03-23 - [Overclock: DisplayManga.resync N+1 Optimization]
+**Learning:** Looping over lists of `DisplayManga` and performing individual `db.getManga(displayManga.mangaId).executeAsBlocking()` calls creates a massive N+1 bottleneck, locking up the CPU and stalling screens like Latest and Browse that handle large lists.
+**Action:** Replaced individual iterations with a chunked `db.getMangas(chunk)` query to fetch all required records in a few bulk queries, mapping them by ID into memory before re-syncing properties.

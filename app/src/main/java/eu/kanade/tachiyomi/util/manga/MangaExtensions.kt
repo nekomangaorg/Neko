@@ -270,8 +270,18 @@ fun List<HomePageManga>.resync(db: DatabaseHelper): PersistentList<HomePageManga
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
+    if (this.isEmpty()) return emptyList()
+
+    // Fetch existing mangas from database by IDs in chunks to avoid SQLite parameter limit
+    val mangaIds = this.map { it.mangaId }.distinct()
+    val existingMangas =
+        mangaIds
+            .chunked(900)
+            .flatMap { chunk -> db.getMangas(chunk).executeAsBlocking() }
+            .associateBy { it.id }
+
     return this.mapNotNull { displayManga ->
-        val dbManga = db.getManga(displayManga.mangaId).executeAsBlocking()
+        val dbManga = existingMangas[displayManga.mangaId]
         when (dbManga == null) {
             true -> null
             else ->
