@@ -390,6 +390,7 @@ class LibraryViewModel() : ViewModel() {
                     filterUnread = it[8] as FilterUnread,
                 )
             }
+            .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     // 1. FILTER FLOW: Applies filters and fetches necessary data (Download counts)
     private val activeMangaFlow =
