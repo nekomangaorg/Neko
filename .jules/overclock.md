@@ -20,3 +20,6 @@
 ## 2026-03-23 - [Overclock: DisplayManga.resync N+1 Optimization]
 **Learning:** Looping over lists of `DisplayManga` and performing individual `db.getManga(displayManga.mangaId).executeAsBlocking()` calls creates a massive N+1 bottleneck, locking up the CPU and stalling screens like Latest and Browse that handle large lists.
 **Action:** Replaced individual iterations with a chunked `db.getMangas(chunk)` query to fetch all required records in a few bulk queries, mapping them by ID into memory before re-syncing properties.
+## 2024-05-24 - [Overclock: Chunked Bulk Query Optimization]
+**Learning:** When trying to eliminate an N+1 query loop by mapping list items to a list of IDs and performing a bulk fetch, fetching a massive list of IDs directly can hit SQLite bind parameter limits or memory pressure.
+**Action:** Use `.chunked(900).flatMap { db.getChapters(it).executeAsBlocking() }` when fetching lists of items by IDs to safely handle thousands of IDs in smaller batches, preventing application crashes.
