@@ -11,7 +11,9 @@ class ChapterUseCases(
     db: DatabaseHelper = Injekt.get(),
     statusHandler: StatusHandler = Injekt.get(),
     mangaDexPreferences: MangaDexPreferences = Injekt.get(),
+    calculateChapterFilter: CalculateChapterFilterUseCase = Injekt.get(),
 ) {
     val markChapters = MarkChapterUseCase(db)
     val markChaptersRemote = MarkChaptersRemote(statusHandler, mangaDexPreferences)
+    val calculateChapterFilter = calculateChapterFilter
 }
