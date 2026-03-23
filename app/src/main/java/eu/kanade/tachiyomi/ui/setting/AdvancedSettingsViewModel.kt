@@ -53,6 +53,13 @@ class AdvancedSettingsViewModel : ViewModel() {
                     }
                 val mangaFolders = downloadManager.getMangaFolders()
 
+                val chaptersByMangaId =
+                    mangaFolders.asSequence()
+                        .mapNotNull { mangaMap[it.name]?.id }
+                        .chunked(900)
+                        .flatMap { db.getChapters(it).executeAsBlocking() }
+                        .groupBy { it.manga_id }
+
                 for (mangaFolder in mangaFolders) {
                     val manga = mangaMap[mangaFolder.name]
                     if (manga == null) {
@@ -63,7 +70,7 @@ class AdvancedSettingsViewModel : ViewModel() {
                         }
                         continue
                     }
-                    val chapterList = db.getChapters(manga).executeAsBlocking()
+                    val chapterList = chaptersByMangaId[manga.id] ?: emptyList()
                     foldersCleared +=
                         downloadManager.cleanupChapters(
                             chapterList,
