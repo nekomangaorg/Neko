@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
+import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -46,16 +46,14 @@ class TrackingSettingsViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     init {
-        viewModelScope.launchIO {
-            preferences.autoAddTracker().changes().distinctUntilChanged().collectLatest { set ->
-                _state.update {
-                    it.copy(
-                        aniListAutoAddTrack = set.contains(it.anilist.id.toString()),
-                        kitsuAutoAddTrack = set.contains(it.kitsu.id.toString()),
-                        malAutoAddTrack = set.contains(it.mal.id.toString()),
-                        mangaUpdatesAutoAddTrack = set.contains(it.mangaUpdates.id.toString()),
-                    )
-                }
+        preferences.autoAddTracker().changes().observeAndUpdate(viewModelScope) { set ->
+            _state.update {
+                it.copy(
+                    aniListAutoAddTrack = set.contains(it.anilist.id.toString()),
+                    kitsuAutoAddTrack = set.contains(it.kitsu.id.toString()),
+                    malAutoAddTrack = set.contains(it.mal.id.toString()),
+                    mangaUpdatesAutoAddTrack = set.contains(it.mangaUpdates.id.toString()),
+                )
             }
         }
 
@@ -93,10 +91,8 @@ class TrackingSettingsViewModel : ViewModel() {
         updateUsername: (String) -> Unit,
         updateLoggedIn: (Boolean) -> Unit,
     ) {
-        viewModelScope.launchIO {
-            tracker.getUsername().changes().distinctUntilChanged().collectLatest { username ->
-                updateUsername(username)
-            }
+        tracker.getUsername().changes().observeAndUpdate(viewModelScope) { username ->
+            updateUsername(username)
         }
         viewModelScope.launchIO {
             tracker.isLoggedInFlow().collectLatest { loggedIn -> updateLoggedIn(loggedIn) }
