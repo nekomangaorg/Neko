@@ -20,7 +20,7 @@ class CalculateChapterFilterUseCaseTest {
 
         val result = useCase(current, option)
 
-        assertEquals(true, result.showAll)
+        assertTrue(result.showAll)
     }
 
     @Test
