@@ -71,7 +71,6 @@ class WebtoonViewer(val activity: ReaderActivity, val noWebtoonTag: Boolean = fa
     /** Configuration used by this viewer, like allow taps, or crop image borders. */
     val config = WebtoonConfig(scope)
 
-    /** Subscriptions to keep while this viewer is used. */
     init {
         recycler.setBackgroundColor(Color.BLACK)
         recycler.isVisible = false // Don't let the recycler layout yet
