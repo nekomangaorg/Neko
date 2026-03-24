@@ -7,6 +7,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
@@ -1569,7 +1570,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
             _mangaDetailScreenState.update { state ->
                 result.fold(
-                    success = { mergedMangaResults ->
+                    { mergedMangaResults ->
                         when (mergedMangaResults.isEmpty()) {
                             true ->
                                 state.copy(
@@ -1588,7 +1589,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 )
                         }
                     },
-                    failure = { errorMessage ->
+                    { errorMessage ->
                         state.copy(
                             merge =
                                 state.merge.copy(
