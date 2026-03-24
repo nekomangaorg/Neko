@@ -52,7 +52,7 @@ class CookieInterceptor(
         try {
             cookieManager.setCookie(url, value)
         } catch (e: Exception) {
-            TimberKt.e(e) { "Error setting cookie" }
+            TimberKt.e(e) { "Error setting cookie for url: $url" }
         }
     }
 }
