@@ -1,8 +1,7 @@
 package org.nekomanga.usecases.manga
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
@@ -19,9 +18,9 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
         query: String,
         mergeType: MergeType,
     ): Result<List<SourceMergeManga>, String> {
-        return try {
-            val source = MergeType.getSource(mergeType, sourceManager)
-            val mergedMangaResults =
+        return com.github.michaelbull.result
+            .runCatching {
+                val source = MergeType.getSource(mergeType, sourceManager)
                 source.searchManga(query).map {
                     SourceMergeManga(
                         coverUrl = it.thumbnail_url ?: "",
@@ -30,11 +29,11 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
                         mergeType = mergeType,
                     )
                 }
-            Ok(mergedMangaResults)
-        } catch (e: Exception) {
-            TimberKt.e(e) { "Error searching merged manga" }
-            Err(e.message ?: "Error looking up information")
-        }
+            }
+            .mapError { e ->
+                TimberKt.e(e) { "Error searching merged manga" }
+                e.message ?: "Error looking up information"
+            }
     }
 }
 
@@ -49,7 +48,11 @@ class RemoveMergedManga(
         val (mergedChapters, _) =
             db.getChapters(dbManga).executeOnIO().partition { it.isMergedChapterOfType(mergeType) }
         if (!libraryPreferences.enableLocalChapters().get()) {
-            downloadManager.deleteChapters(dbManga, mergedChapters)
+            try {
+                downloadManager.deleteChapters(dbManga, mergedChapters)
+            } catch (e: Exception) {
+                TimberKt.e(e) { "Failed to delete chapters for merged manga" }
+            }
         }
         db.deleteChapters(mergedChapters).executeOnIO()
     }
