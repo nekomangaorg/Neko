@@ -7,6 +7,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
@@ -24,7 +25,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -121,6 +121,7 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
+import org.nekomanga.usecases.manga.MergeMangaUseCases
 import org.nekomanga.util.system.mapAsync
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -159,6 +160,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val chapterUseCases: ChapterUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
+    private val mergeMangaUseCases = MergeMangaUseCases()
 
     private var dynamicCoverUpdateJob: Job? = null
 
@@ -1555,18 +1557,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     /** Remove merged manga entry */
     fun removeMergedManga(mergeType: MergeType) {
-        viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeOnIO()!!
-            db.deleteMergeManga(mangaId).executeAsBlocking()
-            val (mergedChapters, _) =
-                db.getChapters(dbManga).executeOnIO().partition {
-                    it.isMergedChapterOfType(mergeType)
-                }
-            if (!libraryPreferences.enableLocalChapters().get()) {
-                downloadManager.deleteChapters(dbManga, mergedChapters)
-            }
-            db.deleteChapters(mergedChapters).executeOnIO()
-        }
+        viewModelScope.launchIO { mergeMangaUseCases.removeMergedManga.execute(mangaId, mergeType) }
     }
 
     fun searchMergedManga(query: String, mergeType: MergeType) {
@@ -1575,60 +1566,46 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 it.copy(merge = it.merge.copy(mergeSearchResult = MergeSearchResult.Loading))
             }
 
-            runCatching {
-                    MergeType.getSource(mergeType, sourceManager)
-                    val mergedMangaResults =
-                        MergeType.getSource(mergeType, sourceManager).searchManga(query).map {
-                            SourceMergeManga(
-                                coverUrl = it.thumbnail_url ?: "",
-                                title = it.title,
-                                url = it.url,
-                                mergeType = mergeType,
-                            )
-                        }
+            val result = mergeMangaUseCases.searchMergedManga.execute(query, mergeType)
 
-                    _mangaDetailScreenState.update {
+            _mangaDetailScreenState.update { state ->
+                result.fold(
+                    { mergedMangaResults ->
                         when (mergedMangaResults.isEmpty()) {
                             true ->
-                                it.copy(
+                                state.copy(
                                     merge =
-                                        it.merge.copy(
+                                        state.merge.copy(
                                             mergeSearchResult = MergeSearchResult.NoResult
                                         )
                                 )
                             false ->
-                                it.copy(
+                                state.copy(
                                     merge =
-                                        it.merge.copy(
+                                        state.merge.copy(
                                             mergeSearchResult =
                                                 MergeSearchResult.Success(mergedMangaResults)
                                         )
                                 )
                         }
-                    }
-                }
-                .getOrElse { error ->
-                    TimberKt.e(error) { "Error searching merged manga" }
-                    _mangaDetailScreenState.update {
-                        it.copy(
+                    },
+                    { errorMessage ->
+                        state.copy(
                             merge =
-                                it.merge.copy(
-                                    mergeSearchResult =
-                                        MergeSearchResult.Error(
-                                            error.message ?: "Error looking up information"
-                                        )
+                                state.merge.copy(
+                                    mergeSearchResult = MergeSearchResult.Error(errorMessage)
                                 )
                         )
-                    }
-                }
+                    },
+                )
+            }
         }
     }
 
     /** Attach the selected merge manga entry */
     fun addMergedManga(mergeManga: SourceMergeManga) {
         viewModelScope.launchIO {
-            val newMergedManga = mergeManga.toMergeMangaImpl(mangaId)
-            db.insertMergeManga(newMergedManga).executeOnIO()
+            mergeMangaUseCases.addMergedManga.execute(mangaId, mergeManga)
             onRefresh(true)
         }
     }
