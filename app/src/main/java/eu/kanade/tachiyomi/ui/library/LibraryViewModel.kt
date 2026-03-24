@@ -540,14 +540,20 @@ class LibraryViewModel() : ViewModel() {
             }
             .distinctUntilChanged()
 
+    /**
+     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Bolt): Prevent redundant downstream UI state
+     * recalculations when multiple preference flows emit sequentially with the same values,
+     * avoiding redundant UI recompositions.
+     */
     private val uiSettingsFlow =
         combine(
-            libraryPreferences.gridSize().changes(),
-            libraryPreferences.layout().changes(),
-            filterPreferencesFlow,
-        ) { gridSize, layout, filters ->
-            Triple(gridSize, layout, filters)
-        }
+                libraryPreferences.gridSize().changes(),
+                libraryPreferences.layout().changes(),
+                filterPreferencesFlow,
+            ) { gridSize, layout, filters ->
+                Triple(gridSize, layout, filters)
+            }
+            .distinctUntilChanged()
 
     val libraryScreenState: StateFlow<LibraryScreenState> =
         combine(
