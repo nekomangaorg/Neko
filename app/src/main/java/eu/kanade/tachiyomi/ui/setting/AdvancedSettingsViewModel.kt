@@ -54,7 +54,8 @@ class AdvancedSettingsViewModel : ViewModel() {
                 val mangaFolders = downloadManager.getMangaFolders()
 
                 val chaptersByMangaId =
-                    mangaFolders.asSequence()
+                    mangaFolders
+                        .asSequence()
                         .mapNotNull { mangaMap[it.name]?.id }
                         .chunked(900)
                         .flatMap { db.getChapters(it).executeAsBlocking() }

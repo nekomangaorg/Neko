@@ -9,3 +9,7 @@
 ## 2026-03-19 - Optimize LibraryUpdateJob List Operations
 **Learning:** Chaining `.filter {}.filter {}.map {}` on collections creates multiple intermediate lists, which is inefficient.
 **Action:** Use `.mapNotNull {}` to combine filtering and mapping in a single pass to reduce memory allocations and improve performance, especially when handling large datasets like chapter updates.
+
+## 2026-03-23 - [Avoid Redundant Updates from Combined UI Settings Flows]
+Learning: Combining multiple UI preference flows (like `gridSize` and `layout`) without applying `.distinctUntilChanged()` creates a stream that emits redundantly when upstream preferences change, causing redundant downstream state recalculations (e.g. `libraryScreenState`).
+Action: Always append `.distinctUntilChanged()` after `combine()` blocks that aggregate multiple UI preferences before merging them into the main screen `StateFlow` to prevent spamming the UI with redundant updates.
