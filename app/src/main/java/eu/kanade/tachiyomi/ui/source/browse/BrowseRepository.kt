@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.source.browse
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.filterValues
+import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -13,6 +13,9 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
@@ -47,36 +50,52 @@ class BrowseRepository(
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
-        val blockedGroupUUIDs =
-            mangaDexPreferences.blockedGroups().get().map {
-                var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
-                if (scanlatorGroupImpl == null) {
-                    mangaDex.getScanlatorGroup(group = it).map { group ->
-                        scanlatorGroupImpl = group.toScanlatorGroupImpl()
-                        db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
-                        scanlatorGroupImpl!!
-                    }
-                } else {
-                    Ok(scanlatorGroupImpl!!)
-                }
+        val blockedGroupNames = mangaDexPreferences.blockedGroups().get().toList()
+        val blockedGroupUUIDs = coroutineScope {
+            val chunks = blockedGroupNames.chunked(900)
+            val existingGroups = chunks.flatMap { chunk ->
+                db.getScanlatorGroupsByNames(chunk).executeAsBlocking()
             }
-        val blockedUploaderUUIDs =
-            mangaDexPreferences.blockedUploaders().get().map {
-                var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
-                if (uploaderImpl == null) {
-                    mangaDex.getUploader(uploader = it).map { uploader ->
-                        uploaderImpl = uploader.toUploaderImpl()
-                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
-                        uploaderImpl!!
-                    }
-                } else {
-                    Ok(uploaderImpl!!)
-                }
+            val existingGroupNames = existingGroups.map { it.name }.toSet()
+            val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
+
+            val fetchedGroups =
+                missingGroupNames
+                    .map { name -> async { mangaDex.getScanlatorGroup(group = name) } }
+                    .awaitAll()
+                    .mapNotNull { result -> result.getOrElse { null }?.toScanlatorGroupImpl() }
+
+            if (fetchedGroups.isNotEmpty()) {
+                db.insertScanlatorGroups(fetchedGroups).executeOnIO()
+            }
+            (existingGroups + fetchedGroups).map { it.uuid }
+        }
+
+        val blockedUploaderNames = mangaDexPreferences.blockedUploaders().get().toList()
+        val blockedUploaderUUIDs = coroutineScope {
+            val chunks = blockedUploaderNames.chunked(900)
+            val existingUploaders = chunks.flatMap { chunk ->
+                db.getUploadersByNames(chunk).executeAsBlocking()
+            }
+            val existingUploaderNames = existingUploaders.map { it.username }.toSet()
+            val missingUploaderNames = blockedUploaderNames.filterNot {
+                it in existingUploaderNames
             }
 
-        val scanlatorUUIDs = blockedGroupUUIDs.filterValues().map { it.uuid }
-        val uploaderUUIDs = blockedUploaderUUIDs.filterValues().map { it.uuid }
-        return mangaDex.fetchHomePageInfo(scanlatorUUIDs, uploaderUUIDs).andThen { listResults ->
+            val fetchedUploaders =
+                missingUploaderNames
+                    .map { name -> async { mangaDex.getUploader(uploader = name) } }
+                    .awaitAll()
+                    .mapNotNull { result -> result.getOrElse { null }?.toUploaderImpl() }
+
+            if (fetchedUploaders.isNotEmpty()) {
+                db.insertUploader(fetchedUploaders).executeOnIO()
+            }
+            (existingUploaders + fetchedUploaders).map { it.uuid }
+        }
+
+        return mangaDex.fetchHomePageInfo(blockedGroupUUIDs, blockedUploaderUUIDs).andThen {
+            listResults ->
             Ok(
                 listResults.map { listResult ->
                     HomePageManga(
