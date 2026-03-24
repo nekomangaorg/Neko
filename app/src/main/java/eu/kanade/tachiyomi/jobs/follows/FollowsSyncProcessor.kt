@@ -135,7 +135,9 @@ class FollowsSyncProcessor {
 
             val listManga =
                 ids?.split(", ")
-                    ?.mapNotNull { db.getManga(it.toLong()).executeAsBlocking() }
+                    ?.map { it.toLong() }
+                    ?.chunked(900)
+                    ?.flatMap { chunk -> db.getMangas(chunk).executeAsBlocking() }
                     ?.toList() ?: db.getLibraryMangaList().executeAsBlocking()
 
             // only add if the current tracker is not set to reading
