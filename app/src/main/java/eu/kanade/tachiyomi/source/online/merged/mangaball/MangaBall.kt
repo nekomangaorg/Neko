@@ -142,7 +142,8 @@ class MangaBall : ReducedHttpSource() {
                             url = translation.id
                             val chapterName = mutableListOf<String>()
                             if (translation.volume > 0) {
-                                val volume = "Vol.${translation.volume}"
+                                val volume =
+                                    "Vol.${translation.volume.toString().removeSuffix(".0")}"
                                 vol = volume
                                 chapterName.add(volume)
                             }
