@@ -22,6 +22,23 @@ interface ScanlatorGroupQueries : DbProvider {
             )
             .prepare()
 
+    fun getScanlatorGroupsByNames(names: List<String>) =
+        db.get()
+            .listOfObjects(ScanlatorGroupImpl::class.java)
+            .withQuery(
+                Query.builder().table(ScanlatorGroupTable.TABLE).let { builder ->
+                    if (names.isEmpty()) {
+                        builder.where("1 = 0")
+                    } else {
+                        val placeHolders = names.joinToString { "?" }
+                        builder.where("${ScanlatorGroupTable.COL_NAME} IN ($placeHolders)")
+                        builder.whereArgs(*names.toTypedArray())
+                    }
+                    builder.build()
+                }
+            )
+            .prepare()
+
     fun deleteScanlatorGroup(name: String) =
         db.delete()
             .byQuery(

@@ -22,6 +22,23 @@ interface UploaderQueries : DbProvider {
             )
             .prepare()
 
+    fun getUploadersByNames(names: List<String>) =
+        db.get()
+            .listOfObjects(UploaderImpl::class.java)
+            .withQuery(
+                Query.builder().table(UploaderTable.TABLE).let { builder ->
+                    if (names.isEmpty()) {
+                        builder.where("1 = 0")
+                    } else {
+                        val placeHolders = names.joinToString { "?" }
+                        builder.where("${UploaderTable.COL_USERNAME} IN ($placeHolders)")
+                        builder.whereArgs(*names.toTypedArray())
+                    }
+                    builder.build()
+                }
+            )
+            .prepare()
+
     fun deleteUploader(name: String) =
         db.delete()
             .byQuery(
