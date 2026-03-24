@@ -1571,23 +1571,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             _mangaDetailScreenState.update { state ->
                 result.fold(
                     { mergedMangaResults ->
-                        when (mergedMangaResults.isEmpty()) {
-                            true ->
-                                state.copy(
-                                    merge =
-                                        state.merge.copy(
-                                            mergeSearchResult = MergeSearchResult.NoResult
-                                        )
-                                )
-                            false ->
-                                state.copy(
-                                    merge =
-                                        state.merge.copy(
-                                            mergeSearchResult =
-                                                MergeSearchResult.Success(mergedMangaResults)
-                                        )
-                                )
-                        }
+                        val searchResult =
+                            if (mergedMangaResults.isEmpty()) {
+                                MergeSearchResult.NoResult
+                            } else {
+                                MergeSearchResult.Success(mergedMangaResults)
+                            }
+                        state.copy(merge = state.merge.copy(mergeSearchResult = searchResult))
                     },
                     { errorMessage ->
                         state.copy(

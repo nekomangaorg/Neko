@@ -2,6 +2,7 @@ package org.nekomanga.usecases.manga
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
@@ -17,8 +18,7 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
         query: String,
         mergeType: MergeType,
     ): Result<List<SourceMergeManga>, String> {
-        return com.github.michaelbull.result
-            .runCatching {
+        return runCatching {
                 val source = MergeType.getSource(mergeType, sourceManager)
                 source.searchManga(query).map {
                     SourceMergeManga(
