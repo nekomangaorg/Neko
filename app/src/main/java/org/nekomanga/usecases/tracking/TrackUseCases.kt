@@ -6,4 +6,5 @@ import uy.kohesive.injekt.api.get
 
 class TrackUseCases(trackManager: TrackManager = Injekt.get()) {
     val loginToTrackService = LoginToTrackService(trackManager)
+    val refreshTracking = RefreshTrackingUseCase()
 }
