@@ -25,7 +25,7 @@ class Chapter(
     val language: String,
     val group: Group,
     val date: String,
-    val volume: Int,
+    val volume: Float,
 )
 
 @Serializable class Group(@SerialName("_id") val id: String, val name: String)
