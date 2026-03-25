@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
-import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -15,6 +14,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.tracking.TrackUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -33,7 +33,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
             val libraryMangaList = db.getLibraryMangaList().executeAsBlocking()
             val loggedServices = trackManager.services.values.filter { it.isLogged() }
             val autoAddTracker = preferences.autoAddTracker().get()
-            val trackingCoordinator: TrackingCoordinator = Injekt.get()
+            val trackUseCases: TrackUseCases = Injekt.get()
 
             val validContentRatings = preferences.autoTrackContentRatingSelections().get()
             val autoAddTrackerIds = autoAddTracker.map { it.toInt() }
@@ -68,8 +68,8 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                                         )
                                                     if (id != null) {
                                                         val trackResult =
-                                                            trackingCoordinator
-                                                                .searchTrackerNonFlow(
+                                                            trackUseCases.searchTracker
+                                                                .awaitNonFlow(
                                                                     "",
                                                                     trackManager
                                                                         .getService(trackService.id)
@@ -82,8 +82,8 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                                             is TrackingConstants.TrackSearchResult.Success -> {
                                                                 val trackSearchItem =
                                                                     trackResult.trackSearchResult[0]
-                                                                trackingCoordinator
-                                                                    .registerTracking(
+                                                                trackUseCases.registerTracking
+                                                                    .await(
                                                                         TrackingConstants
                                                                             .TrackAndService(
                                                                                 trackSearchItem

@@ -3,6 +3,7 @@ package org.nekomanga.usecases.chapters
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CalculateChapterFilterUseCaseTest {
