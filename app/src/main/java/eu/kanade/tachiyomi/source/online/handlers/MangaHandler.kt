@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ForumThreadDto
@@ -126,6 +127,17 @@ class MangaHandler {
         when (fetchArtwork) {
             true -> artworkHandler.getArtwork(mangaUUID).getOrElse { emptyList() }
             false -> emptyList()
+        }
+    }
+
+    suspend fun getAggregate(
+        mangaUUID: String,
+        translatedLanguages: List<String>,
+    ): Result<AggregateDto, ResultError> {
+        return withContext(Dispatchers.IO) {
+            service
+                .getAggregate(mangaUUID, translatedLanguages)
+                .getOrResultError("Error getting aggregate")
         }
     }
 

@@ -28,7 +28,9 @@ import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -341,6 +343,11 @@ open class MangaDex : HttpSource() {
 
     open suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return mangaHandler.getMangaIdFromChapterId(urlChapterId)
+    }
+
+    suspend fun getAggregate(mangaUuid: String): Result<AggregateDto, ResultError> {
+        val translatedLanguages = MdUtil.getLangsToShow(mangaDexPreferences)
+        return mangaHandler.getAggregate(mangaUuid, translatedLanguages)
     }
 
     suspend fun fetchChapterList(manga: SManga): Result<List<SChapter>, ResultError> {
