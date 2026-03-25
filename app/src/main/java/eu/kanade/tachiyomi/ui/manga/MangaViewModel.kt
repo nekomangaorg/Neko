@@ -2404,7 +2404,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     }
 
                 if (volumes != null) {
-                    for ((_, volumeInfo) in volumes!!) {
+                    for ((_, volumeInfo) in volumes) {
                         val chaptersInVolume = volumeInfo.chapters.values
                         val matchById =
                             mangaDexChapterId != null &&
