@@ -423,9 +423,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     }
                                 }
 
-                            if (manga.favorite && manga.id != null) {
-                                mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
-                            }
+                            mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
                             info
                         }
                         val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
