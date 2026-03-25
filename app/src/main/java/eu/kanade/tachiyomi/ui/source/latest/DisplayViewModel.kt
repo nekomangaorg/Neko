@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.map
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -30,9 +29,11 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
@@ -50,6 +51,9 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
+
+    private val mangaUseCases: MangaUseCases by injectLazy()
+
 
     private val _displayScreenState =
         MutableStateFlow(
@@ -177,7 +181,6 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
             db.insertManga(editManga).executeOnIO()
 
-            val mangaUseCases: org.nekomanga.usecases.manga.MangaUseCases = Injekt.get()
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
