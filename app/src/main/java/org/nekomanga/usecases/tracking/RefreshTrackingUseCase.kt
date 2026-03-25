@@ -75,7 +75,7 @@ class RefreshTrackingUseCase(
 
             val chaptersToMark = allChapters.filter {
                 !it.chapter.read &&
-                    it.chapter.chapterNumber >= 0f &&
+                    it.chapter.isRecognizedNumber &&
                     it.chapter.chapterNumber <= maxChapterRead
             }
 
