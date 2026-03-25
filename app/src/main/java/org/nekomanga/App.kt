@@ -103,11 +103,10 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
             TimberKt.plant(DebugReportingTree())
         }
 
-        setupNotificationChannels()
-
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
+            setupNotificationChannels()
             MangaCoverMetadata.load()
         }
 
