@@ -130,14 +130,9 @@ class MangaHandler {
         }
     }
 
-    suspend fun getAggregate(
-        mangaUUID: String,
-        translatedLanguages: List<String>,
-    ): Result<AggregateDto, ResultError> {
+    suspend fun getAggregate(mangaUUID: String): Result<AggregateDto, ResultError> {
         return withContext(Dispatchers.IO) {
-            service
-                .getAggregate(mangaUUID, translatedLanguages)
-                .getOrResultError("Error getting aggregate")
+            service.getAggregate(mangaUUID).getOrResultError("Error getting aggregate")
         }
     }
 

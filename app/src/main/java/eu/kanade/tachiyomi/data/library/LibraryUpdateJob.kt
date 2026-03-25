@@ -408,19 +408,23 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         val source = sourceManager.mangaDex
 
                         val holder = withIOContext {
-                            if (libraryPreferences.skipMangaMetadataDuringUpdate().get()) {
-                                MangaDetailChapterInformation(
-                                    null,
-                                    emptyList(),
-                                    source.fetchChapterList(manga).getOrThrow {
+                            val info =
+                                if (libraryPreferences.skipMangaMetadataDuringUpdate().get()) {
+                                    MangaDetailChapterInformation(
+                                        null,
+                                        emptyList(),
+                                        source.fetchChapterList(manga).getOrThrow {
+                                            Exception(it.message())
+                                        },
+                                    )
+                                } else {
+                                    source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
                                         Exception(it.message())
-                                    },
-                                )
-                            } else {
-                                source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
-                                    Exception(it.message())
+                                    }
                                 }
-                            }
+
+                            mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
+                            info
                         }
                         val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
                         val mergedList =

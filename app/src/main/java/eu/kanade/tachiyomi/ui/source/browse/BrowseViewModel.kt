@@ -49,11 +49,13 @@ import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
-class BrowseViewModel() : ViewModel() {
+class BrowseViewModel : ViewModel() {
     private val browseRepository: BrowseRepository = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
@@ -61,6 +63,7 @@ class BrowseViewModel() : ViewModel() {
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
+    private val mangaUseCases: MangaUseCases by injectLazy()
 
     private val _browseScreenState =
         MutableStateFlow(
@@ -420,6 +423,8 @@ class BrowseViewModel() : ViewModel() {
                     }
             }
             db.insertManga(editManga).executeOnIO()
+
+            mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

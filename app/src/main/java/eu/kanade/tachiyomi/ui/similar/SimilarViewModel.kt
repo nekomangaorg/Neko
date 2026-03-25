@@ -32,8 +32,10 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.usecases.manga.MangaUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
@@ -49,6 +51,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
+    private val mangaUseCases: MangaUseCases by injectLazy()
 
     private val _similarScreenState =
         MutableStateFlow(
@@ -128,8 +131,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
-        viewModelScope.launch {
-            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+        viewModelScope.launchIO {
+            val editManga = db.getManga(mangaId).executeOnIO()!!
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -138,7 +141,9 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeAsBlocking()
+            db.insertManga(editManga).executeOnIO()
+
+            mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

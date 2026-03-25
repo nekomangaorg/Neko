@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.tables.BrowseFilterTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
+import eu.kanade.tachiyomi.data.database.tables.MangaAggregateTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.database.tables.MergeMangaTable
@@ -22,7 +23,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_NAME = "tachiyomi.db"
 
         /** Version of the database. */
-        const val DATABASE_VERSION = 44
+        const val DATABASE_VERSION = 45
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -52,6 +53,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             execSQL(UploaderTable.createTableQuery)
             execSQL(BrowseFilterTable.createTableQuery)
             execSQL(MergeMangaTable.createTableQuery)
+            execSQL(MangaAggregateTable.createTableQuery)
 
             // DB indexes
             execSQL(MangaTable.createUrlIndexQuery)
@@ -200,6 +202,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         if (oldVersion < 44) {
             db.execSQL(ChapterTable.createBookmarkedChaptersIndexQuery)
             db.execSQL(ChapterTable.createUnavailableChaptersIndexQuery)
+        }
+        if (oldVersion < 45) {
+            db.execSQL(MangaAggregateTable.createTableQuery)
         }
     }
 }

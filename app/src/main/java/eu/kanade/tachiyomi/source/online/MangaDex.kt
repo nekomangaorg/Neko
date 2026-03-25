@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -343,15 +344,8 @@ open class MangaDex : HttpSource() {
         return mangaHandler.getMangaIdFromChapterId(urlChapterId)
     }
 
-    suspend fun getAggregate(
-        mangaUuid: String
-    ): com.github.michaelbull.result.Result<
-        eu.kanade.tachiyomi.source.online.models.dto.AggregateDto,
-        org.nekomanga.domain.network.ResultError,
-    > {
-        val translatedLanguages =
-            eu.kanade.tachiyomi.source.online.utils.MdUtil.getLangsToShow(mangaDexPreferences)
-        return mangaHandler.getAggregate(mangaUuid, translatedLanguages)
+    suspend fun getAggregate(mangaUuid: String): Result<AggregateDto, ResultError> {
+        return mangaHandler.getAggregate(mangaUuid)
     }
 
     suspend fun fetchChapterList(manga: SManga): Result<List<SChapter>, ResultError> {

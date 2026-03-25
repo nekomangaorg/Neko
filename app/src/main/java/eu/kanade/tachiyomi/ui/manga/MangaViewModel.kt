@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -90,6 +89,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
@@ -137,7 +137,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     companion object {
-        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 3000L
+        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 1000L
     }
 
     val preferences: PreferencesHelper = Injekt.get()
@@ -2372,18 +2372,36 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         if (lastReadChapterId != null) {
             val chapter = allChapters.find { it.chapter.id == lastReadChapterId }?.chapter
             if (chapter != null) {
-                val aggregateResult = sourceManager.mangaDex.getAggregate(effectiveManga.uuid())
-                aggregateResult.onSuccess { aggregateDto ->
-                    val volumes = with(aggregateDto.volumes) { asMdMap<AggregateVolume>() }
-                    val mangaDexChapterId = chapter.mangaDexChapterId
-                    val chapterNumber = chapter.chapterNumber
-                    val chapterNumberStr =
-                        if (chapterNumber % 1 == 0f) {
-                            chapterNumber.toInt().toString()
-                        } else {
-                            chapterNumber.toString()
-                        }
+                val mangaDexChapterId = chapter.mangaDexChapterId
+                val chapterNumber = chapter.chapterNumber
+                val chapterNumberStr =
+                    if (chapterNumber % 1 == 0f) {
+                        chapterNumber.toInt().toString()
+                    } else {
+                        chapterNumber.toString()
+                    }
 
+                val mangaId = effectiveManga.id
+                var dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+
+                if (dbAggregate == null) {
+                    mangaUseCases.updateMangaAggregate(
+                        effectiveManga.id,
+                        effectiveManga.url,
+                        effectiveManga.favorite,
+                    )
+                }
+
+                dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+
+                val volumes: Map<String, AggregateVolume>? =
+                    if (dbAggregate != null) {
+                        Json.parseToJsonElement(dbAggregate.volumes).asMdMap<AggregateVolume>()
+                    } else {
+                        null
+                    }
+
+                if (volumes != null) {
                     for ((_, volumeInfo) in volumes) {
                         val chaptersInVolume = volumeInfo.chapters.values
                         val matchById =

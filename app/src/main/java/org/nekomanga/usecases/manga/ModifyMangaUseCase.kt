@@ -11,6 +11,8 @@ import java.util.Date
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.storage.StorageManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class ModifyMangaUseCase(
     private val db: DatabaseHelper,
@@ -61,6 +63,10 @@ class ModifyMangaUseCase(
                 }
         }
         db.insertManga(editManga).executeOnIO()
+
+        val mangaUseCases: MangaUseCases = Injekt.get()
+        mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
+
         return editManga
     }
 }
