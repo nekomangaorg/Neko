@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -297,9 +298,7 @@ private fun BaseSettingsItem(
                 .fillMaxWidth()
                 .then(
                     if (isSelected) {
-                        Modifier.androidx.compose.foundation.background(
-                            color = MaterialTheme.colorScheme.secondaryContainer
-                        )
+                        Modifier.background(color = MaterialTheme.colorScheme.secondaryContainer)
                     } else Modifier
                 )
                 .padding(horizontal = horizontalPadding, vertical = verticalPadding),

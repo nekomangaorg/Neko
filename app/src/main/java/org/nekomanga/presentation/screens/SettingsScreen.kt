@@ -12,7 +12,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -124,10 +123,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -142,10 +143,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -161,10 +164,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -187,10 +192,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                backStack.removeLastOrNull()
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     categories = vm.allCategories.collectAsState().value,
@@ -207,10 +214,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -227,10 +236,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -249,10 +260,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
@@ -271,10 +284,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
@@ -292,10 +307,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
@@ -316,10 +333,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
@@ -332,10 +351,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
@@ -358,10 +379,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
@@ -382,10 +405,12 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     onNavigationIconClick =
                         if (isTablet && detailBackStack.size == 1) null
                         else {
-                            if (isTablet && detailBackStack.size > 1) {
-                                detailBackStack.removeLastOrNull()
-                            } else {
-                                reset(backStack, wasDeepLink, onBackPressed)
+                            {
+                                if (isTablet && detailBackStack.size > 1) {
+                                    detailBackStack.removeLastOrNull()
+                                } else {
+                                    reset(backStack, wasDeepLink, onBackPressed)
+                                }
                             }
                         },
                 )
