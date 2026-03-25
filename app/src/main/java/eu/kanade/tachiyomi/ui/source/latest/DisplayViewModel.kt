@@ -54,7 +54,6 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     private val mangaUseCases: MangaUseCases by injectLazy()
 
-
     private val _displayScreenState =
         MutableStateFlow(
             DisplayScreenState(

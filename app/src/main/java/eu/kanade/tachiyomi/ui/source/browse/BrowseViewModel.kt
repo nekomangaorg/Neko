@@ -65,7 +65,6 @@ class BrowseViewModel : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
     private val mangaUseCases: MangaUseCases by injectLazy()
 
-
     private val _browseScreenState =
         MutableStateFlow(
             BrowseScreenState(

@@ -53,7 +53,6 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     private val securityPreferences: SecurityPreferences = Injekt.get()
     private val mangaUseCases: MangaUseCases by injectLazy()
 
-
     private val _similarScreenState =
         MutableStateFlow(
             SimilarScreenState(
