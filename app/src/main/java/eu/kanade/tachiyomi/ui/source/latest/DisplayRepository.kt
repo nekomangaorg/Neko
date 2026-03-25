@@ -6,12 +6,12 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.utils.getBlockedScanlatorGroupUUIDs
+import eu.kanade.tachiyomi.source.online.utils.getBlockedUploaderUUIDs
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
@@ -108,36 +108,9 @@ class DisplayRepository(
     }
 
     private suspend fun getFeedUpdatesPage(page: Int): Result<DisplayPageResult, ResultError> {
-        val blockedGroupUUIDs =
-            mangaDexPreferences
-                .blockedGroups()
-                .get()
-                .map {
-                    var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
-                    if (scanlatorGroupImpl == null) {
-                        mangaDex.getScanlatorGroup(group = it).map { scanlator ->
-                            scanlatorGroupImpl = scanlator.toScanlatorGroupImpl()
-                        }
-                        db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
-                    }
-                    scanlatorGroupImpl
-                }
-                .map { it.uuid }
-        val blockedUploaderUUIDs =
-            mangaDexPreferences
-                .blockedUploaders()
-                .get()
-                .map {
-                    var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
-                    if (uploaderImpl == null) {
-                        mangaDex.getUploader(uploader = it).map { uploader ->
-                            uploaderImpl = uploader.toUploaderImpl()
-                        }
-                        db.insertUploader(listOf(uploaderImpl!!)).executeOnIO()
-                    }
-                    uploaderImpl
-                }
-                .map { it.uuid }
+        val blockedGroupUUIDs = getBlockedScanlatorGroupUUIDs(mangaDexPreferences, db, mangaDex)
+        val blockedUploaderUUIDs = getBlockedUploaderUUIDs(mangaDexPreferences, db, mangaDex)
+
         return mangaDex
             .feedUpdates(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
@@ -155,38 +128,9 @@ class DisplayRepository(
     }
 
     private suspend fun getLatestChapterPage(page: Int): Result<DisplayPageResult, ResultError> {
-        val blockedGroupUUIDs =
-            mangaDexPreferences
-                .blockedGroups()
-                .get()
-                .mapNotNull {
-                    var scanlatorGroupImpl = db.getScanlatorGroupByName(it).executeAsBlocking()
-                    if (scanlatorGroupImpl == null) {
-                        mangaDex
-                            .getScanlatorGroup(group = it)
-                            .map { group -> scanlatorGroupImpl = group.toScanlatorGroupImpl() }
-                            .onSuccess {
-                                db.insertScanlatorGroups(listOf(scanlatorGroupImpl!!)).executeOnIO()
-                            }
-                    }
-                    scanlatorGroupImpl
-                }
-                .map { it.uuid }
-        val blockedUploaderUUIDs =
-            mangaDexPreferences
-                .blockedUploaders()
-                .get()
-                .mapNotNull {
-                    var uploaderImpl = db.getUploaderByName(it).executeAsBlocking()
-                    if (uploaderImpl == null) {
-                        mangaDex
-                            .getUploader(uploader = it)
-                            .map { uploader -> uploaderImpl = uploader.toUploaderImpl() }
-                            .onSuccess { db.insertUploader(listOf(uploaderImpl!!)).executeOnIO() }
-                    }
-                    uploaderImpl
-                }
-                .map { it.uuid }
+        val blockedGroupUUIDs = getBlockedScanlatorGroupUUIDs(mangaDexPreferences, db, mangaDex)
+        val blockedUploaderUUIDs = getBlockedUploaderUUIDs(mangaDexPreferences, db, mangaDex)
+
         return mangaDex
             .latestChapters(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
