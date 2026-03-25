@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resync
 import eu.kanade.tachiyomi.util.manga.unique
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toPersistentList
