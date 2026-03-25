@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -27,6 +28,8 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
+import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
@@ -2361,9 +2364,46 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         if (artworkList.isEmpty()) return
 
         // 1. Flatten the target volume derivation
+        var volumeFromAggregate: String? = null
+        if (lastReadChapterId != null) {
+            val chapter = allChapters.find { it.chapter.id == lastReadChapterId }?.chapter
+            if (chapter != null) {
+                val aggregateResult = sourceManager.mangaDex.getAggregate(effectiveManga.uuid())
+                aggregateResult.onSuccess { aggregateDto ->
+                    val volumes = with(aggregateDto.volumes) { asMdMap<AggregateVolume>() }
+                    val mangaDexChapterId = chapter.mangaDexChapterId
+                    val chapterNumber = chapter.chapterNumber
+                    val chapterNumberStr =
+                        if (chapterNumber % 1 == 0f) {
+                            chapterNumber.toInt().toString()
+                        } else {
+                            chapterNumber.toString()
+                        }
+
+                    for ((_, volumeInfo) in volumes) {
+                        val chaptersInVolume = volumeInfo.chapters.values
+                        val matchById =
+                            mangaDexChapterId != null &&
+                                chaptersInVolume.any {
+                                    it.id == mangaDexChapterId ||
+                                        it.others.contains(mangaDexChapterId)
+                                }
+                        val matchByNumber = chaptersInVolume.any { it.chapter == chapterNumberStr }
+
+                        if (matchById || matchByNumber) {
+                            volumeFromAggregate = volumeInfo.volume
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
         val targetVolume =
             lastReadChapterId?.let { chapterId ->
-                val volume = allChapters.find { it.chapter.id == chapterId }?.chapter?.volume
+                val volume =
+                    volumeFromAggregate
+                        ?: allChapters.find { it.chapter.id == chapterId }?.chapter?.volume
 
                 when {
                     volume.isNullOrBlank() -> "Vol.1"

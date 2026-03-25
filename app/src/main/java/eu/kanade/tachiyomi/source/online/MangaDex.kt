@@ -343,6 +343,17 @@ open class MangaDex : HttpSource() {
         return mangaHandler.getMangaIdFromChapterId(urlChapterId)
     }
 
+    suspend fun getAggregate(
+        mangaUuid: String
+    ): com.github.michaelbull.result.Result<
+        eu.kanade.tachiyomi.source.online.models.dto.AggregateDto,
+        org.nekomanga.domain.network.ResultError,
+    > {
+        val translatedLanguages =
+            eu.kanade.tachiyomi.source.online.utils.MdUtil.getLangsToShow(mangaDexPreferences)
+        return mangaHandler.getAggregate(mangaUuid, translatedLanguages)
+    }
+
     suspend fun fetchChapterList(manga: SManga): Result<List<SChapter>, ResultError> {
         return mangaHandler.fetchChapterList(
             manga.uuid(),
