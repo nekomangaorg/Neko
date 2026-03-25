@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -422,10 +421,8 @@ class BrowseViewModel() : ViewModel() {
             }
             db.insertManga(editManga).executeOnIO()
 
-            val sourceManager: SourceManager = Injekt.get()
-            org.nekomanga.usecases.manga
-                .UpdateMangaAggregate(db, sourceManager)
-                .invoke(mangaId, editManga.url, editManga.favorite)
+            val mangaUseCases: org.nekomanga.usecases.manga.MangaUseCases = Injekt.get()
+            mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

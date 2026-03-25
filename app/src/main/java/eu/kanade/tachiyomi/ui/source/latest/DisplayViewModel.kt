@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
@@ -178,10 +177,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             }
             db.insertManga(editManga).executeOnIO()
 
-            val sourceManager: SourceManager = Injekt.get()
-            org.nekomanga.usecases.manga
-                .UpdateMangaAggregate(db, sourceManager)
-                .invoke(mangaId, editManga.url, editManga.favorite)
+            val mangaUseCases: org.nekomanga.usecases.manga.MangaUseCases = Injekt.get()
+            mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

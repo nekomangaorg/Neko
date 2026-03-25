@@ -35,6 +35,7 @@ import org.nekomanga.domain.manga.uuid
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.manga.MangaUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -53,6 +54,7 @@ class MangaUpdateCoordinator {
     private val sourceManager: SourceManager by lazy { Injekt.get() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
+    private val mangaUseCases: MangaUseCases by injectLazy()
 
     fun update(mangaItem: MangaItem, isMerging: Boolean) =
         channelFlow {
@@ -112,6 +114,12 @@ class MangaUpdateCoordinator {
                 }
 
                 val mangaForDb = updatedMangaItem.toManga()
+
+                mangaUseCases.updateMangaAggregate(
+                    mangaForDb.id!!,
+                    mangaForDb.url,
+                    mangaForDb.favorite,
+                )
 
                 db.inTransaction {
                     db.insertManga(mangaForDb).executeAsBlocking()

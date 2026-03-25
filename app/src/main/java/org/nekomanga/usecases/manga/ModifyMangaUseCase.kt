@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import java.util.Date
 import org.nekomanga.domain.category.CategoryItem
@@ -65,8 +64,8 @@ class ModifyMangaUseCase(
         }
         db.insertManga(editManga).executeOnIO()
 
-        val sourceManager: SourceManager = Injekt.get()
-        UpdateMangaAggregate(db, sourceManager).invoke(mangaId, editManga.url, editManga.favorite)
+        val mangaUseCases: MangaUseCases = Injekt.get()
+        mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
         return editManga
     }
