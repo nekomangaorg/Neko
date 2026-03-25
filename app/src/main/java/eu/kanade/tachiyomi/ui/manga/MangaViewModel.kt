@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -138,7 +137,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     companion object {
-        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 3000L
+        private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 1000L
     }
 
     val preferences: PreferencesHelper = Injekt.get()
@@ -2378,29 +2377,24 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         chapterNumber.toString()
                     }
 
-                val mangaId = effectiveManga.id ?: return@updateDynamicCover
-                val dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+                val mangaId = effectiveManga.id
+                var dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+
+                if (dbAggregate == null) {
+                    mangaUseCases.updateMangaAggregate(
+                        effectiveManga.id,
+                        effectiveManga.url,
+                        effectiveManga.favorite,
+                    )
+                }
+
+                dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
 
                 val volumes: Map<String, AggregateVolume>? =
                     if (dbAggregate != null) {
                         Json.parseToJsonElement(dbAggregate.volumes).asMdMap<AggregateVolume>()
                     } else {
-                        val dto =
-                            sourceManager.mangaDex
-                                .getAggregate(MdUtil.getMangaUUID(effectiveManga.url))
-                                .getOrElse { null }
-                        if (dto != null) {
-                            db.insertMangaAggregate(
-                                    MangaAggregate(
-                                        mangaId = mangaId,
-                                        volumes = dto.volumes.toString(),
-                                    )
-                                )
-                                .executeOnIO()
-                            with(dto.volumes) { asMdMap<AggregateVolume>() }
-                        } else {
-                            null
-                        }
+                        null
                     }
 
                 if (volumes != null) {

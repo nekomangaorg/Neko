@@ -59,8 +59,7 @@ interface MangaDexService {
 
     @GET("${MdConstants.Api.manga}/{id}/aggregate")
     suspend fun getAggregate(
-        @Path("id") mangaId: String,
-        @Query("translatedLanguage[]") translatedLanguages: List<String>,
+        @Path("id") mangaId: String
     ): ApiResponse<eu.kanade.tachiyomi.source.online.models.dto.AggregateDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.chapter}/{id}")
