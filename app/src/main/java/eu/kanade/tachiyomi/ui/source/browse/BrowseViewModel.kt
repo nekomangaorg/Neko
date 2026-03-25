@@ -177,7 +177,7 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val categories =
                 db.getCategories()
-                    .executeAsBlocking()
+                    .executeOnIO()
                     .map { category -> category.toCategoryItem() }
                     .toPersistentList()
 
@@ -418,7 +418,7 @@ class BrowseViewModel() : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeAsBlocking()
+            db.insertManga(editManga).executeOnIO()
 
             updateDisplayManga(mangaId, editManga.favorite)
 
@@ -509,7 +509,7 @@ class BrowseViewModel() : ViewModel() {
                     name = name,
                     dexFilters = Json.encodeToString(browseScreenState.value.filters),
                 )
-            db.insertBrowseFilter(browseFilter).executeAsBlocking()
+            db.insertBrowseFilter(browseFilter).executeOnIO()
             updateBrowseFilters()
         }
     }
@@ -531,14 +531,14 @@ class BrowseViewModel() : ViewModel() {
                         it.copy(default = false)
                     }
                 }
-            db.insertBrowseFilters(updatedFilters).executeAsBlocking()
+            db.insertBrowseFilters(updatedFilters).executeOnIO()
             updateBrowseFilters()
         }
     }
 
     fun deleteFilter(name: String) {
         viewModelScope.launchIO {
-            db.deleteBrowseFilter(name).executeAsBlocking()
+            db.deleteBrowseFilter(name).executeOnIO()
             updateBrowseFilters()
         }
     }
@@ -684,12 +684,12 @@ class BrowseViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
+            db.insertCategory(category).executeOnIO()
             _browseScreenState.update {
                 it.copy(
                     categories =
                         db.getCategories()
-                            .executeAsBlocking()
+                            .executeOnIO()
                             .map { category -> category.toCategoryItem() }
                             .toPersistentList()
                 )
@@ -718,7 +718,7 @@ class BrowseViewModel() : ViewModel() {
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         viewModelScope.launchIO {
-            val filters = db.getBrowseFilters().executeAsBlocking().toPersistentList()
+            val filters = db.getBrowseFilters().executeOnIO().toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters
