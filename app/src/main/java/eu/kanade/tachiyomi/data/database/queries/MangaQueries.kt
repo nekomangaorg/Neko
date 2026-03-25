@@ -10,10 +10,9 @@ import eu.kanade.tachiyomi.data.database.resolvers.LibraryMangaGetResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaDateAddedPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaFavoritePutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaFlagsPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaLanguageFilterFlagsPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaLastUpdatedPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaNextUpdatedPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaScanlatorFilterFlagsPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaStringPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaTitlePutResolver
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
@@ -168,7 +167,15 @@ interface MangaQueries : DbProvider {
             .prepare()
 
     fun updateScanlatorFilterFlag(manga: Manga) =
-        db.put().`object`(manga).withPutResolver(MangaScanlatorFilterFlagsPutResolver()).prepare()
+        db.put()
+            .`object`(manga)
+            .withPutResolver(
+                MangaStringPutResolver(
+                    MangaTable.COL_SCANLATOR_FILTER_FLAG,
+                    Manga::filtered_scanlators,
+                )
+            )
+            .prepare()
 
     fun updateNextUpdated(manga: Manga) =
         db.put().`object`(manga).withPutResolver(MangaNextUpdatedPutResolver()).prepare()
@@ -264,8 +271,24 @@ interface MangaQueries : DbProvider {
             .prepare()
 
     fun updateMangaFilteredScanlators(manga: Manga) =
-        db.put().`object`(manga).withPutResolver(MangaScanlatorFilterFlagsPutResolver()).prepare()
+        db.put()
+            .`object`(manga)
+            .withPutResolver(
+                MangaStringPutResolver(
+                    MangaTable.COL_SCANLATOR_FILTER_FLAG,
+                    Manga::filtered_scanlators,
+                )
+            )
+            .prepare()
 
     fun updateMangaFilteredLanguages(manga: Manga) =
-        db.put().`object`(manga).withPutResolver(MangaLanguageFilterFlagsPutResolver()).prepare()
+        db.put()
+            .`object`(manga)
+            .withPutResolver(
+                MangaStringPutResolver(
+                    MangaTable.COL_LANGUAGE_FILTER_FLAG,
+                    Manga::filtered_language,
+                )
+            )
+            .prepare()
 }
