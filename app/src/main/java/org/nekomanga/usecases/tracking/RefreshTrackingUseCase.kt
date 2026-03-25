@@ -44,8 +44,7 @@ class RefreshTrackingUseCase(
                 }
                 .map { (trackItem, service) ->
                     async {
-                        kotlin
-                            .runCatching { service.refresh(trackItem.toDbTrack()) }
+                        runCatching { service.refresh(trackItem.toDbTrack()) }
                             .onFailure { error ->
                                 if (error !is CancellationException) {
                                     TimberKt.e(error) {
