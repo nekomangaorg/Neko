@@ -119,7 +119,13 @@ data class AggregateVolume(
     val chapters: Map<String, AggregateChapter>,
 )
 
-@Serializable data class AggregateChapter(val chapter: String, val count: String)
+@Serializable
+data class AggregateChapter(
+    val chapter: String,
+    val id: String,
+    val others: List<String>,
+    val count: String,
+)
 
 inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
     return runCatching { MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject) }
