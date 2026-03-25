@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
@@ -13,6 +12,9 @@ import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
