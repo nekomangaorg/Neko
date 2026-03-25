@@ -10,14 +10,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewModelScope
@@ -66,361 +62,222 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
     val animationSpec = tween<IntOffset>(durationMillis = 300)
     val fadeSpec = tween<Float>(durationMillis = 300)
 
-    val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-
-    val detailBackStack = rememberNavBackStack(deepLink ?: Screens.Settings.General)
-
-    androidx.compose.runtime.LaunchedEffect(isTablet) {
-        if (isTablet) {
-            // If switching from Phone to Tablet
-            if (backStack.size > 1) {
-                val lastScreen = backStack.last()
-                backStack.clear()
-                backStack.add(Screens.Settings.Main())
-
-                detailBackStack.clear()
-                detailBackStack.add(lastScreen)
-            }
-        } else {
-            // If switching from Tablet to Phone
-            if (detailBackStack.size > 0 && detailBackStack.last() !is Screens.Settings.General) {
-                val detailScreen = detailBackStack.last()
-                backStack.clear()
-                backStack.add(Screens.Settings.Main())
-                backStack.add(detailScreen)
-            }
-        }
-    }
-
-    val entryProvider = entryProvider {
-        entry<Screens.Settings.Main> {
-            SettingsMainScreen(
-                onNavigateClick = { screen ->
-                    if (isTablet) {
-                        detailBackStack.clear()
-                        detailBackStack.add(screen)
-                    } else {
-                        backStack.add(screen)
-                    }
-                },
-                incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                developerMode = settingsVm.preferences.developerMode().get(),
-                onNavigationIconClick = onBackPressed,
+    NavDisplay(
+        backStack = backStack,
+        onBack = {
+            reset(
+                backstack = backStack,
+                wasDeepLink = deepLink != null,
+                onBackPressed = onBackPressed,
             )
-        }
-
-        entry<Screens.Settings.General> {
-            GeneralSettingsScreen(
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    preferencesHelper = settingsVm.preferences,
-                    showNotificationSetting = true,
-                    manageNotificationsClicked = { manageNotificationClick(context) },
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Appearance> {
-            AppearanceSettingsScreen(
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    preferences = settingsVm.preferences,
-                    libraryPreferences = settingsVm.libraryPreferences,
-                    mangaDetailsPreferences = settingsVm.mangaDetailsPreferences,
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Library> {
-            val vm: LibrarySettingsViewModel = viewModel()
-            LibrarySettingsScreen(
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    libraryPreferences = vm.libraryPreferences,
-                    categories = vm.allCategories.collectAsState().value,
-                    viewModelScope = vm.viewModelScope,
-                    onAddEditCategoryClick = {
-                        if (isTablet) {
-                            detailBackStack.add(Screens.Settings.Categories)
-                        } else {
-                            backStack.add(Screens.Settings.Categories)
-                        }
-                    },
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Categories> {
-            val vm: LibrarySettingsViewModel = viewModel()
-            AddEditCategoriesScreen(
-                    onNavigationIconClick = {
-                        if (isTablet) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            backStack.removeLastOrNull()
-                        }
-                    },
-                    categories = vm.allCategories.collectAsState().value,
-                    addUpdateCategory = vm::addUpdateCategory,
-                    deleteCategory = vm::deleteCategory,
-                    onChangeOrder = vm::onChangeOrder,
-                )
-                .Content()
-        }
-        entry<Screens.Settings.DataStorage> {
-            val vm: DataStorageSettingsViewModel = viewModel()
-
-            DataStorageSettingsScreen(
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    storagePreferences = vm.storagePreferences,
-                    clearCache = vm::clearParentCache,
-                    toastEvent = vm.toastEvent,
-                    cacheData = vm.cacheData.collectAsState().value,
-                )
-                .Content()
-        }
-        entry<Screens.Settings.MangaDex> {
-            val vm: MangaDexSettingsViewModel = viewModel()
-            MangaDexSettingsScreen(
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    mangaDexPreferences = vm.mangaDexPreference,
-                    mangaDexSettingsState = vm.state.collectAsState().value,
-                    deleteSavedFilters = vm::deleteAllBrowseFilters,
-                    logout = vm::logout,
-                )
-                .Content()
-        }
-        entry<Screens.Settings.MergeSource> {
-            val vm: MergeSettingsViewModel = viewModel()
-            MergeSettingsScreen(
-                    login = vm::login,
-                    logout = vm::logout,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    loginEvent = vm.loginEvent,
-                    komgaState = vm.komgaMergeScreenState.collectAsState().value,
-                    suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
-                    preferences = vm.preferences,
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Reader> {
-            val vm: ReaderSettingsViewModel = viewModel()
-            ReaderSettingsScreen(
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    readerPreferences = vm.readerPreferences,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-
-        entry<Screens.Settings.Downloads> {
-            val vm: DownloadSettingsViewModel = viewModel()
-
-            DownloadSettingsScreen(
-                    preferences = vm.preferences,
-                    readerPreferences = vm.readerPreferences,
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    allCategories = vm.allCategories.collectAsState().value,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-
-        entry<Screens.Settings.Tracking> {
-            val vm: TrackingSettingsViewModel = viewModel()
-
-            TrackingSettingsScreen(
-                    preferences = vm.preferences,
-                    trackingScreenState = vm.state.collectAsState().value,
-                    updateAutoAddTrack = vm::updateAutoAddTrack,
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    loginEvent = vm.loginEvent,
-                    login = vm::login,
-                    logout = vm::logout,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Security> {
-            SecuritySettingsScreen(
-                    securityPreferences = settingsVm.securityPreferences,
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-        entry<Screens.Settings.Advanced> {
-            val vm: AdvancedSettingsViewModel = viewModel()
-
-            AdvancedSettingsScreen(
-                    preferences = vm.preferences,
-                    readerPreferences = vm.readerPreferences,
-                    networkPreferences = vm.networkPreference,
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    toastEvent = vm.toastEvent,
-                    clearNetworkCookies = vm::clearNetworkCookies,
-                    clearDatabase = vm::clearDatabase,
-                    cleanupDownloads = vm::cleanupDownloads,
-                    reindexDownloads = vm::reindexDownloads,
-                    dedupeCategories = vm::dedupeCategories,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-
-        entry<Screens.Settings.Debug> {
-            val vm: DebugSettingsViewModel = viewModel()
-
-            DebugSettingsScreen(
-                    toastEvent = vm.toastEvent,
-                    incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    unfollowAllLibraryManga = vm::unfollowAllLibraryManga,
-                    removeAllMangaWithStatusOnMangaDex = vm::removeAllMangaWithStatusOnMangaDex,
-                    clearAllManga = vm::clearAllManga,
-                    clearAllTrackers = vm::clearAllTrackers,
-                    clearAllCategories = vm::clearAllCategories,
-                    onNavigationIconClick = {
-                        if (!isTablet) reset(backStack, wasDeepLink, onBackPressed)
-                    },
-                )
-                .Content()
-        }
-    }
-
-    if (isTablet) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            NavDisplay(
-                backStack = backStack,
-                modifier = Modifier.weight(1f),
-                onBack = {
-                    reset(
-                        backstack = backStack,
-                        wasDeepLink = deepLink != null,
-                        onBackPressed = onBackPressed,
+        },
+        entryDecorators =
+            listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+        transitionSpec = {
+            slideInHorizontally(animationSpec = animationSpec, initialOffsetX = { it / 4 }) +
+                fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+        },
+        popTransitionSpec = {
+            fadeIn(animationSpec = fadeSpec) togetherWith
+                slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it / 4 }) +
+                    fadeOut(animationSpec = fadeSpec)
+        },
+        predictivePopTransitionSpec = {
+            fadeIn(animationSpec = fadeSpec) togetherWith
+                slideOutHorizontally(animationSpec = animationSpec, targetOffsetX = { it / 4 }) +
+                    fadeOut(animationSpec = fadeSpec)
+        },
+        entryProvider =
+            entryProvider {
+                entry<Screens.Settings.Main> {
+                    SettingsMainScreen(
+                        onNavigateClick = { screen -> backStack.add(screen) },
+                        incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                        developerMode = settingsVm.preferences.developerMode().get(),
+                        onNavigationIconClick = onBackPressed,
                     )
-                },
-                entryDecorators =
-                    listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                transitionSpec = {
-                    slideInHorizontally(
-                        animationSpec = animationSpec,
-                        initialOffsetX = { it / 4 },
-                    ) + fadeIn(animationSpec = fadeSpec) togetherWith
-                        fadeOut(animationSpec = fadeSpec)
-                },
-                popTransitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith
-                        slideOutHorizontally(
-                            animationSpec = animationSpec,
-                            targetOffsetX = { it / 4 },
-                        ) + fadeOut(animationSpec = fadeSpec)
-                },
-                predictivePopTransitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith
-                        slideOutHorizontally(
-                            animationSpec = animationSpec,
-                            targetOffsetX = { it / 4 },
-                        ) + fadeOut(animationSpec = fadeSpec)
-                },
-                entryProvider =
-                    entryProvider {
-                        entry<Screens.Settings.Main> {
-                            SettingsMainScreen(
-                                onNavigateClick = { screen ->
-                                    detailBackStack.clear()
-                                    detailBackStack.add(screen)
-                                },
-                                incognitoMode =
-                                    settingsVm.securityPreferences.incognitoMode().get(),
-                                developerMode = settingsVm.preferences.developerMode().get(),
-                                onNavigationIconClick = onBackPressed,
-                            )
-                        }
-                    },
-            )
+                }
 
-            NavDisplay(
-                backStack = detailBackStack,
-                modifier = Modifier.weight(2f),
-                onBack = { onBackPressed() },
-                entryDecorators =
-                    listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                transitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-                },
-                popTransitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-                },
-                predictivePopTransitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-                },
-                entryProvider = entryProvider,
-            )
-        }
-    } else {
-        NavDisplay(
-            backStack = backStack,
-            onBack = {
-                reset(
-                    backstack = backStack,
-                    wasDeepLink = deepLink != null,
-                    onBackPressed = onBackPressed,
-                )
+                entry<Screens.Settings.General> {
+                    GeneralSettingsScreen(
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            preferencesHelper = settingsVm.preferences,
+                            showNotificationSetting = true,
+                            manageNotificationsClicked = { manageNotificationClick(context) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Appearance> {
+                    AppearanceSettingsScreen(
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            preferences = settingsVm.preferences,
+                            libraryPreferences = settingsVm.libraryPreferences,
+                            mangaDetailsPreferences = settingsVm.mangaDetailsPreferences,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Library> {
+                    val vm: LibrarySettingsViewModel = viewModel()
+                    LibrarySettingsScreen(
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            libraryPreferences = vm.libraryPreferences,
+                            categories = vm.allCategories.collectAsState().value,
+                            viewModelScope = vm.viewModelScope,
+                            onAddEditCategoryClick = { backStack.add(Screens.Settings.Categories) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Categories> {
+                    val vm: LibrarySettingsViewModel = viewModel()
+                    AddEditCategoriesScreen(
+                            onNavigationIconClick = { backStack.removeLastOrNull() },
+                            categories = vm.allCategories.collectAsState().value,
+                            addUpdateCategory = vm::addUpdateCategory,
+                            deleteCategory = vm::deleteCategory,
+                            onChangeOrder = vm::onChangeOrder,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.DataStorage> {
+                    val vm: DataStorageSettingsViewModel = viewModel()
+
+                    DataStorageSettingsScreen(
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            storagePreferences = vm.storagePreferences,
+                            clearCache = vm::clearParentCache,
+                            toastEvent = vm.toastEvent,
+                            cacheData = vm.cacheData.collectAsState().value,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.MangaDex> {
+                    val vm: MangaDexSettingsViewModel = viewModel()
+                    MangaDexSettingsScreen(
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            mangaDexPreferences = vm.mangaDexPreference,
+                            mangaDexSettingsState = vm.state.collectAsState().value,
+                            deleteSavedFilters = vm::deleteAllBrowseFilters,
+                            logout = vm::logout,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.MergeSource> {
+                    val vm: MergeSettingsViewModel = viewModel()
+                    MergeSettingsScreen(
+                            login = vm::login,
+                            logout = vm::logout,
+                            onNavigationIconClick = {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            },
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            loginEvent = vm.loginEvent,
+                            komgaState = vm.komgaMergeScreenState.collectAsState().value,
+                            suwayomiState = vm.suwayomiMergeScreenState.collectAsState().value,
+                            preferences = vm.preferences,
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Reader> {
+                    val vm: ReaderSettingsViewModel = viewModel()
+                    ReaderSettingsScreen(
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            readerPreferences = vm.readerPreferences,
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Downloads> {
+                    val vm: DownloadSettingsViewModel = viewModel()
+
+                    DownloadSettingsScreen(
+                            preferences = vm.preferences,
+                            readerPreferences = vm.readerPreferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            allCategories = vm.allCategories.collectAsState().value,
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Tracking> {
+                    val vm: TrackingSettingsViewModel = viewModel()
+
+                    TrackingSettingsScreen(
+                            preferences = vm.preferences,
+                            trackingScreenState = vm.state.collectAsState().value,
+                            updateAutoAddTrack = vm::updateAutoAddTrack,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            loginEvent = vm.loginEvent,
+                            login = vm::login,
+                            logout = vm::logout,
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Security> {
+                    SecuritySettingsScreen(
+                            securityPreferences = settingsVm.securityPreferences,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
+                entry<Screens.Settings.Advanced> {
+                    val vm: AdvancedSettingsViewModel = viewModel()
+
+                    AdvancedSettingsScreen(
+                            preferences = vm.preferences,
+                            readerPreferences = vm.readerPreferences,
+                            networkPreferences = vm.networkPreference,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            toastEvent = vm.toastEvent,
+                            clearNetworkCookies = vm::clearNetworkCookies,
+                            clearDatabase = vm::clearDatabase,
+                            cleanupDownloads = vm::cleanupDownloads,
+                            reindexDownloads = vm::reindexDownloads,
+                            dedupeCategories = vm::dedupeCategories,
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
+
+                entry<Screens.Settings.Debug> {
+                    val vm: DebugSettingsViewModel = viewModel()
+
+                    DebugSettingsScreen(
+                            toastEvent = vm.toastEvent,
+                            incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
+                            unfollowAllLibraryManga = vm::unfollowAllLibraryManga,
+                            removeAllMangaWithStatusOnMangaDex =
+                                vm::removeAllMangaWithStatusOnMangaDex,
+                            clearAllManga = vm::clearAllManga,
+                            clearAllTrackers = vm::clearAllTrackers,
+                            clearAllCategories = vm::clearAllCategories,
+                            onNavigationIconClick = { reset(backStack, wasDeepLink, onBackPressed) },
+                        )
+                        .Content()
+                }
             },
-            entryDecorators =
-                listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-            transitionSpec = {
-                slideInHorizontally(animationSpec = animationSpec, initialOffsetX = { it / 4 }) +
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-            },
-            popTransitionSpec = {
-                fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = animationSpec,
-                        targetOffsetX = { it / 4 },
-                    ) + fadeOut(animationSpec = fadeSpec)
-            },
-            predictivePopTransitionSpec = {
-                fadeIn(animationSpec = fadeSpec) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = animationSpec,
-                        targetOffsetX = { it / 4 },
-                    ) + fadeOut(animationSpec = fadeSpec)
-            },
-            entryProvider = entryProvider,
-        )
-    }
+    )
 }
 
 private fun reset(
