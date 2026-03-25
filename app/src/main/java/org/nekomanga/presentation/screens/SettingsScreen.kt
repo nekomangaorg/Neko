@@ -100,6 +100,9 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
 
     val entryProvider = entryProvider {
         entry<Screens.Settings.Main> {
+            val selectedScreen =
+                if (isTablet && detailBackStack.size > 0) detailBackStack.last() else null
+
             SettingsMainScreen(
                 onNavigateClick = { screen ->
                     if (isTablet) {
@@ -112,18 +115,21 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                 incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                 developerMode = settingsVm.preferences.developerMode().get(),
                 onNavigationIconClick = onBackPressed,
+                selectedScreen = selectedScreen,
             )
         }
 
         entry<Screens.Settings.General> {
             GeneralSettingsScreen(
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     preferencesHelper = settingsVm.preferences,
                     showNotificationSetting = true,
@@ -133,13 +139,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         }
         entry<Screens.Settings.Appearance> {
             AppearanceSettingsScreen(
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     preferences = settingsVm.preferences,
                     libraryPreferences = settingsVm.libraryPreferences,
@@ -150,13 +158,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         entry<Screens.Settings.Library> {
             val vm: LibrarySettingsViewModel = viewModel()
             LibrarySettingsScreen(
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     libraryPreferences = vm.libraryPreferences,
                     categories = vm.allCategories.collectAsState().value,
@@ -174,13 +184,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         entry<Screens.Settings.Categories> {
             val vm: LibrarySettingsViewModel = viewModel()
             AddEditCategoriesScreen(
-                    onNavigationIconClick = {
-                        if (isTablet) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            backStack.removeLastOrNull()
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                backStack.removeLastOrNull()
+                            }
+                        },
                     categories = vm.allCategories.collectAsState().value,
                     addUpdateCategory = vm::addUpdateCategory,
                     deleteCategory = vm::deleteCategory,
@@ -192,13 +204,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
             val vm: DataStorageSettingsViewModel = viewModel()
 
             DataStorageSettingsScreen(
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     storagePreferences = vm.storagePreferences,
                     clearCache = vm::clearParentCache,
@@ -210,13 +224,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         entry<Screens.Settings.MangaDex> {
             val vm: MangaDexSettingsViewModel = viewModel()
             MangaDexSettingsScreen(
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     mangaDexPreferences = vm.mangaDexPreference,
                     mangaDexSettingsState = vm.state.collectAsState().value,
@@ -230,13 +246,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
             MergeSettingsScreen(
                     login = vm::login,
                     logout = vm::logout,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     loginEvent = vm.loginEvent,
                     komgaState = vm.komgaMergeScreenState.collectAsState().value,
@@ -250,13 +268,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
             ReaderSettingsScreen(
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     readerPreferences = vm.readerPreferences,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }
@@ -269,13 +289,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     readerPreferences = vm.readerPreferences,
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
                     allCategories = vm.allCategories.collectAsState().value,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }
@@ -291,13 +313,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     loginEvent = vm.loginEvent,
                     login = vm::login,
                     logout = vm::logout,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }
@@ -305,13 +329,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
             SecuritySettingsScreen(
                     securityPreferences = settingsVm.securityPreferences,
                     incognitoMode = settingsVm.securityPreferences.incognitoMode().get(),
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }
@@ -329,13 +355,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     cleanupDownloads = vm::cleanupDownloads,
                     reindexDownloads = vm::reindexDownloads,
                     dedupeCategories = vm::dedupeCategories,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }
@@ -351,13 +379,15 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
                     clearAllManga = vm::clearAllManga,
                     clearAllTrackers = vm::clearAllTrackers,
                     clearAllCategories = vm::clearAllCategories,
-                    onNavigationIconClick = {
-                        if (isTablet && detailBackStack.size > 1) {
-                            detailBackStack.removeLastOrNull()
-                        } else {
-                            reset(backStack, wasDeepLink, onBackPressed)
-                        }
-                    },
+                    onNavigationIconClick =
+                        if (isTablet && detailBackStack.size == 1) null
+                        else {
+                            if (isTablet && detailBackStack.size > 1) {
+                                detailBackStack.removeLastOrNull()
+                            } else {
+                                reset(backStack, wasDeepLink, onBackPressed)
+                            }
+                        },
                 )
                 .Content()
         }

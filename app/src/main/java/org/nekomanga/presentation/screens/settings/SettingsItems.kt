@@ -61,9 +61,15 @@ fun HeadingItem(text: UiText) {
 }
 
 @Composable
-fun IconItem(labelText: UiText, icon: ImageVector, onClick: () -> Unit) {
+fun IconItem(
+    labelText: UiText,
+    icon: ImageVector,
+    isSelected: Boolean = false,
+    onClick: () -> Unit,
+) {
     BaseSettingsItem(
         labelText = labelText,
+        isSelected = isSelected,
         widget = {
             Icon(
                 modifier = Modifier.size(Size.large),
@@ -283,11 +289,19 @@ private fun BaseSettingsItem(
     labelText: UiText,
     widget: @Composable RowScope.() -> Unit,
     onClick: () -> Unit,
+    isSelected: Boolean = false,
 ) {
     Row(
         modifier =
             Modifier.clickable(onClick = onClick)
                 .fillMaxWidth()
+                .then(
+                    if (isSelected) {
+                        Modifier.androidx.compose.foundation.background(
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    } else Modifier
+                )
                 .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Size.large),
