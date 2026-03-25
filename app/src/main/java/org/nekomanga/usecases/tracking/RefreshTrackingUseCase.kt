@@ -44,7 +44,8 @@ class RefreshTrackingUseCase(
                 }
                 .map { (trackItem, service) ->
                     async {
-                        runCatching { service.refresh(trackItem.toDbTrack()) }
+                        kotlin
+                            .runCatching { service.refresh(trackItem.toDbTrack()) }
                             .onFailure { error ->
                                 if (error !is CancellationException) {
                                     TimberKt.e(error) {
@@ -74,7 +75,7 @@ class RefreshTrackingUseCase(
 
             val chaptersToMark = allChapters.filter {
                 !it.chapter.read &&
-                    it.chapter.isRecognizedNumber &&
+                    it.chapter.chapterNumber >= 0f &&
                     it.chapter.chapterNumber <= maxChapterRead
             }
 
