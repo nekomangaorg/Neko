@@ -356,11 +356,8 @@ class StatsViewModel() : ViewModel() {
     private fun getUserScore(mangaTracks: List<Track>): Double {
         val scores = mangaTracks.mapNotNull { track ->
             // perf: combine filter/map operations to reduce intermediate list allocations
-            if (track.score > 0) {
-                get10PointScore(track)?.takeIf { it > 0.0 }
-            } else {
-                null
-            }
+            if (track.score <= 0) return@mapNotNull null
+            get10PointScore(track)?.takeIf { it > 0.0 }
         }
 
         return when (scores.isEmpty()) {
