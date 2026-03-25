@@ -19,7 +19,12 @@ class RemoveTracking(
         serviceItem: TrackServiceItem,
         mangaId: Long,
     ): TrackingUpdate {
-        val service = trackManager.getService(serviceItem.id)!!
+        val service =
+            trackManager.getService(serviceItem.id)
+                ?: return TrackingUpdate.Error(
+                    "Service not found",
+                    IllegalStateException("Service not found"),
+                )
         val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
         db.deleteTrackForManga(mangaId, service).executeOnIO()
         if (alsoRemoveFromTracker && service.canRemoveFromService()) {

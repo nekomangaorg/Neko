@@ -22,9 +22,8 @@ class RegisterTracking(
                 val trackItem = trackAndService.track.copy(mangaId = mangaId)
 
                 val track =
-                    trackManager
-                        .getService(trackAndService.service.id)!!
-                        .bind(trackItem.toDbTrack())
+                    trackManager.getService(trackAndService.service.id)?.bind(trackItem.toDbTrack())
+                        ?: throw IllegalStateException("Service not found")
                 db.insertTrack(track).executeOnIO()
                 TrackingUpdate.Success
             }

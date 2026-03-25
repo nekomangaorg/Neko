@@ -25,8 +25,10 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
 
                 val id = trackManager.getIdFromManga(service, manga) ?: ""
 
-                val results =
-                    trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
+                val trackService =
+                    trackManager.getService(service.id)
+                        ?: throw IllegalStateException("Service not found")
+                val results = trackService.search(title, manga, previouslyTracker)
                 emit(
                     when (results.isEmpty()) {
                         true -> TrackingConstants.TrackSearchResult.NoResult
@@ -56,8 +58,10 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
     ): TrackingConstants.TrackSearchResult {
         return kotlin
             .runCatching {
-                val results =
-                    trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
+                val trackService =
+                    trackManager.getService(service.id)
+                        ?: throw IllegalStateException("Service not found")
+                val results = trackService.search(title, manga, previouslyTracker)
                 when (results.isEmpty()) {
                     true -> TrackingConstants.TrackSearchResult.NoResult
                     false ->

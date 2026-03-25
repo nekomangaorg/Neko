@@ -17,10 +17,8 @@ class UpdateTrackStatus(
         var track =
             trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
 
-        if (
-            trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
-                track.totalChapters > 0
-        ) {
+        val service = trackManager.getService(trackAndService.service.id)
+        if (service?.isCompletedStatus(statusIndex) == true && track.totalChapters > 0) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingService.await(track, trackAndService.service)
