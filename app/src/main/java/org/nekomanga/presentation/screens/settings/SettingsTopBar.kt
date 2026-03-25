@@ -13,15 +13,16 @@ import org.nekomanga.presentation.functions.getTopAppBarColor
 fun SettingsTopBar(
     title: String = "",
     incognitoMode: Boolean = false,
-    onNavigationIconClicked: () -> Unit,
+    onNavigationIconClicked: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
     TitleTopAppBar(
         color = color,
         title = title,
-        navigationIcon = Icons.AutoMirrored.Default.ArrowBack,
-        onNavigationIconClicked = onNavigationIconClicked,
+        navigationIcon =
+            if (onNavigationIconClicked != null) Icons.AutoMirrored.Default.ArrowBack else null,
+        onNavigationIconClicked = onNavigationIconClicked ?: {},
         navigationIconLabel = stringResource(R.string.back),
         incognitoMode = incognitoMode,
         scrollBehavior = scrollBehavior,

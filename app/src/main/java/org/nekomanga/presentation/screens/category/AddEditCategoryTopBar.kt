@@ -11,7 +11,7 @@ import org.nekomanga.presentation.functions.getTopAppBarColor
 
 @Composable
 fun AddEditCategoryTopBar(
-    onNavigationIconClicked: () -> Unit,
+    onNavigationIconClicked: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
@@ -19,8 +19,9 @@ fun AddEditCategoryTopBar(
     TitleTopAppBar(
         color = color,
         title = stringResource(R.string.edit_categories),
-        navigationIcon = Icons.AutoMirrored.Default.ArrowBack,
-        onNavigationIconClicked = onNavigationIconClicked,
+        navigationIcon =
+            if (onNavigationIconClicked != null) Icons.AutoMirrored.Default.ArrowBack else null,
+        onNavigationIconClicked = onNavigationIconClicked ?: {},
         navigationIconLabel = stringResource(R.string.back),
         incognitoMode = false,
         scrollBehavior = scrollBehavior,

@@ -33,7 +33,7 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 
 internal class MangaDexSettingsScreen(
     incognitoMode: Boolean,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
     val mangaDexPreferences: MangaDexPreferences,
     val mangaDexSettingsState: MangaDexSettingsViewModel.MangaDexSettingsState,
     val deleteSavedFilters: () -> Unit,

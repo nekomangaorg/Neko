@@ -64,6 +64,7 @@ fun SettingsMainScreen(
     onNavigationIconClick: () -> Unit,
     incognitoMode: Boolean,
     developerMode: Boolean = false,
+    selectedScreen: NavKey? = null,
 ) {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -105,6 +106,7 @@ fun SettingsMainScreen(
                 contentPadding = contentPadding,
                 onNavigateClick = onNavigateClick,
                 developerMode = developerMode,
+                selectedScreen = selectedScreen,
             )
         }
     }
@@ -115,12 +117,14 @@ private fun mainContent(
     contentPadding: PaddingValues,
     onNavigateClick: (NavKey) -> Unit,
     developerMode: Boolean,
+    selectedScreen: NavKey?,
 ) {
     LazyColumn(contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
         item {
             IconItem(
                 labelText = UiText.StringResource(R.string.general),
                 icon = Icons.Outlined.Tune,
+                isSelected = selectedScreen == Screens.Settings.General,
                 onClick = { onNavigateClick(Screens.Settings.General) },
             )
         }
@@ -128,6 +132,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.appearance),
                 icon = Icons.Outlined.Palette,
+                isSelected = selectedScreen == Screens.Settings.Appearance,
                 onClick = { onNavigateClick(Screens.Settings.Appearance) },
             )
         }
@@ -135,6 +140,9 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.library),
                 icon = Icons.Outlined.CollectionsBookmark,
+                isSelected =
+                    selectedScreen == Screens.Settings.Library ||
+                        selectedScreen == Screens.Settings.Categories,
                 onClick = { onNavigateClick(Screens.Settings.Library) },
             )
         }
@@ -142,6 +150,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.data_storage),
                 icon = Icons.Outlined.Folder,
+                isSelected = selectedScreen == Screens.Settings.DataStorage,
                 onClick = { onNavigateClick(Screens.Settings.DataStorage) },
             )
         }
@@ -149,6 +158,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.site_specific_settings),
                 icon = Icons.Outlined.Public,
+                isSelected = selectedScreen == Screens.Settings.MangaDex,
                 onClick = { onNavigateClick(Screens.Settings.MangaDex) },
             )
         }
@@ -156,6 +166,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.merge_source_settings),
                 icon = MergeIcon,
+                isSelected = selectedScreen == Screens.Settings.MergeSource,
                 onClick = { onNavigateClick(Screens.Settings.MergeSource) },
             )
         }
@@ -163,6 +174,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.reader),
                 icon = Icons.AutoMirrored.Default.ChromeReaderMode,
+                isSelected = selectedScreen == Screens.Settings.Reader,
                 onClick = { onNavigateClick(Screens.Settings.Reader) },
             )
         }
@@ -170,6 +182,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.downloads),
                 icon = Icons.Outlined.Download,
+                isSelected = selectedScreen == Screens.Settings.Downloads,
                 onClick = { onNavigateClick(Screens.Settings.Downloads) },
             )
         }
@@ -177,6 +190,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.tracking),
                 icon = Icons.Outlined.Autorenew,
+                isSelected = selectedScreen == Screens.Settings.Tracking,
                 onClick = { onNavigateClick(Screens.Settings.Tracking) },
             )
         }
@@ -184,6 +198,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.security),
                 icon = Icons.Outlined.Security,
+                isSelected = selectedScreen == Screens.Settings.Security,
                 onClick = { onNavigateClick(Screens.Settings.Security) },
             )
         }
@@ -191,6 +206,7 @@ private fun mainContent(
             IconItem(
                 labelText = UiText.StringResource(R.string.advanced),
                 icon = Icons.Outlined.Code,
+                isSelected = selectedScreen == Screens.Settings.Advanced,
                 onClick = { onNavigateClick(Screens.Settings.Advanced) },
             )
         }
@@ -199,6 +215,7 @@ private fun mainContent(
                 IconItem(
                     labelText = UiText.StringResource(R.string.debug),
                     icon = Icons.Outlined.BugReport,
+                    isSelected = selectedScreen == Screens.Settings.Debug,
                     onClick = { onNavigateClick(Screens.Settings.Debug) },
                 )
             }

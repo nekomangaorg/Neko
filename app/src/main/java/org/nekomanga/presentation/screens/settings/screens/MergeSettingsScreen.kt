@@ -24,7 +24,7 @@ import org.nekomanga.presentation.screens.settings.widgets.SearchTerm
 
 internal class MergeSettingsScreen(
     incognitoMode: Boolean,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
     val komgaState: MergeScreenState,
     val suwayomiState: MergeScreenState,
     val logout: (MergeScreenType) -> Unit,

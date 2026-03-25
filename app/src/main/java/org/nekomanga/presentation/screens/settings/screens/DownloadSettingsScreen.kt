@@ -24,7 +24,7 @@ internal class DownloadSettingsScreen(
     val preferences: PreferencesHelper,
     val readerPreferences: ReaderPreferences,
     val allCategories: PersistentList<CategoryItem>,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.downloads
 
