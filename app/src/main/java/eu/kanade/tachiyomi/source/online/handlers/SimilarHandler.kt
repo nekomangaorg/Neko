@@ -193,7 +193,6 @@ class SimilarHandler {
         similarDto ?: return
 
         // Get our page of mangaList
-        // TODO: We should also remove any that have a bad language here
         val activeLangs = MdUtil.getLangsToShow(mangaDexPreferences)
         val idPairs =
             similarDto.matches
