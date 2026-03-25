@@ -153,7 +153,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val statusHandler: StatusHandler = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get()
-    private val trackingCoordinator: TrackingCoordinator = Injekt.get()
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
@@ -1436,7 +1435,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Update tracker with new status */
     fun updateTrackStatus(statusIndex: Int, trackAndService: TrackAndService) {
         viewModelScope.launchIO {
-            val trackingUpdate = trackingCoordinator.updateTrackStatus(statusIndex, trackAndService)
+            val trackingUpdate = trackUseCases.updateTrackStatus.await(statusIndex, trackAndService)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1444,7 +1443,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Update tracker with new score */
     fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
         viewModelScope.launchIO {
-            val trackingUpdate = trackingCoordinator.updateTrackScore(scoreIndex, trackAndService)
+            val trackingUpdate = trackUseCases.updateTrackScore.await(scoreIndex, trackAndService)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1453,7 +1452,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackAndService) {
         viewModelScope.launchIO {
             val trackingUpdate =
-                trackingCoordinator.updateTrackChapter(newChapterNumber, trackAndService)
+                trackUseCases.updateTrackChapter.await(newChapterNumber, trackAndService)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1461,7 +1460,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Update the tracker with the start/finished date */
     fun updateTrackDate(trackDateChange: TrackDateChange) {
         viewModelScope.launchIO {
-            val trackingUpdate = trackingCoordinator.updateTrackDate(trackDateChange)
+            val trackingUpdate = trackUseCases.updateTrackDate.await(trackDateChange)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1476,7 +1475,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 } != null
 
             val result =
-                trackingCoordinator.searchTrackerNonFlow(title, service, dbManga, previouslyTracked)
+                trackUseCases.searchTracker.awaitNonFlow(title, service, dbManga, previouslyTracked)
             _mangaDetailScreenState.update {
                 it.copy(track = it.track.copy(trackSearchResult = result))
             }
@@ -1486,7 +1485,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Register tracker with service */
     fun registerTracking(trackAndService: TrackAndService) {
         viewModelScope.launchIO {
-            val trackingUpdate = trackingCoordinator.registerTracking(trackAndService, mangaId)
+            val trackingUpdate = trackUseCases.registerTracking.await(trackAndService, mangaId)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1495,7 +1494,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackServiceItem) {
         viewModelScope.launchIO {
             val trackingUpdate =
-                trackingCoordinator.removeTracking(alsoRemoveFromTracker, service, mangaId)
+                trackUseCases.removeTracking.await(alsoRemoveFromTracker, service, mangaId)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -1805,7 +1804,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                         if (newStatus != null) {
                             track.status = newStatus
-                            trackingCoordinator.updateTrackingService(
+                            trackUseCases.updateTrackingService.await(
                                 track.toTrackItem(),
                                 mdList.toTrackServiceItem(),
                             )
@@ -1854,7 +1853,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                         // We are online, not tracked, and have a remote ID. Proceed.
                         val trackResult =
-                            trackingCoordinator.searchTrackerNonFlow(
+                            trackUseCases.searchTracker.awaitNonFlow(
                                 title = "",
                                 service =
                                     trackManager.getService(trackService.id)!!.toTrackServiceItem(),
@@ -1868,7 +1867,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 if (trackSearchItem != null) {
                                     // Found a match, register it
                                     val trackingUpdate =
-                                        trackingCoordinator.registerTracking(
+                                        trackUseCases.registerTracking.await(
                                             TrackAndService(
                                                 trackSearchItem.trackItem,
                                                 trackService,

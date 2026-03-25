@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
-import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
@@ -149,8 +148,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(SimilarRepository())
 
         addSingleton(MangaUpdateCoordinator())
-
-        addSingleton(TrackingCoordinator())
 
         addSingleton(DisplayRepository())
 
