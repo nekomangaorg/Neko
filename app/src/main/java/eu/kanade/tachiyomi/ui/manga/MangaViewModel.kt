@@ -61,7 +61,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentSet
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -122,7 +121,6 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.manga.MergeMangaUseCases
-import org.nekomanga.util.system.mapAsync
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -158,6 +156,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val trackingCoordinator: TrackingCoordinator = Injekt.get()
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
+    private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
     private val mergeMangaUseCases = MergeMangaUseCases()
@@ -1035,67 +1034,26 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             if (!isOnline()) return@launchIO
 
-            val tracks = db.getTracks(mangaId).executeOnIO()
-            if (tracks.isEmpty()) return@launchIO
-
-            val updatedTracks =
-                tracks
-                    .map { it.toTrackItem() }
-                    .mapNotNull { track ->
-                        trackManager
-                            .getService(track.trackServiceId)
-                            ?.takeIf { it.isLogged() }
-                            ?.let { service -> track to service }
-                    }
-                    .mapAsync { (trackItem, service) ->
-                        kotlin
-                            .runCatching { service.refresh(trackItem.toDbTrack()) }
-                            .onFailure {
-                                if (it !is CancellationException) {
-                                    TimberKt.e(it) {
-                                        "Error refreshing tracker: ${service.nameRes()}"
-                                    }
-                                    delay(3000)
-                                    appSnackbarManager.showSnackbar(
-                                        SnackbarState(
-                                            message = it.message,
-                                            fieldRes = service.nameRes(),
-                                            messageRes = R.string.error_refreshing_,
-                                            snackBarColor =
-                                                _mangaDetailScreenState.value.general.snackbarColor,
-                                        )
-                                    )
-                                }
-                            }
-                            .getOrNull()
-                            ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
-                    }
-                    .filterNotNull()
-
-            if (updatedTracks.isEmpty()) return@launchIO
-            if (!preferences.syncChaptersWithTracker().get()) return@launchIO
-
-            val maxChapterRead = updatedTracks.maxOfOrNull { it.last_chapter_read } ?: 0f
-
-            if (maxChapterRead > 0) {
-                // 3. Mark local chapters as read if they are below the max tracked chapter
-                // Fetch directly from DB to avoid UI state race condition
-                val allChapters =
-                    db.getChapters(mangaId).executeOnIO().mapNotNull {
-                        it.toSimpleChapter()?.toChapterItem()
-                    }
-
-                val chaptersToMark = allChapters.filter {
-                    !it.chapter.read &&
-                        it.chapter.chapterNumber >= 0f &&
-                        it.chapter.chapterNumber <= maxChapterRead
-                }
-
-                if (chaptersToMark.isNotEmpty()) {
-                    // markChapters handles updating the DB and syncing to other trackers
-                    markChapters(chaptersToMark, ChapterMarkActions.Read())
-                }
-            }
+            trackUseCases.refreshTracking.refreshTracking(
+                mangaId = mangaId,
+                onRefreshError = { error, serviceNameRes, errorMessage ->
+                    delay(3000)
+                    appSnackbarManager.showSnackbar(
+                        SnackbarState(
+                            message = errorMessage,
+                            fieldRes = serviceNameRes,
+                            messageRes = org.nekomanga.R.string.error_refreshing_,
+                            snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
+                        )
+                    )
+                },
+                onChaptersToMarkRead = { chaptersToMark ->
+                    markChapters(
+                        chaptersToMark,
+                        org.nekomanga.domain.chapter.ChapterMarkActions.Read(),
+                    )
+                },
+            )
         }
 
         viewModelScope.launchIO {
