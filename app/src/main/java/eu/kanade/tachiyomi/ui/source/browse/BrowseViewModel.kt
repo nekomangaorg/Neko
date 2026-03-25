@@ -409,7 +409,7 @@ class BrowseViewModel() : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeAsBlocking() ?: return@launchIO
+            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =

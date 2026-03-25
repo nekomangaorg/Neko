@@ -129,7 +129,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         viewModelScope.launchIO {
             val categories =
                 db.getCategories()
-                    .executeAsBlocking()
+                    .executeOnIO()
                     .map { category -> category.toCategoryItem() }
                     .toPersistentList()
             _displayScreenState.update {
@@ -164,7 +164,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeAsBlocking() ?: return@launchIO
+            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -173,7 +173,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeAsBlocking()
+            db.insertManga(editManga).executeOnIO()
 
             updateDisplayManga(mangaId, editManga.favorite)
 
@@ -238,12 +238,12 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             val category = Category.create(newCategory)
             category.order =
                 (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
+            db.insertCategory(category).executeOnIO()
             _displayScreenState.update {
                 it.copy(
                     categories =
                         db.getCategories()
-                            .executeAsBlocking()
+                            .executeOnIO()
                             .map { category -> category.toCategoryItem() }
                             .toPersistentList()
                 )
