@@ -6,8 +6,10 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.mapAsync
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
@@ -31,7 +33,7 @@ class RefreshTrackingUseCase(
         val tracks = db.getTracks(mangaId).executeOnIO()
         if (tracks.isEmpty()) return
 
-        val updatedTracks =
+        val updatedTracks = coroutineScope {
             tracks
                 .map { it.toTrackItem() }
                 .mapNotNull { track ->
@@ -40,21 +42,25 @@ class RefreshTrackingUseCase(
                         ?.takeIf { it.isLogged() }
                         ?.let { service -> track to service }
                 }
-                .mapAsync { (trackItem, service) ->
-                    kotlin
-                        .runCatching { service.refresh(trackItem.toDbTrack()) }
-                        .onFailure { error ->
-                            if (error !is CancellationException) {
-                                TimberKt.e(error) {
-                                    "Error refreshing tracker: ${service.nameRes()}"
+                .map { (trackItem, service) ->
+                    async {
+                        kotlin
+                            .runCatching { service.refresh(trackItem.toDbTrack()) }
+                            .onFailure { error ->
+                                if (error !is CancellationException) {
+                                    TimberKt.e(error) {
+                                        "Error refreshing tracker: ${service.nameRes()}"
+                                    }
+                                    onRefreshError(error, service.nameRes(), error.message)
                                 }
-                                onRefreshError(error, service.nameRes(), error.message)
                             }
-                        }
-                        .getOrNull()
-                        ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
+                            .getOrNull()
+                            ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
+                    }
                 }
+                .awaitAll()
                 .filterNotNull()
+        }
 
         if (updatedTracks.isEmpty()) return
         if (!preferences.syncChaptersWithTracker().get()) return
