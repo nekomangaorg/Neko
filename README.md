@@ -19,7 +19,7 @@ If you got any questions, [join our Discord server](https://discord.gg/4vmK42QuK
 
 <div align="left">
 
-- [MangaDex](https://mangadex.org/) manga reader for Android 7+
+- [MangaDex](https://mangadex.org/) manga reader for Android 8+
 - Supports native login to MangaDex
 - Offline reading
 - MDList support
