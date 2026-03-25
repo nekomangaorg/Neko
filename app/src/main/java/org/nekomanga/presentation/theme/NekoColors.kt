@@ -9,17 +9,15 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-class NekoColors {
-    companion object {
-        const val highAlphaHighContrast = 1f
-        const val highAlphaLowContrast = .87f
-        const val mediumAlphaHighContrast = .74f
-        const val mediumAlphaLowContrast = .6f
-        const val halfAlpha = .5f
-        const val disabledAlphaHighContrast = .38f
-        const val disabledAlphaLowContrast = .38f
-        const val veryLowContrast = .1f
-    }
+object NekoColors {
+    const val highAlphaHighContrast = 1f
+    const val highAlphaLowContrast = .87f
+    const val mediumAlphaHighContrast = .74f
+    const val mediumAlphaLowContrast = .6f
+    const val halfAlpha = .5f
+    const val disabledAlphaHighContrast = .38f
+    const val disabledAlphaLowContrast = .38f
+    const val veryLowContrast = .1f
 }
 
 object IconColors {
