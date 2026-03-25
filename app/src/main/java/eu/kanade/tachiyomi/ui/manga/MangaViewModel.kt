@@ -407,6 +407,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                 db.insertManga(manga).executeOnIO()
                 db.updateChapterFlags(manga).executeOnIO()
+                db.updateMangaFilteredScanlators(manga).executeOnIO()
+                db.updateMangaFilteredLanguages(manga).executeOnIO()
             }
         }
 
@@ -1737,6 +1739,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 }
             }
             db.updateChapterFlags(manga).executeOnIO()
+            db.updateMangaFilteredScanlators(manga).executeOnIO()
+            db.updateMangaFilteredLanguages(manga).executeOnIO()
         }
     }
 
