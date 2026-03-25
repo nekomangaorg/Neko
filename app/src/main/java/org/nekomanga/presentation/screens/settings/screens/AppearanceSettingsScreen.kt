@@ -34,7 +34,7 @@ internal class AppearanceSettingsScreen(
     val mangaDetailsPreferences: MangaDetailsPreferences,
     val libraryPreferences: LibraryPreferences,
     val preferences: PreferencesHelper,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
     override fun getTitleRes(): Int = R.string.appearance
 

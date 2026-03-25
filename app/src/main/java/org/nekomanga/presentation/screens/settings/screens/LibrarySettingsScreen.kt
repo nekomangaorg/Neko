@@ -41,7 +41,7 @@ import org.nekomanga.presentation.screens.settings.widgets.TriStateListDialog
 internal class LibrarySettingsScreen(
     incognitoMode: Boolean,
     val libraryPreferences: LibraryPreferences,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
     val categories: PersistentList<CategoryItem>,
     val viewModelScope: CoroutineScope,
     val onAddEditCategoryClick: () -> Unit,

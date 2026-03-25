@@ -14,7 +14,7 @@ internal class GeneralSettingsScreen(
     incognitoMode: Boolean,
     val preferencesHelper: PreferencesHelper,
     val showNotificationSetting: Boolean,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
     val manageNotificationsClicked: () -> Unit,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 

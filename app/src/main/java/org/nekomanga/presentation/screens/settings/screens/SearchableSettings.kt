@@ -12,7 +12,7 @@ import org.nekomanga.presentation.screens.settings.PreferenceScreen
 import org.nekomanga.presentation.screens.settings.SettingsTopBar
 
 internal abstract class SearchableSettings(
-    val onNavigationBackClick: () -> Unit,
+    val onNavigationBackClick: (() -> Unit)?,
     val incognitoMode: Boolean,
 ) {
 

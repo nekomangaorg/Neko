@@ -47,7 +47,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 internal class AddEditCategoriesScreen(
-    val onNavigationIconClick: () -> Unit,
+    val onNavigationIconClick: (() -> Unit)?,
     val categories: PersistentList<CategoryItem>,
     val addUpdateCategory: (String, Int?) -> Unit,
     val onChangeOrder: (CategoryItem, Int) -> Unit,

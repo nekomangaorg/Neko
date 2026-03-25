@@ -41,7 +41,7 @@ internal class DataStorageSettingsScreen(
     val cacheData: CacheData,
     val clearCache: (CacheType) -> Unit,
     val toastEvent: SharedFlow<UiText.StringResource>,
-    onNavigationIconClick: () -> Unit,
+    onNavigationIconClick: (() -> Unit)?,
 ) : SearchableSettings(onNavigationIconClick, incognitoMode) {
 
     override fun getTitleRes(): Int = R.string.data_storage
