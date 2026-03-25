@@ -422,24 +422,10 @@ class BrowseViewModel() : ViewModel() {
             }
             db.insertManga(editManga).executeOnIO()
 
-            if (editManga.favorite) {
-                val sourceManager: SourceManager = Injekt.get()
-                sourceManager.mangaDex
-                    .getAggregate(
-                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(editManga.url)
-                    )
-                    .onSuccess { aggregateDto ->
-                        db.insertMangaAggregate(
-                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
-                                    mangaId = mangaId,
-                                    volumes = aggregateDto.volumes.toString(),
-                                )
-                            )
-                            .executeOnIO()
-                    }
-            } else {
-                db.deleteMangaAggregate(mangaId).executeOnIO()
-            }
+            val sourceManager: SourceManager = Injekt.get()
+            org.nekomanga.usecases.manga
+                .UpdateMangaAggregate(db, sourceManager)
+                .invoke(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

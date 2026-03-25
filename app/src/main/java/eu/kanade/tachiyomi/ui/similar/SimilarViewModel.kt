@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.similar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -130,8 +129,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
-        viewModelScope.launch {
-            val editManga = db.getManga(mangaId).executeAsBlocking()!!
+        viewModelScope.launchIO {
+            val editManga = db.getManga(mangaId).executeOnIO()!!
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -140,26 +139,12 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeAsBlocking()
+            db.insertManga(editManga).executeOnIO()
 
-            if (editManga.favorite) {
-                val sourceManager: SourceManager = Injekt.get()
-                sourceManager.mangaDex
-                    .getAggregate(
-                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(editManga.url)
-                    )
-                    .onSuccess { aggregateDto ->
-                        db.insertMangaAggregate(
-                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
-                                    mangaId = mangaId,
-                                    volumes = aggregateDto.volumes.toString(),
-                                )
-                            )
-                            .executeAsBlocking()
-                    }
-            } else {
-                db.deleteMangaAggregate(mangaId).executeAsBlocking()
-            }
+            val sourceManager: SourceManager = Injekt.get()
+            org.nekomanga.usecases.manga
+                .UpdateMangaAggregate(db, sourceManager)
+                .invoke(mangaId, editManga.url, editManga.favorite)
 
             updateDisplayManga(mangaId, editManga.favorite)
 

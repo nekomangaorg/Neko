@@ -23,7 +23,6 @@ import coil3.request.ImageRequest
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -424,24 +423,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     }
                                 }
 
-                            if (manga.favorite) {
-                                source
-                                    .getAggregate(
-                                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(
-                                            manga.url
-                                        )
-                                    )
-                                    .onSuccess { aggregateDto ->
-                                        val aggregateJson = aggregateDto.volumes.toString()
-                                        db.insertMangaAggregate(
-                                                eu.kanade.tachiyomi.data.database.models
-                                                    .MangaAggregate(
-                                                        mangaId = manga.id!!,
-                                                        volumes = aggregateJson,
-                                                    )
-                                            )
-                                            .executeOnIO()
-                                    }
+                            if (manga.favorite && manga.id != null) {
+                                mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
                             }
                             info
                         }

@@ -10,13 +10,13 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -90,6 +90,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
@@ -2377,41 +2378,30 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         chapterNumber.toString()
                     }
 
-                var volumes:
-                    Map<String, eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume>? =
-                    null
-                val dbAggregate = db.getMangaAggregate(effectiveManga.id!!).executeAsBlocking()
+                val mangaId = effectiveManga.id ?: return@updateDynamicCover
+                val dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
 
-                if (dbAggregate != null) {
-                    val element =
-                        kotlinx.serialization.json.Json.parseToJsonElement(dbAggregate.volumes)
-                    volumes =
-                        with(element) {
-                            asMdMap<eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume>()
-                        }
-                } else {
-                    val aggregateResult =
-                        sourceManager.mangaDex.getAggregate(
-                            eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(
-                                effectiveManga.url
-                            )
-                        )
-                    aggregateResult.onSuccess { aggregateDto ->
-                        volumes =
-                            with(aggregateDto.volumes) {
-                                asMdMap<
-                                    eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
-                                >()
-                            }
-                        db.insertMangaAggregate(
-                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
-                                    mangaId = effectiveManga.id!!,
-                                    volumes = aggregateDto.volumes.toString(),
+                val volumes: Map<String, AggregateVolume>? =
+                    if (dbAggregate != null) {
+                        Json.parseToJsonElement(dbAggregate.volumes).asMdMap<AggregateVolume>()
+                    } else {
+                        val dto =
+                            sourceManager.mangaDex
+                                .getAggregate(MdUtil.getMangaUUID(effectiveManga.url))
+                                .getOrElse { null }
+                        if (dto != null) {
+                            db.insertMangaAggregate(
+                                    MangaAggregate(
+                                        mangaId = mangaId,
+                                        volumes = dto.volumes.toString(),
+                                    )
                                 )
-                            )
-                            .executeAsBlocking()
+                                .executeOnIO()
+                            with(dto.volumes) { asMdMap<AggregateVolume>() }
+                        } else {
+                            null
+                        }
                     }
-                }
 
                 if (volumes != null) {
                     for ((_, volumeInfo) in volumes!!) {
