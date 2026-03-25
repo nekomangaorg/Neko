@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database
 
+/** This class provides operations to manage the database through its interfaces. */
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
@@ -8,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.mappers.BrowseFilterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.CategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.MangaAggregateTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaCategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MergeMangaTypeMapping
@@ -22,6 +24,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
@@ -34,6 +37,7 @@ import eu.kanade.tachiyomi.data.database.queries.BrowseFilterQueries
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
 import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
+import eu.kanade.tachiyomi.data.database.queries.MangaAggregateQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
 import eu.kanade.tachiyomi.data.database.queries.MergeMangaQueries
@@ -48,16 +52,17 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 open class DatabaseHelper(context: Context) :
     ArtworkQueries,
     BrowseFilterQueries,
+    CategoryQueries,
+    ChapterQueries,
+    HistoryQueries,
+    MangaCategoryQueries,
     MangaQueries,
     MergeMangaQueries,
-    ChapterQueries,
     TrackQueries,
-    CategoryQueries,
-    MangaCategoryQueries,
-    HistoryQueries,
     SearchMetadataQueries,
     ScanlatorGroupQueries,
     UploaderQueries,
+    MangaAggregateQueries,
     SimilarQueries {
 
     private val configuration =
@@ -82,6 +87,7 @@ open class DatabaseHelper(context: Context) :
             .addTypeMapping(UploaderImpl::class.java, UploaderTypeMapping())
             .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
             .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())
+            .addTypeMapping(MangaAggregate::class.java, MangaAggregateTypeMapping())
             .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)

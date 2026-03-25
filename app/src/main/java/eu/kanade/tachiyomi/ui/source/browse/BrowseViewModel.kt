@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -420,6 +421,25 @@ class BrowseViewModel() : ViewModel() {
                     }
             }
             db.insertManga(editManga).executeOnIO()
+
+            if (editManga.favorite) {
+                val sourceManager: SourceManager = Injekt.get()
+                sourceManager.mangaDex
+                    .getAggregate(
+                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(editManga.url)
+                    )
+                    .onSuccess { aggregateDto ->
+                        db.insertMangaAggregate(
+                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
+                                    mangaId = mangaId,
+                                    volumes = aggregateDto.volumes.toString(),
+                                )
+                            )
+                            .executeOnIO()
+                    }
+            } else {
+                db.deleteMangaAggregate(mangaId).executeOnIO()
+            }
 
             updateDisplayManga(mangaId, editManga.favorite)
 

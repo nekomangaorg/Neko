@@ -23,6 +23,7 @@ import coil3.request.ImageRequest
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -408,19 +409,41 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         val source = sourceManager.mangaDex
 
                         val holder = withIOContext {
-                            if (libraryPreferences.skipMangaMetadataDuringUpdate().get()) {
-                                MangaDetailChapterInformation(
-                                    null,
-                                    emptyList(),
-                                    source.fetchChapterList(manga).getOrThrow {
+                            val info =
+                                if (libraryPreferences.skipMangaMetadataDuringUpdate().get()) {
+                                    MangaDetailChapterInformation(
+                                        null,
+                                        emptyList(),
+                                        source.fetchChapterList(manga).getOrThrow {
+                                            Exception(it.message())
+                                        },
+                                    )
+                                } else {
+                                    source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
                                         Exception(it.message())
-                                    },
-                                )
-                            } else {
-                                source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
-                                    Exception(it.message())
+                                    }
                                 }
+
+                            if (manga.favorite) {
+                                source
+                                    .getAggregate(
+                                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(
+                                            manga.url
+                                        )
+                                    )
+                                    .onSuccess { aggregateDto ->
+                                        val aggregateJson = aggregateDto.volumes.toString()
+                                        db.insertMangaAggregate(
+                                                eu.kanade.tachiyomi.data.database.models
+                                                    .MangaAggregate(
+                                                        mangaId = manga.id!!,
+                                                        volumes = aggregateJson,
+                                                    )
+                                            )
+                                            .executeOnIO()
+                                    }
                             }
+                            info
                         }
                         val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
                         val mergedList =

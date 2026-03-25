@@ -2368,19 +2368,53 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         if (lastReadChapterId != null) {
             val chapter = allChapters.find { it.chapter.id == lastReadChapterId }?.chapter
             if (chapter != null) {
-                val aggregateResult = sourceManager.mangaDex.getAggregate(effectiveManga.uuid())
-                aggregateResult.onSuccess { aggregateDto ->
-                    val volumes = with(aggregateDto.volumes) { asMdMap<AggregateVolume>() }
-                    val mangaDexChapterId = chapter.mangaDexChapterId
-                    val chapterNumber = chapter.chapterNumber
-                    val chapterNumberStr =
-                        if (chapterNumber % 1 == 0f) {
-                            chapterNumber.toInt().toString()
-                        } else {
-                            chapterNumber.toString()
-                        }
+                val mangaDexChapterId = chapter.mangaDexChapterId
+                val chapterNumber = chapter.chapterNumber
+                val chapterNumberStr =
+                    if (chapterNumber % 1 == 0f) {
+                        chapterNumber.toInt().toString()
+                    } else {
+                        chapterNumber.toString()
+                    }
 
-                    for ((_, volumeInfo) in volumes) {
+                var volumes:
+                    Map<String, eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume>? =
+                    null
+                val dbAggregate = db.getMangaAggregate(effectiveManga.id!!).executeAsBlocking()
+
+                if (dbAggregate != null) {
+                    val element =
+                        kotlinx.serialization.json.Json.parseToJsonElement(dbAggregate.volumes)
+                    volumes =
+                        with(element) {
+                            asMdMap<eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume>()
+                        }
+                } else {
+                    val aggregateResult =
+                        sourceManager.mangaDex.getAggregate(
+                            eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(
+                                effectiveManga.url
+                            )
+                        )
+                    aggregateResult.onSuccess { aggregateDto ->
+                        volumes =
+                            with(aggregateDto.volumes) {
+                                asMdMap<
+                                    eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
+                                >()
+                            }
+                        db.insertMangaAggregate(
+                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
+                                    mangaId = effectiveManga.id!!,
+                                    volumes = aggregateDto.volumes.toString(),
+                                )
+                            )
+                            .executeAsBlocking()
+                    }
+                }
+
+                if (volumes != null) {
+                    for ((_, volumeInfo) in volumes!!) {
                         val chaptersInVolume = volumeInfo.chapters.values
                         val matchById =
                             mangaDexChapterId != null &&

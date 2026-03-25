@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.ui.similar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
@@ -139,6 +141,25 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                     }
             }
             db.insertManga(editManga).executeAsBlocking()
+
+            if (editManga.favorite) {
+                val sourceManager: SourceManager = Injekt.get()
+                sourceManager.mangaDex
+                    .getAggregate(
+                        eu.kanade.tachiyomi.source.online.utils.MdUtil.getMangaUUID(editManga.url)
+                    )
+                    .onSuccess { aggregateDto ->
+                        db.insertMangaAggregate(
+                                eu.kanade.tachiyomi.data.database.models.MangaAggregate(
+                                    mangaId = mangaId,
+                                    volumes = aggregateDto.volumes.toString(),
+                                )
+                            )
+                            .executeAsBlocking()
+                    }
+            } else {
+                db.deleteMangaAggregate(mangaId).executeAsBlocking()
+            }
 
             updateDisplayManga(mangaId, editManga.favorite)
 
