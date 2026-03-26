@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import org.nekomanga.presentation.theme.Shapes
 import org.nekomanga.presentation.theme.Size
 
@@ -33,6 +32,6 @@ fun DefaultHeaderText(text: String) {
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSecondary,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        modifier = Modifier.fillMaxWidth().padding(Size.smedium),
     )
 }
