@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import coil3.ColorImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
@@ -31,7 +30,7 @@ private fun MangaCoverPreviewContent(artwork: Artwork) {
 
     val previewHandler = AsyncImagePreviewHandler { ColorImage(Color.Red.toArgb()) }
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
-        Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(8.dp)) {
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(Size.small)) {
             Row {
                 MangaCover.Book(artwork = artwork, dynamicCover = false)
                 Spacer(modifier = Modifier.width(Size.medium))

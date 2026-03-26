@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.presentation.theme.Size
@@ -42,7 +41,7 @@ fun ResultList(
 @Composable
 private fun ResultRow(displayResult: DisplayResult, onClick: () -> Unit) {
     ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(Size.smedium)) {
             Text(
                 text = displayResult.title,
                 style = MaterialTheme.typography.titleMedium,
