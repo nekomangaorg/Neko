@@ -229,11 +229,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    private data class AggregateResult(
+        val aggregate: eu.kanade.tachiyomi.data.database.models.MangaAggregate?
+    )
+
     val aggregateFlow =
         db.getMangaAggregate(mangaId)
             .asRxObservable()
+            .map { AggregateResult(it) }
             .asFlow()
-            .map { dbAggregate ->
+            .map { result ->
+                val dbAggregate = result.aggregate
                 if (dbAggregate != null) {
                     Json.parseToJsonElement(dbAggregate.volumes).asMdMap<AggregateVolume>()
                 } else null
