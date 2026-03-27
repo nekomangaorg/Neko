@@ -1220,9 +1220,13 @@ class LibraryViewModel() : ViewModel() {
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.DownloadUnread -> {
-                        val unreadDbChapters = chapterItems.mapNotNull {
-                            if (!it.chapter.read) it.chapter.toDbChapter() else null
-                        }
+                        val unreadDbChapters =
+                            chapterItems
+                                .asSequence()
+                                .mapNotNull {
+                                    if (!it.chapter.read) it.chapter.toDbChapter() else null
+                                }
+                                .toList()
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
@@ -1232,9 +1236,13 @@ class LibraryViewModel() : ViewModel() {
                         )
                     }
                     DownloadAction.RemoveRead -> {
-                        val readDbChapters = chapterItems.mapNotNull {
-                            if (it.chapter.read) it.chapter.toDbChapter() else null
-                        }
+                        val readDbChapters =
+                            chapterItems
+                                .asSequence()
+                                .mapNotNull {
+                                    if (it.chapter.read) it.chapter.toDbChapter() else null
+                                }
+                                .toList()
                         downloadManager.deleteChapters(dbManga, readDbChapters)
                     }
                     else -> Unit
