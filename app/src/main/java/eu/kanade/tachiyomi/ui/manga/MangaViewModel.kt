@@ -229,6 +229,18 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    val aggregateFlow =
+        db.getMangaAggregate(mangaId)
+            .asRxObservable()
+            .asFlow()
+            .map { dbAggregate ->
+                if (dbAggregate != null) {
+                    Json.parseToJsonElement(dbAggregate.volumes).asMdMap<AggregateVolume>()
+                } else null
+            }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
     val historyFlow =
         db.getHistoryByMangaId(mangaId)
             .asFlow()
@@ -427,10 +439,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         historyFlow,
                         ::Triple,
                     ),
+                    aggregateFlow,
                 ) {
                     (mangaItem, staticChapterData, categoriesData),
                     (artworkList, tracks, IsMerged),
-                    (filterState, dynamicCover, history) ->
+                    (filterState, dynamicCover, history),
+                    aggregateVolumes ->
                     withContext(Dispatchers.Default) {
                         val effectiveManga =
                             if (filterState != null) {
@@ -495,6 +509,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                             val nextUnread = getNextUnread(effectiveManga, activeChapters)
 
+                            val chapterVolumes =
+                                staticChapterData.allChapters.associate { chapterItem ->
+                                    chapterItem.chapter.id to
+                                        getVolumeForChapter(chapterItem.chapter, aggregateVolumes)
+                                }
+
                             val allChapterInfo =
                                 AllChapterInfo(
                                     nextUnread = nextUnread,
@@ -505,6 +525,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     allUploaders = staticChapterData.allUploaders,
                                     allSources = staticChapterData.allSources,
                                     allLanguages = staticChapterData.allLanguages,
+                                    chapterVolumes = chapterVolumes,
                                 )
 
                             val loggedInTrackerService =
@@ -617,6 +638,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 ),
                             chapters =
                                 it.chapters.copy(
+                                    chapterVolumes = allInfo.allChapterInfo.chapterVolumes,
                                     activeChapters = allInfo.allChapterInfo.activeChapters,
                                     nextUnreadChapter = allInfo.allChapterInfo.nextUnread,
                                     chapterFilter = allInfo.chapterDisplay,
@@ -2401,22 +2423,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         null
                     }
 
-                if (volumes != null) {
-                    for ((_, volumeInfo) in volumes) {
-                        val chaptersInVolume = volumeInfo.chapters.values
-                        val matchById =
-                            mangaDexChapterId != null &&
-                                chaptersInVolume.any {
-                                    it.id == mangaDexChapterId ||
-                                        it.others.contains(mangaDexChapterId)
-                                }
-                        val matchByNumber = chaptersInVolume.any { it.chapter == chapterNumberStr }
-
-                        if (matchById || matchByNumber) {
-                            volumeFromAggregate = volumeInfo.volume
-                            break
-                        }
-                    }
+                val vol = getVolumeForChapter(chapter, volumes)
+                if (vol != "No Volume") {
+                    volumeFromAggregate = vol
                 }
             }
         }
@@ -2495,4 +2504,34 @@ private data class AllChapterInfo(
     val allUploaders: PersistentSet<String> = persistentSetOf(),
     val allSources: PersistentSet<String> = persistentSetOf(),
     val allLanguages: PersistentSet<String> = persistentSetOf(),
+    val chapterVolumes: Map<Long, String> = emptyMap(),
 )
+
+private fun getVolumeForChapter(
+    chapter: SimpleChapter,
+    volumes: Map<String, AggregateVolume>?,
+): String {
+    if (volumes == null) return "No Volume"
+    val mangaDexChapterId = chapter.mangaDexChapterId
+    val chapterNumber = chapter.chapterNumber
+    val chapterNumberStr =
+        if (chapterNumber % 1 == 0f) {
+            chapterNumber.toInt().toString()
+        } else {
+            chapterNumber.toString()
+        }
+    for ((_, volumeInfo) in volumes) {
+        val chaptersInVolume = volumeInfo.chapters.values
+        val matchById =
+            mangaDexChapterId != null &&
+                chaptersInVolume.any {
+                    it.id == mangaDexChapterId || it.others.contains(mangaDexChapterId)
+                }
+        val matchByNumber = chaptersInVolume.any { it.chapter == chapterNumberStr }
+
+        if (matchById || matchByNumber) {
+            return volumeInfo.volume
+        }
+    }
+    return "No Volume"
+}

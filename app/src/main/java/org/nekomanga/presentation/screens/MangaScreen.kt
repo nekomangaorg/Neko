@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -69,7 +71,6 @@ import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.text.DateFormat
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -83,6 +84,8 @@ import org.nekomanga.presentation.components.VerticalDivider
 import org.nekomanga.presentation.components.VerticalFastScroller
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
+import org.nekomanga.presentation.components.listcard.ExpressiveListCard
+import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.components.snackbar.NekoSnackbarHost
@@ -590,7 +593,7 @@ private fun MangaScreenWrapper(
 }
 
 private fun LazyListScope.chapterList(
-    chapters: PersistentList<ChapterItem>,
+    chapterGroups: Map<String, List<ChapterItem>>,
     screenState: MangaConstants.MangaDetailScreenState,
     themeColorState: ThemeColorState,
     chapterActions: ChapterActions,
@@ -599,27 +602,46 @@ private fun LazyListScope.chapterList(
     onOpenSheet: (DetailsBottomSheetScreen) -> Unit,
 ) {
     item(key = "chapter_header") {
+        val totalChapters = chapterGroups.values.sumOf { it.size }
         ChapterHeader(
             themeColor = themeColorState,
-            numberOfChapters = chapters.size,
+            numberOfChapters = totalChapters,
             filterText = screenState.chapters.chapterFilterText,
             onClick = { onOpenSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
         )
     }
 
-    itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapterItem
-        ->
-        MangaChapterListItem(
-            index = index,
-            chapterItem = chapterItem,
-            count = chapters.size,
-            themeColorState = themeColorState,
-            shouldHideChapterTitles =
-                screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
-            chapterActions = chapterActions,
-            onBookmark = onBookmark,
-            onRead = onRead,
-        )
+    chapterGroups.forEach { (volume, chapters) ->
+        item(key = "volume_$volume") {
+            ExpressiveListCard(
+                modifier = Modifier.padding(horizontal = Size.small, vertical = Size.tiny),
+                listCardType = ListCardType.Single,
+                themeColorState = themeColorState,
+            ) {
+                Text(
+                    text = if (volume == "No Volume") "No Volume" else "Vol. $volume",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(Size.medium),
+                )
+            }
+        }
+
+        itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) {
+            index,
+            chapterItem ->
+            MangaChapterListItem(
+                index = index,
+                chapterItem = chapterItem,
+                count = chapters.size,
+                themeColorState = themeColorState,
+                shouldHideChapterTitles =
+                    screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
+                chapterActions = chapterActions,
+                onBookmark = onBookmark,
+                onRead = onRead,
+            )
+        }
     }
 }
 
@@ -685,10 +707,14 @@ private fun VerticalLayout(
                 )
             }
             if (isInitialized) {
+                val chapters =
+                    if (screenState.general.isSearching) screenState.general.searchChapters
+                    else screenState.chapters.activeChapters
+                val chapterGroups = chapters.groupBy {
+                    screenState.chapters.chapterVolumes[it.chapter.id] ?: "No Volume"
+                }
                 chapterList(
-                    chapters =
-                        if (screenState.general.isSearching) screenState.general.searchChapters
-                        else screenState.chapters.activeChapters,
+                    chapterGroups = chapterGroups,
                     screenState = screenState,
                     themeColorState = themeColorState,
                     chapterActions = chapterActions,
@@ -778,10 +804,14 @@ private fun SideBySideLayout(
         ) {
             LazyColumn(state = listState, contentPadding = chapterContentPadding) {
                 if (isInitialized) {
+                    val chapters =
+                        if (screenState.general.isSearching) screenState.general.searchChapters
+                        else screenState.chapters.activeChapters
+                    val chapterGroups = chapters.groupBy {
+                        screenState.chapters.chapterVolumes[it.chapter.id] ?: "No Volume"
+                    }
                     chapterList(
-                        chapters =
-                            if (screenState.general.isSearching) screenState.general.searchChapters
-                            else screenState.chapters.activeChapters,
+                        chapterGroups = chapterGroups,
                         screenState = screenState,
                         themeColorState = themeColorState,
                         chapterActions = chapterActions,
