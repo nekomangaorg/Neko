@@ -37,6 +37,24 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
         )
 
     val comp = compareBy<Chapter> { getChapterNum(it) != null }.thenBy { getChapterNum(it) }
+    // If the chapter number resets on volume change,
+    // we assume null volume chapters are part of volume 1
+    val hasVolumeChange =
+        withVolume
+            .groupBy { getVolumeNum(it) }
+            .values
+            .windowed(2)
+            .any { (a, b) ->
+                a.mapNotNull { getChapterNum(it) }.min() < b.mapNotNull { getChapterNum(it) }.max()
+            }
+    if (hasVolumeChange) {
+        val (firstVolume, withVolume) = withVolume.partition { getVolumeNum(it) == 1 }
+        return specials +
+            withVolume +
+            listOf(nullVolume, firstVolume).mergeSorted(comp) +
+            zeroVolume
+    }
+    // Otherwise, we assume null volume chapters are part of any volume
     return specials + listOf(nullVolume, withVolume).mergeSorted(comp) + zeroVolume
 }
 
