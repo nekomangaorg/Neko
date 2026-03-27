@@ -7,16 +7,24 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
@@ -30,10 +38,12 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -593,6 +603,7 @@ private fun MangaScreenWrapper(
 }
 
 private fun LazyListScope.chapterList(
+    collapsedVolumes: SnapshotStateMap<String, Boolean>,
     chapterGroups: Map<String, List<ChapterItem>>,
     screenState: MangaConstants.MangaDetailScreenState,
     themeColorState: ThemeColorState,
@@ -612,37 +623,69 @@ private fun LazyListScope.chapterList(
     }
 
     chapterGroups.forEach { (volume, chapters) ->
-        item(key = "volume_$volume") {
+        val isCollapsed = collapsedVolumes[volume] ?: false
+
+        // 1. The Volume Header Card
+        item(key = "volume_header_$volume") {
             ExpressiveListCard(
                 modifier = Modifier.padding(horizontal = Size.small),
-                listCardType = ListCardType.Top,
+                listCardType = if (isCollapsed) ListCardType.Single else ListCardType.Top,
                 themeColorState = themeColorState,
+                onClick = { collapsedVolumes[volume] = !isCollapsed },
+                onLongClick = {
+                    val anyExpanded = chapterGroups.keys.any { collapsedVolumes[it] != true }
+                    chapterGroups.keys.forEach { collapsedVolumes[it] = anyExpanded }
+                },
             ) {
-                Text(
-                    text =
-                        if (volume.equals("none", true) || volume == "No Volume") "No Volume"
-                        else "Vol. $volume",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(Size.medium),
-                )
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(
+                                top = Size.small,
+                                bottom = Size.small,
+                                start = Size.small,
+                                end = Size.tiny,
+                            ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = if (volume.equals("none", true)) "No Volume" else "Vol. $volume",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = themeColorState.primaryColor,
+                    )
+                    Icon(
+                        imageVector =
+                            if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                        contentDescription = null,
+                        tint = themeColorState.primaryColor,
+                    )
+                }
             }
+            Spacer(modifier = Modifier.size(Size.tiny))
         }
 
-        itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) {
-            index,
-            chapterItem ->
-            MangaChapterListItem(
-                index = index + 1,
-                chapterItem = chapterItem,
-                count = chapters.size + 1,
-                themeColorState = themeColorState,
-                shouldHideChapterTitles =
-                    screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
-                chapterActions = chapterActions,
-                onBookmark = onBookmark,
-                onRead = onRead,
-            )
+        // 2. The Chapters (Only shown if NOT collapsed)
+        if (!isCollapsed) {
+            // We use itemsIndexed so each chapter is its own lazy list item with its own shape
+            itemsIndexed(
+                items = chapters,
+                key = { _, chapter -> "vol_${volume}_ch_${chapter.chapter.id}" },
+            ) { index, chapterItem ->
+                MangaChapterListItem(
+                    // We adjust the index/count so the shapes (Top, Center, Bottom)
+                    // look correct relative to the volume header
+                    index = index + 1,
+                    count = chapters.size + 1,
+                    chapterItem = chapterItem,
+                    themeColorState = themeColorState,
+                    shouldHideChapterTitles =
+                        screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
+                    chapterActions = chapterActions,
+                    onBookmark = onBookmark,
+                    onRead = onRead,
+                )
+            }
         }
     }
 }
@@ -676,6 +719,8 @@ private fun VerticalLayout(
         topContentPadding = incomingContentPadding.calculateTopPadding(),
         bottomContentPadding = incomingContentPadding.calculateBottomPadding(),
     ) {
+        val collapsedVolumes = remember { mutableStateMapOf<String, Boolean>() }
+
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
@@ -716,6 +761,7 @@ private fun VerticalLayout(
                     screenState.chapters.chapterVolumes[it.chapter.id] ?: "No Volume"
                 }
                 chapterList(
+                    collapsedVolumes = collapsedVolumes,
                     chapterGroups = chapterGroups,
                     screenState = screenState,
                     themeColorState = themeColorState,
@@ -804,6 +850,8 @@ private fun SideBySideLayout(
             topContentPadding = incomingContentPadding.calculateTopPadding(),
             bottomContentPadding = incomingContentPadding.calculateBottomPadding(),
         ) {
+            val collapsedVolumes = remember { mutableStateMapOf<String, Boolean>() }
+
             LazyColumn(state = listState, contentPadding = chapterContentPadding) {
                 if (isInitialized) {
                     val chapters =
@@ -813,6 +861,7 @@ private fun SideBySideLayout(
                         screenState.chapters.chapterVolumes[it.chapter.id] ?: "No Volume"
                     }
                     chapterList(
+                        collapsedVolumes = collapsedVolumes,
                         chapterGroups = chapterGroups,
                         screenState = screenState,
                         themeColorState = themeColorState,
