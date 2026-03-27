@@ -254,16 +254,19 @@ class StatsViewModel() : ViewModel() {
     }
 
     private fun getMangaByTrackCount(mangaList: List<LibraryManga>, tracks: List<Track>): Int {
-        return mangaList
-            .map { it.id!! }
-            .map { mangaId ->
-                tracks
-                    .filter { it.manga_id == mangaId }
-                    .any {
-                        !(it.sync_id == TrackManager.MDLIST && FollowStatus.isUnfollowed(it.status))
+        val trackedMangaIds =
+            tracks
+                .mapNotNull { track ->
+                    if (
+                        track.sync_id == TrackManager.MDLIST &&
+                            FollowStatus.isUnfollowed(track.status)
+                    ) {
+                        return@mapNotNull null
                     }
-            }
-            .count { it }
+                    track.manga_id
+                }
+                .toSet()
+        return mangaList.count { it.id in trackedMangaIds }
     }
 
     private fun getLoggedTrackers(): List<TrackService> {
