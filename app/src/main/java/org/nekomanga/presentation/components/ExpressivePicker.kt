@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,6 +80,12 @@ fun <T> ExpressivePicker(
         }
     }
 
+    // Defer reading the scroll state using derivedStateOf to prevent excessive recompositions
+    // during fast scrolling, which would otherwise recompose every item repeatedly.
+    val centerIndexTarget by remember {
+        derivedStateOf { listState.firstVisibleItemIndex + (visibleItemsCount / 2) }
+    }
+
     // 2. Center the picker only when the external 'value' changes AND it differs
     LaunchedEffect(value) {
         // Only run programmatic scroll if 'value' was changed externally
@@ -114,9 +121,7 @@ fun <T> ExpressivePicker(
             itemsIndexed(items = items, key = { index, item -> "$index-${item.hashCode()}" }) {
                 index,
                 item ->
-                // Note: centerIndexTarget is calculated here based on current scroll state
-                val centerIndexTarget = listState.firstVisibleItemIndex + (visibleItemsCount / 2)
-                val distanceToCenter = abs(index - centerIndexTarget + (visibleItemsCount / 2))
+                val distanceToCenter = abs(index - centerIndexTarget)
 
                 val isSelected = distanceToCenter == 0
                 val alpha =
