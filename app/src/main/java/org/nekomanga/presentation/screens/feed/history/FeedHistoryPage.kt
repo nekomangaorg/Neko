@@ -55,7 +55,7 @@ fun FeedHistoryPage(
     // LaunchedEffect to individual LazyColumn items. This avoids unnecessary
     // composition overhead and redundant pagination triggers.
     if (hasMoreResults && !loadingResults) {
-        LaunchedEffect(scrollState, hasMoreResults, loadingResults) {
+        LaunchedEffect(scrollState) {
             snapshotFlow {
                     val layoutInfo = scrollState.layoutInfo
                     val totalItems = layoutInfo.totalItemsCount
