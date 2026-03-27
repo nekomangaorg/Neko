@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.feed.FeedManga
@@ -50,6 +51,25 @@ fun FeedHistoryPage(
     }
     val scrollState = rememberLazyListState()
 
+    // Optimize: Observe scroll state via snapshotFlow instead of attaching
+    // LaunchedEffect to individual LazyColumn items. This avoids unnecessary
+    // composition overhead and redundant pagination triggers.
+    if (hasMoreResults && !loadingResults) {
+        LaunchedEffect(scrollState) {
+            snapshotFlow {
+                    val layoutInfo = scrollState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleItemIndex >= (totalItems - 5)
+                }
+                .collect { isAtEnd ->
+                    if (isAtEnd) {
+                        loadNextPage()
+                    }
+                }
+        }
+    }
+
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
 
@@ -77,13 +97,6 @@ fun FeedHistoryPage(
             }
 
             item(key = "$index-${feedManga.mangaId}") {
-                LaunchedEffect(scrollState, loadingResults) {
-                    if (
-                        index >= feedHistoryMangaList.size - 5 && hasMoreResults && !loadingResults
-                    ) {
-                        loadNextPage()
-                    }
-                }
                 HistoryCard(
                     feedManga = feedManga,
                     outlineCover = outlineCovers,
