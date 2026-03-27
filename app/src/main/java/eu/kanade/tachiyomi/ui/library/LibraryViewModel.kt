@@ -646,6 +646,11 @@ class LibraryViewModel() : ViewModel() {
             _internalLibraryScreenState.update { state -> state.copy(incognitoMode = value) }
         }
 
+        mangaDetailsPreferences.dynamicCovers().changes().observeAndUpdate(viewModelScope) { value
+            ->
+            _internalLibraryScreenState.update { state -> state.copy(dynamicCovers = value) }
+        }
+
         libraryPreferences.outlineOnCovers().changes().observeAndUpdate(viewModelScope) { value ->
             _internalLibraryScreenState.update { state -> state.copy(outlineCovers = value) }
         }
