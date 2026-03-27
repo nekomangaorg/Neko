@@ -10,7 +10,7 @@ class ArtworkKeyer : Keyer<Artwork> {
     override fun key(data: Artwork, options: Options): String? {
         // Priority 1: Specific/Alternative Artwork or User Custom Cover
         if (data.cover.isNotBlank()) {
-            return DiskUtil.hashKeyForDisk(data.cover)
+            return "${data.mangaId}-${DiskUtil.hashKeyForDisk(data.cover)}"
         }
 
         // Priority 2 & 3: Main Manga Cover
@@ -21,13 +21,13 @@ class ArtworkKeyer : Keyer<Artwork> {
         // FIX: If dynamic cover is enabled and available, use its URL for the cache key.
         // Because the URL changes per volume, Coil will automatically fetch the new image!
         if (useDynamic && data.dynamicCover.isNotBlank()) {
-            return DiskUtil.hashKeyForDisk(data.dynamicCover)
+            return "${data.mangaId}-${DiskUtil.hashKeyForDisk(data.dynamicCover)}"
         }
 
         // Priority 1: Fallback to the Default Cover
         return when (data.inLibrary) {
-            true -> DiskUtil.hashKeyForDisk(data.originalCover)
-            false -> data.originalCover
+            true -> "${data.mangaId}-${DiskUtil.hashKeyForDisk(data.originalCover)}"
+            false -> "${data.mangaId}-${data.originalCover}"
         }
     }
 }
