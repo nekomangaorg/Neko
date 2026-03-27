@@ -614,12 +614,14 @@ private fun LazyListScope.chapterList(
     chapterGroups.forEach { (volume, chapters) ->
         item(key = "volume_$volume") {
             ExpressiveListCard(
-                modifier = Modifier.padding(horizontal = Size.small, vertical = Size.tiny),
-                listCardType = ListCardType.Single,
+                modifier = Modifier.padding(horizontal = Size.small),
+                listCardType = ListCardType.Top,
                 themeColorState = themeColorState,
             ) {
                 Text(
-                    text = if (volume == "No Volume") "No Volume" else "Vol. $volume",
+                    text =
+                        if (volume.equals("none", true) || volume == "No Volume") "No Volume"
+                        else "Vol. $volume",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(Size.medium),
@@ -631,9 +633,9 @@ private fun LazyListScope.chapterList(
             index,
             chapterItem ->
             MangaChapterListItem(
-                index = index,
+                index = index + 1,
                 chapterItem = chapterItem,
-                count = chapters.size,
+                count = chapters.size + 1,
                 themeColorState = themeColorState,
                 shouldHideChapterTitles =
                     screenState.chapters.chapterFilter.hideChapterTitles == ToggleableState.On,
