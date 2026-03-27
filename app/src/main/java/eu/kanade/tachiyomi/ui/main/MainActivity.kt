@@ -151,11 +151,13 @@ class MainActivity : BaseMainActivity() {
                 }
             }
 
-            DisposableEffect(lifecycleOwner, selectedItemIndex) {
+            val isLibrary = backStack.firstOrNull() is Screens.Library
+
+            DisposableEffect(lifecycleOwner, isLibrary) {
                 // Create an observer
                 val observer = LifecycleEventObserver { _, event ->
                     if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_DESTROY) {
-                        viewModel.saveExtras(selectedItemIndex == 0)
+                        viewModel.saveExtras(isLibrary)
                     }
                 }
 
