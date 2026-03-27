@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -106,6 +107,26 @@ private fun Grouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+
+    // Optimize: Observe scroll state via snapshotFlow instead of attaching
+    // LaunchedEffect to individual LazyColumn items. This avoids unnecessary
+    // composition overhead and redundant pagination triggers.
+    if (hasMoreResults && !loadingResults) {
+        LaunchedEffect(scrollState, hasMoreResults, loadingResults) {
+            snapshotFlow {
+                    val layoutInfo = scrollState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleItemIndex >= (totalItems - 5)
+                }
+                .collect { isAtEnd ->
+                    if (isAtEnd) {
+                        loadNextPage()
+                    }
+                }
+        }
+    }
+
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
     val groupedBySeries =
@@ -186,16 +207,6 @@ private fun Grouped(
                 val globalIndex = groupedBySeries.indexOf(feedManga)
 
                 item(key = "${groupIndex}-${feedManga.mangaId}-${latestChapter.chapter.id}") {
-                    LaunchedEffect(scrollState, loadingResults) {
-                        if (
-                            globalIndex >= groupedBySeries.size - 5 &&
-                                hasMoreResults &&
-                                !loadingResults
-                        ) {
-                            loadNextPage()
-                        }
-                    }
-
                     // 7. Wrap UpdatesCard with ExpressiveListCard
                     ExpressiveListCard(
                         modifier = Modifier.padding(horizontal = Size.small),
@@ -245,6 +256,26 @@ private fun Ungrouped(
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+
+    // Optimize: Observe scroll state via snapshotFlow instead of attaching
+    // LaunchedEffect to individual LazyColumn items. This avoids unnecessary
+    // composition overhead and redundant pagination triggers.
+    if (hasMoreResults && !loadingResults) {
+        LaunchedEffect(scrollState, hasMoreResults, loadingResults) {
+            snapshotFlow {
+                    val layoutInfo = scrollState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleItemIndex >= (totalItems - 5)
+                }
+                .collect { isAtEnd ->
+                    if (isAtEnd) {
+                        loadNextPage()
+                    }
+                }
+        }
+    }
+
     val now = Date().time
     var timeSpan by remember { mutableStateOf("") }
 
@@ -292,15 +323,6 @@ private fun Ungrouped(
                 item(
                     key = "$dateString-$chapterIndex-${feedManga.mangaId}-${chapterItem.chapter.id}"
                 ) {
-                    LaunchedEffect(scrollState, loadingResults) {
-                        if (
-                            globalIndex >= feedUpdatesMangaList.size - 5 &&
-                                hasMoreResults &&
-                                !loadingResults
-                        ) {
-                            loadNextPage()
-                        }
-                    }
                     ExpressiveListCard(
                         modifier = Modifier.padding(horizontal = Size.small),
                         listCardType = listCardType, // Pass the correct type
