@@ -261,10 +261,9 @@ class StatsViewModel() : ViewModel() {
                         track.sync_id == TrackManager.MDLIST &&
                             FollowStatus.isUnfollowed(track.status)
                     ) {
-                        null
-                    } else {
-                        track.manga_id
+                        return@mapNotNull null
                     }
+                    track.manga_id
                 }
                 .toSet()
         return mangaList.count { it.id in trackedMangaIds }
