@@ -1222,11 +1222,11 @@ class LibraryViewModel() : ViewModel() {
                     DownloadAction.DownloadUnread -> {
                         val unreadDbChapters =
                             chapterItems
-                                .asSequence()
-                                .mapNotNull {
-                                    if (!it.chapter.read) it.chapter.toDbChapter() else null
+                                .mapNotNull { item ->
+                                    item.chapter.takeIf { !it.read }?.toDbChapter()
                                 }
-                                .toList()
+                                
+                                
                         downloadManager.downloadChapters(dbManga, unreadDbChapters)
                     }
                     DownloadAction.RemoveAll -> {
