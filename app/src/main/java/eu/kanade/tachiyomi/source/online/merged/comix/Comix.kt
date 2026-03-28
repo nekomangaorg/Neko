@@ -15,6 +15,7 @@ import okhttp3.Request
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class Comix : ReducedHttpSource() {
@@ -99,7 +100,15 @@ class Comix : ReducedHttpSource() {
 
             return Ok(chapterList.map { it.toSChapter(mangaHash) to false })
         } catch (e: Exception) {
-            return Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for Comix" }
+            val errorMessage = e.message ?: ""
+            val reason =
+                if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
+                    e.javaClass.simpleName
+                } else {
+                    errorMessage
+                }
+            return Err(ResultError.Generic(reason))
         }
     }
 

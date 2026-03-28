@@ -19,6 +19,7 @@ import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class WeebDex : ReducedHttpSource() {
@@ -96,7 +97,15 @@ class WeebDex : ReducedHttpSource() {
                 }
             }
         } catch (e: Exception) {
-            return Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for WeebDex" }
+            val errorMessage = e.message ?: ""
+            val reason =
+                if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
+                    e.javaClass.simpleName
+                } else {
+                    errorMessage
+                }
+            return Err(ResultError.Generic(reason))
         }
 
         return Ok(chapters.map { it to false })

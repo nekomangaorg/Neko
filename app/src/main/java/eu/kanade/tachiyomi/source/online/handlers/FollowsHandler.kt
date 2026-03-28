@@ -72,7 +72,14 @@ class FollowsHandler {
                 }
                 .getOrElse {
                     TimberKt.e(it) { "Error fetching all follows" }
-                    Err(ResultError.Generic("Unknown error fetching all follows"))
+                    val errorMessage = it.message ?: ""
+                    val reason =
+                        if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
+                            it.javaClass.simpleName
+                        } else {
+                            errorMessage
+                        }
+                    Err(ResultError.Generic(reason))
                 }
         }
     }

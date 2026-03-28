@@ -683,7 +683,15 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     if (e is CancellationException) {
                         throw e
                     } else {
-                        failedUpdates[manga] = e.message ?: "unknown error"
+                        val errorMessage = e.message ?: ""
+                        failedUpdates[manga] =
+                            if (
+                                errorMessage.isBlank() || errorMessage.equals("unknown error", true)
+                            ) {
+                                e.javaClass.simpleName
+                            } else {
+                                errorMessage
+                            }
                         TimberKt.e(e) { "Failed updating: ${manga.title}" }
                     }
                     return@coroutineScope false

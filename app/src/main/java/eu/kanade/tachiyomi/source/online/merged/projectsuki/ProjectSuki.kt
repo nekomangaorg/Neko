@@ -32,6 +32,7 @@ import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class ProjectSuki : ReducedHttpSource() {
@@ -86,7 +87,15 @@ class ProjectSuki : ReducedHttpSource() {
             val chapters = parseChapters(document)
             Ok(chapters.map { it to false })
         } catch (e: Exception) {
-            Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for Project Suki" }
+            val errorMessage = e.message ?: ""
+            val reason =
+                if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
+                    e.javaClass.simpleName
+                } else {
+                    errorMessage
+                }
+            Err(ResultError.Generic(reason))
         }
     }
 
