@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.MangaListDto
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -19,6 +20,7 @@ import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class WeebDex : ReducedHttpSource() {
@@ -96,7 +98,8 @@ class WeebDex : ReducedHttpSource() {
                 }
             }
         } catch (e: Exception) {
-            return Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for WeebDex" }
+            return Err(ResultError.Generic(e.toDisplayMessage()))
         }
 
         return Ok(chapters.map { it to false })

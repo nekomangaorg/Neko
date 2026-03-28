@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -15,6 +16,7 @@ import okhttp3.Request
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class Comix : ReducedHttpSource() {
@@ -99,7 +101,8 @@ class Comix : ReducedHttpSource() {
 
             return Ok(chapterList.map { it.toSChapter(mangaHash) to false })
         } catch (e: Exception) {
-            return Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for Comix" }
+            return Err(ResultError.Generic(e.toDisplayMessage()))
         }
     }
 
