@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.MangaListDto
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -98,14 +99,7 @@ class WeebDex : ReducedHttpSource() {
             }
         } catch (e: Exception) {
             TimberKt.e(e) { "Error fetching chapters for WeebDex" }
-            val errorMessage = e.message ?: ""
-            val reason =
-                if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
-                    e.javaClass.simpleName
-                } else {
-                    errorMessage
-                }
-            return Err(ResultError.Generic(reason))
+            return Err(ResultError.Generic(e.toDisplayMessage()))
         }
 
         return Ok(chapters.map { it to false })

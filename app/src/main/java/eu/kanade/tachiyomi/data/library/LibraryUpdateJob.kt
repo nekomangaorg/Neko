@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.mergeSorted
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -683,15 +684,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     if (e is CancellationException) {
                         throw e
                     } else {
-                        val errorMessage = e.message ?: ""
-                        failedUpdates[manga] =
-                            if (
-                                errorMessage.isBlank() || errorMessage.equals("unknown error", true)
-                            ) {
-                                e.javaClass.simpleName
-                            } else {
-                                errorMessage
-                            }
+                        failedUpdates[manga] = e.toDisplayMessage()
                         TimberKt.e(e) { "Failed updating: ${manga.title}" }
                     }
                     return@coroutineScope false

@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
@@ -72,14 +73,7 @@ class FollowsHandler {
                 }
                 .getOrElse {
                     TimberKt.e(it) { "Error fetching all follows" }
-                    val errorMessage = it.message ?: ""
-                    val reason =
-                        if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
-                            it.javaClass.simpleName
-                        } else {
-                            errorMessage
-                        }
-                    Err(ResultError.Generic(reason))
+                    Err(ResultError.Generic(it.toDisplayMessage()))
                 }
         }
     }

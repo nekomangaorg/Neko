@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -88,14 +89,7 @@ class ProjectSuki : ReducedHttpSource() {
             Ok(chapters.map { it to false })
         } catch (e: Exception) {
             TimberKt.e(e) { "Error fetching chapters for Project Suki" }
-            val errorMessage = e.message ?: ""
-            val reason =
-                if (errorMessage.isBlank() || errorMessage.equals("unknown error", true)) {
-                    e.javaClass.simpleName
-                } else {
-                    errorMessage
-                }
-            Err(ResultError.Generic(reason))
+            Err(ResultError.Generic(e.toDisplayMessage()))
         }
     }
 

@@ -256,7 +256,7 @@ class ComikeyHandler {
                         const manifest = JSON.parse(document.querySelector("#lmao-init").textContent).manifest;
                         window.__interface__.passPayload(manifest, act, await e.detail);
                     } catch (e) {
-                        window.__interface__.passError(e.message || "Unknown error");
+                        window.__interface__.passError(e.message || e.name || "Unknown error");
                     }
                 },
                 { once: true },
