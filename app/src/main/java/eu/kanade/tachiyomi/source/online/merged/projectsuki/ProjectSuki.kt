@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.util.asJsoup
+import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -32,6 +33,7 @@ import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class ProjectSuki : ReducedHttpSource() {
@@ -86,7 +88,8 @@ class ProjectSuki : ReducedHttpSource() {
             val chapters = parseChapters(document)
             Ok(chapters.map { it to false })
         } catch (e: Exception) {
-            Err(ResultError.Generic(e.message ?: "Unknown error"))
+            TimberKt.e(e) { "Error fetching chapters for Project Suki" }
+            Err(ResultError.Generic(e.toDisplayMessage()))
         }
     }
 

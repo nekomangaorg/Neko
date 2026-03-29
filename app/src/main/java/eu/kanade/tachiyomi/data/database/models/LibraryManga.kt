@@ -32,7 +32,11 @@ class LibraryManga : MangaImpl() {
             category == other.category &&
             bookmarkCount == other.bookmarkCount &&
             unavailableCount == other.unavailableCount &&
-            isMerged == other.isMerged
+            isMerged == other.isMerged &&
+            dynamic_cover == other.dynamic_cover &&
+            user_cover == other.user_cover &&
+            thumbnail_url == other.thumbnail_url &&
+            title == other.title
     }
 
     override fun hashCode(): Int {
@@ -43,6 +47,10 @@ class LibraryManga : MangaImpl() {
         result = 31 * result + bookmarkCount
         result = 31 * result + unavailableCount
         result = 31 * result + isMerged.hashCode()
+        result = 31 * result + (dynamic_cover?.hashCode() ?: 0)
+        result = 31 * result + (user_cover?.hashCode() ?: 0)
+        result = 31 * result + (thumbnail_url?.hashCode() ?: 0)
+        result = 31 * result + title.hashCode()
         return result
     }
 

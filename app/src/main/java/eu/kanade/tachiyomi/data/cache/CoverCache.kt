@@ -190,7 +190,10 @@ class CoverCache(val context: Context) {
     fun setCustomCoverToCache(manga: Manga, inputStream: InputStream) {
         getCustomCoverFile(manga).outputStream().use {
             inputStream.copyTo(it)
-            context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+            context.imageLoader.memoryCache
+                ?.keys
+                ?.filter { it.key.startsWith("${manga.id}-") || it.key.startsWith(manga.key()) }
+                ?.forEach { context.imageLoader.memoryCache?.remove(it) }
         }
     }
 
@@ -207,7 +210,12 @@ class CoverCache(val context: Context) {
             coverFile.inputStream().use { inputStream ->
                 getCustomCoverFile(manga).outputStream().use {
                     inputStream.copyTo(it)
-                    context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+                    context.imageLoader.memoryCache
+                        ?.keys
+                        ?.filter {
+                            it.key.startsWith("${manga.id}-") || it.key.startsWith(manga.key())
+                        }
+                        ?.forEach { context.imageLoader.memoryCache?.remove(it) }
                 }
             }
         }
@@ -221,7 +229,10 @@ class CoverCache(val context: Context) {
      */
     fun deleteCustomCover(manga: Manga): Boolean {
         val result = getCustomCoverFile(manga).let { it.exists() && it.delete() }
-        context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+        context.imageLoader.memoryCache
+            ?.keys
+            ?.filter { it.key.startsWith("${manga.id}-") || it.key.startsWith(manga.key()) }
+            ?.forEach { context.imageLoader.memoryCache?.remove(it) }
         return result
     }
 
@@ -261,7 +272,10 @@ class CoverCache(val context: Context) {
         val file = getCoverFile(manga.thumbnail_url, manga.favorite)
         if (deleteCustom) deleteCustomCover(manga)
         if (file.exists()) {
-            context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+            context.imageLoader.memoryCache
+                ?.keys
+                ?.filter { it.key.startsWith("${manga.id}-") || it.key.startsWith(manga.key()) }
+                ?.forEach { context.imageLoader.memoryCache?.remove(it) }
             file.delete()
         }
     }
