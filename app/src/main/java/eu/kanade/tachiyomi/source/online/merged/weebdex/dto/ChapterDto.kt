@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.merged.weebdex.dto
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDex
-import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDexConstants
 import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDexHelper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -34,6 +33,7 @@ class ChapterDto(
     val volume: String? = null,
     @SerialName("published_at") val publishedAt: String = "",
     val language: String = "",
+    private val node: String? = null,
     val data: List<PageData>? = null,
     @SerialName("data_optimized") val dataOptimized: List<PageData>? = null,
     val relationships: ChapterRelationshipsDto? = null,
@@ -99,7 +99,7 @@ class ChapterDto(
             val imageUrl =
                 filename
                     ?.takeIf { it.isNotBlank() && chapterId.isNotBlank() }
-                    ?.let { "${WeebDexConstants.CDN_DATA_URL}/$chapterId/$it" }
+                    ?.let { "$node/data/$chapterId/$it" }
             pages.add(Page(index, imageUrl = imageUrl))
         }
         return pages

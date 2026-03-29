@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.merged.weebdex
 
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.merged.weebdex.WeebDexConstants.BASE_URL
 import eu.kanade.tachiyomi.source.online.merged.weebdex.dto.CoverDto
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -29,7 +30,7 @@ class WeebDexHelper {
                 "512" -> ".512.webp"
                 else -> cover.ext
             }
-        return "${WeebDexConstants.CDN_COVER_URL}/$mangaId/${cover.id}$ext"
+        return "$BASE_URL/covers/$mangaId/${cover.id}$ext"
     }
 
     fun parseDate(dateStr: String): Long {
