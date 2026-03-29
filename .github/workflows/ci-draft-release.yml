@@ -44,7 +44,9 @@ jobs:
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.3"
 
       - name: Setup Gradle and Enable Caching
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-disabled: true
 
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.3
