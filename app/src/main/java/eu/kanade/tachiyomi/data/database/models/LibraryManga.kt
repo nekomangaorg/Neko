@@ -36,6 +36,8 @@ class LibraryManga : MangaImpl() {
             dynamic_cover == other.dynamic_cover &&
             user_cover == other.user_cover &&
             thumbnail_url == other.thumbnail_url &&
+            user_title == other.user_title &&
+            alt_titles == other.alt_titles &&
             title == other.title
     }
 
@@ -50,6 +52,8 @@ class LibraryManga : MangaImpl() {
         result = 31 * result + (dynamic_cover?.hashCode() ?: 0)
         result = 31 * result + (user_cover?.hashCode() ?: 0)
         result = 31 * result + (thumbnail_url?.hashCode() ?: 0)
+        result = 31 * result + (user_title?.hashCode() ?: 0)
+        result = 31 * result + (alt_titles?.hashCode() ?: 0)
         result = 31 * result + title.hashCode()
         return result
     }
