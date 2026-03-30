@@ -1,5 +1,7 @@
 package org.nekomanga.presentation.components.listcard
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -23,6 +25,8 @@ enum class ListCardType {
 fun ExpressiveListCard(
     modifier: Modifier = Modifier,
     listCardType: ListCardType,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     themeColorState: ThemeColorState = defaultThemeColorState(),
     content: @Composable () -> Unit,
 ) {
@@ -72,5 +76,16 @@ fun ExpressiveListCard(
             }
         }
 
-    ElevatedCard(modifier = modifier, shape = shape, colors = colors) { content() }
+    ElevatedCard(modifier = modifier, shape = shape, colors = colors) {
+        Box(
+            modifier =
+                Modifier.combinedClickable(
+                    enabled = onClick != null || onLongClick != null,
+                    onClick = { onClick?.invoke() },
+                    onLongClick = { onLongClick?.invoke() },
+                )
+        ) {
+            content()
+        }
+    }
 }

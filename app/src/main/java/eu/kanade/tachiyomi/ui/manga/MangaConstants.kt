@@ -91,6 +91,7 @@ object MangaConstants {
         val allUploaders: ImmutableSet<String> = persistentSetOf(),
         val allSources: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
+        val chapterVolumes: Map<Long, String> = emptyMap(),
     )
 
     data class MangaScreenTrackState(
