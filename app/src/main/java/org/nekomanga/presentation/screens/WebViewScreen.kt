@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.webview.WebviewTopBar
 import tachiyomi.core.util.system.WebViewUtil
+import tachiyomi.core.util.system.secureShouldInterceptRequest
 import tachiyomi.core.util.system.setDefaultSettings
 
 @Composable
@@ -135,6 +137,11 @@ fun WebViewWrapper(
                         super.doUpdateVisitedHistory(view, url, isReload)
                         url?.let { currentUrl = it }
                     }
+
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                    ): WebResourceResponse? = secureShouldInterceptRequest(view, request)
 
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,

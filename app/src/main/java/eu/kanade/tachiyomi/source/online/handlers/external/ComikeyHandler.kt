@@ -10,7 +10,6 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
@@ -24,6 +23,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
+import tachiyomi.core.util.system.SecureWebViewClient
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -96,7 +96,7 @@ class ComikeyHandler {
             }*/
 
             innerWv.webViewClient =
-                object : WebViewClient() {
+                object : SecureWebViewClient() {
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
                         view?.evaluateJavascript(
@@ -115,6 +115,10 @@ class ComikeyHandler {
                         request: WebResourceRequest?,
                     ): WebResourceResponse? {
                         val url = request?.url ?: return super.shouldInterceptRequest(view, request)
+
+                        if (url.scheme == "http") {
+                            return super.shouldInterceptRequest(view, request)
+                        }
 
                         if (
                             url.host != "relay-us.epub.rocks" ||

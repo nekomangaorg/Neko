@@ -47,6 +47,7 @@ import tachiyomi.core.network.dohNajalla
 import tachiyomi.core.network.dohQuad101
 import tachiyomi.core.network.dohQuad9
 import tachiyomi.core.network.dohShecan
+import tachiyomi.core.network.interceptors.CleartextPolicyInterceptor
 import tachiyomi.core.network.interceptors.CloudflareInterceptor
 import uy.kohesive.injekt.injectLazy
 
@@ -121,6 +122,7 @@ class NetworkHelper(val context: Context) {
                             PREF_DOH_SHECAN -> dohShecan()
                         }
                     }
+                    .addInterceptor(CleartextPolicyInterceptor())
             return builder
         }
 
