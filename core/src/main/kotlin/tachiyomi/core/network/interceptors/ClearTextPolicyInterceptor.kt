@@ -27,8 +27,8 @@ class CleartextPolicyInterceptor : Interceptor {
 }
 
 fun InetAddress.isPrivate(): Boolean {
-    return isAnyLocalAddress || // 0.0.0.0
-        isLoopbackAddress || // 127.0.0.1
-        isSiteLocalAddress || // 192.168.x.x, 10.x.x.x, 172.16-31.x.x
-        isLinkLocalAddress // 169.254.x.x
+    return isLoopbackAddress || // 127.0.0.1, ::1
+        isSiteLocalAddress || // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fec0:/10
+        isLinkLocalAddress || // 169.254.0.0/16, fe80::/10
+        (address.size == 16 && (address[0].toInt() and 0xfe) == 0xfc) // fc00::/7
 }

@@ -24,8 +24,10 @@ fun secureShouldInterceptRequest(
     val host = url.host ?: return null
 
     if (url.scheme == "http") {
-        val addresses = InetAddress.getAllByName(host)
-        val allPrivate = addresses.all { it.isPrivate() }
+        val allPrivate =
+            runCatching { InetAddress.getAllByName(host).all { it.isPrivate() } }
+                .getOrNull()
+                ?: return null
 
         if (!allPrivate) {
             return WebResourceResponse(
