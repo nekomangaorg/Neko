@@ -96,7 +96,7 @@ class PagerPageHolder(
     private var extraProgressJob: Job? = null
 
     /**
-     * Subscription used to read the header of the image. This is needed in order to instantiate the
+     * Job used to read the header of the image. This is needed in order to instantiate the
      * appropiate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderJob: Job? = null
@@ -411,7 +411,7 @@ class PagerPageHolder(
         }
     }
 
-    /** Unsubscribes from the read image header subscription. */
+    /** Cancels the read image header job. */
     private fun cancelReadImageHeaderJob() {
         readImageHeaderJob?.cancel()
         readImageHeaderJob = null
@@ -515,18 +515,17 @@ class PagerPageHolder(
                                     setImage(bytesSource, false, imageConfig)
                                     bytesSource.close()
 
-                                    launch(Main) {
-                                        try {
-                                            pageView?.background = setBG(bytesArray)
-                                        } catch (e: Exception) {
-                                            TimberKt.e(e) { "Error setting BG" }
-                                            pageView?.background = ColorDrawable(Color.WHITE)
-                                        } finally {
-                                            page.bg = pageView?.background
-                                            page.bgType =
-                                                getBGType(viewer.config.readerTheme, context) +
-                                                    item.hashCode()
-                                        }
+                                    try {
+                                        pageView?.background = setBG(bytesArray)
+                                    } catch (e: Exception) {
+                                        if (e is CancellationException) throw e
+                                        TimberKt.e(e) { "Error setting BG" }
+                                        pageView?.background = ColorDrawable(Color.WHITE)
+                                    } finally {
+                                        page.bg = pageView?.background
+                                        page.bgType =
+                                            getBGType(viewer.config.readerTheme, context) +
+                                                item.hashCode()
                                     }
                                 }
                             } else {
