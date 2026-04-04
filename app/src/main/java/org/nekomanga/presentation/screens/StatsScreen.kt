@@ -11,10 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
-import eu.kanade.tachiyomi.ui.more.stats.StatsViewModel
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
@@ -22,7 +18,11 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
+import org.nekomanga.presentation.screens.stats.StatsConstants
+import org.nekomanga.presentation.screens.stats.StatsConstants.ScreenState.Detailed
+import org.nekomanga.presentation.screens.stats.StatsConstants.ScreenState.Loading
 import org.nekomanga.presentation.screens.stats.StatsTopBar
+import org.nekomanga.presentation.screens.stats.StatsViewModel
 
 @Composable
 fun StatsScreen(
