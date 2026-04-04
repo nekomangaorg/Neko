@@ -216,6 +216,8 @@
     <string name="open_random_series">Open a random series</string>
     <string name="expand_all_categories">Expand all categories</string>
     <string name="collapse_all_categories">Collapse all categories</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
     <string name="search_library">Search library</string>
