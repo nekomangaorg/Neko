@@ -679,6 +679,10 @@ class LibraryViewModel() : ViewModel() {
                 layout ->
                 gridSize to layout
             }
+            // MACRO-LEVEL PERFORMANCE OPTIMIZATION (Bolt):
+            // Prevents redundant downstream UI state recalculations when the gridSize or layout preference
+            // flow emits a value that hasn't actually changed, avoiding redundant UI recompositions in the library screen.
+            .distinctUntilChanged()
             .observeAndUpdate(viewModelScope) { value ->
                 _internalLibraryScreenState.update { state ->
                     state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
