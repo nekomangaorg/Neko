@@ -247,7 +247,18 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     fun updateCovers() {
-        viewModelScope.launch {
+        viewModelScope.launchIO {
+            val allMangaIds =
+                _similarScreenState.value.allDisplayManga.values
+                    .flatMap { it.map { displayManga -> displayManga.mangaId } }
+                    .distinct()
+
+            val fetchedMangas =
+                allMangaIds
+                    .chunked(900)
+                    .flatMap { chunk -> db.getMangas(chunk).executeOnIO() }
+                    .associateBy { it.id }
+
             val newDisplayManga =
                 _similarScreenState.value.allDisplayManga
                     .map { entry ->
@@ -255,15 +266,20 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                             entry.key,
                             entry.value
                                 .map {
-                                    val dbManga = db.getManga(it.mangaId).executeOnIO()!!
-                                    it.copy(
-                                        currentArtwork =
-                                            it.currentArtwork.copy(
-                                                cover = dbManga.user_cover ?: "",
-                                                originalCover =
-                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
-                                            )
-                                    )
+                                    val dbManga = fetchedMangas[it.mangaId]
+                                    if (dbManga != null) {
+                                        it.copy(
+                                            currentArtwork =
+                                                it.currentArtwork.copy(
+                                                    cover = dbManga.user_cover ?: "",
+                                                    originalCover =
+                                                        dbManga.thumbnail_url
+                                                            ?: MdConstants.noCoverUrl,
+                                                )
+                                        )
+                                    } else {
+                                        it
+                                    }
                                 }
                                 .toPersistentList(),
                         )
