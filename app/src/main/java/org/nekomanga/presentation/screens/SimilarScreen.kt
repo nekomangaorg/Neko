@@ -103,26 +103,24 @@ private fun SimilarWrapper(
 
     val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
 
-    if (currentBottomSheet != null) {
+    currentBottomSheet?.let { currentSheet ->
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { currentBottomSheet = null },
             content = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
-                    currentBottomSheet?.let { currentSheet ->
-                        DisplayScreenSheet(
-                            currentScreen = currentSheet,
-                            addNewCategory = addNewCategory,
-                            contentPadding =
-                                WindowInsets.navigationBars
-                                    .only(WindowInsetsSides.Bottom)
-                                    .asPaddingValues(),
-                            closeSheet = { currentBottomSheet = null },
-                            categories = similarScreenState.categories,
-                            isList = similarScreenState.isList,
-                            libraryEntryVisibility = similarScreenState.libraryEntryVisibility,
-                        )
-                    }
+                    DisplayScreenSheet(
+                        currentScreen = currentSheet,
+                        addNewCategory = addNewCategory,
+                        contentPadding =
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues(),
+                        closeSheet = { currentBottomSheet = null },
+                        categories = similarScreenState.categories,
+                        isList = similarScreenState.isList,
+                        libraryEntryVisibility = similarScreenState.libraryEntryVisibility,
+                    )
                 }
             },
         )
