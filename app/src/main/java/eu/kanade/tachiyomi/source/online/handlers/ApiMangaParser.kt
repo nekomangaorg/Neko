@@ -43,19 +43,25 @@ class ApiMangaParser {
 
             manga.author =
                 mangaDto.relationships
-                    .filter { relationshipDto ->
-                        relationshipDto.type.equals(MdConstants.Types.author, true)
+                    .mapNotNull { relationshipDto ->
+                        if (relationshipDto.type.equals(MdConstants.Types.author, true)) {
+relationshipDto.attributes?.name
+                        } else {
+                            null
+                        }
                     }
-                    .mapNotNull { it.attributes!!.name }
                     .distinct()
                     .joinToString(Constants.SEPARATOR)
 
             manga.artist =
                 mangaDto.relationships
-                    .filter { relationshipDto ->
-                        relationshipDto.type.equals(MdConstants.Types.artist, true)
+                    .mapNotNull { relationshipDto ->
+                        if (relationshipDto.type.equals(MdConstants.Types.artist, true)) {
+relationshipDto.attributes?.name
+                        } else {
+                            null
+                        }
                     }
-                    .mapNotNull { it.attributes!!.name }
                     .distinct()
                     .joinToString(Constants.SEPARATOR)
 
@@ -175,8 +181,13 @@ class ApiMangaParser {
 
         val scanlatorName =
             networkChapter.relationships
-                .filter { it.type == MdConstants.Types.scanlator }
-                .mapNotNull { groups[it.id] }
+                .mapNotNull {
+                    if (it.type == MdConstants.Types.scanlator) {
+                        groups[it.id]
+                    } else {
+                        null
+                    }
+                }
                 .toMutableSet()
 
         val uploaderName =
