@@ -52,7 +52,6 @@ class CookieInterceptor(
         try {
             cookieManager.setCookie(url, value)
         } catch (e: Exception) {
-            if (e is kotlinx.coroutines.CancellationException) throw e
             TimberKt.e(e) { "Failed to set cookie for $url" }
         }
     }
