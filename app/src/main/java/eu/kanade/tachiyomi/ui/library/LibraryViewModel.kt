@@ -673,17 +673,6 @@ class LibraryViewModel() : ViewModel() {
             ->
             _internalLibraryScreenState.update { state -> state.copy(showLibraryButtonBar = value) }
         }
-
-        combine(libraryPreferences.gridSize().changes(), libraryPreferences.layout().changes()) {
-                gridSize,
-                layout ->
-                gridSize to layout
-            }
-            .observeAndUpdate(viewModelScope) { value ->
-                _internalLibraryScreenState.update { state ->
-                    state.copy(libraryDisplayMode = value.second, rawColumnCount = value.first)
-                }
-            }
     }
 
     private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
