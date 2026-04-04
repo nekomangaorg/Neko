@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.more.stats
+package org.nekomanga.presentation.screens.stats
 
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import kotlinx.collections.immutable.PersistentList
