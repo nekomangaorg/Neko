@@ -5,7 +5,6 @@ import android.content.Context
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import java.io.IOException
@@ -19,6 +18,7 @@ import org.jsoup.Jsoup
 import org.nekomanga.core.R
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.AndroidCookieJar
+import tachiyomi.core.util.system.SecureWebViewClient
 import tachiyomi.core.util.system.isOutdated
 import tachiyomi.core.util.system.toast
 
@@ -89,7 +89,7 @@ class CloudflareInterceptor(
             webview = createWebView(originalRequest)
 
             webview.webViewClient =
-                object : WebViewClient() {
+                object : SecureWebViewClient() {
 
                     override fun onPageFinished(view: WebView, url: String) {
                         fun isCloudFlareBypassed(): Boolean {
