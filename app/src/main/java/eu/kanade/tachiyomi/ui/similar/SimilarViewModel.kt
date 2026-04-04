@@ -250,8 +250,11 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         viewModelScope.launchIO {
             val allMangaIds =
                 _similarScreenState.value.allDisplayManga.values
-                    .flatMap { it.map { displayManga -> displayManga.mangaId } }
+                    .asSequence()
+                    .flatten()
+                    .map { it.mangaId }
                     .distinct()
+                    .toList()
 
             val fetchedMangas =
                 allMangaIds
