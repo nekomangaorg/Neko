@@ -3,6 +3,7 @@ package tachiyomi.core.network.interceptors
 import android.webkit.CookieManager
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.nekomanga.logging.TimberKt
 
 class CookieInterceptor(
     private val domain: String,
@@ -50,6 +51,8 @@ class CookieInterceptor(
     private fun setCookie(url: String, value: String) {
         try {
             cookieManager.setCookie(url, value)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Failed to set cookie for $url" }
+        }
     }
 }
