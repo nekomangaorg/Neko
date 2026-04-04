@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -51,9 +53,14 @@ fun ExpandableRow(
                 true -> Icons.Default.ExpandLess
                 false -> Icons.Default.ExpandMore
             }
+        val contentDescription =
+            when (isExpanded) {
+                true -> stringResource(id = R.string.collapse)
+                false -> stringResource(id = R.string.expand)
+            }
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint =
                 if (!disabled) textColor
                 else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
