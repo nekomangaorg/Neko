@@ -1,0 +1,1 @@
+## 2024-05-24 - [Replicate Observable.never] **Learning:** [RxJava's flatMap { Observable.never<Unit>() } keeps a stream alive indefinitely until unsubscribed] **Action:** [Use awaitCancellation() from kotlinx.coroutines inside a try/finally block to keep the Coroutine alive and handle cleanup upon cancellation]
