@@ -38,8 +38,11 @@ import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -51,10 +54,6 @@ import okio.source
 import org.nekomanga.R
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
-import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 
 /** View of the ViewPager that contains a page of a chapter. */
@@ -100,7 +99,7 @@ class PagerPageHolder(
      * Subscription used to read the header of the image. This is needed in order to instantiate the
      * appropiate image view depending if the image is animated (GIF).
      */
-    private var readImageHeaderSubscription: Subscription? = null
+    private var readImageHeaderJob: Job? = null
 
     private var status = Page.State.READY
     private var extraStatus = Page.State.READY
@@ -173,7 +172,7 @@ class PagerPageHolder(
         cancelLoadJob(1)
         cancelProgressJob(2)
         cancelLoadJob(2)
-        unsubscribeReadImageHeader()
+        cancelReadImageHeaderJob()
         (pageView as? SubsamplingScaleImageView)?.setOnImageEventListener(null)
     }
 
@@ -413,9 +412,9 @@ class PagerPageHolder(
     }
 
     /** Unsubscribes from the read image header subscription. */
-    private fun unsubscribeReadImageHeader() {
-        readImageHeaderSubscription?.unsubscribe()
-        readImageHeaderSubscription = null
+    private fun cancelReadImageHeaderJob() {
+        readImageHeaderJob?.cancel()
+        readImageHeaderJob = null
     }
 
     /** Called when the page is queued. */
@@ -450,97 +449,107 @@ class PagerPageHolder(
         retryButton?.isVisible = false
         decodeErrorLayout?.isVisible = false
 
-        unsubscribeReadImageHeader()
+        cancelReadImageHeaderJob()
         val streamFn = page.stream ?: return
         val streamFn2 = extraPage?.stream
 
         var openStream: BufferedSource? = null
 
-        readImageHeaderSubscription =
-            Observable.fromCallable {
-                    val stream = streamFn().source().buffer()
+        readImageHeaderJob =
+            scope.launch(IO) {
+                try {
+                    val (isAnimated, bytesArray) =
+                        try {
+                            val stream = streamFn().source().buffer()
 
-                    val stream2 = streamFn2?.invoke()?.source()?.buffer()
-                    openStream =
-                        when (
-                            viewer.config.doublePageRotate &&
-                                stream2 == null &&
-                                ImageUtil.isWideImage(stream)
-                        ) {
-                            true -> {
-                                val rotation =
-                                    if (viewer.config.doublePageRotateReverse) -90f else 90f
-                                ImageUtil.rotateImage(stream, rotation)
-                            }
-                            false -> this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
+                            val stream2 = streamFn2?.invoke()?.source()?.buffer()
+                            openStream =
+                                when (
+                                    viewer.config.doublePageRotate &&
+                                        stream2 == null &&
+                                        ImageUtil.isWideImage(stream)
+                                ) {
+                                    true -> {
+                                        val rotation =
+                                            if (viewer.config.doublePageRotateReverse) -90f else 90f
+                                        ImageUtil.rotateImage(stream, rotation)
+                                    }
+                                    false -> this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
+                                }
+
+                            val animated =
+                                ImageUtil.isAnimatedAndSupported(stream) ||
+                                    if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2)
+                                    else false
+
+                            val bytes =
+                                if (
+                                    !animated &&
+                                        viewer.config.readerTheme >= 2 &&
+                                        !(page.bg != null &&
+                                            page.bgType ==
+                                                getBGType(viewer.config.readerTheme, context) +
+                                                    item.hashCode())
+                                ) {
+                                    openStream?.readByteArray()
+                                } else null
+
+                            animated to bytes
+                        } catch (e: Exception) {
+                            TimberKt.e(e) { "Error checking image header" }
+                            return@launch
                         }
 
-                    ImageUtil.isAnimatedAndSupported(stream) ||
-                        if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { isAnimated ->
-                    if (!isAnimated) {
-                        if (viewer.config.readerTheme >= 2) {
-                            if (
-                                page.bg != null &&
-                                    page.bgType ==
-                                        getBGType(viewer.config.readerTheme, context) +
-                                            item.hashCode()
-                            ) {
-                                setImage(openStream!!, false, imageConfig)
-                                pageView?.background = page.bg
-                            }
-                            // if the user switches to automatic when pages are already cached, the
-                            // bg needs to be loaded
-                            else {
-                                val bytesArray = openStream!!.readByteArray()
-                                val bytesSource = Buffer().write(bytesArray)
-                                setImage(bytesSource, false, imageConfig)
-                                bytesSource.close()
+                    withContext(Main) {
+                        if (!isAnimated) {
+                            if (viewer.config.readerTheme >= 2) {
+                                if (bytesArray == null && page.bg != null) {
+                                    openStream?.let { setImage(it, false, imageConfig) }
+                                    pageView?.background = page.bg
+                                }
+                                // if the user switches to automatic when pages are already cached,
+                                // the
+                                // bg needs to be loaded
+                                else if (bytesArray != null) {
+                                    val bytesSource = Buffer().write(bytesArray)
+                                    setImage(bytesSource, false, imageConfig)
+                                    bytesSource.close()
 
-                                scope.launchUI {
-                                    try {
-                                        pageView?.background = setBG(bytesArray)
-                                    } catch (e: Exception) {
-                                        TimberKt.e(e) { "Error setting BG" }
-                                        pageView?.background = ColorDrawable(Color.WHITE)
-                                    } finally {
-                                        page.bg = pageView?.background
-                                        page.bgType =
-                                            getBGType(viewer.config.readerTheme, context) +
-                                                item.hashCode()
+                                    launch(Main) {
+                                        try {
+                                            pageView?.background = setBG(bytesArray)
+                                        } catch (e: Exception) {
+                                            TimberKt.e(e) { "Error setting BG" }
+                                            pageView?.background = ColorDrawable(Color.WHITE)
+                                        } finally {
+                                            page.bg = pageView?.background
+                                            page.bgType =
+                                                getBGType(viewer.config.readerTheme, context) +
+                                                    item.hashCode()
+                                        }
                                     }
                                 }
+                            } else {
+                                openStream?.let { setImage(it, false, imageConfig) }
                             }
                         } else {
-                            setImage(openStream!!, false, imageConfig)
-                        }
-                    } else {
-                        setImage(openStream!!, true, imageConfig)
-                        if (viewer.config.readerTheme >= 2 && page.bg != null) {
-                            pageView?.background = page.bg
+                            openStream?.let { setImage(it, true, imageConfig) }
+                            if (viewer.config.readerTheme >= 2 && page.bg != null) {
+                                pageView?.background = page.bg
+                            }
                         }
                     }
-                }
-                // Keep the Rx stream alive to close the input stream only when unsubscribed
-                .flatMap { Observable.never<Unit>() }
-                .doOnUnsubscribe {
+
+                    // Keep the Coroutine alive to close the input stream only when cancelled
+                    awaitCancellation()
+                } finally {
                     try {
                         openStream?.close()
                     } catch (e: Exception) {
                         TimberKt.e(e) { "Error closing stream" }
                     }
                 }
-                .doOnError {
-                    try {
-                        openStream?.close()
-                    } catch (e: Exception) {
-                        TimberKt.e(e) { "Error closing stream" }
-                    }
-                }
-                .subscribe({}, {})
+            }
     }
 
     private val imageConfig: Config
