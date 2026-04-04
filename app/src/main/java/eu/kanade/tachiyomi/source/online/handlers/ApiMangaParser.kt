@@ -45,7 +45,7 @@ class ApiMangaParser {
                 mangaDto.relationships
                     .mapNotNull { relationshipDto ->
                         if (relationshipDto.type.equals(MdConstants.Types.author, true)) {
-relationshipDto.attributes?.name
+                            relationshipDto.attributes?.name
                         } else {
                             null
                         }
@@ -57,7 +57,7 @@ relationshipDto.attributes?.name
                 mangaDto.relationships
                     .mapNotNull { relationshipDto ->
                         if (relationshipDto.type.equals(MdConstants.Types.artist, true)) {
-relationshipDto.attributes?.name
+                            relationshipDto.attributes?.name
                         } else {
                             null
                         }
