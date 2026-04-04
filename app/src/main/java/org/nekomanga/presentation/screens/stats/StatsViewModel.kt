@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.more.stats
+package org.nekomanga.presentation.screens.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,9 +13,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedStatManga
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
-import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow

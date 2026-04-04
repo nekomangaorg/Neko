@@ -8,8 +8,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState
 import org.nekomanga.R
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.bars.TitleTopAppBar

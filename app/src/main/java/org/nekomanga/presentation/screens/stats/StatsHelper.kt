@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.more.stats
+package org.nekomanga.presentation.screens.stats
 
 import android.graphics.Color
 import android.text.SpannableStringBuilder

@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size

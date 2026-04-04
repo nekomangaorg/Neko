@@ -55,9 +55,6 @@ import com.himanshoe.charty.line.model.LineData
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.PieConfig
 import com.himanshoe.charty.pie.config.PieData
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
-import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
-import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
