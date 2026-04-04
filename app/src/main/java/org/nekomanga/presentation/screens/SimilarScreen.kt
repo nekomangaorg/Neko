@@ -101,9 +101,9 @@ private fun SimilarWrapper(
     /** Close the bottom sheet on back if its open */
     BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
-    val openSheet: (DisplaySheetScreen) -> Unit = { scope.launch { currentBottomSheet = it } }
+    val openSheet: (DisplaySheetScreen) -> Unit = { currentBottomSheet = it }
 
-    if (currentBottomSheet != null) {
+    if (currentBottomSheet != null || sheetState.isVisible) {
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { currentBottomSheet = null },
