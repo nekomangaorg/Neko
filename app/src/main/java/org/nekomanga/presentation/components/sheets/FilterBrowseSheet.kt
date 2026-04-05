@@ -659,47 +659,57 @@ fun SavedFilters(
             LazyRow(verticalAlignment = Alignment.CenterVertically, state = listState) {
                 item { Gap(Size.tiny) }
 
-                items(sortedFilters) { filter ->
+                items(items = sortedFilters, key = { it.name }) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
-                    FilterChipWrapper(
+                    Row(
                         modifier = Modifier.animateItem(),
-                        selected = isEnabled,
-                        onClick = {
-                            scope.launch { listState.animateScrollToItem(0) }
-                            loadFilter(filter)
-                        },
-                        name = filter.name,
-                    )
-                    if (isEnabled) {
-                        Row(modifier = Modifier.animateItem()) {
-                            ToolTipButton(
-                                toolTipLabel = stringResource(id = R.string.delete_filter),
-                                icon = Icons.Outlined.Delete,
-                                onClick = { deleteFilterClick(nameOfEnabledFilter) },
-                            )
-                            val isDefault =
-                                savedFilters
-                                    .firstOrNull { nameOfEnabledFilter.equals(it.name, true) }
-                                    ?.default ?: false
-                            val (textRes, makeDefault, icon) =
-                                when (isDefault) {
-                                    true ->
-                                        Triple(
-                                            R.string.remove_default,
-                                            false,
-                                            Icons.Default.HeartBroken,
-                                        )
-                                    false ->
-                                        Triple(R.string.make_default, true, Icons.Default.Favorite)
-                                }
-                            ToolTipButton(
-                                toolTipLabel = stringResource(textRes),
-                                icon = icon,
-                                onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
-                            )
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        FilterChipWrapper(
+                            selected = isEnabled,
+                            onClick = {
+                                scope.launch { listState.animateScrollToItem(0) }
+                                loadFilter(filter)
+                            },
+                            name = filter.name,
+                        )
+                        if (isEnabled) {
+                            Row {
+                                ToolTipButton(
+                                    toolTipLabel = stringResource(id = R.string.delete_filter),
+                                    icon = Icons.Outlined.Delete,
+                                    onClick = { deleteFilterClick(nameOfEnabledFilter) },
+                                )
+                                val isDefault =
+                                    savedFilters
+                                        .firstOrNull { nameOfEnabledFilter.equals(it.name, true) }
+                                        ?.default ?: false
+                                val (textRes, makeDefault, icon) =
+                                    when (isDefault) {
+                                        true ->
+                                            Triple(
+                                                R.string.remove_default,
+                                                false,
+                                                Icons.Default.HeartBroken,
+                                            )
+                                        false ->
+                                            Triple(
+                                                R.string.make_default,
+                                                true,
+                                                Icons.Default.Favorite,
+                                            )
+                                    }
+                                ToolTipButton(
+                                    toolTipLabel = stringResource(textRes),
+                                    icon = icon,
+                                    onClick = {
+                                        filterDefaultClick(nameOfEnabledFilter, makeDefault)
+                                    },
+                                )
+                            }
                         }
+                        Gap(Size.tiny)
                     }
-                    Gap(Size.tiny)
                 }
                 item { Gap(Size.tiny) }
             }

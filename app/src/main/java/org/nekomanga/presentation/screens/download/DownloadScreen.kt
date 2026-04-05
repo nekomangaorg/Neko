@@ -115,7 +115,6 @@ fun DownloadScreen(
                                 val last = index == downloads.lastIndex
 
                                 DownloadChapterRow(
-                                    modifier = Modifier.animateItem(),
                                     first = first,
                                     last = last,
                                     chapter = download,
