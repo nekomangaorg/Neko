@@ -143,6 +143,8 @@ fun FilterBrowseSheet(
 
         var queryText by remember { mutableStateOf(filters.query.text) }
 
+        LaunchedEffect(filters.query.text) { queryText = filters.query.text }
+
         BaseSheet(themeColor = themeColorState, bottomPaddingAroundContent = 0.dp) {
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
