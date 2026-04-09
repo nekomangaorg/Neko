@@ -30,6 +30,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
@@ -37,6 +40,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
@@ -190,7 +194,44 @@ fun MangaRow(
     unreadCount: Int = 0,
     downloadCount: Int = 0,
 ) {
-    Box(modifier = modifier) {
+    val subtitleText =
+        when (displayManga.displayTextRes) {
+            null -> displayManga.displayText
+            else -> stringResource(displayManga.displayTextRes)
+        }
+
+    val title = displayManga.getTitle()
+    val inLibraryText = stringResource(id = R.string.in_library)
+    val unreadText = stringResource(id = R.string.unread)
+    val downloadedText = stringResource(id = R.string.downloaded)
+    val contentDescriptionText =
+        remember(
+            title,
+            subtitleText,
+            displayManga.inLibrary,
+            unreadCount,
+            downloadCount,
+            inLibraryText,
+            unreadText,
+            downloadedText,
+        ) {
+            buildList {
+                    add(title)
+                    if (subtitleText.isNotBlank()) add(subtitleText)
+                    if (displayManga.inLibrary) add(inLibraryText)
+                    if (showUnreadBadge && unreadCount > 0) add("$unreadCount $unreadText")
+                    if (showDownloadBadge && downloadCount > 0)
+                        add("$downloadCount $downloadedText")
+                }
+                .joinToString(", ")
+        }
+
+    Box(
+        modifier =
+            modifier.semantics(mergeDescendants = true) {
+                this.contentDescription = contentDescriptionText
+            }
+    ) {
         Row(
             modifier = Modifier.padding(Size.tiny),
             verticalAlignment = Alignment.CenterVertically,
@@ -215,14 +256,16 @@ fun MangaRow(
             }
             if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
                 Gap(Size.tiny)
-                DownloadUnreadBadge(
-                    offset = 0.dp,
-                    outline = shouldOutlineCover,
-                    showUnread = showUnreadBadge,
-                    showDownloads = showDownloadBadge,
-                    unreadCount = unreadCount,
-                    downloadCount = downloadCount,
-                )
+                Box(modifier = Modifier.clearAndSetSemantics {}) {
+                    DownloadUnreadBadge(
+                        offset = 0.dp,
+                        outline = shouldOutlineCover,
+                        showUnread = showUnreadBadge,
+                        showDownloads = showDownloadBadge,
+                        unreadCount = unreadCount,
+                        downloadCount = downloadCount,
+                    )
+                }
             }
             if (showStartReadingButton) {
                 Gap(Size.tiny)
