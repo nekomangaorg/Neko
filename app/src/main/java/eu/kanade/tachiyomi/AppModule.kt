@@ -56,6 +56,7 @@ import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.tracking.TrackUseCases
 import tachiyomi.core.preference.AndroidPreferenceStore
@@ -155,6 +156,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(CalculateChapterFilterUseCase())
         addSingleton(ChapterUseCases())
+
+        addSingleton(FilterLibraryMangaUseCase())
 
         addSingleton(MangaUseCases())
 

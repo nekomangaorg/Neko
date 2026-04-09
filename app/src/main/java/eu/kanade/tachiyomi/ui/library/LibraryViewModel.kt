@@ -78,6 +78,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -94,6 +95,7 @@ class LibraryViewModel() : ViewModel() {
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
+    val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
 
     private val initialState =
         LibraryScreenState(
@@ -396,7 +398,7 @@ class LibraryViewModel() : ViewModel() {
     private val activeMangaFlow =
         combine(filteredMangaListFlow, filterPreferencesFlow) { mangaList, libraryFilters ->
                 withContext(Dispatchers.Default) {
-                    mangaList.filter { it.matchesFilters(libraryFilters) }
+                    mangaList.filter { filterLibraryManga(it, libraryFilters) }
                 }
             }
             .distinctUntilChanged()
@@ -673,24 +675,6 @@ class LibraryViewModel() : ViewModel() {
             ->
             _internalLibraryScreenState.update { state -> state.copy(showLibraryButtonBar = value) }
         }
-    }
-
-    private fun LibraryMangaItem.matchesFilters(libraryFilters: LibraryFilters): Boolean {
-        // Check Unread first (most common filter)
-        if (!libraryFilters.filterUnread.matches(this)) return false
-
-        // Check Downloaded second (common and quick)
-        if (!libraryFilters.filterDownloaded.matches(this)) return false
-
-        // Check the rest
-        if (!libraryFilters.filterBookmarked.matches(this)) return false
-        if (!libraryFilters.filterCompleted.matches(this)) return false
-        if (!libraryFilters.filterMangaType.matches(this)) return false
-        if (!libraryFilters.filterMerged.matches(this)) return false
-        if (!libraryFilters.filterUnavailable.matches(this)) return false
-        if (!libraryFilters.filterTracked.matches(this)) return false
-
-        return true // passed all checks
     }
 
     fun categoryItemClick(category: CategoryItem) {
