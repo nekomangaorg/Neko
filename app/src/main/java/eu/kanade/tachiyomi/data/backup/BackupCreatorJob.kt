@@ -37,8 +37,11 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
         return try {
             withIOContext {
                 val location = BackupCreator(context).createBackup(uri, flags, isAutoBackup)
-                if (!isAutoBackup)
-                    notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
+                if (!isAutoBackup) {
+                    UniFile.fromUri(context, location.toUri())?.let {
+                        notifier.showBackupComplete(it)
+                    }
+                }
             }
             Result.success()
         } catch (e: Exception) {
@@ -72,7 +75,11 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
             if (interval == 0) {
                 cancelTask(context)
             } else {
-                val constraints = Constraints.Builder().setRequiresBatteryNotLow(true).build()
+                val constraints =
+                    Constraints.Builder()
+                        .setRequiresBatteryNotLow(true)
+                        .setRequiresDeviceIdle(true)
+                        .build()
                 val request =
                     PeriodicWorkRequestBuilder<BackupCreatorJob>(
                             interval.toLong(),
