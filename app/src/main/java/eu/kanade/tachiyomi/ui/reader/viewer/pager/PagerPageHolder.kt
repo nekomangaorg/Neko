@@ -39,6 +39,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.awaitCancellation
@@ -457,7 +458,7 @@ class PagerPageHolder(
         readImageHeaderJob = scope.launch {
             try {
                 val isAnimated =
-                    withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    withContext(IO) {
                         val stream = streamFn().source().buffer()
 
                         val stream2 = streamFn2?.invoke()?.source()?.buffer()
@@ -480,6 +481,7 @@ class PagerPageHolder(
                             else false
                     }
 
+                val currentOpenStream = openStream ?: return@launch
                 if (!isAnimated) {
                     if (viewer.config.readerTheme >= 2) {
                         if (
@@ -487,16 +489,13 @@ class PagerPageHolder(
                                 page.bgType ==
                                     getBGType(viewer.config.readerTheme, context) + item.hashCode()
                         ) {
-                            setImage(openStream!!, false, imageConfig)
+                            setImage(currentOpenStream, false, imageConfig)
                             pageView?.background = page.bg
                         }
                         // if the user switches to automatic when pages are already cached, the
                         // bg needs to be loaded
                         else {
-                            val bytesArray =
-                                withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    openStream!!.readByteArray()
-                                }
+                            val bytesArray = withContext(IO) { currentOpenStream.readByteArray() }
                             val bytesSource = Buffer().write(bytesArray)
                             setImage(bytesSource, false, imageConfig)
                             bytesSource.close()
@@ -513,10 +512,10 @@ class PagerPageHolder(
                             }
                         }
                     } else {
-                        setImage(openStream!!, false, imageConfig)
+                        setImage(currentOpenStream, false, imageConfig)
                     }
                 } else {
-                    setImage(openStream!!, true, imageConfig)
+                    setImage(currentOpenStream, true, imageConfig)
                     if (viewer.config.readerTheme >= 2 && page.bg != null) {
                         pageView?.background = page.bg
                     }
