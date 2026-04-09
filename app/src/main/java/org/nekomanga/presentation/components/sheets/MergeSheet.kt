@@ -138,7 +138,6 @@ fun MergeSheet(
                                         MergeType.Toonily -> R.drawable.ic_toonily
                                         MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                         MergeType.MangaBall -> R.drawable.ic_mangaball_logo
-                                        MergeType.WeebDex -> R.drawable.ic_weebdex_logo
                                         MergeType.ProjectSuki -> R.drawable.ic_projectsuki_logo
                                         MergeType.Comix -> R.drawable.ic_comix_logo
                                         MergeType.Invalid -> R.drawable.ic_neko_yokai
