@@ -115,7 +115,14 @@ class NotificationReceiver : BroadcastReceiver() {
                 }
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
-                markAsRead(urls, mangaId)
+                val pendingResult = goAsync()
+                launchIO {
+                    try {
+                        markAsRead(urls, mangaId)
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
             }
             // download manga chapter
             ACTION_DOWNLOAD_CHAPTER -> {
@@ -130,7 +137,14 @@ class NotificationReceiver : BroadcastReceiver() {
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
                 if (mangaId > -1) {
-                    downloadChapters(urls, mangaId)
+                    val pendingResult = goAsync()
+                    launchIO {
+                        try {
+                            downloadChapters(urls, mangaId)
+                        } finally {
+                            pendingResult.finish()
+                        }
+                    }
                 }
             }
 
@@ -255,17 +269,17 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /** Method called when user wants to mark as read */
-    private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
+    private suspend fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val db: DatabaseHelper = Injekt.get()
         val preferences: PreferencesHelper = Injekt.get()
         val mangaDexPreference: MangaDexPreferences = Injekt.get()
 
-        val manga = db.getManga(mangaId).executeAsBlocking() ?: return
+        val manga = db.getManga(mangaId).executeOnIO() ?: return
 
-        val dbChapters = chapterUrls.map { chapterUrl ->
-            val chapter = db.getChapter(chapterUrl, mangaId).executeAsBlocking() ?: return
+        val dbChapters = chapterUrls.mapNotNull { chapterUrl ->
+            val chapter = db.getChapter(chapterUrl, mangaId).executeOnIO() ?: return@mapNotNull null
             chapter.read = true
-            db.updateChapterProgress(chapter).executeAsBlocking()
+            db.updateChapterProgress(chapter).executeOnIO()
             chapter
         }
         if (preferences.removeAfterMarkedAsRead().get()) {
@@ -277,16 +291,14 @@ class NotificationReceiver : BroadcastReceiver() {
             val (mergedChapters, nonMergedChapters) = dbChapters.partition { it.isMergedChapter() }
             if (nonMergedChapters.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
-                launchIO {
-                    statusHandler.markChaptersStatus(
-                        mangaId.toString(),
-                        nonMergedChapters.map { it.mangadex_chapter_id },
-                    )
-                }
+                statusHandler.markChaptersStatus(
+                    mangaId.toString(),
+                    nonMergedChapters.map { it.mangadex_chapter_id },
+                )
             }
             if (mergedChapters.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
-                launchIO { statusHandler.markMergedChaptersStatus(mergedChapters) }
+                statusHandler.markMergedChaptersStatus(mergedChapters)
             }
         }
         val newLastChapter = dbChapters.maxByOrNull { it.chapter_number.toInt() }
@@ -315,14 +327,12 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param chapterUrls URLs of chapter to download
      * @param mangaId id of manga
      */
-    private fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
-        launchIO {
-            val db: DatabaseHelper = Injekt.get()
-            val manga = db.getManga(mangaId).executeOnIO()
-            val chapters = chapterUrls.mapNotNull { db.getChapter(it, mangaId).executeOnIO() }
-            if (manga != null && chapters.isNotEmpty()) {
-                downloadManager.downloadChapters(manga, chapters)
-            }
+    private suspend fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
+        val db: DatabaseHelper = Injekt.get()
+        val manga = db.getManga(mangaId).executeOnIO()
+        val chapters = chapterUrls.mapNotNull { db.getChapter(it, mangaId).executeOnIO() }
+        if (manga != null && chapters.isNotEmpty()) {
+            downloadManager.downloadChapters(manga, chapters)
         }
     }
 
