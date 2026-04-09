@@ -209,6 +209,10 @@ class SimilarHandler {
                     }
                 }
                 .toMap()
+        if (idPairs.isEmpty()) {
+            return
+        }
+
         val filteredIdPairs = idPairs.filterKeys { it != dexId }
         if (filteredIdPairs.isEmpty()) return
 
@@ -350,6 +354,10 @@ class SimilarHandler {
                 val text = it.votes.toString() + " user votes"
                 id to text
             }
+        if (idPairs.isEmpty()) {
+            return
+        }
+
         val filteredIdPairs = idPairs.filterKeys { it != dexId }
         if (filteredIdPairs.isEmpty()) return
 
@@ -427,6 +435,10 @@ class SimilarHandler {
                 val text = "Similar"
                 id to text
             }
+        if (idPairs.isEmpty()) {
+            return
+        }
+
         val filteredIdPairs = idPairs.filterKeys { it != dexId }
         if (filteredIdPairs.isEmpty()) return
 
