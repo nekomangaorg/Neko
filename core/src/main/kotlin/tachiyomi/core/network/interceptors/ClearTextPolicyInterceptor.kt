@@ -32,3 +32,5 @@ fun InetAddress.isPrivate(): Boolean {
         isLinkLocalAddress || // 169.254.0.0/16, fe80::/10
         (address.size == 16 && (address[0].toInt() and 0xfe) == 0xfc) // fc00::/7
 }
+
+fun String.isIpLiteral(): Boolean = this.matches(Regex("""\d+\.\d+\.\d+\.\d+"""))

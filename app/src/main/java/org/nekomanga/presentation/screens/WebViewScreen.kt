@@ -36,6 +36,7 @@ import org.nekomanga.presentation.screens.webview.WebviewTopBar
 import tachiyomi.core.util.system.WebViewUtil
 import tachiyomi.core.util.system.secureShouldInterceptRequest
 import tachiyomi.core.util.system.setDefaultSettings
+import tachiyomi.core.util.system.shouldOverrideUrlLoading
 
 @Composable
 fun WebViewScreen(title: String, url: String, onBackPressed: () -> Unit) {
@@ -141,13 +142,14 @@ fun WebViewWrapper(
                     override fun shouldInterceptRequest(
                         view: WebView?,
                         request: WebResourceRequest?,
-                    ): WebResourceResponse? = secureShouldInterceptRequest(view, request)
+                    ): WebResourceResponse? = secureShouldInterceptRequest(request)
 
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest?,
                     ): Boolean {
-                        request?.let { view?.loadUrl(it.url.toString(), headers) }
+                        if (!shouldOverrideUrlLoading(request))
+                            request?.let { view?.loadUrl(it.url.toString(), headers) }
                         return super.shouldOverrideUrlLoading(view, request)
                     }
                 }
