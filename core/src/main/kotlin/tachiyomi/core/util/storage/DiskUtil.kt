@@ -92,7 +92,9 @@ object DiskUtil {
 
     /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, uri: Uri) {
-        uri.path?.let { MediaScannerConnection.scanFile(context, arrayOf(it), null, null) }
+        if (uri.scheme == "file") {
+            uri.path?.let { MediaScannerConnection.scanFile(context, arrayOf(it), null, null) }
+        }
     }
 
     /**
