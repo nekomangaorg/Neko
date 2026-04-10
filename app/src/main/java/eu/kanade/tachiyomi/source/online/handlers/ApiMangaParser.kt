@@ -109,7 +109,7 @@ class ApiMangaParser {
                         mangaAttributesDto.tags
                             .map { it.id }
                             .map { dexTagId ->
-                                MangaTag.values().firstOrNull { tag -> tag.uuid == dexTagId }
+                                MangaTag.entries.firstOrNull { tag -> tag.uuid == dexTagId }
                             }
                             .map { tag -> tag?.prettyPrint } +
                         listOf(contentRating))
@@ -191,15 +191,13 @@ class ApiMangaParser {
                 .toMutableSet()
 
         val uploaderName =
-            networkChapter.relationships
-                .mapNotNull { relationship ->
-                    if (relationship.type == MdConstants.Types.uploader) {
-                        uploaders[relationship.id]
-                    } else {
-                        null
-                    }
+            networkChapter.relationships.firstNotNullOfOrNull { relationship ->
+                if (relationship.type == MdConstants.Types.uploader) {
+                    uploaders[relationship.id]
+                } else {
+                    null
                 }
-                .firstOrNull()
+            }
 
         if (scanlatorName.isEmpty()) {
             scanlatorName.add(Constants.NO_GROUP)
@@ -229,7 +227,7 @@ fun ChapterDataDto.buildChapterName(
 
     if (attributes.volume != null) {
         chapterName.add("Vol.${attributes.volume}")
-        chapter?.vol = attributes.volume.toString()
+        chapter?.vol = attributes.volume
     }
 
     if (!attributes.chapter.isNullOrBlank()) {
@@ -242,7 +240,7 @@ fun ChapterDataDto.buildChapterName(
         if (chapterName.isNotEmpty()) {
             chapterName.add("-")
         }
-        chapterName.add(attributes.title!!)
+attributes.title?.let { chapterName.add(it) }
         chapter?.chapter_title = MdUtil.cleanString(attributes.title)
     }
 
