@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.mangabaka
 
 import android.net.Uri
 import androidx.core.net.toUri
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaItem
@@ -11,13 +12,18 @@ import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaSearchResult
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaUserProfileResponse
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.util.PkceCodes
+import eu.kanade.tachiyomi.network.DELETE
+import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.HttpException
+import eu.kanade.tachiyomi.network.POST
+import eu.kanade.tachiyomi.network.PUT
+import eu.kanade.tachiyomi.network.awaitSuccess
+import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.PkceUtil
-import eu.kanade.tachiyomi.util.system.toLocalDate
-import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.lang.toLocalDate
 import java.math.RoundingMode
 import java.util.Locale
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -25,17 +31,13 @@ import okhttp3.FormBody
 import okhttp3.Headers.Companion.headersOf
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.nekomanga.BuildConfig
-import org.nekomanga.core.network.GET
-import org.nekomanga.core.network.POST
-import org.nekomanga.core.network.PUT
-import tachiyomi.core.network.HttpException
-import tachiyomi.core.network.awaitSuccess
-import tachiyomi.core.network.parseAs
+import tachiyomi.core.common.util.lang.withIOContext
+import tachiyomi.domain.track.model.Track as DomainTrack
+import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 
 class MangaBakaApi(
-    private val trackId: Int,
+    private val trackId: Long,
     baseClient: OkHttpClient,
     interceptor: MangaBakaInterceptor,
 ) {
@@ -48,9 +50,9 @@ class MangaBakaApi(
                     .header(
                         "User-Agent",
                         buildString {
-                            append("Neko/v${BuildConfig.VERSION_NAME} ")
+                            append("${MR.strings.app_name}/v${BuildConfig.VERSION_NAME} ")
                             append("(${BuildConfig.APPLICATION_ID} ${BuildConfig.COMMIT_SHA}) ")
-                            append("(Android) (https://github.com/nekomangaorg/Neko)")
+                            append("(Android) (https://github.com/CarlosEsco/Neko)")
                         },
                     )
                     .build()
@@ -64,10 +66,10 @@ class MangaBakaApi(
 
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.media_id}"
+            val url = "$LIBRARY_API_URL/${track.remote_id}"
             val body =
                 buildJsonObject {
-                        //  put("is_private", track.private)
+                        put("is_private", track.private)
                         put("state", track.toApiStatus())
                         if (track.last_chapter_read > 0.0) {
                             put("progress_chapter", track.last_chapter_read)
@@ -95,11 +97,19 @@ class MangaBakaApi(
         }
     }
 
+    suspend fun deleteLibManga(track: DomainTrack) {
+        withIOContext {
+            val url = "$LIBRARY_API_URL/${track.remoteId}"
+
+            authClient.newCall(DELETE(url)).awaitSuccess()
+        }
+    }
+
     suspend fun findLibManga(track: Track): Track? {
         return withIOContext {
             with(json) {
                 try {
-                    val url = "$LIBRARY_API_URL/${track.media_id}"
+                    val url = "$LIBRARY_API_URL/${track.remote_id}"
                     val userData =
                         authClient
                             .newCall(GET(url))
@@ -109,23 +119,23 @@ class MangaBakaApi(
 
                     val additionalData =
                         authClient
-                            .newCall(GET("$API_BASE_URL/v1/series/${track.media_id}"))
+                            .newCall(GET("$API_BASE_URL/v1/series/${track.remote_id}"))
                             .awaitSuccess()
                             .parseAs<MangaBakaItemResult>()
                             .data
 
                     Track.create(TrackManager.MANGABAKA).apply {
-                        media_id = track.media_id
+                        remote_id = track.remote_id
                         title = additionalData.title
-                        status = userData.getStatus().toInt()
-                        score = userData.rating?.toDouble()?.toFloat() ?: 0.0f
+                        status = userData.getStatus()
+                        score = userData.rating?.toDouble() ?: 0.0
                         started_reading_date =
                             userData.startDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
                         finished_reading_date =
                             userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() }
                                 ?: 0
-                        last_chapter_read = userData.progressChapter?.toFloat() ?: 0.0f
-                        // private = userData.isPrivate
+                        last_chapter_read = userData.progressChapter ?: 0.0
+                        private = userData.isPrivate
                     }
                 } catch (e: HttpException) {
                     if (e.code == 404) {
@@ -140,11 +150,11 @@ class MangaBakaApi(
 
     suspend fun updateLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.media_id}"
+            val url = "$LIBRARY_API_URL/${track.remote_id}"
             val body =
                 buildJsonObject {
                         put("state", track.toApiStatus())
-                        // put("is_private", track.private)
+                        put("is_private", track.private)
                         if (track.last_chapter_read > 0.0) {
                             put("progress_chapter", track.last_chapter_read)
                         } else {
@@ -194,23 +204,25 @@ class MangaBakaApi(
                     .data
                     .map {
                         TrackSearch.create(trackId).apply {
-                            media_id = it.id
+                            remote_id = it.id
                             title = it.title
                             summary = it.description?.trim().orEmpty()
                             score =
                                 it.rating
                                     ?.toBigDecimal()
                                     ?.setScale(2, RoundingMode.HALF_UP)
-                                    ?.toFloat() ?: -1.0f
+                                    ?.toDouble() ?: -1.0
                             cover_url = it.cover.x250.x1.orEmpty()
                             tracking_url = "$BASE_URL/${it.id}"
-                            start_date = it.published.startDate.orEmpty()
+                            start_date = it.year?.toString().orEmpty()
                             publishing_status = it.status
                             publishing_type =
                                 it.type.replaceFirstChar { c ->
                                     if (c.isLowerCase()) c.titlecase(Locale.getDefault())
                                     else c.toString()
                                 }
+                            authors = it.authors.orEmpty()
+                            artists = it.artists.orEmpty()
                         }
                     }
             }
@@ -219,11 +231,11 @@ class MangaBakaApi(
 
     private fun parseSearchItem(item: MangaBakaItem): TrackSearch {
         return TrackSearch.create(trackId).apply {
-            media_id = item.id
+            remote_id = item.id
             title = item.title
             summary = item.description?.trim().orEmpty()
             score =
-                item.rating?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)?.toFloat() ?: -1.0f
+                item.rating?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)?.toDouble() ?: -1.0
             cover_url = item.cover.x250.x1.orEmpty()
             tracking_url = "$BASE_URL/${item.id}"
             start_date = item.published.startDate.orEmpty()
@@ -232,6 +244,8 @@ class MangaBakaApi(
                 item.type.replaceFirstChar { c ->
                     if (c.isLowerCase()) c.titlecase(Locale.getDefault()) else c.toString()
                 }
+            authors = item.authors.orEmpty()
+            artists = item.artists.orEmpty()
         }
     }
 
@@ -270,7 +284,7 @@ class MangaBakaApi(
         }
     }
 
-    suspend fun getAccessToken(code: String, codeVerifier: String): MangaBakaOAuth {
+    suspend fun getAccessToken(code: String): MangaBakaOAuth {
         return withIOContext {
             val formBody =
                 FormBody.Builder()
@@ -290,7 +304,7 @@ class MangaBakaApi(
     }
 
     companion object {
-        private const val CLIENT_ID = "UZqzTejmOGFldPOSpDHjiTYZKxPthHUa"
+        private const val CLIENT_ID = ""
 
         private const val BASE_URL = "https://mangabaka.org"
         private const val API_BASE_URL = "https://api.mangabaka.dev"
@@ -302,12 +316,14 @@ class MangaBakaApi(
 
         private const val APP_JSON = "application/json"
 
-        fun authUrl(codeChallenge: String): Uri =
+        private var codeVerifier: String = ""
+
+        fun authUrl(): Uri =
             "$OAUTH_URL/authorize"
                 .toUri()
                 .buildUpon() //
                 .appendQueryParameter("client_id", CLIENT_ID)
-                .appendQueryParameter("code_challenge", codeChallenge)
+                .appendQueryParameter("code_challenge", getPkceS256ChallengeCode())
                 .appendQueryParameter("code_challenge_method", "S256")
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("scope", SCOPES)
@@ -326,13 +342,15 @@ class MangaBakaApi(
                         .build(),
             )
 
-        fun getPkceS256ChallengeCode(): PkceCodes {
+        private fun getPkceS256ChallengeCode(): String {
             // MangaBaka requires an actually conformant PKCE process, unlike MAL
             // 1. create verifier
             // 2. create challenge from verifier (S256 hash -> base64 URL encode)
             // 3. send challenge to /authorize
             // 4. send verifier for access tokens to /token
-            return PkceUtil.generateS256Codes()
+            val codes = PkceUtil.generateS256Codes()
+            codeVerifier = codes.codeVerifier
+            return codes.codeChallenge
         }
     }
 }
