@@ -1,8 +1,14 @@
 package org.nekomanga.usecases.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryFilters
+import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
+import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
+import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
+import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
 import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import io.mockk.every
 import io.mockk.mockk
@@ -22,6 +28,10 @@ class FilterLibraryMangaUseCaseTest {
         bookmarkCount: Int = 0,
         isMerged: Boolean = false,
         isTracked: Boolean = false,
+        unavailableCount: Int = 0,
+        hasMissingChapters: Boolean = false,
+        status: List<String> = emptyList(),
+        seriesType: FilterMangaType = FilterMangaType.Manga,
     ): LibraryMangaItem {
         val displayManga = mockk<DisplayManga>()
         every { displayManga.getTitle() } returns "Manga Title"
@@ -41,13 +51,15 @@ class FilterLibraryMangaUseCaseTest {
             latestChapterDate = 0L,
             readCount = 0,
             category = 0,
-            unavailableCount = 0,
-            hasMissingChapters = false,
+            unavailableCount = unavailableCount,
+            hasMissingChapters = hasMissingChapters,
             allCategories = emptyList(),
             altTitles = emptyList(),
             genre = emptyList(),
             author = emptyList(),
             contentRating = emptyList(),
+            status = status,
+            seriesType = seriesType,
         )
     }
 
@@ -118,6 +130,208 @@ class FilterLibraryMangaUseCaseTest {
             )
 
         // Fails because unread matches() returns false
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when bookmarked filter active and item is bookmarked, returns true`() {
+        val manga = mockMangaItem(bookmarkCount = 1)
+        val filters = LibraryFilters(filterBookmarked = FilterBookmarked.Bookmarked)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when bookmarked filter active and item is not bookmarked, returns false`() {
+        val manga = mockMangaItem(bookmarkCount = 0)
+        val filters = LibraryFilters(filterBookmarked = FilterBookmarked.Bookmarked)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when not bookmarked filter active and item is not bookmarked, returns true`() {
+        val manga = mockMangaItem(bookmarkCount = 0)
+        val filters = LibraryFilters(filterBookmarked = FilterBookmarked.NotBookmarked)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when not bookmarked filter active and item is bookmarked, returns false`() {
+        val manga = mockMangaItem(bookmarkCount = 1)
+        val filters = LibraryFilters(filterBookmarked = FilterBookmarked.NotBookmarked)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when completed filter active and item is completed, returns true`() {
+        val manga = mockMangaItem(status = listOf("Completed"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Completed)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when completed filter active and item is ongoing, returns false`() {
+        val manga = mockMangaItem(status = listOf("Ongoing"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Completed)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when ongoing filter active and item is ongoing, returns true`() {
+        val manga = mockMangaItem(status = listOf("Ongoing"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Ongoing)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when ongoing filter active and item is completed, returns false`() {
+        val manga = mockMangaItem(status = listOf("Completed"))
+        val filters = LibraryFilters(filterCompleted = FilterCompleted.Ongoing)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when manga type filter active and item is manga, returns true`() {
+        val manga = mockMangaItem(seriesType = FilterMangaType.Manga)
+        val filters = LibraryFilters(filterMangaType = FilterMangaType.Manga)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when manga type filter active and item is manhwa, returns false`() {
+        val manga = mockMangaItem(seriesType = FilterMangaType.Manhwa)
+        val filters = LibraryFilters(filterMangaType = FilterMangaType.Manga)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when manhwa type filter active and item is manhwa, returns true`() {
+        val manga = mockMangaItem(seriesType = FilterMangaType.Manhwa)
+        val filters = LibraryFilters(filterMangaType = FilterMangaType.Manhwa)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when manhwa type filter active and item is manhua, returns false`() {
+        val manga = mockMangaItem(seriesType = FilterMangaType.Manhua)
+        val filters = LibraryFilters(filterMangaType = FilterMangaType.Manhwa)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when manhua type filter active and item is manhua, returns true`() {
+        val manga = mockMangaItem(seriesType = FilterMangaType.Manhua)
+        val filters = LibraryFilters(filterMangaType = FilterMangaType.Manhua)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when merged filter active and item is merged, returns true`() {
+        val manga = mockMangaItem(isMerged = true)
+        val filters = LibraryFilters(filterMerged = FilterMerged.Merged)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when merged filter active and item is not merged, returns false`() {
+        val manga = mockMangaItem(isMerged = false)
+        val filters = LibraryFilters(filterMerged = FilterMerged.Merged)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when not merged filter active and item is not merged, returns true`() {
+        val manga = mockMangaItem(isMerged = false)
+        val filters = LibraryFilters(filterMerged = FilterMerged.NotMerged)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when not merged filter active and item is merged, returns false`() {
+        val manga = mockMangaItem(isMerged = true)
+        val filters = LibraryFilters(filterMerged = FilterMerged.NotMerged)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when unavailable filter active and item has unavailable chapters, returns true`() {
+        val manga = mockMangaItem(unavailableCount = 1)
+        val filters = LibraryFilters(filterUnavailable = FilterUnavailable.Unavailable)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when unavailable filter active and item has no unavailable chapters, returns false`() {
+        val manga = mockMangaItem(unavailableCount = 0)
+        val filters = LibraryFilters(filterUnavailable = FilterUnavailable.Unavailable)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when no unavailable filter active and item has no unavailable chapters, returns true`() {
+        val manga = mockMangaItem(unavailableCount = 0)
+        val filters = LibraryFilters(filterUnavailable = FilterUnavailable.NoUnavailable)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when no unavailable filter active and item has unavailable chapters, returns false`() {
+        val manga = mockMangaItem(unavailableCount = 1)
+        val filters = LibraryFilters(filterUnavailable = FilterUnavailable.NoUnavailable)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when missing chapters filter active and item has missing chapters, returns true`() {
+        val manga = mockMangaItem(hasMissingChapters = true)
+        val filters = LibraryFilters(filterMissingChapters = FilterMissingChapters.MissingChapter)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when missing chapters filter active and item has no missing chapters, returns false`() {
+        val manga = mockMangaItem(hasMissingChapters = false)
+        val filters = LibraryFilters(filterMissingChapters = FilterMissingChapters.MissingChapter)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when no missing chapters filter active and item has no missing chapters, returns true`() {
+        val manga = mockMangaItem(hasMissingChapters = false)
+        val filters =
+            LibraryFilters(filterMissingChapters = FilterMissingChapters.NoMissingChapters)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when no missing chapters filter active and item has missing chapters, returns false`() {
+        val manga = mockMangaItem(hasMissingChapters = true)
+        val filters =
+            LibraryFilters(filterMissingChapters = FilterMissingChapters.NoMissingChapters)
+
         assertFalse(useCase(manga, filters))
     }
 }
