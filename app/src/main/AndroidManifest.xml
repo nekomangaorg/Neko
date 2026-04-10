@@ -119,7 +119,6 @@
 
                 <data android:scheme="neko" />
                 <data android:host="anilist-auth" />
-                <data android:host="mangabaka-auth" />
             </intent-filter>
         </activity>
         <activity

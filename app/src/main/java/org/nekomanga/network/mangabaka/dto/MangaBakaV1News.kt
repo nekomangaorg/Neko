@@ -17,5 +17,5 @@ data class MangaBakaV1News(
     val series: List<MangaBakaV1Series>? = null,
     @SerialName("published_at") val publishedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("updated_at") val updatedAt: String? = null
+    @SerialName("updated_at") val updatedAt: String? = null,
 )

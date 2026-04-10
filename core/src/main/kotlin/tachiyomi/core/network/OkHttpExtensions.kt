@@ -108,9 +108,7 @@ suspend fun Call.awaitSuccess(): Response {
     val response = await(callStack)
     if (!response.isSuccessful) {
         response.close()
-        val exception = Exception("HTTP error ${response.code}")
-
-        throw exception.apply { stackTrace = callStack }
+        throw HttpException(response.code).apply { stackTrace = callStack }
     }
     return response
 }
@@ -145,3 +143,5 @@ context(jsonInstance: Json)
 fun <T> decodeFromJsonResponse(deserializer: DeserializationStrategy<T>, response: Response): T {
     return response.body.source().use { jsonInstance.decodeFromBufferedSource(deserializer, it) }
 }
+
+class HttpException(val code: Int) : IllegalStateException("HTTP error $code")

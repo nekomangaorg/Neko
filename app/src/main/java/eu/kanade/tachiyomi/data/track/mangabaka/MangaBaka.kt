@@ -1,20 +1,24 @@
 package eu.kanade.tachiyomi.data.track.mangabaka
 
-import dev.icerock.moko.resources.StringResource
-import eu.kanade.tachiyomi.R
+import android.content.Context
+import android.graphics.Color
+import androidx.annotation.StringRes
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.BaseTracker
-import eu.kanade.tachiyomi.data.track.DeletableTracker
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
-import tachiyomi.domain.track.model.Track as DomainTrack
-import tachiyomi.i18n.MR
+import org.nekomanga.R
 import uy.kohesive.injekt.injectLazy
 
-class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
+class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
+
+    @StringRes override fun nameRes() = R.string.mangabaka
+
+    private val scorePreference = preferences.mangabakaScoreType()
 
     private val json: Json by injectLazy()
 
@@ -22,31 +26,40 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
     private val api by lazy { MangaBakaApi(id, client, interceptor) }
 
     override val supportsReadingDates: Boolean = true
-    override val supportsPrivateTracking: Boolean = true
 
     override fun getLogo(): Int = R.drawable.ic_tracker_mangabaka
 
-    override fun getStatusList(): List<Long> {
+    override fun getLogoColor() = Color.rgb(18, 25, 35)
+
+    override fun getStatusList(): List<Int> {
         return listOf(READING, COMPLETED, PAUSED, DROPPED, PLAN_TO_READ, REREADING, CONSIDERING)
     }
 
-    override fun getStatus(status: Long): StringResource? =
-        when (status) {
-            CONSIDERING -> MR.strings.considering
-            COMPLETED -> MR.strings.completed
-            DROPPED -> MR.strings.dropped
-            PAUSED -> MR.strings.paused
-            PLAN_TO_READ -> MR.strings.plan_to_read
-            READING -> MR.strings.reading
-            REREADING -> MR.strings.repeating
-            else -> null
+    override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
+    override fun completedStatus() = COMPLETED
+
+    override fun readingStatus() = READING
+
+    override fun planningStatus() = PLAN_TO_READ
+
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                CONSIDERING -> getString(R.string.considering)
+                COMPLETED -> getString(R.string.completed)
+                DROPPED -> getString(R.string.dropped)
+                PAUSED -> getString(R.string.paused)
+                PLAN_TO_READ -> getString(R.string.plan_to_read)
+                READING -> getString(R.string.reading)
+                REREADING -> getString(R.string.repeating)
+                else -> ""
+            }
         }
 
-    override fun getReadingStatus(): Long = READING
-
-    override fun getRereadingStatus(): Long = REREADING
-
-    override fun getCompletionStatus(): Long = COMPLETED
+    override fun getGlobalStatus(status: Int): String {
+        TODO("Not yet implemented")
+    }
 
     override fun getScoreList(): ImmutableList<String> {
         return when (scorePreference.get()) {
@@ -64,12 +77,17 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
         }
     }
 
-    override fun displayScore(track: DomainTrack): String = track.score.toInt().toString()
+    override fun displayScore(track: Track): String = track.score.toInt().toString()
 
-    override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-        if (track.status != COMPLETED && didReadChapter) {
+    override suspend fun add(track: Track): Track {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
+        if (track.status != COMPLETED && setToRead) {
             if (
-                track.total_chapters > 0 && track.last_chapter_read.toLong() == track.total_chapters
+                track.total_chapters > 0 &&
+                    track.last_chapter_read.toLong() == track.total_chapters.toLong()
             ) {
                 track.status = COMPLETED
                 track.finished_reading_date = System.currentTimeMillis()
@@ -84,29 +102,33 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
         return api.updateLibManga(track)
     }
 
-    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
+    override suspend fun bind(track: Track): Track {
         val remoteTrack = api.findLibManga(track)
         return if (remoteTrack != null) {
-            track.copyPersonalFrom(remoteTrack, copyRemotePrivate = false)
+            track.copyPersonalFrom(remoteTrack)
             track.title = remoteTrack.title
-            track.remote_id = remoteTrack.remote_id
+            track.media_id = remoteTrack.media_id
 
             if (track.status != COMPLETED) {
                 val isRereading = track.status == REREADING
-                track.status = if (!isRereading && hasReadChapters) READING else track.status
+                track.status = if (!isRereading) READING else track.status
             }
 
             update(track)
         } else {
             // Set default fields if it's not found in the list
-            track.status = if (hasReadChapters) READING else PLAN_TO_READ
-            track.score = 0.0
+            track.status = PLAN_TO_READ
+            track.score = 0.0f
 
             api.addLibManga(track)
         }
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
+    override suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> {
         if (query.startsWith(SEARCH_ID_PREFIX)) {
             query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
                 return api.getMangaDetails(id)?.let { listOf(it) } ?: emptyList()
@@ -119,15 +141,16 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.findLibManga(track) ?: throw Exception("Could not find manga")
         track.copyPersonalFrom(remoteTrack)
-        track.remote_id = remoteTrack.remote_id
+        track.media_id = remoteTrack.media_id
         track.title = remoteTrack.title
         return track
     }
 
     override suspend fun login(username: String, password: String) = login(password)
 
-    suspend fun login(code: String, codeVerifier: String) {
+    suspend fun login(code: String): Boolean {
         try {
+            val codeVerifier = preferences.mangabakaCodeVerifier().get()
             val oauth = api.getAccessToken(code, codeVerifier)
             interceptor.setAuth(oauth)
             saveCredentials("user", oauth.accessToken)
@@ -141,18 +164,20 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
                     else -> throw Exception("Unknown score step size $scoreStep")
                 }
             scorePreference.set(scoreType)
+            return true
         } catch (_: Exception) {
             logout()
         }
+        return false
     }
 
     fun saveToken(oauth: MangaBakaOAuth?) {
-        trackPreferences.trackToken(this).set(json.encodeToString(oauth))
+        preferences.trackToken(this).set(json.encodeToString(oauth))
     }
 
     fun restoreToken(): MangaBakaOAuth? {
         return try {
-            json.decodeFromString(trackPreferences.trackToken(this).get())
+            json.decodeFromString(preferences.trackToken(this).get())
         } catch (_: Exception) {
             null
         }
@@ -160,22 +185,18 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
 
     override fun logout() {
         super.logout()
-        trackPreferences.trackToken(this).delete()
+        preferences.trackToken(this).delete()
         interceptor.setAuth(null)
     }
 
-    override suspend fun delete(track: DomainTrack) {
-        api.deleteLibManga(track)
-    }
-
     companion object {
-        const val READING = 1L
-        const val COMPLETED = 2L
-        const val PAUSED = 3L
-        const val DROPPED = 4L
-        const val PLAN_TO_READ = 5L
-        const val REREADING = 6L
-        const val CONSIDERING = 7L
+        const val READING = 1
+        const val COMPLETED = 2
+        const val PAUSED = 3
+        const val DROPPED = 4
+        const val PLAN_TO_READ = 5
+        const val REREADING = 6
+        const val CONSIDERING = 7
 
         const val STEP_1 = "STEP_1"
         const val STEP_5 = "STEP_5"

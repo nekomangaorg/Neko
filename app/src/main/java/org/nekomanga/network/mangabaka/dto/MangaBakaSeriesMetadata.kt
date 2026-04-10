@@ -8,21 +8,12 @@ data class MangaBakaPublished(
     @SerialName("start_date") val startDate: String?,
     @SerialName("end_date") val endDate: String?,
     @SerialName("start_date_is_estimated") val startDateIsEstimated: Boolean?,
-    @SerialName("end_date_is_estimated") val endDateIsEstimated: Boolean?
+    @SerialName("end_date_is_estimated") val endDateIsEstimated: Boolean?,
 )
 
-@Serializable
-data class MangaBakaAnimeDetails(
-    val start: String?,
-    val end: String?
-)
+@Serializable data class MangaBakaAnimeDetails(val start: String?, val end: String?)
 
-@Serializable
-data class MangaBakaPublisher(
-    val name: String?,
-    val type: String?,
-    val note: String?
-)
+@Serializable data class MangaBakaPublisher(val name: String?, val type: String?, val note: String?)
 
 @Serializable
 data class MangaBakaTagV2(
@@ -38,7 +29,7 @@ data class MangaBakaTagV2(
     @SerialName("name_path") val namePath: String,
     @SerialName("series_count") val seriesCount: Double,
     val description: String?,
-    @SerialName("content_rating") val contentRating: MangaBakaContentRating
+    @SerialName("content_rating") val contentRating: MangaBakaContentRating,
 )
 
 @Serializable
@@ -50,7 +41,7 @@ data class MangaBakaRelationships(
     @SerialName("side_story") val sideStory: List<Double>? = null,
     @SerialName("spin_off") val spinOff: List<Double>? = null,
     val alternative: List<Double>? = null,
-    val other: List<Double>? = null
+    val other: List<Double>? = null,
 )
 
 @Serializable
@@ -61,19 +52,19 @@ data class MangaBakaSourceSpecificData(
     val kitsu: MangaBakaSourceItemNum,
     @SerialName("manga_updates") val mangaUpdates: MangaBakaSourceItemStr,
     @SerialName("my_anime_list") val myAnimeList: MangaBakaSourceItemNum,
-    val shikimori: MangaBakaSourceItemNum
+    val shikimori: MangaBakaSourceItemNum,
 )
 
 @Serializable
 data class MangaBakaSourceItemNum(
     val id: Double?,
     val rating: Double?,
-    @SerialName("rating_normalized") val ratingNormalized: Double? = null
+    @SerialName("rating_normalized") val ratingNormalized: Double? = null,
 )
 
 @Serializable
 data class MangaBakaSourceItemStr(
     val id: String?,
     val rating: Double?,
-    @SerialName("rating_normalized") val ratingNormalized: Double? = null
+    @SerialName("rating_normalized") val ratingNormalized: Double? = null,
 )

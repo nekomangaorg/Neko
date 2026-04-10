@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.mangabaka.MangaBakaApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.getValue
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -99,7 +98,7 @@ class TrackingSettingsViewModel : ViewModel() {
         )
 
         val pkceCodes = MangaBakaApi.getPkceS256ChallengeCode()
-        preferences.mangabakaCodeVerifier.set(pkceCodes.codeVerifier)
+        preferences.mangabakaCodeVerifier().set(pkceCodes.codeVerifier)
         _state.update { it.copy(mangaBakaAuthUrl = MangaBakaApi.authUrl(pkceCodes.codeChallenge)) }
     }
 

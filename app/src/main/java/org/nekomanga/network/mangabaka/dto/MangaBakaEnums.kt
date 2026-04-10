@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 enum class MangaBakaSeriesState {
     @SerialName("active") ACTIVE,
     @SerialName("merged") MERGED,
-    @SerialName("deleted") DELETED
+    @SerialName("deleted") DELETED,
 }
 
 @Serializable
@@ -17,7 +17,7 @@ enum class MangaBakaPublicationStatus {
     @SerialName("hiatus") HIATUS,
     @SerialName("releasing") RELEASING,
     @SerialName("unknown") UNKNOWN,
-    @SerialName("upcoming") UPCOMING
+    @SerialName("upcoming") UPCOMING,
 }
 
 @Serializable
@@ -25,7 +25,7 @@ enum class MangaBakaContentRating {
     @SerialName("safe") SAFE,
     @SerialName("suggestive") SUGGESTIVE,
     @SerialName("erotica") EROTICA,
-    @SerialName("pornographic") PORNOGRAPHIC
+    @SerialName("pornographic") PORNOGRAPHIC,
 }
 
 @Serializable
@@ -35,12 +35,12 @@ enum class MangaBakaMediaType {
     @SerialName("manhwa") MANHWA,
     @SerialName("manhua") MANHUA,
     @SerialName("oel") OEL,
-    @SerialName("other") OTHER
+    @SerialName("other") OTHER,
 }
 
 @Serializable
 enum class MangaBakaNewsType {
     @SerialName("default") DEFAULT,
     @SerialName("review") REVIEW,
-    @SerialName("releases") RELEASES
+    @SerialName("releases") RELEASES,
 }

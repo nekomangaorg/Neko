@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
-import eu.kanade.tachiyomi.util.lang.toTimestampString
+import eu.kanade.tachiyomi.util.system.toTimestampString
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
