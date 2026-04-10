@@ -15,6 +15,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
@@ -63,8 +64,12 @@ class Comix : ReducedHttpSource() {
     ): Result<List<SChapterStatusPair>, ResultError> {
         val mangaHash = mangaUrl.removePrefix("/").substringAfterLast("/")
 
+        val path = "/manga/$mangaHash/chapters"
+        val time = 1L
+        val hashToken = ComixHash.generateHash(path, 0, time)
+
         // Logic to support deduplication if enabled
-        var chapterList: ArrayList<Chapter>? = null
+        var chapterList: ArrayList<Chapter>?
 
         chapterList = ArrayList()
 
@@ -74,15 +79,14 @@ class Comix : ReducedHttpSource() {
         try {
             do {
                 val url =
-                    apiUrl
+                    (apiUrl + (path.removePrefix("/")))
                         .toHttpUrl()
                         .newBuilder()
-                        .addPathSegment("manga")
-                        .addPathSegment(mangaHash)
-                        .addPathSegment("chapters")
                         .addQueryParameter("order[number]", "desc")
                         .addQueryParameter("limit", "100")
                         .addQueryParameter("page", page.toString())
+                        .addQueryParameter("time", time.toString())
+                        .addQueryParameter("_", hashToken)
                         .build()
 
                 val response = client.newCall(GET(url.toString(), headers)).await()
@@ -130,7 +134,7 @@ class Comix : ReducedHttpSource() {
         return GET(page.imageUrl ?: throw Exception("Image URL is null"), headers)
     }
 
-    override fun getChapterUrl(simpleChapter: org.nekomanga.domain.chapter.SimpleChapter): String {
+    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return "$baseUrl/${simpleChapter.url}"
     }
 
