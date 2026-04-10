@@ -4,6 +4,7 @@ import android.content.Context
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
+import eu.kanade.tachiyomi.data.track.mangabaka.MangaBaka
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdatesHelper.getMangaUpdatesApiId
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
@@ -20,9 +21,11 @@ class TrackManager(private val context: Context) {
         const val ANILIST = 2
         const val KITSU = 3
         const val MANGA_UPDATES = 7
+        const val MANGABAKA = 11
 
         fun isValidTracker(id: Int): Boolean {
-            return arrayOf(MDLIST, MYANIMELIST, ANILIST, KITSU, MANGA_UPDATES).contains(id)
+            return arrayOf(MDLIST, MYANIMELIST, ANILIST, KITSU, MANGA_UPDATES, MANGABAKA)
+                .contains(id)
         }
     }
 
@@ -36,6 +39,8 @@ class TrackManager(private val context: Context) {
 
     val mangaUpdates = MangaUpdates(context, MANGA_UPDATES)
 
+    val mangaBaka = MangaBaka(MANGABAKA.toLong())
+
     val services =
         hashMapOf(
             mdList.id to mdList,
@@ -43,6 +48,7 @@ class TrackManager(private val context: Context) {
             aniList.id to aniList,
             kitsu.id to kitsu,
             mangaUpdates.id to mangaUpdates,
+            mangaBaka.id.toInt() to mangaBaka,
         )
 
     fun getService(id: Int) = services[id]

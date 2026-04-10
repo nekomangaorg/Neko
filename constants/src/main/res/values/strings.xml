@@ -744,6 +744,8 @@
     <string name="plan_to_read">Plan to read</string>
     <string name="want_to_read">Want to Read</string>
     <string name="paused">Paused</string>
+    <string name="considering">Considering</string>
+    <string name="repeating">Rereading</string>
     <string name="rereading">Rereading</string>
     <string name="score">Score</string>
     <string name="status">Status</string>
@@ -766,6 +768,7 @@
     <string name="myanimelist" translatable="false">MyAnimeList</string>
     <string name="kitsu" translatable="false">Kitsu</string>
     <string name="manga_updates" translatable="false">MangaUpdates</string>
+    <string name="mangabaka" translatable="false">MangaBaka</string>
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
     <string name="auto_track">Automatically link tracking</string>
     <string name="scoring_type_updated">Scoring type updated</string>

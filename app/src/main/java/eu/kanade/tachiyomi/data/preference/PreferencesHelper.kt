@@ -136,6 +136,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
+    val mangabakaScoreType = this.preferenceStore.getString("mangabaka_score_type", "STEP_1")
+
     fun dateFormat(
         format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()
     ): DateFormat =

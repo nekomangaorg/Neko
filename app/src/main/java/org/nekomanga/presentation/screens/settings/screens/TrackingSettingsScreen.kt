@@ -270,6 +270,38 @@ internal class TrackingSettingsScreen(
                         ),
                     ),
             ),
+            Preference.PreferenceGroup(
+                title = stringResource(R.string.mangabaka),
+                preferenceItems =
+                    persistentListOf(
+                        Preference.PreferenceItem.TrackerPreference(
+                            tracker = trackingScreenState.mangaBaka,
+                            title =
+                                if (trackingScreenState.mangaBakaIsLoggedIn)
+                                    stringResource(R.string.sign_out)
+                                else stringResource(R.string.sign_in),
+                            subtitle =
+                                if (trackingScreenState.mangaBakaIsLoggedIn)
+                                    trackingScreenState.mangaBakaUsername
+                                else null,
+                            isLoggedIn = trackingScreenState.mangaBakaIsLoggedIn,
+                            login = { context.openInBrowser(trackingScreenState.mangaBakaAuthUrl) },
+                            logout = {
+                                trackServiceForLoginLogout = trackingScreenState.mangaBaka
+                                showLogoutDialog = true
+                            },
+                        ),
+                        Preference.PreferenceItem.BasicSwitchPreference(
+                            title = stringResource(R.string.auto_track),
+                            enabled = trackingScreenState.mangaBakaIsLoggedIn,
+                            checked = trackingScreenState.mangaBakaAutoAddTrack,
+                            onValueChanged = {
+                                updateAutoAddTrack(it, trackingScreenState.mangaBaka)
+                                true
+                            },
+                        ),
+                    ),
+            ),
         )
     }
 
@@ -296,6 +328,7 @@ internal class TrackingSettingsScreen(
                 SearchTerm(title = stringResource(R.string.kitsu)),
                 SearchTerm(title = stringResource(R.string.myanimelist)),
                 SearchTerm(title = stringResource(R.string.manga_updates)),
+                SearchTerm(title = stringResource(R.string.mangabaka)),
             )
         }
     }
