@@ -39,10 +39,19 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
             val autoAddTrackerIds = autoAddTracker.map { it.toInt() }
             val loggedServicesMap = loggedServices.associateBy { it.id }
 
+            val tracksByMangaId =
+                libraryMangaList
+                    .mapNotNull { it.id }
+                    .chunked(900)
+                    .map { chunk -> async { db.getTracks(chunk).executeOnIO() } }
+                    .awaitAll()
+                    .flatten()
+                    .groupBy { it.manga_id }
+
             libraryMangaList.forEach { manga ->
                 updateNotification(manga.title, count++, libraryMangaList.size)
 
-                val tracks = db.getTracks(manga).executeOnIO()
+                val tracks = tracksByMangaId[manga.id] ?: emptyList()
                 val trackSyncIds = tracks.map { it.sync_id }.toSet()
 
                 coroutineScope {
