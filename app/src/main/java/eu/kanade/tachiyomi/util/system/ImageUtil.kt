@@ -733,7 +733,7 @@ object ImageUtil {
             val imageHeight = outHeight
             val imageWidth = outWidth
 
-            val optimalImageHeight = displayMaxHeightInPx * 8
+            val optimalImageHeight = displayMaxHeightInPx * 2
 
             // -1 so it doesn't try to split when imageHeight = optimalImageHeight
             val partCount = (imageHeight - 1) / optimalImageHeight + 1
