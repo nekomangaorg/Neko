@@ -43,7 +43,9 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                 libraryMangaList
                     .mapNotNull { it.id }
                     .chunked(900)
-                    .flatMap { chunk -> db.getTracks(chunk).executeOnIO() }
+                    .map { chunk -> async { db.getTracks(chunk).executeOnIO() } }
+                    .awaitAll()
+                    .flatten()
                     .groupBy { it.manga_id }
 
             libraryMangaList.forEach { manga ->
