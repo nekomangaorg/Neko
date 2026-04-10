@@ -13,6 +13,7 @@ class FilterLibraryMangaUseCase {
             filters.filterMangaType.matches(manga) &&
             filters.filterMerged.matches(manga) &&
             filters.filterUnavailable.matches(manga) &&
+            filters.filterMissingChapters.matches(manga) &&
             filters.filterTracked.matches(manga)
     }
 }

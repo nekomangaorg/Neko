@@ -1,14 +1,8 @@
 package org.nekomanga.usecases.library
 
 import eu.kanade.tachiyomi.ui.library.LibraryFilters
-import eu.kanade.tachiyomi.ui.library.filter.FilterBookmarked
-import eu.kanade.tachiyomi.ui.library.filter.FilterCompleted
 import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
-import eu.kanade.tachiyomi.ui.library.filter.FilterMangaType
-import eu.kanade.tachiyomi.ui.library.filter.FilterMerged
-import eu.kanade.tachiyomi.ui.library.filter.FilterMissingChapters
 import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
-import eu.kanade.tachiyomi.ui.library.filter.FilterUnavailable
 import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
 import io.mockk.every
 import io.mockk.mockk
@@ -28,10 +22,6 @@ class FilterLibraryMangaUseCaseTest {
         bookmarkCount: Int = 0,
         isMerged: Boolean = false,
         isTracked: Boolean = false,
-        unavailableCount: Int = 0,
-        hasMissingChapters: Boolean = false,
-        status: List<String> = emptyList(),
-        seriesType: FilterMangaType = FilterMangaType.Manga,
     ): LibraryMangaItem {
         val displayManga = mockk<DisplayManga>()
         every { displayManga.getTitle() } returns "Manga Title"
@@ -51,15 +41,13 @@ class FilterLibraryMangaUseCaseTest {
             latestChapterDate = 0L,
             readCount = 0,
             category = 0,
-            unavailableCount = unavailableCount,
-            hasMissingChapters = hasMissingChapters,
+            unavailableCount = 0,
+            hasMissingChapters = false,
             allCategories = emptyList(),
             altTitles = emptyList(),
             genre = emptyList(),
             author = emptyList(),
             contentRating = emptyList(),
-            status = status,
-            seriesType = seriesType,
         )
     }
 
