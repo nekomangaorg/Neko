@@ -293,6 +293,6 @@ class MangaHandler {
             }
             .filter { it.type == MdConstants.Types.uploader }
             .distinctBy { it.id }
-            .associate { it.id to it.attributes!!.username!! }
+            .associate { it.id to (it.attributes?.username ?: "Delete uploader") }
     }
 }
