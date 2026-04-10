@@ -1,30 +1,26 @@
 package eu.kanade.tachiyomi.data.track.mangabaka
 
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
-import java.io.IOException
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
-import tachiyomi.core.network.parseAs
+import org.nekomanga.network.mangabaka.dto.MangaBakaOAuth
 import uy.kohesive.injekt.injectLazy
 
 class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {
     private val json: Json by injectLazy()
 
-    private var currentAuth = mangaBaka.restoreToken()
+    private var oauth = mangaBaka.restoreToken()
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        if (currentAuth == null) {
-            throw IOException("MangaBaka: User is not authenticated")
-        }
-        val currentAuth = currentAuth!!
+        var currentAuth = oauth ?: throw Exception("Not authenticated with MangaBaka")
 
         if (currentAuth.isExpired()) {
             val response = chain.proceed(MangaBakaApi.refreshTokenRequest(currentAuth.refreshToken))
             if (response.isSuccessful) {
-                setAuth(with(json) { response.parseAs() })
+                currentAuth = json.decodeFromString(response.body.string())
+                setAuth(currentAuth)
             } else {
                 response.close()
             }
@@ -38,7 +34,7 @@ class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {
     }
 
     fun setAuth(auth: MangaBakaOAuth?) {
-        currentAuth = auth
+        oauth = auth
         mangaBaka.saveToken(auth)
     }
 }

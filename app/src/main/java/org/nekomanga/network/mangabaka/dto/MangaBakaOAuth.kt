@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.track.mangabaka.dto
+package org.nekomanga.network.mangabaka.dto
 
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes

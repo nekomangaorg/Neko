@@ -9,14 +9,14 @@ enum class MangaBakaUserRole {
     @SerialName("developer") DEVELOPER,
     @SerialName("contributor") CONTRIBUTOR,
     @SerialName("moderator") MODERATOR,
-    @SerialName("admin") ADMIN
+    @SerialName("admin") ADMIN,
 }
 
 @Serializable
 enum class MangaBakaAuthType {
     @SerialName("oauth") OAUTH,
     @SerialName("pat") PAT,
-    @SerialName("session") SESSION
+    @SerialName("session") SESSION,
 }
 
 @Serializable
@@ -26,7 +26,7 @@ enum class MangaBakaAuthScope {
     @SerialName("mod") MOD,
     @SerialName("openid") OPENID,
     @SerialName("profile") PROFILE,
-    @SerialName("offline_access") OFFLINE_ACCESS
+    @SerialName("offline_access") OFFLINE_ACCESS,
 }
 
 @Serializable
@@ -37,5 +37,5 @@ enum class MangaBakaLibraryState {
     @SerialName("paused") PAUSED,
     @SerialName("plan_to_read") PLAN_TO_READ,
     @SerialName("reading") READING,
-    @SerialName("rereading") REREADING
+    @SerialName("rereading") REREADING,
 }

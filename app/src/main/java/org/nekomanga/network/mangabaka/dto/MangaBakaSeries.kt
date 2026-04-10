@@ -3,8 +3,12 @@ package org.nekomanga.network.mangabaka.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable data class MangaBakaSeriesResult(val data: MangaBakaSeries)
+
+@Serializable data class MangaBakaSeriesSearchResult(val data: List<MangaBakaSeries>)
+
 @Serializable
-data class MangaBakaV1Series(
+data class MangaBakaSeries(
     val id: Double,
     val state: MangaBakaSeriesState,
     @SerialName("merged_with") val mergedWith: Double? = null,
@@ -42,4 +46,10 @@ data class MangaBakaV1Series(
     @SerialName("last_updated_at") val lastUpdatedAt: String? = null,
     val relationships: MangaBakaRelationships? = null,
     val source: MangaBakaSourceSpecificData,
-)
+) {
+    fun parseTitle(): String {
+        return titles?.firstOrNull { it.traits.contains("native") }?.title
+            ?: nativeTitle
+            ?: "NO TITLE"
+    }
+}
