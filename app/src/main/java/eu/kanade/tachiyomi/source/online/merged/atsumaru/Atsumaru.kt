@@ -22,7 +22,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
@@ -38,11 +37,14 @@ class Atsumaru : ReducedHttpSource() {
 
     override val client = network.cloudFlareClient.newBuilder().rateLimit(2).build()
 
-    override val headers = Headers.Builder().apply {
-        add("Accept", "*/*")
-        add("Referer", baseUrl)
-        add("Content-Type", "application/json")
-    }.build()
+    override val headers =
+        Headers.Builder()
+            .apply {
+                add("Accept", "*/*")
+                add("Referer", baseUrl)
+                add("Content-Type", "application/json")
+            }
+            .build()
 
     private val json: Json by injectLazy()
 
@@ -54,7 +56,9 @@ class Atsumaru : ReducedHttpSource() {
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val (slug, name) = chapter.url.split("/")
         val url =
-            "$baseUrl/api/read/chapter".toHttpUrl().newBuilder()
+            "$baseUrl/api/read/chapter"
+                .toHttpUrl()
+                .newBuilder()
                 .addQueryParameter("mangaId", slug)
                 .addQueryParameter("chapterId", name)
 
@@ -70,7 +74,8 @@ class Atsumaru : ReducedHttpSource() {
                 when {
                     page.image.startsWith("http") -> page.image
                     page.image.startsWith("//") -> "https:${page.image}"
-                    else -> "$baseUrl/static/${page.image.removePrefix("/").removePrefix("static/")}"
+                    else ->
+                        "$baseUrl/static/${page.image.removePrefix("/").removePrefix("static/")}"
                 }
 
             Page(index, imageUrl = imageUrl.replaceFirst(Regex("^https?:?//"), "https://"))
@@ -78,30 +83,36 @@ class Atsumaru : ReducedHttpSource() {
     }
 
     override fun imageRequest(page: Page): Request {
-        val imgHeaders = headers.newBuilder().apply {
-            add("Accept", "image/avif,image/webp,*/*")
-            add("Referer", baseUrl)
-        }.build()
+        val imgHeaders =
+            headers
+                .newBuilder()
+                .apply {
+                    add("Accept", "image/avif,image/webp,*/*")
+                    add("Referer", baseUrl)
+                }
+                .build()
         return GET(page.imageUrl!!, imgHeaders)
     }
 
     override suspend fun searchManga(query: String): List<SManga> {
         val types = listOf("Manga", "Manwha", "Manhua", "OEL")
 
-        val searchRequest = SearchRequest(
-            page = 0,
-            filter =
-                SearchFilter(
-                    search = query.ifEmpty { null },
-                    types = types,
-                    sortBy = "popularity",
-                ),
-        )
+        val searchRequest =
+            SearchRequest(
+                page = 0,
+                filter =
+                    SearchFilter(
+                        search = query.ifEmpty { null },
+                        types = types,
+                        sortBy = "popularity",
+                    ),
+            )
 
         val jsonString = json.encodeToString(searchRequest)
         val requestBody = jsonString.toRequestBody("application/json".toMediaType())
 
-        val response = client.newCall(POST("$baseUrl/api/explore/filteredView", headers, requestBody)).await()
+        val response =
+            client.newCall(POST("$baseUrl/api/explore/filteredView", headers, requestBody)).await()
 
         if (!response.isSuccessful) {
             response.closeQuietly()
@@ -117,43 +128,51 @@ class Atsumaru : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapterStatusPair>, ResultError> {
-        val response = client.newCall(GET("$baseUrl/api/manga/allChapters?mangaId=$mangaUrl", headers)).await()
+    override suspend fun fetchChapters(
+        mangaUrl: String
+    ): Result<List<SChapterStatusPair>, ResultError> {
+        val response =
+            client.newCall(GET("$baseUrl/api/manga/allChapters?mangaId=$mangaUrl", headers)).await()
 
         if (!response.isSuccessful) {
             response.closeQuietly()
             return Err(ResultError.HttpError(response.code, "HTTP ${response.code}"))
         }
 
-        val mangaId = mangaUrl
-        val scanlatorMap =
-            try {
-                val detailsRequest = GET("$baseUrl/api/manga/page?id=$mangaId", headers)
-                client
-                    .newCall(detailsRequest)
-                    .execute()
-                    .use {
-                        json
-                            .decodeFromString<MangaObjectDto>(it.body.string())
-                            .mangaPage
-                            .scanlators
-                            ?.associate { it.id to it.name }
-                    }
-                    .orEmpty()
-            } catch (_: Exception) {
-                emptyMap()
-            }
+        return response.use { res ->
+            val mangaId = mangaUrl
+            val scanlatorMap =
+                try {
+                    val detailsRequest = GET("$baseUrl/api/manga/page?id=$mangaId", headers)
+                    client
+                        .newCall(detailsRequest)
+                        .await()
+                        .use {
+                            json
+                                .decodeFromString<MangaObjectDto>(it.body.string())
+                                .mangaPage
+                                .scanlators
+                                ?.associate { it.id to it.name }
+                        }
+                        .orEmpty()
+                } catch (_: Exception) {
+                    emptyMap()
+                }
 
-        val data = json.decodeFromString<AllChaptersDto>(response.body.string())
+            val data = json.decodeFromString<AllChaptersDto>(res.body.string())
 
-        val chapters = data.chapters.map {
-            it.toSChapter(mangaId, it.scanlationMangaId?.let { id -> scanlatorMap[id] }) to false
+            val chapters =
+                data.chapters.map {
+                    it.toSChapter(mangaId, it.scanlationMangaId?.let { id -> scanlatorMap[id] }) to
+                        false
+                }
+            Ok(chapters)
         }
-        return Ok(chapters)
     }
 
     companion object {
         const val name = "Atsumaru"
         const val baseUrl = "https://atsu.moe"
+        private val PROTOCOL_REGEX = Regex("^https?://")
     }
 }
