@@ -160,8 +160,10 @@ class MangaUpdateCoordinator {
             ) {
                 val chaptersToDownload =
                     newChapters
-                        .filterNot { isMerging && it.isMergedChapter() }
-                        .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                        .mapNotNull {
+                            if (isMerging && it.isMergedChapter()) null
+                            else it.toSimpleChapter()?.toChapterItem()
+                        }
                         .sortedBy { it.chapter.chapterNumber }
                 downloadChapters(manga, chaptersToDownload)
             }
