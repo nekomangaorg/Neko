@@ -105,8 +105,7 @@ class MarkChaptersRemoteTest {
 
             coVerify(exactly = 1) {
                 statusHandler.markMergedChaptersStatus(
-                    chapters =
-                        match { it.size == 1 && it.first().mangadex_chapter_id == "md-chapter-2" },
+                    chapters = match { it.size == 1 && it.first().url == "" },
                     read = true,
                 )
             }
