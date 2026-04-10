@@ -240,7 +240,7 @@ fun ChapterDataDto.buildChapterName(
         if (chapterName.isNotEmpty()) {
             chapterName.add("-")
         }
-        chapterName.add(attributes.title)
+attributes.title?.let { chapterName.add(it) }
         chapter?.chapter_title = MdUtil.cleanString(attributes.title)
     }
 
