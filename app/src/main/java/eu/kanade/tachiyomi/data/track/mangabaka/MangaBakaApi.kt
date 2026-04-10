@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.util.PkceUtil
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import java.math.RoundingMode
 import java.util.Locale
-import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -130,10 +129,17 @@ class MangaBakaApi(
                         status = userData.getStatus()
                         score = userData.rating?.toDouble() ?: 0.0
                         started_reading_date =
-                            userData.startDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
+                            userData.startDate?.let {
+                                LocalDate.parse(it)
+                                    .atStartOfDayIn(TimeZone.UTC)
+                                    .toEpochMilliseconds()
+                            } ?: 0
                         finished_reading_date =
-                            userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() }
-                                ?: 0
+                            userData.finishDate?.let {
+                                LocalDate.parse(it)
+                                    .atStartOfDayIn(TimeZone.UTC)
+                                    .toEpochMilliseconds()
+                            } ?: 0
                         last_chapter_read = userData.progressChapter ?: 0.0
                         private = userData.isPrivate
                     }
@@ -284,7 +290,7 @@ class MangaBakaApi(
         }
     }
 
-    suspend fun getAccessToken(code: String): MangaBakaOAuth {
+    suspend fun getAccessToken(code: String, codeVerifier: String): MangaBakaOAuth {
         return withIOContext {
             val formBody =
                 FormBody.Builder()
@@ -316,14 +322,12 @@ class MangaBakaApi(
 
         private const val APP_JSON = "application/json"
 
-        private var codeVerifier: String = ""
-
-        fun authUrl(): Uri =
+        fun authUrl(codeChallenge: String): Uri =
             "$OAUTH_URL/authorize"
                 .toUri()
                 .buildUpon() //
                 .appendQueryParameter("client_id", CLIENT_ID)
-                .appendQueryParameter("code_challenge", getPkceS256ChallengeCode())
+                .appendQueryParameter("code_challenge", codeChallenge)
                 .appendQueryParameter("code_challenge_method", "S256")
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("scope", SCOPES)
@@ -342,15 +346,13 @@ class MangaBakaApi(
                         .build(),
             )
 
-        private fun getPkceS256ChallengeCode(): String {
+        fun getPkceS256ChallengeCode(): PkceUtil.PkceCodes {
             // MangaBaka requires an actually conformant PKCE process, unlike MAL
             // 1. create verifier
             // 2. create challenge from verifier (S256 hash -> base64 URL encode)
             // 3. send challenge to /authorize
             // 4. send verifier for access tokens to /token
-            val codes = PkceUtil.generateS256Codes()
-            codeVerifier = codes.codeVerifier
-            return codes.codeChallenge
+            return PkceUtil.generateS256Codes()
         }
     }
 }

@@ -126,9 +126,9 @@ class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
 
     override suspend fun login(username: String, password: String) = login(password)
 
-    suspend fun login(code: String) {
+    suspend fun login(code: String, codeVerifier: String) {
         try {
-            val oauth = api.getAccessToken(code)
+            val oauth = api.getAccessToken(code, codeVerifier)
             interceptor.setAuth(oauth)
             saveCredentials("user", oauth.accessToken)
             val scoreType =
