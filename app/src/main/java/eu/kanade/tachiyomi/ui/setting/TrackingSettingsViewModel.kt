@@ -97,6 +97,10 @@ class TrackingSettingsViewModel : ViewModel() {
                 _state.update { it.copy(mangaBakaIsLoggedIn = loggedIn) }
             },
         )
+
+        val pkceCodes = MangaBakaApi.getPkceS256ChallengeCode()
+        preferences.mangabakaCodeVerifier.set(pkceCodes.codeVerifier)
+        _state.update { it.copy(mangaBakaAuthUrl = MangaBakaApi.authUrl(pkceCodes.codeChallenge)) }
     }
 
     fun launchTrackerUpdates(
@@ -166,6 +170,6 @@ class TrackingSettingsViewModel : ViewModel() {
         val mangaBakaUsername: String = "",
         val mangaBakaIsLoggedIn: Boolean = false,
         val mangaBakaAutoAddTrack: Boolean = false,
-        val mangaBakaAuthUrl: Uri = MangaBakaApi.authUrl(),
+        val mangaBakaAuthUrl: Uri = Uri.EMPTY,
     )
 }
