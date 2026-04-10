@@ -1,0 +1,123 @@
+package org.nekomanga.usecases.library
+
+import eu.kanade.tachiyomi.ui.library.LibraryFilters
+import eu.kanade.tachiyomi.ui.library.filter.FilterDownloaded
+import eu.kanade.tachiyomi.ui.library.filter.FilterTracked
+import eu.kanade.tachiyomi.ui.library.filter.FilterUnread
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.manga.LibraryMangaItem
+
+class FilterLibraryMangaUseCaseTest {
+
+    private val useCase = FilterLibraryMangaUseCase()
+
+    private fun mockMangaItem(
+        unreadCount: Int = 0,
+        downloadCount: Int = 0,
+        bookmarkCount: Int = 0,
+        isMerged: Boolean = false,
+        isTracked: Boolean = false,
+    ): LibraryMangaItem {
+        val displayManga = mockk<DisplayManga>()
+        every { displayManga.getTitle() } returns "Manga Title"
+        every { displayManga.mangaId } returns 1L
+
+        return LibraryMangaItem(
+            displayManga = displayManga,
+            unreadCount = unreadCount,
+            downloadCount = downloadCount,
+            bookmarkCount = bookmarkCount,
+            isMerged = isMerged,
+            trackCount = if (isTracked) 1 else 0,
+            userCover = null,
+            dynamicCover = null,
+            url = "",
+            addedToLibraryDate = 0L,
+            latestChapterDate = 0L,
+            readCount = 0,
+            category = 0,
+            unavailableCount = 0,
+            hasMissingChapters = false,
+            allCategories = emptyList(),
+            altTitles = emptyList(),
+            genre = emptyList(),
+            author = emptyList(),
+            contentRating = emptyList(),
+        )
+    }
+
+    @Test
+    fun `when all filters inactive, returns true`() {
+        val manga = mockMangaItem()
+        val filters = LibraryFilters()
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when unread filter active and item has unread, returns true`() {
+        val manga = mockMangaItem(unreadCount = 1)
+        val filters = LibraryFilters(filterUnread = FilterUnread.Unread)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when unread filter active and item has no unread, returns false`() {
+        val manga = mockMangaItem(unreadCount = 0)
+        val filters = LibraryFilters(filterUnread = FilterUnread.Unread)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when downloaded filter active and item has downloads, returns true`() {
+        val manga = mockMangaItem(downloadCount = 1)
+        val filters = LibraryFilters(filterDownloaded = FilterDownloaded.Downloaded)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when downloaded filter active and item has no downloads, returns false`() {
+        val manga = mockMangaItem(downloadCount = 0)
+        val filters = LibraryFilters(filterDownloaded = FilterDownloaded.Downloaded)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when tracked filter active and item is tracked, returns true`() {
+        val manga = mockMangaItem(isTracked = true)
+        val filters = LibraryFilters(filterTracked = FilterTracked.Tracked)
+
+        assertTrue(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when tracked filter active and item is not tracked, returns false`() {
+        val manga = mockMangaItem(isTracked = false)
+        val filters = LibraryFilters(filterTracked = FilterTracked.Tracked)
+
+        assertFalse(useCase(manga, filters))
+    }
+
+    @Test
+    fun `when multiple filters active, fails fast on first mismatch`() {
+        val manga = mockMangaItem(unreadCount = 0, downloadCount = 1)
+        // Has downloads but no unread chapters
+        val filters =
+            LibraryFilters(
+                filterUnread = FilterUnread.Unread,
+                filterDownloaded = FilterDownloaded.Downloaded,
+            )
+
+        // Fails because unread matches() returns false
+        assertFalse(useCase(manga, filters))
+    }
+}
