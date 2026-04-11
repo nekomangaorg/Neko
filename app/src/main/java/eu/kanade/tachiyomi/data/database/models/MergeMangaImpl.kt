@@ -102,8 +102,7 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
 
         fun isHostedSource(mergeType: MergeType): Boolean {
             return when (mergeType) {
-                Suwayomi,
-                Komga -> true
+                Suwayomi, Komga -> true
                 else -> false
             }
         }
