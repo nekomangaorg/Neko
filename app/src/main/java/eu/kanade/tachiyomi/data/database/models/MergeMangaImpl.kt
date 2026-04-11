@@ -65,8 +65,8 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
     ),
     Atsumaru(
         id = 11,
-        scanlatorName = eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru().name,
-        baseUrl = eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru().baseUrl,
+        scanlatorName = Atsumaru.name,
+        baseUrl = Atsumaru.baseUrl,
     );
 
     companion object {
