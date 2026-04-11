@@ -38,6 +38,7 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -33,7 +34,9 @@ import org.nekomanga.R
 import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.screens.webview.WebviewTopBar
 import tachiyomi.core.util.system.WebViewUtil
+import tachiyomi.core.util.system.secureShouldInterceptRequest
 import tachiyomi.core.util.system.setDefaultSettings
+import tachiyomi.core.util.system.shouldOverrideUrlLoading
 
 @Composable
 fun WebViewScreen(title: String, url: String, onBackPressed: () -> Unit) {
@@ -136,11 +139,17 @@ fun WebViewWrapper(
                         url?.let { currentUrl = it }
                     }
 
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                    ): WebResourceResponse? = secureShouldInterceptRequest(request)
+
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest?,
                     ): Boolean {
-                        request?.let { view?.loadUrl(it.url.toString(), headers) }
+                        if (!shouldOverrideUrlLoading(request))
+                            request?.let { view?.loadUrl(it.url.toString(), headers) }
                         return super.shouldOverrideUrlLoading(view, request)
                     }
                 }
