@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
+import eu.kanade.tachiyomi.data.track.mangabaka.MangaBakaApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.getValue
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -40,6 +40,7 @@ class TrackingSettingsViewModel : ViewModel() {
                 kitsu = trackManager.kitsu.toTrackServiceItem(),
                 mal = trackManager.myAnimeList.toTrackServiceItem(),
                 mangaUpdates = trackManager.mangaUpdates.toTrackServiceItem(),
+                mangaBaka = trackManager.mangaBaka.toTrackServiceItem(),
             )
         )
 
@@ -53,6 +54,7 @@ class TrackingSettingsViewModel : ViewModel() {
                     kitsuAutoAddTrack = set.contains(it.kitsu.id.toString()),
                     malAutoAddTrack = set.contains(it.mal.id.toString()),
                     mangaUpdatesAutoAddTrack = set.contains(it.mangaUpdates.id.toString()),
+                    mangaBakaAutoAddTrack = set.contains(it.mangaBaka.id.toString()),
                 )
             }
         }
@@ -84,6 +86,20 @@ class TrackingSettingsViewModel : ViewModel() {
                 _state.update { it.copy(mangaUpdatesIsLoggedIn = loggedIn) }
             },
         )
+
+        launchTrackerUpdates(
+            tracker = trackManager.mangaBaka,
+            updateUsername = { username ->
+                _state.update { it.copy(mangaBakaUsername = username) }
+            },
+            updateLoggedIn = { loggedIn ->
+                _state.update { it.copy(mangaBakaIsLoggedIn = loggedIn) }
+            },
+        )
+
+        val pkceCodes = MangaBakaApi.getPkceS256ChallengeCode()
+        preferences.mangabakaCodeVerifier().set(pkceCodes.codeVerifier)
+        _state.update { it.copy(mangaBakaAuthUrl = MangaBakaApi.authUrl(pkceCodes.codeChallenge)) }
     }
 
     fun launchTrackerUpdates(
@@ -149,5 +165,10 @@ class TrackingSettingsViewModel : ViewModel() {
         val mangaUpdatesUsername: String = "",
         val mangaUpdatesIsLoggedIn: Boolean = false,
         val mangaUpdatesAutoAddTrack: Boolean = false,
+        val mangaBaka: TrackServiceItem,
+        val mangaBakaUsername: String = "",
+        val mangaBakaIsLoggedIn: Boolean = false,
+        val mangaBakaAutoAddTrack: Boolean = false,
+        val mangaBakaAuthUrl: Uri = Uri.EMPTY,
     )
 }

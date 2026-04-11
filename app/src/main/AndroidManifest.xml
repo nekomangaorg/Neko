@@ -123,6 +123,20 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="eu.kanade.tachiyomi.ui.setting.logins.MangaBakaLoginActivity"
+            android:label="MangaBaka"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="neko" />
+                <data android:host="mangabaka-auth" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name="eu.kanade.tachiyomi.ui.setting.logins.MangaDexLoginActivity"
             android:label="MangaDexLogin"
             android:exported="true">
