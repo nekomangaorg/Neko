@@ -152,13 +152,17 @@ fun MergeSheet(
                                                 validMergeType.baseUrl,
                                                 validMergeType.scanlatorName,
                                             )
-                                        } else if (MergeType.isHostedSource(validMergeType)) {
+                                        } else {
                                             val source =
                                                 MergeType.getSource(validMergeType, Injekt.get())
-                                            openMergeSource(
-                                                (source as MergedServerSource).hostUrl(),
-                                                validMergeType.scanlatorName,
-                                            )
+                                            val hostUrl =
+                                                if (source is MergedServerSource) source.hostUrl()
+                                                else ""
+                                            if (hostUrl.isNotEmpty())
+                                                openMergeSource(
+                                                    hostUrl,
+                                                    validMergeType.scanlatorName,
+                                                )
                                         }
                                     },
                                     title = validMergeType.name,
