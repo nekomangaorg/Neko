@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -86,15 +87,16 @@ internal class TrackingSettingsScreen(
     @Composable
     fun servicesGroup(context: Context): List<Preference.PreferenceGroup> {
         var trackServiceIdForLoginLogout by rememberSaveable { mutableStateOf<Int?>(null) }
-        val trackServiceForLoginLogout = remember(trackServiceIdForLoginLogout, trackingScreenState) {
-            when (trackServiceIdForLoginLogout) {
-                trackingScreenState.anilist.id -> trackingScreenState.anilist
-                trackingScreenState.kitsu.id -> trackingScreenState.kitsu
-                trackingScreenState.mal.id -> trackingScreenState.mal
-                trackingScreenState.mangaUpdates.id -> trackingScreenState.mangaUpdates
-                else -> null
+        val trackServiceForLoginLogout =
+            remember(trackServiceIdForLoginLogout, trackingScreenState) {
+                when (trackServiceIdForLoginLogout) {
+                    trackingScreenState.anilist.id -> trackingScreenState.anilist
+                    trackingScreenState.kitsu.id -> trackingScreenState.kitsu
+                    trackingScreenState.mal.id -> trackingScreenState.mal
+                    trackingScreenState.mangaUpdates.id -> trackingScreenState.mangaUpdates
+                    else -> null
+                }
             }
-        }
         var showLoginDialog by rememberSaveable { mutableStateOf(false) }
 
         var loginDialogUsernameLabel by rememberSaveable { mutableStateOf("") }
