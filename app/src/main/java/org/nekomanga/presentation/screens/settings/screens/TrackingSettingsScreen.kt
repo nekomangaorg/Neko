@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -85,9 +86,17 @@ internal class TrackingSettingsScreen(
 
     @Composable
     fun servicesGroup(context: Context): List<Preference.PreferenceGroup> {
-        var trackServiceForLoginLogout by rememberSaveable {
-            mutableStateOf<TrackServiceItem?>(null)
-        }
+        var trackServiceIdForLoginLogout by rememberSaveable { mutableStateOf<Int?>(null) }
+        val trackServiceForLoginLogout =
+            remember(trackServiceIdForLoginLogout, trackingScreenState) {
+                when (trackServiceIdForLoginLogout) {
+                    trackingScreenState.anilist.id -> trackingScreenState.anilist
+                    trackingScreenState.kitsu.id -> trackingScreenState.kitsu
+                    trackingScreenState.mal.id -> trackingScreenState.mal
+                    trackingScreenState.mangaUpdates.id -> trackingScreenState.mangaUpdates
+                    else -> null
+                }
+            }
         var showLoginDialog by rememberSaveable { mutableStateOf(false) }
 
         var loginDialogUsernameLabel by rememberSaveable { mutableStateOf("") }
@@ -98,16 +107,16 @@ internal class TrackingSettingsScreen(
         if (showLoginDialog) {
             if (trackServiceForLoginLogout != null) {
                 LoginDialog(
-                    sourceName = stringResource(trackServiceForLoginLogout!!.nameRes),
+                    sourceName = stringResource(trackServiceForLoginLogout.nameRes),
                     loginEvent = loginEvent,
                     usernameLabel = loginDialogUsernameLabel,
                     onDismiss = {
-                        trackServiceForLoginLogout = null
+                        trackServiceIdForLoginLogout = null
                         showLoginDialog = false
                     },
                     onConfirm = { username, password, _ ->
                         if (trackServiceForLoginLogout != null) {
-                            login(trackServiceForLoginLogout!!, username, password)
+                            login(trackServiceForLoginLogout, username, password)
                         }
                     },
                 )
@@ -119,14 +128,14 @@ internal class TrackingSettingsScreen(
         if (showLogoutDialog) {
             if (trackServiceForLoginLogout != null) {
                 LogoutDialog(
-                    sourceName = stringResource(trackServiceForLoginLogout!!.nameRes),
+                    sourceName = stringResource(trackServiceForLoginLogout.nameRes),
                     onDismiss = {
-                        trackServiceForLoginLogout = null
+                        trackServiceIdForLoginLogout = null
                         showLogoutDialog = false
                     },
                     onConfirm = {
                         if (trackServiceForLoginLogout != null) {
-                            logout(trackServiceForLoginLogout!!)
+                            logout(trackServiceForLoginLogout)
                         }
                     },
                 )
@@ -151,7 +160,7 @@ internal class TrackingSettingsScreen(
                             isLoggedIn = trackingScreenState.aniListIsLoggedIn,
                             login = { context.openInBrowser(trackingScreenState.aniListAuthUrl) },
                             logout = {
-                                trackServiceForLoginLogout = trackingScreenState.anilist
+                                trackServiceIdForLoginLogout = trackingScreenState.anilist.id
                                 showLogoutDialog = true
                             },
                         ),
@@ -183,11 +192,11 @@ internal class TrackingSettingsScreen(
                             isLoggedIn = trackingScreenState.kitsuIsLoggedIn,
                             login = {
                                 loginDialogUsernameLabel = email
-                                trackServiceForLoginLogout = trackingScreenState.kitsu
+                                trackServiceIdForLoginLogout = trackingScreenState.kitsu.id
                                 showLoginDialog = true
                             },
                             logout = {
-                                trackServiceForLoginLogout = trackingScreenState.kitsu
+                                trackServiceIdForLoginLogout = trackingScreenState.kitsu.id
                                 showLogoutDialog = true
                             },
                         ),
@@ -219,7 +228,7 @@ internal class TrackingSettingsScreen(
                             isLoggedIn = trackingScreenState.malIsLoggedIn,
                             login = { context.openInBrowser(trackingScreenState.malAuthUrl) },
                             logout = {
-                                trackServiceForLoginLogout = trackingScreenState.mal
+                                trackServiceIdForLoginLogout = trackingScreenState.mal.id
                                 showLogoutDialog = true
                             },
                         ),
@@ -251,11 +260,11 @@ internal class TrackingSettingsScreen(
                             isLoggedIn = trackingScreenState.mangaUpdatesIsLoggedIn,
                             login = {
                                 loginDialogUsernameLabel = username
-                                trackServiceForLoginLogout = trackingScreenState.mangaUpdates
+                                trackServiceIdForLoginLogout = trackingScreenState.mangaUpdates.id
                                 showLoginDialog = true
                             },
                             logout = {
-                                trackServiceForLoginLogout = trackingScreenState.mangaUpdates
+                                trackServiceIdForLoginLogout = trackingScreenState.mangaUpdates.id
                                 showLogoutDialog = true
                             },
                         ),
