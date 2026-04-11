@@ -100,11 +100,26 @@ fun DownloadScreen(
                             )
 
                             Spacer(modifier = Modifier.weight(1f))
+                            var showClearSourceDialog by remember { mutableStateOf(false) }
+
+                            if (showClearSourceDialog) {
+                                org.nekomanga.presentation.components.dialog.ConfirmationDialog(
+                                    title = stringResource(R.string.clear_download_source),
+                                    body =
+                                        stringResource(R.string.clear_download_queue_confirmation),
+                                    confirmButton = stringResource(id = R.string.clear),
+                                    onDismiss = { showClearSourceDialog = false },
+                                    onConfirm = {
+                                        showClearSourceDialog = false
+                                        downloadScreenActions.cancelSourceClick(entry.key)
+                                    },
+                                )
+                            }
                             ToolTipButton(
                                 toolTipLabel = stringResource(R.string.clear_download_source),
                                 icon = Icons.Default.ClearAll,
                                 enabledTint = MaterialTheme.colorScheme.primary,
-                                onClick = { downloadScreenActions.cancelSourceClick(entry.key) },
+                                onClick = { showClearSourceDialog = true },
                             )
                         }
 
