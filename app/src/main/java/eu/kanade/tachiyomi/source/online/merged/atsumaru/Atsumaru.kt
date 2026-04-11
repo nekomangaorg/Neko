@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.PageObjectDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchFilter
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchRequest
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchResultsDto
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -119,13 +117,12 @@ class Atsumaru : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-        val body = response.body.string()
-        if (body.contains("\"hits\"")) {
-            val data = json.decodeFromString<SearchResultsDto>(body)
-            return data.hits.map { it.document.toSManga(baseUrl) }
-        } else {
-            return emptyList()
-        }
+        return runCatching {
+                json.decodeFromString<SearchResultsDto>(response.body.string()).hits.map {
+                    it.document.toSManga(baseUrl)
+                }
+            }
+            .getOrElse { emptyList() }
     }
 
     override suspend fun fetchChapters(

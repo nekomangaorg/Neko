@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.InvalidHttpSource
-import eu.kanade.tachiyomi.source.online.merged.comix.Comix
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru
+import eu.kanade.tachiyomi.source.online.merged.comix.Comix
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangaball.MangaBall
 import eu.kanade.tachiyomi.source.online.merged.projectsuki.ProjectSuki
