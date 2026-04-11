@@ -138,9 +138,9 @@ class ChapterDto(
     }
 
     data class ParsedChapter(
-        val tag: String?,        // Holds "Official Scans", "Redraw", or null
+        val tag: String?, // Holds "Official Scans", "Redraw", or null
         val chapterNum: String?, // Holds strictly the "Ch.X" string
-        val formattedName: String // Holds the full "Ch.X - Title" string
+        val formattedName: String, // Holds the full "Ch.X - Title" string
     )
 
     fun parseTitle(rawTitle: String): ParsedChapter {
@@ -180,7 +180,7 @@ class ChapterDto(
             return ParsedChapter(
                 tag = tagString,
                 chapterNum = chapterString, // The new field is populated here
-                formattedName = chapterName.joinToString(" ")
+                formattedName = chapterName.joinToString(" "),
             )
         }
 
