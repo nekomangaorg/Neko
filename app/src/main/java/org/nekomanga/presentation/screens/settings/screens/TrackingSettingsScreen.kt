@@ -86,14 +86,14 @@ internal class TrackingSettingsScreen(
     @Composable
     fun servicesGroup(context: Context): List<Preference.PreferenceGroup> {
         var trackServiceIdForLoginLogout by rememberSaveable { mutableStateOf<Int?>(null) }
-        val trackServiceForLoginLogout = trackServiceIdForLoginLogout?.let { id ->
-            listOf(
-                    trackingScreenState.anilist,
-                    trackingScreenState.kitsu,
-                    trackingScreenState.mal,
-                    trackingScreenState.mangaUpdates,
-                )
-                .firstOrNull { it.id == id }
+        val trackServiceForLoginLogout = remember(trackServiceIdForLoginLogout, trackingScreenState) {
+            when (trackServiceIdForLoginLogout) {
+                trackingScreenState.anilist.id -> trackingScreenState.anilist
+                trackingScreenState.kitsu.id -> trackingScreenState.kitsu
+                trackingScreenState.mal.id -> trackingScreenState.mal
+                trackingScreenState.mangaUpdates.id -> trackingScreenState.mangaUpdates
+                else -> null
+            }
         }
         var showLoginDialog by rememberSaveable { mutableStateOf(false) }
 
