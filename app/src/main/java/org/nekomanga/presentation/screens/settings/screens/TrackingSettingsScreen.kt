@@ -87,7 +87,7 @@ internal class TrackingSettingsScreen(
     @Composable
     fun servicesGroup(context: Context): List<Preference.PreferenceGroup> {
         var trackServiceIdForLoginLogout by rememberSaveable { mutableStateOf<Int?>(null) }
-        val trackServiceForLoginLogout =
+        var trackServiceForLoginLogout =
             remember(trackServiceIdForLoginLogout, trackingScreenState) {
                 when (trackServiceIdForLoginLogout) {
                     trackingScreenState.anilist.id -> trackingScreenState.anilist
@@ -115,9 +115,7 @@ internal class TrackingSettingsScreen(
                         showLoginDialog = false
                     },
                     onConfirm = { username, password, _ ->
-                        if (trackServiceForLoginLogout != null) {
-                            login(trackServiceForLoginLogout, username, password)
-                        }
+                        trackServiceForLoginLogout?.let{ login(it, username, password) }
                     },
                 )
             }
@@ -134,9 +132,7 @@ internal class TrackingSettingsScreen(
                         showLogoutDialog = false
                     },
                     onConfirm = {
-                        if (trackServiceForLoginLogout != null) {
-                            logout(trackServiceForLoginLogout)
-                        }
+                        trackServiceForLoginLogout?.let { logout(it) }
                     },
                 )
             }
