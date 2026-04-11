@@ -57,6 +57,7 @@ import coil3.request.crossfade
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
+import eu.kanade.tachiyomi.source.online.MergedServerSource
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
@@ -151,6 +152,17 @@ fun MergeSheet(
                                                 validMergeType.baseUrl,
                                                 validMergeType.scanlatorName,
                                             )
+                                        } else {
+                                            val source =
+                                                MergeType.getSource(validMergeType, Injekt.get())
+                                            val hostUrl =
+                                                if (source is MergedServerSource) source.hostUrl()
+                                                else ""
+                                            if (hostUrl.isNotEmpty())
+                                                openMergeSource(
+                                                    hostUrl,
+                                                    validMergeType.scanlatorName,
+                                                )
                                         }
                                     },
                                     title = validMergeType.name,
