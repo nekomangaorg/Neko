@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.AllChaptersDto
+import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.BrowseMangaDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.MangaObjectDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.PageObjectDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchFilter
@@ -98,12 +99,7 @@ class Atsumaru : ReducedHttpSource() {
         val searchRequest =
             SearchRequest(
                 page = 0,
-                filter =
-                    SearchFilter(
-                        search = query.ifEmpty { null },
-                        types = types,
-                        sortBy = "popularity",
-                    ),
+                filter = SearchFilter(search = query, types = types, sortBy = "popularity"),
             )
 
         val jsonString = json.encodeToString(searchRequest)
@@ -117,12 +113,16 @@ class Atsumaru : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
+        val body = response.body.string()
+
         return runCatching {
-                json.decodeFromString<SearchResultsDto>(response.body.string()).hits.map {
+                json.decodeFromString<SearchResultsDto>(body).hits.map {
                     it.document.toSManga(baseUrl)
                 }
             }
-            .getOrElse { emptyList() }
+            .getOrElse {
+                json.decodeFromString<BrowseMangaDto>(body).items.map { it.toSManga(baseUrl) }
+            }
     }
 
     override suspend fun fetchChapters(

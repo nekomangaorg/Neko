@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.atsumaru.dto
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.merged.atsumaru.Atsumaru
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -13,6 +14,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import org.nekomanga.constants.Constants
 
 @Serializable class BrowseMangaDto(val items: List<MangaDto>)
 
@@ -113,14 +115,78 @@ class ChapterDto(
     val scanlationMangaId: String? = null,
     @SerialName("createdAt") private val date: JsonElement? = null,
 ) {
-    fun toSChapter(slug: String, scanlatorName: String? = null): SChapter =
-        SChapter.create().apply {
+    fun toSChapter(slug: String, scanlatorName: String? = null): SChapter {
+
+        val parsedName = parseTitle(title)
+
+        val scanlatorList = mutableListOf(Atsumaru.name)
+        if (scanlatorName != null && !scanlatorName.equals("alpha", true)) {
+            scanlatorList.add(scanlatorName)
+        }
+        if (parsedName.tag != null) {
+            scanlatorList.add(parsedName.tag)
+        }
+
+        return SChapter.create().apply {
             url = "$slug/$id"
             chapter_number = number
-            name = title
-            scanlator = scanlatorName
+            chapter_txt = parsedName.chapterNum ?: ""
+            name = parsedName.formattedName
+            scanlator = scanlatorList.joinToString(Constants.SCANLATOR_SEPARATOR)
             date?.let { date_upload = parseDate(it) }
         }
+    }
+
+    data class ParsedChapter(
+        val tag: String?,        // Holds "Official Scans", "Redraw", or null
+        val chapterNum: String?, // Holds strictly the "Ch.X" string
+        val formattedName: String // Holds the full "Ch.X - Title" string
+    )
+
+    fun parseTitle(rawTitle: String): ParsedChapter {
+        // Regex remains the same
+        val regex = Regex("^(\\D*?)\\s*(\\d+(?:\\.\\d+)?)\\s*(.*)$")
+        val match = regex.find(rawTitle)
+
+        if (match != null) {
+            val prefix = match.groupValues[1].trim()
+            var number = match.groupValues[2]
+            val suffix = match.groupValues[3].trim()
+
+            // 1. Clean the number
+            if (number.contains(".")) {
+                number = number.trimEnd('0').trimEnd('.')
+            }
+
+            // 2. Check for "Official" or "Redraw"
+            var tagString: String? = null
+            val lowerPrefix = prefix.lowercase()
+            if (lowerPrefix.contains("official") || lowerPrefix.contains("redraw")) {
+                tagString = prefix
+            }
+
+            // 3. Create the standalone chapter string
+            val chapterString = "Ch.$number"
+
+            // 4. Build the full formatted name
+            val chapterName = mutableListOf<String>()
+            chapterName.add(chapterString)
+
+            if (suffix.isNotBlank()) {
+                chapterName.add("-")
+                chapterName.add(suffix)
+            }
+
+            return ParsedChapter(
+                tag = tagString,
+                chapterNum = chapterString, // The new field is populated here
+                formattedName = chapterName.joinToString(" ")
+            )
+        }
+
+        // Fallback: If no number is found, tag and chapterNum remain null
+        return ParsedChapter(null, null, rawTitle)
+    }
 
     private fun parseDate(dateElement: JsonElement): Long =
         when (dateElement) {
