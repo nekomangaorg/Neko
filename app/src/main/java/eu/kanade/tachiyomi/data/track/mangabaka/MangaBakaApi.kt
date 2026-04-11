@@ -19,11 +19,14 @@ import okhttp3.Headers.Companion.headersOf
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.nekomanga.BuildConfig
+import org.nekomanga.core.network.DELETE
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.PUT
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.network.mangabaka.dto.MangaBakaLibraryListResult
 import org.nekomanga.network.mangabaka.dto.MangaBakaOAuth
+import org.nekomanga.network.mangabaka.dto.MangaBakaProfile
 import org.nekomanga.network.mangabaka.dto.MangaBakaSeries
 import org.nekomanga.network.mangabaka.dto.MangaBakaSeriesResult
 import org.nekomanga.network.mangabaka.dto.MangaBakaSeriesSearchResult
@@ -115,7 +118,7 @@ class MangaBakaApi(
 
                     Track.create(TrackManager.MANGABAKA).apply {
                         media_id = track.media_id
-                        title = userData.series?.parseTitle() ?: "Unknown"
+                        title = additionalData.parseTitle()
                         status = userData.getStatus()
                         score = userData.rating?.toFloat() ?: 0.0f
                         started_reading_date =
@@ -126,8 +129,8 @@ class MangaBakaApi(
                         last_chapter_read = userData.progressChapter?.toFloat() ?: 0.0f
                         // private = userData.isPrivate
                     }
-                } catch (e: HttpException) {
-                    if (e.code == 404) {
+                } catch (e: Exception) {
+                    if (e is HttpException && e.code == 404) {
                         null
                     } else {
                         throw e
@@ -196,9 +199,20 @@ class MangaBakaApi(
         }
     }
 
+    suspend fun remove(track: Track): Boolean {
+        try {
+            val url = "$LIBRARY_API_URL/${track.media_id}"
+            authClient.newCall(DELETE(url)).awaitSuccess()
+            return true
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Error trying to remove from MangaBaka" }
+        }
+        return false
+    }
+
     private fun parseSearchItem(item: MangaBakaSeries): TrackSearch {
         return TrackSearch.create(trackId).apply {
-            media_id = item.id.toLong()
+            media_id = item.id
             title = item.parseTitle()
             summary = item.description?.trim().orEmpty()
             score =
@@ -233,7 +247,7 @@ class MangaBakaApi(
         }
     }
 
-    suspend fun getScoreStepSize(): Int {
+    suspend fun getUserProfile(): MangaBakaProfile {
         return withIOContext {
             with(json) {
                 authClient
@@ -241,7 +255,6 @@ class MangaBakaApi(
                     .awaitSuccess()
                     .parseAs<MangaBakaUserProfileResponse>()
                     .data
-                    .ratingSteps
             }
         }
     }
@@ -253,7 +266,6 @@ class MangaBakaApi(
                     .add("client_id", CLIENT_ID)
                     .add("code", code)
                     .add("code_verifier", codeVerifier)
-                    .add("code_challenge_method", "S256")
                     .add("grant_type", "authorization_code")
                     .add("redirect_uri", REDIRECT_URI)
                     .add("scope", SCOPES)
@@ -281,7 +293,7 @@ class MangaBakaApi(
         fun authUrl(codeChallenge: String): Uri =
             "$OAUTH_URL/authorize"
                 .toUri()
-                .buildUpon() //
+                .buildUpon()
                 .appendQueryParameter("client_id", CLIENT_ID)
                 .appendQueryParameter("code_challenge", codeChallenge)
                 .appendQueryParameter("code_challenge_method", "S256")

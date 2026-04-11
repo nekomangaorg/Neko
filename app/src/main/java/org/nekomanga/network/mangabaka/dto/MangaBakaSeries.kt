@@ -9,9 +9,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MangaBakaSeries(
-    val id: Double,
+    val id: Long,
     val state: MangaBakaSeriesState,
-    @SerialName("merged_with") val mergedWith: Double? = null,
+    @SerialName("merged_with") val mergedWith: Long? = null,
     @Deprecated("Use the titles property instead") val title: String? = null,
     @Deprecated("Use the titles property instead")
     @SerialName("native_title")
@@ -25,7 +25,7 @@ data class MangaBakaSeries(
     val authors: List<String>? = null,
     val artists: List<String>? = null,
     val description: String? = null,
-    @Deprecated("The year publication began for the series") val year: Double? = null,
+    @Deprecated("The year publication began for the series") val year: Long? = null,
     val published: MangaBakaPublished? = null,
     val status: MangaBakaPublicationStatus,
     @SerialName("is_licensed") val isLicensed: Boolean? = null,
@@ -50,6 +50,8 @@ data class MangaBakaSeries(
     fun parseTitle(): String {
         return titles?.firstOrNull { it.traits.contains("native") }?.title
             ?: nativeTitle
+            ?: title
+            ?: romanizedTitle
             ?: "NO TITLE"
     }
 }

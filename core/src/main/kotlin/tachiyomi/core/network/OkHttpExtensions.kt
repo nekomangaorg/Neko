@@ -2,7 +2,6 @@ package tachiyomi.core.network
 
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.DeserializationStrategy
@@ -60,22 +59,12 @@ fun Call.asObservable(): Observable<Response> {
     }
 }
 
-// Based on https://github.com/gildor/kotlin-coroutines-okhttp
 private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
         val callback =
             object : Callback {
                 override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        val exception =
-                            Exception("HTTP error ${response.code}").apply {
-                                stackTrace = callStack
-                            }
-                        continuation.resumeWithException(exception)
-                        return
-                    } else {
-                        continuation.resume(response)
-                    }
+                    continuation.resume(response) { _, _, _ -> response.body.close() }
                 }
 
                 override fun onFailure(call: Call, e: IOException) {

@@ -290,16 +290,7 @@ internal class TrackingSettingsScreen(
                                 trackServiceForLoginLogout = trackingScreenState.mangaBaka
                                 showLogoutDialog = true
                             },
-                        ),
-                        Preference.PreferenceItem.BasicSwitchPreference(
-                            title = stringResource(R.string.auto_track),
-                            enabled = trackingScreenState.mangaBakaIsLoggedIn,
-                            checked = trackingScreenState.mangaBakaAutoAddTrack,
-                            onValueChanged = {
-                                updateAutoAddTrack(it, trackingScreenState.mangaBaka)
-                                true
-                            },
-                        ),
+                        )
                     ),
             ),
         )

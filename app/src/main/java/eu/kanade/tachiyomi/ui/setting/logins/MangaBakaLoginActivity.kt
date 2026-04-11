@@ -10,8 +10,7 @@ class MangaBakaLoginActivity : BaseOAuthLoginActivity() {
         val code = data?.getQueryParameter("code")
         if (code != null) {
             lifecycleScope.launchIO {
-                val codeVerifier = preferences.mangabakaCodeVerifier().get()
-                trackManager.mangaBaka.login(code, codeVerifier)
+                trackManager.mangaBaka.login(code)
                 returnToSettings()
             }
         } else {

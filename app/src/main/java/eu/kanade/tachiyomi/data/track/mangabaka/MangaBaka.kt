@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
@@ -57,8 +58,26 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
             }
         }
 
+    override fun canRemoveFromService() = true
+
+    override fun isAutoAddTracker() = false
+
+    override suspend fun removeFromService(track: Track): Boolean {
+        return api.remove(track)
+    }
+
     override fun getGlobalStatus(status: Int): String {
-        TODO("Not yet implemented")
+        return with(context) {
+            when (status) {
+                READING -> getString(R.string.follows_reading)
+                PLAN_TO_READ,
+                CONSIDERING -> getString(R.string.follows_plan_to_read)
+                COMPLETED -> getString(R.string.follows_completed)
+                PAUSED -> getString(R.string.follows_on_hold)
+                DROPPED -> getString(R.string.follows_dropped)
+                else -> ""
+            }
+        }
     }
 
     override fun getScoreList(): ImmutableList<String> {
@@ -80,7 +99,8 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
     override fun displayScore(track: Track): String = track.score.toInt().toString()
 
     override suspend fun add(track: Track): Track {
-        TODO("Not yet implemented")
+        updateNewTrackInfo(track, PLAN_TO_READ)
+        return api.addLibManga(track)
     }
 
     override suspend fun update(track: Track, setToRead: Boolean): Track {
@@ -153,9 +173,12 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
             val codeVerifier = preferences.mangabakaCodeVerifier().get()
             val oauth = api.getAccessToken(code, codeVerifier)
             interceptor.setAuth(oauth)
-            saveCredentials("user", oauth.accessToken)
+            val userProfile = api.getUserProfile()
+            val user = userProfile.preferredUsername ?: userProfile.nickname ?: "username not set"
+            saveCredentials(user, oauth.accessToken)
+
             val scoreType =
-                when (val scoreStep = api.getScoreStepSize()) {
+                when (val scoreStep = userProfile.ratingSteps) {
                     1 -> STEP_1
                     5 -> STEP_5
                     10 -> STEP_10
