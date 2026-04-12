@@ -94,6 +94,7 @@ internal class TrackingSettingsScreen(
                     trackingScreenState.kitsu.id -> trackingScreenState.kitsu
                     trackingScreenState.mal.id -> trackingScreenState.mal
                     trackingScreenState.mangaUpdates.id -> trackingScreenState.mangaUpdates
+                    trackingScreenState.mangaBaka.id -> trackingScreenState.mangaBaka
                     else -> null
                 }
             }

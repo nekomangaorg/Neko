@@ -41,6 +41,7 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.presentation.components.ToolTipButton
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.theme.Size
 import soup.compose.material.motion.MaterialFade
 
@@ -100,11 +101,26 @@ fun DownloadScreen(
                             )
 
                             Spacer(modifier = Modifier.weight(1f))
+                            var showClearSourceDialog by rememberSaveable { mutableStateOf(false) }
+
+                            if (showClearSourceDialog) {
+                                ConfirmationDialog(
+                                    title = stringResource(R.string.clear_download_source),
+                                    body =
+                                        stringResource(R.string.clear_download_queue_confirmation),
+                                    confirmButton = stringResource(id = R.string.clear),
+                                    onDismiss = { showClearSourceDialog = false },
+                                    onConfirm = {
+                                        showClearSourceDialog = false
+                                        downloadScreenActions.cancelSourceClick(entry.key)
+                                    },
+                                )
+                            }
                             ToolTipButton(
                                 toolTipLabel = stringResource(R.string.clear_download_source),
                                 icon = Icons.Default.ClearAll,
                                 enabledTint = MaterialTheme.colorScheme.primary,
-                                onClick = { downloadScreenActions.cancelSourceClick(entry.key) },
+                                onClick = { showClearSourceDialog = true },
                             )
                         }
 
