@@ -24,10 +24,10 @@ If you got any questions, [join our Discord server](https://discord.gg/4vmK42QuK
 - Offline reading
 - MDList support
 - Tracker support: <a target="_blank" href="https://myanimelist.net/">MyAnimeList</a>, <a target="_blank" href="https://anilist.co/">AniList</a>, <a target="_blank" href="https://kitsu.app/">
-  Kitsu</a>, <a target="_blank" href="https://mangaupdates.com">MangaUpdates</a>
+  Kitsu</a>, <a target="_blank" href="https://mangaupdates.com">MangaUpdates</a> and <a target="_blank" href="https://mangabaka.org/">MangaBaka</a>
 - Custom computer generated similar manga recommendations, as well as user recommendations from MyAnimeList, MangaUpdates, AniList
 - Syncing manga, and read statuses to and from MangaDex and Neko
-- Ability to merge missing chapters from MangaDex with other sources including <a target="_blank" href="https://toonily.com/">Toonily</a>, 
+- Ability to merge missing chapters from MangaDex with other sources including <a target="_blank" href="https://atsu.moe/">Atsumaru</a>, <a target="_blank" href="https://toonily.com/">Toonily</a>, 
   <a target="_blank" href="https://weebcentral.com/">Weeb Central</a>, <a target="_blank" href="https://projectsuki.com">Project Suki</a>, <a target="_blank" href="https://comix.to/">Comix</a>, <a target="_blank" href="https://github.com/Suwayomi/Suwayomi-Server">Suwayomi</a> and <a target="_blank" href="https://komga.org/">Komga</a>
 - Plus much more...
 
