@@ -4,61 +4,63 @@ import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.source.latest.SerializableDisplayScreenType
 import kotlinx.serialization.Serializable
 
+@Serializable sealed interface Screen : NavKey
+
 object Screens {
 
-    @Serializable data object Onboarding : NavKey
+    @Serializable data object Onboarding : Screen
 
-    @Serializable data class Library(val initialSearch: String = "") : NavKey
+    @Serializable data class Library(val initialSearch: String = "") : Screen
 
-    @Serializable data object Feed : NavKey
+    @Serializable data object Feed : Screen
 
-    @Serializable data class Loading(val showLoadingIndicator: Boolean) : NavKey
+    @Serializable data class Loading(val showLoadingIndicator: Boolean) : Screen
 
-    @Serializable data object Stats : NavKey
+    @Serializable data object Stats : Screen
 
-    @Serializable data object About : NavKey
+    @Serializable data object About : Screen
 
-    @Serializable data object License : NavKey
+    @Serializable data object License : Screen
 
-    @Serializable data class WebView(val title: String, val url: String) : NavKey
+    @Serializable data class WebView(val title: String, val url: String) : Screen
 
-    @Serializable data class Browse(val title: String? = null) : NavKey
+    @Serializable data class Browse(val title: String? = null) : Screen
 
-    @Serializable data class Manga(val mangaId: Long) : NavKey
+    @Serializable data class Manga(val mangaId: Long) : Screen
 
-    @Serializable data class Display(val displayScreenType: SerializableDisplayScreenType) : NavKey
+    @Serializable data class Display(val displayScreenType: SerializableDisplayScreenType) : Screen
 
-    @Serializable data class Similar(val mangaUUID: String) : NavKey
+    @Serializable data class Similar(val mangaUUID: String) : Screen
 
-    @Serializable data class DeepLink(val host: String, val path: String, val id: String) : NavKey
+    @Serializable data class DeepLink(val host: String, val path: String, val id: String) : Screen
 
     object Settings {
-        @Serializable data class Main(val deepLink: NavKey? = null) : NavKey
+        @Serializable data class Main(val deepLink: Screen? = null) : Screen
 
-        @Serializable data object General : NavKey
+        @Serializable data object General : Screen
 
-        @Serializable data object Appearance : NavKey
+        @Serializable data object Appearance : Screen
 
-        @Serializable data object Categories : NavKey
+        @Serializable data object Categories : Screen
 
-        @Serializable data object Debug : NavKey
+        @Serializable data object Debug : Screen
 
-        @Serializable data object Library : NavKey
+        @Serializable data object Library : Screen
 
-        @Serializable data object DataStorage : NavKey
+        @Serializable data object DataStorage : Screen
 
-        @Serializable data object MangaDex : NavKey
+        @Serializable data object MangaDex : Screen
 
-        @Serializable data object MergeSource : NavKey
+        @Serializable data object MergeSource : Screen
 
-        @Serializable data object Reader : NavKey
+        @Serializable data object Reader : Screen
 
-        @Serializable data object Downloads : NavKey
+        @Serializable data object Downloads : Screen
 
-        @Serializable data object Tracking : NavKey
+        @Serializable data object Tracking : Screen
 
-        @Serializable data object Security : NavKey
+        @Serializable data object Security : Screen
 
-        @Serializable data object Advanced : NavKey
+        @Serializable data object Advanced : Screen
     }
 }

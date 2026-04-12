@@ -24,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -97,7 +98,7 @@ fun SettingsScreen(windowSizeClass: WindowSizeClass, onBackPressed: () -> Unit, 
         true
     }
 
-    val entryProvider = entryProvider {
+    val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<Screens.Settings.Main> {
             val selectedScreen =
                 if (isTablet && detailBackStack.size > 0) detailBackStack.last() else null
