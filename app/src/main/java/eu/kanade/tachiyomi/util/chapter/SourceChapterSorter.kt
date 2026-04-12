@@ -45,7 +45,9 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
             .values
             .windowed(2)
             .any { (a, b) ->
-                a.mapNotNull { getChapterNum(it) }.min() < b.mapNotNull { getChapterNum(it) }.max()
+                val first = a.mapNotNull { getChapterNum(it) }.minOrNull() ?: 0f
+                val second = b.mapNotNull { getChapterNum(it) }.maxOrNull() ?: 0f
+                first < second
             }
     if (hasVolumeChange) {
         val (firstVolume, withVolume) = withVolume.partition { getVolumeNum(it) == 1 }
