@@ -41,6 +41,7 @@ import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.presentation.components.ToolTipButton
+import org.nekomanga.presentation.components.dialog.ConfirmationDialog
 import org.nekomanga.presentation.theme.Size
 import soup.compose.material.motion.MaterialFade
 
@@ -100,10 +101,10 @@ fun DownloadScreen(
                             )
 
                             Spacer(modifier = Modifier.weight(1f))
-                            var showClearSourceDialog by remember { mutableStateOf(false) }
+                            var showClearSourceDialog by rememberSaveable { mutableStateOf(false) }
 
                             if (showClearSourceDialog) {
-                                org.nekomanga.presentation.components.dialog.ConfirmationDialog(
+                                ConfirmationDialog(
                                     title = stringResource(R.string.clear_download_source),
                                     body =
                                         stringResource(R.string.clear_download_queue_confirmation),
