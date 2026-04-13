@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
-import org.nekomanga.network.mangabaka.dto.MangaBakaOAuth
+import org.nekomanga.data.network.mangabaka.dto.MangaBakaOAuth
 import uy.kohesive.injekt.injectLazy
 
 class MangaBaka(private val context: Context, id: Int) : TrackService(id) {

@@ -24,7 +24,6 @@ import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga

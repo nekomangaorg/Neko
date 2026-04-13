@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.similar
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download.model
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource

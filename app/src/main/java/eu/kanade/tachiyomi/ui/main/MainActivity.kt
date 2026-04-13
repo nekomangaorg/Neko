@@ -37,7 +37,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver

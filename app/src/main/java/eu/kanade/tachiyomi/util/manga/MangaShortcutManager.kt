@@ -10,7 +10,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.toBitmap
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.feed.FeedRepository

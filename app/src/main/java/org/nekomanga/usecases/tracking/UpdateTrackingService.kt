@@ -1,6 +1,5 @@
 package org.nekomanga.usecases.tracking
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingUpdate
 import eu.kanade.tachiyomi.util.system.executeOnIO

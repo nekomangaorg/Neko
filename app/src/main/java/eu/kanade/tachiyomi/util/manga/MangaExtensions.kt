@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util.manga
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl

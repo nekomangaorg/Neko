@@ -10,7 +10,6 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType

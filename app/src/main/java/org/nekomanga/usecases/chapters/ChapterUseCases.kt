@@ -1,6 +1,5 @@
 package org.nekomanga.usecases.chapters
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.Injekt

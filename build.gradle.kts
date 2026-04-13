@@ -16,6 +16,7 @@ plugins {
   alias(libs.plugins.about.libraries) apply false
   alias(kotlinx.plugins.serialization) apply false
   alias(libs.plugins.firebase) apply false
+  alias(libs.plugins.ksp) apply false
   alias(libs.plugins.ktfmt)
   alias(libs.plugins.detekt)
 }

@@ -6,7 +6,6 @@ import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.retrofit.statusCode
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto

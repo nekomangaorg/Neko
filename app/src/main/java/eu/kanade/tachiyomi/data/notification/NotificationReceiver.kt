@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Handler
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter

@@ -13,7 +13,6 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType

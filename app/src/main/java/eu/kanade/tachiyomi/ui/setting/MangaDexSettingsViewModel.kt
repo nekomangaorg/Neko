@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO

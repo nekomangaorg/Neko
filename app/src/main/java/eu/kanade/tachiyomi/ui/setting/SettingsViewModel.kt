@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlin.getValue
 import org.nekomanga.core.security.SecurityPreferences

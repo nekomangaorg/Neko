@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper

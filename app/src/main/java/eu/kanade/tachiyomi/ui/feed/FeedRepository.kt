@@ -4,7 +4,6 @@ import androidx.compose.ui.util.fastAny
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -23,6 +22,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -35,7 +35,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedRepository(
-    private val db: DatabaseHelper = Injekt.get(),
+    private val db: ChapterRepositoryImpl = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),

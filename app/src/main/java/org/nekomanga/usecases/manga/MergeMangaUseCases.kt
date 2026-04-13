@@ -1,6 +1,5 @@
 package org.nekomanga.usecases.manga
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import org.nekomanga.domain.library.LibraryPreferences

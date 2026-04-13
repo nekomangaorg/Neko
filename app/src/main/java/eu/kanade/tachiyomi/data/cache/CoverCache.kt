@@ -5,7 +5,6 @@ import android.text.format.Formatter
 import coil3.imageLoader
 import coil3.memory.MemoryCache
 import eu.kanade.tachiyomi.data.coil.CoilDiskCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.toast

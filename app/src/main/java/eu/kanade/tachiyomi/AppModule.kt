@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
+import androidx.room.Room
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
+import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler as FeedLatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
@@ -45,6 +46,14 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
+import org.nekomanga.data.database.repository.ScanlatorRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -74,7 +83,39 @@ class AppModule(val app: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
 
-        addSingletonFactory { DatabaseHelper(app) }
+        addSingletonFactory {
+            Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+                .addCallback(AppDatabase.roomCallback)
+                .addMigrations(AppDatabase.MIGRATION_45_46)
+                .fallbackToDestructiveMigration(false)
+                .build()
+        }
+
+        addSingletonFactory { get<AppDatabase>().mangaDao() }
+        addSingletonFactory { get<AppDatabase>().chapterDao() }
+        addSingletonFactory { get<AppDatabase>().historyDao() }
+        addSingletonFactory { get<AppDatabase>().categoryDao() }
+        addSingletonFactory { get<AppDatabase>().trackDao() }
+        addSingletonFactory { get<AppDatabase>().artworkDao() }
+        addSingletonFactory { get<AppDatabase>().browseFilterDao() }
+        addSingletonFactory { get<AppDatabase>().mergeMangaDao() }
+        addSingletonFactory { get<AppDatabase>().scanlatorDao() }
+        addSingletonFactory { get<AppDatabase>().similarDao() }
+        addSingletonFactory { get<AppDatabase>().uploaderDao() }
+        addSingletonFactory { get<AppDatabase>().mangaAggregateDao() }
+        addSingletonFactory { get<AppDatabase>().mangaCategoryDao() }
+
+        addSingletonFactory {
+            MangaRepositoryImpl(
+                get(), get(), get(), get(), get()
+            )
+        }
+        addSingletonFactory { ChapterRepositoryImpl(get(), get()) }
+        addSingletonFactory { CategoryRepositoryImpl(get(), get()) }
+        addSingletonFactory { TrackRepositoryImpl(get()) }
+        addSingletonFactory { BrowseFilterRepositoryImpl(get()) }
+        addSingletonFactory { ScanlatorRepositoryImpl(get(), get()) }
+        addSingletonFactory { MergeRepositoryImpl(get(), get()) }
 
         addSingletonFactory { ChapterCache(app) }
 
@@ -179,7 +220,7 @@ class AppModule(val app: Application) : InjektModule {
 
                 get<SourceManager>()
 
-                get<DatabaseHelper>()
+                get<AppDatabase>()
 
                 get<DownloadManager>()
             } catch (e: Exception) {

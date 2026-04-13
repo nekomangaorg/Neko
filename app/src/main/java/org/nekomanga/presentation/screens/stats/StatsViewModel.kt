@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga

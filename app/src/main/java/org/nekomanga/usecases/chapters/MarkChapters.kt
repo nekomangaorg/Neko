@@ -1,6 +1,5 @@
 package org.nekomanga.usecases.chapters
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions

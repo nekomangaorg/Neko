@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.coil.CoilDiskCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import com.github.michaelbull.result.getOrElse
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.async

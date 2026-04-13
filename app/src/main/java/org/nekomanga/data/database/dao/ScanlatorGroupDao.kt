@@ -1,0 +1,25 @@
+package org.nekomanga.data.database.dao
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import org.nekomanga.data.database.entity.ScanlatorGroupEntity
+
+@Dao
+interface ScanlatorGroupDao {
+    @Query("SELECT * FROM scanlator_groups WHERE name = :name")
+    suspend fun getScanlatorGroupByName(name: String): ScanlatorGroupEntity?
+
+    @Query("SELECT * FROM scanlator_groups WHERE name IN (:names)")
+    suspend fun getScanlatorGroupsByNames(names: List<String>): List<ScanlatorGroupEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScanlatorGroup(group: ScanlatorGroupEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScanlatorGroups(groups: List<ScanlatorGroupEntity>)
+
+    @Query("DELETE FROM scanlator_groups WHERE name = :name")
+    suspend fun deleteScanlatorGroup(name: String)
+}

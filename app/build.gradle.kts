@@ -9,6 +9,7 @@ plugins {
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase) apply false
+    alias(libs.plugins.ksp)
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
@@ -138,6 +139,10 @@ dependencies {
     implementation(libs.sqlite)
     implementation(libs.sqlite.android)
 
+    // Room
+    implementation(androidx.bundles.room)
+    ksp(androidx.room.compiler)
+
     // Dependency injection
     implementation(libs.injekt.core)
 
@@ -181,6 +186,7 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.mockk) { exclude(group = "junit", module = "junit") }
     testImplementation(kotlinx.coroutines.test)
+    testImplementation(androidx.room.testing)
 }
 
 tasks.withType<Test> { useJUnit() }

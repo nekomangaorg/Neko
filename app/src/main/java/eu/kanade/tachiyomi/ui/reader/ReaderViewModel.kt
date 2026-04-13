@@ -11,7 +11,6 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga

@@ -6,7 +6,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.utils.getBlockedScanlatorGroupUUIDs

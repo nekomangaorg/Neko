@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.jobs.follows
 
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import android.content.Context
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper

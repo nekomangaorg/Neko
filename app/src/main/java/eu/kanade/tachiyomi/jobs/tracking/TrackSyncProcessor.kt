@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.jobs.tracking
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants

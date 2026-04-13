@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.models
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
 import eu.kanade.tachiyomi.data.external.AnimePlanet

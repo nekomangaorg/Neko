@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util.chapter
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager

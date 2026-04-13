@@ -2,7 +2,6 @@ package org.nekomanga.usecases.manga
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.download.DownloadManager

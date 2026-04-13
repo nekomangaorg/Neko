@@ -1,7 +1,6 @@
 package org.nekomanga.usecases.manga
 
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
