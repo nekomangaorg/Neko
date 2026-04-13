@@ -54,14 +54,14 @@ class FeedRepository(
             chapterHistories
                 .mapNotNull { chpHistory ->
                     val chapter = chpHistory.chapter
-                    val scanlators = chapter.scanlatorList()
-
-                    if (
-                        scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
-                            (chapter.uploader in blockedUploaders &&
-                                Constants.NO_GROUP in scanlators)
-                    ) {
-                        return@mapNotNull null
+                    if (blockedGroups.isNotEmpty() || blockedUploaders.isNotEmpty()) {
+                        val scanlators = chapter.scanlatorList()
+                        if (
+                            scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
+                                (chapter.uploader in blockedUploaders && Constants.NO_GROUP in scanlators)
+                        ) {
+                            return@mapNotNull null
+                        }
                     }
 
                     chapter.toSimpleChapter(chpHistory.history.last_read)?.toChapterItem()
