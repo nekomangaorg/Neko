@@ -53,16 +53,18 @@ class FeedRepository(
         val simpleChapters =
             chapterHistories
                 .mapNotNull { chpHistory ->
-                    chpHistory.chapter
-                        .toSimpleChapter(chpHistory.history.last_read)!!
-                        .toChapterItem()
-                }
-                .filterNot {
-                    it.chapter.scanlatorList().fastAny { scanlator -> scanlator in blockedGroups }
-                }
-                .filterNot {
-                    it.chapter.uploader in blockedUploaders &&
-                        Constants.NO_GROUP in it.chapter.scanlatorList()
+                    val chapter = chpHistory.chapter
+                    val scanlators = chapter.scanlatorList()
+
+                    if (
+                        scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
+                            (chapter.uploader in blockedUploaders &&
+                                Constants.NO_GROUP in scanlators)
+                    ) {
+                        return@mapNotNull null
+                    }
+
+                    chapter.toSimpleChapter(chpHistory.history.last_read)?.toChapterItem()
                 }
                 .toPersistentList()
 
