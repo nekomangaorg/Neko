@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.similar
+package org.nekomanga.presentation.screens.similar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

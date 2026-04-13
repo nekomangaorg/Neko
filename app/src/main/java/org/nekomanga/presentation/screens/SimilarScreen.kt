@@ -27,8 +27,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
-import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
-import eu.kanade.tachiyomi.ui.similar.SimilarViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.R
@@ -41,7 +39,9 @@ import org.nekomanga.presentation.components.scaffold.ChildScreenScaffold
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.DisplayScreenSheet
 import org.nekomanga.presentation.screens.browse.DisplaySheetScreen
+import org.nekomanga.presentation.screens.similar.SimilarScreenState
 import org.nekomanga.presentation.screens.similar.SimilarTopBar
+import org.nekomanga.presentation.screens.similar.SimilarViewModel
 import org.nekomanga.presentation.theme.Size
 
 @Composable
