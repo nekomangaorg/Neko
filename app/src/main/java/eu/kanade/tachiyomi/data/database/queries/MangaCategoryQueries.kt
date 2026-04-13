@@ -10,6 +10,27 @@ import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 
 interface MangaCategoryQueries : DbProvider {
 
+    fun getMangaCategories(mangaIds: List<Long>) =
+        db.get()
+            .listOfObjects(MangaCategory::class.java)
+            .withQuery(
+                com.pushtorefresh.storio.sqlite.queries.Query.builder()
+                    .table(MangaCategoryTable.TABLE)
+                    .let { builder ->
+                        if (mangaIds.isEmpty()) {
+                            builder.where("1 = 0")
+                        } else {
+                            builder
+                                .where(
+                                    "${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})"
+                                )
+                                .whereArgs(*mangaIds.toTypedArray())
+                        }
+                    }
+                    .build()
+            )
+            .prepare()
+
     fun insertMangaCategory(mangaCategory: MangaCategory) =
         db.put().`object`(mangaCategory).prepare()
 
