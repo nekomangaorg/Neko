@@ -1,29 +1,22 @@
 package org.nekomanga.usecases.chapters
 
-import eu.kanade.tachiyomi.data.database.models.Chapter
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
-import org.nekomanga.domain.chapter.toSimpleChapter
 
 class MarkPreviousChaptersUseCaseTest {
 
     private val useCase = MarkPreviousChaptersUseCase()
 
     private fun createChapter(id: Long, name: String): ChapterItem {
-        return ChapterItem(
-            chapter =
-                eu.kanade.tachiyomi.data.database.models.Chapter.create()
-                    .apply {
-                        this.id = id
-                        this.manga_id = 1L
-                        this.name = name
-                        this.url = ""
-                    }
-                    .toSimpleChapter()!!
-        )
+        return mockk<ChapterItem>(relaxed = true) {
+            every { chapter.id } returns id
+            every { chapter.name } returns name
+        }
     }
 
     @Test

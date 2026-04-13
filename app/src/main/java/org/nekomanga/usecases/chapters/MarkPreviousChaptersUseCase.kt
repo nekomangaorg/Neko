@@ -5,11 +5,13 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
 
 class MarkPreviousChaptersUseCase {
 
+    data class Result(val chaptersToMark: List<ChapterItem>, val action: ChapterMarkActions)
+
     operator fun invoke(
         chapterItem: ChapterItem,
         chapterList: List<ChapterItem>,
         read: Boolean,
-    ): Pair<List<ChapterItem>, ChapterMarkActions>? {
+    ): Result? {
         val chapterIndex = chapterList.indexOf(chapterItem)
         if (chapterIndex == -1) return null
 
@@ -20,6 +22,6 @@ class MarkPreviousChaptersUseCase {
             if (read) ChapterMarkActions.PreviousRead(true, altChapters)
             else ChapterMarkActions.PreviousUnread(true, altChapters)
 
-        return Pair(chaptersToMark, action)
+        return Result(chaptersToMark, action)
     }
 }
