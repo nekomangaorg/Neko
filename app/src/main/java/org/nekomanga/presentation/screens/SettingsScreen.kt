@@ -530,11 +530,15 @@ private fun reset(
     wasDeepLink: Boolean,
     onBackPressed: () -> Unit,
 ) {
-    if (wasDeepLink) {
-        onBackPressed()
+    if (backstack.size > 1) {
+        if (wasDeepLink) {
+            backstack.removeLastOrNull()
+        } else {
+            backstack.clear()
+            backstack.add(Screens.Settings.Main())
+        }
     } else {
-        backstack.clear()
-        backstack.add(Screens.Settings.Main())
+        onBackPressed()
     }
 }
 
