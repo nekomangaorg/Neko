@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.similar
+package org.nekomanga.presentation.screens.similar
 
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList

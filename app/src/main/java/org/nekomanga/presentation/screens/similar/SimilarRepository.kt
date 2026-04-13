@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.similar
+package org.nekomanga.presentation.screens.similar
 
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
