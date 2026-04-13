@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -222,7 +223,7 @@ class BackupCreator(val context: Context) {
         mergeMangaList: List<MergeMangaImpl>,
         chapters: List<Chapter>,
         categoriesForManga: List<MangaCategory>,
-        allCategories: Map<Int?, eu.kanade.tachiyomi.data.database.models.Category>,
+        allCategories: Map<Int?, Category>,
         tracks: List<Track>,
         historyMap: Map<Long, List<History>>,
     ): BackupManga {
