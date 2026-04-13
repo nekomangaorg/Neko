@@ -1,1 +1,5 @@
 ## 2024-05-24 - Extracting Library Filtering Logic **Learning:** The project relies heavily on `mockk` for testing domain layers, and UI logic often tightly couples domain models with state objects before filtering. Use Cases are typically registered as singletons in `AppModule.kt` using `addSingleton()` and injected via `Injekt.get()`. **Action:** Always create a `mockk` test file matching the usecase name and update `AppModule.kt` to bind the new usecase for DI.
+
+## 2024-04-13 - Extracting MarkPreviousChaptersUseCase
+**Learning:** When trying to instantiate data classes like `Chapter` or `ChapterItem` for unit testing, the implementation classes (`ChapterImpl`) can be cumbersome. The instruction "Use Mockk" implies that we should create mocks via MockK (`mockk<Chapter>()`) instead of manually instantiating or using `apply`.
+**Action:** When asked to "use MockK" for unit tests on domain layer extractions, mock the entity directly using `mockk<Type>()` and stub the fields using `every { field } returns ...` rather than spending cycles trying to find the appropriate `Impl.create().apply {}` equivalent.
