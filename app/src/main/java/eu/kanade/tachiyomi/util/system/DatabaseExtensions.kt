@@ -31,11 +31,13 @@ suspend fun <T> PreparedDeleteCollectionOfObjects<T>.executeOnIO() =
     withContext(Dispatchers.IO) { executeAsBlocking() }
 
 fun <T> PreparedGetObject<T>.asFlow(): Flow<T> = callbackFlow {
-    val subscription = this@asFlow.asRxObservable().subscribe { trySend(it) }
+    val subscription =
+        this@asFlow.asRxObservable().subscribe({ trySend(it) }, { close(it) }, { close() })
     awaitClose { subscription.unsubscribe() }
 }
 
 fun <T> PreparedGetListOfObjects<T>.asFlow(): Flow<List<T>> = callbackFlow {
-    val subscription = this@asFlow.asRxObservable().subscribe { trySend(it) }
+    val subscription =
+        this@asFlow.asRxObservable().subscribe({ trySend(it) }, { close(it) }, { close() })
     awaitClose { subscription.unsubscribe() }
 }

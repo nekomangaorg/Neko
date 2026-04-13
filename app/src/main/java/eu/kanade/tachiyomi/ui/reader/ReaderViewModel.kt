@@ -754,7 +754,14 @@ constructor(
                 manga.viewer_flags = 0
             }
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
-            db.updateViewerFlags(manga).executeAsBlocking()
+            viewModelScope.launchIO {
+                try {
+                    db.updateViewerFlags(manga).executeOnIO()
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    TimberKt.e(e)
+                }
+            }
         }
         val viewer = if (manga.readingModeType == 0) default else manga.readingModeType
 
@@ -770,7 +777,14 @@ constructor(
 
         viewModelScope.launchIO {
             manga.readingModeType = readingModeType
-            db.updateViewerFlags(manga).executeAsBlocking()
+            viewModelScope.launchIO {
+                try {
+                    db.updateViewerFlags(manga).executeOnIO()
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    TimberKt.e(e)
+                }
+            }
             val currChapters = state.value.viewerChapters
             if (currChapters != null) {
                 // Save current page
@@ -805,12 +819,26 @@ constructor(
     fun setMangaOrientationType(rotationType: Int) {
         val manga = manga ?: return
         this.manga?.orientationType = rotationType
-        db.updateViewerFlags(manga).executeAsBlocking()
+        viewModelScope.launchIO {
+            try {
+                db.updateViewerFlags(manga).executeOnIO()
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                TimberKt.e(e)
+            }
+        }
 
         TimberKt.i { "Manga orientation is ${manga.orientationType}" }
 
         viewModelScope.launchIO {
-            db.updateViewerFlags(manga).executeAsBlocking()
+            viewModelScope.launchIO {
+                try {
+                    db.updateViewerFlags(manga).executeOnIO()
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    TimberKt.e(e)
+                }
+            }
             val currChapters = state.value.viewerChapters
             if (currChapters != null) {
                 mutableState.update {
