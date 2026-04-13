@@ -823,15 +823,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             } else {
                 mangaDetailScreenState.value.chapters.activeChapters
             }
-        val chapterIndex = chapterList.indexOf(chapterItem)
-        if (chapterIndex == -1) return
 
-        val chaptersToMark = chapterList.subList(0, chapterIndex)
-        val altChapters = chapterList.subList(chapterIndex + 1, chapterList.size)
-        val action =
-            if (read) ChapterMarkActions.PreviousRead(true, altChapters)
-            else ChapterMarkActions.PreviousUnread(true, altChapters)
-        markChapters(chaptersToMark, action)
+        val result = chapterUseCases.markPreviousChapters(chapterItem, chapterList, read)
+        if (result != null) {
+            val (chaptersToMark, action) = result
+            markChapters(chaptersToMark, action)
+        }
     }
 
     fun markChapters(
