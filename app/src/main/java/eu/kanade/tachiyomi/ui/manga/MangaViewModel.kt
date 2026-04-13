@@ -296,6 +296,19 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
      * Architecture: We injected the `mangaFlow` directly into this `combine` operator. By using the
      * emitted `mangaItem` instead of performing a synchronous query, the flow becomes fully
      * reactive and avoids I/O operations on the main flow dispatcher.
+     *
+     * SECOND MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
+     *
+     * Why: Previously, `allChapterFlow` called `downloadManager.isChapterDownloaded` and
+     * `downloadManager.getQueuedDownloadOrNull` inside an O(N) map loop for every single chapter.
+     * Since `getQueuedDownloadOrNull` iterates over the list of active downloads, this created an
+     * O(N*M) bottleneck where N is chapters and M is queued items. In addition, checking the cache
+     * for downloaded chapters unconditionally causes redundant overhead.
+     *
+     * Architecture: We perform a bulk O(1) hashmap association of the queued downloads before the
+     * loop. We also check if the total `downloadCount` is 0 to completely bypass the O(N)
+     * evaluation of `isChapterDownloaded` on un-downloaded manga, saving thousands of redundant
+     * string allocations and map lookups on large libraries.
      */
     val allChapterFlow =
         combine(
@@ -305,6 +318,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 mangaDexPreferences.blockedUploaders().changes(),
             ) { dbChapters, mangaItem, blockedGroups, blockedUploaders ->
                 val dbManga = mangaItem.toManga()
+
+                // Pre-compute O(1) lookups outside the loop to prevent O(N*M) thrashing
+                val downloadCount = downloadManager.getDownloadCount(dbManga)
+                val queuedDownloadsById =
+                    downloadManager.queueState.value.associateBy { it.chapterItem.id }
+
                 dbChapters.mapNotNull { dbChapter ->
                     dbChapter
                         .toSimpleChapter()
@@ -317,13 +336,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         ?.let { chapter ->
                             val downloadState =
                                 when {
-                                    downloadManager.isChapterDownloaded(
-                                        chapter.toDbChapter(),
-                                        dbManga,
-                                    ) -> Download.State.DOWNLOADED
+                                    downloadCount > 0 &&
+                                        downloadManager.isChapterDownloaded(
+                                            chapter.toDbChapter(),
+                                            dbManga,
+                                        ) -> Download.State.DOWNLOADED
                                     else -> {
-                                        val download =
-                                            downloadManager.getQueuedDownloadOrNull(chapter.id)
+                                        val download = queuedDownloadsById[chapter.id]
                                         when (download == null) {
                                             true -> Download.State.NOT_DOWNLOADED
                                             false -> download.status
@@ -336,10 +355,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 downloadState = downloadState,
                                 downloadProgress =
                                     when (downloadState == Download.State.DOWNLOADING) {
-                                        true ->
-                                            downloadManager
-                                                .getQueuedDownloadOrNull(chapter.id)!!
-                                                .progress
+                                        true -> queuedDownloadsById[chapter.id]?.progress ?: 0
                                         false -> 0
                                     },
                             )
