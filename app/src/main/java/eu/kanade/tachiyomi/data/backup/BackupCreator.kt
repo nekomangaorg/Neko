@@ -21,7 +21,13 @@ import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import java.io.FileOutputStream
@@ -124,7 +130,73 @@ class BackupCreator(val context: Context) {
     }
 
     private fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
-        return mangaList.map { backupMangaObject(it, flags) }
+        val allCategories =
+            if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY)
+                databaseHelper.getCategories().executeAsBlocking().associateBy { it.id }
+            else emptyMap()
+
+        return mangaList.chunked(500).flatMap { chunk ->
+            val mangaIds = chunk.mapNotNull { it.id }
+
+            // Pre-fetch all dependencies for the list of mangas
+            val mergeMangaMap =
+                databaseHelper.getMergeMangaList(mangaIds).executeAsBlocking().groupBy {
+                    it.mangaId
+                }
+
+            val chaptersMap =
+                if (
+                    flags and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER ||
+                        flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY
+                ) {
+                    databaseHelper.getChapters(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                } else {
+                    emptyMap()
+                }
+
+            val categoriesMap =
+                if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY) {
+                    databaseHelper.getMangaCategories(mangaIds).executeAsBlocking().groupBy {
+                        it.manga_id
+                    }
+                } else {
+                    emptyMap()
+                }
+
+            val tracksMap =
+                if (flags and BACKUP_TRACK_MASK == BACKUP_TRACK) {
+                    databaseHelper.getTracks(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                } else {
+                    emptyMap()
+                }
+
+            val historyMap =
+                if (flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
+                    // We need history entries matching chapters from these mangas.
+                    // getHistoryByMangaIds fetches history matching chapter_id linked to the manga
+                    databaseHelper.getHistoryByMangaIds(mangaIds).executeAsBlocking().groupBy {
+                        // It isn't trivial to group by mangaId since history object only contains
+                        // chapter_id.
+                        // However history object does not have mangaId so grouping by chapter_id
+                        // here
+                        // and associating inside backupMangaObject.
+                        it.chapter_id
+                    }
+                } else emptyMap()
+
+            chunk.map {
+                backupMangaObject(
+                    it,
+                    flags,
+                    mergeMangaMap[it.id] ?: emptyList(),
+                    chaptersMap[it.id] ?: emptyList(),
+                    categoriesMap[it.id] ?: emptyList(),
+                    allCategories,
+                    tracksMap[it.id] ?: emptyList(),
+                    historyMap,
+                )
+            }
+        }
     }
 
     /**
@@ -145,26 +217,22 @@ class BackupCreator(val context: Context) {
      * @param options options for the backup
      * @return [BackupManga] containing manga in a serializable form
      */
-    private fun backupMangaObject(manga: Manga, options: Int): BackupManga {
+    private fun backupMangaObject(
+        manga: Manga,
+        options: Int,
+        mergeMangaList: List<MergeMangaImpl>,
+        chapters: List<Chapter>,
+        categoriesForManga: List<MangaCategory>,
+        allCategories: Map<Int?, Category>,
+        tracks: List<Track>,
+        historyMap: Map<Long, List<History>>,
+    ): BackupManga {
         // Entry for this manga
         val mangaObject = BackupManga.copyFrom(manga)
 
-        val mergeMangaList = databaseHelper.getMergeMangaList(manga.id!!).executeAsBlocking()
         if (mergeMangaList.isNotEmpty()) {
             mangaObject.mergeMangaList = mergeMangaList.map { BackupMergeManga.copyFrom(it) }
         }
-
-        // [OPTIMIZATION] Pre-fetch all chapters for the manga to avoid N+1 query problems
-        // when backing up history, which previously queried the database per history entry.
-        val chapters =
-            if (
-                options and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER ||
-                    options and BACKUP_HISTORY_MASK == BACKUP_HISTORY
-            ) {
-                databaseHelper.getChapters(manga).executeAsBlocking()
-            } else {
-                emptyList()
-            }
 
         // Check if user wants chapter information in backup
         if (options and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER) {
@@ -177,15 +245,15 @@ class BackupCreator(val context: Context) {
         // Check if user wants category information in backup
         if (options and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY) {
             // Backup categories for this manga
-            val categoriesForManga = databaseHelper.getCategoriesForManga(manga).executeAsBlocking()
             if (categoriesForManga.isNotEmpty()) {
-                mangaObject.categories = categoriesForManga.mapNotNull { it.order }
+                mangaObject.categories = categoriesForManga.mapNotNull {
+                    allCategories[it.category_id]?.order
+                }
             }
         }
 
         // Check if user wants track information in backup
         if (options and BACKUP_TRACK_MASK == BACKUP_TRACK) {
-            val tracks = databaseHelper.getTracks(manga).executeAsBlocking()
             if (tracks.isNotEmpty()) {
                 mangaObject.tracking = tracks.map { BackupTracking.copyFrom(it) }
             }
@@ -193,7 +261,7 @@ class BackupCreator(val context: Context) {
 
         // Check if user wants history information in backup
         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
-            val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
+            val historyForManga = chapters.flatMap { historyMap[it.id] ?: emptyList() }
             if (historyForManga.isNotEmpty()) {
                 val historyChapters = chapters.associateBy { it.id }
                 val history = historyForManga.mapNotNull { history ->

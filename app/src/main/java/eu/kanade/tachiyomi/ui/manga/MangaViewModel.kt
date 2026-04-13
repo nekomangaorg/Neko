@@ -122,6 +122,7 @@ import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.chapters.GetChapterFilterText
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.manga.MergeMangaUseCases
 import tachiyomi.core.util.storage.DiskUtil
@@ -161,6 +162,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
+
+    private val getFilterText = GetChapterFilterText(preferences.context)
     private val mergeMangaUseCases = MergeMangaUseCases()
 
     private var dynamicCoverUpdateJob: Job? = null
@@ -1247,32 +1250,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 .toPersistentList()
 
         return MangaConstants.LanguageFilter(languages = languageOptions.toPersistentList())
-    }
-
-    private fun getFilterText(
-        chapterDisplay: MangaConstants.ChapterDisplay,
-        chapterSourceFilter: MangaConstants.ScanlatorFilter,
-        chapterScanlatorFilter: MangaConstants.ScanlatorFilter,
-        languageFilter: MangaConstants.LanguageFilter,
-    ): String {
-        val context = preferences.context
-        val filters = buildList {
-            if (chapterDisplay.unread == ToggleableState.Indeterminate) add(R.string.read)
-            if (chapterDisplay.unread == ToggleableState.On) add(R.string.unread)
-            if (chapterDisplay.downloaded == ToggleableState.On) add(R.string.downloaded)
-            if (chapterDisplay.downloaded == ToggleableState.Indeterminate)
-                add(R.string.not_downloaded)
-            if (chapterDisplay.bookmarked == ToggleableState.On) add(R.string.bookmarked)
-            if (chapterDisplay.bookmarked == ToggleableState.Indeterminate)
-                add(R.string.not_bookmarked)
-            if (chapterDisplay.available == ToggleableState.On) add(R.string.available)
-            if (chapterDisplay.available == ToggleableState.Indeterminate) add(R.string.unavailable)
-            if (languageFilter.languages.any { it.disabled }) add(R.string.language)
-            if (chapterScanlatorFilter.scanlators.any { it.disabled }) add(R.string.scanlators)
-            if (chapterSourceFilter.scanlators.any { it.disabled }) add(R.string.sources)
-        }
-
-        return filters.joinToString(", ") { context.getString(it) }
     }
 
     private fun getSortFilter(mangaItem: MangaItem): MangaConstants.SortFilter {
