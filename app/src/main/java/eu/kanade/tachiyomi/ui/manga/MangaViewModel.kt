@@ -223,7 +223,6 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
      */
     val mangaFlow =
         db.getManga(mangaId)
-            .asRxObservable()
             .asFlow()
             .map { it.toMangaItem() }
             .distinctUntilChanged()

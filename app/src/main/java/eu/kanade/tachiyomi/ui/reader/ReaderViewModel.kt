@@ -754,7 +754,7 @@ constructor(
                 manga.viewer_flags = 0
             }
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
-            db.updateViewerFlags(manga).asRxObservable().subscribe()
+            db.updateViewerFlags(manga).executeAsBlocking()
         }
         val viewer = if (manga.readingModeType == 0) default else manga.readingModeType
 
