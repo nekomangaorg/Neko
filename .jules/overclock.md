@@ -26,3 +26,6 @@
 ## 2026-04-12 - Fixing N+1 Queries in BackupCreator
 **Learning:** When trying to fix N+1 queries by fetching dependencies for a whole list using `IN (?, ?, ...)`, passing an unbounded list of IDs directly into SQLite queries (e.g. via StorIO) can crash the app due to the `SQLITE_MAX_VARIABLE_NUMBER` limit (999 host parameters on older Android versions). It also causes memory spikes by trying to load massive sets of records at once.
 **Action:** When resolving N+1 queries using an `IN` clause for collections, always process the primary list in manageable chunks (e.g., `mangaList.chunked(500)`) and execute the prefetches iteratively per chunk to stay under SQLite variable limits and reduce OOM risks.
+## 2026-04-13 - [Overclock: Hot Flow Loop Lookup Optimization]
+**Learning:** Calling O(N) list lookups like `downloadManager.getQueuedDownloadOrNull` inside an O(M) mapping loop inside a hot `combine` Flow causes O(N*M) performance degradation, heavily thrashing CPU and memory by repeated iterations on list emissions, which can stutter the UI thread.
+**Action:** Pre-compute an O(1) Map representation of the list using `.associateBy { it.id }` before the loop, and use variables (like `downloadCount > 0`) to completely skip expensive IO/Cache checking functions when unnecessary.
