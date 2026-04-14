@@ -160,6 +160,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
+    private val categoryUseCases: org.nekomanga.usecases.category.CategoryUseCases =
+        org.nekomanga.usecases.category.CategoryUseCases()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
 
@@ -1342,13 +1344,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             val order =
                 (_mangaDetailScreenState.value.category.allCategories.maxOfOrNull { it.order }
                     ?: 0) + 1
-            mangaUseCases.modifyManga.addNewCategory(newCategory, order)
+            categoryUseCases.modifyCategory.addNewCategory(newCategory, order)
         }
     }
 
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
         viewModelScope.launchIO {
-            mangaUseCases.modifyManga.updateMangaCategories(mangaId, enabledCategories)
+            categoryUseCases.modifyCategory.updateMangaCategories(mangaId, enabledCategories)
         }
     }
 
