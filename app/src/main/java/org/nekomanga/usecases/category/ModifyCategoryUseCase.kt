@@ -15,7 +15,9 @@ class ModifyCategoryUseCase(
     private val libraryPreferences: LibraryPreferences,
 ) {
 
-    suspend fun addNewCategory(newCategory: String, order: Int) {
+    suspend fun addNewCategory(newCategory: String) {
+        val categories = db.getCategories().executeOnIO()
+        val order = (categories.maxOfOrNull { it.order } ?: 0) + 1
         val category = Category.create(newCategory).apply { this.order = order }
         db.insertCategory(category).executeOnIO()
     }

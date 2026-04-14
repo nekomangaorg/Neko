@@ -1340,12 +1340,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     fun addNewCategory(newCategory: String) {
-        viewModelScope.launchIO {
-            val order =
-                (_mangaDetailScreenState.value.category.allCategories.maxOfOrNull { it.order }
-                    ?: 0) + 1
-            categoryUseCases.modifyCategory.addNewCategory(newCategory, order)
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.addNewCategory(newCategory) }
     }
 
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {

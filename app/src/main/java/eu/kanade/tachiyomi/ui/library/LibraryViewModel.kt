@@ -784,10 +784,7 @@ class LibraryViewModel() : ViewModel() {
 
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
-        viewModelScope.launchIO {
-            val order = (libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
-            categoryUseCases.modifyCategory.addNewCategory(newCategory, order)
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.addNewCategory(newCategory) }
     }
 
     fun editCategories(mangaList: List<DisplayManga>, categories: List<CategoryItem>) {
