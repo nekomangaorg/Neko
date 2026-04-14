@@ -18,6 +18,5 @@ interface UploaderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUploaders(uploaders: List<UploaderEntity>)
 
-    @Query("DELETE FROM uploaders WHERE username = :name")
-    suspend fun deleteUploader(name: String)
+    @Query("DELETE FROM uploaders WHERE username = :name") suspend fun deleteUploader(name: String)
 }

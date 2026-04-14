@@ -5,18 +5,24 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import org.nekomanga.constants.Constants
 
 @Entity(
     tableName = "chapters",
-    foreignKeys = [
-        ForeignKey(
-            entity = MangaEntity::class,
-            parentColumns = ["_id"],
-            childColumns = ["manga_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [Index(value = ["manga_id"])]
+    foreignKeys =
+        [
+            ForeignKey(
+                entity = MangaEntity::class,
+                parentColumns = ["_id"],
+                childColumns = ["manga_id"],
+                onDelete = ForeignKey.CASCADE,
+            )
+        ],
+    indices = [Index(value = ["manga_id"])],
 )
 data class ChapterEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
@@ -40,5 +46,26 @@ data class ChapterEntity(
     @ColumnInfo(name = "date_upload") val dateUpload: Long,
     @ColumnInfo(name = "mangadex_chapter_id") val mangadexChapterId: String?,
     @ColumnInfo(name = "old_mangadex_chapter_id") val oldMangadexId: String?,
-    @ColumnInfo(name = "language") val language: String?
+    @ColumnInfo(name = "language") val language: String?,
 )
+
+fun ChapterEntity.canDeleteChapter() =
+    !this.isLocalSource() && !this.bookmark && !this.isUnavailable
+
+fun ChapterEntity.isLocalSource() =
+    this.scanlator?.equals(Constants.LOCAL_SOURCE) == true && this.isUnavailable
+
+fun ChapterEntity.scanlatorList(): List<String> {
+    this.scanlator ?: return emptyList()
+    return ChapterUtil.getScanlators(this.scanlator)
+}
+
+fun ChapterEntity.uuid(): String {
+    return MdUtil.getChapterUUID(this.url)
+}
+
+fun ChapterEntity.isAvailable(downloadManager: DownloadManager, manga: Manga): Boolean {
+    return !this.isUnavailable ||
+        this.isLocalSource() ||
+        downloadManager.isChapterDownloaded(this, manga)
+}

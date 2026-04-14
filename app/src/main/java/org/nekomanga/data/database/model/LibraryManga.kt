@@ -9,5 +9,5 @@ data class LibraryManga(
     val readCount: Int,
     val bookmarkCount: Int,
     val unavailableCount: Int,
-    val category: Int
+    val category: Int,
 )

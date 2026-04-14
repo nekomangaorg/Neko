@@ -10,5 +10,5 @@ data class CategoryEntity(
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "sort") val order: Int,
     @ColumnInfo(name = "flags") val flags: Int,
-    @ColumnInfo(name = "manga_order") val mangaOrder: String
+    @ColumnInfo(name = "manga_order") val mangaOrder: String,
 )

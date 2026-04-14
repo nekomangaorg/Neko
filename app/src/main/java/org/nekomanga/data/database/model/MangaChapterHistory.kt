@@ -8,5 +8,5 @@ import org.nekomanga.data.database.entity.MangaEntity
 data class MangaChapterHistory(
     @Embedded val manga: MangaEntity,
     @Embedded(prefix = "ch_") val chapter: ChapterEntity,
-    @Embedded(prefix = "hi_") val history: HistoryEntity
+    @Embedded(prefix = "hi_") val history: HistoryEntity,
 )

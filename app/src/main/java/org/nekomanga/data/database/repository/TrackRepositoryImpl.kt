@@ -4,9 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.nekomanga.data.database.dao.TrackDao
 import org.nekomanga.data.database.entity.TrackEntity
 
-class TrackRepositoryImpl(
-    private val trackDao: TrackDao
-) {
+class TrackRepositoryImpl(private val trackDao: TrackDao) {
 
     fun getTracksForManga(mangaId: Long): Flow<List<TrackEntity>> {
         return trackDao.getTracksForManga(mangaId)

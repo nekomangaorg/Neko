@@ -33,29 +33,37 @@ interface ChapterDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChapters(chapters: List<ChapterEntity>)
 
-    @Update
-    suspend fun updateChapters(chapters: List<ChapterEntity>)
+    @Update suspend fun updateChapters(chapters: List<ChapterEntity>)
 
-    @Delete
-    suspend fun deleteChapter(chapter: ChapterEntity)
+    @Delete suspend fun deleteChapter(chapter: ChapterEntity)
 
-    @Delete
-    suspend fun deleteChapters(chapters: List<ChapterEntity>)
+    @Delete suspend fun deleteChapters(chapters: List<ChapterEntity>)
 
-    @Query("""
+    @Query(
+        """
         UPDATE chapters SET
         read = :read,
         bookmark = :bookmark,
         last_page_read = :lastPage,
         pages_left = :pagesLeft
         WHERE _id = :id
-    """)
-    suspend fun updateProgress(id: Long, read: Boolean, bookmark: Boolean, lastPage: Int, pagesLeft: Int)
+    """
+    )
+    suspend fun updateProgress(
+        id: Long,
+        read: Boolean,
+        bookmark: Boolean,
+        lastPage: Int,
+        pagesLeft: Int,
+    )
 
-    @Query("UPDATE chapters SET source_order = :order WHERE mangadex_chapter_id = :chapterId AND manga_id = :mangaId")
+    @Query(
+        "UPDATE chapters SET source_order = :order WHERE mangadex_chapter_id = :chapterId AND manga_id = :mangaId"
+    )
     suspend fun updateSourceOrder(chapterId: String, mangaId: Long, order: Int)
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
                chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -76,6 +84,12 @@ interface ChapterDao {
         ORDER BY
             CASE WHEN :sortByFetched = 1 THEN chapters.date_fetch ELSE chapters.date_upload END DESC
         LIMIT :limit OFFSET :offset
-    """)
-    fun getRecentChapters(search: String, limit: Int, offset: Int, sortByFetched: Boolean): Flow<List<MangaChapter>>
+    """
+    )
+    fun getRecentChapters(
+        search: String,
+        limit: Int,
+        offset: Int,
+        sortByFetched: Boolean,
+    ): Flow<List<MangaChapter>>
 }

@@ -19,8 +19,7 @@ interface MergeMangaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMergeMangas(mergeMangas: List<MergeMangaEntity>)
 
-    @Delete
-    suspend fun deleteMergeManga(mergeManga: MergeMangaEntity)
+    @Delete suspend fun deleteMergeManga(mergeManga: MergeMangaEntity)
 
     @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId AND merge_type = :mergeType")
     suspend fun deleteMergeMangaByType(mangaId: Long, mergeType: Int)

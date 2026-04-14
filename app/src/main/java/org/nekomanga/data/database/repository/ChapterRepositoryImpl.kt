@@ -10,7 +10,7 @@ import org.nekomanga.data.database.model.MangaChapterHistory
 
 class ChapterRepositoryImpl(
     private val chapterDao: ChapterDao,
-    private val historyDao: HistoryDao
+    private val historyDao: HistoryDao,
 ) {
 
     fun getChaptersForManga(mangaId: Long): Flow<List<ChapterEntity>> {
@@ -53,7 +53,13 @@ class ChapterRepositoryImpl(
         chapterDao.deleteChapters(chapters)
     }
 
-    suspend fun updateProgress(id: Long, read: Boolean, bookmark: Boolean, lastPage: Int, pagesLeft: Int) {
+    suspend fun updateProgress(
+        id: Long,
+        read: Boolean,
+        bookmark: Boolean,
+        lastPage: Int,
+        pagesLeft: Int,
+    ) {
         chapterDao.updateProgress(id, read, bookmark, lastPage, pagesLeft)
     }
 
@@ -61,15 +67,28 @@ class ChapterRepositoryImpl(
         chapterDao.updateSourceOrder(chapterId, mangaId, order)
     }
 
-    fun getRecentChapters(search: String, limit: Int, offset: Int, sortByFetched: Boolean): Flow<List<MangaChapter>> {
+    fun getRecentChapters(
+        search: String,
+        limit: Int,
+        offset: Int,
+        sortByFetched: Boolean,
+    ): Flow<List<MangaChapter>> {
         return chapterDao.getRecentChapters(search, limit, offset, sortByFetched)
     }
 
-    fun getRecentHistoryUngrouped(search: String, limit: Int, offset: Int): Flow<List<MangaChapterHistory>> {
+    fun getRecentHistoryUngrouped(
+        search: String,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>> {
         return historyDao.getRecentHistoryUngrouped(search, limit, offset)
     }
 
-    fun getRecentMangaLimit(search: String, limit: Int, offset: Int): Flow<List<MangaChapterHistory>> {
+    fun getRecentMangaLimit(
+        search: String,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>> {
         return historyDao.getRecentMangaLimit(search, limit, offset)
     }
 
@@ -77,7 +96,12 @@ class ChapterRepositoryImpl(
         return historyDao.getHistoryPerPeriod(startDate, endDate)
     }
 
-    fun getAllRecentsTypes(search: String, includeRead: Boolean, limit: Int, offset: Int): Flow<List<MangaChapterHistory>> {
+    fun getAllRecentsTypes(
+        search: String,
+        includeRead: Boolean,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>> {
         return historyDao.getAllRecentsTypes(search, includeRead, limit, offset)
     }
 

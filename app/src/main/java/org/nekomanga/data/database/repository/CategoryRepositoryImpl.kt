@@ -8,7 +8,7 @@ import org.nekomanga.data.database.entity.MangaCategoryEntity
 
 class CategoryRepositoryImpl(
     private val categoryDao: CategoryDao,
-    private val mangaCategoryDao: MangaCategoryDao
+    private val mangaCategoryDao: MangaCategoryDao,
 ) {
 
     fun getAllCategories(): Flow<List<CategoryEntity>> {
@@ -55,7 +55,10 @@ class CategoryRepositoryImpl(
         mangaCategoryDao.deleteOldMangaListCategories(mangaIds)
     }
 
-    suspend fun setMangaCategories(mangaListCategories: List<MangaCategoryEntity>, mangaIds: List<Long>) {
+    suspend fun setMangaCategories(
+        mangaListCategories: List<MangaCategoryEntity>,
+        mangaIds: List<Long>,
+    ) {
         mangaCategoryDao.setMangaCategories(mangaListCategories, mangaIds)
     }
 

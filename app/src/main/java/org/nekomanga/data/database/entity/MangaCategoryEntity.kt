@@ -8,14 +8,25 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "mangas_categories",
-    foreignKeys = [
-        ForeignKey(entity = MangaEntity::class, parentColumns = ["_id"], childColumns = ["manga_id"], onDelete = ForeignKey.CASCADE),
-        ForeignKey(entity = CategoryEntity::class, parentColumns = ["_id"], childColumns = ["category_id"], onDelete = ForeignKey.CASCADE)
-    ],
-    indices = [Index("category_id")]
+    foreignKeys =
+        [
+            ForeignKey(
+                entity = MangaEntity::class,
+                parentColumns = ["_id"],
+                childColumns = ["manga_id"],
+                onDelete = ForeignKey.CASCADE,
+            ),
+            ForeignKey(
+                entity = CategoryEntity::class,
+                parentColumns = ["_id"],
+                childColumns = ["category_id"],
+                onDelete = ForeignKey.CASCADE,
+            ),
+        ],
+    indices = [Index("category_id")],
 )
 data class MangaCategoryEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Int? = null,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
-    @ColumnInfo(name = "category_id") val categoryId: Int
+    @ColumnInfo(name = "category_id") val categoryId: Int,
 )

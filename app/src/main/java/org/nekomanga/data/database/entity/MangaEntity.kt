@@ -1,8 +1,13 @@
 package org.nekomanga.data.database.entity
 
+import androidx.annotation.StringRes
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import eu.kanade.tachiyomi.util.lang.capitalizeWords
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.DisplayManga
 
 @Entity(tableName = "mangas")
 data class MangaEntity(
@@ -45,5 +50,33 @@ data class MangaEntity(
     @ColumnInfo(name = "user_cover") val userCover: String?,
     @ColumnInfo(name = "user_title") val userTitle: String?,
     @ColumnInfo(name = "language_filter_flag") val filteredLanguage: String?,
-    @ColumnInfo(name = "dynamic_cover") val dynamicCover: String?
-)
+    @ColumnInfo(name = "dynamic_cover") val dynamicCover: String?,
+) {
+    fun displayTitle(): String {
+        return userTitle ?: title
+    }
+}
+
+fun MangaEntity.toDisplayManga(
+    displayText: String = "",
+    @StringRes displayTextRes: Int? = null,
+): DisplayManga {
+    return DisplayManga(
+        mangaId = this.id!!, // Primary key from MangaEntity
+        url = this.url,
+        originalTitle = this.title,
+        userTitle = this.userTitle ?: "", // Mapped from COL_USER_TITLE
+        inLibrary = this.favorite,
+        displayText = displayText.replace("_", " ").capitalizeWords(),
+        displayTextRes = displayTextRes,
+        currentArtwork =
+            Artwork(
+                cover = this.userCover ?: "", // Mapped from COL_USER_COVER
+                dynamicCover = this.dynamicCover ?: "", // Mapped from COL_DYNAMIC_COVER
+                inLibrary = this.favorite,
+                mangaId = this.id,
+                originalCover =
+                    this.thumbnailUrl ?: MdConstants.noCoverUrl, // Mapped from COL_THUMBNAIL_URL
+            ),
+    )
+}

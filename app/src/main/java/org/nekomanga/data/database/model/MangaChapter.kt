@@ -6,5 +6,5 @@ import org.nekomanga.data.database.entity.MangaEntity
 
 data class MangaChapter(
     @Embedded val manga: MangaEntity,
-    @Embedded(prefix = "ch_") val chapter: ChapterEntity
+    @Embedded(prefix = "ch_") val chapter: ChapterEntity,
 )

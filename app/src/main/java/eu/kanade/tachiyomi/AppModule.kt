@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler as FeedLatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
@@ -105,11 +104,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { get<AppDatabase>().mangaAggregateDao() }
         addSingletonFactory { get<AppDatabase>().mangaCategoryDao() }
 
-        addSingletonFactory {
-            MangaRepositoryImpl(
-                get(), get(), get(), get(), get()
-            )
-        }
+        addSingletonFactory { MangaRepositoryImpl(get(), get(), get(), get(), get()) }
         addSingletonFactory { ChapterRepositoryImpl(get(), get()) }
         addSingletonFactory { CategoryRepositoryImpl(get(), get()) }
         addSingletonFactory { TrackRepositoryImpl(get()) }

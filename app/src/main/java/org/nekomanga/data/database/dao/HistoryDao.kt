@@ -9,7 +9,8 @@ import org.nekomanga.data.database.model.MangaChapterHistory
 
 @Dao
 interface HistoryDao {
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
                chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -28,10 +29,16 @@ interface HistoryDao {
         AND LOWER(mangas.title) LIKE :search
         ORDER BY history.history_last_read DESC
         LIMIT :limit OFFSET :offset
-    """)
-    fun getRecentHistoryUngrouped(search: String, limit: Int, offset: Int): Flow<List<MangaChapterHistory>>
+    """
+    )
+    fun getRecentHistoryUngrouped(
+        search: String,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
                chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -57,10 +64,16 @@ interface HistoryDao {
         AND LOWER(mangas.title) LIKE :search
         ORDER BY max_last_read.history_last_read DESC
         LIMIT :limit OFFSET :offset
-    """)
-    fun getRecentMangaLimit(search: String, limit: Int, offset: Int): Flow<List<MangaChapterHistory>>
+    """
+    )
+    fun getRecentMangaLimit(
+        search: String,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
                chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -78,10 +91,12 @@ interface HistoryDao {
         AND history.history_last_read >= :startDate
         AND history.history_last_read <= :endDate
         ORDER BY history.history_last_read DESC
-    """)
+    """
+    )
     fun getHistoryPerPeriod(startDate: Long, endDate: Long): Flow<List<MangaChapterHistory>>
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM
         (SELECT mangas.*, chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -181,26 +196,37 @@ interface HistoryDao {
         AND LOWER(mangas.title) LIKE :search)
         ORDER BY hi_history_last_read DESC
         LIMIT :limit OFFSET :offset
-    """)
-    fun getAllRecentsTypes(search: String, includeRead: Boolean, limit: Int, offset: Int): Flow<List<MangaChapterHistory>>
+    """
+    )
+    fun getAllRecentsTypes(
+        search: String,
+        includeRead: Boolean,
+        limit: Int,
+        offset: Int,
+    ): Flow<List<MangaChapterHistory>>
 
-    @Query("""
+    @Query(
+        """
         SELECT history.*
         FROM history
         JOIN chapters ON history.history_chapter_id = chapters._id
         WHERE chapters.manga_id = :mangaId
-    """)
+    """
+    )
     suspend fun getHistoryByMangaId(mangaId: Long): List<HistoryEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT history.*
         FROM history
         JOIN chapters ON history.history_chapter_id = chapters._id
         WHERE chapters.manga_id IN (:mangaIds)
-    """)
+    """
+    )
     suspend fun getHistoryByMangaIds(mangaIds: List<Long>): List<HistoryEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
                chapters._id AS ch__id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
                chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
@@ -219,30 +245,28 @@ interface HistoryDao {
         WHERE mangas._id = :mangaId
         ORDER BY history.history_last_read DESC
         LIMIT 25
-    """)
+    """
+    )
     fun getChapterHistoryByMangaId(mangaId: Long): Flow<List<MangaChapterHistory>>
 
-    @Query("""
+    @Query(
+        """
         SELECT history.*
         FROM history
         JOIN chapters ON history.history_chapter_id = chapters._id
         WHERE chapters.url = :chapterUrl
         LIMIT 1
-    """)
+    """
+    )
     suspend fun getHistoryByChapterUrl(chapterUrl: String): HistoryEntity?
 
-    @Query("SELECT SUM(history_time_read) FROM history")
-    suspend fun getTotalReadDuration(): Long
+    @Query("SELECT SUM(history_time_read) FROM history") suspend fun getTotalReadDuration(): Long
 
-    @Upsert
-    suspend fun upsertHistory(history: HistoryEntity)
+    @Upsert suspend fun upsertHistory(history: HistoryEntity)
 
-    @Upsert
-    suspend fun upsertHistoryList(historyList: List<HistoryEntity>)
+    @Upsert suspend fun upsertHistoryList(historyList: List<HistoryEntity>)
 
-    @Query("DELETE FROM history")
-    suspend fun deleteAllHistory()
+    @Query("DELETE FROM history") suspend fun deleteAllHistory()
 
-    @Query("DELETE FROM history WHERE history_last_read = 0")
-    suspend fun deleteHistoryNoLastRead()
+    @Query("DELETE FROM history WHERE history_last_read = 0") suspend fun deleteHistoryNoLastRead()
 }

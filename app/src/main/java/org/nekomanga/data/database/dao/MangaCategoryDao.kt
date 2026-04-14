@@ -29,7 +29,10 @@ interface MangaCategoryDao {
     suspend fun deleteOldMangaListCategories(mangaIds: List<Long>)
 
     @Transaction
-    suspend fun setMangaCategories(mangaListCategories: List<MangaCategoryEntity>, mangaIds: List<Long>) {
+    suspend fun setMangaCategories(
+        mangaListCategories: List<MangaCategoryEntity>,
+        mangaIds: List<Long>,
+    ) {
         deleteOldMangaListCategories(mangaIds)
         insertMangaListCategories(mangaListCategories)
     }

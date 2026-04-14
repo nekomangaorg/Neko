@@ -17,11 +17,13 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE _id = :id")
     suspend fun getCategoryById(id: Int): CategoryEntity?
 
-    @Query("""
+    @Query(
+        """
         SELECT categories.* FROM categories
         JOIN mangas_categories ON categories._id = mangas_categories.category_id
         WHERE mangas_categories.manga_id = :mangaId
-    """)
+    """
+    )
     fun getCategoriesForManga(mangaId: Long): Flow<List<CategoryEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -30,11 +32,9 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategories(categories: List<CategoryEntity>)
 
-    @Delete
-    suspend fun deleteCategory(category: CategoryEntity)
+    @Delete suspend fun deleteCategory(category: CategoryEntity)
 
-    @Delete
-    suspend fun deleteCategories(categories: List<CategoryEntity>)
+    @Delete suspend fun deleteCategories(categories: List<CategoryEntity>)
 
     // Join table operations
     @Insert(onConflict = OnConflictStrategy.REPLACE)

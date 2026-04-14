@@ -37,6 +37,8 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
+        ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+
         ndk { abiFilters += supportedAbis }
     }
 

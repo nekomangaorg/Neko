@@ -13,8 +13,7 @@ import org.nekomanga.data.database.model.LibraryMangaRaw
 
 @Dao
 interface MangaDao {
-    @Query("SELECT * FROM mangas")
-    fun getMangaList(): Flow<List<MangaEntity>>
+    @Query("SELECT * FROM mangas") fun getMangaList(): Flow<List<MangaEntity>>
 
     @Query("SELECT * FROM mangas WHERE favorite = 1 ORDER BY title")
     fun getFavoriteMangaList(): Flow<List<MangaEntity>>
@@ -31,11 +30,11 @@ interface MangaDao {
     @Query("SELECT * FROM mangas WHERE url = :url")
     suspend fun getMangaByUrl(url: String): MangaEntity?
 
-    @Query("SELECT * FROM mangas WHERE _id = :id")
-    suspend fun getMangaById(id: Long): MangaEntity?
+    @Query("SELECT * FROM mangas WHERE _id = :id") suspend fun getMangaById(id: Long): MangaEntity?
 
     // Replaces the complex libraryQuery from RawQueries.kt
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*,
         (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND read = 0) as unreadCount,
         (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND read = 1) as readCount,
@@ -46,10 +45,12 @@ interface MangaDao {
         LEFT JOIN mangas_categories ON mangas._id = mangas_categories.manga_id
         WHERE favorite = 1
         ORDER BY title
-    """)
+    """
+    )
     fun getLibraryMangaList(): Flow<List<LibraryManga>>
 
-    @Query("""
+    @Query(
+        """
     SELECT M.*, COALESCE(MC.category_id, 0) AS category
     FROM (
         SELECT mangas.*,
@@ -115,7 +116,8 @@ interface MangaDao {
     LEFT JOIN (
         SELECT * FROM mangas_categories) AS MC
         ON MC.manga_id = M._id
-    """)
+    """
+    )
     fun getLibraryMangaRaw(): Flow<List<LibraryMangaRaw>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -124,38 +126,38 @@ interface MangaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMangas(mangas: List<MangaEntity>)
 
-    @Update
-    suspend fun updateManga(manga: MangaEntity)
+    @Update suspend fun updateManga(manga: MangaEntity)
 
-    @Delete
-    suspend fun deleteManga(manga: MangaEntity)
+    @Delete suspend fun deleteManga(manga: MangaEntity)
 
-    @Delete
-    suspend fun deleteMangas(mangas: List<MangaEntity>)
+    @Delete suspend fun deleteMangas(mangas: List<MangaEntity>)
 
-    @Query("DELETE FROM mangas WHERE favorite = 0")
-    suspend fun deleteAllNotInLibrary()
+    @Query("DELETE FROM mangas WHERE favorite = 0") suspend fun deleteAllNotInLibrary()
 
-    @Query("""
+    @Query(
+        """
         DELETE FROM mangas
         WHERE favorite = 0 AND _id NOT IN (
             SELECT manga_id FROM chapters WHERE read = 1 OR last_page_read != 0
         )
-    """)
+    """
+    )
     suspend fun deleteAllNotInLibraryAndNotRead()
 
-    @Query("DELETE FROM mangas")
-    suspend fun deleteAllManga()
+    @Query("DELETE FROM mangas") suspend fun deleteAllManga()
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM mangas
         WHERE favorite = 0 AND _id IN (
             SELECT manga_id FROM chapters WHERE read = 1 OR last_page_read != 0
         )
-    """)
+    """
+    )
     fun getReadNotInLibraryMangas(): Flow<List<MangaEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*, MAX(history.history_last_read) AS max
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
@@ -163,26 +165,31 @@ interface MangaDao {
         WHERE mangas.favorite = 1
         GROUP BY mangas._id
         ORDER BY max DESC
-    """)
+    """
+    )
     fun getLastReadManga(): Flow<List<MangaEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*, MAX(chapters.date_fetch) AS max
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
         WHERE mangas.favorite = 1
         GROUP BY mangas._id
         ORDER BY max DESC
-    """)
+    """
+    )
     fun getLastFetchedManga(): Flow<List<MangaEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT mangas.*
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
         GROUP BY mangas._id
         ORDER BY COUNT(*)
-    """)
+    """
+    )
     fun getTotalChapterManga(): Flow<List<MangaEntity>>
 
     @Query("UPDATE mangas SET favorite = :isFavorite WHERE _id = :mangaId")
@@ -197,7 +204,8 @@ interface MangaDao {
     @Query("UPDATE mangas SET chapter_flags = :flags WHERE _id = :mangaId")
     suspend fun updateChapterFlags(mangaId: Long, flags: Int)
 
-    @Query("""
+    @Query(
+        """
     UPDATE mangas SET
     title = :title,
     genre = :genre,
@@ -206,7 +214,8 @@ interface MangaDao {
     status = :status,
     description = :description
     WHERE _id = :mangaId
-""")
+"""
+    )
     suspend fun updateMangaInfo(
         mangaId: Long,
         title: String,
@@ -214,7 +223,7 @@ interface MangaDao {
         author: String?,
         artist: String?,
         status: Int,
-        description: String?
+        description: String?,
     )
 
     @Query("UPDATE mangas SET last_update = :lastUpdate WHERE _id = :mangaId")

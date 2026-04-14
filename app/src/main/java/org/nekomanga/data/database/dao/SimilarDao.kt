@@ -15,6 +15,5 @@ interface SimilarDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSimilar(similar: MangaSimilarEntity)
 
-    @Query("DELETE FROM manga_similar")
-    suspend fun deleteAllSimilar()
+    @Query("DELETE FROM manga_similar") suspend fun deleteAllSimilar()
 }

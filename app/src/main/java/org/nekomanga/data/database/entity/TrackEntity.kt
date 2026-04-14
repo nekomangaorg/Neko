@@ -18,5 +18,5 @@ data class TrackEntity(
     @ColumnInfo(name = "track_score") val score: Float,
     @ColumnInfo(name = "track_tracking_url") val trackingUrl: String,
     @ColumnInfo(name = "track_start_date") val startedReadingDate: Long,
-    @ColumnInfo(name = "track_finish_date") val finishedReadingDate: Long
+    @ColumnInfo(name = "track_finish_date") val finishedReadingDate: Long,
 )

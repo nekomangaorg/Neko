@@ -32,50 +32,73 @@ import org.nekomanga.data.database.entity.TrackEntity
 import org.nekomanga.data.database.entity.UploaderEntity
 
 @Database(
-    entities = [
-        MangaEntity::class, ChapterEntity::class, ArtworkEntity::class,
-        BrowseFilterEntity::class, CategoryEntity::class, MangaCategoryEntity::class,
-        HistoryEntity::class, TrackEntity::class, MangaAggregateEntity::class,
-        ScanlatorGroupEntity::class, MangaSimilarEntity::class, UploaderEntity::class,
-        MergeMangaEntity::class
-    ],
+    entities =
+        [
+            MangaEntity::class,
+            ChapterEntity::class,
+            ArtworkEntity::class,
+            BrowseFilterEntity::class,
+            CategoryEntity::class,
+            MangaCategoryEntity::class,
+            HistoryEntity::class,
+            TrackEntity::class,
+            MangaAggregateEntity::class,
+            ScanlatorGroupEntity::class,
+            MangaSimilarEntity::class,
+            UploaderEntity::class,
+            MergeMangaEntity::class,
+        ],
     version = 46, // Set higher than StorIO version 45
-    exportSchema = true
+    exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun mangaDao(): MangaDao
+
     abstract fun chapterDao(): ChapterDao
+
     abstract fun historyDao(): HistoryDao
+
     abstract fun categoryDao(): CategoryDao
+
     abstract fun trackDao(): TrackDao
+
     abstract fun artworkDao(): ArtworkDao
+
     abstract fun browseFilterDao(): BrowseFilterDao
+
     abstract fun mergeMangaDao(): MergeMangaDao
+
     abstract fun scanlatorDao(): ScanlatorGroupDao
+
     abstract fun uploaderDao(): UploaderDao
+
     abstract fun similarDao(): SimilarDao
+
     abstract fun mangaAggregateDao(): MangaAggregateDao
+
     abstract fun mangaCategoryDao(): MangaCategoryDao
 
     companion object {
         const val DATABASE_NAME = "tachiyomi.db"
-        val MIGRATION_45_46 = object : Migration(45, 46) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Empty migration to allow Room to take over the existing database
+        val MIGRATION_45_46 =
+            object : Migration(45, 46) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Empty migration to allow Room to take over the existing database
+                }
             }
-        }
-        val roomCallback = object : Callback() {
-            override fun onOpen(db: SupportSQLiteDatabase) {
-                super.onOpen(db)
-                // Enable Foreign Key constraints (Critical for Neko's schema)
-                db.execSQL("PRAGMA foreign_keys = ON;")
+        val roomCallback =
+            object : Callback() {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    super.onOpen(db)
+                    // Enable Foreign Key constraints (Critical for Neko's schema)
+                    db.execSQL("PRAGMA foreign_keys = ON;")
 
-                // Optional: Set journal mode to WAL if not already default
-                db.execSQL("PRAGMA journal_mode = WAL;")
+                    // Optional: Set journal mode to WAL if not already default
+                    db.execSQL("PRAGMA journal_mode = WAL;")
 
-                // Optional: Optimize for build/write speed
-                db.execSQL("PRAGMA synchronous = NORMAL;")
+                    // Optional: Optimize for build/write speed
+                    db.execSQL("PRAGMA synchronous = NORMAL;")
+                }
             }
-        }
     }
 }

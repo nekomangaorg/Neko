@@ -30,12 +30,11 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room_version" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room_version" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version" }
-room-paging = { module = "androidx.room:room-paging", version.ref = "room_version" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room_version" }
 
 [bundles]
 androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preferencektx", "annotation", "browser", "biometric", "palette", "core-ktx", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "lifecycle-runtime-compose", "work"]
-room = ["room-runtime", "room-ktx", "room-paging"]
+room = ["room-runtime", "room-ktx"]
 
 [plugins]
 application = { id = "com.android.application", version.ref = "agp_version" }

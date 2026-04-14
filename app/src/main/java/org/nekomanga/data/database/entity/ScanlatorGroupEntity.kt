@@ -9,5 +9,5 @@ data class ScanlatorGroupEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "uuid") val uuid: String,
-    @ColumnInfo(name = "description") val description: String?
+    @ColumnInfo(name = "description") val description: String?,
 )

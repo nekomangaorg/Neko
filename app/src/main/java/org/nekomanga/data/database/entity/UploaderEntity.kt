@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "uploaders")
 data class UploaderEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "_id") val id: Long? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
     @ColumnInfo(name = "username") val username: String,
-    @ColumnInfo(name = "uuid") val uuid: String
+    @ColumnInfo(name = "uuid") val uuid: String,
 )

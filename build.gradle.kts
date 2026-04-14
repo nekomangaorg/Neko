@@ -21,6 +21,7 @@ plugins {
   alias(libs.plugins.detekt)
 }
 
+
 subprojects {
   tasks {
     withType<KotlinCompile> {
