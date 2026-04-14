@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id(androidx.plugins.application.get().pluginId)
     id(kotlinx.plugins.android.get().pluginId)
@@ -183,33 +185,20 @@ dependencies {
 
 tasks.withType<Test> { useJUnit() }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.addAll(listOf("-opt-in=kotlin.Experimental"))
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
-        )
-        freeCompilerArgs.addAll(listOf("-opt-in=androidx.compose.material.ExperimentalMaterialApi"))
         freeCompilerArgs.addAll(
             listOf(
-                "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi"
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+                "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+                "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+                "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+                "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+                "-opt-in=coil3.annotation.ExperimentalCoilApi",
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
             )
-        )
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
-        )
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi")
-        )
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi")
-        )
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=androidx.compose.foundation.ExperimentalFoundationApi")
-        )
-        freeCompilerArgs.addAll(listOf("-opt-in=coil3.annotation.ExperimentalCoilApi"))
-        freeCompilerArgs.addAll(
-            listOf("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
         )
     }
 }
