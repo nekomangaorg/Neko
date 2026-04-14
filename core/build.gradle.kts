@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id(androidx.plugins.library.get().pluginId)
     id(kotlinx.plugins.android.get().pluginId)
@@ -23,4 +25,12 @@ dependencies {
     implementation(libs.tachi.unifile)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
+}
+
+tasks.withType<KotlinCompile> {
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
+        )
+    }
 }

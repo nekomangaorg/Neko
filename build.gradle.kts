@@ -28,23 +28,13 @@ subprojects {
         freeCompilerArgs.addAll(
             listOf(
                 "-Xcontext-parameters",
-                "-opt-in=kotlin.Experimental",
                 "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-                "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
-                "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
-                "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
-                "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
                 "-opt-in=kotlin.time.ExperimentalTime",
                 "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
-                "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-                "-opt-in=coil3.annotation.ExperimentalCoilApi",
                 "-opt-in=kotlin.ExperimentalStdlibApi",
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
-                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
             )
         )
       }
