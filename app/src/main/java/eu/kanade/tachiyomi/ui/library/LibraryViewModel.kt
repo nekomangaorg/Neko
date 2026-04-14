@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -68,7 +67,6 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
-import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -77,6 +75,7 @@ import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.util.system.mapAsync
@@ -96,6 +95,7 @@ class LibraryViewModel() : ViewModel() {
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
+    val categoryUseCases: CategoryUseCases = CategoryUseCases()
 
     private val initialState =
         LibraryScreenState(
@@ -784,24 +784,12 @@ class LibraryViewModel() : ViewModel() {
 
     /** Add New Category */
     fun addNewCategory(newCategory: String) {
-        viewModelScope.launchIO {
-            val category = Category.create(newCategory)
-            category.order =
-                (libraryScreenState.value.userCategories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.addNewCategory(newCategory) }
     }
 
     fun editCategories(mangaList: List<DisplayManga>, categories: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val dbCategories = categories.map { it.toDbCategory() }
-
-            val mangaIds = mangaList.map { it.mangaId }
-            val dbMangas = db.getMangas(mangaIds).executeOnIO()
-            val mangaCategories = dbMangas.flatMap { dbManga ->
-                dbCategories.map { MangaCategory.create(dbManga, it) }
-            }
-            db.setMangaCategories(mangaCategories, dbMangas)
+            categoryUseCases.modifyCategory.setMangaCategories(mangaList, categories)
 
             clearSelectedManga()
             if (libraryPreferences.groupBy().get() == LibraryGroup.ByCategory) {
@@ -813,24 +801,13 @@ class LibraryViewModel() : ViewModel() {
 
     fun categoryAscendingClick(category: CategoryItem) {
         viewModelScope.launchIO {
-            if (category.isDynamic || category.isSystemCategory) {
-                libraryPreferences.sortAscending().set(!category.isAscending)
-            } else {
-                val updatedDbCategory = category.toDbCategory(true)
-                db.insertCategory(updatedDbCategory).executeOnIO()
-            }
+            categoryUseCases.modifyCategory.updateCategorySortAscending(category)
         }
     }
 
     fun categoryItemLibrarySortClick(category: CategoryItem, librarySort: LibrarySort) {
         viewModelScope.launchIO {
-            if (category.isDynamic || category.isSystemCategory) {
-                libraryPreferences.sortingMode().set(librarySort.mainValue)
-            } else {
-                val updatedDbCategory =
-                    category.copy(isAscending = true, sortOrder = librarySort).toDbCategory()
-                db.insertCategory(updatedDbCategory).executeOnIO()
-            }
+            categoryUseCases.modifyCategory.updateCategoryLibrarySort(category, librarySort)
         }
     }
 

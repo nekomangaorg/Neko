@@ -122,6 +122,7 @@ import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.chapters.GetChapterFilterText
 import org.nekomanga.usecases.manga.MangaUseCases
@@ -163,6 +164,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
+    private val categoryUseCases = CategoryUseCases()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
 
@@ -1357,17 +1359,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     fun addNewCategory(newCategory: String) {
-        viewModelScope.launchIO {
-            val order =
-                (_mangaDetailScreenState.value.category.allCategories.maxOfOrNull { it.order }
-                    ?: 0) + 1
-            mangaUseCases.modifyManga.addNewCategory(newCategory, order)
-        }
+        viewModelScope.launchIO { categoryUseCases.modifyCategory.addNewCategory(newCategory) }
     }
 
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
         viewModelScope.launchIO {
-            mangaUseCases.modifyManga.updateMangaCategories(mangaId, enabledCategories)
+            categoryUseCases.modifyCategory.updateMangaCategories(mangaId, enabledCategories)
         }
     }
 

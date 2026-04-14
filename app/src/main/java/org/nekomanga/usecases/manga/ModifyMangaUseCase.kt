@@ -1,15 +1,11 @@
 package org.nekomanga.usecases.manga
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import java.util.Date
-import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -20,17 +16,6 @@ class ModifyMangaUseCase(
     private val downloadManager: DownloadManager,
     private val storageManager: StorageManager,
 ) {
-    suspend fun addNewCategory(newCategory: String, order: Int) {
-        val category = Category.create(newCategory).apply { this.order = order }
-        db.insertCategory(category).executeOnIO()
-    }
-
-    suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
-        val dbManga = db.getManga(mangaId).executeOnIO() ?: return
-        val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
-        db.setMangaCategories(categories, listOf(dbManga))
-    }
-
     suspend fun setAltTitle(
         mangaId: Long,
         title: String?,
