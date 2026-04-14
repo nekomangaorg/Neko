@@ -15,6 +15,10 @@ class CategoryRepositoryImpl(
         return categoryDao.getAllCategories()
     }
 
+    suspend fun getAllCategoriesList(): List<CategoryEntity> {
+        return categoryDao.getAllCategoriesList()
+    }
+
     suspend fun getCategoryById(id: Int): CategoryEntity? {
         return categoryDao.getCategoryById(id)
     }
@@ -41,6 +45,10 @@ class CategoryRepositoryImpl(
 
     fun getMangaCategories(mangaIds: List<Long>): Flow<List<MangaCategoryEntity>> {
         return mangaCategoryDao.getMangaCategories(mangaIds)
+    }
+
+    suspend fun getMangaCategoriesList(mangaIds: List<Long>): List<MangaCategoryEntity> {
+        return mangaCategoryDao.getMangaCategoriesList(mangaIds)
     }
 
     suspend fun insertMangaCategory(mangaCategory: MangaCategoryEntity) {

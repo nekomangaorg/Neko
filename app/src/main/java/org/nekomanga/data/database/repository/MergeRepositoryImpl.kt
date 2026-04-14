@@ -14,6 +14,9 @@ class MergeRepositoryImpl(
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>> =
         mergeMangaDao.getMergeMangaList(mangaId)
 
+    suspend fun getMergeMangaList(mangaIds: List<Long>): List<MergeMangaEntity> =
+        mergeMangaDao.getMergeMangaList(mangaIds)
+
     suspend fun insertMergeManga(mergeManga: MergeMangaEntity): Long =
         mergeMangaDao.insertMergeManga(mergeManga)
 

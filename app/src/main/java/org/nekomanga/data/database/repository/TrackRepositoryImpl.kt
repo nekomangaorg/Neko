@@ -10,6 +10,10 @@ class TrackRepositoryImpl(private val trackDao: TrackDao) {
         return trackDao.getTracksForManga(mangaId)
     }
 
+    suspend fun getTracksForMangas(mangaIds: List<Long>): List<TrackEntity> {
+        return trackDao.getTracksForMangas(mangaIds)
+    }
+
     suspend fun insertTrack(track: TrackEntity): Long {
         return trackDao.insertTrack(track)
     }

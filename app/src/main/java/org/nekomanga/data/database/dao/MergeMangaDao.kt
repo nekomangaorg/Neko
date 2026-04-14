@@ -13,6 +13,9 @@ interface MergeMangaDao {
     @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>>
 
+    @Query("SELECT * FROM merge_manga WHERE manga_id IN (:mangaIds)")
+    suspend fun getMergeMangaList(mangaIds: List<Long>): List<MergeMangaEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMergeManga(mergeManga: MergeMangaEntity): Long
 

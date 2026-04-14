@@ -133,6 +133,8 @@ class MangaRepositoryImpl(
 
     fun getFavoriteMangaList(): Flow<List<MangaEntity>> = mangaDao.getFavoriteMangaList()
 
+    suspend fun getFavoriteMangaListSync(): List<MangaEntity> = mangaDao.getFavoriteMangaListSync()
+
     suspend fun getMangas(ids: List<Long>): List<MangaEntity> = mangaDao.getMangas(ids)
 
     suspend fun getMangaByUrlAndSource(url: String, sourceId: Long): MangaEntity? =
@@ -164,6 +166,9 @@ class MangaRepositoryImpl(
     suspend fun deleteAllManga() = mangaDao.deleteAllManga()
 
     fun getReadNotInLibraryMangas(): Flow<List<MangaEntity>> = mangaDao.getReadNotInLibraryMangas()
+
+    suspend fun getReadNotInLibraryMangasSync(): List<MangaEntity> =
+        mangaDao.getReadNotInLibraryMangasSync()
 
     fun getLastReadManga(): Flow<List<MangaEntity>> = mangaDao.getLastReadManga()
 

@@ -1,9 +1,20 @@
 package org.nekomanga.data.database.model
 
+import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.HistoryImpl
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.database.models.TrackImpl
+import org.nekomanga.data.database.entity.CategoryEntity
 import org.nekomanga.data.database.entity.ChapterEntity
+import org.nekomanga.data.database.entity.HistoryEntity
+import org.nekomanga.data.database.entity.MangaCategoryEntity
 import org.nekomanga.data.database.entity.MangaEntity
+import org.nekomanga.data.database.entity.MergeMangaEntity
+import org.nekomanga.data.database.entity.TrackEntity
 import org.nekomanga.domain.chapter.SimpleChapter
 
 fun MangaEntity.toManga(): MangaImpl {
@@ -74,6 +85,62 @@ fun ChapterEntity.toChapter(): ChapterImpl {
         mangadex_chapter_id = this@toChapter.mangadexChapterId ?: ""
         old_mangadex_id = this@toChapter.oldMangadexId
         language = this@toChapter.language
+    }
+}
+
+fun CategoryEntity.toCategory(): CategoryImpl {
+    return CategoryImpl().apply {
+        id = this@toCategory.id
+        name = this@toCategory.name
+        order = this@toCategory.order
+        flags = this@toCategory.flags
+        mangaOrder = this@toCategory.mangaOrder.split("/").mapNotNull { it.toLongOrNull() }
+    }
+}
+
+fun TrackEntity.toTrack(): TrackImpl {
+    return TrackImpl().apply {
+        id = this@toTrack.id
+        manga_id = this@toTrack.mangaId
+        sync_id = this@toTrack.syncId
+        media_id = this@toTrack.mediaId
+        library_id = this@toTrack.libraryId
+        title = this@toTrack.title
+        last_chapter_read = this@toTrack.lastChapterRead
+        total_chapters = this@toTrack.totalChapters
+        status = this@toTrack.status
+        score = this@toTrack.score
+        tracking_url = this@toTrack.trackingUrl
+        started_reading_date = this@toTrack.startedReadingDate
+        finished_reading_date = this@toTrack.finishedReadingDate
+    }
+}
+
+fun MergeMangaEntity.toMergeManga(): MergeMangaImpl {
+    return MergeMangaImpl(
+        id = this@toMergeManga.id,
+        mangaId = this@toMergeManga.mangaId,
+        coverUrl = this@toMergeManga.coverUrl,
+        title = this@toMergeManga.title,
+        url = this@toMergeManga.url,
+        mergeType = MergeType.getById(this@toMergeManga.mergeType),
+    )
+}
+
+fun HistoryEntity.toHistory(): HistoryImpl {
+    return HistoryImpl().apply {
+        id = this@toHistory.id
+        chapter_id = this@toHistory.chapterId
+        last_read = this@toHistory.lastRead
+        time_read = this@toHistory.timeRead
+    }
+}
+
+fun MangaCategoryEntity.toMangaCategory(): MangaCategory {
+    return MangaCategory().apply {
+        id = this@toMangaCategory.id?.toLong()
+        manga_id = this@toMangaCategory.mangaId
+        category_id = this@toMangaCategory.categoryId
     }
 }
 

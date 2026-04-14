@@ -18,6 +18,9 @@ interface MangaDao {
     @Query("SELECT * FROM mangas WHERE favorite = 1 ORDER BY title")
     fun getFavoriteMangaList(): Flow<List<MangaEntity>>
 
+    @Query("SELECT * FROM mangas WHERE favorite = 1 ORDER BY title")
+    suspend fun getFavoriteMangaListSync(): List<MangaEntity>
+
     @Query("SELECT * FROM mangas WHERE _id IN (:ids)")
     suspend fun getMangas(ids: List<Long>): List<MangaEntity>
 
@@ -155,6 +158,16 @@ interface MangaDao {
     """
     )
     fun getReadNotInLibraryMangas(): Flow<List<MangaEntity>>
+
+    @Query(
+        """
+        SELECT * FROM mangas
+        WHERE favorite = 0 AND _id IN (
+            SELECT manga_id FROM chapters WHERE read = 1 OR last_page_read != 0
+        )
+    """
+    )
+    suspend fun getReadNotInLibraryMangasSync(): List<MangaEntity>
 
     @Query(
         """

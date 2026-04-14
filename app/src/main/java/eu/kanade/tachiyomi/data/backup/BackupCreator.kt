@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.withTransaction
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY_MASK
@@ -35,13 +36,32 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import org.nekomanga.R
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toHistory
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toMangaCategory
+import org.nekomanga.data.database.model.toMergeManga
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupCreator(val context: Context) {
 
-    internal val databaseHelper: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
+    private val categoryRepository: CategoryRepositoryImpl by injectLazy()
+    private val trackRepository: TrackRepositoryImpl by injectLazy()
+    private val mergeRepository: MergeRepositoryImpl by injectLazy()
+    private val appDatabase: AppDatabase by injectLazy()
+
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     internal val storageManager: StorageManager by injectLazy()
@@ -56,11 +76,11 @@ class BackupCreator(val context: Context) {
      * @param uri path of Uri
      * @param isAutoBackup backup called from scheduled backup job
      */
-    fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
+    suspend fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
         // Create root object
         var backup: Backup? = null
 
-        databaseHelper.inTransaction {
+        appDatabase.withTransaction {
             val databaseManga =
                 getFavoriteManga() +
                     if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA || isAutoBackup) {
@@ -128,10 +148,12 @@ class BackupCreator(val context: Context) {
         }
     }
 
-    private fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
+    private suspend fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
         val allCategories =
             if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY)
-                databaseHelper.getCategories().executeAsBlocking().associateBy { it.id }
+                categoryRepository.getAllCategoriesList().map { it.toCategory() }.associateBy {
+                    it.id
+                }
             else emptyMap()
 
         return mangaList.chunked(500).flatMap { chunk ->
@@ -139,7 +161,7 @@ class BackupCreator(val context: Context) {
 
             // Pre-fetch all dependencies for the list of mangas
             val mergeMangaMap =
-                databaseHelper.getMergeMangaList(mangaIds).executeAsBlocking().groupBy {
+                mergeRepository.getMergeMangaList(mangaIds).map { it.toMergeManga() }.groupBy {
                     it.mangaId
                 }
 
@@ -148,23 +170,30 @@ class BackupCreator(val context: Context) {
                     flags and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER ||
                         flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY
                 ) {
-                    databaseHelper.getChapters(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                    chapterRepository
+                        .getChaptersForMangas(mangaIds)
+                        .map { it.toChapter() }
+                        .groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
 
             val categoriesMap =
                 if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY) {
-                    databaseHelper.getMangaCategories(mangaIds).executeAsBlocking().groupBy {
-                        it.manga_id
-                    }
+                    categoryRepository
+                        .getMangaCategoriesList(mangaIds)
+                        .map { it.toMangaCategory() }
+                        .groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
 
             val tracksMap =
                 if (flags and BACKUP_TRACK_MASK == BACKUP_TRACK) {
-                    databaseHelper.getTracks(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                    trackRepository
+                        .getTracksForMangas(mangaIds)
+                        .map { it.toTrack() }
+                        .groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
@@ -173,14 +202,19 @@ class BackupCreator(val context: Context) {
                 if (flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
                     // We need history entries matching chapters from these mangas.
                     // getHistoryByMangaIds fetches history matching chapter_id linked to the manga
-                    databaseHelper.getHistoryByMangaIds(mangaIds).executeAsBlocking().groupBy {
-                        // It isn't trivial to group by mangaId since history object only contains
-                        // chapter_id.
-                        // However history object does not have mangaId so grouping by chapter_id
-                        // here
-                        // and associating inside backupMangaObject.
-                        it.chapter_id
-                    }
+                    chapterRepository
+                        .getHistoryByMangaIds(mangaIds)
+                        .map { it.toHistory() }
+                        .groupBy {
+                            // It isn't trivial to group by mangaId since history object only
+                            // contains
+                            // chapter_id.
+                            // However history object does not have mangaId so grouping by
+                            // chapter_id
+                            // here
+                            // and associating inside backupMangaObject.
+                            it.chapter_id
+                        }
                 } else emptyMap()
 
             chunk.map {
@@ -203,8 +237,8 @@ class BackupCreator(val context: Context) {
      *
      * @return list of [BackupCategory] to be backed up
      */
-    private fun backupCategories(): List<BackupCategory> {
-        return databaseHelper.getCategories().executeAsBlocking().map {
+    private suspend fun backupCategories(): List<BackupCategory> {
+        return categoryRepository.getAllCategoriesList().map { it.toCategory() }.map {
             BackupCategory.copyFrom(it)
         }
     }
@@ -277,9 +311,9 @@ class BackupCreator(val context: Context) {
         return mangaObject
     }
 
-    internal fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangaList().executeAsBlocking()
+    internal suspend fun getFavoriteManga(): List<Manga> =
+        mangaRepository.getFavoriteMangaListSync().map { it.toManga() }
 
-    internal fun getReadManga(): List<Manga> =
-        databaseHelper.getReadNotInLibraryMangas().executeAsBlocking()
+    internal suspend fun getReadManga(): List<Manga> =
+        mangaRepository.getReadNotInLibraryMangasSync().map { it.toManga() }
 }

@@ -13,6 +13,9 @@ interface MangaCategoryDao {
     @Query("SELECT * FROM mangas_categories WHERE manga_id IN (:mangaIds)")
     fun getMangaCategories(mangaIds: List<Long>): Flow<List<MangaCategoryEntity>>
 
+    @Query("SELECT * FROM mangas_categories WHERE manga_id IN (:mangaIds)")
+    suspend fun getMangaCategoriesList(mangaIds: List<Long>): List<MangaCategoryEntity>
+
     @Query("SELECT * FROM mangas_categories WHERE manga_id = :mangaId")
     fun getMangaCategoriesForManga(mangaId: Long): Flow<List<MangaCategoryEntity>>
 
