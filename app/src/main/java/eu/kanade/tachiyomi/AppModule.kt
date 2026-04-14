@@ -58,6 +58,7 @@ import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
+import org.nekomanga.usecases.preferences.GetDateFormatUseCase
 import org.nekomanga.usecases.tracking.TrackUseCases
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
@@ -217,5 +218,6 @@ class PreferenceModule(val application: Application) : InjektModule {
         addSingletonFactory { MangaDexPreferences(get()) }
 
         addSingletonFactory { PreferencesHelper(context = application, preferenceStore = get()) }
+        addSingletonFactory { GetDateFormatUseCase(get<PreferencesHelper>()) }
     }
 }

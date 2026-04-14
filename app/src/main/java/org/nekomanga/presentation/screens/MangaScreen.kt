@@ -185,7 +185,7 @@ fun MangaScreen(
             }
         },
         onToggleFavorite = mangaViewModel::toggleFavorite,
-        dateFormat = mangaViewModel.preferences.dateFormat(),
+        dateFormat = remember { mangaViewModel.getDateFormat() },
         trackActions =
             TrackActions(
                 statusChange = { statusIndex, trackAndService ->
