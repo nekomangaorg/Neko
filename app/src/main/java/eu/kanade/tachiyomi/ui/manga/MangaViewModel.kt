@@ -121,6 +121,7 @@ import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.chapters.GetChapterFilterText
 import org.nekomanga.usecases.manga.MangaUseCases
@@ -160,8 +161,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     private val storageManager: StorageManager = Injekt.get()
     private val chapterUseCases: ChapterUseCases = Injekt.get()
     private val trackUseCases: org.nekomanga.usecases.tracking.TrackUseCases = Injekt.get()
-    private val categoryUseCases: org.nekomanga.usecases.category.CategoryUseCases =
-        org.nekomanga.usecases.category.CategoryUseCases()
+    private val categoryUseCases = CategoryUseCases()
 
     private val mangaUseCases: MangaUseCases = Injekt.get()
 

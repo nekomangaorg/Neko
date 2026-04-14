@@ -58,8 +58,7 @@ class FeedRepository(
                         val scanlators = chapter.scanlatorList()
                         if (
                             scanlators.fastAny { scanlator -> scanlator in blockedGroups } ||
-                                (chapter.uploader in blockedUploaders &&
-                                    Constants.NO_GROUP in scanlators)
+                                (chapter.uploader in blockedUploaders && Constants.NO_GROUP in scanlators)
                         ) {
                             return@mapNotNull null
                         }
