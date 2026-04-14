@@ -24,3 +24,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
+        )
+    }
+}

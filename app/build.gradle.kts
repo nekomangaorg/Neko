@@ -182,3 +182,34 @@ dependencies {
 }
 
 tasks.withType<Test> { useJUnit() }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        freeCompilerArgs.addAll(listOf("-opt-in=kotlin.Experimental"))
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
+        )
+        freeCompilerArgs.addAll(listOf("-opt-in=androidx.compose.material.ExperimentalMaterialApi"))
+        freeCompilerArgs.addAll(
+            listOf(
+                "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi"
+            )
+        )
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+        )
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi")
+        )
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi")
+        )
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=androidx.compose.foundation.ExperimentalFoundationApi")
+        )
+        freeCompilerArgs.addAll(listOf("-opt-in=coil3.annotation.ExperimentalCoilApi"))
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
+        )
+    }
+}
