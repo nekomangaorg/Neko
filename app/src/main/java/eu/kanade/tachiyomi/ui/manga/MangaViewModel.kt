@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
+import java.text.DateFormat
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentSet
@@ -125,6 +126,7 @@ import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.chapters.GetChapterFilterText
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.manga.MergeMangaUseCases
+import org.nekomanga.usecases.preferences.GetDateFormatUseCase
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -142,8 +144,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     private val preferences: PreferencesHelper = Injekt.get()
-    private val getDateFormatUseCase: org.nekomanga.usecases.preferences.GetDateFormatUseCase =
-        Injekt.get()
+    private val getDateFormatUseCase: GetDateFormatUseCase = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
@@ -2439,7 +2440,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         }
     }
 
-    fun getDateFormat(): java.text.DateFormat {
+    fun getDateFormat(): DateFormat {
         return getDateFormatUseCase()
     }
 }
