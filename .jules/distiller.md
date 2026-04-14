@@ -7,3 +7,6 @@
 ## 2026-04-13 - Extracting MarkPreviousChaptersUseCase
 **Learning:** When trying to instantiate data classes like `Chapter` or `ChapterItem` for unit testing, the implementation classes (`ChapterImpl`) can be cumbersome. The instruction "Use Mockk" implies that we should create mocks via MockK (`mockk<Chapter>()`) instead of manually instantiating or using `apply`.
 **Action:** When asked to "use MockK" for unit tests on domain layer extractions, mock the entity directly using `mockk<Type>()` and stub the fields using `every { field } returns ...` rather than spending cycles trying to find the appropriate `Impl.create().apply {}` equivalent.
+## 2026-04-13 - Extracting GetDateFormatUseCase
+**Learning:** Injekt binds components directly to the Use Case implementations using `addSingletonFactory { MyUseCase(get()) }`. Note that mocking objects correctly with MockK for unit testing requires careful attention to matching the precise signature expected by the actual class, especially when default parameters are at play, otherwise `NullPointerException` or similar mock errors will be raised.
+**Action:** When extracting Use Cases that fetch preferences with default values, be cautious about testing them without proper mock signatures and default arguments unless explicitly told to skip tests.

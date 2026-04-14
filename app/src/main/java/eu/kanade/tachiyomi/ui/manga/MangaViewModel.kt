@@ -141,7 +141,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         private const val DYNAMIC_COVER_UPDATE_DELAY_MS = 1000L
     }
 
-    val preferences: PreferencesHelper = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get()
+    private val getDateFormatUseCase: org.nekomanga.usecases.preferences.GetDateFormatUseCase =
+        Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val libraryPreferences: LibraryPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
@@ -2435,6 +2437,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
             db.insertManga(dbManga).executeOnIO()
         }
+    }
+
+    fun getDateFormat(): java.text.DateFormat {
+        return getDateFormatUseCase()
     }
 }
 
