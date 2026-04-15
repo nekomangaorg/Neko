@@ -310,7 +310,7 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): List<SourceManga> {
         // See if we have a valid mapping for our MAL service
-        val malId = mappings.getExternalID(dexId, "mal") ?: return emptySet<String>().toList()
+        val malId = mappings.getExternalID(dexId, "mal") ?: return emptyList()
 
         if (forceRefresh) {
             val response =
