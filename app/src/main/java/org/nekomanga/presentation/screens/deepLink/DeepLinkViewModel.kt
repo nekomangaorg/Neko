@@ -76,7 +76,8 @@ class DeepLinkViewModel() : ViewModel() {
 
     suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
         return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
-            val displayManga = mangaListPage.sourceManga.first().toDisplayManga(mangaRepository, mangaDex.id)
+            val displayManga =
+                mangaListPage.sourceManga.first().toDisplayManga(mangaRepository, mangaDex.id)
             Ok(displayManga)
         }
     }

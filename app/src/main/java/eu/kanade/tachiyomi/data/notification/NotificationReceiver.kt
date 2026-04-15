@@ -201,7 +201,7 @@ class NotificationReceiver : BroadcastReceiver() {
         dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
         val mangaRepository: MangaRepositoryImpl = Injekt.get()
         val chapterRepository: ChapterRepositoryImpl = Injekt.get()
-        val manga = mangaRepository.getMangaById(mangaId)?.toManga()
+        val manga = mangaRepository.getMangaByIdSync(mangaId)?.toManga()
         val chapter = chapterRepository.getChapterById(chapterId)?.toChapter()
         if (manga != null && chapter != null) {
             val intent =
@@ -278,11 +278,19 @@ class NotificationReceiver : BroadcastReceiver() {
         val preferences: PreferencesHelper = Injekt.get()
         val mangaDexPreference: MangaDexPreferences = Injekt.get()
 
-        val manga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return
+        val manga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return
 
         val dbChapters = chapterUrls.mapNotNull { chapterUrl ->
-            val chapterEntity = chapterRepository.getChapterByUrlAndMangaId(chapterUrl, mangaId) ?: return@mapNotNull null
-            chapterRepository.updateProgress(chapterEntity.id!!, true, chapterEntity.bookmark, chapterEntity.lastPageRead, chapterEntity.pagesLeft)
+            val chapterEntity =
+                chapterRepository.getChapterByUrlAndMangaId(chapterUrl, mangaId)
+                    ?: return@mapNotNull null
+            chapterRepository.updateProgress(
+                chapterEntity.id!!,
+                true,
+                chapterEntity.bookmark,
+                chapterEntity.lastPageRead,
+                chapterEntity.pagesLeft,
+            )
             chapterEntity.toChapter().apply { read = true }
         }
         if (preferences.removeAfterMarkedAsRead().get()) {
@@ -333,8 +341,10 @@ class NotificationReceiver : BroadcastReceiver() {
     private suspend fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
         val mangaRepository: MangaRepositoryImpl = Injekt.get()
         val chapterRepository: ChapterRepositoryImpl = Injekt.get()
-        val manga = mangaRepository.getMangaById(mangaId)?.toManga()
-        val chapters = chapterUrls.mapNotNull { chapterRepository.getChapterByUrlAndMangaId(it, mangaId)?.toChapter() }
+        val manga = mangaRepository.getMangaByIdSync(mangaId)?.toManga()
+        val chapters = chapterUrls.mapNotNull {
+            chapterRepository.getChapterByUrlAndMangaId(it, mangaId)?.toChapter()
+        }
         if (manga != null && chapters.isNotEmpty()) {
             downloadManager.downloadChapters(manga, chapters)
         }

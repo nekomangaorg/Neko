@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.logging.TimberKt
@@ -127,7 +127,10 @@ class SimilarRepository {
         }
     }
 
-    private suspend fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
+    private suspend fun createGroup(
+        @StringRes id: Int,
+        manga: List<SourceManga>,
+    ): SimilarMangaGroup? {
         return if (manga.isEmpty()) {
             null
         } else {

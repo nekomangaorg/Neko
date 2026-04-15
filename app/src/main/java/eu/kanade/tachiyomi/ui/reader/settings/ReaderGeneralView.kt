@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.databinding.ReaderGeneralLayoutBinding
 
 class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -19,7 +20,11 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             val readingModeType = ReadingModeType.fromSpinner(position)
             (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
-            when (ReadingModeType.isWebtoonType(activity.viewModel.getMangaReadingMode())) {
+            when (
+                ReadingModeType.isWebtoonType(
+                    runBlocking { activity.viewModel.getMangaReadingMode() }
+                )
+            ) {
                 true -> initWebtoonPreferences()
                 else -> initPagerPreferences()
             }

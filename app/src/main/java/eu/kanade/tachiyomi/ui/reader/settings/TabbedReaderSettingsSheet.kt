@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
 import org.nekomanga.databinding.ReaderColorFilterBinding
 
@@ -29,7 +30,7 @@ class TabbedReaderSettingsSheet(
         View.inflate(readerActivity, R.layout.reader_color_filter, null) as ReaderFilterView
 
     var showWebtoonView: Boolean = run {
-        val mangaViewer = readerActivity.viewModel.getMangaReadingMode()
+        val mangaViewer = runBlocking { readerActivity.viewModel.getMangaReadingMode() }
         ReadingModeType.isWebtoonType(mangaViewer)
     }
 

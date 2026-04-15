@@ -35,7 +35,10 @@ interface MangaDao {
     @Query("SELECT * FROM mangas WHERE url = :url")
     suspend fun getMangaByUrl(url: String): MangaEntity?
 
-    @Query("SELECT * FROM mangas WHERE _id = :id") suspend fun getMangaById(id: Long): MangaEntity?
+    @Query("SELECT * FROM mangas WHERE _id = :id")
+    suspend fun getMangaByIdSync(id: Long): MangaEntity?
+
+    @Query("SELECT * FROM mangas WHERE _id = :id") fun getMangaById(id: Long): Flow<MangaEntity?>
 
     // Replaces the complex libraryQuery from RawQueries.kt
     @Query(

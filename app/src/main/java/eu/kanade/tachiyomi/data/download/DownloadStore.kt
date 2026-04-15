@@ -87,7 +87,9 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
                 val manga =
-                    cachedManga.getOrPut(mangaId) { mangaRepository.getMangaById(mangaId)?.toManga() } ?: continue
+                    cachedManga.getOrPut(mangaId) {
+                        mangaRepository.getMangaByIdSync(mangaId)?.toManga()
+                    } ?: continue
                 val chapterEntity = chapterRepository.getChapterById(chapterId) ?: continue
                 val chapter = chapterEntity.toChapter()
                 val simpleChapter = chapterEntity.toSimpleChapter()

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -21,7 +22,6 @@ import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 
 abstract class TrackService(val id: Int) {
 
@@ -141,13 +141,14 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
     val mangaRepository: MangaRepositoryImpl = Injekt.get()
     val chapterRepository: ChapterRepositoryImpl = Injekt.get()
-    val manga = mangaRepository.getMangaById(track.manga_id)?.toManga()
+    val manga = mangaRepository.getMangaByIdSync(track.manga_id)?.toManga()
 
     val chapters = chapterRepository.getChaptersForMangaSync(track.manga_id)
 
     val tags = manga?.genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
     val firstChapterName = chapters.firstOrNull()?.name?.lowercase() ?: ""
-    val isOneShotOrCompleted = manga?.status == SManga.COMPLETED ||
+    val isOneShotOrCompleted =
+        manga?.status == SManga.COMPLETED ||
             tags?.contains("oneshot") == true ||
             (chapters.size == 1 &&
                 (Regex("one.?shot").containsMatchIn(firstChapterName) ||
@@ -173,7 +174,7 @@ suspend fun TrackService.getStartDate(track: Track): Long {
     val chapters = chapterRepository.getChaptersForMangaSync(track.manga_id)
     if (chapters.any { it.read }) {
         val history =
-            chapterRepository.getHistoryByMangaId(track.manga_id).filter { it.lastRead > 0 }
+            chapterRepository.getHistoryByMangaIdSync(track.manga_id).filter { it.lastRead > 0 }
         val date = history.minOfOrNull { it.lastRead } ?: return 0L
         return if (date <= 0L) 0L else date
     }
@@ -183,7 +184,7 @@ suspend fun TrackService.getStartDate(track: Track): Long {
 suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long {
     val chapterRepository: ChapterRepositoryImpl = Injekt.get()
     if (allRead) {
-        val history = chapterRepository.getHistoryByMangaId(track.manga_id)
+        val history = chapterRepository.getHistoryByMangaIdSync(track.manga_id)
         val date = history.maxOfOrNull { it.lastRead } ?: return 0L
         return if (date <= 0L) 0L else date
     }

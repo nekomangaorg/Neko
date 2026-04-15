@@ -28,8 +28,10 @@ class ModifyMangaUseCase(
     }
 
     suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
-        val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return
-        val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()).toEntity() }
+        val dbManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return
+        val categories = enabledCategories.map {
+            MangaCategory.create(dbManga, it.toDbCategory()).toEntity()
+        }
         categoryRepository.setMangaCategories(categories, listOf(mangaId))
     }
 
@@ -37,7 +39,7 @@ class ModifyMangaUseCase(
         mangaId: Long,
         title: String?,
     ): eu.kanade.tachiyomi.data.database.models.Manga? {
-        val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return null
+        val dbManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return null
         val previousEffectiveTitle = dbManga.user_title ?: dbManga.title
         val newEffectiveTitle = title ?: dbManga.title
 
@@ -55,7 +57,7 @@ class ModifyMangaUseCase(
     }
 
     suspend fun toggleFavorite(mangaId: Long): eu.kanade.tachiyomi.data.database.models.Manga? {
-        val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return null
+        val editManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return null
         editManga.apply {
             favorite = !favorite
             date_added =

@@ -10,10 +10,9 @@ import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import org.nekomanga.data.database.model.toChapter
 import org.nekomanga.data.database.model.toEntity
-import org.nekomanga.data.database.model.toSimpleChapter
 import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.data.database.repository.MangaRepositoryImpl
-import org.nekomanga.domain.chapter.toChapterItem
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 
 class UpdateMangaStatusAndMissingChapterCount(

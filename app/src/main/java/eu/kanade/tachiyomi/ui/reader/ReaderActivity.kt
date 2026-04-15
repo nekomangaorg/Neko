@@ -132,6 +132,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
@@ -1081,7 +1082,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     fun setManga(manga: Manga) {
         val prevViewer = viewer
         val noDefault = manga.viewer_flags == -1
-        val mangaViewer = viewModel.getMangaReadingMode()
+        val mangaViewer = runBlocking { viewModel.getMangaReadingMode() }
         val newViewer =
             when (mangaViewer) {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)

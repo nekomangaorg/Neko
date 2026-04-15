@@ -77,7 +77,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         getSimilarManga()
         viewModelScope.launch {
             val categories =
-                categoryRepository.getAllCategoriesList()
+                categoryRepository
+                    .getAllCategoriesList()
                     .map { entity -> entity.toCategory().toCategoryItem() }
                     .toPersistentList()
             _similarScreenState.update {
@@ -135,7 +136,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchIO
+            val editManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -158,8 +159,13 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         .firstOrNull { defaultCategory == it.id }
                         ?.let {
                             val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()).toEntity())
-                            categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
+                                listOf(
+                                    MangaCategory.create(editManga, it.toDbCategory()).toEntity()
+                                )
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOf(editManga.id!!),
+                            )
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
@@ -236,7 +242,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             _similarScreenState.update {
                 it.copy(
                     categories =
-                        categoryRepository.getAllCategoriesList()
+                        categoryRepository
+                            .getAllCategoriesList()
                             .map { entity -> entity.toCategory().toCategoryItem() }
                             .toPersistentList()
                 )

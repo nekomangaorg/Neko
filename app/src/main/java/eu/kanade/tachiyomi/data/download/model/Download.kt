@@ -92,7 +92,7 @@ data class Download(
             sourceManager: SourceManager = Injekt.get(),
         ): Download? {
             val chapterEntity = chapterRepository.getChapterById(chapterId) ?: return null
-            val mangaEntity = mangaRepository.getMangaById(chapterEntity.mangaId) ?: return null
+            val mangaEntity = mangaRepository.getMangaByIdSync(chapterEntity.mangaId) ?: return null
             val chapter = chapterEntity.toChapter()
             val manga = mangaEntity.toManga()
             val source = chapter.getHttpSource(sourceManager)

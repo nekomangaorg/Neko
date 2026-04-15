@@ -9,14 +9,14 @@ import org.nekomanga.data.database.entity.MangaSimilarEntity
 
 @Dao
 interface SimilarDao {
-    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
+    @Query("SELECT * FROM manga_related WHERE manga_id = :mangaId")
     fun getSimilar(mangaId: String): Flow<MangaSimilarEntity?>
 
-    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
+    @Query("SELECT * FROM manga_related WHERE manga_id = :mangaId")
     suspend fun getSimilarSync(mangaId: String): MangaSimilarEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSimilar(similar: MangaSimilarEntity)
 
-    @Query("DELETE FROM manga_similar") suspend fun deleteAllSimilar()
+    @Query("DELETE FROM manga_related") suspend fun deleteAllSimilar()
 }

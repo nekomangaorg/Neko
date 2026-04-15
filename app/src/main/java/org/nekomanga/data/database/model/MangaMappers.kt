@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
-import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.ScanlatorGroupImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
@@ -33,7 +32,7 @@ import org.nekomanga.data.database.entity.TrackEntity
 import org.nekomanga.data.database.entity.UploaderEntity
 import org.nekomanga.domain.chapter.SimpleChapter
 
-fun MangaEntity.toManga(): MangaImpl {
+fun MangaEntity.toManga(): Manga {
     return MangaImpl().apply {
         id = this@toManga.id
         source = this@toManga.source
@@ -46,12 +45,12 @@ fun MangaEntity.toManga(): MangaImpl {
         status = this@toManga.status
         thumbnail_url = this@toManga.thumbnailUrl
         favorite = this@toManga.favorite
-        last_update = this@toManga.lastUpdate
-        next_update = this@toManga.nextUpdate
+        last_update = this@toManga.lastUpdate ?: 0L
+        next_update = this@toManga.nextUpdate ?: 0L
         initialized = this@toManga.initialized
         viewer_flags = this@toManga.viewerFlags
         chapter_flags = this@toManga.chapterFlags
-        date_added = this@toManga.dateAdded
+        date_added = this@toManga.dateAdded ?: 0L
         lang_flag = this@toManga.langFlag
         anilist_id = this@toManga.anilistId
         kitsu_id = this@toManga.kitsuId
@@ -79,7 +78,7 @@ fun MangaEntity.toManga(): MangaImpl {
 
 fun Manga.toEntity(): MangaEntity {
     return MangaEntity(
-        id = id,
+        id = id!!,
         source = source,
         url = url,
         artist = artist,
@@ -118,6 +117,7 @@ fun Manga.toEntity(): MangaEntity {
         dynamicCover = dynamic_cover,
         repliesCount = replies_count,
         threadId = thread_id,
+        followStatus = follow_status,
     )
 }
 
@@ -150,7 +150,7 @@ fun ChapterEntity.toChapter(): ChapterImpl {
 
 fun Chapter.toEntity(): ChapterEntity {
     return ChapterEntity(
-        id = id,
+        id = id!!,
         mangaId = manga_id!!,
         url = url,
         name = name,
@@ -170,7 +170,7 @@ fun Chapter.toEntity(): ChapterEntity {
         dateFetch = date_fetch,
         dateUpload = date_upload,
         mangadexChapterId = mangadex_chapter_id,
-        oldMangadexId = oldMangadexId,
+        oldMangadexId = old_mangadex_id,
         language = language,
     )
 }
@@ -197,7 +197,7 @@ fun SimpleChapter.toEntity(): ChapterEntity {
         dateFetch = dateFetch,
         dateUpload = dateUpload,
         mangadexChapterId = mangaDexChapterId,
-        oldMangaDexChapterId = oldMangaDexChapterId,
+        oldMangadexId = oldMangaDexChapterId,
         language = language,
     )
 }
@@ -214,7 +214,7 @@ fun CategoryEntity.toCategory(): CategoryImpl {
 
 fun Category.toEntity(): CategoryEntity {
     return CategoryEntity(
-        id = id,
+        id = id!!,
         name = name,
         order = order,
         flags = flags,
@@ -242,11 +242,11 @@ fun TrackEntity.toTrack(): TrackImpl {
 
 fun Track.toEntity(): TrackEntity {
     return TrackEntity(
-        id = id,
+        id = id!!,
         mangaId = manga_id,
         syncId = sync_id,
         mediaId = media_id,
-        libraryId = library_id,
+        libraryId = library_id!!,
         title = title,
         lastChapterRead = last_chapter_read,
         totalChapters = total_chapters,
@@ -265,18 +265,18 @@ fun MergeMangaEntity.toMergeManga(): MergeMangaImpl {
         coverUrl = this@toMergeManga.coverUrl,
         title = this@toMergeManga.title,
         url = this@toMergeManga.url,
-        mergeType = MergeType.getById(this@toMergeManga.mergeType),
+        mergeType = this@toMergeManga.mergeType,
     )
 }
 
 fun MergeMangaImpl.toEntity(): MergeMangaEntity {
     return MergeMangaEntity(
-        id = id,
+        id = id!!,
         mangaId = mangaId,
         coverUrl = coverUrl,
         title = title,
         url = url,
-        mergeType = mergeType.id,
+        mergeType = mergeType,
     )
 }
 
@@ -291,7 +291,7 @@ fun HistoryEntity.toHistory(): HistoryImpl {
 
 fun History.toEntity(): HistoryEntity {
     return HistoryEntity(
-        id = id,
+        id = id!!,
         chapterId = chapter_id,
         lastRead = last_read,
         timeRead = time_read,
@@ -307,33 +307,20 @@ fun MangaCategoryEntity.toMangaCategory(): MangaCategory {
 }
 
 fun MangaCategory.toEntity(): MangaCategoryEntity {
-    return MangaCategoryEntity(
-        id = id?.toInt(),
-        mangaId = manga_id,
-        categoryId = category_id,
-    )
+    return MangaCategoryEntity(id = id!!.toInt(), mangaId = manga_id, categoryId = category_id)
 }
 
 fun ScanlatorGroupImpl.toEntity(): ScanlatorGroupEntity {
-    return ScanlatorGroupEntity(
-        id = id,
-        name = name,
-        uuid = uuid,
-        description = description,
-    )
+    return ScanlatorGroupEntity(id = id!!, name = name, uuid = uuid, description = description)
 }
 
 fun UploaderImpl.toEntity(): UploaderEntity {
-    return UploaderEntity(
-        id = id,
-        username = username,
-        uuid = uuid,
-    )
+    return UploaderEntity(id = id!!, username = username, uuid = uuid)
 }
 
 fun ArtworkImpl.toEntity(): ArtworkEntity {
     return ArtworkEntity(
-        id = id,
+        id = id!!,
         mangaId = mangaId,
         fileName = fileName,
         volume = volume,
@@ -343,21 +330,11 @@ fun ArtworkImpl.toEntity(): ArtworkEntity {
 }
 
 fun BrowseFilterEntity.toBrowseFilter(): BrowseFilterImpl {
-    return BrowseFilterImpl(
-        id = id,
-        name = name,
-        default = isDefault,
-        dexFilters = dexFilters,
-    )
+    return BrowseFilterImpl(id = id, name = name, default = isDefault, dexFilters = dexFilters)
 }
 
 fun BrowseFilterImpl.toEntity(): BrowseFilterEntity {
-    return BrowseFilterEntity(
-        id = id,
-        name = name,
-        isDefault = default,
-        dexFilters = dexFilters,
-    )
+    return BrowseFilterEntity(id = id!!, name = name, isDefault = default, dexFilters = dexFilters)
 }
 
 fun MangaSimilarEntity.toMangaSimilar(): MangaSimilarImpl {
@@ -369,11 +346,7 @@ fun MangaSimilarEntity.toMangaSimilar(): MangaSimilarImpl {
 }
 
 fun MangaSimilar.toEntity(): MangaSimilarEntity {
-    return MangaSimilarEntity(
-        id = id,
-        mangaId = manga_id,
-        data = data,
-    )
+    return MangaSimilarEntity(id = id!!, mangaId = manga_id, data = data)
 }
 
 fun LibraryManga.toLegacyModel(): eu.kanade.tachiyomi.data.database.models.LibraryManga {
@@ -459,7 +432,7 @@ fun MangaChapter.toSimpleChapter(lastRead: Long = 0L): SimpleChapter {
     return chapter.toSimpleChapter(lastRead)
 }
 
-fun MangaChapter.toManga(): MangaImpl {
+fun MangaChapter.toManga(): Manga {
     return manga.toManga()
 }
 
@@ -471,7 +444,7 @@ fun MangaChapterHistory.toSimpleChapter(): SimpleChapter {
     return chapter.toSimpleChapter(history.lastRead)
 }
 
-fun MangaChapterHistory.toManga(): MangaImpl {
+fun MangaChapterHistory.toManga(): Manga {
     return manga.toManga()
 }
 

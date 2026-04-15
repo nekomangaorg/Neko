@@ -3,7 +3,6 @@ package org.nekomanga.data.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -23,10 +22,9 @@ import androidx.room.PrimaryKey
                 onDelete = ForeignKey.CASCADE,
             ),
         ],
-    indices = [Index("category_id")],
 )
 data class MangaCategoryEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Int? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Int = 0,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "category_id") val categoryId: Int,
 )

@@ -80,10 +80,17 @@ class FollowsSyncProcessor {
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
                     val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
-                        updateNotification(networkManga.title, count.getAndIncrement(), listManga.size)
+                        updateNotification(
+                            networkManga.title,
+                            count.getAndIncrement(),
+                            listManga.size,
+                        )
 
                         val dbMangaEntity =
-                            mangaRepository.getMangaByUrlAndSource(networkManga.url, sourceManager.mangaDex.id)
+                            mangaRepository.getMangaByUrlAndSource(
+                                networkManga.url,
+                                sourceManager.mangaDex.id,
+                            )
 
                         var dbManga = dbMangaEntity?.toManga()
 
@@ -107,7 +114,10 @@ class FollowsSyncProcessor {
 
                             if (defaultCategory != null) {
                                 categoryRepository.setMangaCategories(
-                                    listOf(MangaCategory.create(dbManga, defaultCategory.toCategory()).toEntity()),
+                                    listOf(
+                                        MangaCategory.create(dbManga, defaultCategory.toCategory())
+                                            .toEntity()
+                                    ),
                                     listOf(dbManga.id!!),
                                 )
                             }
@@ -151,9 +161,11 @@ class FollowsSyncProcessor {
                     updateNotification(manga.title, count.getAndIncrement(), listManga.size)
 
                     // Get this manga's trackers from the database
-                    var mdListTrack: Track? = trackRepository.getTracksForMangaSync(manga.id!!)
-                        .find { it.syncId == TrackManager.MDLIST }
-                        ?.toTrack()
+                    var mdListTrack: Track? =
+                        trackRepository
+                            .getTracksForMangaSync(manga.id!!)
+                            .find { it.syncId == TrackManager.MDLIST }
+                            ?.toTrack()
 
                     // create mdList if missing
                     if (mdListTrack == null) {

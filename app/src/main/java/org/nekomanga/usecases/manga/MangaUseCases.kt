@@ -25,7 +25,14 @@ class MangaUseCases(
     val updateMangaStatusAndMissingCount =
         UpdateMangaStatusAndMissingChapterCount(mangaRepository, chapterRepository, downloadManager)
 
-    val modifyManga = ModifyMangaUseCase(mangaRepository, categoryRepository, preferences, downloadManager, storageManager)
+    val modifyManga =
+        ModifyMangaUseCase(
+            mangaRepository,
+            categoryRepository,
+            preferences,
+            downloadManager,
+            storageManager,
+        )
 
     val updateMangaAggregate = UpdateMangaAggregate(mergeRepository, sourceManager)
 }

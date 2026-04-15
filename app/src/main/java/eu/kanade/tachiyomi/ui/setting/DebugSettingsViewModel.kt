@@ -47,10 +47,14 @@ class DebugSettingsViewModel : ViewModel() {
             mangaRepository.getLibraryMangaListSync().forEach { libraryManga ->
                 val legacyManga = libraryManga.toLegacyModel()
                 followsHandler.updateFollowStatus(legacyManga.uuid(), FollowStatus.UNFOLLOWED)
-                trackRepository.getTracksForMangaSync(legacyManga.id!!)
+                trackRepository
+                    .getTracksForMangaSync(legacyManga.id!!)
                     .find { it.syncId == TrackManager.MDLIST }
                     ?.let {
-                        trackRepository.deleteTrackByMangaIdAndSyncId(legacyManga.id!!, TrackManager.MDLIST)
+                        trackRepository.deleteTrackByMangaIdAndSyncId(
+                            legacyManga.id!!,
+                            TrackManager.MDLIST,
+                        )
                     }
             }
             _toastEvent.emit(UiText.StringResource(R.string.complete))

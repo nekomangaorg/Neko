@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
 import org.nekomanga.databinding.ReaderPagedLayoutBinding
 
@@ -22,7 +23,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         with(binding) {
             scaleType.bindToPreference(readerPreferences.imageScaleType(), 1) {
                 val mangaViewer =
-                    (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
+                    runBlocking { (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() }
+                        ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
                 landscapeZoom.isVisible =
@@ -43,7 +45,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             extendPastCutout.bindToPreference(readerPreferences.pagerCutoutBehavior())
             pageLayout.bindToPreference(readerPreferences.pageLayout()) {
                 val mangaViewer =
-                    (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
+                    runBlocking { (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() }
+                        ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
             }
@@ -64,7 +67,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             pageLayout.title =
                 pageLayout.title.toString().addBetaTag(context, R.attr.colorSecondary)
 
-            val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
+            val mangaViewer =
+                runBlocking { (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() } ?: 0
             val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
             val hasMargins =
                 ((context as? ReaderActivity)?.viewer as? WebtoonViewer)?.hasMargins ?: false
@@ -90,7 +94,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun updatePrefs() {
-        val mangaViewer = activity.viewModel.getMangaReadingMode()
+        val mangaViewer = runBlocking { activity.viewModel.getMangaReadingMode() }
         val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
         val hasMargins =
             ((context as? ReaderActivity)?.viewer as? WebtoonViewer)?.hasMargins ?: false

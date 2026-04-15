@@ -58,7 +58,9 @@ class RefreshTrackingUseCase(
                                 }
                             }
                             .getOrNull()
-                            ?.also { updatedTrack -> trackRepository.insertTrack(updatedTrack.toEntity()) }
+                            ?.also { updatedTrack ->
+                                trackRepository.insertTrack(updatedTrack.toEntity())
+                            }
                     }
                 }
                 .awaitAll()

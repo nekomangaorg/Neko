@@ -48,8 +48,6 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import java.lang.ref.WeakReference
-import java.util.Date
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
@@ -59,7 +57,6 @@ import org.nekomanga.data.database.model.toManga
 import org.nekomanga.data.database.model.toSimpleChapter
 import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.data.database.repository.MangaRepositoryImpl
-import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.dialog.WhatsNewDialog
@@ -362,18 +359,15 @@ class MainActivity : BaseMainActivity() {
 
                         lifecycleScope.launch {
                             val chapterEntities = chapterRepository.getChaptersForMangaSync(mangaId)
-                            mangaRepository.getMangaById(mangaId)?.toManga()?.let { manga ->
-                                val availableChapterItems = chapterEntities.filter {
-                                    it.isAvailable(downloadManager, manga)
-                                }.map { it.toSimpleChapter().toChapterItem() }
+                            mangaRepository.getMangaByIdSync(mangaId)?.toManga()?.let { manga ->
+                                val availableChapterItems =
+                                    chapterEntities
+                                        .filter { it.isAvailable(downloadManager, manga) }
+                                        .map { it.toSimpleChapter().toChapterItem() }
 
                                 val nextUnreadChapter =
                                     ChapterItemSort()
-                                        .getNextUnreadChapter(
-                                            manga,
-                                            availableChapterItems,
-                                            false,
-                                        )
+                                        .getNextUnreadChapter(manga, availableChapterItems, false)
                                 if (nextUnreadChapter != null) {
                                     val activity =
                                         ReaderActivity.newIntent(

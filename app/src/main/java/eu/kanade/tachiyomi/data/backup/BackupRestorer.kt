@@ -124,7 +124,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
         // [OPTIMIZATION] Pre-fetch all existing MangaDex manga IDs to avoid N read queries
         val dbMangaMap =
-            mangaRepository.getMangaListSync()
+            mangaRepository
+                .getMangaListSync()
                 .filter { sourceManager.isMangadex(it.source) }
                 .associateBy { MdUtil.getMangaUUID(it.url) }
 
@@ -166,7 +167,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 try {
                     appDatabase.withTransaction {
                         // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
-                        val dbCategories = categoryRepository.getAllCategoriesList().map { it.toCategory() }
+                        val dbCategories =
+                            categoryRepository.getAllCategoriesList().map { it.toCategory() }
 
                         // [OVERCLOCK] Pre-fetch related data for all existing manga in this chunk
                         // to prevent N+1 queries
@@ -176,21 +178,24 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
                         val dbChaptersMap =
                             if (existingMangaIds.isNotEmpty())
-                                chapterRepository.getChaptersForMangas(existingMangaIds).map { it.toChapter() }.groupBy {
-                                    it.manga_id
-                                }
+                                chapterRepository
+                                    .getChaptersForMangas(existingMangaIds)
+                                    .map { it.toChapter() }
+                                    .groupBy { it.manga_id }
                             else emptyMap()
                         val dbMergeMangaMap =
                             if (existingMangaIds.isNotEmpty())
-                                mergeRepository.getMergeMangaList(existingMangaIds).map { it.toMergeManga() }.groupBy {
-                                    it.mangaId
-                                }
+                                mergeRepository
+                                    .getMergeMangaList(existingMangaIds)
+                                    .map { it.toMergeManga() }
+                                    .groupBy { it.mangaId }
                             else emptyMap()
                         val dbTracksMap =
                             if (existingMangaIds.isNotEmpty())
-                                trackRepository.getTracksForMangas(existingMangaIds).map { it.toTrack() }.groupBy {
-                                    it.manga_id
-                                }
+                                trackRepository
+                                    .getTracksForMangas(existingMangaIds)
+                                    .map { it.toTrack() }
+                                    .groupBy { it.manga_id }
                             else emptyMap()
 
                         // 1. Create a bridge map linking chapter_id -> manga_id
@@ -202,13 +207,15 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                         // and group them using our bridge map!
                         val dbHistoriesMap =
                             if (existingMangaIds.isNotEmpty())
-                                chapterRepository.getHistoryByMangaIds(existingMangaIds)
+                                chapterRepository
+                                    .getHistoryByMangaIds(existingMangaIds)
                                     .map { it.toHistory() }
                                     .groupBy { history -> chapterToMangaMap[history.chapter_id] }
                             else emptyMap()
 
                         preparedItems.forEach { item ->
-                            val existingManga = dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]?.toManga()
+                            val existingManga =
+                                dbMangaMap[MdUtil.getMangaUUID(item.manga.url)]?.toManga()
                             val mangaId = existingManga?.id
                             val dbChapters = dbChaptersMap[mangaId] ?: emptyList()
                             val dbMergeMangaList = dbMergeMangaMap[mangaId] ?: emptyList()

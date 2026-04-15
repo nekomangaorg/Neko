@@ -48,10 +48,11 @@ class RemoveMergedManga(
     private val libraryPreferences: LibraryPreferences,
 ) {
     suspend fun execute(mangaId: Long, mergeType: MergeType) {
-        val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return
+        val dbManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return
         mergeRepository.deleteMergeMangaByType(mangaId, mergeType.id)
         val (mergedChapters, _) =
-            chapterRepository.getChaptersForMangaSync(mangaId)
+            chapterRepository
+                .getChaptersForMangaSync(mangaId)
                 .map { it.toChapter() }
                 .partition { it.isMergedChapterOfType(mergeType) }
         if (!libraryPreferences.enableLocalChapters().get()) {

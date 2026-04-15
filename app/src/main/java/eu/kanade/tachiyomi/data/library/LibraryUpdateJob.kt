@@ -88,7 +88,6 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.entity.isMergedChapter
-import org.nekomanga.data.database.model.toChapter
 import org.nekomanga.data.database.model.toEntity
 import org.nekomanga.data.database.model.toLegacyModel
 import org.nekomanga.data.database.model.toTrack
@@ -447,38 +446,37 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         val mergeMangaList = mergeRepository.getMergeMangaListSync(manga.id!!)
                         val mergedList =
                             if (mergeMangaList.isNotEmpty()) {
-                                mergeMangaList.map { mergeManga ->
-                                    async {
-                                        MergeType.getSource(
-                                                MergeType.getById(mergeManga.mergeType),
-                                                sourceManager,
-                                            )
-                                            .fetchChapters(mergeManga.url)
-                                            .onFailure { err ->
-                                                errorFromMerged = true
-                                                failedUpdates[manga] =
-                                                    "Merged Chapter --${mergeManga.mergeType}-- ${err.message()}"
-                                            }
-                                            .getOrElse { emptyList() }
-                                            .map { (sChapter, status) ->
-                                                val sameVolume =
-                                                    sChapter.vol == "" ||
-                                                        manga.last_volume_number == null ||
-                                                        sChapter.vol ==
-                                                            manga.last_volume_number.toString()
-                                                if (
-                                                    manga.last_chapter_number != null &&
-                                                        sChapter.chapter_number ==
-                                                            manga.last_chapter_number
-                                                                ?.toFloat() &&
-                                                        sameVolume
-                                                ) {
-                                                    sChapter.name += " [END]"
+                                mergeMangaList
+                                    .map { mergeManga ->
+                                        async {
+                                            MergeType.getSource(mergeManga.mergeType, sourceManager)
+                                                .fetchChapters(mergeManga.url)
+                                                .onFailure { err ->
+                                                    errorFromMerged = true
+                                                    failedUpdates[manga] =
+                                                        "Merged Chapter --${mergeManga.mergeType}-- ${err.message()}"
                                                 }
-                                                sChapter to status
-                                            }
+                                                .getOrElse { emptyList() }
+                                                .map { (sChapter, status) ->
+                                                    val sameVolume =
+                                                        sChapter.vol == "" ||
+                                                            manga.last_volume_number == null ||
+                                                            sChapter.vol ==
+                                                                manga.last_volume_number.toString()
+                                                    if (
+                                                        manga.last_chapter_number != null &&
+                                                            sChapter.chapter_number ==
+                                                                manga.last_chapter_number
+                                                                    ?.toFloat() &&
+                                                            sameVolume
+                                                    ) {
+                                                        sChapter.name += " [END]"
+                                                    }
+                                                    sChapter to status
+                                                }
+                                        }
                                     }
-                                }.awaitAll()
+                                    .awaitAll()
                             } else {
                                 emptyList()
                             }
@@ -535,7 +533,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     .let { art ->
                                         runCatching {
                                             mangaRepository.deleteArtworkForManga(manga.id!!)
-                                            mangaRepository.insertArtworks(art.map { it.toEntity() })
+                                            mangaRepository.insertArtworks(
+                                                art.map { it.toEntity() }
+                                            )
                                         }
                                     }
                             }
@@ -583,22 +583,20 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 .toMutableSet()
 
                                         // only download scanlators not filtered out
-                                        chaptersToDl =
-                                            chaptersToDl.filterNot {
-                                                val scanlators =
-                                                    ChapterUtil.getScanlators(it.scanlator)
+                                        chaptersToDl = chaptersToDl.filterNot {
+                                            val scanlators = ChapterUtil.getScanlators(it.scanlator)
 
-                                                val scanlatorMatchAll =
-                                                    libraryPreferences
-                                                        .chapterScanlatorFilterOption()
-                                                        .get() == 0
-                                                ChapterUtil.filterByScanlator(
-                                                    scanlators,
-                                                    it.uploader ?: "",
-                                                    scanlatorMatchAll,
-                                                    toIgnore,
-                                                )
-                                            }
+                                            val scanlatorMatchAll =
+                                                libraryPreferences
+                                                    .chapterScanlatorFilterOption()
+                                                    .get() == 0
+                                            ChapterUtil.filterByScanlator(
+                                                scanlators,
+                                                it.uploader ?: "",
+                                                scanlatorMatchAll,
+                                                toIgnore,
+                                            )
+                                        }
                                     }
 
                                     downloadChapters(manga, chaptersToDl)
@@ -738,7 +736,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         TimberKt.d { "Updating follow statuses" }
                         mangaList.mapAsync { libraryManga ->
                             runCatching {
-                                    trackRepository.getTracksForMangaSync(libraryManga.id!!)
+                                    trackRepository
+                                        .getTracksForMangaSync(libraryManga.id!!)
                                         .toMutableList()
                                         .firstOrNull { it.syncId == trackManager.mdList.id }
                                         ?.apply {
@@ -869,19 +868,18 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         mangaToUpdate.addAll(distinctManga)
         extraScope.launch {
-            val jobs =
-                distinctManga.map { manga ->
-                    async(Dispatchers.IO) {
-                        val shouldDownload =
-                            manga.shouldDownloadNewChapters(categoryRepository, preferences)
-                        val hasDLs = updateMangaChapters(manga, shouldDownload)
+            val jobs = distinctManga.map { manga ->
+                async(Dispatchers.IO) {
+                    val shouldDownload =
+                        manga.shouldDownloadNewChapters(categoryRepository, preferences)
+                    val hasDLs = updateMangaChapters(manga, shouldDownload)
 
-                        if (hasDLs && !hasDownloads) {
-                            hasDownloads = true
-                        }
-                        return@async hasDLs
+                    if (hasDLs && !hasDownloads) {
+                        hasDownloads = true
                     }
+                    return@async hasDLs
                 }
+            }
 
             extraDeferredJobs.addAll(jobs)
         }

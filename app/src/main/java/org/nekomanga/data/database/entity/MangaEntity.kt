@@ -3,15 +3,24 @@ package org.nekomanga.data.database.entity
 import androidx.annotation.StringRes
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 
-@Entity(tableName = "mangas")
+@Entity(
+    tableName = "mangas",
+    indices =
+        [
+            Index(value = ["favorite"], name = "library_favorite_index"),
+            Index(value = ["url"], name = "mangas_url_index"),
+        ],
+)
 data class MangaEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
     @ColumnInfo(name = "source") val source: Long,
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "artist") val artist: String?,
@@ -22,14 +31,14 @@ data class MangaEntity(
     @ColumnInfo(name = "status") val status: Int,
     @ColumnInfo(name = "thumbnail_url") val thumbnailUrl: String?,
     @ColumnInfo(name = "favorite") val favorite: Boolean,
-    @ColumnInfo(name = "last_update") val lastUpdate: Long,
-    @ColumnInfo(name = "next_update") val nextUpdate: Long,
+    @ColumnInfo(name = "last_update") val lastUpdate: Long?,
+    @ColumnInfo(name = "next_update") val nextUpdate: Long?,
+    @ColumnInfo(name = "date_added") val dateAdded: Long?,
     @ColumnInfo(name = "initialized") val initialized: Boolean,
     @ColumnInfo(name = "viewer") val viewerFlags: Int,
     @ColumnInfo(name = "chapter_flags") val chapterFlags: Int,
-    @ColumnInfo(name = "date_added") val dateAdded: Long,
     @ColumnInfo(name = "lang_flag") val langFlag: String?,
-    @ColumnInfo(name = "follow_status") val followStatus: Int?,
+    @ColumnInfo(name = "follow_status") val followStatus: FollowStatus?,
     @ColumnInfo(name = "anilist_id") val anilistId: String?,
     @ColumnInfo(name = "kitsu_id") val kitsuId: String?,
     @ColumnInfo(name = "my_anime_list_id") val myAnimeListId: String?,
@@ -46,7 +55,7 @@ data class MangaEntity(
     @ColumnInfo(name = "manga_last_volume") val lastVolumeNumber: Int?,
     @ColumnInfo(name = "manga_last_chapter") val lastChapterNumber: Int?,
     @ColumnInfo(name = "merge_manga_image_url") val mergeMangaImageUrl: String?,
-    @ColumnInfo(name = "alt_title") val altTitles: String?,
+    @ColumnInfo(name = "alt_titles") val altTitles: String?,
     @ColumnInfo(name = "user_cover") val userCover: String?,
     @ColumnInfo(name = "user_title") val userTitle: String?,
     @ColumnInfo(name = "language_filter_flag") val filteredLanguage: String?,

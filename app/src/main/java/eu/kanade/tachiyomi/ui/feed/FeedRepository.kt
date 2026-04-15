@@ -324,7 +324,7 @@ class FeedRepository(
                         FeedManga(
                             mangaId = displayManga.mangaId,
                             mangaTitle = displayManga.getTitle(),
-                            date = mangaEntity.dateAdded,
+                            date = mangaEntity.dateAdded ?: 0L,
                             artwork = displayManga.currentArtwork,
                             chapters = persistentListOf(getChapterItem(manga, simpleChapter)),
                         )
@@ -537,7 +537,7 @@ class FeedRepository(
     }
 
     suspend fun deleteChapter(chapterItem: ChapterItem) {
-        val mangaEntity = mangaRepository.getMangaById(chapterItem.chapter.mangaId)!!
+        val mangaEntity = mangaRepository.getMangaByIdSync(chapterItem.chapter.mangaId)!!
         downloadManager.deleteChapters(
             mangaEntity.toManga(),
             listOf(chapterItem.chapter.toDbChapter()),
@@ -545,7 +545,7 @@ class FeedRepository(
     }
 
     suspend fun deleteAllHistoryForManga(mangaId: Long) {
-        val history = chapterRepository.getHistoryByMangaId(mangaId)
+        val history = chapterRepository.getHistoryByMangaIdSync(mangaId)
         history.forEach { chapterRepository.upsertHistory(it.copy(lastRead = 0L, timeRead = 0L)) }
     }
 
@@ -591,7 +591,7 @@ class FeedRepository(
     suspend fun markChapter(chapterItem: ChapterItem, markAction: ChapterMarkActions): ChapterItem {
         chapterUseCases.markChapters(markAction, listOf(chapterItem))
 
-        val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId)!!.toManga()
+        val manga = mangaRepository.getMangaByIdSync(chapterItem.chapter.mangaId)!!.toManga()
 
         chapterUseCases.markChaptersRemote(markAction, manga.uuid(), listOf(chapterItem))
 
@@ -605,7 +605,7 @@ class FeedRepository(
         chapterItem: ChapterItem,
         downloadAction: MangaConstants.DownloadAction,
     ) {
-        val dbManga = mangaRepository.getMangaById(feedManga.mangaId)!!.toManga()
+        val dbManga = mangaRepository.getMangaByIdSync(feedManga.mangaId)!!.toManga()
         val dbChapter = chapterItem.chapter.toDbChapter()
 
         when (downloadAction) {
@@ -626,7 +626,7 @@ class FeedRepository(
             val feedRepository = FeedRepository()
             val page = feedRepository.getHistoryPage(offset = 0, group = FeedHistoryGroup.Series)
             return page.get()?.second?.mapNotNull { feedManga ->
-                feedRepository.mangaRepository.getMangaById(feedManga.mangaId)?.toManga()
+                feedRepository.mangaRepository.getMangaByIdSync(feedManga.mangaId)?.toManga()
             } ?: emptyList()
         }
     }

@@ -10,8 +10,7 @@ import org.nekomanga.data.database.entity.MergeMangaEntity
 
 @Dao
 interface MergeMangaDao {
-    @Query("SELECT * FROM merge_manga")
-    suspend fun getAllMergeManga(): List<MergeMangaEntity>
+    @Query("SELECT * FROM merge_manga") suspend fun getAllMergeManga(): List<MergeMangaEntity>
 
     @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>>
@@ -30,7 +29,7 @@ interface MergeMangaDao {
 
     @Delete suspend fun deleteMergeManga(mergeManga: MergeMangaEntity)
 
-    @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId AND merge_type = :mergeType")
+    @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId AND mergeType = :mergeType")
     suspend fun deleteMergeMangaByType(mangaId: Long, mergeType: Int)
 
     @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId")

@@ -2,8 +2,7 @@ package org.nekomanga.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room.TypeConverters
 import org.nekomanga.data.database.dao.ArtworkDao
 import org.nekomanga.data.database.dao.BrowseFilterDao
 import org.nekomanga.data.database.dao.CategoryDao
@@ -30,6 +29,8 @@ import org.nekomanga.data.database.entity.MergeMangaEntity
 import org.nekomanga.data.database.entity.ScanlatorGroupEntity
 import org.nekomanga.data.database.entity.TrackEntity
 import org.nekomanga.data.database.entity.UploaderEntity
+import org.nekomanga.data.database.utils.FollowStatusConverter
+import org.nekomanga.data.database.utils.MergeTypeConverter
 
 @Database(
     entities =
@@ -51,6 +52,7 @@ import org.nekomanga.data.database.entity.UploaderEntity
     version = 46, // Set higher than StorIO version 45
     exportSchema = true,
 )
+@TypeConverters(MergeTypeConverter::class, FollowStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun mangaDao(): MangaDao
 
@@ -80,25 +82,5 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "tachiyomi.db"
-        val MIGRATION_45_46 =
-            object : Migration(45, 46) {
-                override fun migrate(db: SupportSQLiteDatabase) {
-                    // Empty migration to allow Room to take over the existing database
-                }
-            }
-        val roomCallback =
-            object : Callback() {
-                override fun onOpen(db: SupportSQLiteDatabase) {
-                    super.onOpen(db)
-                    // Enable Foreign Key constraints (Critical for Neko's schema)
-                    db.execSQL("PRAGMA foreign_keys = ON;")
-
-                    // Optional: Set journal mode to WAL if not already default
-                    db.execSQL("PRAGMA journal_mode = WAL;")
-
-                    // Optional: Optimize for build/write speed
-                    db.execSQL("PRAGMA synchronous = NORMAL;")
-                }
-            }
     }
 }

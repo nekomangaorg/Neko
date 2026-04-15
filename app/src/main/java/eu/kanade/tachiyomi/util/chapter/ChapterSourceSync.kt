@@ -49,8 +49,7 @@ suspend fun syncChaptersWithSource(
     val mangaDexPreferences: MangaDexPreferences = Injekt.get()
 
     // Chapters from db.
-    var dbChapters =
-        chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
+    var dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
 
     // Dedup unavailable with local prefix
     val chapterUUIDs =
@@ -58,16 +57,13 @@ suspend fun syncChaptersWithSource(
             .filterNot { it.isLocalSource() || it.isMergedChapter() }
             .map { MdUtil.getChapterUUID(it.url) }
             .toHashSet()
-    dbChapters =
-        dbChapters.mapNotNull { dbChapter ->
-            if (
-                dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs
-            ) {
-                chapterRepository.deleteChapter(dbChapter.toEntity())
-                return@mapNotNull null
-            }
-            dbChapter
+    dbChapters = dbChapters.mapNotNull { dbChapter ->
+        if (dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs) {
+            chapterRepository.deleteChapter(dbChapter.toEntity())
+            return@mapNotNull null
         }
+        dbChapter
+    }
 
     val localChapterLookupEnabled = libraryPreferences.enableLocalChapters().get()
     var finalRawSourceChapters = rawSourceChapters
@@ -174,14 +170,13 @@ suspend fun syncChaptersWithSource(
             }
     }
 
-    val sourceChapters =
-        finalRawSourceChapters.mapIndexed { i, sChapter ->
-            Chapter.create().apply {
-                copyFrom(sChapter)
-                manga_id = manga.id
-                source_order = i
-            }
+    val sourceChapters = finalRawSourceChapters.mapIndexed { i, sChapter ->
+        Chapter.create().apply {
+            copyFrom(sChapter)
+            manga_id = manga.id
+            source_order = i
         }
+    }
 
     dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
@@ -273,17 +268,16 @@ suspend fun syncChaptersWithSource(
     toAdd.forEach { ChapterRecognition.parseChapterNumber(it, manga) }
 
     // Chapters from the db not in the source.
-    var toDelete =
-        dbChapters.filterNot { dbChapter ->
-            // ignore to delete when there is a site error
-            if (dbChapter.isMergedChapter() && errorFromMerged) {
-                true
-            } else if (dbChapter.isLocalSource()) {
-                downloadManager.isChapterDownloaded(dbChapter, manga, true)
-            } else {
-                sourceChaptersByUrl[dbChapter.url] != null
-            }
+    var toDelete = dbChapters.filterNot { dbChapter ->
+        // ignore to delete when there is a site error
+        if (dbChapter.isMergedChapter() && errorFromMerged) {
+            true
+        } else if (dbChapter.isLocalSource()) {
+            downloadManager.isChapterDownloaded(dbChapter, manga, true)
+        } else {
+            sourceChaptersByUrl[dbChapter.url] != null
         }
+    }
 
     val dupes =
         dbChapters

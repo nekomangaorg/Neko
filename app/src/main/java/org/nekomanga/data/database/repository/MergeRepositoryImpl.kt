@@ -11,8 +11,7 @@ class MergeRepositoryImpl(
     private val mangaAggregateDao: MangaAggregateDao,
 ) {
     // Merge Manga methods
-    suspend fun getAllMergeManga(): List<MergeMangaEntity> =
-        mergeMangaDao.getAllMergeManga()
+    suspend fun getAllMergeManga(): List<MergeMangaEntity> = mergeMangaDao.getAllMergeManga()
 
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>> =
         mergeMangaDao.getMergeMangaList(mangaId)

@@ -8,10 +8,10 @@ import org.nekomanga.data.database.entity.ScanlatorGroupEntity
 
 @Dao
 interface ScanlatorGroupDao {
-    @Query("SELECT * FROM scanlator_groups WHERE name = :name")
+    @Query("SELECT * FROM scanlator_group WHERE name = :name")
     suspend fun getScanlatorGroupByName(name: String): ScanlatorGroupEntity?
 
-    @Query("SELECT * FROM scanlator_groups WHERE name IN (:names)")
+    @Query("SELECT * FROM scanlator_group WHERE name IN (:names)")
     suspend fun getScanlatorGroupsByNames(names: List<String>): List<ScanlatorGroupEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -20,6 +20,6 @@ interface ScanlatorGroupDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertScanlatorGroups(groups: List<ScanlatorGroupEntity>)
 
-    @Query("DELETE FROM scanlator_groups WHERE name = :name")
+    @Query("DELETE FROM scanlator_group WHERE name = :name")
     suspend fun deleteScanlatorGroup(name: String)
 }

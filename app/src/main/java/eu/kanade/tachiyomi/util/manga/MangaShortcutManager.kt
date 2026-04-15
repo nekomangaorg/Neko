@@ -41,7 +41,8 @@ class MangaShortcutManager(
             return
         }
         withContext(ioDispatcher) {
-            val shortcutManager = context.getSystemService(ShortcutManager::class.java) ?: return@withContext
+            val shortcutManager =
+                context.getSystemService(ShortcutManager::class.java) ?: return@withContext
 
             val recentManga =
                 if (preferences.showSeriesInShortcuts().get()) {
@@ -50,8 +51,7 @@ class MangaShortcutManager(
                     emptyList()
                 }
 
-            val recents =
-                recentManga.take(shortcutManager.maxShortcutCountPerActivity)
+            val recents = recentManga.take(shortcutManager.maxShortcutCountPerActivity)
 
             val shortcuts = recents.map { item ->
                 val request =

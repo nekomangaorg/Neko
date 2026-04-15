@@ -144,7 +144,11 @@ class StatsViewModel() : ViewModel() {
                     libraryList
                         .map {
                             async {
-                                val history = chapterRepository.getHistoryByMangaId(it.id!!).map { entity -> entity.toHistory() }
+                                val history =
+                                    chapterRepository.getHistoryByMangaIdSync(it.id!!).map { entity
+                                        ->
+                                        entity.toHistory()
+                                    }
                                 val tracks = getTracks(it)
 
                                 DetailedStatManga(
@@ -169,7 +173,8 @@ class StatsViewModel() : ViewModel() {
                                             .map { prefs.context.getString(it.nameRes()) }
                                             .toPersistentList(),
                                     categories =
-                                        (categoryRepository.getCategoriesForMangaSync(it.id!!)
+                                        (categoryRepository
+                                                .getCategoriesForMangaSync(it.id!!)
                                                 .map { category -> category.name }
                                                 .takeUnless { it.isEmpty() }
                                                 ?: listOf(
@@ -248,7 +253,10 @@ class StatsViewModel() : ViewModel() {
     }
 
     private suspend fun getLibrary(): List<LibraryManga> {
-        return mangaRepository.getLibraryMangaListSync().map { it.toLegacyModel() }.distinctBy { it.id }
+        return mangaRepository
+            .getLibraryMangaListSync()
+            .map { it.toLegacyModel() }
+            .distinctBy { it.id }
     }
 
     private suspend fun getTracks(mangaList: List<LibraryManga>): List<Track> {

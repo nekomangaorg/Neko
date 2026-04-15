@@ -109,7 +109,7 @@ class ModifyMangaUseCaseTest {
             every { mockManga.title } returns oldTitle
             every { mockManga.user_title } returns null
 
-            coEvery { mangaRepository.getMangaById(mangaId) } returns mockMangaEntity
+            coEvery { mangaRepository.getMangaByIdSync(mangaId) } returns mockMangaEntity
             coEvery { mangaRepository.insertManga(any()) } returns mangaId
 
             val mockContext = mockk<Context>()

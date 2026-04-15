@@ -38,7 +38,8 @@ class LibrarySettingsViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            categoryRepository.getAllCategories()
+            categoryRepository
+                .getAllCategories()
                 .map { entities -> entities.map { it.toCategory() } }
                 .distinctUntilChanged()
                 .collectLatest { categories ->
@@ -87,7 +88,8 @@ class LibrarySettingsViewModel : ViewModel() {
 
     fun onChangeOrder(category: CategoryItem, newIndex: Int) {
         viewModelScope.launchIO {
-            val dbCategories = categoryRepository.getAllCategoriesList().map { it.toCategory() }.toMutableList()
+            val dbCategories =
+                categoryRepository.getAllCategoriesList().map { it.toCategory() }.toMutableList()
 
             val currentIndex = dbCategories.indexOfFirst { category.id == it.id }
 

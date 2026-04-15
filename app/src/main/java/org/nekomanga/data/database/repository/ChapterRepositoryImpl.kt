@@ -109,7 +109,11 @@ class ChapterRepositoryImpl(
         return historyDao.getAllRecentsTypes(search, includeRead, limit, offset)
     }
 
-    suspend fun getHistoryByMangaId(mangaId: Long): List<HistoryEntity> {
+    suspend fun getHistoryByMangaIdSync(mangaId: Long): List<HistoryEntity> {
+        return historyDao.getHistoryByMangaIdSync(mangaId)
+    }
+
+    fun getHistoryByMangaId(mangaId: Long): Flow<List<HistoryEntity>> {
         return historyDao.getHistoryByMangaId(mangaId)
     }
 

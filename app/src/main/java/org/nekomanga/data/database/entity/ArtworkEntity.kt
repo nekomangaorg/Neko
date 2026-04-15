@@ -3,7 +3,6 @@ package org.nekomanga.data.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -17,10 +16,9 @@ import androidx.room.PrimaryKey
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["manga_id"])],
 )
 data class ArtworkEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "filename") val fileName: String,
     @ColumnInfo(name = "volume") val volume: String,

@@ -35,7 +35,8 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
     ) =
         withContext(dispatcher) {
             var count = 0
-            val libraryMangaList = mangaRepository.getLibraryMangaListSync().map { it.manga.toManga() }
+            val libraryMangaList =
+                mangaRepository.getLibraryMangaListSync().map { it.manga.toManga() }
             val loggedServices = trackManager.services.values.filter { it.isLogged() }
             val autoAddTracker = preferences.autoAddTracker().get()
             val trackUseCases: TrackUseCases = Injekt.get()
@@ -48,7 +49,9 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                 libraryMangaList
                     .mapNotNull { it.id }
                     .chunked(900)
-                    .map { chunk -> async { trackRepository.getTracksForMangas(chunk).map { it.toTrack() } } }
+                    .map { chunk ->
+                        async { trackRepository.getTracksForMangas(chunk).map { it.toTrack() } }
+                    }
                     .awaitAll()
                     .flatten()
                     .groupBy { it.manga_id }

@@ -20,7 +20,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-               history._id AS hi__id, history.history_chapter_id AS hi_history_chapter_id,
+               history.history_id AS hi_history_id, history.history_chapter_id AS hi_history_chapter_id,
                history.history_last_read AS hi_history_last_read, history.history_time_read AS hi_history_time_read
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
@@ -48,7 +48,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-               history._id AS hi__id, history.history_chapter_id AS hi_history_chapter_id,
+               history.history_id AS hi_history_id, history.history_chapter_id AS hi_history_chapter_id,
                history.history_last_read AS hi_history_last_read, history.history_time_read AS hi_history_time_read
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
@@ -83,7 +83,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-               history._id AS hi__id, history.history_chapter_id AS hi_history_chapter_id,
+               history.history_id AS hi_history_id, history.history_chapter_id AS hi_history_chapter_id,
                history.history_last_read AS hi_history_last_read, history.history_time_read AS hi_history_time_read
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id
@@ -106,7 +106,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-               history._id AS hi__id, history.history_chapter_id AS hi_history_chapter_id,
+               history.history_id AS hi_history_id, history.history_chapter_id AS hi_history_chapter_id,
                history.history_last_read AS hi_history_last_read, history.history_time_read AS hi_history_time_read
         FROM (
             SELECT mangas.*
@@ -144,7 +144,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-            Null as hi__id,
+            Null as hi_history_id,
             Null as hi_history_chapter_id,
             chapters.date_fetch as hi_history_last_read,
             Null as hi_history_time_read
@@ -187,7 +187,7 @@ interface HistoryDao {
             Null as ch_mangadex_chapter_id,
             Null as ch_old_mangadex_id,
             Null as ch_language,
-            Null as hi__id,
+            Null as hi_history_id,
             Null as hi_history_chapter_id,
             mangas.date_added as hi_history_last_read,
             Null as hi_history_time_read
@@ -213,7 +213,17 @@ interface HistoryDao {
         WHERE chapters.manga_id = :mangaId
     """
     )
-    suspend fun getHistoryByMangaId(mangaId: Long): List<HistoryEntity>
+    suspend fun getHistoryByMangaIdSync(mangaId: Long): List<HistoryEntity>
+
+    @Query(
+        """
+        SELECT history.*
+        FROM history
+        JOIN chapters ON history.history_chapter_id = chapters._id
+        WHERE chapters.manga_id = :mangaId
+    """
+    )
+    fun getHistoryByMangaId(mangaId: Long): Flow<List<HistoryEntity>>
 
     @Query(
         """
@@ -236,7 +246,7 @@ interface HistoryDao {
                chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
                chapters.mangadex_chapter_id AS ch_mangadex_chapter_id, chapters.old_mangadex_chapter_id AS ch_old_mangadex_id,
                chapters.language AS ch_language,
-               history._id AS hi__id, history.history_chapter_id AS hi_history_chapter_id,
+               history.history_id AS hi_history_id, history.history_chapter_id AS hi_history_chapter_id,
                history.history_last_read AS hi_history_last_read, history.history_time_read AS hi_history_time_read
         FROM mangas
         JOIN chapters ON mangas._id = chapters.manga_id

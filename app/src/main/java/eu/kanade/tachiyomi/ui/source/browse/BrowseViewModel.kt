@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.resyncHomePageManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.activeNetworkState
@@ -187,7 +188,8 @@ class BrowseViewModel : ViewModel() {
 
         viewModelScope.launchIO {
             val categories =
-                categoryRepository.getAllCategoriesList()
+                categoryRepository
+                    .getAllCategoriesList()
                     .map { category -> category.toCategory().toCategoryItem() }
                     .toPersistentList()
 
@@ -419,7 +421,7 @@ class BrowseViewModel : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchIO
+            val editManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -442,8 +444,13 @@ class BrowseViewModel : ViewModel() {
                         .firstOrNull { defaultCategory == it.id }
                         ?.let {
                             val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()).toEntity())
-                            categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
+                                listOf(
+                                    MangaCategory.create(editManga, it.toDbCategory()).toEntity()
+                                )
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOf(editManga.id!!),
+                            )
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
@@ -700,7 +707,8 @@ class BrowseViewModel : ViewModel() {
             _browseScreenState.update {
                 it.copy(
                     categories =
-                        categoryRepository.getAllCategoriesList()
+                        categoryRepository
+                            .getAllCategoriesList()
                             .map { category -> category.toCategory().toCategoryItem() }
                             .toPersistentList()
                 )
@@ -729,7 +737,11 @@ class BrowseViewModel : ViewModel() {
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         viewModelScope.launchIO {
-            val filters = browseFilterRepository.getBrowseFiltersSync().map { it.toBrowseFilter() }.toPersistentList()
+            val filters =
+                browseFilterRepository
+                    .getBrowseFiltersSync()
+                    .map { it.toBrowseFilter() }
+                    .toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters
@@ -746,12 +758,16 @@ class BrowseViewModel : ViewModel() {
         if (!_browseScreenState.value.firstLoad) {
             viewModelScope.launchIO {
                 val newHomePageManga =
-                    _browseScreenState.value.homePageManga.resync(mangaRepository).updateVisibility(preferences)
+                    _browseScreenState.value.homePageManga
+                        .resyncHomePageManga(mangaRepository)
+                        .updateVisibility(preferences)
                 _browseScreenState.update { it.copy(homePageManga = newHomePageManga) }
             }
             viewModelScope.launchIO {
                 val allDisplayManga =
-                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(mangaRepository).unique()
+                    _browseScreenState.value.displayMangaHolder.allDisplayManga
+                        .resync(mangaRepository)
+                        .unique()
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =

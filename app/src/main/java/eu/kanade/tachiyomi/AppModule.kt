@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi
 
 import android.app.Application
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -36,7 +37,6 @@ import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
-import eu.kanade.tachiyomi.source.online.handlers.SearchHandler as OnlineSearchHandler
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
@@ -48,6 +48,7 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.migration.DatabaseMigrations
 import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
 import org.nekomanga.data.database.repository.CategoryRepositoryImpl
 import org.nekomanga.data.database.repository.ChapterRepositoryImpl
@@ -86,8 +87,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory {
             Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
-                .addCallback(AppDatabase.roomCallback)
-                .addMigrations(AppDatabase.MIGRATION_45_46)
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .addMigrations(DatabaseMigrations.MIGRATION_45_46)
                 .fallbackToDestructiveMigration(false)
                 .build()
         }

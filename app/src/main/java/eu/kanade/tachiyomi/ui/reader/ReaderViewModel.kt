@@ -162,7 +162,8 @@ constructor(
         }
 
         val manga = manga!!
-        val dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
+        val dbChapters =
+            chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
 
         val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
 
@@ -192,6 +193,7 @@ constructor(
     private val statusHandler: StatusHandler by injectLazy()
 
     private var hasTrackers: Boolean = false
+
     private suspend fun checkTrackers(manga: Manga) {
         val tracks = trackRepository.getTracksForMangaSync(manga.id!!)
 
@@ -237,7 +239,7 @@ constructor(
         deletePendingChapters()
         val currentChapters = state.value.viewerChapters
         if (currentChapters != null) {
-            saveReadingProgress(currentChapters.currChapter)
+            viewModelScope.launchNonCancellable { saveReadingProgress(currentChapters.currChapter) }
         }
     }
 
@@ -247,9 +249,7 @@ constructor(
      */
     fun onSaveInstanceState() {
         val currentChapter = getCurrentChapter() ?: return
-        viewModelScope.launchNonCancellable {
-            saveChapterProgress(currentChapter)
-        }
+        viewModelScope.launchNonCancellable { saveChapterProgress(currentChapter) }
     }
 
     /** Whether this presenter is initialized yet. */
@@ -265,7 +265,7 @@ constructor(
         if (!needsInit()) return Result.success(true)
         return withIOContext {
             try {
-                val mangaEntity = mangaRepository.getMangaById(mangaId)
+                val mangaEntity = mangaRepository.getMangaByIdSync(mangaId)
                 if (mangaEntity != null) {
                     val manga = mangaEntity.toManga()
                     mutableState.update { it.copy(manga = manga) }
@@ -310,7 +310,8 @@ constructor(
         val manga = manga ?: return emptyList()
         chapterItems =
             withContext(Dispatchers.IO) {
-                val dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
+                val dbChapters =
+                    chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
                 val currentReaderChapter = getCurrentChapter()
 
                 // 1. Convert to ChapterItem
@@ -357,9 +358,10 @@ constructor(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val chapterEntity = chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
+        val chapterEntity =
+            chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
         if (chapterEntity?.mangaId != null) {
-            val dbMangaEntity = mangaRepository.getMangaById(chapterEntity.mangaId)
+            val dbMangaEntity = mangaRepository.getMangaByIdSync(chapterEntity.mangaId)
             if (dbMangaEntity != null) {
                 withContext(Dispatchers.Main) { init(dbMangaEntity.id!!, chapterEntity.id!!) }
                 return
@@ -384,13 +386,20 @@ constructor(
             tempManga.title = networkManga.title
 
             val mangaId = mangaRepository.insertManga(tempManga.toEntity())
-            val manga = mangaRepository.getMangaById(mangaId)!!.toManga()
+            val manga = mangaRepository.getMangaByIdSync(mangaId)!!.toManga()
 
             TimberKt.d { "tempManga id ${tempManga.id}" }
             TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
-                val (newChapters, _) = syncChaptersWithSource(mangaRepository, chapterRepository, appDatabase, chapters, manga)
+                val (newChapters, _) =
+                    syncChaptersWithSource(
+                        mangaRepository,
+                        chapterRepository,
+                        appDatabase,
+                        chapters,
+                        manga,
+                    )
                 val currentChapter = newChapters.find {
                     it.url == MdConstants.chapterSuffix + urlChapterId
                 }
@@ -484,7 +493,13 @@ constructor(
     fun toggleBookmark(chapter: Chapter) {
         viewModelScope.launchIO {
             chapter.bookmark = !chapter.bookmark
-            chapterRepository.updateProgress(chapter.id!!, chapter.read, chapter.bookmark, chapter.last_page_read, chapter.pages_left)
+            chapterRepository.updateProgress(
+                chapter.id!!,
+                chapter.read,
+                chapter.bookmark,
+                chapter.last_page_read,
+                chapter.pages_left,
+            )
         }
     }
 
@@ -794,7 +809,7 @@ constructor(
 
                 mutableState.update {
                     it.copy(
-                        manga = mangaRepository.getMangaById(manga.id!!)?.toManga(),
+                        manga = mangaRepository.getMangaByIdSync(manga.id!!)?.toManga(),
                         viewerChapters = currChapters,
                     )
                 }
@@ -829,7 +844,7 @@ constructor(
             if (currChapters != null) {
                 mutableState.update {
                     it.copy(
-                        manga = mangaRepository.getMangaById(manga.id!!)?.toManga(),
+                        manga = mangaRepository.getMangaByIdSync(manga.id!!)?.toManga(),
                         viewerChapters = currChapters,
                     )
                 }

@@ -261,7 +261,9 @@ class DownloadManager(
             val mangaId = entry.key
             val chapters = entry.value.map { it.chapterItem.toDbChapter() }
             scope.launchNonCancellable {
-                val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchNonCancellable
+                val dbManga =
+                    mangaRepository.getMangaByIdSync(mangaId)?.toManga()
+                        ?: return@launchNonCancellable
                 deleteChaptersInternal(dbManga, chapters)
             }
         }
@@ -278,7 +280,9 @@ class DownloadManager(
             val mangaId = entry.key
             val chapters = entry.value.map { it.chapterItem.chapter.toDbChapter() }
             scope.launchNonCancellable {
-                val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchNonCancellable
+                val dbManga =
+                    mangaRepository.getMangaByIdSync(mangaId)?.toManga()
+                        ?: return@launchNonCancellable
                 deleteChaptersInternal(dbManga, chapters)
             }
         }
@@ -292,12 +296,13 @@ class DownloadManager(
      * @param source the source of the chapters.
      */
     fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
-        scope.launchNonCancellable {
-            deleteChaptersInternal(manga, chapters)
-        }
+        scope.launchNonCancellable { deleteChaptersInternal(manga, chapters) }
     }
 
-    private suspend fun CoroutineScope.deleteChaptersInternal(manga: Manga, chapters: List<Chapter>) {
+    private suspend fun CoroutineScope.deleteChaptersInternal(
+        manga: Manga,
+        chapters: List<Chapter>,
+    ) {
         launchNonCancellable { cache.removeChapters(chapters, manga) }
         launchNonCancellable { removeFromDownloadQueue(chapters) }
 

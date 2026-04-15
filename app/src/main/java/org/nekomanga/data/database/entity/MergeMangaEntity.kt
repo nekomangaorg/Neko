@@ -2,14 +2,27 @@ package org.nekomanga.data.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import eu.kanade.tachiyomi.data.database.models.MergeType
 
-@Entity(tableName = "merge_manga")
+@Entity(
+    tableName = "merge_manga",
+    foreignKeys =
+        [
+            ForeignKey(
+                entity = MangaEntity::class,
+                parentColumns = ["_id"],
+                childColumns = ["manga_id"],
+                onDelete = ForeignKey.CASCADE,
+            )
+        ],
+)
 data class MergeMangaEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "cover_url") val coverUrl: String,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "url") val url: String,
-    @ColumnInfo(name = "merge_type") val mergeType: Int,
+    @ColumnInfo(name = "mergeType") val mergeType: MergeType,
 )

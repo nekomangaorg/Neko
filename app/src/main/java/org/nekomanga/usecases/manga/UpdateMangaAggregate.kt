@@ -1,7 +1,6 @@
 package org.nekomanga.usecases.manga
 
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import org.nekomanga.data.database.entity.MangaAggregateEntity
@@ -16,8 +15,11 @@ class UpdateMangaAggregate(
             sourceManager.mangaDex.getAggregate(MdUtil.getMangaUUID(mangaUrl)).onSuccess {
                 aggregateDto ->
                 mergeRepository.insertMangaAggregate(
-                        MangaAggregateEntity(mangaId = mangaId, volumes = aggregateDto.volumes.toString())
+                    MangaAggregateEntity(
+                        mangaId = mangaId,
+                        volumes = aggregateDto.volumes.toString(),
                     )
+                )
             }
         } else {
             mergeRepository.deleteMangaAggregate(mangaId)

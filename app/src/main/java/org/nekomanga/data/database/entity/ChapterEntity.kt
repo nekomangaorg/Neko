@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.model.toChapter
 
 @Entity(
     tableName = "chapters",
@@ -23,10 +24,16 @@ import org.nekomanga.constants.Constants
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["manga_id"])],
+    indices =
+        [
+            Index(value = ["manga_id"], name = "chapters_manga_id_index"),
+            Index(value = ["manga_id", "read"], name = "chapters_unread_by_manga_index"),
+            Index(value = ["manga_id"], name = "chapters_bookmarked_by_manga_index"),
+            Index(value = ["manga_id"], name = "chapters_unavailable_by_manga_index"),
+        ],
 )
 data class ChapterEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long? = null,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "name") val name: String,
@@ -70,5 +77,5 @@ fun ChapterEntity.uuid(): String {
 fun ChapterEntity.isAvailable(downloadManager: DownloadManager, manga: Manga): Boolean {
     return !this.isUnavailable ||
         this.isLocalSource() ||
-        downloadManager.isChapterDownloaded(this, manga)
+        downloadManager.isChapterDownloaded(this.toChapter(), manga)
 }

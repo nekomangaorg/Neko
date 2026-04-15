@@ -137,7 +137,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
         viewModelScope.launchIO {
             val categories =
-                categoryRepository.getAllCategoriesList()
+                categoryRepository
+                    .getAllCategoriesList()
                     .map { category -> category.toCategory().toCategoryItem() }
                     .toPersistentList()
             _displayScreenState.update {
@@ -172,7 +173,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchIO
+            val editManga = mangaRepository.getMangaByIdSync(mangaId)?.toManga() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -195,7 +196,9 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         .firstOrNull { defaultCategory == it.id }
                         ?.let {
                             val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()).toEntity())
+                                listOf(
+                                    MangaCategory.create(editManga, it.toDbCategory()).toEntity()
+                                )
                             categoryRepository.setMangaCategories(categories, listOf(mangaId))
                         }
                 } else if (categoryItems.isNotEmpty()) {
@@ -252,7 +255,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             _displayScreenState.update {
                 it.copy(
                     categories =
-                        categoryRepository.getAllCategoriesList()
+                        categoryRepository
+                            .getAllCategoriesList()
                             .map { category -> category.toCategory().toCategoryItem() }
                             .toPersistentList()
                 )
@@ -271,7 +275,10 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     fun updateMangaForChanges() {
         viewModelScope.launchIO {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(mangaRepository).unique().toPersistentList()
+                _displayScreenState.value.allDisplayManga
+                    .resync(mangaRepository)
+                    .unique()
+                    .toPersistentList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,

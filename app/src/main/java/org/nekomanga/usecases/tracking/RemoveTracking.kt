@@ -25,7 +25,8 @@ class RemoveTracking(
                     "Service not found",
                     IllegalStateException("Service not found"),
                 )
-        val tracks = trackRepository.getTracksForMangaSync(mangaId).filter { it.syncId == service.id }
+        val tracks =
+            trackRepository.getTracksForMangaSync(mangaId).filter { it.syncId == service.id }
         trackRepository.deleteTrackByMangaIdAndSyncId(mangaId, service.id)
         if (alsoRemoveFromTracker && service.canRemoveFromService()) {
             withNonCancellableContext {

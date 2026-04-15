@@ -17,13 +17,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
+
+    private val mangaRepositoryImpl: MangaRepositoryImpl by injectLazy()
+
+    private val trackRepositoryImpl: TrackRepositoryImpl by injectLazy()
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
@@ -40,7 +48,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun getStatusList(): List<Int> {
-        return FollowStatus.values().map { it.int }
+        return FollowStatus.entries.map { it.int }
     }
 
     override fun getStatus(status: Int): String =
@@ -64,14 +72,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         return withContext(Dispatchers.IO) {
             try {
                 val manga =
-                    db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                        .executeAsBlocking() ?: return@withContext track
+                    mangaRepositoryImpl.getMangaByUrlAndSource(
+                        track.tracking_url.substringAfter(".org"),
+                        mdex.id,
+                    ) ?: return@withContext track
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
                 mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
-                manga.follow_status = followStatus
-                db.insertManga(manga).executeAsBlocking()
+                val updatedManga = manga.copy(followStatus = followStatus)
+                mangaRepositoryImpl.updateManga(updatedManga)
 
                 // mangadex wont update chapters if manga is not follows this prevents unneeded
                 // network call
@@ -94,8 +104,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             MdUtil.getMangaUUID(track.tracking_url),
                             newFollowStatus,
                         )
-                        manga.follow_status = newFollowStatus
-                        db.insertManga(manga).executeAsBlocking()
+
+                        val updatedManga = manga.copy(followStatus = newFollowStatus)
+                        mangaRepositoryImpl.updateManga(updatedManga)
                     }
                     mdex.updateReadingProgress(track)
                 } else if (track.last_chapter_read.toInt() != 0) {
@@ -106,7 +117,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             } catch (e: Exception) {
                 TimberKt.e(e) { "error updating MDList" }
             }
-            db.insertTrack(track).executeAsBlocking()
+            trackRepositoryImpl.insertTrack(track.toEntity())
             track
         }
     }

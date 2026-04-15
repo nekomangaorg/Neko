@@ -34,7 +34,8 @@ class DownloadSettingsViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            categoryRepository.getAllCategories()
+            categoryRepository
+                .getAllCategories()
                 .map { categories -> categories.map { it.toCategory() } }
                 .distinctUntilChanged()
                 .collectLatest { categories ->

@@ -67,7 +67,8 @@ class SimilarHandler {
                 mangaList.data.map { it.toRelatedMangaDto(thumbQuality, mangaIdMap[it.id] ?: "") }
 
             // Update the Manga Similar database
-            val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+            val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+            val mangaDb = mangaSimilarEntity?.toMangaSimilar()
             val dbDto = getDbDto(mangaDb)
             dbDto.relatedManga = relatedMangaList
             insertMangaSimilar(dexId, dbDto, mangaDb)
@@ -102,7 +103,8 @@ class SimilarHandler {
                     .map { it.toRelatedMangaDto(thumbQuality, "") }
 
             // Update the Manga Similar database
-            val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+            val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+            val mangaDb = mangaSimilarEntity?.toMangaSimilar()
             val dbDto = getDbDto(mangaDb)
             dbDto.recommendedManga = recommendedMangaList
             insertMangaSimilar(dexId, dbDto, mangaDb)
@@ -175,7 +177,8 @@ class SimilarHandler {
             similarMangaParse(dexId, dto)
         }
 
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.similarManga
@@ -224,7 +227,8 @@ class SimilarHandler {
             }
 
         // update db
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         dbDto.similarApi = similarDto
         dbDto.similarManga = mangaList
@@ -257,7 +261,8 @@ class SimilarHandler {
             anilistRecommendationParse(dexId, response)
         }
 
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.aniListManga
@@ -297,7 +302,8 @@ class SimilarHandler {
             mangaListDto.data.map { it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "") }
 
         // update db
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         dbDto.aniListApi = similarDto
         dbDto.aniListManga = mangaList
@@ -330,7 +336,8 @@ class SimilarHandler {
             similarMangaExternalMalParse(dexId, response)
         }
 
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.myAnimeListManga
@@ -365,7 +372,8 @@ class SimilarHandler {
             }
 
         // update db
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         dbDto.myAnimelistApi = similarDto
         dbDto.myAnimeListManga = mangaList
@@ -397,7 +405,8 @@ class SimilarHandler {
                     .getOrNull()
             similarMangaExternalMUParse(dexId, response)
         }
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.mangaUpdatesListManga
@@ -442,7 +451,8 @@ class SimilarHandler {
             }
 
         // update db
-        val mangaDb = mangaRepository.getSimilarSync(dexId)?.toMangaSimilar()
+        val mangaSimilarEntity = mangaRepository.getSimilarSync(dexId)
+        val mangaDb = mangaSimilarEntity?.toMangaSimilar()
         val dbDto = getDbDto(mangaDb)
         dbDto.mangaUpdatesApi = similarDto
         dbDto.mangaUpdatesListManga = mangaList

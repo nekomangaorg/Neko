@@ -79,7 +79,8 @@ class DisplayRepository(
         return mangaDex
             .search(page, createContentRatingFilter().copy(authorId = Filter.AuthorId(authorUUID)))
             .map { mangaListPage ->
-                val displayMangaList = mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                val displayMangaList =
+                    mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                 DisplayPageResult(
                     hasNextPage = mangaListPage.hasNextPage,
                     displayManga = displayMangaList.toPersistentList(),
@@ -101,7 +102,8 @@ class DisplayRepository(
         return mangaDex
             .search(page, createContentRatingFilter().copy(groupId = Filter.GroupId(groupUUID)))
             .map { mangaListPage ->
-                val displayMangaList = mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                val displayMangaList =
+                    mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                 DisplayPageResult(
                     hasNextPage = mangaListPage.hasNextPage,
                     displayManga = displayMangaList.toPersistentList(),
@@ -110,14 +112,17 @@ class DisplayRepository(
     }
 
     private suspend fun getFeedUpdatesPage(page: Int): Result<DisplayPageResult, ResultError> {
-        val blockedGroupUUIDs = getBlockedScanlatorGroupUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
-        val blockedUploaderUUIDs = getBlockedUploaderUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
+        val blockedGroupUUIDs =
+            getBlockedScanlatorGroupUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
+        val blockedUploaderUUIDs =
+            getBlockedUploaderUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
 
         return mangaDex
             .feedUpdates(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
-                    val displayMangaList = mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
@@ -130,14 +135,17 @@ class DisplayRepository(
     }
 
     private suspend fun getLatestChapterPage(page: Int): Result<DisplayPageResult, ResultError> {
-        val blockedGroupUUIDs = getBlockedScanlatorGroupUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
-        val blockedUploaderUUIDs = getBlockedUploaderUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
+        val blockedGroupUUIDs =
+            getBlockedScanlatorGroupUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
+        val blockedUploaderUUIDs =
+            getBlockedUploaderUUIDs(mangaDexPreferences, scanlatorRepository, mangaDex)
 
         return mangaDex
             .latestChapters(page, blockedGroupUUIDs, blockedUploaderUUIDs)
             .mapBoth(
                 success = { mangaListPage ->
-                    val displayMangaList = mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
@@ -154,7 +162,8 @@ class DisplayRepository(
             .fetchAllList(listUUID)
             .mapBoth(
                 success = { listResults ->
-                    val displayMangaList = listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(DisplayPageResult(displayManga = displayMangaList.toPersistentList()))
                 },
                 failure = { Err(it) },
@@ -166,7 +175,8 @@ class DisplayRepository(
             .recentlyAdded(page)
             .mapBoth(
                 success = { listResults ->
-                    val displayMangaList = listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(
                         DisplayPageResult(
                             hasNextPage = listResults.hasNextPage,
@@ -218,7 +228,8 @@ class DisplayRepository(
             .search(page, filters)
             .mapBoth(
                 success = { mangaListPage ->
-                    val displayMangaList = mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(
                         DisplayPageResult(
                             hasNextPage = mangaListPage.hasNextPage,
@@ -235,7 +246,8 @@ class DisplayRepository(
             .popularNewTitles(page)
             .mapBoth(
                 success = { listResults ->
-                    val displayMangaList = listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
+                    val displayMangaList =
+                        listResults.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
                     Ok(
                         DisplayPageResult(
                             hasNextPage = listResults.hasNextPage,

@@ -25,7 +25,6 @@ import java.io.File
 import kotlin.math.max
 import org.nekomanga.R
 import org.nekomanga.data.database.AppDatabase
-import org.nekomanga.data.database.model.toCategory
 import org.nekomanga.data.database.model.toChapter
 import org.nekomanga.data.database.model.toEntity
 import org.nekomanga.data.database.model.toHistory
@@ -294,7 +293,9 @@ class RestoreHelper(val context: Context) {
         // Update database
         if (mangaCategoriesToUpdate.isNotEmpty()) {
             categoryRepository.deleteOldMangaListCategories(listOf(manga.id!!))
-            categoryRepository.insertMangaListCategories(mangaCategoriesToUpdate.map { it.toEntity() })
+            categoryRepository.insertMangaListCategories(
+                mangaCategoriesToUpdate.map { it.toEntity() }
+            )
         }
     }
 
@@ -315,7 +316,8 @@ class RestoreHelper(val context: Context) {
         val historyToBeUpdated = ArrayList<History>(history.size)
 
         val dbHistories =
-            (preFetchedDbHistories ?: chapterRepository.getHistoryByMangaId(mangaId).map { it.toHistory() })
+            (preFetchedDbHistories
+                    ?: chapterRepository.getHistoryByMangaIdSync(mangaId).map { it.toHistory() })
                 .associateBy { it.chapter_id }
         val dbChaptersMap = updatedChapters.associateBy { it.url }
 
@@ -364,7 +366,9 @@ class RestoreHelper(val context: Context) {
         val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
 
         // Get tracks from database
-        val dbTracks = preFetchedDbTracks ?: trackRepository.getTracksForMangaSync(manga.id!!).map { it.toTrack() }
+        val dbTracks =
+            preFetchedDbTracks
+                ?: trackRepository.getTracksForMangaSync(manga.id!!).map { it.toTrack() }
         val trackToUpdate = mutableListOf<Track>()
 
         validTracks.forEach { track ->
@@ -406,7 +410,8 @@ class RestoreHelper(val context: Context) {
         preFetchedDbMergeMangaList: List<MergeMangaImpl>? = null,
     ) {
         val dbMergeMangaList =
-            preFetchedDbMergeMangaList ?: mergeRepository.getMergeMangaListSync(manga.id!!).map { it.toMergeManga() }
+            preFetchedDbMergeMangaList
+                ?: mergeRepository.getMergeMangaListSync(manga.id!!).map { it.toMergeManga() }
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
@@ -421,7 +426,9 @@ class RestoreHelper(val context: Context) {
         chapters: List<Chapter>,
         preFetchedDbChapters: List<Chapter>? = null,
     ): List<Chapter> {
-        val dbChapters = preFetchedDbChapters ?: chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
+        val dbChapters =
+            preFetchedDbChapters
+                ?: chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
         val dbChaptersMap = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
@@ -452,9 +459,7 @@ class RestoreHelper(val context: Context) {
         // Populate chapter.id from the put results to correctly process History later
         newChapters[false]?.let { newChaps ->
             val insertedIds = chapterRepository.insertChapters(newChaps.map { it.toEntity() })
-            newChaps.forEachIndexed { index, chapter ->
-                chapter.id = insertedIds[index]
-            }
+            newChaps.forEachIndexed { index, chapter -> chapter.id = insertedIds[index] }
         }
 
         return chapters

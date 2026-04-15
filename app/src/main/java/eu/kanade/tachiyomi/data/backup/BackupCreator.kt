@@ -151,9 +151,10 @@ class BackupCreator(val context: Context) {
     private suspend fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
         val allCategories =
             if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY)
-                categoryRepository.getAllCategoriesList().map { it.toCategory() }.associateBy {
-                    it.id
-                }
+                categoryRepository
+                    .getAllCategoriesList()
+                    .map { it.toCategory() }
+                    .associateBy { it.id }
             else emptyMap()
 
         return mangaList.chunked(500).flatMap { chunk ->
@@ -161,9 +162,10 @@ class BackupCreator(val context: Context) {
 
             // Pre-fetch all dependencies for the list of mangas
             val mergeMangaMap =
-                mergeRepository.getMergeMangaList(mangaIds).map { it.toMergeManga() }.groupBy {
-                    it.mangaId
-                }
+                mergeRepository
+                    .getMergeMangaList(mangaIds)
+                    .map { it.toMergeManga() }
+                    .groupBy { it.mangaId }
 
             val chaptersMap =
                 if (
@@ -238,9 +240,10 @@ class BackupCreator(val context: Context) {
      * @return list of [BackupCategory] to be backed up
      */
     private suspend fun backupCategories(): List<BackupCategory> {
-        return categoryRepository.getAllCategoriesList().map { it.toCategory() }.map {
-            BackupCategory.copyFrom(it)
-        }
+        return categoryRepository
+            .getAllCategoriesList()
+            .map { it.toCategory() }
+            .map { BackupCategory.copyFrom(it) }
     }
 
     /**

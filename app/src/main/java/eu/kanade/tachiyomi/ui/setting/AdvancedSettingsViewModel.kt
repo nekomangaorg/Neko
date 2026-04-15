@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.data.database.model.toCategory
@@ -57,9 +57,10 @@ class AdvancedSettingsViewModel : ViewModel() {
                 _toastEvent.emit(UiText.StringResource(R.string.starting_cleanup))
                 var foldersCleared = 0
                 val mangaMap =
-                    mangaRepository.getMangaListSync().map { it.toManga() }.associateBy {
-                        downloadManager.getMangaDirName(it)
-                    }
+                    mangaRepository
+                        .getMangaListSync()
+                        .map { it.toManga() }
+                        .associateBy { downloadManager.getMangaDirName(it) }
                 val mangaFolders = downloadManager.getMangaFolders()
 
                 val chaptersByMangaId =
@@ -67,7 +68,11 @@ class AdvancedSettingsViewModel : ViewModel() {
                         .asSequence()
                         .mapNotNull { mangaMap[it.name]?.id }
                         .chunked(900)
-                        .flatMap { chapterRepository.getChaptersForMangas(it).map { entity -> entity.toChapter() } }
+                        .flatMap { ids ->
+                            runBlocking {
+                                chapterRepository.getChaptersForMangas(ids).map { it.toChapter() }
+                            }
+                        }
                         .groupBy { it.manga_id }
 
                 for (mangaFolder in mangaFolders) {
