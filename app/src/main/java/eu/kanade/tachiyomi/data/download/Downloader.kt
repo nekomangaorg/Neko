@@ -31,7 +31,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -52,7 +51,11 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -69,7 +72,8 @@ class Downloader(
     private val readerPreferences: ReaderPreferences by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
 
-    private val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
 
     /** Store for persisting downloads across restarts. */
     private val store = DownloadStore(context, sourceManager)
@@ -302,8 +306,10 @@ class Downloader(
      * @param download the chapter to be downloaded.
      */
     private suspend fun downloadChapter(download: Download) {
-        val dbManga = db.getManga(download.mangaItem.id).executeAsBlocking() ?: return
-        val dbChapter = db.getChapter(download.chapterItem.id).executeAsBlocking() ?: return
+        val mangaEntity = mangaRepository.getMangaById(download.mangaItem.id) ?: return
+        val chapterEntity = chapterRepository.getChapterById(download.chapterItem.id) ?: return
+        val dbManga = mangaEntity.toManga()
+        val dbChapter = chapterEntity.toChapter()
 
         val mangaDir = provider.getMangaDir(dbManga)
 

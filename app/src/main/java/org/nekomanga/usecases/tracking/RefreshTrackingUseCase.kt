@@ -4,14 +4,17 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toChapterItem
-import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.logging.TimberKt
@@ -19,7 +22,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class RefreshTrackingUseCase(
-    private val db: DatabaseHelper = Injekt.get(),
+    private val trackRepository: TrackRepositoryImpl = Injekt.get(),
+    private val chapterRepository: ChapterRepositoryImpl = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
 ) {
@@ -29,7 +33,7 @@ class RefreshTrackingUseCase(
         onRefreshError: suspend (Throwable, Int, String?) -> Unit,
         onChaptersToMarkRead: suspend (List<ChapterItem>) -> Unit,
     ) {
-        val tracks = db.getTracks(mangaId).executeOnIO()
+        val tracks = trackRepository.getTracksForMangaSync(mangaId).map { it.toTrack() }
         if (tracks.isEmpty()) return
 
         val updatedTracks = coroutineScope {
@@ -54,7 +58,7 @@ class RefreshTrackingUseCase(
                                 }
                             }
                             .getOrNull()
-                            ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
+                            ?.also { updatedTrack -> trackRepository.insertTrack(updatedTrack.toEntity()) }
                     }
                 }
                 .awaitAll()
@@ -68,8 +72,8 @@ class RefreshTrackingUseCase(
 
         if (maxChapterRead > 0) {
             val allChapters =
-                db.getChapters(mangaId).executeOnIO().mapNotNull {
-                    it.toSimpleChapter()?.toChapterItem()
+                chapterRepository.getChaptersForMangaSync(mangaId).map {
+                    it.toSimpleChapter().toChapterItem()
                 }
 
             val chaptersToMark = allChapters.filter {

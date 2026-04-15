@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
@@ -20,7 +21,7 @@ import uy.kohesive.injekt.injectLazy
 class SimilarRepository {
 
     private val similarHandler: SimilarHandler by injectLazy()
-    private val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
     private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     suspend fun fetchSimilar(
@@ -28,7 +29,7 @@ class SimilarRepository {
         forceRefresh: Boolean = false,
     ): List<SimilarMangaGroup> {
         return withContext(Dispatchers.IO) {
-            val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
+            val similarDbEntry = mangaRepository.getSimilarSync(dexId)
             val actualRefresh =
                 when (similarDbEntry == null) {
                     true -> true
@@ -126,11 +127,11 @@ class SimilarRepository {
         }
     }
 
-    private fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
+    private suspend fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(id, manga.map { it.toDisplayManga(db, mangaDex.id) })
+            SimilarMangaGroup(id, manga.map { it.toDisplayManga(mangaRepository, mangaDex.id) })
         }
     }
 }

@@ -11,6 +11,9 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import kotlinx.coroutines.delay
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -48,10 +51,10 @@ suspend fun updateTrackChapterRead(
 ) {
     withNonCancellableContext {
         val preferences = Injekt.get<PreferencesHelper>()
-        val db = Injekt.get<DatabaseHelper>()
+        val trackRepository = Injekt.get<TrackRepositoryImpl>()
         val trackManager = Injekt.get<TrackManager>()
 
-        val trackList = db.getTracks(mangaId).executeAsBlocking()
+        val trackList = trackRepository.getTracksForMangaSync(mangaId!!).map { it.toTrack() }
         trackList.map { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
@@ -61,7 +64,7 @@ suspend fun updateTrackChapterRead(
                     try {
                         track.last_chapter_read = newChapterRead
                         service.update(track, true)
-                        db.insertTrack(track).executeAsBlocking()
+                        trackRepository.insertTrack(track.toEntity())
                     } catch (e: Exception) {
                         onError?.invoke(service, e.localizedMessage)
                         if (retryWhenOnline) {

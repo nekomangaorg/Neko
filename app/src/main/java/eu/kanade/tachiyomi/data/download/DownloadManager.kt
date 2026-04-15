@@ -26,10 +26,10 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.logging.TimberKt
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -55,7 +55,7 @@ class DownloadManager(
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
 
-    private val db = Injekt.get<DatabaseHelper>()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
 
     /**
      * Downloads provider, used to retrieve the folders where the chapters are or should be stored.
@@ -258,9 +258,12 @@ class DownloadManager(
     fun deletePendingDownloads(downloads: List<Download>) {
         val downloadsByManga = downloads.groupBy { it.chapterItem.mangaId }
         downloadsByManga.forEach { entry ->
-            val manga = entry.value.first().mangaItem
-            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
-            deleteChapters(dbManga, entry.value.map { it.chapterItem.toDbChapter() })
+            val mangaId = entry.key
+            val chapters = entry.value.map { it.chapterItem.toDbChapter() }
+            scope.launchNonCancellable {
+                val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchNonCancellable
+                deleteChaptersInternal(dbManga, chapters)
+            }
         }
     }
 
@@ -272,9 +275,12 @@ class DownloadManager(
     fun deletePendingDownloadsItems(downloads: List<DownloadItem>) {
         val downloadsByManga = downloads.groupBy { it.mangaItem.id }
         downloadsByManga.forEach { entry ->
-            val manga = entry.value.first().mangaItem
-            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
-            deleteChapters(dbManga, entry.value.map { it.chapterItem.chapter.toDbChapter() })
+            val mangaId = entry.key
+            val chapters = entry.value.map { it.chapterItem.chapter.toDbChapter() }
+            scope.launchNonCancellable {
+                val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchNonCancellable
+                deleteChaptersInternal(dbManga, chapters)
+            }
         }
     }
 
@@ -287,45 +293,49 @@ class DownloadManager(
      */
     fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
         scope.launchNonCancellable {
-            launchNonCancellable { cache.removeChapters(chapters, manga) }
-            launchNonCancellable { removeFromDownloadQueue(chapters) }
+            deleteChaptersInternal(manga, chapters)
+        }
+    }
 
-            try {
+    private suspend fun CoroutineScope.deleteChaptersInternal(manga: Manga, chapters: List<Chapter>) {
+        launchNonCancellable { cache.removeChapters(chapters, manga) }
+        launchNonCancellable { removeFromDownloadQueue(chapters) }
 
-                val mangaDir = provider.findMangaDir(manga)
+        try {
 
-                val chapterDirs =
-                    provider.findChapterDirs(chapters, manga) +
-                        provider.findTempChapterDirs(chapters, manga)
+            val mangaDir = provider.findMangaDir(manga)
 
-                if (chapterDirs.isEmpty()) {
-                    launchNonCancellable { pendingDeleter.deletePendingChapter(manga, chapters) }
-                } else {
+            val chapterDirs =
+                provider.findChapterDirs(chapters, manga) +
+                    provider.findTempChapterDirs(chapters, manga)
 
-                    launchNonCancellable {
-                        chapterDirs.forEach {
-                            it.delete()
-                            pendingDeleter.deletePendingChapter(manga, chapters)
-                        }
+            if (chapterDirs.isEmpty()) {
+                launchNonCancellable { pendingDeleter.deletePendingChapter(manga, chapters) }
+            } else {
 
-                        if (
-                            cache.getDownloadCount(manga, true) == 0
-                        ) { // Delete manga directory if empty
-                            chapterDirs.firstOrNull()?.parentFile?.delete()
-                        }
+                launchNonCancellable {
+                    chapterDirs.forEach {
+                        it.delete()
+                        pendingDeleter.deletePendingChapter(manga, chapters)
+                    }
 
-                        // Delete manga directory if empty
-                        if (mangaDir?.listFiles()?.isEmpty() == true) {
-                            deleteManga(manga, removeQueued = false)
-                        }
-                        if (manga.id != null) {
-                            _removedChaptersFlow.emit(manga.id!!)
-                        }
+                    if (
+                        cache.getDownloadCount(manga, true) == 0
+                    ) { // Delete manga directory if empty
+                        chapterDirs.firstOrNull()?.parentFile?.delete()
+                    }
+
+                    // Delete manga directory if empty
+                    if (mangaDir?.listFiles()?.isEmpty() == true) {
+                        deleteManga(manga, removeQueued = false)
+                    }
+                    if (manga.id != null) {
+                        _removedChaptersFlow.emit(manga.id!!)
                     }
                 }
-            } catch (e: Exception) {
-                TimberKt.e(e) { "error deleting chapters" }
             }
+        } catch (e: Exception) {
+            TimberKt.e(e) { "error deleting chapters" }
         }
     }
 

@@ -25,6 +25,13 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
+import org.nekomanga.data.database.repository.ScanlatorRepositoryImpl
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -38,13 +45,20 @@ import org.nekomanga.usecases.manga.MangaUseCases
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import androidx.room.withTransaction
 
 /**
  * Class that updates the database with the manga, chapter, information from the source returning a
  * MangaResult at each stage of the process
  */
 class MangaUpdateCoordinator {
-    private val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
+    private val categoryRepository: CategoryRepositoryImpl by injectLazy()
+    private val mergeRepository: MergeRepositoryImpl by injectLazy()
+    private val scanlatorRepository: ScanlatorRepositoryImpl by injectLazy()
+    private val appDatabase: AppDatabase by injectLazy()
+
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
@@ -120,14 +134,14 @@ class MangaUpdateCoordinator {
                     mangaForDb.favorite,
                 )
 
-                db.inTransaction {
-                    db.insertManga(mangaForDb).executeAsBlocking()
+                appDatabase.withTransaction {
+                    mangaRepository.insertManga(mangaForDb.toEntity())
                     send(MangaResult.UpdatedManga)
 
                     if (artwork.isNotEmpty()) {
                         val artworkImpls = artwork.map { it.toArtworkImpl(updatedMangaItem.id) }
-                        db.deleteArtworkForManga(mangaForDb).executeAsBlocking()
-                        db.insertArtWorkList(artworkImpls).executeAsBlocking()
+                        mangaRepository.deleteArtworkForManga(mangaForDb.id!!)
+                        mangaRepository.insertArtworks(artworkImpls.map { it.toEntity() })
                         send(MangaResult.UpdatedArtwork)
                     }
                 }
@@ -144,7 +158,9 @@ class MangaUpdateCoordinator {
         val (allChapters, readFromMerged, errorFromMerged) = fetchAndCombineChapters(manga)
         val (newChapters, removedChapters) =
             syncChaptersWithSource(
-                db = db,
+                mangaRepository = mangaRepository,
+                chapterRepository = chapterRepository,
+                appDatabase = appDatabase,
                 rawSourceChapters = allChapters,
                 manga = manga,
                 errorFromMerged = errorFromMerged,
@@ -155,7 +171,7 @@ class MangaUpdateCoordinator {
             if (
                 preferences.downloadNewChapters().get() &&
                     mangaWasAlreadyInitialized &&
-                    manga.shouldDownloadNewChapters(db, preferences)
+                    manga.shouldDownloadNewChapters(categoryRepository, preferences)
             ) {
                 val chaptersToDownload =
                     newChapters
@@ -193,9 +209,10 @@ class MangaUpdateCoordinator {
         var mergedSourceError = false
 
         val mergedSourcesChapters =
-            db.getMergeMangaList(manga).executeAsBlocking().map { mergeManga ->
+            mergeRepository.getMergeMangaListSync(manga.id!!).map { mergeManga ->
                 async {
-                    val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
+                    val source =
+                        MergeType.getSource(MergeType.getById(mergeManga.mergeType), sourceManager)
                     source
                         .fetchChapters(mergeManga.url)
                         .onFailure {
@@ -218,13 +235,14 @@ class MangaUpdateCoordinator {
 
         val readFromMerged =
             mergedChapterPairs.mapNotNull { if (it.second) it.first.url else null }.toSet()
-        val mergedChapters = mergedChapterPairs.map { (sChapter, _) ->
-            val lastChapterNum = manga.last_chapter_number?.toFloat()
-            if (lastChapterNum != null && sChapter.chapter_number == lastChapterNum) {
-                sChapter.name += " [END]"
+        val mergedChapters =
+            mergedChapterPairs.map { (sChapter, _) ->
+                val lastChapterNum = manga.last_chapter_number?.toFloat()
+                if (lastChapterNum != null && sChapter.chapter_number == lastChapterNum) {
+                    sChapter.name += " [END]"
+                }
+                sChapter
             }
-            sChapter
-        }
 
         val allChapters = (dexChapters + mergedChapters).sortedWith(compareBy { getChapterNum(it) })
         Triple(allChapters, readFromMerged, mergedSourceError)
@@ -235,13 +253,14 @@ class MangaUpdateCoordinator {
         val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-        val chaptersToDownload = chapters.mapNotNull { item ->
-            if (isChapterDownloadable(item, blockedGroups, blockedUploaders)) {
-                item.chapter.toDbChapter()
-            } else {
-                null
+        val chaptersToDownload =
+            chapters.mapNotNull { item ->
+                if (isChapterDownloadable(item, blockedGroups, blockedUploaders)) {
+                    item.chapter.toDbChapter()
+                } else {
+                    null
+                }
             }
-        }
 
         downloadManager.downloadChapters(manga, chaptersToDownload)
     }
@@ -264,14 +283,14 @@ class MangaUpdateCoordinator {
         sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
             val scanlatorGroupImpl = it.toScanlatorGroupImpl()
             if (group == scanlatorGroupImpl.name) {
-                db.insertScanlatorGroups(listOf(scanlatorGroupImpl)).executeAsBlocking()
+                scanlatorRepository.insertScanlatorGroups(listOf(scanlatorGroupImpl.toEntity()))
             }
         }
     }
 
     suspend fun updateUploader(uploader: String) {
         sourceManager.mangaDex.getUploader(uploader).onSuccess {
-            db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
+            mangaRepository.insertUploader(listOf(it.toUploaderImpl().toEntity()))
         }
     }
 }

@@ -8,25 +8,30 @@ import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.isAvailable
-import eu.kanade.tachiyomi.util.system.executeOnIO
-import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.logging.TimberKt
 
 class UpdateMangaStatusAndMissingChapterCount(
-    private val db: DatabaseHelper,
+    private val mangaRepository: MangaRepositoryImpl,
+    private val chapterRepository: ChapterRepositoryImpl,
     private val downloadManager: DownloadManager,
 ) {
     suspend operator fun invoke(manga: Manga) {
         // This can fail due to a race condition
         val allChaps =
             try {
-                db.getChapters(manga).executeOnIO()
+                chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
             } catch (e: Exception) {
                 TimberKt.d { "Failed to get chapters: $e" }
                 listOf()
             }
         val missingChapters =
-            allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
+            allChaps.mapNotNull { it.toSimpleChapter()?.toChapterItem() }.getMissingChapters().count
 
         var updated = false
 
@@ -48,7 +53,7 @@ class UpdateMangaStatusAndMissingChapterCount(
         }
 
         // Persist changes
-        if (updated) db.insertManga(manga).executeOnIO()
+        if (updated) mangaRepository.insertManga(manga.toEntity())
     }
 
     private fun isMangaStatusCompleted(chapters: List<DbChapter>, manga: Manga): Boolean {

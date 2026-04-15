@@ -15,6 +15,8 @@ import org.nekomanga.data.database.model.LibraryMangaRaw
 interface MangaDao {
     @Query("SELECT * FROM mangas") fun getMangaList(): Flow<List<MangaEntity>>
 
+    @Query("SELECT * FROM mangas") suspend fun getMangaListSync(): List<MangaEntity>
+
     @Query("SELECT * FROM mangas WHERE favorite = 1 ORDER BY title")
     fun getFavoriteMangaList(): Flow<List<MangaEntity>>
 
@@ -51,6 +53,23 @@ interface MangaDao {
     """
     )
     fun getLibraryMangaList(): Flow<List<LibraryManga>>
+
+    // Replaces the complex libraryQuery from RawQueries.kt
+    @Query(
+        """
+        SELECT mangas.*,
+        (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND read = 0) as unreadCount,
+        (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND read = 1) as readCount,
+        (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND bookmark = 1) as bookmarkCount,
+        (SELECT COUNT(*) FROM chapters WHERE manga_id = mangas._id AND unavailable = 1) as unavailableCount,
+        COALESCE(mangas_categories.category_id, 0) as category
+        FROM mangas
+        LEFT JOIN mangas_categories ON mangas._id = mangas_categories.manga_id
+        WHERE favorite = 1
+        ORDER BY title
+    """
+    )
+    suspend fun getLibraryMangaListSync(): List<LibraryManga>
 
     @Query(
         """

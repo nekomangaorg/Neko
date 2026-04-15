@@ -17,6 +17,10 @@ class ChapterRepositoryImpl(
         return chapterDao.getChaptersForManga(mangaId)
     }
 
+    suspend fun getChaptersForMangaSync(mangaId: Long): List<ChapterEntity> {
+        return chapterDao.getChaptersForMangaSync(mangaId)
+    }
+
     suspend fun getChaptersForMangas(mangaIds: List<Long>): List<ChapterEntity> {
         return chapterDao.getChaptersForMangas(mangaIds)
     }
@@ -37,8 +41,8 @@ class ChapterRepositoryImpl(
         return chapterDao.insertChapter(chapter)
     }
 
-    suspend fun insertChapters(chapters: List<ChapterEntity>) {
-        chapterDao.insertChapters(chapters)
+    suspend fun insertChapters(chapters: List<ChapterEntity>): List<Long> {
+        return chapterDao.insertChapters(chapters)
     }
 
     suspend fun updateChapters(chapters: List<ChapterEntity>) {

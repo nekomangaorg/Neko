@@ -12,6 +12,9 @@ interface SimilarDao {
     @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
     fun getSimilar(mangaId: String): Flow<MangaSimilarEntity?>
 
+    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
+    suspend fun getSimilarSync(mangaId: String): MangaSimilarEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSimilar(similar: MangaSimilarEntity)
 

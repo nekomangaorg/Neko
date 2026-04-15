@@ -9,19 +9,24 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import okhttp3.OkHttpClient
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.track.TrackItem
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 abstract class TrackService(val id: Int) {
 
     val preferences: PreferencesHelper by injectLazy()
     val networkService: NetworkHelper by injectLazy()
-    val db: DatabaseHelper by injectLazy()
 
     open fun canRemoveFromService() = false
 
@@ -134,10 +139,22 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
-    val manga = db.getManga(track.manga_id).executeOnIO()
-    val allRead =
-        manga?.isOneShotOrCompleted(db) == true &&
-            db.getChapters(track.manga_id).executeOnIO().all { it.read }
+    val mangaRepository: MangaRepositoryImpl = Injekt.get()
+    val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+    val manga = mangaRepository.getMangaById(track.manga_id)?.toManga()
+
+    val chapters = chapterRepository.getChaptersForMangaSync(track.manga_id)
+
+    val tags = manga?.genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
+    val firstChapterName = chapters.firstOrNull()?.name?.lowercase() ?: ""
+    val isOneShotOrCompleted = manga?.status == SManga.COMPLETED ||
+            tags?.contains("oneshot") == true ||
+            (chapters.size == 1 &&
+                (Regex("one.?shot").containsMatchIn(firstChapterName) ||
+                    firstChapterName.contains("oneshot")))
+
+    val allRead = isOneShotOrCompleted && chapters.all { it.read }
+
     if (supportsReadingDates) {
         track.started_reading_date = getStartDate(track)
         track.finished_reading_date = getCompletedDate(track, allRead)
@@ -152,26 +169,30 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
 }
 
 suspend fun TrackService.getStartDate(track: Track): Long {
-    if (db.getChapters(track.manga_id).executeOnIO().any { it.read }) {
-        val chapters =
-            db.getHistoryByMangaId(track.manga_id).executeOnIO().filter { it.last_read > 0 }
-        val date = chapters.minOfOrNull { it.last_read } ?: return 0L
+    val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+    val chapters = chapterRepository.getChaptersForMangaSync(track.manga_id)
+    if (chapters.any { it.read }) {
+        val history =
+            chapterRepository.getHistoryByMangaId(track.manga_id).filter { it.lastRead > 0 }
+        val date = history.minOfOrNull { it.lastRead } ?: return 0L
         return if (date <= 0L) 0L else date
     }
     return 0L
 }
 
 suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long {
+    val chapterRepository: ChapterRepositoryImpl = Injekt.get()
     if (allRead) {
-        val chapters = db.getHistoryByMangaId(track.manga_id).executeOnIO()
-        val date = chapters.maxOfOrNull { it.last_read } ?: return 0L
+        val history = chapterRepository.getHistoryByMangaId(track.manga_id)
+        val date = history.maxOfOrNull { it.lastRead } ?: return 0L
         return if (date <= 0L) 0L else date
     }
     return 0L
 }
 
 suspend fun TrackService.getLastChapterRead(track: Track): Float {
-    val chapters = db.getChapters(track.manga_id).executeOnIO()
-    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.smart_order }
-    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
+    val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+    val chapters = chapterRepository.getChaptersForMangaSync(track.manga_id)
+    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.smartOrder }
+    return lastChapterRead?.chapterNumber ?: 0f
 }

@@ -15,10 +15,15 @@ interface TrackDao {
     @Query("SELECT * FROM track WHERE track_manga_id = :mangaId")
     fun getTracksForManga(mangaId: Long): Flow<List<TrackEntity>>
 
+    @Query("SELECT * FROM track WHERE track_manga_id = :mangaId")
+    suspend fun getTracksForMangaSync(mangaId: Long): List<TrackEntity>
+
     @Query("SELECT * FROM track WHERE track_manga_id IN (:mangaIds)")
     suspend fun getTracksForMangas(mangaIds: List<Long>): List<TrackEntity>
 
     @Query("SELECT * FROM track") fun getAllTracks(): Flow<List<TrackEntity>>
+
+    @Query("SELECT * FROM track") suspend fun getAllTracksSync(): List<TrackEntity>
 
     @Query("SELECT * FROM track WHERE track_manga_id = :mangaId AND track_sync_id = :syncId")
     suspend fun getTrackByMangaIdAndSyncId(mangaId: Long, syncId: Int): TrackEntity?

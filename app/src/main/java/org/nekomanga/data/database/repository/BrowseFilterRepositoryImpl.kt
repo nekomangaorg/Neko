@@ -7,6 +7,8 @@ import org.nekomanga.data.database.entity.BrowseFilterEntity
 class BrowseFilterRepositoryImpl(private val browseFilterDao: BrowseFilterDao) {
     fun getBrowseFilters(): Flow<List<BrowseFilterEntity>> = browseFilterDao.getBrowseFilters()
 
+    suspend fun getBrowseFiltersSync(): List<BrowseFilterEntity> = browseFilterDao.getBrowseFiltersSync()
+
     suspend fun getDefaultFilter(): List<BrowseFilterEntity> = browseFilterDao.getDefaultFilter()
 
     suspend fun insertBrowseFilter(filter: BrowseFilterEntity): Long =

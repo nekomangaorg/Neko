@@ -15,13 +15,20 @@ import kotlin.math.roundToInt
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
-fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
+suspend fun Manga.shouldDownloadNewChapters(
+    categoryRepository: CategoryRepositoryImpl,
+    prefs: PreferencesHelper,
+): Boolean {
     if (!favorite) return false
 
     // Boolean to determine if user wants to automatically download new chapters.
@@ -34,8 +41,8 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 
     // Get all categories, else default category (0)
     val categoriesForManga =
-        db.getCategoriesForManga(this)
-            .executeAsBlocking()
+        categoryRepository
+            .getCategoriesForMangaSync(this.id!!)
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
@@ -48,23 +55,29 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 }
 
 /** Takes a SourceManga and converts to a display manga */
-fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga {
-    var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
+suspend fun SourceManga.toDisplayManga(
+    mangaRepository: MangaRepositoryImpl,
+    sourceId: Long,
+): DisplayManga {
+    var localManga = mangaRepository.getMangaByUrlAndSource(this.url, sourceId)?.toManga()
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
         newManga.apply { this.thumbnail_url = currentThumbnail }
-        val result = db.insertManga(newManga).executeAsBlocking()
-        newManga.id = result.insertedId()
+        val id = mangaRepository.insertManga(newManga.toEntity())
+        newManga.id = id
         localManga = newManga
     } else if (localManga.title.isBlank()) {
         localManga.title = this.title
-        db.insertManga(localManga).executeAsBlocking()
+        mangaRepository.updateManga(localManga.toEntity())
     }
     return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
 /** Takes a list of SourceManga and converts to a list of display manga in bulk */
-fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): List<DisplayManga> {
+suspend fun Iterable<SourceManga>.toDisplayManga(
+    mangaRepository: MangaRepositoryImpl,
+    sourceId: Long,
+): List<DisplayManga> {
     if (!any()) return emptyList()
 
     val sourceMangas = this.toList()
@@ -74,38 +87,46 @@ fun Iterable<SourceManga>.toDisplayManga(db: DatabaseHelper, sourceId: Long): Li
     val existingMangas =
         urls
             .chunked(900)
-            .flatMap { chunk -> db.getMangasByUrl(chunk).executeAsBlocking() }
+            .flatMap { chunk -> mangaRepository.getMangasByUrl(chunk) }
             .associateBy { it.url }
 
     val newMangasList = mutableListOf<Manga>()
     val updateMangasList = mutableListOf<Manga>()
 
-    val mappedMangas = sourceMangas.map { sourceManga ->
-        var localManga = existingMangas[sourceManga.url]
-        if (localManga == null) {
-            val newManga =
-                Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
-                    this.thumbnail_url = sourceManga.currentThumbnail
-                }
-            newMangasList.add(newManga)
-            localManga = newManga
-        } else if (localManga.title.isBlank()) {
-            localManga.title = sourceManga.title
-            updateMangasList.add(localManga)
+    val mappedMangas =
+        sourceMangas.map { sourceManga ->
+            var localManga = existingMangas[sourceManga.url]?.toManga()
+            if (localManga == null) {
+                val newManga =
+                    Manga.create(sourceManga.url, sourceManga.title, sourceId).apply {
+                        this.thumbnail_url = sourceManga.currentThumbnail
+                    }
+                newMangasList.add(newManga)
+                localManga = newManga
+            } else if (localManga.title.isBlank()) {
+                localManga.title = sourceManga.title
+                updateMangasList.add(localManga)
+            }
+            sourceManga to localManga
         }
-        sourceManga to localManga
-    }
 
     if (newMangasList.isNotEmpty()) {
-        val results = db.insertMangaList(newMangasList).executeAsBlocking()
-        results.results().forEach { (manga, result) -> manga.id = result.insertedId() }
+        mangaRepository.insertMangas(newMangasList.map { it.toEntity() })
+        // Note: we can't easily get the IDs back here without fetching again or changing insert
+        // signature
+        // But for display manga, if they are brand new, we might need IDs if they are used
+        // immediately.
+        // Let's re-fetch if newMangas were added.
+        val reFetchedMangas =
+            mangaRepository.getMangasByUrl(newMangasList.map { it.url }).associateBy { it.url }
+        newMangasList.forEach { it.id = reFetchedMangas[it.url]?.id }
     }
     if (updateMangasList.isNotEmpty()) {
-        db.insertMangaList(updateMangasList).executeAsBlocking()
+        mangaRepository.insertMangas(updateMangasList.map { it.toEntity() })
     }
 
     return mappedMangas.map { (sourceManga, localManga) ->
-        localManga.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
+        localManga!!.toDisplayManga(sourceManga.displayText, sourceManga.displayTextRes)
     }
 }
 
@@ -259,16 +280,18 @@ fun SManga.getSlug(): String {
 }
 
 /** resync homepage manga with db manga */
-fun List<HomePageManga>.resync(db: DatabaseHelper): PersistentList<HomePageManga> {
+suspend fun List<HomePageManga>.resync(
+    mangaRepository: MangaRepositoryImpl
+): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.resync(db).toPersistentList()
+                displayManga = homePageManga.displayManga.resync(mangaRepository).toPersistentList()
             )
         }
         .toPersistentList()
 }
 
-fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
+suspend fun List<DisplayManga>.resync(mangaRepository: MangaRepositoryImpl): List<DisplayManga> {
     if (this.isEmpty()) return emptyList()
 
     // Fetch existing mangas from database by IDs in chunks to avoid SQLite parameter limit
@@ -276,7 +299,7 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
     val existingMangas =
         mangaIds
             .chunked(900)
-            .flatMap { chunk -> db.getMangas(chunk).executeAsBlocking() }
+            .flatMap { chunk -> mangaRepository.getMangas(chunk) }
             .associateBy { it.id }
 
     return this.mapNotNull { displayManga ->
@@ -288,8 +311,8 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
                     inLibrary = dbManga.favorite,
                     currentArtwork =
                         displayManga.currentArtwork.copy(
-                            cover = dbManga.user_cover ?: "",
-                            originalCover = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                            cover = dbManga.userCover ?: "",
+                            originalCover = dbManga.thumbnailUrl ?: MdConstants.noCoverUrl,
                         ),
                 )
         }

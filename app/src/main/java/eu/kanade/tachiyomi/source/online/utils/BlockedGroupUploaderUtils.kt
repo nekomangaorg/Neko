@@ -2,22 +2,23 @@ package eu.kanade.tachiyomi.source.online.utils
 
 import com.github.michaelbull.result.getOrElse
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.repository.ScanlatorRepositoryImpl
 import org.nekomanga.domain.site.MangaDexPreferences
 
 suspend fun getBlockedScanlatorGroupUUIDs(
     mangaDexPreferences: MangaDexPreferences,
-    db: DatabaseHelper,
+    scanlatorRepository: ScanlatorRepositoryImpl,
     mangaDex: MangaDex,
 ): List<String> {
     val blockedGroupNames = mangaDexPreferences.blockedGroups().get().toList()
     return coroutineScope {
         val chunks = blockedGroupNames.chunked(900)
         val existingGroups = chunks.flatMap { chunk ->
-            db.getScanlatorGroupsByNames(chunk).executeAsBlocking()
+            scanlatorRepository.getScanlatorGroupsByNames(chunk)
         }
         val existingGroupNames = existingGroups.map { it.name }.toSet()
         val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
@@ -29,22 +30,23 @@ suspend fun getBlockedScanlatorGroupUUIDs(
                 .mapNotNull { result -> result.getOrElse { null }?.toScanlatorGroupImpl() }
 
         if (fetchedGroups.isNotEmpty()) {
-            db.insertScanlatorGroups(fetchedGroups).executeOnIO()
+            scanlatorRepository.insertScanlatorGroups(fetchedGroups.map { it.toEntity() })
         }
-        (existingGroups + fetchedGroups).map { it.uuid }
+        val fetchedGroupEntities = fetchedGroups.map { it.toEntity() }
+        (existingGroups + fetchedGroupEntities).map { it.uuid }
     }
 }
 
 suspend fun getBlockedUploaderUUIDs(
     mangaDexPreferences: MangaDexPreferences,
-    db: DatabaseHelper,
+    scanlatorRepository: ScanlatorRepositoryImpl,
     mangaDex: MangaDex,
 ): List<String> {
     val blockedUploaderNames = mangaDexPreferences.blockedUploaders().get().toList()
     return coroutineScope {
         val chunks = blockedUploaderNames.chunked(900)
         val existingUploaders = chunks.flatMap { chunk ->
-            db.getUploadersByNames(chunk).executeAsBlocking()
+            scanlatorRepository.getUploadersByNamesSync(chunk)
         }
         val existingUploaderNames = existingUploaders.map { it.username }.toSet()
         val missingUploaderNames = blockedUploaderNames.filterNot { it in existingUploaderNames }
@@ -56,8 +58,9 @@ suspend fun getBlockedUploaderUUIDs(
                 .mapNotNull { result -> result.getOrElse { null }?.toUploaderImpl() }
 
         if (fetchedUploaders.isNotEmpty()) {
-            db.insertUploader(fetchedUploaders).executeOnIO()
+            scanlatorRepository.insertUploaders(fetchedUploaders.map { it.toEntity() })
         }
-        (existingUploaders + fetchedUploaders).map { it.uuid }
+        val fetchedUploaderEntities = fetchedUploaders.map { it.toEntity() }
+        (existingUploaders + fetchedUploaderEntities).map { it.uuid }
     }
 }

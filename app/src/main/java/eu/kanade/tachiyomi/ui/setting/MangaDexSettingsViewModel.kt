@@ -3,9 +3,7 @@ package eu.kanade.tachiyomi.ui.setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.getValue
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableSet
@@ -16,6 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
 import org.nekomanga.domain.site.MangaDexPreferences
 import uy.kohesive.injekt.injectLazy
 
@@ -25,7 +24,7 @@ class MangaDexSettingsViewModel : ViewModel() {
 
     val mangaDexPreference by injectLazy<MangaDexPreferences>()
 
-    val db: DatabaseHelper by injectLazy()
+    private val browseFilterRepository by injectLazy<BrowseFilterRepositoryImpl>()
 
     private val _state = MutableStateFlow(MangaDexSettingsState())
 
@@ -70,7 +69,7 @@ class MangaDexSettingsViewModel : ViewModel() {
     }
 
     fun deleteAllBrowseFilters() {
-        viewModelScope.launchIO { db.deleteAllBrowseFilters().executeOnIO() }
+        viewModelScope.launchIO { browseFilterRepository.deleteAllBrowseFilters() }
     }
 
     fun logout() {

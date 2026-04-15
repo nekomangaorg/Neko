@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableMap
@@ -25,6 +24,11 @@ import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -45,7 +49,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     private val repo: SimilarRepository = Injekt.get()
-    private val db: DatabaseHelper = Injekt.get()
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get()
+    private val categoryRepository: CategoryRepositoryImpl = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
@@ -72,9 +77,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         getSimilarManga()
         viewModelScope.launch {
             val categories =
-                db.getCategories()
-                    .executeAsBlocking()
-                    .map { category -> category.toCategoryItem() }
+                categoryRepository.getAllCategoriesList()
+                    .map { entity -> entity.toCategory().toCategoryItem() }
                     .toPersistentList()
             _similarScreenState.update {
                 it.copy(
@@ -131,7 +135,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO()!!
+            val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -140,7 +144,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.insertManga(editManga.toEntity())
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -154,14 +158,14 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         .firstOrNull { defaultCategory == it.id }
                         ?.let {
                             val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            db.setMangaCategories(categories, listOf(editManga))
+                                listOf(MangaCategory.create(editManga, it.toDbCategory()).toEntity())
+                            categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
-                        MangaCategory.create(editManga, it.toDbCategory())
+                        MangaCategory.create(editManga, it.toDbCategory()).toEntity()
                     }
-                    db.setMangaCategories(categories, listOf(editManga))
+                    categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
                 }
             }
         }
@@ -228,13 +232,12 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             val category = Category.create(newCategory)
             category.order =
                 (_similarScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
+            categoryRepository.insertCategory(category.toEntity())
             _similarScreenState.update {
                 it.copy(
                     categories =
-                        db.getCategories()
-                            .executeAsBlocking()
-                            .map { category -> category.toCategoryItem() }
+                        categoryRepository.getAllCategoriesList()
+                            .map { entity -> entity.toCategory().toCategoryItem() }
                             .toPersistentList()
                 )
             }
@@ -258,7 +261,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             val fetchedMangas =
                 allMangaIds
                     .chunked(900)
-                    .flatMap { chunk -> db.getMangas(chunk).executeOnIO() }
+                    .flatMap { chunk -> mangaRepository.getMangas(chunk) }
                     .associateBy { it.id }
 
             val newDisplayManga =
@@ -273,9 +276,9 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                                         it.copy(
                                             currentArtwork =
                                                 it.currentArtwork.copy(
-                                                    cover = dbManga.user_cover ?: "",
+                                                    cover = dbManga.userCover ?: "",
                                                     originalCover =
-                                                        dbManga.thumbnail_url
+                                                        dbManga.thumbnailUrl
                                                             ?: MdConstants.noCoverUrl,
                                                 )
                                         )

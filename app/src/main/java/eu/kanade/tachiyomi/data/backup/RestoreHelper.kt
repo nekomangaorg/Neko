@@ -24,12 +24,30 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import kotlin.math.max
 import org.nekomanga.R
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toHistory
+import org.nekomanga.data.database.model.toMergeManga
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class RestoreHelper(val context: Context) {
 
-    val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
+    private val categoryRepository: CategoryRepositoryImpl by injectLazy()
+    private val trackRepository: TrackRepositoryImpl by injectLazy()
+    private val mergeRepository: MergeRepositoryImpl by injectLazy()
+    private val appDatabase: AppDatabase by injectLazy()
+
     val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -203,13 +221,13 @@ class RestoreHelper(val context: Context) {
         return null
     }
 
-    fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+    suspend fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
         val backupFavorite = manga.favorite
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.initialized = false
         manga.favorite = dbManga.favorite || backupFavorite
-        db.insertManga(manga).executeAsBlocking()
+        mangaRepository.insertManga(manga.toEntity())
     }
 
     /**
@@ -217,37 +235,35 @@ class RestoreHelper(val context: Context) {
      *
      * @param backupCategories list containing categories
      */
-    internal fun restoreCategories(backupCategories: List<BackupCategory>) {
+    internal suspend fun restoreCategories(backupCategories: List<BackupCategory>) {
         // Get categories from file and from db
-        db.inTransaction {
-            val dbCategories = db.getCategories().executeAsBlocking()
+        val dbCategories = categoryRepository.getAllCategoriesList()
 
-            // Iterate over them
-            backupCategories
-                .map { it.getCategoryImpl() }
-                .forEach { category ->
-                    // Used to know if the category is already in the db
-                    var found = false
-                    for (dbCategory in dbCategories) {
-                        // If the category is already in the db, assign the id to the file's
-                        // category
-                        // and do nothing
-                        if (category.name == dbCategory.name) {
-                            category.id = dbCategory.id
-                            found = true
-                            break
-                        }
-                    }
-                    // If the category isn't in the db, remove the id and insert a new category
-                    // Store the inserted id in the category
-                    if (!found) {
-                        // Let the db assign the id
-                        category.id = null
-                        val result = db.insertCategory(category).executeAsBlocking()
-                        category.id = result.insertedId()?.toInt()
+        // Iterate over them
+        backupCategories
+            .map { it.getCategoryImpl() }
+            .forEach { category ->
+                // Used to know if the category is already in the db
+                var found = false
+                for (dbCategory in dbCategories) {
+                    // If the category is already in the db, assign the id to the file's
+                    // category
+                    // and do nothing
+                    if (category.name == dbCategory.name) {
+                        category.id = dbCategory.id
+                        found = true
+                        break
                     }
                 }
-        }
+                // If the category isn't in the db, remove the id and insert a new category
+                // Store the inserted id in the category
+                if (!found) {
+                    // Let the db assign the id
+                    category.id = null
+                    val result = categoryRepository.insertCategory(category.toEntity())
+                    category.id = result.toInt()
+                }
+            }
     }
 
     /**
@@ -256,11 +272,11 @@ class RestoreHelper(val context: Context) {
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(
+    internal suspend fun restoreCategoriesForManga(
         manga: Manga,
         categories: List<Int>,
         backupCategories: List<BackupCategory>,
-        dbCategories: List<Category> = db.getCategories().executeAsBlocking(),
+        dbCategories: List<Category>,
     ) {
         val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         categories.forEach { backupCategoryOrder ->
@@ -277,8 +293,8 @@ class RestoreHelper(val context: Context) {
 
         // Update database
         if (mangaCategoriesToUpdate.isNotEmpty()) {
-            db.deleteOldMangaListCategories(listOf(manga)).executeAsBlocking()
-            db.insertMangaListCategories(mangaCategoriesToUpdate).executeAsBlocking()
+            categoryRepository.deleteOldMangaListCategories(listOf(manga.id!!))
+            categoryRepository.insertMangaListCategories(mangaCategoriesToUpdate.map { it.toEntity() })
         }
     }
 
@@ -287,7 +303,7 @@ class RestoreHelper(val context: Context) {
      *
      * @param history list containing history to be restored
      */
-    internal fun restoreHistoryForManga(
+    internal suspend fun restoreHistoryForManga(
         history: List<BackupHistory>,
         manga: Manga,
         updatedChapters: List<Chapter>,
@@ -299,7 +315,7 @@ class RestoreHelper(val context: Context) {
         val historyToBeUpdated = ArrayList<History>(history.size)
 
         val dbHistories =
-            (preFetchedDbHistories ?: db.getHistoryByMangaId(mangaId).executeAsBlocking())
+            (preFetchedDbHistories ?: chapterRepository.getHistoryByMangaId(mangaId).map { it.toHistory() })
                 .associateBy { it.chapter_id }
         val dbChaptersMap = updatedChapters.associateBy { it.url }
 
@@ -325,7 +341,7 @@ class RestoreHelper(val context: Context) {
         }
 
         if (historyToBeUpdated.isNotEmpty()) {
-            db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+            chapterRepository.upsertHistoryList(historyToBeUpdated.map { it.toEntity() })
         }
     }
 
@@ -335,7 +351,7 @@ class RestoreHelper(val context: Context) {
      * @param manga the manga whose sync have to be restored.
      * @param tracks the track list to restore.
      */
-    internal fun restoreTrackForManga(
+    internal suspend fun restoreTrackForManga(
         manga: Manga,
         tracks: List<Track>,
         preFetchedDbTracks: List<Track>? = null,
@@ -348,7 +364,7 @@ class RestoreHelper(val context: Context) {
         val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
 
         // Get tracks from database
-        val dbTracks = preFetchedDbTracks ?: db.getTracks(manga).executeAsBlocking()
+        val dbTracks = preFetchedDbTracks ?: trackRepository.getTracksForMangaSync(manga.id!!).map { it.toTrack() }
         val trackToUpdate = mutableListOf<Track>()
 
         validTracks.forEach { track ->
@@ -380,32 +396,32 @@ class RestoreHelper(val context: Context) {
         }
         // Update database
         if (trackToUpdate.isNotEmpty() || needToUpdate) {
-            db.insertTracks(trackToUpdate).executeAsBlocking()
+            trackRepository.insertTracks(trackToUpdate.map { it.toEntity() })
         }
     }
 
-    fun restoreMergeMangaForManga(
+    suspend fun restoreMergeMangaForManga(
         manga: Manga,
         mergeMangaList: List<MergeMangaImpl>,
         preFetchedDbMergeMangaList: List<MergeMangaImpl>? = null,
     ) {
         val dbMergeMangaList =
-            preFetchedDbMergeMangaList ?: db.getMergeMangaList(manga).executeAsBlocking()
+            preFetchedDbMergeMangaList ?: mergeRepository.getMergeMangaListSync(manga.id!!).map { it.toMergeManga() }
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
                 val newMergeManga = mergeManga.copy(mangaId = manga.id!!)
-                db.insertMergeManga(newMergeManga).executeAsBlocking()
+                mergeRepository.insertMergeManga(newMergeManga.toEntity())
             }
         }
     }
 
-    internal fun restoreChaptersForMangaOffline(
+    internal suspend fun restoreChaptersForMangaOffline(
         manga: Manga,
         chapters: List<Chapter>,
         preFetchedDbChapters: List<Chapter>? = null,
     ): List<Chapter> {
-        val dbChapters = preFetchedDbChapters ?: db.getChapters(manga).executeAsBlocking()
+        val dbChapters = preFetchedDbChapters ?: chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
         val dbChaptersMap = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
@@ -431,13 +447,13 @@ class RestoreHelper(val context: Context) {
         }
 
         val newChapters = chapters.groupBy { it.id != null }
-        newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
+        newChapters[true]?.let { chapterRepository.updateChapters(it.map { it.toEntity() }) }
 
         // Populate chapter.id from the put results to correctly process History later
         newChapters[false]?.let { newChaps ->
-            val results = db.insertChapters(newChaps).executeAsBlocking()
-            results.results().entries.forEach { (insertedChap, result) ->
-                insertedChap.id = result.insertedId()
+            val insertedIds = chapterRepository.insertChapters(newChaps.map { it.toEntity() })
+            newChaps.forEachIndexed { index, chapter ->
+                chapter.id = insertedIds[index]
             }
         }
 

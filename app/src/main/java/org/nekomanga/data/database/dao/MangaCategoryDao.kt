@@ -22,6 +22,9 @@ interface MangaCategoryDao {
     @Query("SELECT * FROM mangas_categories WHERE category_id = :categoryId")
     fun getMangaCategoriesForCategory(categoryId: Int): Flow<List<MangaCategoryEntity>>
 
+    @Query("SELECT * FROM mangas_categories WHERE category_id = :categoryId")
+    suspend fun getMangaCategoriesForCategorySync(categoryId: Int): List<MangaCategoryEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMangaCategory(mangaCategory: MangaCategoryEntity)
 

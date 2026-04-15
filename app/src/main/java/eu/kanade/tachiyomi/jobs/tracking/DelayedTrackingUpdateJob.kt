@@ -10,10 +10,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.concurrent.TimeUnit
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -37,17 +39,18 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         }
 
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
-        val db = Injekt.get<DatabaseHelper>()
+        val trackRepository = Injekt.get<TrackRepositoryImpl>()
         val trackManager = Injekt.get<TrackManager>()
 
         withIOContext {
             delayedTrackingStore
                 .getItems()
                 .mapNotNull {
-                    val track = db.getTrackByTrackId(it.trackId).executeOnIO()
-                    if (track == null) {
+                    val trackEntity = trackRepository.getTrackById(it.trackId)
+                    if (trackEntity == null) {
                         delayedTrackingStore.remove(it.trackId)
                     }
+                    val track = trackEntity?.toTrack()
                     track?.last_chapter_read = it.lastChapterRead
                     track
                 }
@@ -62,7 +65,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             false -> {
                                 try {
                                     service.update(track, true)
-                                    db.insertTrack(track).executeAsBlocking()
+                                    trackRepository.insertTrack(track.toEntity())
                                 } catch (e: Exception) {
                                     delayedTrackingStore.add(track.id!!, track.last_chapter_read)
                                     TimberKt.e(e) { "Error inserting for delayed tracker" }

@@ -7,9 +7,11 @@ import org.nekomanga.constants.Constants
 import org.nekomanga.data.database.dao.ArtworkDao
 import org.nekomanga.data.database.dao.MangaDao
 import org.nekomanga.data.database.dao.SimilarDao
+import org.nekomanga.data.database.dao.UploaderDao
 import org.nekomanga.data.database.entity.ArtworkEntity
 import org.nekomanga.data.database.entity.MangaEntity
 import org.nekomanga.data.database.entity.MangaSimilarEntity
+import org.nekomanga.data.database.entity.UploaderEntity
 import org.nekomanga.data.database.model.LibraryManga
 import org.nekomanga.data.database.model.LibraryMangaRaw
 import org.nekomanga.domain.library.LibraryPreferences
@@ -19,6 +21,7 @@ class MangaRepositoryImpl(
     private val mangaDao: MangaDao,
     private val artworkDao: ArtworkDao,
     private val similarDao: SimilarDao,
+    private val uploaderDao: UploaderDao,
     private val libraryPreferences: LibraryPreferences,
     private val mangaDexPreferences: MangaDexPreferences,
 ) {
@@ -131,6 +134,8 @@ class MangaRepositoryImpl(
     // MangaDao wrappers
     fun getMangaList(): Flow<List<MangaEntity>> = mangaDao.getMangaList()
 
+    suspend fun getMangaListSync(): List<MangaEntity> = mangaDao.getMangaListSync()
+
     fun getFavoriteMangaList(): Flow<List<MangaEntity>> = mangaDao.getFavoriteMangaList()
 
     suspend fun getFavoriteMangaListSync(): List<MangaEntity> = mangaDao.getFavoriteMangaListSync()
@@ -148,6 +153,8 @@ class MangaRepositoryImpl(
     suspend fun getMangaById(id: Long): MangaEntity? = mangaDao.getMangaById(id)
 
     fun getLibraryMangaList(): Flow<List<LibraryManga>> = mangaDao.getLibraryMangaList()
+
+    suspend fun getLibraryMangaListSync(): List<LibraryManga> = mangaDao.getLibraryMangaListSync()
 
     suspend fun insertManga(manga: MangaEntity): Long = mangaDao.insertManga(manga)
 
@@ -223,9 +230,14 @@ class MangaRepositoryImpl(
     // SimilarDao wrappers
     fun getSimilar(mangaId: String): Flow<MangaSimilarEntity?> = similarDao.getSimilar(mangaId)
 
+    suspend fun getSimilarSync(mangaId: String): MangaSimilarEntity? = similarDao.getSimilarSync(mangaId)
+
     suspend fun insertSimilar(similar: MangaSimilarEntity) = similarDao.insertSimilar(similar)
 
     suspend fun deleteAllSimilar() = similarDao.deleteAllSimilar()
+
+    // UploaderDao wrappers
+    suspend fun insertUploader(uploaders: List<UploaderEntity>) = uploaderDao.insertUploaders(uploaders)
 }
 
 fun LibraryMangaRaw.toDomainModel(filteredUnread: Int, filteredRead: Int): LibraryManga {

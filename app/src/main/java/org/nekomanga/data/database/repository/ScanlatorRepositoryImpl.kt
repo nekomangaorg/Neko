@@ -32,6 +32,9 @@ class ScanlatorRepositoryImpl(
     fun getUploadersByNames(names: List<String>): Flow<List<UploaderEntity>> =
         uploaderDao.getUploadersByNames(names)
 
+    suspend fun getUploadersByNamesSync(names: List<String>): List<UploaderEntity> =
+        uploaderDao.getUploadersByNamesSync(names)
+
     suspend fun insertUploaders(uploaders: List<UploaderEntity>) =
         uploaderDao.insertUploaders(uploaders)
 

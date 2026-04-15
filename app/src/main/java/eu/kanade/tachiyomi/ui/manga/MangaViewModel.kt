@@ -48,8 +48,6 @@ import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.asFlow
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -66,12 +64,9 @@ import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -85,7 +80,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -94,22 +88,35 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.entity.MangaAggregateEntity
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toHistory
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.model.toTrack
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
+import org.nekomanga.data.database.repository.ScanlatorRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
-import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MangaItem
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.manga.getDescription
-import org.nekomanga.domain.manga.toManga
 import org.nekomanga.domain.manga.toMangaItem
 import org.nekomanga.domain.manga.uuid
-import org.nekomanga.domain.network.message
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.snackbar.SnackbarColor
 import org.nekomanga.domain.snackbar.SnackbarState
@@ -130,6 +137,7 @@ import org.nekomanga.usecases.preferences.GetDateFormatUseCase
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class MangaViewModel(val mangaId: Long) : ViewModel() {
 
@@ -150,7 +158,15 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val securityPreferences: SecurityPreferences = Injekt.get()
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
-    val db: DatabaseHelper = Injekt.get()
+
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get()
+    private val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+    private val categoryRepository: CategoryRepositoryImpl = Injekt.get()
+    private val trackRepository: TrackRepositoryImpl = Injekt.get()
+    private val mergeRepository: MergeRepositoryImpl = Injekt.get()
+    private val scanlatorRepository: ScanlatorRepositoryImpl = Injekt.get()
+    private val appDatabase: AppDatabase = Injekt.get()
+
     val downloadManager: DownloadManager = Injekt.get()
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
@@ -188,76 +204,39 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     private val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
-    private data class MangaFilterState(
-        val scanlators: Set<String>? = null,
-        val languages: Set<String>? = null,
-        val sortOption: SortOption? = null,
-        val readFilter: Int? = null,
-        val downloadedFilter: Int? = null,
-        val bookmarkedFilter: Int? = null,
-        val availableFilter: Int? = null,
-        val hideChapterTitles: Boolean? = null,
-        val forceGlobal: Boolean = false,
-    )
-
     private val _mangaFilterState = MutableStateFlow<MangaFilterState?>(null)
 
     // Channel to debounce DB writes for filters
     private val _persistFilterChannel = Channel<Unit>(Channel.CONFLATED)
 
-    /**
-     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
-     *
-     * Why: Previously, these database flows (`mangaFlow`, `historyFlow`, `artworkFlow`, etc.) were
-     * standard cold flows. When they were combined inside the large `combine` block below, or when
-     * collected multiple times due to UI state updates or rotation, they would each trigger
-     * redundant database queries and re-execute expensive mapping operations. In complex screens
-     * with many DB observers, this caused massive CPU spikes and unnecessary memory allocations as
-     * the same data was fetched repeatedly.
-     *
-     * Architecture: By applying `.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)`
-     * to these intermediate flows, we fundamentally shift them from Cold to Hot streams.
-     * - `viewModelScope` bounds the flow lifecycle to the ViewModel, preventing memory leaks.
-     * - `SharingStarted.WhileSubscribed(5000)` ensures the upstream database subscription stays
-     *   alive for 5 seconds after the last subscriber disconnects (e.g., during a configuration
-     *   change like device rotation). This avoids tearing down and recreating the expensive DB
-     *   query.
-     * - `replay = 1` immediately emits the latest cached value to any new parallel collectors
-     *   without needing a dummy initial value like `stateIn` would require.
-     *
-     * Impact: Reduces N database queries per observer down to exactly 1 query per active stream.
-     * Massive reduction in UI thread blocking, measurement overhead, and GC thrashing.
-     */
     val mangaFlow =
-        db.getManga(mangaId)
-            .asRxObservable()
-            .asFlow()
-            .map { it.toMangaItem() }
+        mangaRepository.getMangaByIdFlow(mangaId)
+            .map { it?.toMangaItem() ?: MangaItem(title = "") }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val historyFlow =
-        db.getHistoryByMangaId(mangaId)
-            .asFlow()
+        chapterRepository.getHistoryByMangaIdFlow(mangaId)
+            .map { list -> list.map { it.toHistory() } }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val artworkFlow =
-        db.getArtwork(mangaId)
-            .asFlow()
+        mangaRepository.getArtworkForManga(mangaId)
+            .map { list -> list.map { ArtworkImpl(it.id, it.mangaId, it.fileName, it.volume, it.locale, it.description) } }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val categoriesDataFlow =
-        combine(db.getCategories().asFlow(), db.getMangaCategory(mangaId).asFlow()) {
+        combine(categoryRepository.getAllCategories(), categoryRepository.getMangaCategoriesForManga(mangaId)) {
                 allCategories,
                 mangaCategories ->
-                val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
+                val mangaCategorySet = mangaCategories.map { it.categoryId }.toSet()
                 MangaConstants.CategoriesData(
-                    all = allCategories.map { it.toCategoryItem() },
+                    all = allCategories.map { it.toCategory().toCategoryItem() },
                     current =
                         allCategories.mapNotNull {
-                            if (it.id != null && it.id in mangaCategorySet) it.toCategoryItem()
+                            if (it.id != null && it.id in mangaCategorySet) it.toCategory().toCategoryItem()
                             else null
                         },
                 )
@@ -266,20 +245,18 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val tracksFlow =
-        db.getTracks(mangaId)
-            .asFlow()
-            .map { tracks -> tracks.map { it.toTrackItem() }.toPersistentList() }
+        trackRepository.getTracksForManga(mangaId)
+            .map { tracks -> tracks.map { it.toTrack().toTrackItem() }.toPersistentList() }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val mergedFlow =
-        db.getMergeMangaList(mangaId)
-            .asFlow()
+        mergeRepository.getMergeMangaList(mangaId)
             .map { mergeMangaList ->
                 when (mergeMangaList.isNotEmpty()) {
                     true -> {
                         val mergeManga = mergeMangaList.first()
-                        val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
+                        val source = MergeType.getSource(MergeType.getById(mergeManga.mergeType), sourceManager)
                         val url = source.getMangaUrl(mergeManga.url)
                         Yes(url, title = mergeManga.title, mergeType = mergeManga.mergeType)
                     }
@@ -289,34 +266,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
-    /**
-     * MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
-     *
-     * Why: Previously, this flow was performing a blocking database query
-     * `db.getManga(mangaId).executeAsBlocking()!!` inside the `combine` block. Because this is a
-     * hot flow observed by the UI, it forced the reactive pipeline to block the thread on every
-     * emission of chapters or preferences, leading to stuttering, CPU spikes, and frame drops.
-     *
-     * Architecture: We injected the `mangaFlow` directly into this `combine` operator. By using the
-     * emitted `mangaItem` instead of performing a synchronous query, the flow becomes fully
-     * reactive and avoids I/O operations on the main flow dispatcher.
-     *
-     * SECOND MACRO-LEVEL PERFORMANCE OPTIMIZATION (Overclock):
-     *
-     * Why: Previously, `allChapterFlow` called `downloadManager.isChapterDownloaded` and
-     * `downloadManager.getQueuedDownloadOrNull` inside an O(N) map loop for every single chapter.
-     * Since `getQueuedDownloadOrNull` iterates over the list of active downloads, this created an
-     * O(N*M) bottleneck where N is chapters and M is queued items. In addition, checking the cache
-     * for downloaded chapters unconditionally causes redundant overhead.
-     *
-     * Architecture: We perform a bulk O(1) hashmap association of the queued downloads before the
-     * loop. We also check if the total `downloadCount` is 0 to completely bypass the O(N)
-     * evaluation of `isChapterDownloaded` on un-downloaded manga, saving thousands of redundant
-     * string allocations and map lookups on large libraries.
-     */
     val allChapterFlow =
         combine(
-                db.getChapters(mangaId).asFlow(),
+                chapterRepository.getChaptersForManga(mangaId),
                 mangaFlow,
                 mangaDexPreferences.blockedGroups().changes(),
                 mangaDexPreferences.blockedUploaders().changes(),
@@ -415,7 +367,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            if (!db.getManga(mangaId).executeAsBlocking()!!.initialized) {
+            if (mangaRepository.getMangaById(mangaId)?.initialized == false) {
                 onRefresh()
             }
         }
@@ -424,16 +376,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             @OptIn(FlowPreview::class)
             _persistFilterChannel.receiveAsFlow().debounce(2000).collect {
-                val manga = db.getManga(mangaId).executeAsBlocking()!!
+                val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@collect
+                val manga = mangaEntity.toManga()
                 val filterState = _mangaFilterState.value ?: return@collect
 
                 // Apply state to DB object using the consolidated logic
                 filterState.applyToManga(manga, mangaDetailsPreferences)
 
-                db.insertManga(manga).executeOnIO()
-                db.updateChapterFlags(manga).executeOnIO()
-                db.updateMangaFilteredScanlators(manga).executeOnIO()
-                db.updateMangaFilteredLanguages(manga).executeOnIO()
+                mangaRepository.updateManga(manga.toEntity())
+                mangaRepository.updateChapterFlags(manga.id!!, manga.chapter_flags)
+                mangaRepository.updateScanlatorFilter(manga.id!!, manga.filtered_scanlators)
+                mangaRepository.updateLanguageFilter(manga.id!!, manga.filtered_language)
             }
         }
 
@@ -501,11 +454,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 staticChapterData.allScanlators.size == 1 &&
                                     !effectiveManga.filteredScanlators.isEmpty()
                             ) {
-                                val manga =
-                                    effectiveManga
-                                        .copy(filteredScanlators = persistentListOf())
-                                        .toManga()
-                                db.insertManga(manga).executeOnIO()
+                                mangaRepository.updateScanlatorFilter(mangaId, null)
                             }
 
                             val activeChapters =
@@ -708,7 +657,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 it.copy(general = it.general.copy(isRefreshing = true))
             }
 
-            val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+            val mangaItem = mangaRepository.getMangaById(mangaId)!!.toMangaItem()
 
             mangaUpdateCoordinator
                 .update(mangaItem = mangaItem, isMerging = isMerging)
@@ -742,7 +691,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                         is MangaResult.Success -> {
                             syncChaptersReadStatus()
-                            val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+                            val mangaItem = mangaRepository.getMangaById(mangaId)!!.toMangaItem()
 
                             autoAddTrackers(
                                 mangaItem,
@@ -789,7 +738,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         canUndo: Boolean = false,
     ) {
         viewModelScope.launchNonCancellable {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchNonCancellable
             if (chapterItems.isNotEmpty()) {
                 val delete: suspend () -> Unit = {
                     if (isEverything) {
@@ -800,10 +749,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             chapterItems.map { it.chapter.toDbChapter() },
                         )
                         val localDbChapters = chapterItems.mapNotNull {
-                            if (it.chapter.isLocalSource()) it.chapter.toDbChapter() else null
+                            if (it.chapter.isLocalSource()) it.chapter.toEntity() else null
                         }
                         if (localDbChapters.isNotEmpty()) {
-                            db.deleteChapters(localDbChapters).executeAsBlocking()
+                            chapterRepository.deleteChapters(localDbChapters)
                         }
                     }
                     updateRemovedDownload(chapterItems)
@@ -857,7 +806,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         skipSync: Boolean = false,
     ) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
+            val manga = mangaEntity.toManga()
             val updatedChapterList =
                 if (
                     markAction is ChapterMarkActions.PreviousRead ||
@@ -946,8 +896,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         action = {
                             viewModelScope.launchIO {
                                 val originalDbChapters =
-                                    updatedChapterList.map { it.chapter }.map { it.toDbChapter() }
-                                db.updateChaptersProgress(originalDbChapters).executeOnIO()
+                                    updatedChapterList.map { it.chapter }.map { it.toEntity() }
+                                chapterRepository.updateChapters(originalDbChapters)
                             }
                         },
                         dismissAction = { viewModelScope.launchIO { finalizeChapters() } },
@@ -963,7 +913,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Delete the list of chapters */
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!.toManga()
             val allChapterSize = mangaDetailScreenState.value.chapters.allChapters.size
             when (downloadAction) {
                 is DownloadAction.ImmediateDownload -> {
@@ -1126,7 +1076,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     private fun createInitialCurrentArtwork(): Artwork {
-        val manga = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+        val manga = mangaRepository.getMangaById(mangaId)!!.toMangaItem()
         return Artwork(
             cover = manga.userCover,
             dynamicCover = manga.dynamicCover,
@@ -1462,7 +1412,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Search Tracker */
     fun searchTracker(title: String, service: TrackServiceItem) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
+            val dbManga = mangaEntity.toManga()
             val previouslyTracked =
                 mangaDetailScreenState.value.track.tracks.firstOrNull {
                     service.id == it.trackServiceId
@@ -1655,12 +1606,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun changeScanlatorOption(scanlatorOption: MangaConstants.ScanlatorOption?) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
 
             val newFilteredScanlators =
                 if (scanlatorOption != null) {
                     val filteredScanlators =
-                        ChapterUtil.getScanlators(manga.filtered_scanlators).toMutableSet()
+                        ChapterUtil.getScanlators(mangaEntity.filteredScanlators).toMutableSet()
                     // Merge with local overrides
                     val local = _mangaFilterState.value?.scanlators
                     val effective = local?.toMutableSet() ?: filteredScanlators
@@ -1684,11 +1635,11 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun changeLanguageOption(languageOptions: MangaConstants.LanguageOption?) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             val newFilteredLanguages =
                 if (languageOptions != null) {
                     val filteredLanguages =
-                        ChapterUtil.getLanguages(manga.filtered_language).toMutableSet()
+                        ChapterUtil.getLanguages(mangaEntity.filteredLanguage).toMutableSet()
                     val local = _mangaFilterState.value?.languages
                     val effective = local?.toMutableSet() ?: filteredLanguages
 
@@ -1711,7 +1662,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun setGlobalOption(option: MangaConstants.SetGlobal) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val mangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
+            val manga = mangaEntity.toManga()
             when (option) {
                 MangaConstants.SetGlobal.Sort -> {
                     mangaDetailsPreferences.sortChapterOrder().set(manga.sorting)
@@ -1729,9 +1681,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     manga.setFilterToGlobal()
                 }
             }
-            db.updateChapterFlags(manga).executeOnIO()
-            db.updateMangaFilteredScanlators(manga).executeOnIO()
-            db.updateMangaFilteredLanguages(manga).executeOnIO()
+            mangaRepository.updateChapterFlags(manga.id!!, manga.chapter_flags)
+            mangaRepository.updateScanlatorFilter(manga.id!!, manga.filtered_scanlators)
+            mangaRepository.updateLanguageFilter(manga.id!!, manga.filtered_language)
         }
     }
 
@@ -1783,7 +1735,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 }
                         }
                         // Save the new track (with or without remote data) to the local DB *once*
-                        db.insertTrack(track).executeOnIO()
+                        trackRepository.insertTrack(track.toEntity())
                     }
                     val autoAddStatus = mangaDexPreferences.autoAddToMangaDexLibrary().get()
                     val canAutoAdd =
@@ -1929,7 +1881,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     /** Save Cover to directory, if given a url save that specific cover */
     private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
-        val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+        val mangaEntity = mangaRepository.getMangaById(mangaId)!!
+        val dbManga = mangaEntity.toManga()
         val cover =
             when (artwork.cover.isBlank() || dbManga.thumbnail_url == artwork.cover) {
                 true ->
@@ -1960,22 +1913,24 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Set custom cover */
     fun setCover(artwork: Artwork) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbMangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
+            val dbManga = dbMangaEntity.toManga()
             coverCache.setCustomCoverToCache(dbManga, artwork.cover)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = artwork.cover
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga.toEntity())
         }
     }
 
     /** Reset cover */
     fun resetCover() {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbMangaEntity = mangaRepository.getMangaById(mangaId) ?: return@launchIO
+            val dbManga = dbMangaEntity.toManga()
             coverCache.deleteCustomCover(dbManga)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = null
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga.toEntity())
         }
     }
 
@@ -2042,7 +1997,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
 
             runCatching {
-                    val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+                    val dbMangaEntity = mangaRepository.getMangaById(mangaId) ?: return@runCatching
+                    val dbManga = dbMangaEntity.toManga()
                     statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
                         val chaptersToMarkRead =
                             mangaDetailScreenState.value.chapters.allChapters
@@ -2195,7 +2151,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     fun getManga(): Manga {
-        return db.getManga(mangaId).executeAsBlocking()!!
+        return mangaRepository.getMangaById(mangaId)!!.toManga()
     }
 
     fun getChapterUrl(chapter: SimpleChapter): String {
@@ -2206,8 +2162,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             when (blockType) {
                 MangaConstants.BlockType.Group -> {
-                    val scanlatorGroupImpl = db.getScanlatorGroupByName(name).executeAsBlocking()
-                    if (scanlatorGroupImpl == null) {
+                    val scanlatorGroupEntity = scanlatorRepository.getScanlatorGroupByName(name)
+                    if (scanlatorGroupEntity == null) {
                         launchIO { mangaUpdateCoordinator.updateGroup(name) }
                     }
                     val blockedGroups = mangaDexPreferences.blockedGroups().get().toMutableSet()
@@ -2215,8 +2171,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     mangaDexPreferences.blockedGroups().set(blockedGroups)
                 }
                 MangaConstants.BlockType.Uploader -> {
-                    val uploaderImpl = db.getUploaderByName(name).executeAsBlocking()
-                    if (uploaderImpl == null) {
+                    val uploaderEntity = scanlatorRepository.getUploaderByName(name)
+                    if (uploaderEntity == null) {
                         launchIO { mangaUpdateCoordinator.updateUploader(name) }
                     }
                     val blockedUploaders =
@@ -2234,7 +2190,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         viewModelScope.launchIO {
                             when (blockType) {
                                 MangaConstants.BlockType.Group -> {
-                                    db.deleteScanlatorGroup(name).executeOnIO()
+                                    scanlatorRepository.deleteScanlatorGroup(name)
                                     val allBlockedGroups =
                                         mangaDexPreferences.blockedGroups().get().toMutableSet()
                                     allBlockedGroups.remove(name)
@@ -2242,7 +2198,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 }
 
                                 MangaConstants.BlockType.Uploader -> {
-                                    db.deleteUploader(name).executeOnIO()
+                                    scanlatorRepository.deleteUploader(name)
                                     val allBlockedUploaders =
                                         mangaDexPreferences.blockedUploaders().get().toMutableSet()
                                     allBlockedUploaders.remove(name)
@@ -2371,7 +2327,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     }
 
                 val mangaId = effectiveManga.id
-                var dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+                var dbAggregate = mergeRepository.getMangaAggregateSync(mangaId)
 
                 if (dbAggregate == null) {
                     mangaUseCases.updateMangaAggregate(
@@ -2381,7 +2337,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     )
                 }
 
-                dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+                dbAggregate = mergeRepository.getMangaAggregateSync(mangaId)
 
                 val volumes: Map<String, AggregateVolume>? =
                     if (dbAggregate != null) {
@@ -2448,7 +2404,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
         if (url != effectiveManga.dynamicCover) {
             val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga.toEntity())
         }
     }
 
@@ -2467,7 +2423,6 @@ private data class AllInfo(
     val chapterSourceFilter: MangaConstants.ScanlatorFilter = MangaConstants.ScanlatorFilter(),
     val chapterScanlatorFilter: MangaConstants.ScanlatorFilter = MangaConstants.ScanlatorFilter(),
     val chapterLanguageFilter: MangaConstants.LanguageFilter = MangaConstants.LanguageFilter(),
-    val chapterSortFilter: MangaConstants.SortFilter = MangaConstants.SortFilter(),
     val chapterFilterText: String = "",
     val allCategories: PersistentList<CategoryItem> = persistentListOf(),
     val mangaCategories: PersistentList<CategoryItem> = persistentListOf(),
@@ -2477,6 +2432,7 @@ private data class AllInfo(
     val tracks: PersistentList<TrackItem> = persistentListOf(),
     val loggedInTrackerService: PersistentList<TrackServiceItem> = persistentListOf(),
     val trackServiceCount: Int = 0,
+    val chapterSortFilter: MangaConstants.SortFilter = MangaConstants.SortFilter(),
 )
 
 private data class AllChapterInfo(
@@ -2488,4 +2444,16 @@ private data class AllChapterInfo(
     val allUploaders: PersistentSet<String> = persistentSetOf(),
     val allSources: PersistentSet<String> = persistentSetOf(),
     val allLanguages: PersistentSet<String> = persistentSetOf(),
+)
+
+private data class MangaFilterState(
+    val scanlators: Set<String>? = null,
+    val languages: Set<String>? = null,
+    val sortOption: SortOption? = null,
+    val readFilter: Int? = null,
+    val downloadedFilter: Int? = null,
+    val bookmarkedFilter: Int? = null,
+    val availableFilter: Int? = null,
+    val hideChapterTitles: Boolean? = null,
+    val forceGlobal: Boolean = false,
 )

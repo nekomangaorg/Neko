@@ -31,9 +31,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
-import eu.kanade.tachiyomi.util.system.asFlow
-import eu.kanade.tachiyomi.util.system.combine
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.collections.immutable.PersistentList
@@ -63,11 +60,22 @@ import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.entity.TrackEntity
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toLegacyModel
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
-import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
@@ -88,7 +96,10 @@ class LibraryViewModel() : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
-    val db: DatabaseHelper = Injekt.get()
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get()
+    private val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+    private val categoryRepository: CategoryRepositoryImpl = Injekt.get()
+    private val trackRepository: TrackRepositoryImpl = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
@@ -142,32 +153,31 @@ class LibraryViewModel() : ViewModel() {
         combine(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
-                db.getCategories().asFlow(),
+                categoryRepository.getAllCategories(),
             ) { sortingMode, sortAscending, dbCategories ->
                 val librarySort = LibrarySort.valueOf(sortingMode)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
                 val updatedDefaultCategory =
                     defaultCategory.copy(sortOrder = librarySort, isAscending = sortAscending)
                 (listOf(updatedDefaultCategory) +
-                        dbCategories.map { dbCategory -> dbCategory.toCategoryItem() })
+                        dbCategories.map { dbCategory -> dbCategory.toCategory().toCategoryItem() })
                     .sortedBy { it.order }
             }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val trackMapFlow: Flow<Map<Long, List<String>>> =
-        db.getAllTracks()
-            .asFlow()
-            .mapNotNull { tracks ->
+        trackRepository.getAllTracks()
+            .map { tracks ->
                 val serviceMap = loggedServices.associateBy { it.id }
 
                 tracks
                     .mapNotNull { track ->
-                        val trackService = serviceMap[track.sync_id]
+                        val trackService = serviceMap[track.syncId]
                         if (trackService == null) {
                             return@mapNotNull null
                         }
-                        track.manga_id to trackService.getGlobalStatus(track.status)
+                        track.mangaId to trackService.getGlobalStatus(track.status)
                     }
                     .groupBy({ it.first }, { it.second })
             }
@@ -175,8 +185,7 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     private val rawLibraryMangaListFlow =
-        db.getLibraryMangaList()
-            .asFlow()
+        mangaRepository.getLibraryMangaList()
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -190,7 +199,7 @@ class LibraryViewModel() : ViewModel() {
     val downloadCountMapFlow: Flow<Map<Long, Int>> =
         combine(
                 rawLibraryMangaListFlow
-                    .map { list -> list.asSequence().mapNotNull { it.id }.toList() }
+                    .map { list -> list.asSequence().mapNotNull { it.manga.id }.toList() }
                     .distinctUntilChanged(),
                 _downloadRefreshTrigger,
             ) { mangaIds, _ ->
@@ -206,7 +215,7 @@ class LibraryViewModel() : ViewModel() {
      */
     private val initialLibraryItemsFlow =
         rawLibraryMangaListFlow
-            .map { dbMangaList -> dbMangaList.map { it.toLibraryMangaItem() } }
+            .map { dbMangaList -> dbMangaList.map { it.toLegacyModel().toLibraryMangaItem() } }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -297,12 +306,12 @@ class LibraryViewModel() : ViewModel() {
      * Optimization: To prevent multi-second blocking operations on startup for large libraries
      * (e.g. 1000+ items), we first check if the current global sorting mode or any individual
      * category's sorting mode actually requires the "Last Read" data. If not needed, we emit an
-     * empty map via `flatMapLatest`, completely bypassing the expensive `db.getLastReadManga()`
+     * empty map via `flatMapLatest`, completely bypassing the expensive `mangaRepository.getLastReadManga()`
      * query (which scans `History` and `Chapter` tables).
      */
     private fun getSortFlow(
         sortType: LibrarySort,
-        queryFlow: () -> Flow<List<Manga>>,
+        queryFlow: () -> Flow<List<org.nekomanga.data.database.entity.MangaEntity>>,
     ): Flow<Map<Long, Int>> {
         return combine(libraryViewFlow, categoryListFlow) { viewPrefs, categories ->
                 if (viewPrefs.groupBy == LibraryGroup.ByCategory) {
@@ -327,17 +336,17 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     }
 
-    val lastReadMangaFlow = getSortFlow(LibrarySort.LastRead) { db.getLastReadManga().asFlow() }
+    val lastReadMangaFlow = getSortFlow(LibrarySort.LastRead) { mangaRepository.getLastReadManga() }
 
     /**
      * Flow that tracks the last fetched manga to be used for sorting.
      *
      * Optimization: Similar to `lastReadMangaFlow`, this uses `flatMapLatest` to skip the expensive
-     * `db.getLastFetchedManga()` query if the "Date Fetched" sorting mode is not actively used
+     * `mangaRepository.getLastFetchedManga()` query if the "Date Fetched" sorting mode is not actively used
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        getSortFlow(LibrarySort.DateFetched) { db.getLastFetchedManga().asFlow() }
+        getSortFlow(LibrarySort.DateFetched) { mangaRepository.getLastFetchedManga() }
 
     val filteredMangaListFlow =
         combine(
@@ -497,9 +506,11 @@ class LibraryViewModel() : ViewModel() {
      */
     private val itemsWithRefreshingFlow =
         combine(sortedMangaFlow, _mangaRefreshingState.asStateFlow(), collapsedStateFlow) {
-                (sortedItems, libraryViewPreferences),
+                sortedMangaPair,
                 mangaRefreshingState,
-                (collapsedCategories, collapsedDynamicCategories) ->
+                collapsedState ->
+                val (sortedItems, libraryViewPreferences) = sortedMangaPair
+                val (collapsedCategories, collapsedDynamicCategories) = collapsedState
                 withContext(Dispatchers.Default) {
                     val collapsedCategorySet =
                         collapsedCategories.mapNotNull { it.toIntOrNull() }.toSet()
@@ -566,11 +577,13 @@ class LibraryViewModel() : ViewModel() {
                 uiSettingsFlow,
             ) {
                 state,
-                (itemsWithRefreshing, allCollapsed),
+                itemsWithRefreshingPair,
                 trackMap,
                 categories,
                 viewPrefs,
-                (gridSize, layout, filters) ->
+                uiSettings ->
+                val (itemsWithRefreshing, allCollapsed) = itemsWithRefreshingPair
+                val (gridSize, layout, filters) = uiSettings
                 state.copy(
                     items = itemsWithRefreshing,
                     allCollapsed = allCollapsed,
@@ -613,7 +626,7 @@ class LibraryViewModel() : ViewModel() {
             if (loggedServices.isNotEmpty()) {
                 groupItems.add(LibraryGroup.ByTrackStatus)
             }
-            if (db.getCategories().executeAsBlocking().isNotEmpty()) {
+            if (categoryRepository.getAllCategoriesList().isNotEmpty()) {
                 groupItems.add(LibraryGroup.Ungrouped)
             }
             _internalLibraryScreenState.update {
@@ -1059,7 +1072,7 @@ class LibraryViewModel() : ViewModel() {
             clearSelectedManga()
 
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
-            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+            val dbMangas = mangaRepository.getMangas(mangaIds).map { it.toManga() }
 
             for (dbManga in dbMangas) {
                 try {
@@ -1071,7 +1084,7 @@ class LibraryViewModel() : ViewModel() {
                 dbManga.favorite = false
             }
 
-            db.insertMangaList(dbMangas).executeOnIO()
+            mangaRepository.insertMangas(dbMangas.map { it.toEntity() })
         }
     }
 
@@ -1086,9 +1099,8 @@ class LibraryViewModel() : ViewModel() {
                     libraryScreenState.value.selectedItems.removeAt(index)
                 } else {
                     val categoryItems =
-                        db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
-                            .executeOnIO()
-                            .map { it.toCategoryItem() }
+                        categoryRepository.getCategoriesForMangaSync(libraryMangaItem.displayManga.mangaId)
+                            .map { it.toCategory().toCategoryItem() }
                     val copy = libraryMangaItem.copy(allCategories = categoryItems)
                     libraryScreenState.value.selectedItems.add(copy)
                 }
@@ -1105,14 +1117,15 @@ class LibraryViewModel() : ViewModel() {
             _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
             val mangaIds = selectedItems.map { it.displayManga.mangaId }
-            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
-            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+            val mangasMap = mangaRepository.getMangas(mangaIds).associateBy { it.id }
+            val chaptersMap = chapterRepository.getChaptersForMangas(mangaIds).groupBy { it.mangaId }
 
             selectedItems.mapAsync { selectedItem ->
                 val mangaId = selectedItem.displayManga.mangaId
-                val dbManga = mangasMap[mangaId] ?: return@mapAsync
+                val mangaEntity = mangasMap[mangaId] ?: return@mapAsync
+                val dbManga = mangaEntity.toManga()
                 val chapterItems =
-                    chaptersMap[mangaId]?.mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                    chaptersMap[mangaId]?.mapNotNull { it.toSimpleChapter().toChapterItem() }
                         ?: emptyList()
 
                 chapterUseCases.markChapters(markAction, chapterItems)
@@ -1135,14 +1148,15 @@ class LibraryViewModel() : ViewModel() {
             }
 
             val mangaIds = displayMangaList.map { it.mangaId }
-            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
-            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+            val mangasMap = mangaRepository.getMangas(mangaIds).associateBy { it.id }
+            val chaptersMap = chapterRepository.getChaptersForMangas(mangaIds).groupBy { it.mangaId }
 
             displayMangaList.mapAsync { displayManga ->
-                val dbManga = mangasMap[displayManga.mangaId] ?: return@mapAsync
+                val mangaEntity = mangasMap[displayManga.mangaId] ?: return@mapAsync
+                val dbManga = mangaEntity.toManga()
                 val rawChapters =
                     chaptersMap[displayManga.mangaId]?.mapNotNull {
-                        it.toSimpleChapter()?.toChapterItem()
+                        it.toSimpleChapter().toChapterItem()
                     } ?: emptyList()
                 val chapterItems =
                     chapterItemFilter
@@ -1201,15 +1215,16 @@ class LibraryViewModel() : ViewModel() {
 
     fun openNextUnread(mangaId: Long, openChapter: (Manga, Chapter) -> Unit) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeOnIO()
-            manga ?: return@launchIO
-            val chapters = db.getChapters(manga).executeAsBlocking()
+            val mangaEntity = mangaRepository.getMangaById(mangaId)
+            val manga = mangaEntity?.toManga() ?: return@launchIO
+            val chapters = chapterRepository.getChaptersForMangaSync(mangaId).map { it.toChapter() }
 
             // to avoid allocating an intermediate list of available chapters,
             // reducing GC overhead when the user quickly jumps to reading.
             val availableChapters = chapters.mapNotNull { chapter ->
-                if (chapter.isAvailable(downloadManager, manga)) {
-                    chapter.toSimpleChapter()?.toChapterItem()
+                val simpleChapter = chapter.toSimpleChapter()
+                if (chapter.isAvailable(downloadManager, manga) && simpleChapter != null) {
+                    simpleChapter.toChapterItem()
                 } else {
                     null
                 }

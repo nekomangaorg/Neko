@@ -27,6 +27,10 @@ class CategoryRepositoryImpl(
         return categoryDao.getCategoriesForManga(mangaId)
     }
 
+    suspend fun getCategoriesForMangaSync(mangaId: Long): List<CategoryEntity> {
+        return categoryDao.getCategoriesForMangaSync(mangaId)
+    }
+
     suspend fun insertCategory(category: CategoryEntity): Long {
         return categoryDao.insertCategory(category)
     }
@@ -47,8 +51,16 @@ class CategoryRepositoryImpl(
         return mangaCategoryDao.getMangaCategories(mangaIds)
     }
 
+    fun getMangaCategoriesForManga(mangaId: Long): Flow<List<MangaCategoryEntity>> {
+        return mangaCategoryDao.getMangaCategoriesForManga(mangaId)
+    }
+
     suspend fun getMangaCategoriesList(mangaIds: List<Long>): List<MangaCategoryEntity> {
         return mangaCategoryDao.getMangaCategoriesList(mangaIds)
+    }
+
+    suspend fun getMangaCategoriesForCategorySync(categoryId: Int): List<MangaCategoryEntity> {
+        return mangaCategoryDao.getMangaCategoriesForCategorySync(categoryId)
     }
 
     suspend fun insertMangaCategory(mangaCategory: MangaCategoryEntity) {

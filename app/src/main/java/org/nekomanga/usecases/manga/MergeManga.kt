@@ -7,7 +7,12 @@ import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 
@@ -36,15 +41,19 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
 }
 
 class RemoveMergedManga(
-    private val db: DatabaseHelper,
+    private val mangaRepository: MangaRepositoryImpl,
+    private val chapterRepository: ChapterRepositoryImpl,
+    private val mergeRepository: MergeRepositoryImpl,
     private val downloadManager: DownloadManager,
     private val libraryPreferences: LibraryPreferences,
 ) {
     suspend fun execute(mangaId: Long, mergeType: MergeType) {
-        val dbManga = db.getManga(mangaId).executeOnIO() ?: return
-        db.deleteMergeManga(mangaId).executeOnIO()
+        val dbManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return
+        mergeRepository.deleteMergeMangaByType(mangaId, mergeType.id)
         val (mergedChapters, _) =
-            db.getChapters(dbManga).executeOnIO().partition { it.isMergedChapterOfType(mergeType) }
+            chapterRepository.getChaptersForMangaSync(mangaId)
+                .map { it.toChapter() }
+                .partition { it.isMergedChapterOfType(mergeType) }
         if (!libraryPreferences.enableLocalChapters().get()) {
             try {
                 downloadManager.deleteChapters(dbManga, mergedChapters)
@@ -52,13 +61,13 @@ class RemoveMergedManga(
                 TimberKt.e(e) { "Failed to delete chapters for merged manga" }
             }
         }
-        db.deleteChapters(mergedChapters).executeOnIO()
+        chapterRepository.deleteChapters(mergedChapters.map { it.toEntity() })
     }
 }
 
-class AddMergedManga(private val db: DatabaseHelper) {
+class AddMergedManga(private val mergeRepository: MergeRepositoryImpl) {
     suspend fun execute(mangaId: Long, mergeManga: SourceMergeManga) {
         val newMergedManga = mergeManga.toMergeMangaImpl(mangaId)
-        db.insertMergeManga(newMergedManga).executeOnIO()
+        mergeRepository.insertMergeManga(newMergedManga.toEntity())
     }
 }

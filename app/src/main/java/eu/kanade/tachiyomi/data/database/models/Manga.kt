@@ -171,17 +171,6 @@ interface Manga : SManga {
         }
     }
 
-    fun isOneShotOrCompleted(db: DatabaseHelper): Boolean {
-        val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
-        val chapters by lazy { db.getChapters(this).executeAsBlocking() }
-        val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
-        return status == SManga.COMPLETED ||
-            tags?.contains("oneshot") == true ||
-            (chapters.size == 1 &&
-                (Regex("one.?shot").containsMatchIn(firstChapterName) ||
-                    firstChapterName.contains("oneshot")))
-    }
-
     fun key(): String {
         return id!!.toMangaCacheKey()
     }

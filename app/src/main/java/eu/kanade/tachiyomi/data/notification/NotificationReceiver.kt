@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -34,6 +33,10 @@ import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 import org.nekomanga.R
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.site.MangaDexPreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -196,9 +199,10 @@ class NotificationReceiver : BroadcastReceiver() {
      */
     internal suspend fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
         dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
-        val db = DatabaseHelper(context)
-        val manga = db.getManga(mangaId).executeOnIO()
-        val chapter = db.getChapter(chapterId).executeOnIO()
+        val mangaRepository: MangaRepositoryImpl = Injekt.get()
+        val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+        val manga = mangaRepository.getMangaById(mangaId)?.toManga()
+        val chapter = chapterRepository.getChapterById(chapterId)?.toChapter()
         if (manga != null && chapter != null) {
             val intent =
                 ReaderActivity.newIntent(context, manga, chapter).apply {
@@ -269,17 +273,17 @@ class NotificationReceiver : BroadcastReceiver() {
 
     /** Method called when user wants to mark as read */
     private suspend fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
-        val db: DatabaseHelper = Injekt.get()
+        val mangaRepository: MangaRepositoryImpl = Injekt.get()
+        val chapterRepository: ChapterRepositoryImpl = Injekt.get()
         val preferences: PreferencesHelper = Injekt.get()
         val mangaDexPreference: MangaDexPreferences = Injekt.get()
 
-        val manga = db.getManga(mangaId).executeOnIO() ?: return
+        val manga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return
 
         val dbChapters = chapterUrls.mapNotNull { chapterUrl ->
-            val chapter = db.getChapter(chapterUrl, mangaId).executeOnIO() ?: return@mapNotNull null
-            chapter.read = true
-            db.updateChapterProgress(chapter).executeOnIO()
-            chapter
+            val chapterEntity = chapterRepository.getChapterByUrlAndMangaId(chapterUrl, mangaId) ?: return@mapNotNull null
+            chapterRepository.updateProgress(chapterEntity.id!!, true, chapterEntity.bookmark, chapterEntity.lastPageRead, chapterEntity.pagesLeft)
+            chapterEntity.toChapter().apply { read = true }
         }
         if (preferences.removeAfterMarkedAsRead().get()) {
             val chaptersToDelete = dbChapters.filter { it.canDeleteChapter() }
@@ -327,9 +331,10 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param mangaId id of manga
      */
     private suspend fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
-        val db: DatabaseHelper = Injekt.get()
-        val manga = db.getManga(mangaId).executeOnIO()
-        val chapters = chapterUrls.mapNotNull { db.getChapter(it, mangaId).executeOnIO() }
+        val mangaRepository: MangaRepositoryImpl = Injekt.get()
+        val chapterRepository: ChapterRepositoryImpl = Injekt.get()
+        val manga = mangaRepository.getMangaById(mangaId)?.toManga()
+        val chapters = chapterUrls.mapNotNull { chapterRepository.getChapterByUrlAndMangaId(it, mangaId)?.toChapter() }
         if (manga != null && chapters.isNotEmpty()) {
             downloadManager.downloadChapters(manga, chapters)
         }

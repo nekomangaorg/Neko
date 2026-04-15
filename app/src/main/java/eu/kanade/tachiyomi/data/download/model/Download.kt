@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,8 +13,12 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.chapter.SimpleChapter
-import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.SimpleManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -84,15 +87,17 @@ data class Download(
 
         suspend fun fromChapterId(
             chapterId: Long,
-            db: DatabaseHelper = Injekt.get(),
+            mangaRepository: MangaRepositoryImpl = Injekt.get(),
+            chapterRepository: ChapterRepositoryImpl = Injekt.get(),
             sourceManager: SourceManager = Injekt.get(),
         ): Download? {
-            val chapter = db.getChapter(chapterId).executeOnIO()
-            chapter?.manga_id ?: return null
-            val manga = db.getManga(chapter.manga_id!!).executeOnIO() ?: return null
+            val chapterEntity = chapterRepository.getChapterById(chapterId) ?: return null
+            val mangaEntity = mangaRepository.getMangaById(chapterEntity.mangaId) ?: return null
+            val chapter = chapterEntity.toChapter()
+            val manga = mangaEntity.toManga()
             val source = chapter.getHttpSource(sourceManager)
 
-            return Download(source, manga.toSimpleManga(), chapter.toSimpleChapter()!!)
+            return Download(source, manga.toSimpleManga(), chapterEntity.toSimpleChapter())
         }
     }
 }

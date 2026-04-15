@@ -11,8 +11,14 @@ class MergeRepositoryImpl(
     private val mangaAggregateDao: MangaAggregateDao,
 ) {
     // Merge Manga methods
+    suspend fun getAllMergeManga(): List<MergeMangaEntity> =
+        mergeMangaDao.getAllMergeManga()
+
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>> =
         mergeMangaDao.getMergeMangaList(mangaId)
+
+    suspend fun getMergeMangaListSync(mangaId: Long): List<MergeMangaEntity> =
+        mergeMangaDao.getMergeMangaListSync(mangaId)
 
     suspend fun getMergeMangaList(mangaIds: List<Long>): List<MergeMangaEntity> =
         mergeMangaDao.getMergeMangaList(mangaIds)
@@ -35,6 +41,9 @@ class MergeRepositoryImpl(
     // Manga Aggregate methods
     fun getMangaAggregate(mangaId: Long): Flow<MangaAggregateEntity?> =
         mangaAggregateDao.getMangaAggregate(mangaId)
+
+    suspend fun getMangaAggregateSync(mangaId: Long): MangaAggregateEntity? =
+        mangaAggregateDao.getMangaAggregateSync(mangaId)
 
     suspend fun insertMangaAggregate(aggregate: MangaAggregateEntity) =
         mangaAggregateDao.insertMangaAggregate(aggregate)

@@ -10,8 +10,24 @@ class TrackRepositoryImpl(private val trackDao: TrackDao) {
         return trackDao.getTracksForManga(mangaId)
     }
 
+    suspend fun getTracksForMangaSync(mangaId: Long): List<TrackEntity> {
+        return trackDao.getTracksForMangaSync(mangaId)
+    }
+
     suspend fun getTracksForMangas(mangaIds: List<Long>): List<TrackEntity> {
         return trackDao.getTracksForMangas(mangaIds)
+    }
+
+    fun getAllTracks(): Flow<List<TrackEntity>> {
+        return trackDao.getAllTracks()
+    }
+
+    suspend fun getAllTracksSync(): List<TrackEntity> {
+        return trackDao.getAllTracksSync()
+    }
+
+    suspend fun getTrackById(id: Long): TrackEntity? {
+        return trackDao.getTrackById(id)
     }
 
     suspend fun insertTrack(track: TrackEntity): Long {
@@ -24,5 +40,13 @@ class TrackRepositoryImpl(private val trackDao: TrackDao) {
 
     suspend fun deleteTrack(track: TrackEntity) {
         trackDao.deleteTrack(track)
+    }
+
+    suspend fun deleteTrackByMangaIdAndSyncId(mangaId: Long, syncId: Int) {
+        trackDao.deleteTrackByMangaIdAndSyncId(mangaId, syncId)
+    }
+
+    suspend fun deleteAllTracks() {
+        trackDao.deleteAllTracks()
     }
 }

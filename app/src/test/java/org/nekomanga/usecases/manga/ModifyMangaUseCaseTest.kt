@@ -1,16 +1,12 @@
 package org.nekomanga.usecases.manga
 
 import android.content.Context
-import com.pushtorefresh.storio.sqlite.operations.get.PreparedGetObject
-import com.pushtorefresh.storio.sqlite.operations.put.PreparedPutObject
-import com.pushtorefresh.storio.sqlite.operations.put.PutResult
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -28,15 +24,19 @@ import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.data.database.entity.MangaEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.storage.StorageManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.addSingleton
-import uy.kohesive.injekt.api.get
 
 class ModifyMangaUseCaseTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var db: DatabaseHelper
+    private lateinit var mangaRepository: MangaRepositoryImpl
+    private lateinit var categoryRepository: CategoryRepositoryImpl
     private lateinit var preferences: PreferencesHelper
     private lateinit var downloadManager: DownloadManager
     private lateinit var storageManager: StorageManager
@@ -45,14 +45,22 @@ class ModifyMangaUseCaseTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        db = mockk()
+        mangaRepository = mockk()
+        categoryRepository = mockk()
         preferences = mockk()
         downloadManager = mockk()
         storageManager = mockk()
 
-        modifyMangaUseCase = ModifyMangaUseCase(db, preferences, downloadManager, storageManager)
+        modifyMangaUseCase =
+            ModifyMangaUseCase(
+                mangaRepository,
+                categoryRepository,
+                preferences,
+                downloadManager,
+                storageManager,
+            )
 
-        mockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
+        mockkStatic("org.nekomanga.data.database.model.MangaMappersKt")
         mockkConstructor(DownloadProvider::class)
 
         // Setup Injekt for DownloadProvider implicit dependencies
@@ -66,7 +74,7 @@ class ModifyMangaUseCaseTest {
     @After
     fun tearDown() {
         try {
-            unmockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
+            unmockkStatic("org.nekomanga.data.database.model.MangaMappersKt")
             unmockkConstructor(DownloadProvider::class)
         } finally {
             Dispatchers.resetMain()
@@ -90,25 +98,26 @@ class ModifyMangaUseCaseTest {
             val oldTitle = "Old Title"
             val newTitle = "New Title"
 
+            val mockMangaEntity = mockk<MangaEntity>(relaxed = true)
+            every { mockMangaEntity.id } returns mangaId
+            every { mockMangaEntity.title } returns oldTitle
+            every { mockMangaEntity.userTitle } returns null
+
             val mockManga = mockk<Manga>(relaxed = true)
+            every { mockMangaEntity.toManga() } returns mockManga
+            every { mockManga.id } returns mangaId
             every { mockManga.title } returns oldTitle
             every { mockManga.user_title } returns null
 
-            val mockGetManga = mockk<PreparedGetObject<Manga>>()
-            every { db.getManga(mangaId) } returns mockGetManga
-            coEvery { mockGetManga.executeOnIO() } returns mockManga
-
-            val mockInsertManga = mockk<PreparedPutObject<Manga>>()
-            every { db.insertManga(mockManga) } returns mockInsertManga
-            val mockPutResult = mockk<PutResult>(relaxed = true)
-            coEvery { mockInsertManga.executeOnIO() } returns mockPutResult
+            coEvery { mangaRepository.getMangaById(mangaId) } returns mockMangaEntity
+            coEvery { mangaRepository.insertManga(any()) } returns mangaId
 
             val mockContext = mockk<Context>()
             every { preferences.context } returns mockContext
 
             every { anyConstructed<DownloadProvider>().renameMangaFolder(any(), any()) } returns
                 Unit
-            every { downloadManager.updateDownloadCacheForManga(mockManga) } returns Unit
+            every { downloadManager.updateDownloadCacheForManga(any()) } returns Unit
             every { storageManager.renamePagesAndCoverDirectory(any(), any()) } returns Unit
 
             // Act
@@ -117,11 +126,11 @@ class ModifyMangaUseCaseTest {
             // Assert
             assertNotNull(result)
             coVerify(exactly = 1) { mockManga.user_title = newTitle }
-            coVerify(exactly = 1) { mockInsertManga.executeOnIO() }
+            coVerify(exactly = 1) { mangaRepository.insertManga(any()) }
             coVerify(exactly = 1) {
                 anyConstructed<DownloadProvider>().renameMangaFolder(oldTitle, newTitle)
             }
-            coVerify(exactly = 1) { downloadManager.updateDownloadCacheForManga(mockManga) }
+            coVerify(exactly = 1) { downloadManager.updateDownloadCacheForManga(any()) }
             coVerify(exactly = 1) {
                 storageManager.renamePagesAndCoverDirectory(oldTitle, newTitle)
             }

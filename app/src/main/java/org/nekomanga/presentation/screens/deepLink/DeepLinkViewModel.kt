@@ -21,6 +21,7 @@ import java.math.BigInteger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
@@ -37,7 +38,7 @@ class DeepLinkViewModel() : ViewModel() {
 
     private val mangaMappings: MangaMappings = Injekt.get()
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex
-    private val db: DatabaseHelper = Injekt.get()
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get()
 
     private val _deepLinkState = MutableStateFlow<DeepLinkState>(DeepLinkState.Loading)
     val deepLinkState = _deepLinkState.asStateFlow()
@@ -75,7 +76,7 @@ class DeepLinkViewModel() : ViewModel() {
 
     suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
         return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
-            val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
+            val displayManga = mangaListPage.sourceManga.first().toDisplayManga(mangaRepository, mangaDex.id)
             Ok(displayManga)
         }
     }

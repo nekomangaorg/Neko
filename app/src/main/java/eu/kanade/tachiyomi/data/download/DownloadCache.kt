@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -181,9 +182,9 @@ class DownloadCache(
                 it.name == provider.getSourceDirName()
             } ?: return
 
-        val db: DatabaseHelper by injectLazy()
+        val mangaRepository: MangaRepositoryImpl by injectLazy()
         // Optimization: Fetch once
-        val allManga = db.getMangaList().executeAsBlocking()
+        val allManga = mangaRepository.getMangaListSync()
 
         // 3. Create lookup map for O(1) access
         val mangaLookup = allManga.associateBy {

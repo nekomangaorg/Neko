@@ -29,6 +29,15 @@ interface CategoryDao {
     )
     fun getCategoriesForManga(mangaId: Long): Flow<List<CategoryEntity>>
 
+    @Query(
+        """
+        SELECT categories.* FROM categories
+        JOIN mangas_categories ON categories._id = mangas_categories.category_id
+        WHERE mangas_categories.manga_id = :mangaId
+    """
+    )
+    suspend fun getCategoriesForMangaSync(mangaId: Long): List<CategoryEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: CategoryEntity): Long
 

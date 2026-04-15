@@ -4,23 +4,23 @@ import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.entity.MangaAggregateEntity
+import org.nekomanga.data.database.repository.MergeRepositoryImpl
 
 class UpdateMangaAggregate(
-    private val db: DatabaseHelper,
+    private val mergeRepository: MergeRepositoryImpl,
     private val sourceManager: SourceManager,
 ) {
     suspend operator fun invoke(mangaId: Long, mangaUrl: String, isFavorite: Boolean) {
         if (isFavorite) {
             sourceManager.mangaDex.getAggregate(MdUtil.getMangaUUID(mangaUrl)).onSuccess {
                 aggregateDto ->
-                db.insertMangaAggregate(
-                        MangaAggregate(mangaId = mangaId, volumes = aggregateDto.volumes.toString())
+                mergeRepository.insertMangaAggregate(
+                        MangaAggregateEntity(mangaId = mangaId, volumes = aggregateDto.volumes.toString())
                     )
-                    .executeOnIO()
             }
         } else {
-            db.deleteMangaAggregate(mangaId).executeOnIO()
+            mergeRepository.deleteMangaAggregate(mangaId)
         }
     }
 }

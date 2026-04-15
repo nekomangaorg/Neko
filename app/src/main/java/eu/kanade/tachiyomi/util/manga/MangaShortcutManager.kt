@@ -19,13 +19,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MangaShortcutManager(
     val preferences: PreferencesHelper = Injekt.get(),
-    val db: DatabaseHelper = Injekt.get(),
+    val mangaRepository: MangaRepositoryImpl = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -36,11 +37,11 @@ class MangaShortcutManager(
     suspend fun updateShortcuts() {
         if (!preferences.showSeriesInShortcuts().get()) {
             val shortcutManager = context.getSystemService(ShortcutManager::class.java)
-            shortcutManager.removeAllDynamicShortcuts()
+            shortcutManager?.removeAllDynamicShortcuts()
             return
         }
         withContext(ioDispatcher) {
-            val shortcutManager = context.getSystemService(ShortcutManager::class.java)
+            val shortcutManager = context.getSystemService(ShortcutManager::class.java) ?: return@withContext
 
             val recentManga =
                 if (preferences.showSeriesInShortcuts().get()) {
@@ -50,16 +51,14 @@ class MangaShortcutManager(
                 }
 
             val recents =
-                (recentManga.take(shortcutManager.maxShortcutCountPerActivity)).take(
-                    shortcutManager.maxShortcutCountPerActivity
-                )
+                recentManga.take(shortcutManager.maxShortcutCountPerActivity)
 
             val shortcuts = recents.map { item ->
                 val request =
                     ImageRequest.Builder(context).data(item.toDisplayManga().currentArtwork).build()
                 val bitmap = context.imageLoader.execute(request).image?.toBitmap()
 
-                ShortcutInfo.Builder(context, "Manga-${item.id.toString() ?: item.title}")
+                ShortcutInfo.Builder(context, "Manga-${item.id.toString()}")
                     .setShortLabel(
                         item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga)
                     )

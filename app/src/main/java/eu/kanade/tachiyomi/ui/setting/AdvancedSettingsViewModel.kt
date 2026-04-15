@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -12,6 +13,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.UiText
@@ -29,7 +37,9 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     val downloadManager: DownloadManager by injectLazy()
 
-    val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
+    private val categoryRepository: CategoryRepositoryImpl by injectLazy()
 
     private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -47,7 +57,7 @@ class AdvancedSettingsViewModel : ViewModel() {
                 _toastEvent.emit(UiText.StringResource(R.string.starting_cleanup))
                 var foldersCleared = 0
                 val mangaMap =
-                    db.getMangaList().executeAsBlocking().associateBy {
+                    mangaRepository.getMangaListSync().map { it.toManga() }.associateBy {
                         downloadManager.getMangaDirName(it)
                     }
                 val mangaFolders = downloadManager.getMangaFolders()
@@ -57,7 +67,7 @@ class AdvancedSettingsViewModel : ViewModel() {
                         .asSequence()
                         .mapNotNull { mangaMap[it.name]?.id }
                         .chunked(900)
-                        .flatMap { db.getChapters(it).executeAsBlocking() }
+                        .flatMap { chapterRepository.getChaptersForMangas(it).map { entity -> entity.toChapter() } }
                         .groupBy { it.manga_id }
 
                 for (mangaFolder in mangaFolders) {
@@ -99,11 +109,11 @@ class AdvancedSettingsViewModel : ViewModel() {
         viewModelScope.launchUI {
             mangaDetailsPreferences.coverVibrantColors().delete()
             if (keepRead) {
-                db.deleteAllMangaNotInLibraryAndNotRead().executeAsBlocking()
+                mangaRepository.deleteAllNotInLibraryAndNotRead()
             } else {
-                db.deleteAllMangaNotInLibrary().executeAsBlocking()
+                mangaRepository.deleteAllNotInLibrary()
             }
-            db.deleteHistoryNoLastRead().executeAsBlocking()
+            chapterRepository.deleteHistoryNoLastRead()
 
             _toastEvent.emit(UiText.StringResource(R.string.clear_database_completed))
         }
@@ -122,7 +132,7 @@ class AdvancedSettingsViewModel : ViewModel() {
     fun dedupeCategories() {
         viewModelScope.launchNonCancellable {
             launchIO {
-                val categories = db.getCategories().executeAsBlocking()
+                val categories = categoryRepository.getAllCategoriesList().map { it.toCategory() }
 
                 val categoriesByName = categories.groupBy { it.name }
 
@@ -131,16 +141,16 @@ class AdvancedSettingsViewModel : ViewModel() {
                     if (categories.size > 1) {
                         val oldest = categories.minBy { it.id!! }
                         val others = categories.filter { it.id != oldest.id }
-                        val mangaCategoryToMove = others.flatMap {
-                            db.getMangaCategoryForCategory(it).executeAsBlocking()
+                        val mangaCategoryToMove = others.flatMap { category ->
+                            categoryRepository.getMangaCategoriesForCategorySync(category.id!!)
                         }
                         if (mangaCategoryToMove.isNotEmpty()) {
                             mangaCategoryToMove.forEach {
-                                it.category_id = oldest.id!!
-                                db.insertMangaCategory(it)
+                                val updated = it.copy(categoryId = oldest.id!!)
+                                categoryRepository.insertMangaCategory(updated)
                             }
                         }
-                        db.deleteCategories(others).executeAsBlocking()
+                        categoryRepository.deleteCategories(others.map { it.toEntity() })
 
                         duplicates++
                     }

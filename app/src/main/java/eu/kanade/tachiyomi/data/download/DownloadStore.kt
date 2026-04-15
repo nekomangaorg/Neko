@@ -7,10 +7,13 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.model.toSimpleChapter
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -24,7 +27,8 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)
 
     private val json: Json by injectLazy()
-    private val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepositoryImpl by injectLazy()
+    private val chapterRepository: ChapterRepositoryImpl by injectLazy()
 
     /** Counter used to keep the queue order. */
     private var counter = 0
@@ -83,9 +87,10 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
                 val manga =
-                    cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeOnIO() } ?: continue
-                val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
-                val simpleChapter = chapter.toSimpleChapter() ?: continue
+                    cachedManga.getOrPut(mangaId) { mangaRepository.getMangaById(mangaId)?.toManga() } ?: continue
+                val chapterEntity = chapterRepository.getChapterById(chapterId) ?: continue
+                val chapter = chapterEntity.toChapter()
+                val simpleChapter = chapterEntity.toSimpleChapter()
                 val source = chapter.getHttpSource(sourceManager)
                 downloads.add(Download(source, manga.toSimpleManga(), simpleChapter))
             }

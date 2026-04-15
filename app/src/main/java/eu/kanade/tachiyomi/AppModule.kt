@@ -35,6 +35,8 @@ import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
+import eu.kanade.tachiyomi.ui.similar.SimilarRepository
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler as OnlineSearchHandler
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
@@ -104,7 +106,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { get<AppDatabase>().mangaAggregateDao() }
         addSingletonFactory { get<AppDatabase>().mangaCategoryDao() }
 
-        addSingletonFactory { MangaRepositoryImpl(get(), get(), get(), get(), get()) }
+        addSingletonFactory { MangaRepositoryImpl(get(), get(), get(), get(), get(), get()) }
         addSingletonFactory { ChapterRepositoryImpl(get(), get()) }
         addSingletonFactory { CategoryRepositoryImpl(get(), get()) }
         addSingletonFactory { TrackRepositoryImpl(get()) }

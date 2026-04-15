@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -54,6 +55,8 @@ fun ChapterEntity.canDeleteChapter() =
 
 fun ChapterEntity.isLocalSource() =
     this.scanlator?.equals(Constants.LOCAL_SOURCE) == true && this.isUnavailable
+
+fun ChapterEntity.isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
 fun ChapterEntity.scanlatorList(): List<String> {
     this.scanlator ?: return emptyList()

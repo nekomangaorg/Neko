@@ -10,8 +10,14 @@ import org.nekomanga.data.database.entity.MergeMangaEntity
 
 @Dao
 interface MergeMangaDao {
+    @Query("SELECT * FROM merge_manga")
+    suspend fun getAllMergeManga(): List<MergeMangaEntity>
+
     @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
     fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>>
+
+    @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
+    suspend fun getMergeMangaListSync(mangaId: Long): List<MergeMangaEntity>
 
     @Query("SELECT * FROM merge_manga WHERE manga_id IN (:mangaIds)")
     suspend fun getMergeMangaList(mangaIds: List<Long>): List<MergeMangaEntity>

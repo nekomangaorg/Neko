@@ -37,8 +37,6 @@ class DataStorageSettingsViewModel : ViewModel() {
 
     val network: NetworkHelper by injectLazy()
 
-    val db: DatabaseHelper by injectLazy()
-
     private val _toastEvent = MutableSharedFlow<UiText.StringResource>()
     val toastEvent = _toastEvent.asSharedFlow()
 

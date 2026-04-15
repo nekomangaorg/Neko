@@ -9,8 +9,10 @@ import org.nekomanga.data.database.entity.BrowseFilterEntity
 
 @Dao
 interface BrowseFilterDao {
-
     @Query("SELECT * FROM browse_filter") fun getBrowseFilters(): Flow<List<BrowseFilterEntity>>
+
+    @Query("SELECT * FROM browse_filter")
+    suspend fun getBrowseFiltersSync(): List<BrowseFilterEntity>
 
     @Query("SELECT * FROM browse_filter WHERE is_default = 1")
     suspend fun getDefaultFilter(): List<BrowseFilterEntity>

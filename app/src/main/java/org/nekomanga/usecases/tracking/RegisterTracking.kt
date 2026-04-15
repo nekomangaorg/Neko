@@ -3,14 +3,15 @@ package org.nekomanga.usecases.tracking
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingUpdate
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class RegisterTracking(
-    private val db: DatabaseHelper = Injekt.get(),
+    private val trackRepository: TrackRepositoryImpl = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
 ) {
     suspend fun await(
@@ -23,7 +24,7 @@ class RegisterTracking(
                 val track =
                     trackManager.getService(trackAndService.service.id)?.bind(trackItem.toDbTrack())
                         ?: throw IllegalStateException("Service not found")
-                db.insertTrack(track).executeOnIO()
+                trackRepository.insertTrack(track.toEntity())
                 TrackingUpdate.Success
             }
             .getOrElse { exception ->

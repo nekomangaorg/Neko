@@ -15,6 +15,9 @@ interface ChapterDao {
     @Query("SELECT * FROM chapters WHERE manga_id = :mangaId")
     fun getChaptersForManga(mangaId: Long): Flow<List<ChapterEntity>>
 
+    @Query("SELECT * FROM chapters WHERE manga_id = :mangaId")
+    suspend fun getChaptersForMangaSync(mangaId: Long): List<ChapterEntity>
+
     @Query("SELECT * FROM chapters WHERE manga_id IN (:mangaIds)")
     suspend fun getChaptersForMangas(mangaIds: List<Long>): List<ChapterEntity>
 
@@ -31,7 +34,7 @@ interface ChapterDao {
     suspend fun insertChapter(chapter: ChapterEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertChapters(chapters: List<ChapterEntity>)
+    suspend fun insertChapters(chapters: List<ChapterEntity>): List<Long>
 
     @Update suspend fun updateChapters(chapters: List<ChapterEntity>)
 

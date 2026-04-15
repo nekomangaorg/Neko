@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resync
 import eu.kanade.tachiyomi.util.manga.unique
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toPersistentList
@@ -22,6 +21,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.model.toCategory
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -49,7 +53,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val securityPreferences: SecurityPreferences = Injekt.get()
-    private val db: DatabaseHelper = Injekt.get()
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get()
+    private val categoryRepository: CategoryRepositoryImpl = Injekt.get()
 
     private val mangaUseCases: MangaUseCases by injectLazy()
 
@@ -132,9 +137,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
         viewModelScope.launchIO {
             val categories =
-                db.getCategories()
-                    .executeOnIO()
-                    .map { category -> category.toCategoryItem() }
+                categoryRepository.getAllCategoriesList()
+                    .map { category -> category.toCategory().toCategoryItem() }
                     .toPersistentList()
             _displayScreenState.update {
                 it.copy(
@@ -168,7 +172,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
+            val editManga = mangaRepository.getMangaById(mangaId)?.toManga() ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -177,7 +181,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.insertManga(editManga.toEntity())
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -191,14 +195,14 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         .firstOrNull { defaultCategory == it.id }
                         ?.let {
                             val categories =
-                                listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            db.setMangaCategories(categories, listOf(editManga))
+                                listOf(MangaCategory.create(editManga, it.toDbCategory()).toEntity())
+                            categoryRepository.setMangaCategories(categories, listOf(mangaId))
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
-                        MangaCategory.create(editManga, it.toDbCategory())
+                        MangaCategory.create(editManga, it.toDbCategory()).toEntity()
                     }
-                    db.setMangaCategories(categories, listOf(editManga))
+                    categoryRepository.setMangaCategories(categories, listOf(mangaId))
                 }
             }
         }
@@ -244,13 +248,12 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
             val category = Category.create(newCategory)
             category.order =
                 (_displayScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeOnIO()
+            categoryRepository.insertCategory(category.toEntity())
             _displayScreenState.update {
                 it.copy(
                     categories =
-                        db.getCategories()
-                            .executeOnIO()
-                            .map { category -> category.toCategoryItem() }
+                        categoryRepository.getAllCategoriesList()
+                            .map { category -> category.toCategory().toCategoryItem() }
                             .toPersistentList()
                 )
             }
@@ -268,7 +271,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     fun updateMangaForChanges() {
         viewModelScope.launchIO {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
+                _displayScreenState.value.allDisplayManga.resync(mangaRepository).unique().toPersistentList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,

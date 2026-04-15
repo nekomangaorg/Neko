@@ -15,6 +15,9 @@ interface UploaderDao {
     @Query("SELECT * FROM uploaders WHERE username IN (:names)")
     fun getUploadersByNames(names: List<String>): Flow<List<UploaderEntity>>
 
+    @Query("SELECT * FROM uploaders WHERE username IN (:names)")
+    suspend fun getUploadersByNamesSync(names: List<String>): List<UploaderEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUploaders(uploaders: List<UploaderEntity>)
 

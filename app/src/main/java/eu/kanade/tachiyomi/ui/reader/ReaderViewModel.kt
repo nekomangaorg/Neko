@@ -6,6 +6,7 @@ import androidx.annotation.ColorInt
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -45,7 +46,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
@@ -69,6 +69,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.model.toChapter
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.model.toHistory
+import org.nekomanga.data.database.model.toManga
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
@@ -86,7 +94,10 @@ class ReaderViewModel
 @JvmOverloads
 constructor(
     private val savedState: SavedStateHandle,
-    private val db: DatabaseHelper = Injekt.get(),
+    private val mangaRepository: MangaRepositoryImpl = Injekt.get(),
+    private val chapterRepository: ChapterRepositoryImpl = Injekt.get(),
+    private val trackRepository: TrackRepositoryImpl = Injekt.get(),
+    private val appDatabase: AppDatabase = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
@@ -151,7 +162,7 @@ constructor(
         }
 
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeOnIO()
+        val dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
 
         val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
 
@@ -181,10 +192,10 @@ constructor(
     private val statusHandler: StatusHandler by injectLazy()
 
     private var hasTrackers: Boolean = false
-    private val checkTrackers: (Manga) -> Unit = { manga ->
-        val tracks = db.getTracks(manga).executeAsBlocking()
+    private suspend fun checkTrackers(manga: Manga) {
+        val tracks = trackRepository.getTracksForMangaSync(manga.id!!)
 
-        hasTrackers = tracks.size > 0
+        hasTrackers = tracks.isNotEmpty()
     }
 
     init {
@@ -236,7 +247,9 @@ constructor(
      */
     fun onSaveInstanceState() {
         val currentChapter = getCurrentChapter() ?: return
-        saveChapterProgress(currentChapter)
+        viewModelScope.launchNonCancellable {
+            saveChapterProgress(currentChapter)
+        }
     }
 
     /** Whether this presenter is initialized yet. */
@@ -252,8 +265,9 @@ constructor(
         if (!needsInit()) return Result.success(true)
         return withIOContext {
             try {
-                val manga = db.getManga(mangaId).executeAsBlocking()
-                if (manga != null) {
+                val mangaEntity = mangaRepository.getMangaById(mangaId)
+                if (mangaEntity != null) {
+                    val manga = mangaEntity.toManga()
                     mutableState.update { it.copy(manga = manga) }
                     if (chapterId == -1L) {
                         chapterId = initialChapterId
@@ -296,7 +310,7 @@ constructor(
         val manga = manga ?: return emptyList()
         chapterItems =
             withContext(Dispatchers.IO) {
-                val dbChapters = db.getChapters(manga).executeAsBlocking()
+                val dbChapters = chapterRepository.getChaptersForMangaSync(manga.id!!).map { it.toChapter() }
                 val currentReaderChapter = getCurrentChapter()
 
                 // 1. Convert to ChapterItem
@@ -343,20 +357,20 @@ constructor(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdConstants.chapterSuffix + urlChapterId).executeAsBlocking()
-        if (dbChapter?.manga_id != null) {
-            val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
-            if (dbManga != null) {
-                withContext(Dispatchers.Main) { init(dbManga.id!!, dbChapter.id!!) }
+        val chapterEntity = chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
+        if (chapterEntity?.mangaId != null) {
+            val dbMangaEntity = mangaRepository.getMangaById(chapterEntity.mangaId)
+            if (dbMangaEntity != null) {
+                withContext(Dispatchers.Main) { init(dbMangaEntity.id!!, chapterEntity.id!!) }
                 return
             }
         }
         val mangaDex = sourceManager.mangaDex
-        val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/title/$mangaId"
-        val dbManga = db.getMangadexManga(url).executeAsBlocking()
+        val mangaUUID = mangaDex.getMangaIdFromChapterId(urlChapterId)
+        val url = "/title/$mangaUUID"
+        val dbMangaEntity = mangaRepository.getMangaByUrl(url)
         val tempManga =
-            dbManga
+            dbMangaEntity?.toManga()
                 ?: (MangaImpl().apply {
                     this.source = mangaDex.id
                     this.url = url
@@ -369,14 +383,14 @@ constructor(
             tempManga.copyFrom(networkManga)
             tempManga.title = networkManga.title
 
-            db.insertManga(tempManga).executeAsBlocking()
-            val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
+            val mangaId = mangaRepository.insertManga(tempManga.toEntity())
+            val manga = mangaRepository.getMangaById(mangaId)!!.toManga()
 
             TimberKt.d { "tempManga id ${tempManga.id}" }
             TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
-                val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
+                val (newChapters, _) = syncChaptersWithSource(mangaRepository, chapterRepository, appDatabase, chapters, manga)
                 val currentChapter = newChapters.find {
                     it.url == MdConstants.chapterSuffix + urlChapterId
                 }
@@ -468,8 +482,10 @@ constructor(
     }
 
     fun toggleBookmark(chapter: Chapter) {
-        chapter.bookmark = !chapter.bookmark
-        db.updateChapterProgress(chapter).executeAsBlocking()
+        viewModelScope.launchIO {
+            chapter.bookmark = !chapter.bookmark
+            chapterRepository.updateProgress(chapter.id!!, chapter.read, chapter.bookmark, chapter.last_page_read, chapter.pages_left)
+        }
     }
 
     /**
@@ -671,8 +687,8 @@ constructor(
     }
 
     /** Called when reader chapter is changed in reader or when activity is paused. */
-    private fun saveReadingProgress(readerChapter: ReaderChapter) {
-        db.inTransaction {
+    private suspend fun saveReadingProgress(readerChapter: ReaderChapter) {
+        appDatabase.withTransaction {
             saveChapterProgress(readerChapter)
             saveChapterHistory(readerChapter)
         }
@@ -686,23 +702,23 @@ constructor(
      * Saves this [readerChapter]'s progress (last read page and whether it's read). If incognito
      * mode isn't on or has at least 1 tracker
      */
-    private fun saveChapterProgress(readerChapter: ReaderChapter) {
+    private suspend fun saveChapterProgress(readerChapter: ReaderChapter) {
         readerChapter.requestedPage = readerChapter.chapter.last_page_read
-        db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
+        chapterRepository.getChapterById(readerChapter.chapter.id!!)?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
         if (!securityPreferences.incognitoMode().get() || hasTrackers) {
-            db.updateChapterProgress(readerChapter.chapter).executeAsBlocking()
+            chapterRepository.updateChapters(listOf(readerChapter.chapter.toEntity()))
         }
     }
 
     /** Saves this [readerChapter] last read history. */
-    private fun saveChapterHistory(readerChapter: ReaderChapter) {
+    private suspend fun saveChapterHistory(readerChapter: ReaderChapter) {
         if (!securityPreferences.incognitoMode().get()) {
             val readAt = Date().time
             val sessionReadDuration = chapterReadStartTime?.let { readAt - it } ?: 0
             val history =
-                db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()
+                chapterRepository.getHistoryByChapterUrl(readerChapter.chapter.url)?.toHistory()
                     ?: History.create(readerChapter.chapter)
 
             val oldTimeRead = history.time_read
@@ -711,7 +727,7 @@ constructor(
                 last_read = readAt
                 time_read = sessionReadDuration + oldTimeRead
             }
-            db.upsertHistoryLastRead(history).executeAsBlocking()
+            chapterRepository.upsertHistory(history.toEntity())
             chapterReadStartTime = null
         }
     }
@@ -741,7 +757,7 @@ constructor(
     }
 
     /** Returns the viewer position used by this manga or the default one. */
-    fun getMangaReadingMode(): Int {
+    suspend fun getMangaReadingMode(): Int {
         val default = readerPreferences.defaultReadingMode().get()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
@@ -753,7 +769,7 @@ constructor(
                 manga.viewer_flags = 0
             }
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
-            db.updateViewerFlags(manga).asRxObservable().subscribe()
+            mangaRepository.updateViewerFlags(manga.id!!, manga.viewer_flags)
         }
         val viewer = if (manga.readingModeType == 0) default else manga.readingModeType
 
@@ -769,7 +785,7 @@ constructor(
 
         viewModelScope.launchIO {
             manga.readingModeType = readingModeType
-            db.updateViewerFlags(manga).executeAsBlocking()
+            mangaRepository.updateViewerFlags(manga.id!!, manga.viewer_flags)
             val currChapters = state.value.viewerChapters
             if (currChapters != null) {
                 // Save current page
@@ -778,7 +794,7 @@ constructor(
 
                 mutableState.update {
                     it.copy(
-                        manga = db.getManga(manga.id!!).executeAsBlocking(),
+                        manga = mangaRepository.getMangaById(manga.id!!)?.toManga(),
                         viewerChapters = currChapters,
                     )
                 }
@@ -804,17 +820,16 @@ constructor(
     fun setMangaOrientationType(rotationType: Int) {
         val manga = manga ?: return
         this.manga?.orientationType = rotationType
-        db.updateViewerFlags(manga).executeAsBlocking()
 
         TimberKt.i { "Manga orientation is ${manga.orientationType}" }
 
         viewModelScope.launchIO {
-            db.updateViewerFlags(manga).executeAsBlocking()
+            mangaRepository.updateViewerFlags(manga.id!!, manga.viewer_flags)
             val currChapters = state.value.viewerChapters
             if (currChapters != null) {
                 mutableState.update {
                     it.copy(
-                        manga = db.getManga(manga.id!!).executeAsBlocking(),
+                        manga = mangaRepository.getMangaById(manga.id!!)?.toManga(),
                         viewerChapters = currChapters,
                     )
                 }
@@ -1045,7 +1060,7 @@ constructor(
                     if (manga.favorite) {
                         coverCache.setCustomCoverToCache(manga, stream())
                         manga.user_cover = "file://chapterPage-" + Random.nextInt(1000)
-                        db.insertManga(manga).executeOnIO()
+                        mangaRepository.insertManga(manga.toEntity())
                         SetAsCoverResult.Success
                     } else {
                         SetAsCoverResult.AddToLibraryFirst

@@ -1,6 +1,7 @@
 package org.nekomanga.usecases.chapters
 
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.model.toEntity
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 
@@ -8,7 +9,7 @@ import org.nekomanga.domain.chapter.ChapterMarkActions
  * Use Case to mark chapter read, unread, previously read, previously unread, bookmarked,
  * unbookmarked
  */
-class MarkChapterUseCase(private val db: DatabaseHelper) {
+class MarkChapterUseCase(private val chapterRepository: ChapterRepositoryImpl) {
     suspend operator fun invoke(markAction: ChapterMarkActions, chapterItems: List<ChapterItem>) {
 
         val dbChapters = chapterItems.map { chapterItem ->
@@ -27,9 +28,9 @@ class MarkChapterUseCase(private val db: DatabaseHelper) {
                 is ChapterMarkActions.PreviousUnread -> {
                     chapterItem.chapter.copy(read = false, lastPageRead = 0, pagesLeft = 0)
                 }
-            }.toDbChapter()
+            }.toEntity()
         }
 
-        db.updateChaptersProgress(dbChapters).executeOnIO()
+        chapterRepository.updateChapters(dbChapters)
     }
 }
