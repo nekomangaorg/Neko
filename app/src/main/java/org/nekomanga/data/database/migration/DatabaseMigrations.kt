@@ -435,7 +435,6 @@ object DatabaseMigrations {
             INSERT INTO `manga_related_new` (`_id`, `manga_id`, `matched_ids`)
             SELECT `_id`, COALESCE(`manga_id`, ''), COALESCE(`matched_ids`, '') FROM `manga_related`
             """)
-        db.execSQL("CREATE INDEX IF NOT EXISTS chapters_unread_by_manga_index ON chapters (manga_id, read)")
         db.execSQL("DROP TABLE IF EXISTS `manga_related`")
         db.execSQL("ALTER TABLE `manga_related_new` RENAME TO `manga_related`")
     }
@@ -479,12 +478,6 @@ object DatabaseMigrations {
         )
         db.execSQL(
             "CREATE INDEX IF NOT EXISTS `chapters_unread_by_manga_index` ON `chapters` (`manga_id`, `read`)"
-        )
-        db.execSQL(
-            "CREATE INDEX IF NOT EXISTS `chapters_bookmarked_by_manga_index` ON `chapters` (`manga_id`)"
-        )
-        db.execSQL(
-            "CREATE INDEX IF NOT EXISTS `chapters_unavailable_by_manga_index` ON `chapters` (`manga_id`)"
         )
 
         // History
