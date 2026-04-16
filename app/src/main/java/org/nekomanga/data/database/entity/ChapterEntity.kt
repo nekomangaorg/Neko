@@ -21,8 +21,6 @@ import androidx.room.PrimaryKey
         [
             Index(value = ["manga_id"], name = "chapters_manga_id_index"),
             Index(value = ["manga_id", "read"], name = "chapters_unread_by_manga_index"),
-            Index(value = ["manga_id"], name = "chapters_bookmarked_by_manga_index"),
-            Index(value = ["manga_id"], name = "chapters_unavailable_by_manga_index"),
         ],
 )
 data class ChapterEntity(
