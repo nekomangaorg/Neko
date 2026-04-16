@@ -95,6 +95,7 @@ class AppModule(val app: Application) : InjektModule {
             } catch (e: Exception) {
                 Firebase.crashlytics.recordException(e)
             }
+            database
         }
 
         addSingletonFactory { DatabaseHelper(app) }
