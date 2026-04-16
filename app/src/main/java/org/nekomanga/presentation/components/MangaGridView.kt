@@ -210,7 +210,7 @@ fun MangaGridItem(
         }
 
     Box(modifier = modifier) {
-        Box(modifier = Modifier.padding(start = 2.dp, top = 2.dp)) {
+        Box(modifier = Modifier.padding(start = Size.extraTiny, top = Size.extraTiny)) {
             Box(
                 modifier =
                     Modifier.clip(RoundedCornerShape(Shapes.coverRadius))

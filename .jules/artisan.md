@@ -1,0 +1,1 @@
+## 2024-05-24 - MangaGridView Hardcoded Value **Learning:** `MangaGridView.kt` contained a hardcoded `2.dp` padding that did not align with the AppTheme. **Action:** Next time, scan for hardcoded DP values using `grep` or similar tooling before assuming UI components are fully utilizing `Size` design tokens like `Size.extraTiny`.
