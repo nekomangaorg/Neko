@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.NamiComiHandler
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
-import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
