@@ -432,8 +432,8 @@ object DatabaseMigrations {
 
         db.execSQL(
             """
-            INSERT INTO manga_related_new (_id, manga_id, matched_ids)
-            SELECT _id, COALESCE(manga_id, ''), COALESCE(matched_ids, '') FROM manga_related
+            INSERT INTO `manga_related_new` (`_id`, `manga_id`, `matched_ids`)
+            SELECT `_id`, COALESCE(`manga_id`, ''), COALESCE(`matched_ids`, '') FROM `manga_related`
             """
                 .trimIndent()
         )
