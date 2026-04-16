@@ -11,6 +11,6 @@ class FollowStatusConverter {
 
     @TypeConverter
     fun toFollowStatus(value: Int?): FollowStatus {
-        return value?.let { FollowStatus.fromInt(value)} ?: FollowStatus.UNFOLLOWED
+        return value?.let { FollowStatus.fromInt(value) } ?: FollowStatus.UNFOLLOWED
     }
 }
