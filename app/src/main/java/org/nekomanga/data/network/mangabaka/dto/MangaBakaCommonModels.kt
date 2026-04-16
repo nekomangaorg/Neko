@@ -1,4 +1,4 @@
-package org.nekomanga.network.mangabaka.dto
+package org.nekomanga.data.network.mangabaka.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

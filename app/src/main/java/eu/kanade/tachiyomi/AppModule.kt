@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -45,6 +47,8 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.migration.DatabaseMigrations
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -73,6 +77,14 @@ class AppModule(val app: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
+
+        addSingletonFactory {
+            Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .addMigrations(DatabaseMigrations.MIGRATION_45_46)
+                .fallbackToDestructiveMigration(false)
+                .build()
+        }
 
         addSingletonFactory { DatabaseHelper(app) }
 
@@ -179,7 +191,7 @@ class AppModule(val app: Application) : InjektModule {
 
                 get<SourceManager>()
 
-                get<DatabaseHelper>()
+                get<AppDatabase>()
 
                 get<DownloadManager>()
             } catch (e: Exception) {
