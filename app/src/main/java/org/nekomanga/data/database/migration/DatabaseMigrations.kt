@@ -309,7 +309,7 @@ object DatabaseMigrations {
         db.execSQL(
             """
             INSERT INTO `history_new` (`history_id`, `history_chapter_id`, `history_last_read`, `history_time_read`)
-            SELECT `history_id`, `history_chapter_id`, COALESCE(`history_last_read`, 0), COALESCE(`history_time_read`, 0) FROM `history`
+            SELECT history_id, COALESCE(history_chapter_id, 0), COALESCE(history_last_read, 0), COALESCE(history_time_read, 0) FROM history 
             """
                 .trimIndent()
         )
