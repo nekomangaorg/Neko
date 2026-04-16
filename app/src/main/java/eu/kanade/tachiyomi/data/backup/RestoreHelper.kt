@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -238,31 +239,34 @@ class RestoreHelper(val context: Context) {
         // Get categories from file and from db
         val dbCategories = categoryRepository.getAllCategoriesList()
 
-        // Iterate over them
-        backupCategories
-            .map { it.getCategoryImpl() }
-            .forEach { category ->
-                // Used to know if the category is already in the db
-                var found = false
-                for (dbCategory in dbCategories) {
-                    // If the category is already in the db, assign the id to the file's
-                    // category
-                    // and do nothing
-                    if (category.name == dbCategory.name) {
-                        category.id = dbCategory.id
-                        found = true
-                        break
+        appDatabase.withTransaction {
+
+            // Iterate over them
+            backupCategories
+                .map { it.getCategoryImpl() }
+                .forEach { category ->
+                    // Used to know if the category is already in the db
+                    var found = false
+                    for (dbCategory in dbCategories) {
+                        // If the category is already in the db, assign the id to the file's
+                        // category
+                        // and do nothing
+                        if (category.name == dbCategory.name) {
+                            category.id = dbCategory.id
+                            found = true
+                            break
+                        }
+                    }
+                    // If the category isn't in the db, remove the id and insert a new category
+                    // Store the inserted id in the category
+                    if (!found) {
+                        // Let the db assign the id
+                        category.id = null
+                        val result = categoryRepository.insertCategory(category.toEntity())
+                        category.id = result.toInt()
                     }
                 }
-                // If the category isn't in the db, remove the id and insert a new category
-                // Store the inserted id in the category
-                if (!found) {
-                    // Let the db assign the id
-                    category.id = null
-                    val result = categoryRepository.insertCategory(category.toEntity())
-                    category.id = result.toInt()
-                }
-            }
+        }
     }
 
     /**
