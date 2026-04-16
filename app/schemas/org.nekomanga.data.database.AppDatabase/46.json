@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 46,
-    "identityHash": "3c204f5297c1370e8d5fc1c39848892a",
+    "identityHash": "2e56c43b9eae291d2f75b41a900c22a4",
     "entities": [
       {
         "tableName": "mangas",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `source` INTEGER NOT NULL, `url` TEXT NOT NULL, `artist` TEXT, `author` TEXT, `description` TEXT, `genre` TEXT, `title` TEXT NOT NULL, `status` INTEGER NOT NULL, `thumbnail_url` TEXT, `favorite` INTEGER NOT NULL, `last_update` INTEGER, `next_update` INTEGER, `date_added` INTEGER, `initialized` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `chapter_flags` INTEGER NOT NULL, `lang_flag` TEXT, `follow_status` INTEGER, `anilist_id` TEXT, `kitsu_id` TEXT, `my_anime_list_id` TEXT, `manga_updates_id` TEXT, `anime_planet_id` TEXT, `other_urls` TEXT, `scanlator_filter_flag` TEXT, `missing_chapters` TEXT, `rating` TEXT, `users` TEXT, `thread_id` TEXT, `replies_count` TEXT, `merge_manga_url` TEXT, `manga_last_volume` INTEGER, `manga_last_chapter` INTEGER, `merge_manga_image_url` TEXT, `alt_titles` TEXT, `user_cover` TEXT, `user_title` TEXT, `language_filter_flag` TEXT, `dynamic_cover` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `source` INTEGER NOT NULL, `url` TEXT NOT NULL, `artist` TEXT, `author` TEXT, `description` TEXT, `genre` TEXT, `title` TEXT NOT NULL, `status` INTEGER NOT NULL, `thumbnail_url` TEXT, `favorite` INTEGER NOT NULL, `last_update` INTEGER, `next_update` INTEGER, `date_added` INTEGER, `initialized` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `chapter_flags` INTEGER NOT NULL, `lang_flag` TEXT, `follow_status` INTEGER NOT NULL, `anilist_id` TEXT, `kitsu_id` TEXT, `my_anime_list_id` TEXT, `manga_updates_id` TEXT, `anime_planet_id` TEXT, `other_urls` TEXT, `scanlator_filter_flag` TEXT, `missing_chapters` TEXT, `rating` TEXT, `users` TEXT, `thread_id` TEXT, `replies_count` TEXT, `merge_manga_url` TEXT, `manga_last_volume` INTEGER, `manga_last_chapter` INTEGER, `merge_manga_image_url` TEXT, `alt_titles` TEXT, `user_cover` TEXT, `user_title` TEXT, `language_filter_flag` TEXT, `dynamic_cover` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -110,7 +110,8 @@
           {
             "fieldPath": "followStatus",
             "columnName": "follow_status",
-            "affinity": "INTEGER"
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "anilistId",
@@ -1023,7 +1024,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3c204f5297c1370e8d5fc1c39848892a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e56c43b9eae291d2f75b41a900c22a4')"
     ]
   }
 }

@@ -82,11 +82,12 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(app)
 
         addSingletonFactory {
-            val database = Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
-                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
-                .addMigrations(DatabaseMigrations.MIGRATION_45_46)
-                .fallbackToDestructiveMigration(false)
-                .build()
+            val database =
+                Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+                    .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                    .addMigrations(DatabaseMigrations.MIGRATION_45_46)
+                    .fallbackToDestructiveMigration(false)
+                    .build()
             try {
                 val version = database.openHelper.readableDatabase.version
                 Firebase.crashlytics.setCustomKey("db_version", version)
