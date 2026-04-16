@@ -1,0 +1,25 @@
+package org.nekomanga.data.database.dao
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+import org.nekomanga.data.database.entity.UploaderEntity
+
+@Dao
+interface UploaderDao {
+    @Query("SELECT * FROM uploader WHERE username = :name")
+    suspend fun getUploaderByNameSync(name: String): UploaderEntity?
+
+    @Query("SELECT * FROM uploader WHERE username IN (:names)")
+    fun getUploadersByNames(names: List<String>): Flow<List<UploaderEntity>>
+
+    @Query("SELECT * FROM uploader WHERE username IN (:names)")
+    suspend fun getUploadersByNamesSync(names: List<String>): List<UploaderEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUploaders(uploaders: List<UploaderEntity>)
+
+    @Query("DELETE FROM uploader WHERE username = :name") suspend fun deleteUploader(name: String)
+}

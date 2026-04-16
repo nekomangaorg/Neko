@@ -17,8 +17,7 @@ import androidx.room.PrimaryKey
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["history_chapter_id"], name = "history_history_chapter_id_index")],
-)
+    indices = [Index(value = ["history_chapter_id"], name = "history_history_chapter_id_index", unique = true)],)
 data class HistoryEntity(
     // Changed column name to "history_id" and made non-nullable
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "history_id") val id: Long = 0L,
