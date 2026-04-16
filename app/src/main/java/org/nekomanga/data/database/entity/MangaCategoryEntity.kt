@@ -32,5 +32,5 @@ import androidx.room.PrimaryKey
 data class MangaCategoryEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
-    @ColumnInfo(name = "category_id") val categoryId: Long,
+    @ColumnInfo(name = "category_id") val categoryId: Int,
 )
