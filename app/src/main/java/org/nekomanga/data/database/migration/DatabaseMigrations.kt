@@ -349,7 +349,6 @@ object DatabaseMigrations {
                 `track_score`, `track_tracking_url`, `track_start_date`, `track_finish_date`
             )
             SELECT
-            SELECT
                 _id, COALESCE(manga_id, 0), COALESCE(sync_id, 0), COALESCE(remote_id, 0), COALESCE(library_id, 0),
                 COALESCE(title, ''), COALESCE(last_chapter_read, 0.0), COALESCE(total_chapters, 0), COALESCE(status, 0),
                 COALESCE(score, 0.0), COALESCE(remote_url, ''), COALESCE(start_date, 0), COALESCE(finish_date, 0)
