@@ -78,7 +78,7 @@ fun MangaEntity.toManga(): Manga {
 
 fun Manga.toEntity(): MangaEntity {
     return MangaEntity(
-        id = id!!,
+        id = id ?: 0L,
         source = source,
         url = url,
         artist = artist,
@@ -150,7 +150,7 @@ fun ChapterEntity.toChapter(): ChapterImpl {
 
 fun Chapter.toEntity(): ChapterEntity {
     return ChapterEntity(
-        id = id!!,
+        id = id ?: 0L,
         mangaId = manga_id!!,
         url = url,
         name = name,
@@ -214,7 +214,7 @@ fun CategoryEntity.toCategory(): CategoryImpl {
 
 fun Category.toEntity(): CategoryEntity {
     return CategoryEntity(
-        id = id!!,
+        id = id ?: 0,
         name = name,
         order = order,
         flags = flags,
@@ -242,7 +242,7 @@ fun TrackEntity.toTrack(): TrackImpl {
 
 fun Track.toEntity(): TrackEntity {
     return TrackEntity(
-        id = id!!,
+        id = id ?: 0L,
         mangaId = manga_id,
         syncId = sync_id,
         mediaId = media_id,
@@ -271,7 +271,7 @@ fun MergeMangaEntity.toMergeManga(): MergeMangaImpl {
 
 fun MergeMangaImpl.toEntity(): MergeMangaEntity {
     return MergeMangaEntity(
-        id = id!!,
+        id = id ?: 0L,
         mangaId = mangaId,
         coverUrl = coverUrl,
         title = title,
@@ -291,7 +291,7 @@ fun HistoryEntity.toHistory(): HistoryImpl {
 
 fun History.toEntity(): HistoryEntity {
     return HistoryEntity(
-        id = id!!,
+        id = id ?: 0L,
         chapterId = chapter_id,
         lastRead = last_read,
         timeRead = time_read,
@@ -307,20 +307,20 @@ fun MangaCategoryEntity.toMangaCategory(): MangaCategory {
 }
 
 fun MangaCategory.toEntity(): MangaCategoryEntity {
-    return MangaCategoryEntity(id = id!!.toInt(), mangaId = manga_id, categoryId = category_id)
+    return MangaCategoryEntity(id = (id ?: 0).toInt(), mangaId = manga_id, categoryId = category_id)
 }
 
 fun ScanlatorGroupImpl.toEntity(): ScanlatorGroupEntity {
-    return ScanlatorGroupEntity(id = id!!, name = name, uuid = uuid, description = description)
+    return ScanlatorGroupEntity(id = id ?: 0L, name = name, uuid = uuid, description = description)
 }
 
 fun UploaderImpl.toEntity(): UploaderEntity {
-    return UploaderEntity(id = id!!, username = username, uuid = uuid)
+    return UploaderEntity(id = id ?: 0L, username = username, uuid = uuid)
 }
 
 fun ArtworkImpl.toEntity(): ArtworkEntity {
     return ArtworkEntity(
-        id = id!!,
+        id = id ?: 0L,
         mangaId = mangaId,
         fileName = fileName,
         volume = volume,
@@ -334,7 +334,12 @@ fun BrowseFilterEntity.toBrowseFilter(): BrowseFilterImpl {
 }
 
 fun BrowseFilterImpl.toEntity(): BrowseFilterEntity {
-    return BrowseFilterEntity(id = id!!, name = name, isDefault = default, dexFilters = dexFilters)
+    return BrowseFilterEntity(
+        id = id ?: 0L,
+        name = name,
+        isDefault = default,
+        dexFilters = dexFilters,
+    )
 }
 
 fun MangaSimilarEntity.toMangaSimilar(): MangaSimilarImpl {
@@ -346,7 +351,7 @@ fun MangaSimilarEntity.toMangaSimilar(): MangaSimilarImpl {
 }
 
 fun MangaSimilar.toEntity(): MangaSimilarEntity {
-    return MangaSimilarEntity(id = id!!, mangaId = manga_id, data = data)
+    return MangaSimilarEntity(id = id ?: 0L, mangaId = manga_id, data = data)
 }
 
 fun LibraryManga.toLegacyModel(): eu.kanade.tachiyomi.data.database.models.LibraryManga {
@@ -402,7 +407,7 @@ fun LibraryManga.toLegacyModel(): eu.kanade.tachiyomi.data.database.models.Libra
 
 fun ChapterEntity.toSimpleChapter(lastRead: Long = 0L): SimpleChapter {
     return SimpleChapter(
-        id = id!!,
+        id = id,
         mangaId = mangaId,
         read = read,
         bookmark = bookmark,
