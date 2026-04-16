@@ -54,7 +54,7 @@ object DatabaseMigrations {
                 `viewer` INTEGER NOT NULL,
                 `chapter_flags` INTEGER NOT NULL,
                 `lang_flag` TEXT,
-                `follow_status` INTEGER,
+                follow_status INTEGER NOT NULL,
                 `anilist_id` TEXT,
                 `kitsu_id` TEXT,
                 `my_anime_list_id` TEXT,
