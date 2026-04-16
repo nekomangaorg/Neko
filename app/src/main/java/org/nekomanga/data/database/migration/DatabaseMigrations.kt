@@ -54,7 +54,7 @@ object DatabaseMigrations {
                 `viewer` INTEGER NOT NULL,
                 `chapter_flags` INTEGER NOT NULL,
                 `lang_flag` TEXT,
-                `follow_status` INTEGER,
+                follow_status INTEGER NOT NULL,
                 `anilist_id` TEXT,
                 `kitsu_id` TEXT,
                 `my_anime_list_id` TEXT,
@@ -85,7 +85,7 @@ object DatabaseMigrations {
         db.execSQL(
             """
             INSERT INTO `mangas_new` (`_id`, `source`, `url`, `artist`, `author`, `description`, `genre`, `title`, `status`, `thumbnail_url`, `favorite`, `last_update`, `next_update`, `date_added`, `initialized`, `viewer`, `chapter_flags`, `lang_flag`, `follow_status`, `anilist_id`, `kitsu_id`, `my_anime_list_id`, `manga_updates_id`, `anime_planet_id`, `other_urls`, `scanlator_filter_flag`, `missing_chapters`, `rating`, `users`, `thread_id`, `replies_count`, `merge_manga_url`, `manga_last_volume`, `manga_last_chapter`, `merge_manga_image_url`, `alt_titles`, `user_cover`, `user_title`, `language_filter_flag`, `dynamic_cover`)
-            SELECT `_id`, COALESCE(`source`, 0), COALESCE(`url`, ''), `artist`, `author`, `description`, `genre`, COALESCE(`title`, ''), COALESCE(`status`, 0), `thumbnail_url`, COALESCE(`favorite`, 0), `last_update`, `next_update`, `date_added`, COALESCE(`initialized`, 0), COALESCE(`viewer`, 0), COALESCE(`chapter_flags`, 0), `lang_flag`, `follow_status`, `anilist_id`, `kitsu_id`, `my_anime_list_id`, `manga_updates_id`, `anime_planet_id`, `other_urls`, `scanlator_filter_flag`, `missing_chapters`, `rating`, `users`, `thread_id`, `replies_count`, `merge_manga_url`, `manga_last_volume`, `manga_last_chapter`, `merge_manga_image_url`, `alt_titles`, `user_cover`, `user_title`, `language_filter_flag`, `dynamic_cover` FROM `mangas`
+            SELECT _id, COALESCE(source, 0), COALESCE(url, ''), artist, author, description, genre, COALESCE(title, ''), COALESCE(status, 0), thumbnail_url, COALESCE(favorite, 0), last_update, next_update, date_added, COALESCE(initialized, 0), COALESCE(viewer, 0), COALESCE(chapter_flags, 0), lang_flag, COALESCE(follow_status, 0), anilist_id, kitsu_id, my_anime_list_id, manga_updates_id, anime_planet_id, other_urls, scanlator_filter_flag, missing_chapters, rating, users, thread_id, replies_count, merge_manga_url, manga_last_volume, manga_last_chapter, merge_manga_image_url, alt_titles, user_cover, user_title, language_filter_flag, dynamic_cover FROM mangas 
             """
                 .trimIndent()
         )
@@ -309,7 +309,7 @@ object DatabaseMigrations {
         db.execSQL(
             """
             INSERT INTO `history_new` (`history_id`, `history_chapter_id`, `history_last_read`, `history_time_read`)
-            SELECT `history_id`, `history_chapter_id`, COALESCE(`history_last_read`, 0), COALESCE(`history_time_read`, 0) FROM `history`
+            SELECT history_id, COALESCE(history_chapter_id, 0), COALESCE(history_last_read, 0), COALESCE(history_time_read, 0) FROM history 
             """
                 .trimIndent()
         )
