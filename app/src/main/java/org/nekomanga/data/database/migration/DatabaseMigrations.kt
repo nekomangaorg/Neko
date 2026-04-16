@@ -387,12 +387,12 @@ object DatabaseMigrations {
 
     private fun migrateScanlatorGroupsTable(db: SupportSQLiteDatabase) {
         db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `scanlator_groups` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uuid` TEXT NOT NULL, `description` TEXT)"
+            "CREATE TABLE IF NOT EXISTS `scanlator_group` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uuid` TEXT NOT NULL, `description` TEXT)"
         )
 
         db.execSQL(
             """
-            CREATE TABLE IF NOT EXISTS `scanlator_groups_new` (
+            CREATE TABLE IF NOT EXISTS `scanlator_group_new` (
                 `_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 `name` TEXT NOT NULL,
                 `uuid` TEXT NOT NULL,
@@ -404,14 +404,14 @@ object DatabaseMigrations {
 
         db.execSQL(
             """
-            INSERT INTO `scanlator_groups_new` (`_id`, `name`, `uuid`, `description`)
-            SELECT `_id`, COALESCE(`name`, ''), COALESCE(`uuid`, ''), `description` FROM `scanlator_groups`
+            INSERT INTO `scanlator_group_new` (`_id`, `name`, `uuid`, `description`)
+            SELECT `_id`, COALESCE(`name`, ''), COALESCE(`uuid`, ''), `description` FROM `scanlator_group`
             """
                 .trimIndent()
         )
 
-        db.execSQL("DROP TABLE IF EXISTS `scanlator_groups`")
-        db.execSQL("ALTER TABLE `scanlator_groups_new` RENAME TO `scanlator_groups`")
+        db.execSQL("DROP TABLE IF EXISTS `scanlator_group`")
+        db.execSQL("ALTER TABLE `scanlator_group_new` RENAME TO `scanlator_group`")
     }
 
     private fun migrateMangaRelatedTable(db: SupportSQLiteDatabase) {
