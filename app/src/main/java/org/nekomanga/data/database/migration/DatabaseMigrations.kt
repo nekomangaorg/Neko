@@ -206,7 +206,7 @@ object DatabaseMigrations {
             SELECT
                 `_id`, `manga_id`, `sync_id`, `remote_id`, `library_id`,
                 `title`, `last_chapter_read`, `total_chapters`, `status`,
-                `score`, `remote_url`, `start_date`, `finish_date`
+                `score`, COALESCE(remote_url, ''), COALESCE(start_date, 0), COALESCE(finish_date, 0)
             FROM `manga_sync`
             """
                 .trimIndent()
@@ -226,12 +226,6 @@ object DatabaseMigrations {
         )
         db.execSQL(
             "CREATE INDEX IF NOT EXISTS `chapters_unread_by_manga_index` ON `chapters` (`manga_id`, `read`)"
-        )
-        db.execSQL(
-            "CREATE INDEX IF NOT EXISTS `chapters_bookmarked_by_manga_index` ON `chapters` (`manga_id`)"
-        )
-        db.execSQL(
-            "CREATE INDEX IF NOT EXISTS `chapters_unavailable_by_manga_index` ON `chapters` (`manga_id`)"
         )
 
         // History
