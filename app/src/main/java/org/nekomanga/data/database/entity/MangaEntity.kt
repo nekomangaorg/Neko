@@ -33,7 +33,7 @@ data class MangaEntity(
     @ColumnInfo(name = "viewer") val viewerFlags: Int,
     @ColumnInfo(name = "chapter_flags") val chapterFlags: Int,
     @ColumnInfo(name = "lang_flag") val langFlag: String?,
-    @ColumnInfo(name = "follow_status") val followStatus: FollowStatus?,
+    @ColumnInfo(name = "follow_status") val followStatus: FollowStatus,
     @ColumnInfo(name = "anilist_id") val anilistId: String?,
     @ColumnInfo(name = "kitsu_id") val kitsuId: String?,
     @ColumnInfo(name = "my_anime_list_id") val myAnimeListId: String?,
