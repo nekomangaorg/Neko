@@ -332,9 +332,13 @@ class MainActivity : BaseMainActivity() {
             DeepLinks.Intents.Search -> {
                 val host = intent.data?.host
                 val pathSegments = intent.data?.pathSegments
-                if (host != null && pathSegments != null && pathSegments.size > 1) {
-                    val path = pathSegments[0]
-                    val id = pathSegments[1]
+                if (host != null && pathSegments != null && pathSegments.size >= 1) {
+                    val (path, id) =
+                        if (pathSegments.size == 1) {
+                            "" to pathSegments[0]
+                        } else {
+                            pathSegments[0] to pathSegments[1]
+                        }
                     if (id != null && id.isNotEmpty()) {
                         deepLinkScreens = listOf(Screens.DeepLink(host, path, id))
                     }
@@ -398,6 +402,7 @@ class MainActivity : BaseMainActivity() {
 
     private fun isDeepLink(intent: Intent?): Boolean {
         if (intent == null) return false
+
         return when (intent.action) {
             Intent.ACTION_SEARCH,
             Intent.ACTION_SEND,

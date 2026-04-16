@@ -255,6 +255,16 @@
                 <data android:host="www.mangaupdates.com" />
                 <data android:pathPattern="/series/..*" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="mangabaka.org" />
+                <data android:pathPattern="/..*" />
+            </intent-filter>
         </activity>
 
 

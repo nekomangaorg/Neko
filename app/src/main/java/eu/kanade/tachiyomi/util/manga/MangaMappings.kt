@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import org.nekomanga.logging.TimberKt
 
 /**
  * This class provides operations to manage the database through its interfaces.
@@ -13,7 +14,7 @@ import java.io.IOException
 class MangaMappings(context: Context) {
 
     private val dbMappings: SQLiteDatabase by lazy {
-        openDatabase(context, "2026-02-20_neko_mapping.db")
+        openDatabase(context, "2026-04-15_neko_mapping.db")
     }
 
     private fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
@@ -36,6 +37,7 @@ class MangaMappings(context: Context) {
     }
 
     fun getMangadexUUID(id: String, service: String): String? {
+        TimberKt.d { "CESCO getMangadexUUID: $id, $service" }
         val queryString = "SELECT mdex FROM mappings WHERE ${service.lowercase()} = ? LIMIT 1"
         val whereArgs = arrayOf(id)
         return getResult(queryString, whereArgs)
@@ -49,6 +51,12 @@ class MangaMappings(context: Context) {
 
     fun getMuNewForMuID(id: String): String? {
         val queryString = "SELECT mu_new FROM mappings WHERE mu = ? AND mu_new IS NOT NULL LIMIT 1"
+        val whereArgs = arrayOf(id)
+        return getResult(queryString, whereArgs)
+    }
+
+    fun getMbForMuID(id: String): String? {
+        val queryString = "SELECT mb FROM mappings WHERE mb = ? LIMIT 1"
         val whereArgs = arrayOf(id)
         return getResult(queryString, whereArgs)
     }

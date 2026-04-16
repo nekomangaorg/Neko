@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.more.about.AboutViewModel
 import eu.kanade.tachiyomi.ui.source.browse.BrowseViewModel
 import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
 import org.nekomanga.presentation.screens.deepLink.DeepLinkViewModel
@@ -132,6 +133,7 @@ fun MainScreen(
                     entry<Screens.Loading> { LoadingScreen(it.showLoadingIndicator) }
                     entry<Screens.DeepLink> {
                         val deepLinkViewModel: DeepLinkViewModel = viewModel()
+                        TimberKt.d { "CESCO DeepLinkScreen ${it.host}" }
                         DeepLinkScreen(
                             onNavigate = { screens ->
                                 backStack.clear()

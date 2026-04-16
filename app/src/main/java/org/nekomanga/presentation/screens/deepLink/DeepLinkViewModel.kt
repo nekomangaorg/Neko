@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.Screens
 import org.nekomanga.presentation.screens.Screens.Browse
@@ -44,6 +45,7 @@ class DeepLinkViewModel() : ViewModel() {
     val deepLinkState = _deepLinkState.asStateFlow()
 
     fun handleDeepLink(host: String, path: String, id: String) {
+        TimberKt.d { "CESCO parseUri: $host, $path, $id" }
 
         viewModelScope.launch {
             parseUri(host, path, id)
@@ -119,6 +121,7 @@ class DeepLinkViewModel() : ViewModel() {
                 val convertedId = BigInteger(id, 36).toString()
                 resolveMapping(convertedId, "mu_new", "MangaUpdates")
             }
+            host.contains("mangabaka", true) -> resolveMapping(id, "mb", "MangaBaka")
 
             // Direct matches
             path.equals("GROUP", true) -> Ok(DeepLinkType.Group(id))
