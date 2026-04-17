@@ -122,9 +122,9 @@ fun VerticalCategoriesPage(
                     selectionMode = selectionMode,
                     allSelected =
                         item.libraryItems.isNotEmpty() &&
-                            item.libraryItems
-                                .map { it.displayManga.mangaId }
-                                .all { id -> id in selectedIds },
+                            item.libraryItems.all { libraryItem ->
+                                libraryItem.displayManga.mangaId in selectedIds
+                            },
                     isCollapsible = collapsible,
                     categoryItemClick = {
                         if (selectionMode) {

@@ -160,9 +160,9 @@ fun HorizontalCategoriesPage(
                     remember(selectionMode, selectedIds) {
                         mutableStateOf(
                             item.libraryItems.isNotEmpty() &&
-                                item.libraryItems
-                                    .map { it.displayManga.mangaId }
-                                    .all { id -> id in selectedIds }
+                                item.libraryItems.all { libraryItem ->
+                                    libraryItem.displayManga.mangaId in selectedIds
+                                }
                         )
                     }
                 when (libraryScreenState.libraryDisplayMode) {
