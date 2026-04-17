@@ -12,17 +12,17 @@ import androidx.room.PrimaryKey
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["manga_id"], name = "artwork_manga_id_index")],
+    indices = [Index(value = ["manga_id"])],
 )
 data class ArtworkEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
-    @ColumnInfo(name = "filename") val fileName: String,
+    @ColumnInfo(name = "file_name") val fileName: String,
     @ColumnInfo(name = "volume") val volume: String,
     @ColumnInfo(name = "locale") val locale: String,
     @ColumnInfo(name = "description") val description: String,

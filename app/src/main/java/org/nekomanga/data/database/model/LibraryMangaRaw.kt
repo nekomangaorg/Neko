@@ -1,5 +1,6 @@
 package org.nekomanga.data.database.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import org.nekomanga.data.database.entity.MangaEntity
 
@@ -9,9 +10,9 @@ import org.nekomanga.data.database.entity.MangaEntity
  */
 data class LibraryMangaRaw(
     @Embedded val manga: MangaEntity,
-    val unread: String, // Raw string of scanlator/uploader/count
-    val hasRead: String, // Raw string of read chapters
-    val bookmarkCount: Int,
-    val unavailableCount: Int,
-    val category: Int, // From COALESCE(MC.category_id, 0)
+    @ColumnInfo(name = "unread") val unread: String,
+    @ColumnInfo(name = "has_read") val hasRead: String,
+    @ColumnInfo(name = "bookmark_count") val bookmarkCount: Int,
+    @ColumnInfo(name = "unavailable_count") val unavailableCount: Int,
+    @ColumnInfo(name = "category") val category: Int,
 )

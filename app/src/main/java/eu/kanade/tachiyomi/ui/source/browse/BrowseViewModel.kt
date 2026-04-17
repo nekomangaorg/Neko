@@ -36,6 +36,8 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.repository.BrowseFilterRepository
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -63,6 +65,11 @@ class BrowseViewModel : ViewModel() {
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
+
+    private val categoryRepository: CategoryRepository = Injekt.get()
+
+    val browseFilterRepository: BrowseFilterRepository = Injekt.get()
+
     private val mangaUseCases: MangaUseCases by injectLazy()
 
     private val _browseScreenState =
@@ -180,8 +187,8 @@ class BrowseViewModel : ViewModel() {
 
         viewModelScope.launchIO {
             val categories =
-                db.getCategories()
-                    .executeOnIO()
+                categoryRepository
+                    .getCategories()
                     .map { category -> category.toCategoryItem() }
                     .toPersistentList()
 
@@ -437,13 +444,16 @@ class BrowseViewModel : ViewModel() {
                         ?.let {
                             val categories =
                                 listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            db.setMangaCategories(categories, listOf(editManga))
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOf(editManga.id!!),
+                            )
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
                         MangaCategory.create(editManga, it.toDbCategory())
                     }
-                    db.setMangaCategories(categories, listOf(editManga))
+                    categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
                 }
             }
         }
@@ -515,7 +525,7 @@ class BrowseViewModel : ViewModel() {
                     name = name,
                     dexFilters = Json.encodeToString(browseScreenState.value.filters),
                 )
-            db.insertBrowseFilter(browseFilter).executeOnIO()
+            browseFilterRepository.insertBrowseFilter(browseFilter)
             updateBrowseFilters()
         }
     }
@@ -537,14 +547,14 @@ class BrowseViewModel : ViewModel() {
                         it.copy(default = false)
                     }
                 }
-            db.insertBrowseFilters(updatedFilters).executeOnIO()
+            browseFilterRepository.insertBrowseFilters(updatedFilters)
             updateBrowseFilters()
         }
     }
 
     fun deleteFilter(name: String) {
         viewModelScope.launchIO {
-            db.deleteBrowseFilter(name).executeOnIO()
+            browseFilterRepository.deleteBrowseFilterByName(name)
             updateBrowseFilters()
         }
     }
@@ -690,12 +700,12 @@ class BrowseViewModel : ViewModel() {
         viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeOnIO()
+            categoryRepository.insertCategory(category)
             _browseScreenState.update {
                 it.copy(
                     categories =
-                        db.getCategories()
-                            .executeOnIO()
+                        categoryRepository
+                            .getCategories()
                             .map { category -> category.toCategoryItem() }
                             .toPersistentList()
                 )
@@ -724,7 +734,7 @@ class BrowseViewModel : ViewModel() {
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         viewModelScope.launchIO {
-            val filters = db.getBrowseFilters().executeOnIO().toPersistentList()
+            val filters = browseFilterRepository.getBrowseFilters().toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters

@@ -89,6 +89,8 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -105,6 +107,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     CoroutineWorker(context, workerParameters) {
 
     private val db by injectLazy<DatabaseHelper>()
+
+    private val artworkRepository by injectLazy<ArtworkRepository>()
+
+    private val categoryRepository by injectLazy<CategoryRepository>()
+
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
     private val preferences by injectLazy<PreferencesHelper>()
@@ -363,7 +370,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             async {
                                 requestSemaphore.withPermit {
                                     val shouldDownload =
-                                        manga.shouldDownloadNewChapters(db, preferences)
+                                        manga.shouldDownloadNewChapters(
+                                            categoryRepository,
+                                            preferences,
+                                        )
                                     updateMangaChapters(manga, shouldDownload)
                                 }
                             }
@@ -517,8 +527,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     .map { sourceArt -> sourceArt.toArtworkImpl(manga.id!!) }
                                     .let { art ->
                                         runCatching {
-                                            db.deleteArtworkForManga(manga).executeOnIO()
-                                            db.insertArtWorkList(art).executeOnIO()
+                                            artworkRepository.deleteArtworkByMangaId(manga.id!!)
+                                            artworkRepository.insertArtworks(art)
                                         }
                                     }
                             }
@@ -834,7 +844,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         extraScope.launch {
             val jobs = distinctManga.map { manga ->
                 async(Dispatchers.IO) {
-                    val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
+                    val shouldDownload =
+                        manga.shouldDownloadNewChapters(categoryRepository, preferences)
                     val hasDLs = updateMangaChapters(manga, shouldDownload)
 
                     if (hasDLs && !hasDownloads) {

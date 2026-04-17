@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -46,6 +48,10 @@ import uy.kohesive.injekt.injectLazy
  */
 class MangaUpdateCoordinator {
     private val db: DatabaseHelper by injectLazy()
+
+    private val artworkRepository: ArtworkRepository by injectLazy()
+
+    private val categoryRepository: CategoryRepository by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
@@ -91,7 +97,7 @@ class MangaUpdateCoordinator {
                 send(MangaResult.Error(text = "Error getting manga from MangaDex"))
                 throw UpdateError()
             }
-            .onSuccess { (networkManga, artwork) ->
+            .onSuccess { (networkManga, sourceArtwork) ->
                 val currentManga = mangaItem.toManga()
                 currentManga.copyFrom(networkManga)
                 currentManga.initialized = true
@@ -125,10 +131,12 @@ class MangaUpdateCoordinator {
                     db.insertManga(mangaForDb).executeAsBlocking()
                     send(MangaResult.UpdatedManga)
 
-                    if (artwork.isNotEmpty()) {
-                        val artworkImpls = artwork.map { it.toArtworkImpl(updatedMangaItem.id) }
-                        db.deleteArtworkForManga(mangaForDb).executeAsBlocking()
-                        db.insertArtWorkList(artworkImpls).executeAsBlocking()
+                    if (sourceArtwork.isNotEmpty()) {
+                        val artworkImpls = sourceArtwork.map {
+                            it.toArtworkImpl(updatedMangaItem.id)
+                        }
+                        artworkRepository.deleteArtworkByMangaId(mangaForDb.id!!)
+                        artworkRepository.insertArtworks(artworkImpls)
                         send(MangaResult.UpdatedArtwork)
                     }
                 }
@@ -156,7 +164,7 @@ class MangaUpdateCoordinator {
             if (
                 preferences.downloadNewChapters().get() &&
                     mangaWasAlreadyInitialized &&
-                    manga.shouldDownloadNewChapters(db, preferences)
+                    manga.shouldDownloadNewChapters(categoryRepository, preferences)
             ) {
                 val chaptersToDownload =
                     newChapters

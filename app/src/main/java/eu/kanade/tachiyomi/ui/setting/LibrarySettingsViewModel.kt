@@ -2,12 +2,9 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import eu.kanade.tachiyomi.util.system.asFlow
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -17,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -29,7 +27,7 @@ class LibrarySettingsViewModel : ViewModel() {
 
     val preferences by injectLazy<PreferencesHelper>()
 
-    val db by injectLazy<DatabaseHelper>()
+    val categoryRepository: CategoryRepository by injectLazy()
 
     private val _allCategories =
         MutableStateFlow<PersistentList<CategoryItem>>((persistentListOf()))
@@ -37,7 +35,8 @@ class LibrarySettingsViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            db.getCategories().asFlow().distinctUntilChanged().collectLatest { categories ->
+            categoryRepository.observeCategories().distinctUntilChanged().collectLatest { categories
+                ->
                 _allCategories.value =
                     (listOf(Category.createSystemCategory()) + categories)
                         .sortedBy { it.order }
@@ -54,7 +53,7 @@ class LibrarySettingsViewModel : ViewModel() {
 
             // Insert into database.
             category.mangaSort = LibrarySort.Title.categoryValue
-            db.insertCategory(category).executeAsBlocking()
+            categoryRepository.insertCategory(category)
         }
     }
 
@@ -66,7 +65,7 @@ class LibrarySettingsViewModel : ViewModel() {
                 val category = _allCategories.value.firstOrNull { it.id == id }
                 if (category != null) {
                     val updatedCategory = category.copy(name = newCategoryName)
-                    db.insertCategory(updatedCategory.toDbCategory()).executeAsBlocking()
+                    categoryRepository.insertCategory(updatedCategory.toDbCategory())
                 }
             }
         }
@@ -76,14 +75,14 @@ class LibrarySettingsViewModel : ViewModel() {
         viewModelScope.launchIO {
             val category = _allCategories.value.firstOrNull { it.id == id }
             if (category != null) {
-                db.deleteCategory(category.toDbCategory()).executeAsBlocking()
+                categoryRepository.deleteCategory(category.toDbCategory())
             }
         }
     }
 
     fun onChangeOrder(category: CategoryItem, newIndex: Int) {
         viewModelScope.launchIO {
-            val dbCategories = db.getCategories().executeOnIO().toMutableList()
+            val dbCategories = categoryRepository.getCategories().toMutableList()
 
             val currentIndex = dbCategories.indexOfFirst { category.id == it.id }
 
@@ -91,8 +90,7 @@ class LibrarySettingsViewModel : ViewModel() {
 
             // Default category is not saved to DB and is always 0 order
             dbCategories.forEachIndexed { index, dbCategory -> dbCategory.order = index + 1 }
-
-            db.insertCategories(dbCategories).executeOnIO()
+            categoryRepository.insertCategories(dbCategories)
         }
     }
 }

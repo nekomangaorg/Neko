@@ -95,6 +95,8 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -152,6 +154,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
+    val artworkRepository: ArtworkRepository = Injekt.get()
+    val categoryRepository: CategoryRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
@@ -244,15 +248,16 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val artworkFlow =
-        db.getArtwork(mangaId)
-            .asFlow()
+        artworkRepository
+            .observeArtworkByMangaId(mangaId)
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val categoriesDataFlow =
-        combine(db.getCategories().asFlow(), db.getMangaCategory(mangaId).asFlow()) {
-                allCategories,
-                mangaCategories ->
+        combine(
+                categoryRepository.observeCategories(),
+                categoryRepository.observeMangaCategories(listOf(mangaId)),
+            ) { allCategories, mangaCategories ->
                 val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
                 MangaConstants.CategoriesData(
                     all = allCategories.map { it.toCategoryItem() },

@@ -36,6 +36,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -43,6 +44,7 @@ import uy.kohesive.injekt.injectLazy
 class BackupCreator(val context: Context) {
 
     internal val databaseHelper: DatabaseHelper by injectLazy()
+    internal val categoryRepository: CategoryRepository by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     internal val storageManager: StorageManager by injectLazy()
@@ -57,7 +59,7 @@ class BackupCreator(val context: Context) {
      * @param uri path of Uri
      * @param isAutoBackup backup called from scheduled backup job
      */
-    fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
+    suspend fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
         // Create root object
         var backup: Backup? = null
 
@@ -129,10 +131,10 @@ class BackupCreator(val context: Context) {
         }
     }
 
-    private fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
+    private suspend fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
         val allCategories =
             if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY)
-                databaseHelper.getCategories().executeAsBlocking().associateBy { it.id }
+                categoryRepository.getCategories().associateBy { it.id }
             else emptyMap()
 
         return mangaList.chunked(500).flatMap { chunk ->
@@ -156,9 +158,7 @@ class BackupCreator(val context: Context) {
 
             val categoriesMap =
                 if (flags and BACKUP_CATEGORY_MASK == BACKUP_CATEGORY) {
-                    databaseHelper.getMangaCategories(mangaIds).executeAsBlocking().groupBy {
-                        it.manga_id
-                    }
+                    categoryRepository.getMangaCategories(mangaIds).groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
@@ -204,10 +204,8 @@ class BackupCreator(val context: Context) {
      *
      * @return list of [BackupCategory] to be backed up
      */
-    private fun backupCategories(): List<BackupCategory> {
-        return databaseHelper.getCategories().executeAsBlocking().map {
-            BackupCategory.copyFrom(it)
-        }
+    private suspend fun backupCategories(): List<BackupCategory> {
+        return categoryRepository.getCategories().map { BackupCategory.copyFrom(it) }
     }
 
     /**

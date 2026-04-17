@@ -8,7 +8,7 @@ fun BrowseFilterEntity.toImpl(): BrowseFilterImpl {
         id = this.id,
         name = this.name,
         default = this.isDefault,
-        dexFilters = this.dexFilters
+        dexFilters = this.filters,
     )
 }
 
@@ -17,6 +17,6 @@ fun BrowseFilterImpl.toEntity(): BrowseFilterEntity {
         id = this.id ?: 0L,
         name = this.name,
         isDefault = this.default,
-        dexFilters = this.dexFilters
+        filters = this.dexFilters,
     )
 }

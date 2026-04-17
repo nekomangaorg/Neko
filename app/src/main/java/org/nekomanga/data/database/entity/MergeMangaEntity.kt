@@ -13,15 +13,15 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["manga_id"], name = "merge_manga_manga_id_index")],
+    indices = [Index(value = ["manga_id"])],
 )
 data class MergeMangaEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "cover_url") val coverUrl: String,
     @ColumnInfo(name = "title") val title: String,

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -44,6 +45,7 @@ import uy.kohesive.injekt.api.get
 
 class StatsViewModel() : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
+    private val categoryRepository: CategoryRepository = Injekt.get()
     private val prefs: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -162,8 +164,8 @@ class StatsViewModel() : ViewModel() {
                                             .map { prefs.context.getString(it.nameRes()) }
                                             .toPersistentList(),
                                     categories =
-                                        (db.getCategoriesForManga(it)
-                                                .executeAsBlocking()
+                                        (categoryRepository
+                                                .getCategoriesForManga(it.id!!)
                                                 .map { category -> category.name }
                                                 .takeUnless { it.isEmpty() }
                                                 ?: listOf(
@@ -181,7 +183,7 @@ class StatsViewModel() : ViewModel() {
                         isLoading = false,
                         manga = detailedStatMangaList.toPersistentList(),
                         categories =
-                            (db.getCategories().executeAsBlocking().map { it.name } +
+                            (categoryRepository.getCategories().map { it.name } +
                                     listOf(prefs.context.getString(R.string.default_value)))
                                 .toPersistentList(),
                         tags =

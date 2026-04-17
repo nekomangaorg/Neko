@@ -10,23 +10,23 @@ import org.nekomanga.data.database.entity.TrackEntity
 
 @Dao
 interface TrackDao {
-    @Query("SELECT * FROM track WHERE _id = :id") suspend fun getTrackByIdSync(id: Long): TrackEntity?
+    @Query("SELECT * FROM track WHERE id = :id") suspend fun getTrackById(id: Long): TrackEntity?
 
-    @Query("SELECT * FROM track WHERE track_manga_id = :mangaId")
-    fun getTracksForManga(mangaId: Long): Flow<List<TrackEntity>>
+    @Query("SELECT * FROM track WHERE manga_id = :mangaId")
+    fun observeTracksForManga(mangaId: Long): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM track WHERE track_manga_id = :mangaId")
-    suspend fun getTracksForMangaSync(mangaId: Long): List<TrackEntity>
+    @Query("SELECT * FROM track WHERE manga_id = :mangaId")
+    suspend fun getTracksForManga(mangaId: Long): List<TrackEntity>
 
-    @Query("SELECT * FROM track WHERE track_manga_id IN (:mangaIds)")
-    suspend fun getTracksForMangasSync(mangaIds: List<Long>): List<TrackEntity>
+    @Query("SELECT * FROM track WHERE manga_id IN (:mangaIds)")
+    suspend fun getTracksForMangaByIds(mangaIds: List<Long>): List<TrackEntity>
 
-    @Query("SELECT * FROM track") fun getAllTracks(): Flow<List<TrackEntity>>
+    @Query("SELECT * FROM track") fun observeAllTracks(): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM track") suspend fun getAllTracksSync(): List<TrackEntity>
+    @Query("SELECT * FROM track") suspend fun getAllTracks(): List<TrackEntity>
 
-    @Query("SELECT * FROM track WHERE track_manga_id = :mangaId AND track_sync_id = :syncId")
-    suspend fun getTrackByMangaIdAndSyncId(mangaId: Long, syncId: Int): TrackEntity?
+    @Query("SELECT * FROM track WHERE manga_id = :mangaId AND track_service_id = :trackServiceId")
+    suspend fun getTrackByMangaIdAndTrackServiceId(mangaId: Long, trackServiceId: Int): TrackEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrack(track: TrackEntity): Long
@@ -36,8 +36,8 @@ interface TrackDao {
 
     @Delete suspend fun deleteTrack(track: TrackEntity)
 
-    @Query("DELETE FROM track WHERE track_manga_id = :mangaId AND track_sync_id = :syncId")
-    suspend fun deleteTrackByMangaIdAndSyncId(mangaId: Long, syncId: Int)
+    @Query("DELETE FROM track WHERE manga_id = :mangaId AND track_service_id = :trackServiceId")
+    suspend fun deleteTrackByMangaIdAndTrackServiceId(mangaId: Long, trackServiceId: Int)
 
     @Query("DELETE FROM track") suspend fun deleteAllTracks()
 }

@@ -12,7 +12,7 @@ interface ScanlatorGroupDao {
     suspend fun getScanlatorGroupByName(name: String): ScanlatorGroupEntity?
 
     @Query("SELECT * FROM scanlator_group WHERE name IN (:names)")
-    suspend fun getScanlatorGroupsByNamesSync(names: List<String>): List<ScanlatorGroupEntity>
+    suspend fun getScanlatorGroupsByNames(names: List<String>): List<ScanlatorGroupEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertScanlatorGroup(group: ScanlatorGroupEntity): Long

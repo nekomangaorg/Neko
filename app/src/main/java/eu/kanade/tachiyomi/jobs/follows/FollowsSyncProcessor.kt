@@ -18,6 +18,7 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -30,6 +31,7 @@ class FollowsSyncProcessor {
     val mangaDexPreferences: MangaDexPreferences by injectLazy()
     val libraryPreference: LibraryPreferences by injectLazy()
     val db: DatabaseHelper by injectLazy()
+    val categoryRepository: CategoryRepository by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
     private val followsHandler: FollowsHandler by injectLazy()
@@ -66,7 +68,7 @@ class FollowsSyncProcessor {
 
                     TimberKt.d { "total number from mangadex is ${listManga.size}" }
 
-                    val categories = db.getCategories().executeAsBlocking()
+                    val categories = categoryRepository.getCategories()
                     val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
@@ -107,7 +109,10 @@ class FollowsSyncProcessor {
                                     .executeAsBlocking()
                             if (defaultCategory != null) {
                                 val mc = MangaCategory.create(dbManga!!, defaultCategory)
-                                db.setMangaCategories(listOf(mc), listOf(dbManga))
+                                categoryRepository.setMangaCategories(
+                                    listOf(mc),
+                                    listOf(dbManga.id!!),
+                                )
                             }
 
                             return@mapNotNull dbManga?.id
