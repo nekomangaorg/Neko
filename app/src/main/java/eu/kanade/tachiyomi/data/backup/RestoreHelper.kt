@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -25,12 +26,16 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import kotlin.math.max
 import org.nekomanga.R
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class RestoreHelper(val context: Context) {
 
     val db: DatabaseHelper by injectLazy()
+    val appDatabase: AppDatabase by injectLazy()
+    val categoryRepository: CategoryRepository by injectLazy()
     val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -218,11 +223,10 @@ class RestoreHelper(val context: Context) {
      *
      * @param backupCategories list containing categories
      */
-    internal fun restoreCategories(backupCategories: List<BackupCategory>) {
+    internal suspend fun restoreCategories(backupCategories: List<BackupCategory>) {
         // Get categories from file and from db
-        db.inTransaction {
-            val dbCategories = db.getCategories().executeAsBlocking()
-
+        val dbCategories = categoryRepository.getCategories()
+        appDatabase.withTransaction {
             // Iterate over them
             backupCategories
                 .map { it.getCategoryImpl() }
@@ -243,9 +247,7 @@ class RestoreHelper(val context: Context) {
                     // Store the inserted id in the category
                     if (!found) {
                         // Let the db assign the id
-                        category.id = null
-                        val result = db.insertCategory(category).executeAsBlocking()
-                        category.id = result.insertedId()?.toInt()
+                        category.id = categoryRepository.insertCategory(category)
                     }
                 }
         }
@@ -257,11 +259,11 @@ class RestoreHelper(val context: Context) {
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(
+    internal suspend fun restoreCategoriesForManga(
         manga: Manga,
         categories: List<Int>,
         backupCategories: List<BackupCategory>,
-        dbCategories: List<Category> = db.getCategories().executeAsBlocking(),
+        dbCategories: List<Category>,
     ) {
         val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         categories.forEach { backupCategoryOrder ->
@@ -277,9 +279,11 @@ class RestoreHelper(val context: Context) {
         }
 
         // Update database
-        if (mangaCategoriesToUpdate.isNotEmpty()) {
-            db.deleteOldMangaListCategories(listOf(manga)).executeAsBlocking()
-            db.insertMangaListCategories(mangaCategoriesToUpdate).executeAsBlocking()
+        if (mangaCategoriesToUpdate.isNotEmpty() && manga.id != null) {
+            categoryRepository.setMangaCategories(
+                mangaCategories = mangaCategoriesToUpdate,
+                mangaIds = listOf(manga.id!!),
+            )
         }
     }
 

@@ -1,4 +1,5 @@
 package org.nekomanga.data.database.mapper
+
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import org.nekomanga.data.database.entity.MangaCategoryEntity
 
@@ -14,6 +15,6 @@ fun MangaCategory.toEntity(): MangaCategoryEntity {
     return MangaCategoryEntity(
         id = this.id ?: 0L, // Safely handles auto-generation for new inserts
         mangaId = this.manga_id,
-        categoryId = this.category_id
+        categoryId = this.category_id,
     )
 }

@@ -12,25 +12,29 @@ import androidx.room.PrimaryKey
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
-                childColumns = ["track_manga_id"],
+                parentColumns = ["id"],
+                childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["track_manga_id"], name = "track_manga_id_index")],
+    indices =
+        [
+            Index(value = ["manga_id"]),
+            Index(value = ["manga_id", "track_service_id"], unique = true),
+        ],
 )
 data class TrackEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
-    @ColumnInfo(name = "track_manga_id") val mangaId: Long,
-    @ColumnInfo(name = "track_sync_id") val syncId: Int,
-    @ColumnInfo(name = "track_media_id") val mediaId: Long,
-    @ColumnInfo(name = "track_library_id") val libraryId: Long,
-    @ColumnInfo(name = "track_title") val title: String,
-    @ColumnInfo(name = "track_last_chapter_read") val lastChapterRead: Float,
-    @ColumnInfo(name = "track_total_chapters") val totalChapters: Int,
-    @ColumnInfo(name = "track_status") val status: Int,
-    @ColumnInfo(name = "track_score") val score: Float,
-    @ColumnInfo(name = "track_tracking_url") val trackingUrl: String,
-    @ColumnInfo(name = "track_start_date") val startedReadingDate: Long,
-    @ColumnInfo(name = "track_finish_date") val finishedReadingDate: Long,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
+    @ColumnInfo(name = "manga_id") val mangaId: Long,
+    @ColumnInfo(name = "track_service_id") val trackServiceId: Int,
+    @ColumnInfo(name = "media_id") val mediaId: Long,
+    @ColumnInfo(name = "library_id") val libraryId: Long?,
+    @ColumnInfo(name = "title") val title: String,
+    @ColumnInfo(name = "last_chapter_read") val lastChapterRead: Float,
+    @ColumnInfo(name = "total_chapters") val totalChapters: Int,
+    @ColumnInfo(name = "status") val status: Int,
+    @ColumnInfo(name = "score") val score: Float,
+    @ColumnInfo(name = "tracking_url") val trackingUrl: String,
+    @ColumnInfo(name = "start_date") val startedReadingDate: Long,
+    @ColumnInfo(name = "finish_date") val finishedReadingDate: Long,
 )

@@ -7,30 +7,26 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "mangas_categories",
+    tableName = "manga_categories",
     foreignKeys =
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             ),
             ForeignKey(
                 entity = CategoryEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["category_id"],
                 onDelete = ForeignKey.CASCADE,
             ),
         ],
-    indices =
-        [
-            Index(value = ["manga_id"], name = "mangas_categories_manga_id_index"),
-            Index(value = ["category_id"], name = "mangas_categories_category_id_index"),
-        ],
+    indices = [Index(value = ["manga_id"]), Index(value = ["category_id"])],
 )
 data class MangaCategoryEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "category_id") val categoryId: Int,
 )

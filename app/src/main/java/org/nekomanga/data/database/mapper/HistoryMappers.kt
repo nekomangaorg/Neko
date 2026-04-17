@@ -1,4 +1,5 @@
 package org.nekomanga.data.database.mapper
+
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import org.nekomanga.data.database.entity.HistoryEntity

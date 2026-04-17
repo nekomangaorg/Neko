@@ -6,16 +6,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
-@Entity(
-    tableName = "mangas",
-    indices =
-        [
-            Index(value = ["favorite"], name = "library_favorite_index"),
-            Index(value = ["url"], name = "mangas_url_index"),
-        ],
-)
+@Entity(tableName = "manga", indices = [Index(value = ["favorite"]), Index(value = ["url"])])
 data class MangaEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "source") val source: Long,
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "artist") val artist: String?,

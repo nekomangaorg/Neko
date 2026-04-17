@@ -10,20 +10,20 @@ import org.nekomanga.data.database.entity.MangaCategoryEntity
 
 @Dao
 interface MangaCategoryDao {
-    @Query("SELECT * FROM mangas_categories WHERE manga_id IN (:mangaIds)")
-    fun getMangaCategories(mangaIds: List<Long>): Flow<List<MangaCategoryEntity>>
+    @Query("SELECT * FROM manga_categories WHERE manga_id IN (:mangaIds)")
+    fun observeMangaCategories(mangaIds: List<Long>): Flow<List<MangaCategoryEntity>>
 
-    @Query("SELECT * FROM mangas_categories WHERE manga_id IN (:mangaIds)")
-    suspend fun getMangaCategoriesSync(mangaIds: List<Long>): List<MangaCategoryEntity>
+    @Query("SELECT * FROM manga_categories WHERE manga_id IN (:mangaIds)")
+    suspend fun getMangaCategories(mangaIds: List<Long>): List<MangaCategoryEntity>
 
-    @Query("SELECT * FROM mangas_categories WHERE manga_id = :mangaId")
-    fun getMangaCategoriesForManga(mangaId: Long): Flow<List<MangaCategoryEntity>>
+    @Query("SELECT * FROM manga_categories WHERE manga_id = :mangaId")
+    fun observeMangaCategoriesForManga(mangaId: Long): Flow<List<MangaCategoryEntity>>
 
-    @Query("SELECT * FROM mangas_categories WHERE category_id = :categoryId")
-    fun getMangaCategoriesForCategory(categoryId: Int): Flow<List<MangaCategoryEntity>>
+    @Query("SELECT * FROM manga_categories WHERE category_id = :categoryId")
+    fun observeMangaCategoriesForCategory(categoryId: Int): Flow<List<MangaCategoryEntity>>
 
-    @Query("SELECT * FROM mangas_categories WHERE category_id = :categoryId")
-    suspend fun getMangaCategoriesForCategorySync(categoryId: Int): List<MangaCategoryEntity>
+    @Query("SELECT * FROM manga_categories WHERE category_id = :categoryId")
+    suspend fun getMangaCategoriesForCategory(categoryId: Int): List<MangaCategoryEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMangaCategory(mangaCategory: MangaCategoryEntity)
@@ -31,7 +31,7 @@ interface MangaCategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMangaListCategories(mangaListCategories: List<MangaCategoryEntity>)
 
-    @Query("DELETE FROM mangas_categories WHERE manga_id IN (:mangaIds)")
+    @Query("DELETE FROM manga_categories WHERE manga_id IN (:mangaIds)")
     suspend fun deleteOldMangaListCategories(mangaIds: List<Long>)
 
     @Transaction

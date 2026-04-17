@@ -64,6 +64,7 @@ import org.nekomanga.constants.Constants.SEARCH_DEBOUNCE_MILLIS
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
@@ -90,6 +91,7 @@ class LibraryViewModel() : ViewModel() {
     val preferences: PreferencesHelper = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
+    val categoryRepository: CategoryRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
@@ -143,7 +145,7 @@ class LibraryViewModel() : ViewModel() {
         combine(
                 libraryPreferences.sortingMode().changes(),
                 libraryPreferences.sortAscending().changes(),
-                db.getCategories().asFlow(),
+                categoryRepository.observeCategories(),
             ) { sortingMode, sortAscending, dbCategories ->
                 val librarySort = LibrarySort.valueOf(sortingMode)
                 val defaultCategory = Category.createSystemCategory().toCategoryItem()
@@ -614,7 +616,7 @@ class LibraryViewModel() : ViewModel() {
             if (loggedServices.isNotEmpty()) {
                 groupItems.add(LibraryGroup.ByTrackStatus)
             }
-            if (db.getCategories().executeAsBlocking().isNotEmpty()) {
+            if (categoryRepository.getCategories().isNotEmpty()) {
                 groupItems.add(LibraryGroup.Ungrouped)
             }
             _internalLibraryScreenState.update {
@@ -1087,8 +1089,8 @@ class LibraryViewModel() : ViewModel() {
                     libraryScreenState.value.selectedItems.removeAt(index)
                 } else {
                     val categoryItems =
-                        db.getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
-                            .executeOnIO()
+                        categoryRepository
+                            .getCategoriesForManga(libraryMangaItem.displayManga.mangaId)
                             .map { it.toCategoryItem() }
                     val copy = libraryMangaItem.copy(allCategories = categoryItems)
                     libraryScreenState.value.selectedItems.add(copy)

@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -47,6 +48,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     private val repo: SimilarRepository = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
+
+    private val categoryRepository: CategoryRepository = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
@@ -73,8 +76,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         getSimilarManga()
         viewModelScope.launch {
             val categories =
-                db.getCategories()
-                    .executeAsBlocking()
+                categoryRepository
+                    .getCategories()
                     .map { category -> category.toCategoryItem() }
                     .toPersistentList()
             _similarScreenState.update {
@@ -156,13 +159,16 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         ?.let {
                             val categories =
                                 listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            db.setMangaCategories(categories, listOf(editManga))
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOf(editManga.id!!),
+                            )
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
                         MangaCategory.create(editManga, it.toDbCategory())
                     }
-                    db.setMangaCategories(categories, listOf(editManga))
+                    categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
                 }
             }
         }
@@ -229,12 +235,12 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             val category = Category.create(newCategory)
             category.order =
                 (_similarScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeAsBlocking()
+            categoryRepository.insertCategory(category)
             _similarScreenState.update {
                 it.copy(
                     categories =
-                        db.getCategories()
-                            .executeAsBlocking()
+                        categoryRepository
+                            .getCategories()
                             .map { category -> category.toCategoryItem() }
                             .toPersistentList()
                 )

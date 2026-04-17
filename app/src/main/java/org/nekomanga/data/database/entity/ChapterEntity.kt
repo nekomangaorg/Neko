@@ -12,19 +12,15 @@ import androidx.room.PrimaryKey
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices =
-        [
-            Index(value = ["manga_id"], name = "chapters_manga_id_index"),
-            Index(value = ["manga_id", "read"], name = "chapters_unread_by_manga_index"),
-        ],
+    indices = [Index(value = ["manga_id"]), Index(value = ["manga_id", "read"])],
 )
 data class ChapterEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "_id") val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "manga_id") val mangaId: Long,
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "name") val name: String,
@@ -44,6 +40,5 @@ data class ChapterEntity(
     @ColumnInfo(name = "date_fetch") val dateFetch: Long,
     @ColumnInfo(name = "date_upload") val dateUpload: Long,
     @ColumnInfo(name = "mangadex_chapter_id") val mangadexChapterId: String?,
-    @ColumnInfo(name = "old_mangadex_chapter_id") val oldMangadexId: String?,
     @ColumnInfo(name = "language") val language: String?,
 )

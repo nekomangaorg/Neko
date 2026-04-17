@@ -35,6 +35,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -54,10 +55,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private var cancelled = 0
     private val trackingErrors = Collections.synchronizedList(mutableListOf<String>())
 
-    // Queue for deferred cover art processing
-    private val coverRestoreQueue =
-        Collections.synchronizedList(mutableListOf<Pair<Manga, String>>())
-
+    private val categoryRepository: CategoryRepository by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
@@ -149,7 +147,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 try {
                     db.inTransaction {
                         // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
-                        val dbCategories = db.getCategories().executeAsBlocking()
+                        val dbCategories = categoryRepository.getCategories()
 
                         // [OVERCLOCK] Pre-fetch related data for all existing manga in this chunk
                         // to prevent N+1 queries
@@ -311,7 +309,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     }
 
     /** Writes data to DB. Must be called inside a transaction */
-    private fun writeMangaToDb(
+    private suspend fun writeMangaToDb(
         item: RestorableItem,
         existingDbManga: Manga?,
         dbCategories: List<Category>,
@@ -368,7 +366,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
             .awaitAll()
     }
 
-    private fun restoreCategories(backupCategories: List<BackupCategory>) {
+    private suspend fun restoreCategories(backupCategories: List<BackupCategory>) {
         restoreHelper.restoreCategories(backupCategories)
         categoriesAmount = backupCategories.size
         restoreAmount += 1

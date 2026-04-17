@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.UiText
@@ -31,6 +32,8 @@ class AdvancedSettingsViewModel : ViewModel() {
     val downloadManager: DownloadManager by injectLazy()
 
     val db: DatabaseHelper by injectLazy()
+
+    val categoryRepository: CategoryRepository by injectLazy()
 
     private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -123,7 +126,7 @@ class AdvancedSettingsViewModel : ViewModel() {
     fun dedupeCategories() {
         viewModelScope.launchNonCancellable {
             launchIO {
-                val categories = db.getCategories().executeAsBlocking()
+                val categories = categoryRepository.getCategories()
 
                 val categoriesByName = categories.groupBy { it.name }
 
@@ -133,15 +136,15 @@ class AdvancedSettingsViewModel : ViewModel() {
                         val oldest = categories.minBy { it.id!! }
                         val others = categories.filter { it.id != oldest.id }
                         val mangaCategoryToMove = others.flatMap {
-                            db.getMangaCategoryForCategory(it).executeAsBlocking()
+                            categoryRepository.getMangaCategoriesForCategory(it.id!!)
                         }
                         if (mangaCategoryToMove.isNotEmpty()) {
                             mangaCategoryToMove.forEach {
                                 it.category_id = oldest.id!!
-                                db.insertMangaCategory(it)
+                                categoryRepository.insertMangaCategory(it)
                             }
                         }
-                        db.deleteCategories(others).executeAsBlocking()
+                        categoryRepository.deleteCategories(others)
 
                         duplicates++
                     }

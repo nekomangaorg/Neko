@@ -17,6 +17,7 @@ data class SourceArtwork(
     }
 }
 
+// TODO rename this to Artwork
 data class ArtworkImpl(
     val id: Long? = null,
     val mangaId: Long,

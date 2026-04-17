@@ -13,13 +13,12 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.getValue
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.presentation.components.UiText
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 // This class just holds some injects.  If a settings screen requires
@@ -31,6 +30,8 @@ class DebugSettingsViewModel : ViewModel() {
     val downloadManager: DownloadManager by injectLazy()
 
     val db: DatabaseHelper by injectLazy()
+
+    val categoryRepository: CategoryRepository by injectLazy()
     val followsHandler: FollowsHandler by injectLazy()
     val trackManager: TrackManager by injectLazy()
     val statusHandler: StatusHandler by injectLazy()
@@ -76,8 +77,8 @@ class DebugSettingsViewModel : ViewModel() {
     fun clearAllCategories() {
         viewModelScope.launchIO {
             _toastEvent.emit(UiText.StringResource(R.string.started))
-            val categories = db.getCategories().executeAsBlocking()
-            db.deleteCategories(categories).executeOnIO()
+            val categories = categoryRepository.getCategories()
+            categoryRepository.deleteCategories(categories)
             _toastEvent.emit(UiText.StringResource(R.string.complete))
         }
     }

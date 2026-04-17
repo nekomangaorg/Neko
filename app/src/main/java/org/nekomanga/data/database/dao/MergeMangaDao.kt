@@ -10,22 +10,22 @@ import org.nekomanga.data.database.entity.MergeMangaEntity
 
 @Dao
 interface MergeMangaDao {
-    @Query("SELECT * FROM merge_manga") suspend fun getAllMergeMangaSync(): List<MergeMangaEntity>
+    @Query("SELECT * FROM merge_manga") suspend fun getAllMergeManga(): List<MergeMangaEntity>
 
     @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
-    fun getMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>>
+    fun observeMergeMangaList(mangaId: Long): Flow<List<MergeMangaEntity>>
 
     @Query("SELECT * FROM merge_manga WHERE manga_id = :mangaId")
-    suspend fun getMergeMangaListSync(mangaId: Long): List<MergeMangaEntity>
+    suspend fun getMergeMangaList(mangaId: Long): List<MergeMangaEntity>
 
     @Query("SELECT * FROM merge_manga WHERE manga_id IN (:mangaIds)")
-    suspend fun getMergeMangaListSync(mangaIds: List<Long>): List<MergeMangaEntity>
+    suspend fun getMergeMangaList(mangaIds: List<Long>): List<MergeMangaEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMergeManga(mergeManga: MergeMangaEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMergeMangas(mergeMangas: List<MergeMangaEntity>)
+    suspend fun insertMergeManga(mergeMangaList: List<MergeMangaEntity>)
 
     @Delete suspend fun deleteMergeManga(mergeManga: MergeMangaEntity)
 

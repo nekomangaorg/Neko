@@ -10,7 +10,7 @@ fun ArtworkEntity.toImpl(): ArtworkImpl {
         fileName = this.fileName,
         volume = this.volume,
         locale = this.locale,
-        description = this.description
+        description = this.description,
     )
 }
 
@@ -21,6 +21,6 @@ fun ArtworkImpl.toEntity(): ArtworkEntity {
         fileName = this.fileName,
         volume = this.volume,
         locale = this.locale,
-        description = this.description
+        description = this.description,
     )
 }

@@ -52,6 +52,12 @@ import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.migration.DatabaseMigrations
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.ArtworkRepositoryImpl
+import org.nekomanga.data.database.repository.BrowseFilterRepository
+import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -96,6 +102,21 @@ class AppModule(val app: Application) : InjektModule {
                 Firebase.crashlytics.recordException(e)
             }
             database
+        }
+
+        addSingletonFactory<ArtworkRepository> {
+            ArtworkRepositoryImpl(artworkDao = get<AppDatabase>().artworkDao())
+        }
+
+        addSingletonFactory<BrowseFilterRepository> {
+            BrowseFilterRepositoryImpl(browseFilterDao = get<AppDatabase>().browseFilterDao())
+        }
+
+        addSingletonFactory<CategoryRepository> {
+            CategoryRepositoryImpl(
+                categoryDao = get<AppDatabase>().categoryDao(),
+                mangaCategoryDao = get<AppDatabase>().mangaCategoryDao(),
+            )
         }
 
         addSingletonFactory { DatabaseHelper(app) }

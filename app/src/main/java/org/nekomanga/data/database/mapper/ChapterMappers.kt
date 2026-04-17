@@ -26,7 +26,6 @@ fun ChapterEntity.toChapter(): ChapterImpl {
         date_fetch = this@toChapter.dateFetch
         date_upload = this@toChapter.dateUpload
         mangadex_chapter_id = this@toChapter.mangadexChapterId ?: ""
-        old_mangadex_id = this@toChapter.oldMangadexId
         language = this@toChapter.language
 
         // (Note: isUnavailable is an extension property handled by Chapter.canDeleteChapter
@@ -56,10 +55,6 @@ fun Chapter.toEntity(): ChapterEntity {
         dateFetch = this.date_fetch,
         dateUpload = this.date_upload,
         mangadexChapterId = this.mangadex_chapter_id,
-        oldMangadexId = this.old_mangadex_id,
-        language = this.language
+        language = this.language,
     )
 }
-
-
-

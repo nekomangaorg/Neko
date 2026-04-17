@@ -12,16 +12,16 @@ import androidx.room.PrimaryKey
         [
             ForeignKey(
                 entity = ChapterEntity::class,
-                parentColumns = ["_id"],
-                childColumns = ["history_chapter_id"],
+                parentColumns = ["id"],
+                childColumns = ["chapter_id"],
                 onDelete = ForeignKey.CASCADE,
             )
         ],
-    indices = [Index(value = ["history_chapter_id"], name = "history_history_chapter_id_index", unique = true)],)
+    indices = [Index(value = ["chapter_id"], unique = true)],
+)
 data class HistoryEntity(
-    // Changed column name to "history_id" and made non-nullable
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "history_id") val id: Long = 0L,
-    @ColumnInfo(name = "history_chapter_id") val chapterId: Long,
-    @ColumnInfo(name = "history_last_read") val lastRead: Long,
-    @ColumnInfo(name = "history_time_read") val timeRead: Long,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0L,
+    @ColumnInfo(name = "chapter_id") val chapterId: Long,
+    @ColumnInfo(name = "last_read") val lastRead: Long,
+    @ColumnInfo(name = "time_read") val timeRead: Long,
 )

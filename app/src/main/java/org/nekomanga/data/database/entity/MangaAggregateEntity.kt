@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
         [
             ForeignKey(
                 entity = MangaEntity::class,
-                parentColumns = ["_id"],
+                parentColumns = ["id"],
                 childColumns = ["manga_id"],
                 onDelete = ForeignKey.CASCADE,
             )

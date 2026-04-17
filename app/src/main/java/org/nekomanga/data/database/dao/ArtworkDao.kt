@@ -11,7 +11,10 @@ import org.nekomanga.data.database.entity.ArtworkEntity
 interface ArtworkDao {
 
     @Query("SELECT * FROM artwork WHERE manga_id = :mangaId")
-    fun getArtworkForManga(mangaId: Long): Flow<List<ArtworkEntity>>
+    fun observeArtworkForManga(mangaId: Long): Flow<List<ArtworkEntity>>
+
+    @Query("SELECT * FROM artwork WHERE manga_id = :mangaId")
+    fun getArtworkForManga(mangaId: Long): List<ArtworkEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArtwork(artwork: ArtworkEntity): Long

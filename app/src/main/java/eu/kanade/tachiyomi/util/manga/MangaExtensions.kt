@@ -15,14 +15,19 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
-fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
+fun Manga.shouldDownloadNewChapters(
+    categoryRepository: CategoryRepository,
+    prefs: PreferencesHelper,
+): Boolean {
     if (!favorite) return false
 
     // Boolean to determine if user wants to automatically download new chapters.
@@ -35,8 +40,9 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 
     // Get all categories, else default category (0)
     val categoriesForManga =
-        db.getCategoriesForManga(this)
-            .executeAsBlocking()
+        runBlocking {
+                categoryRepository.getCategoriesForManga(this@shouldDownloadNewChapters.id!!)
+            }
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
