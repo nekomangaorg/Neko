@@ -11,9 +11,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
-import android.webkit.CookieManager
 import android.webkit.WebView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,15 +32,12 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.feed.FeedViewModel
 import eu.kanade.tachiyomi.ui.library.LibraryViewModel
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.notification
-import java.security.Security
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.conscrypt.Conscrypt
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.logging.CrashReportingTree
@@ -68,22 +63,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
 
-        kotlin
-            .runCatching { CookieManager.getInstance() }
-            .onFailure {
-                Toast.makeText(
-                        applicationContext,
-                        "Error! App requires WebView to be installed",
-                        Toast.LENGTH_LONG,
-                    )
-                    .show()
-            }
-
-        // TLS 1.3 support for Android < 10
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            Security.insertProviderAt(Conscrypt.newProvider(), 1)
-        }
-
         // Avoid potential crashes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val process = getProcessName()
@@ -107,7 +86,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
 
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.Default) {
             setupNotificationChannels()
-            MangaCoverMetadata.load()
         }
 
         preferences
