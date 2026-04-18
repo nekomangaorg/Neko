@@ -10,18 +10,20 @@ import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 
 class UpdateMangaStatusAndMissingChapterCount(
     private val db: DatabaseHelper,
+    private val chapterRepository: ChapterRepository,
     private val downloadManager: DownloadManager,
 ) {
     suspend operator fun invoke(manga: Manga) {
         // This can fail due to a race condition
         val allChaps =
             try {
-                db.getChapters(manga).executeOnIO()
+                chapterRepository.getChaptersForManga(manga.id!!)
             } catch (e: Exception) {
                 TimberKt.d { "Failed to get chapters: $e" }
                 listOf()

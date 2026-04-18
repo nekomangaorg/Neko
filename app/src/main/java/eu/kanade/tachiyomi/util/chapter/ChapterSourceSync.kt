@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.util.chapter
 
+import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -11,8 +12,9 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
-import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -31,8 +33,10 @@ import uy.kohesive.injekt.api.get
  * @param readFromMerged a set of merged chapters that have a read status
  * @return a pair of new insertions and deletions.
  */
-fun syncChaptersWithSource(
+suspend fun syncChaptersWithSource(
     db: DatabaseHelper,
+    appDatabase: AppDatabase,
+    chapterRepository: ChapterRepository,
     rawSourceChapters: List<SChapter>,
     manga: Manga,
     errorFromMerged: Boolean = false,
@@ -43,7 +47,7 @@ fun syncChaptersWithSource(
     val mangaDexPreferences: MangaDexPreferences = Injekt.get()
 
     // Chapters from db.
-    var dbChapters = db.getChapters(manga).executeAsBlocking()
+    var dbChapters = chapterRepository.getChaptersForManga(manga.id!!)
 
     // Dedup unavailable with local prefix
     val chapterUUIDs =
@@ -53,7 +57,7 @@ fun syncChaptersWithSource(
             .toHashSet()
     dbChapters = dbChapters.mapNotNull { dbChapter ->
         if (dbChapter.isLocalSource() && dbChapter.name.substringAfterLast(" - ") in chapterUUIDs) {
-            db.deleteChapter(dbChapter).executeAsBlocking()
+            chapterRepository.deleteChapter(dbChapter)
             return@mapNotNull null
         }
         dbChapter
@@ -87,7 +91,7 @@ fun syncChaptersWithSource(
                             allDownloadsMap.remove(validName)
                         }
                     } else if (dbChapter.isLocalSource()) { // means its not downloaded currently
-                        db.deleteChapter(dbChapter).executeAsBlocking()
+                        chapterRepository.deleteChapter(dbChapter)
                     }
                 }
             }
@@ -172,7 +176,7 @@ fun syncChaptersWithSource(
         }
     }
 
-    dbChapters = db.getChapters(manga).executeAsBlocking()
+    dbChapters = chapterRepository.getChaptersForManga(manga.id!!)
     val dbChaptersByUrl = dbChapters.associateBy { it.url }
     val sourceChaptersByUrl = sourceChapters.associateBy { it.url }
 
@@ -255,7 +259,7 @@ fun syncChaptersWithSource(
         }
     }
     if (mangaDexPreferences.readingSync().get()) {
-        runBlocking { Injekt.get<StatusHandler>().markMergedChaptersStatus(toSync, true) }
+        Injekt.get<StatusHandler>().markMergedChaptersStatus(toSync, true)
     }
 
     // Recognize number for new chapters.
@@ -314,7 +318,7 @@ fun syncChaptersWithSource(
 
     val readded = mutableListOf<Chapter>()
 
-    db.inTransaction {
+    appDatabase.withTransaction {
         val deletedChapterNumbers = TreeSet<Float>()
         val deletedReadChapterNumbers = TreeSet<Float>()
         if (toDelete.isNotEmpty()) {
@@ -324,7 +328,7 @@ fun syncChaptersWithSource(
                 }
                 deletedChapterNumbers.add(c.chapter_number)
             }
-            db.deleteChapters(toDelete).executeAsBlocking()
+            chapterRepository.deleteChapters(toDelete)
         }
 
         if (toAdd.isNotEmpty()) {
@@ -349,17 +353,18 @@ fun syncChaptersWithSource(
                     readded.add(chapter)
                 }
             }
-            val chapters = db.insertChapters(toAdd).executeAsBlocking()
-            toAdd.forEach { chapter ->
-                chapter.id = chapters.results().getValue(chapter).insertedId()
-            }
+            val chapterIds = chapterRepository.insertChapters(toAdd)
+            toAdd.forEachIndexed { index, chapter -> chapter.id = chapterIds[index] }
         }
 
         if (toChange.isNotEmpty()) {
-            db.insertChapters(toChange).executeAsBlocking()
+            chapterRepository.insertChapters(toChange)
         }
         val topChapters =
-            db.getChapters(manga).executeAsBlocking().sortedByDescending { it.date_upload }.take(4)
+            chapterRepository
+                .getChaptersForManga(manga.id!!)
+                .sortedByDescending { it.date_upload }
+                .take(4)
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {
             var delta = 0L

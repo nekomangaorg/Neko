@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -46,6 +47,7 @@ import uy.kohesive.injekt.api.get
 class StatsViewModel() : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
     private val categoryRepository: CategoryRepository = Injekt.get()
+    private val historyRepository: HistoryRepository = Injekt.get()
     private val prefs: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -139,7 +141,7 @@ class StatsViewModel() : ViewModel() {
                     libraryList
                         .map {
                             async {
-                                val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
+                                val history = historyRepository.getHistoryByMangaId(it.id!!)
                                 val tracks = getTracks(it)
 
                                 DetailedStatManga(
@@ -332,8 +334,8 @@ class StatsViewModel() : ViewModel() {
         return service?.get10PointScore(track.score)
     }
 
-    private fun getReadDuration(): String {
-        val chaptersTime = db.getTotalReadDuration()
+    private suspend fun getReadDuration(): String {
+        val chaptersTime = historyRepository.getTotalReadDuration()
         return chaptersTime.getReadDuration(prefs.context.getString(R.string.none))
     }
 

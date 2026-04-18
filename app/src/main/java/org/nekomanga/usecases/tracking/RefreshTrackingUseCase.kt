@@ -1,7 +1,5 @@
 package org.nekomanga.usecases.tracking
 
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -10,8 +8,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.domain.chapter.toChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
@@ -21,6 +19,7 @@ import uy.kohesive.injekt.api.get
 
 class RefreshTrackingUseCase(
     private val db: DatabaseHelper = Injekt.get(),
+    private val chapterRepository: ChapterRepository = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
 ) {
@@ -69,7 +68,7 @@ class RefreshTrackingUseCase(
 
         if (maxChapterRead > 0) {
             val allChapters =
-                db.getChapters(mangaId).executeOnIO().mapNotNull {
+                chapterRepository.getChaptersForManga(mangaId).mapNotNull {
                     it.toSimpleChapter()?.toChapterItem()
                 }
 

@@ -1,28 +1,66 @@
 package org.nekomanga.data.database.repository
 
-import eu.kanade.tachiyomi.data.database.models.MangaChapter
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.MangaChapter as LegacyMangaChapter
 import kotlinx.coroutines.flow.Flow
 
 interface ChapterRepository {
 
-    /**
-     * Observes a paginated list of recent chapters with their associated manga.
-     * * @param search The user's search query to filter manga titles.
-     *
-     * @param limit The number of items to load (for pagination).
-     * @param offset The starting point (for pagination).
-     * @param sortByFetched If true, sorts by when the app fetched the chapter. If false, sorts by
-     *   when the scanlator uploaded it.
-     */
-    fun getRecentChapters(
-        search: String = "",
+    fun observeChaptersForManga(mangaId: Long): Flow<List<Chapter>>
+
+    suspend fun getChaptersForManga(mangaId: Long): List<Chapter>
+
+    suspend fun getChaptersForMangaIds(mangaIds: List<Long>): List<Chapter>
+
+    suspend fun getChapterById(id: Long): Chapter?
+
+    suspend fun getChapterByUrl(url: String): Chapter?
+
+    suspend fun getChapterByUrlAndMangaId(url: String, mangaId: Long): Chapter?
+
+    suspend fun insertChapter(chapter: Chapter): Long
+
+    suspend fun insertChapters(chapters: List<Chapter>): List<Long>
+
+    suspend fun updateChapters(chapters: List<Chapter>)
+
+    suspend fun deleteChapter(chapter: Chapter)
+
+    suspend fun deleteChapters(chapters: List<Chapter>)
+
+    suspend fun updateProgress(
+        id: Long,
+        read: Boolean,
+        bookmark: Boolean,
+        lastPage: Int,
+        pagesLeft: Int,
+    )
+
+    suspend fun updateSourceOrder(chapterId: String, mangaId: Long, order: Int)
+
+    fun observeRecentChapters(
+        search: String,
         limit: Int,
         offset: Int,
         sortByFetched: Boolean,
-    ): Flow<List<MangaChapter>>
+    ): Flow<List<LegacyMangaChapter>>
 
-    // Future methods you will add later:
-    // suspend fun getChapterById(id: Long): Chapter?
-    // suspend fun updateChapter(chapter: Chapter)
-    // suspend fun deleteChapters(chapters: List<Chapter>)
+    suspend fun getRecentChapters(
+        search: String,
+        limit: Int,
+        offset: Int,
+        sortByFetched: Boolean,
+    ): List<LegacyMangaChapter>
+
+    // =========================================================================
+    // LEGACY PUT RESOLVER BATCH OPERATIONS
+    // =========================================================================
+
+    suspend fun updateChaptersBackup(chapters: List<Chapter>)
+
+    suspend fun updateKnownChaptersBackup(chapters: List<Chapter>)
+
+    suspend fun updateChaptersProgress(chapters: List<Chapter>)
+
+    suspend fun fixChaptersSourceOrder(chapters: List<Chapter>)
 }

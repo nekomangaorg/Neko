@@ -36,6 +36,8 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -56,6 +58,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private val trackingErrors = Collections.synchronizedList(mutableListOf<String>())
 
     private val categoryRepository: CategoryRepository by injectLazy()
+    private val chapterRepository: ChapterRepository by injectLazy()
+    private val historyRepository: HistoryRepository by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
@@ -157,7 +161,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
                         val dbChaptersMap =
                             if (existingMangaIds.isNotEmpty())
-                                db.getChapters(existingMangaIds).executeAsBlocking().groupBy {
+                                chapterRepository.getChaptersForMangaIds(existingMangaIds).groupBy {
                                     it.manga_id
                                 }
                             else emptyMap()
@@ -183,9 +187,10 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                         // and group them using our bridge map!
                         val dbHistoriesMap =
                             if (existingMangaIds.isNotEmpty())
-                                db.getHistoryByMangaIds(existingMangaIds)
-                                    .executeAsBlocking()
-                                    .groupBy { history -> chapterToMangaMap[history.chapter_id] }
+                                historyRepository.getHistoryByMangaIds(existingMangaIds).groupBy {
+                                    history ->
+                                    chapterToMangaMap[history.chapter_id]
+                                }
                             else emptyMap()
 
                         preparedItems.forEach { item ->

@@ -6,6 +6,7 @@ import androidx.annotation.ColorInt
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -70,6 +71,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
@@ -88,6 +92,9 @@ class ReaderViewModel
 constructor(
     private val savedState: SavedStateHandle,
     private val db: DatabaseHelper = Injekt.get(),
+    private val appDatabase: AppDatabase = Injekt.get(),
+    private val chapterRepository: ChapterRepository = Injekt.get(),
+    private val historyRepository: HistoryRepository = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
@@ -152,7 +159,7 @@ constructor(
         }
 
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeOnIO()
+        val dbChapters = chapterRepository.getChaptersForManga(manga.id!!)
 
         val allChapterItems = dbChapters.map { DomainChapterItem(it.toSimpleChapter()!!) }
 
@@ -237,7 +244,7 @@ constructor(
      */
     fun onSaveInstanceState() {
         val currentChapter = getCurrentChapter() ?: return
-        saveChapterProgress(currentChapter)
+        viewModelScope.launchNonCancellable { saveChapterProgress(currentChapter) }
     }
 
     /** Whether this presenter is initialized yet. */
@@ -297,7 +304,7 @@ constructor(
         val manga = manga ?: return emptyList()
         chapterItems =
             withContext(Dispatchers.IO) {
-                val dbChapters = db.getChapters(manga).executeAsBlocking()
+                val dbChapters = chapterRepository.getChaptersForManga(manga.id!!)
                 val currentReaderChapter = getCurrentChapter()
 
                 // 1. Convert to ChapterItem
@@ -344,7 +351,7 @@ constructor(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdConstants.chapterSuffix + urlChapterId).executeAsBlocking()
+        val dbChapter = chapterRepository.getChapterByUrl(MdConstants.chapterSuffix + urlChapterId)
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
@@ -377,7 +384,8 @@ constructor(
             TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
-                val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
+                val (newChapters, _) =
+                    syncChaptersWithSource(db, appDatabase, chapterRepository, chapters, manga)
                 val currentChapter = newChapters.find {
                     it.url == MdConstants.chapterSuffix + urlChapterId
                 }
@@ -469,8 +477,10 @@ constructor(
     }
 
     fun toggleBookmark(chapter: Chapter) {
-        chapter.bookmark = !chapter.bookmark
-        db.updateChapterProgress(chapter).executeAsBlocking()
+        viewModelScope.launch {
+            chapter.bookmark = !chapter.bookmark
+            chapterRepository.updateChaptersProgress(listOf(chapter))
+        }
     }
 
     /**
@@ -673,9 +683,11 @@ constructor(
 
     /** Called when reader chapter is changed in reader or when activity is paused. */
     private fun saveReadingProgress(readerChapter: ReaderChapter) {
-        db.inTransaction {
-            saveChapterProgress(readerChapter)
-            saveChapterHistory(readerChapter)
+        viewModelScope.launchNonCancellable {
+            appDatabase.withTransaction {
+                saveChapterProgress(readerChapter)
+                saveChapterHistory(readerChapter)
+            }
         }
     }
 
@@ -687,23 +699,23 @@ constructor(
      * Saves this [readerChapter]'s progress (last read page and whether it's read). If incognito
      * mode isn't on or has at least 1 tracker
      */
-    private fun saveChapterProgress(readerChapter: ReaderChapter) {
+    private suspend fun saveChapterProgress(readerChapter: ReaderChapter) {
         readerChapter.requestedPage = readerChapter.chapter.last_page_read
-        db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
+        chapterRepository.getChapterById(readerChapter.chapter.id!!)?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
         if (!securityPreferences.incognitoMode().get() || hasTrackers) {
-            db.updateChapterProgress(readerChapter.chapter).executeAsBlocking()
+            chapterRepository.updateChaptersProgress(listOf(readerChapter.chapter))
         }
     }
 
     /** Saves this [readerChapter] last read history. */
-    private fun saveChapterHistory(readerChapter: ReaderChapter) {
+    private suspend fun saveChapterHistory(readerChapter: ReaderChapter) {
         if (!securityPreferences.incognitoMode().get()) {
             val readAt = Date().time
             val sessionReadDuration = chapterReadStartTime?.let { readAt - it } ?: 0
             val history =
-                db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()
+                historyRepository.getHistoryByChapterUrl(readerChapter.chapter.url)
                     ?: History.create(readerChapter.chapter)
 
             val oldTimeRead = history.time_read
@@ -712,7 +724,7 @@ constructor(
                 last_read = readAt
                 time_read = sessionReadDuration + oldTimeRead
             }
-            db.upsertHistoryLastRead(history).executeAsBlocking()
+            historyRepository.upsertHistory(history)
             chapterReadStartTime = null
         }
     }
