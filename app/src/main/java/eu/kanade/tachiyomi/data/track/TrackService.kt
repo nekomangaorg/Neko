@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import okhttp3.OkHttpClient
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.injectLazy
 
@@ -23,6 +25,9 @@ abstract class TrackService(val id: Int) {
     val preferences: PreferencesHelper by injectLazy()
     val networkService: NetworkHelper by injectLazy()
     val db: DatabaseHelper by injectLazy()
+
+    val chapterRepository: ChapterRepository by injectLazy()
+    val historyRepository: HistoryRepository by injectLazy()
 
     open fun canRemoveFromService() = false
 
@@ -137,8 +142,8 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
     val manga = db.getManga(track.manga_id).executeOnIO()
     val allRead =
-        manga?.isOneShotOrCompleted(db) == true &&
-            db.getChapters(track.manga_id).executeOnIO().all { it.read }
+        manga?.isOneShotOrCompleted(chapterRepository) == true &&
+            chapterRepository.getChaptersForManga(track.manga_id).all { it.read }
     if (supportsReadingDates) {
         track.started_reading_date = getStartDate(track)
         track.finished_reading_date = getCompletedDate(track, allRead)
@@ -153,9 +158,9 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
 }
 
 suspend fun TrackService.getStartDate(track: Track): Long {
-    if (db.getChapters(track.manga_id).executeOnIO().any { it.read }) {
+    if (chapterRepository.getChaptersForManga(track.manga_id).any { it.read }) {
         val chapters =
-            db.getHistoryByMangaId(track.manga_id).executeOnIO().filter { it.last_read > 0 }
+            historyRepository.getHistoryByMangaId(track.manga_id).filter { it.last_read > 0 }
         val date = chapters.minOfOrNull { it.last_read } ?: return 0L
         return if (date <= 0L) 0L else date
     }
@@ -164,7 +169,7 @@ suspend fun TrackService.getStartDate(track: Track): Long {
 
 suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long {
     if (allRead) {
-        val chapters = db.getHistoryByMangaId(track.manga_id).executeOnIO()
+        val chapters = historyRepository.getHistoryByMangaId(track.manga_id)
         val date = chapters.maxOfOrNull { it.last_read } ?: return 0L
         return if (date <= 0L) 0L else date
     }
@@ -172,7 +177,7 @@ suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long 
 }
 
 suspend fun TrackService.getLastChapterRead(track: Track): Float {
-    val chapters = db.getChapters(track.manga_id).executeOnIO()
+    val chapters = chapterRepository.getChaptersForManga(track.manga_id)
     val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.smart_order }
     return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
 }

@@ -26,8 +26,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -49,9 +51,13 @@ import uy.kohesive.injekt.injectLazy
 class MangaUpdateCoordinator {
     private val db: DatabaseHelper by injectLazy()
 
+    private val appDatabase: AppDatabase by injectLazy()
+
     private val artworkRepository: ArtworkRepository by injectLazy()
 
     private val categoryRepository: CategoryRepository by injectLazy()
+
+    private val chapterRepository: ChapterRepository by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
@@ -154,6 +160,8 @@ class MangaUpdateCoordinator {
         val (newChapters, removedChapters) =
             syncChaptersWithSource(
                 db = db,
+                appDatabase = appDatabase,
+                chapterRepository = chapterRepository,
                 rawSourceChapters = allChapters,
                 manga = manga,
                 errorFromMerged = errorFromMerged,

@@ -9,11 +9,15 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.UiText
@@ -33,7 +37,11 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     val db: DatabaseHelper by injectLazy()
 
+    val historyRepository: HistoryRepository by injectLazy()
+
     val categoryRepository: CategoryRepository by injectLazy()
+
+    val chapterRepository: ChapterRepository by injectLazy()
 
     private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -58,10 +66,11 @@ class AdvancedSettingsViewModel : ViewModel() {
 
                 val chaptersByMangaId =
                     mangaFolders
-                        .asSequence()
                         .mapNotNull { mangaMap[it.name]?.id }
                         .chunked(900)
-                        .flatMap { db.getChapters(it).executeAsBlocking() }
+                        .map { chunk -> async { chapterRepository.getChaptersForMangaIds(chunk) } }
+                        .awaitAll()
+                        .flatten()
                         .groupBy { it.manga_id }
 
                 for (mangaFolder in mangaFolders) {
@@ -107,7 +116,7 @@ class AdvancedSettingsViewModel : ViewModel() {
             } else {
                 db.deleteAllMangaNotInLibrary().executeAsBlocking()
             }
-            db.deleteHistoryNoLastRead().executeAsBlocking()
+            historyRepository.deleteHistoryNoLastRead()
 
             _toastEvent.emit(UiText.StringResource(R.string.clear_database_completed))
         }

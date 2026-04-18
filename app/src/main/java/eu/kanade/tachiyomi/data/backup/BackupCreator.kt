@@ -37,6 +37,8 @@ import okio.gzip
 import okio.sink
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -45,6 +47,8 @@ class BackupCreator(val context: Context) {
 
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val categoryRepository: CategoryRepository by injectLazy()
+    internal val chapterRepository: ChapterRepository by injectLazy()
+    internal val historyRepository: HistoryRepository by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     internal val storageManager: StorageManager by injectLazy()
@@ -151,7 +155,7 @@ class BackupCreator(val context: Context) {
                     flags and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER ||
                         flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY
                 ) {
-                    databaseHelper.getChapters(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                    chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
@@ -174,7 +178,7 @@ class BackupCreator(val context: Context) {
                 if (flags and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
                     // We need history entries matching chapters from these mangas.
                     // getHistoryByMangaIds fetches history matching chapter_id linked to the manga
-                    databaseHelper.getHistoryByMangaIds(mangaIds).executeAsBlocking().groupBy {
+                    historyRepository.getHistoryByMangaIds(mangaIds).groupBy {
                         // It isn't trivial to group by mangaId since history object only contains
                         // chapter_id.
                         // However history object does not have mangaId so grouping by chapter_id

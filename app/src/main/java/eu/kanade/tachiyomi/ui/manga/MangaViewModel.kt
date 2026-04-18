@@ -97,6 +97,8 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -156,6 +158,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val db: DatabaseHelper = Injekt.get()
     val artworkRepository: ArtworkRepository = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
+    val chapterRepository: ChapterRepository = Injekt.get()
+    val historyRepository: HistoryRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
@@ -242,8 +246,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val historyFlow =
-        db.getHistoryByMangaId(mangaId)
-            .asFlow()
+        historyRepository
+            .observeHistoryByMangaId(mangaId)
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -322,7 +326,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
      */
     val allChapterFlow =
         combine(
-                db.getChapters(mangaId).asFlow(),
+                chapterRepository.observeChaptersForManga(mangaId),
                 mangaFlow,
                 mangaDexPreferences.blockedGroups().changes(),
                 mangaDexPreferences.blockedUploaders().changes(),
@@ -809,7 +813,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             if (it.chapter.isLocalSource()) it.chapter.toDbChapter() else null
                         }
                         if (localDbChapters.isNotEmpty()) {
-                            db.deleteChapters(localDbChapters).executeAsBlocking()
+                            chapterRepository.deleteChapters(localDbChapters)
                         }
                     }
                     updateRemovedDownload(chapterItems)
@@ -953,7 +957,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             viewModelScope.launchIO {
                                 val originalDbChapters =
                                     updatedChapterList.map { it.chapter }.map { it.toDbChapter() }
-                                db.updateChaptersProgress(originalDbChapters).executeOnIO()
+                                chapterRepository.updateChaptersProgress(originalDbChapters)
                             }
                         },
                         dismissAction = { viewModelScope.launchIO { finalizeChapters() } },

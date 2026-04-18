@@ -58,6 +58,8 @@ import org.nekomanga.data.database.repository.BrowseFilterRepository
 import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -117,6 +119,10 @@ class AppModule(val app: Application) : InjektModule {
                 categoryDao = get<AppDatabase>().categoryDao(),
                 mangaCategoryDao = get<AppDatabase>().mangaCategoryDao(),
             )
+        }
+
+        addSingletonFactory<ChapterRepository> {
+            ChapterRepositoryImpl(chapterDao = get<AppDatabase>().chapterDao())
         }
 
         addSingletonFactory { DatabaseHelper(app) }

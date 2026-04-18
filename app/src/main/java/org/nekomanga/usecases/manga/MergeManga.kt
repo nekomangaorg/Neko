@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 
@@ -38,6 +39,7 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
 
 class RemoveMergedManga(
     private val db: DatabaseHelper,
+    private val chapterRepository: ChapterRepository,
     private val downloadManager: DownloadManager,
     private val libraryPreferences: LibraryPreferences,
 ) {
@@ -45,7 +47,9 @@ class RemoveMergedManga(
         val dbManga = db.getManga(mangaId).executeOnIO() ?: return
         db.deleteMergeManga(mangaId).executeOnIO()
         val (mergedChapters, _) =
-            db.getChapters(dbManga).executeOnIO().partition { it.isMergedChapterOfType(mergeType) }
+            chapterRepository.getChaptersForManga(mangaId).partition {
+                it.isMergedChapterOfType(mergeType)
+            }
         if (!libraryPreferences.enableLocalChapters().get()) {
             try {
                 downloadManager.deleteChapters(dbManga, mergedChapters)
@@ -53,7 +57,7 @@ class RemoveMergedManga(
                 TimberKt.e(e) { "Failed to delete chapters for merged manga" }
             }
         }
-        db.deleteChapters(mergedChapters).executeOnIO()
+        chapterRepository.deleteChapters(mergedChapters)
     }
 }
 

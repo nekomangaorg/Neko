@@ -97,6 +97,37 @@ interface ChapterDao {
         sortByFetched: Int,
     ): Flow<List<MangaChapter>>
 
+    @Query(
+        """
+        SELECT manga.*,
+               chapters.id AS ch_id, chapters.manga_id AS ch_manga_id, chapters.url AS ch_url, chapters.name AS ch_name,
+               chapters.chapter_txt AS ch_chapter_txt, chapters.chapter_title AS ch_chapter_title, chapters.vol AS ch_vol,
+               chapters.scanlator AS ch_scanlator, chapters.uploader AS ch_uploader, chapters.unavailable AS ch_unavailable,
+               chapters.read AS ch_read, chapters.bookmark AS ch_bookmark, chapters.last_page_read AS ch_last_page_read,
+               chapters.pages_left AS ch_pages_left, chapters.chapter_number AS ch_chapter_number, chapters.source_order AS ch_source_order,
+               chapters.smart_order AS ch_smart_order, chapters.date_fetch AS ch_date_fetch, chapters.date_upload AS ch_date_upload,
+               chapters.mangadex_chapter_id AS ch_mangadex_chapter_id,
+               chapters.language AS ch_language
+        FROM manga JOIN chapters ON manga.id = chapters.manga_id
+        WHERE manga.favorite = 1
+        AND chapters.date_fetch > manga.date_added
+        AND LOWER(manga.title) LIKE :search
+        AND (
+          chapters.unavailable = 0
+          OR (chapters.unavailable = 1 AND chapters.scanlator = 'Local')
+        )
+        ORDER BY
+            CASE WHEN :sortByFetched = 1 THEN chapters.date_fetch ELSE chapters.date_upload END DESC
+        LIMIT :limit OFFSET :offset
+    """
+    )
+    suspend fun getRecentChapters(
+        search: String,
+        limit: Int,
+        offset: Int,
+        sortByFetched: Int,
+    ): List<MangaChapter>
+
     // =========================================================================
     // LEGACY PUT RESOLVER MIGRATIONS (Partial Column Updates)
     // =========================================================================

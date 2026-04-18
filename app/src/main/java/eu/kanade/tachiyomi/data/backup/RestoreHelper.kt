@@ -28,6 +28,8 @@ import kotlin.math.max
 import org.nekomanga.R
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -36,6 +38,8 @@ class RestoreHelper(val context: Context) {
     val db: DatabaseHelper by injectLazy()
     val appDatabase: AppDatabase by injectLazy()
     val categoryRepository: CategoryRepository by injectLazy()
+    val chapterRepository: ChapterRepository by injectLazy()
+    val historyRepository: HistoryRepository by injectLazy()
     val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -292,7 +296,7 @@ class RestoreHelper(val context: Context) {
      *
      * @param history list containing history to be restored
      */
-    internal fun restoreHistoryForManga(
+    internal suspend fun restoreHistoryForManga(
         history: List<BackupHistory>,
         manga: Manga,
         updatedChapters: List<Chapter>,
@@ -304,8 +308,9 @@ class RestoreHelper(val context: Context) {
         val historyToBeUpdated = ArrayList<History>(history.size)
 
         val dbHistories =
-            (preFetchedDbHistories ?: db.getHistoryByMangaId(mangaId).executeAsBlocking())
-                .associateBy { it.chapter_id }
+            (preFetchedDbHistories ?: historyRepository.getHistoryByMangaId(mangaId)).associateBy {
+                it.chapter_id
+            }
         val dbChaptersMap = updatedChapters.associateBy { it.url }
 
         for ((url, lastRead, readDuration) in history) {
@@ -330,7 +335,7 @@ class RestoreHelper(val context: Context) {
         }
 
         if (historyToBeUpdated.isNotEmpty()) {
-            db.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+            historyRepository.upsertHistoryList(historyToBeUpdated)
         }
     }
 
@@ -405,12 +410,12 @@ class RestoreHelper(val context: Context) {
         }
     }
 
-    internal fun restoreChaptersForMangaOffline(
+    internal suspend fun restoreChaptersForMangaOffline(
         manga: Manga,
         chapters: List<Chapter>,
         preFetchedDbChapters: List<Chapter>? = null,
     ): List<Chapter> {
-        val dbChapters = preFetchedDbChapters ?: db.getChapters(manga).executeAsBlocking()
+        val dbChapters = preFetchedDbChapters ?: chapterRepository.getChaptersForManga(manga.id!!)
         val dbChaptersMap = dbChapters.associateBy { it.url }
 
         chapters.forEach { chapter ->
@@ -436,14 +441,15 @@ class RestoreHelper(val context: Context) {
         }
 
         val newChapters = chapters.groupBy { it.id != null }
-        newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
+        newChapters[true]?.let { chapterRepository.updateKnownChaptersBackup(it) }
 
         // Populate chapter.id from the put results to correctly process History later
         newChapters[false]?.let { newChaps ->
-            val results = db.insertChapters(newChaps).executeAsBlocking()
-            results.results().entries.forEach { (insertedChap, result) ->
-                insertedChap.id = result.insertedId()
-            }
+            // Room returns a List<Long> of the new IDs in the exact order they were inserted
+            val insertedIds = chapterRepository.insertChapters(newChaps)
+
+            // Map the new IDs back to the chapter objects so History can use them
+            newChaps.forEachIndexed { index, insertedChap -> insertedChap.id = insertedIds[index] }
         }
 
         return chapters

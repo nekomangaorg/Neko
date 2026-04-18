@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.SimpleManga
@@ -86,9 +87,10 @@ data class Download(
         suspend fun fromChapterId(
             chapterId: Long,
             db: DatabaseHelper = Injekt.get(),
+            chapterRepository: ChapterRepository = Injekt.get(),
             sourceManager: SourceManager = Injekt.get(),
         ): Download? {
-            val chapter = db.getChapter(chapterId).executeOnIO()
+            val chapter = chapterRepository.getChapterById(chapterId)
             chapter?.manga_id ?: return null
             val manga = db.getManga(chapter.manga_id!!).executeOnIO() ?: return null
             val source = chapter.getHttpSource(sourceManager)

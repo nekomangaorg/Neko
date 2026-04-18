@@ -52,8 +52,10 @@ import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.R
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
@@ -356,8 +358,12 @@ class MainActivity : BaseMainActivity() {
                     val mangaId = extras.getLong(DeepLinks.Extras.MangaId)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
+                        val chapterRepository: ChapterRepository = Injekt.get()
+
                         val downloadManager = Injekt.get<DownloadManager>()
-                        val chapters = db.getChapters(mangaId).executeAsBlocking()
+                        val chapters = runBlocking {
+                            chapterRepository.getChaptersForManga(mangaId)
+                        }
                         db.getManga(mangaId).executeAsBlocking()?.let { manga ->
                             val availableChapters = chapters.filter {
                                 it.isAvailable(downloadManager, manga)

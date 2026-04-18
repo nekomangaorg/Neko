@@ -89,8 +89,10 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -108,9 +110,13 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private val db by injectLazy<DatabaseHelper>()
 
+    private val appDatabase by injectLazy<AppDatabase>()
+
     private val artworkRepository by injectLazy<ArtworkRepository>()
 
     private val categoryRepository by injectLazy<CategoryRepository>()
+
+    private val chapterRepository by injectLazy<ChapterRepository>()
 
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
@@ -552,7 +558,14 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                         if (fetchedChapters.isNotEmpty()) {
                             val newChapters =
-                                syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
+                                syncChaptersWithSource(
+                                    db,
+                                    appDatabase,
+                                    chapterRepository,
+                                    fetchedChapters,
+                                    manga,
+                                    errorFromMerged,
+                                )
 
                             if (newChapters.first.isNotEmpty()) {
                                 if (shouldDownload) {
@@ -609,7 +622,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         coroutineScope {
                             launch {
                                 if (mangaDexPreferences.readingSync().get()) {
-                                    val dbChapters = db.getChapters(manga).executeOnIO()
+                                    val dbChapters =
+                                        chapterRepository.getChaptersForManga(manga.id!!)
                                     val (mergedChapters, nonMergedChapters) =
                                         dbChapters.partition { it.isMergedChapter() }
                                     if (mangaDexLoginHelper.isLoggedIn()) {
@@ -636,7 +650,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                             }
                                                         }
                                                         .toList()
-                                                db.updateChaptersProgress(markRead).executeOnIO()
+                                                chapterRepository.updateChaptersProgress(markRead)
                                             }
                                     }
                                     if (mergedChapters.isNotEmpty()) {
@@ -670,7 +684,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                     }
                                                 }
                                                 .toList()
-                                        db.updateChaptersProgress(markRead).executeOnIO()
+                                        chapterRepository.updateChaptersProgress(markRead)
                                     }
                                 }
                             }

@@ -65,6 +65,7 @@ import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
@@ -92,6 +93,7 @@ class LibraryViewModel() : ViewModel() {
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
+    val chapterRepository: ChapterRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
@@ -1109,7 +1111,8 @@ class LibraryViewModel() : ViewModel() {
 
             val mangaIds = selectedItems.map { it.displayManga.mangaId }
             val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
-            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+            val chaptersMap =
+                chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
             selectedItems.mapAsync { selectedItem ->
                 val mangaId = selectedItem.displayManga.mangaId
@@ -1139,7 +1142,8 @@ class LibraryViewModel() : ViewModel() {
 
             val mangaIds = displayMangaList.map { it.mangaId }
             val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
-            val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+            val chaptersMap =
+                chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
             displayMangaList.mapAsync { displayManga ->
                 val dbManga = mangasMap[displayManga.mangaId] ?: return@mapAsync
@@ -1206,7 +1210,7 @@ class LibraryViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val manga = db.getManga(mangaId).executeOnIO()
             manga ?: return@launchIO
-            val chapters = db.getChapters(manga).executeAsBlocking()
+            val chapters = chapterRepository.getChaptersForManga(mangaId)
 
             // to avoid allocating an intermediate list of available chapters,
             // reducing GC overhead when the user quickly jumps to reading.
