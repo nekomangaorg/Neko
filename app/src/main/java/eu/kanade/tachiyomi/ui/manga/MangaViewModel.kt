@@ -13,7 +13,6 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -49,15 +48,12 @@ import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.asFlow
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.DateFormat
-import kotlin.getValue
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentSet
@@ -102,8 +98,12 @@ import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaAggregateRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.ScanlatorGroupRepository
+import org.nekomanga.data.database.repository.TrackRepository
+import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -160,14 +160,19 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val securityPreferences: SecurityPreferences = Injekt.get()
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
-    val db: DatabaseHelper = Injekt.get()
     val mangaRepository: MangaRepository = Injekt.get()
+    val mangaAggregateRepository: MangaAggregateRepository = Injekt.get()
     val mergeMangaRepository: MergeMangaRepository = Injekt.get()
 
     val artworkRepository: ArtworkRepository = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
     val historyRepository: HistoryRepository = Injekt.get()
+
+    val scanlatorGroupRepository: ScanlatorGroupRepository = Injekt.get()
+
+    val uploaderGroupRepository: UploaderRepository = Injekt.get()
+    val trackRepository: TrackRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
 
     val appSnackbarManager: AppSnackbarManager = Injekt.get()
@@ -286,8 +291,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val tracksFlow =
-        db.getTracks(mangaId)
-            .asFlow()
+        trackRepository
+            .observeTracksForManga(mangaId)
             .map { tracks -> tracks.map { it.toTrackItem() }.toPersistentList() }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
@@ -1803,7 +1808,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 }
                         }
                         // Save the new track (with or without remote data) to the local DB *once*
-                        db.insertTrack(track).executeOnIO()
+                        trackRepository.insertTrack(track)
                     }
                     val autoAddStatus = mangaDexPreferences.autoAddToMangaDexLibrary().get()
                     val canAutoAdd =
@@ -2226,7 +2231,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             when (blockType) {
                 MangaConstants.BlockType.Group -> {
-                    val scanlatorGroupImpl = db.getScanlatorGroupByName(name).executeAsBlocking()
+                    val scanlatorGroupImpl = scanlatorGroupRepository.getScanlatorGroupByName(name)
                     if (scanlatorGroupImpl == null) {
                         launchIO { mangaUpdateCoordinator.updateGroup(name) }
                     }
@@ -2235,7 +2240,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     mangaDexPreferences.blockedGroups().set(blockedGroups)
                 }
                 MangaConstants.BlockType.Uploader -> {
-                    val uploaderImpl = db.getUploaderByName(name).executeAsBlocking()
+                    val uploaderImpl = uploaderGroupRepository.getUploaderByName(name)
                     if (uploaderImpl == null) {
                         launchIO { mangaUpdateCoordinator.updateUploader(name) }
                     }
@@ -2254,7 +2259,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         viewModelScope.launchIO {
                             when (blockType) {
                                 MangaConstants.BlockType.Group -> {
-                                    db.deleteScanlatorGroup(name).executeOnIO()
+                                    scanlatorGroupRepository.deleteScanlatorGroup(name)
                                     val allBlockedGroups =
                                         mangaDexPreferences.blockedGroups().get().toMutableSet()
                                     allBlockedGroups.remove(name)
@@ -2262,7 +2267,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                 }
 
                                 MangaConstants.BlockType.Uploader -> {
-                                    db.deleteUploader(name).executeOnIO()
+                                    uploaderGroupRepository.deleteUploader(name)
                                     val allBlockedUploaders =
                                         mangaDexPreferences.blockedUploaders().get().toMutableSet()
                                     allBlockedUploaders.remove(name)
@@ -2391,7 +2396,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     }
 
                 val mangaId = effectiveManga.id
-                var dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+                var dbAggregate = mangaAggregateRepository.getMangaAggregate(mangaId)
 
                 if (dbAggregate == null) {
                     mangaUseCases.updateMangaAggregate(
@@ -2401,7 +2406,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     )
                 }
 
-                dbAggregate = db.getMangaAggregate(mangaId).executeOnIO()
+                dbAggregate = mangaAggregateRepository.getMangaAggregate(mangaId)
 
                 val volumes: Map<String, AggregateVolume>? =
                     if (dbAggregate != null) {

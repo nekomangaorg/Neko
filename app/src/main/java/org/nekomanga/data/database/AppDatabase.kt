@@ -75,7 +75,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun mergeMangaDao(): MergeMangaDao
 
-    abstract fun scanlatorDao(): ScanlatorGroupDao
+    abstract fun scanlatorGroupDao(): ScanlatorGroupDao
 
     abstract fun similarDao(): SimilarDao
 

@@ -10,7 +10,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.toBitmap
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.feed.FeedRepository
@@ -26,7 +25,6 @@ import uy.kohesive.injekt.api.get
 
 class MangaShortcutManager(
     val preferences: PreferencesHelper = Injekt.get(),
-    val db: DatabaseHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,

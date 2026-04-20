@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.jobs.follows
 
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -12,7 +11,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
@@ -20,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -31,9 +30,9 @@ class FollowsSyncProcessor {
     val preferences: PreferencesHelper by injectLazy()
     val mangaDexPreferences: MangaDexPreferences by injectLazy()
     val libraryPreference: LibraryPreferences by injectLazy()
-    val db: DatabaseHelper by injectLazy()
     val mangaRepository: MangaRepository by injectLazy()
     val categoryRepository: CategoryRepository by injectLazy()
+    val trackRepository: TrackRepository by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
     private val followsHandler: FollowsHandler by injectLazy()
@@ -151,12 +150,16 @@ class FollowsSyncProcessor {
                     updateNotification(manga.title, count.andIncrement, listManga.size)
 
                     // Get this manga's trackers from the database
-                    var mdListTrack = db.getMDList(manga).executeOnIO()
+                    var mdListTrack =
+                        trackRepository.getTrackByMangaIdAndTrackServiceId(
+                            manga.id!!,
+                            TrackManager.MDLIST,
+                        )
 
                     // create mdList if missing
                     if (mdListTrack == null) {
                         mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                        db.insertTrack(mdListTrack).executeAsBlocking()
+                        trackRepository.insertTrack(mdListTrack)
                     }
 
                     if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
@@ -168,7 +171,7 @@ class FollowsSyncProcessor {
 
                             mdListTrack.status = FollowStatus.READING.int
                             val returnedTracker = trackManager.mdList.update(mdListTrack)
-                            db.insertTrack(returnedTracker).executeOnIO()
+                            trackRepository.insertTrack(returnedTracker)
                         }
                         countNew.incrementAndGet()
                     }

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -32,7 +31,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
-import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.combine
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
@@ -66,6 +64,7 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
@@ -91,10 +90,12 @@ class LibraryViewModel() : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
-    val db: DatabaseHelper = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
     val mangaRepository: MangaRepository = Injekt.get()
+
+    val trackRepository: TrackRepository = Injekt.get()
+
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
@@ -162,8 +163,8 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val trackMapFlow: Flow<Map<Long, List<String>>> =
-        db.getAllTracks()
-            .asFlow()
+        trackRepository
+            .observeAllTracks()
             .mapNotNull { tracks ->
                 val serviceMap = loggedServices.associateBy { it.id }
 

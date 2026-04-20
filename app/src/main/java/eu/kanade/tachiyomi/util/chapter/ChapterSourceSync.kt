@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import androidx.room.withTransaction
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -35,7 +34,6 @@ import uy.kohesive.injekt.api.get
  * @return a pair of new insertions and deletions.
  */
 suspend fun syncChaptersWithSource(
-    db: DatabaseHelper,
     appDatabase: AppDatabase,
     chapterRepository: ChapterRepository,
     mangaRepository: MangaRepository,

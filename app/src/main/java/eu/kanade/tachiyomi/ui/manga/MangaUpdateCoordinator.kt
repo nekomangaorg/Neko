@@ -5,7 +5,6 @@ import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -33,6 +32,8 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.ScanlatorGroupRepository
+import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -52,8 +53,6 @@ import uy.kohesive.injekt.injectLazy
  * MangaResult at each stage of the process
  */
 class MangaUpdateCoordinator {
-    private val db: DatabaseHelper by injectLazy()
-
     private val appDatabase: AppDatabase by injectLazy()
 
     private val artworkRepository: ArtworkRepository by injectLazy()
@@ -63,6 +62,10 @@ class MangaUpdateCoordinator {
     private val chapterRepository: ChapterRepository by injectLazy()
     private val mangaRepository: MangaRepository by injectLazy()
     private val mergeMangaRepository: MergeMangaRepository by injectLazy()
+
+    private val scanlatorGroupRepository: ScanlatorGroupRepository by injectLazy()
+
+    private val uploaderRepository: UploaderRepository by injectLazy()
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -165,7 +168,6 @@ class MangaUpdateCoordinator {
         val (allChapters, readFromMerged, errorFromMerged) = fetchAndCombineChapters(manga)
         val (newChapters, removedChapters) =
             syncChaptersWithSource(
-                db = db,
                 appDatabase = appDatabase,
                 chapterRepository = chapterRepository,
                 mangaRepository = mangaRepository,
@@ -288,14 +290,14 @@ class MangaUpdateCoordinator {
         sourceManager.mangaDex.getScanlatorGroup(group).onSuccess {
             val scanlatorGroupImpl = it.toScanlatorGroupImpl()
             if (group == scanlatorGroupImpl.name) {
-                db.insertScanlatorGroups(listOf(scanlatorGroupImpl)).executeAsBlocking()
+                scanlatorGroupRepository.insertScanlatorGroups(listOf(scanlatorGroupImpl))
             }
         }
     }
 
     suspend fun updateUploader(uploader: String) {
         sourceManager.mangaDex.getUploader(uploader).onSuccess {
-            db.insertUploader(listOf(it.toUploaderImpl())).executeAsBlocking()
+            uploaderRepository.insertUploaders(listOf(it.toUploaderImpl()))
         }
     }
 }

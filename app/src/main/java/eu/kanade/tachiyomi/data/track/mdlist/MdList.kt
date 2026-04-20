@@ -108,7 +108,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             } catch (e: Exception) {
                 TimberKt.e(e) { "error updating MDList" }
             }
-            db.insertTrack(track).executeAsBlocking()
+            trackRepository.insertTrack(track)
             track
         }
     }

@@ -9,11 +9,11 @@ import org.nekomanga.data.database.entity.MangaSimilarEntity
 
 @Dao
 interface SimilarDao {
-    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
-    fun observeSimilar(mangaId: String): Flow<MangaSimilarEntity?>
+    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaDexUuid")
+    fun observeSimilar(mangaDexUuid: String): Flow<MangaSimilarEntity?>
 
-    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaId")
-    suspend fun getSimilar(mangaId: String): MangaSimilarEntity?
+    @Query("SELECT * FROM manga_similar WHERE manga_id = :mangaDexUuid")
+    suspend fun getSimilar(mangaDexUuid: String): MangaSimilarEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSimilar(similar: MangaSimilarEntity)

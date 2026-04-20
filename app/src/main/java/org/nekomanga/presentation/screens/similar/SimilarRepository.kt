@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.similar
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
@@ -12,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.SimilarRepository
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.logging.TimberKt
@@ -19,11 +19,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class SimilarRepository {
+class SimilarRepo {
 
     private val similarHandler: SimilarHandler by injectLazy()
-    private val db: DatabaseHelper by injectLazy()
     private val mangaRepository: MangaRepository by injectLazy()
+    private val similarRepository: SimilarRepository by injectLazy()
     private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     suspend fun fetchSimilar(
@@ -31,7 +31,7 @@ class SimilarRepository {
         forceRefresh: Boolean = false,
     ): List<SimilarMangaGroup> {
         return withContext(Dispatchers.IO) {
-            val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
+            val similarDbEntry = similarRepository.getSimilar(dexId)
             val actualRefresh =
                 when (similarDbEntry == null) {
                     true -> true

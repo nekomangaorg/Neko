@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.withTransaction
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY_MASK
@@ -20,7 +21,6 @@ import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -36,22 +36,25 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import org.nekomanga.R
+import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupCreator(val context: Context) {
-    internal val databaseHelper: DatabaseHelper by injectLazy()
+    internal val appDatabase: AppDatabase by injectLazy()
     internal val categoryRepository: CategoryRepository by injectLazy()
     internal val chapterRepository: ChapterRepository by injectLazy()
     internal val historyRepository: HistoryRepository by injectLazy()
     internal val mangaRepository: MangaRepository by injectLazy()
     internal val mergeMangaRepository: MergeMangaRepository by injectLazy()
+    internal val trackRepository: TrackRepository by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     internal val storageManager: StorageManager by injectLazy()
@@ -70,7 +73,7 @@ class BackupCreator(val context: Context) {
         // Create root object
         var backup: Backup? = null
 
-        databaseHelper.inTransaction {
+        appDatabase.withTransaction {
             val databaseManga =
                 getFavoriteManga() +
                     if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA || isAutoBackup) {
@@ -170,7 +173,7 @@ class BackupCreator(val context: Context) {
 
             val tracksMap =
                 if (flags and BACKUP_TRACK_MASK == BACKUP_TRACK) {
-                    databaseHelper.getTracks(mangaIds).executeAsBlocking().groupBy { it.manga_id }
+                    trackRepository.getTracksForMangaByIds(mangaIds).groupBy { it.manga_id }
                 } else {
                     emptyMap()
                 }
