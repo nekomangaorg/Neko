@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import androidx.core.content.edit
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
@@ -26,7 +25,6 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)
 
     private val json: Json by injectLazy()
-    private val db: DatabaseHelper by injectLazy()
     private val chapterRepository: ChapterRepository by injectLazy()
 
     private val mangaRepository: MangaRepository by injectLazy()

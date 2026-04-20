@@ -12,7 +12,6 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -75,6 +74,7 @@ import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
@@ -92,11 +92,11 @@ class ReaderViewModel
 @JvmOverloads
 constructor(
     private val savedState: SavedStateHandle,
-    private val db: DatabaseHelper = Injekt.get(),
     private val appDatabase: AppDatabase = Injekt.get(),
     private val chapterRepository: ChapterRepository = Injekt.get(),
     private val historyRepository: HistoryRepository = Injekt.get(),
     private val mangaRepository: MangaRepository = Injekt.get(),
+    private val trackRepository: TrackRepository = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
@@ -192,7 +192,7 @@ constructor(
 
     private var hasTrackers: Boolean = false
     private val checkTrackers: (Manga) -> Unit = { manga ->
-        val tracks = db.getTracks(manga).executeAsBlocking()
+        val tracks = runBlocking { trackRepository.getTracksForManga(manga.id!!) }
 
         hasTrackers = tracks.size > 0
     }
@@ -388,12 +388,11 @@ constructor(
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) =
                     syncChaptersWithSource(
-                        db,
-                        appDatabase,
-                        chapterRepository,
-                        mangaRepository,
-                        chapters,
-                        manga,
+                        appDatabase = appDatabase,
+                        chapterRepository = chapterRepository,
+                        mangaRepository = mangaRepository,
+                        manga = manga,
+                        rawSourceChapters = chapters,
                     )
                 val currentChapter = newChapters.find {
                     it.url == MdConstants.chapterSuffix + urlChapterId

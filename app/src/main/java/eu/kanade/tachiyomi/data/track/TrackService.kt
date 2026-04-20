@@ -4,7 +4,6 @@ import androidx.annotation.CallSuper
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -17,6 +16,7 @@ import okhttp3.OkHttpClient
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.injectLazy
 
@@ -24,12 +24,10 @@ abstract class TrackService(val id: Int) {
 
     val preferences: PreferencesHelper by injectLazy()
     val networkService: NetworkHelper by injectLazy()
-    val db: DatabaseHelper by injectLazy()
-
     val chapterRepository: ChapterRepository by injectLazy()
     val historyRepository: HistoryRepository by injectLazy()
-
     val mangaRepository: MangaRepository by injectLazy()
+    val trackRepository: TrackRepository by injectLazy()
 
     open fun canRemoveFromService() = false
 

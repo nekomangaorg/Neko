@@ -45,7 +45,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
         }
     }
 
-    private val repo: SimilarRepository = Injekt.get()
+    private val repo: SimilarRepo = Injekt.get()
     private val categoryRepository: CategoryRepository = Injekt.get()
     private val mangaRepository: MangaRepository = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()

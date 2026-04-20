@@ -2,11 +2,11 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.withTransaction
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -34,11 +34,13 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -58,15 +60,17 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private var cancelled = 0
     private val trackingErrors = Collections.synchronizedList(mutableListOf<String>())
 
+    private val appDatabase: AppDatabase by injectLazy()
     private val categoryRepository: CategoryRepository by injectLazy()
     private val chapterRepository: ChapterRepository by injectLazy()
     private val historyRepository: HistoryRepository by injectLazy()
     private val mangaRepository: MangaRepository by injectLazy()
     private val mergeMangaRepository: MergeMangaRepository by injectLazy()
 
-    private val db: DatabaseHelper by injectLazy()
+    private val trackRepository: TrackRepository by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
+
     private val sourceManager: SourceManager by injectLazy()
 
     // Notification Throttling
@@ -153,7 +157,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 // PHASE 2: Transactional Write (DB I/O)
                 val itemsWithCovers = mutableListOf<RestorableItem>()
                 try {
-                    db.inTransaction {
+                    appDatabase.withTransaction {
                         // [OPTIMIZATION] Fetch dbCategories once per chunk instead of per manga
                         val dbCategories = categoryRepository.getCategories()
 
@@ -177,7 +181,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                             else emptyMap()
                         val dbTracksMap =
                             if (existingMangaIds.isNotEmpty())
-                                db.getTracks(existingMangaIds).executeAsBlocking().groupBy {
+                                trackRepository.getTracksForMangaByIds(existingMangaIds).groupBy {
                                     it.manga_id
                                 }
                             else emptyMap()

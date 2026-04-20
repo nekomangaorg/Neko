@@ -1,14 +1,13 @@
 package org.nekomanga.usecases.tracking
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.track.toDbTrack
@@ -18,8 +17,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class RefreshTrackingUseCase(
-    private val db: DatabaseHelper = Injekt.get(),
     private val chapterRepository: ChapterRepository = Injekt.get(),
+    private val trackRepository: TrackRepository = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
 ) {
@@ -29,7 +28,7 @@ class RefreshTrackingUseCase(
         onRefreshError: suspend (Throwable, Int, String?) -> Unit,
         onChaptersToMarkRead: suspend (List<ChapterItem>) -> Unit,
     ) {
-        val tracks = db.getTracks(mangaId).executeOnIO()
+        val tracks = trackRepository.getTracksForManga(mangaId)
         if (tracks.isEmpty()) return
 
         val updatedTracks = coroutineScope {
@@ -54,7 +53,7 @@ class RefreshTrackingUseCase(
                                 }
                             }
                             .getOrNull()
-                            ?.also { updatedTrack -> db.insertTrack(updatedTrack).executeOnIO() }
+                            ?.also { updatedTrack -> trackRepository.insertTrack(updatedTrack) }
                     }
                 }
                 .awaitAll()

@@ -1,7 +1,6 @@
 package org.nekomanga.usecases.chapters
 
 import com.pushtorefresh.storio.sqlite.operations.put.PreparedPutCollectionOfObjects
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import io.mockk.coEvery

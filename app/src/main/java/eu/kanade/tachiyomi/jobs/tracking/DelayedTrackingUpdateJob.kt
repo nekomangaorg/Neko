@@ -9,12 +9,11 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.concurrent.TimeUnit
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -38,14 +37,14 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         }
 
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
-        val db = Injekt.get<DatabaseHelper>()
+        val trackRepository = Injekt.get<TrackRepository>()
         val trackManager = Injekt.get<TrackManager>()
 
         withIOContext {
             delayedTrackingStore
                 .getItems()
                 .mapNotNull {
-                    val track = db.getTrackByTrackId(it.trackId).executeOnIO()
+                    val track = trackRepository.getTrackById(it.trackId)
                     if (track == null) {
                         delayedTrackingStore.remove(it.trackId)
                     }
@@ -63,7 +62,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             false -> {
                                 try {
                                     service.update(track, true)
-                                    db.insertTrack(track).executeAsBlocking()
+                                    trackRepository.insertTrack(track)
                                 } catch (e: Exception) {
                                     delayedTrackingStore.add(track.id!!, track.last_chapter_read)
                                     TimberKt.e(e) { "Error inserting for delayed tracker" }

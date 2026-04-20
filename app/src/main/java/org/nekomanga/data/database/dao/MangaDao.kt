@@ -85,25 +85,25 @@ interface MangaDao {
 
     @Query(
         """
-        SELECT manga.*, MAX(history.last_read) AS max
+        SELECT manga.*
         FROM manga
         JOIN chapters ON manga.id = chapters.manga_id
         JOIN history ON chapters.id = history.chapter_id
         WHERE manga.favorite = 1
         GROUP BY manga.id
-        ORDER BY max DESC
+        ORDER BY MAX(history.last_read) DESC
     """
     )
     fun observeLastReadManga(): Flow<List<MangaEntity>>
 
     @Query(
         """
-        SELECT manga.*, MAX(chapters.date_fetch) AS max
+        SELECT manga.*
         FROM manga
         JOIN chapters ON manga.id = chapters.manga_id
         WHERE manga.favorite = 1
         GROUP BY manga.id
-        ORDER BY max DESC
+        ORDER BY MAX(chapters.date_fetch) DESC
     """
     )
     fun observeLastFetchedManga(): Flow<List<MangaEntity>>

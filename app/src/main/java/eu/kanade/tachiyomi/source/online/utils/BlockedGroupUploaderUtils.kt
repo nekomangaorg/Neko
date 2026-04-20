@@ -1,24 +1,24 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import com.github.michaelbull.result.getOrElse
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.repository.ScanlatorGroupRepository
+import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.domain.site.MangaDexPreferences
 
 suspend fun getBlockedScanlatorGroupUUIDs(
     mangaDexPreferences: MangaDexPreferences,
-    db: DatabaseHelper,
+    scanlatorGroupRepository: ScanlatorGroupRepository,
     mangaDex: MangaDex,
 ): List<String> {
     val blockedGroupNames = mangaDexPreferences.blockedGroups().get().toList()
     return coroutineScope {
         val chunks = blockedGroupNames.chunked(900)
         val existingGroups = chunks.flatMap { chunk ->
-            db.getScanlatorGroupsByNames(chunk).executeAsBlocking()
+            scanlatorGroupRepository.getScanlatorGroupsByNames(chunk)
         }
         val existingGroupNames = existingGroups.map { it.name }.toSet()
         val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
@@ -30,7 +30,7 @@ suspend fun getBlockedScanlatorGroupUUIDs(
                 .mapNotNull { result -> result.getOrElse { null }?.toScanlatorGroupImpl() }
 
         if (fetchedGroups.isNotEmpty()) {
-            db.insertScanlatorGroups(fetchedGroups).executeOnIO()
+            scanlatorGroupRepository.insertScanlatorGroups(fetchedGroups)
         }
         (existingGroups + fetchedGroups).map { it.uuid }
     }
@@ -38,14 +38,14 @@ suspend fun getBlockedScanlatorGroupUUIDs(
 
 suspend fun getBlockedUploaderUUIDs(
     mangaDexPreferences: MangaDexPreferences,
-    db: DatabaseHelper,
+    uploaderRepository: UploaderRepository,
     mangaDex: MangaDex,
 ): List<String> {
     val blockedUploaderNames = mangaDexPreferences.blockedUploaders().get().toList()
     return coroutineScope {
         val chunks = blockedUploaderNames.chunked(900)
         val existingUploaders = chunks.flatMap { chunk ->
-            db.getUploadersByNames(chunk).executeAsBlocking()
+            uploaderRepository.getUploadersByNames(chunk)
         }
         val existingUploaderNames = existingUploaders.map { it.username }.toSet()
         val missingUploaderNames = blockedUploaderNames.filterNot { it in existingUploaderNames }
@@ -57,7 +57,7 @@ suspend fun getBlockedUploaderUUIDs(
                 .mapNotNull { result -> result.getOrElse { null }?.toUploaderImpl() }
 
         if (fetchedUploaders.isNotEmpty()) {
-            db.insertUploader(fetchedUploaders).executeOnIO()
+            uploaderRepository.insertUploaders(fetchedUploaders)
         }
         (existingUploaders + fetchedUploaders).map { it.uuid }
     }
