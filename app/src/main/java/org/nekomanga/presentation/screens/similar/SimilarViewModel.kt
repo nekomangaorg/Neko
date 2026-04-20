@@ -3,14 +3,12 @@ package org.nekomanga.presentation.screens.similar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.browse.LibraryEntryVisibility
 import eu.kanade.tachiyomi.util.category.CategoryUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableMap
@@ -27,6 +25,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -47,9 +46,8 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
     }
 
     private val repo: SimilarRepository = Injekt.get()
-    private val db: DatabaseHelper = Injekt.get()
-
     private val categoryRepository: CategoryRepository = Injekt.get()
+    private val mangaRepository: MangaRepository = Injekt.get()
     private val preferences: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
@@ -135,7 +133,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO()!!
+            val editManga = mangaRepository.getMangaById(mangaId)!!
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -144,7 +142,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.insertManga(editManga)
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -265,7 +263,7 @@ class SimilarViewModel(val mangaUUID: String) : ViewModel() {
             val fetchedMangas =
                 allMangaIds
                     .chunked(900)
-                    .flatMap { chunk -> db.getMangas(chunk).executeOnIO() }
+                    .flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
                     .associateBy { it.id }
 
             val newDisplayManga =

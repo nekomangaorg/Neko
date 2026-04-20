@@ -5,9 +5,7 @@ import android.text.format.Formatter
 import coil3.imageLoader
 import coil3.memory.MemoryCache
 import eu.kanade.tachiyomi.data.coil.CoilDiskCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -18,6 +16,7 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -66,10 +65,10 @@ class CoverCache(val context: Context) {
     }
 
     suspend fun deleteOldCovers() {
-        val db = Injekt.get<DatabaseHelper>()
+        val mangaRepository = Injekt.get<MangaRepository>()
         var deletedSize = 0L
         val urls =
-            db.getFavoriteMangaList().executeOnIO().mapNotNull {
+            mangaRepository.getFavoriteMangaList().mapNotNull {
                 it.thumbnail_url?.let { url ->
                     return@mapNotNull DiskUtil.hashKeyForDisk(url)
                 }

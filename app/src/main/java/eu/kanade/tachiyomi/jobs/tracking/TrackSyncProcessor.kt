@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -21,6 +22,7 @@ import uy.kohesive.injekt.api.get
 class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
     val db: DatabaseHelper = Injekt.get()
+    val mangaRepository: MangaRepository = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
 
@@ -30,7 +32,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
     ) =
         withContext(dispatcher) {
             var count = 0
-            val libraryMangaList = db.getLibraryMangaList().executeAsBlocking()
+            val libraryMangaList = mangaRepository.getLibraryList()
             val loggedServices = trackManager.services.values.filter { it.isLogged() }
             val autoAddTracker = preferences.autoAddTracker().get()
             val trackUseCases: TrackUseCases = Injekt.get()

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.presentation.components.UiText
 import uy.kohesive.injekt.injectLazy
 
@@ -32,6 +33,7 @@ class DebugSettingsViewModel : ViewModel() {
     val db: DatabaseHelper by injectLazy()
 
     val categoryRepository: CategoryRepository by injectLazy()
+    val mangaRepository: MangaRepository by injectLazy()
     val followsHandler: FollowsHandler by injectLazy()
     val trackManager: TrackManager by injectLazy()
     val statusHandler: StatusHandler by injectLazy()
@@ -42,7 +44,7 @@ class DebugSettingsViewModel : ViewModel() {
     fun unfollowAllLibraryManga() {
         viewModelScope.launchIO {
             _toastEvent.emit(UiText.StringResource(R.string.started))
-            db.getLibraryMangaList().executeAsBlocking().forEach {
+            mangaRepository.getLibraryList().forEach {
                 followsHandler.updateFollowStatus(it.uuid(), FollowStatus.UNFOLLOWED)
                 db.getMDList(it).executeOnIO()?.let { _ ->
                     db.deleteTrackForManga(it, trackManager.mdList).executeAsBlocking()
@@ -69,7 +71,7 @@ class DebugSettingsViewModel : ViewModel() {
     fun clearAllManga() {
         viewModelScope.launchIO {
             _toastEvent.emit(UiText.StringResource(R.string.started))
-            db.deleteAllManga().executeOnIO()
+            mangaRepository.deleteAllManga()
             _toastEvent.emit(UiText.StringResource(R.string.complete))
         }
     }

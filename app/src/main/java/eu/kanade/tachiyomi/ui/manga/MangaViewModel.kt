@@ -84,11 +84,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
@@ -99,6 +101,7 @@ import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -156,6 +159,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
+    val mangaRepository: MangaRepository = Injekt.get()
     val artworkRepository: ArtworkRepository = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
@@ -238,10 +242,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
      * Massive reduction in UI thread blocking, measurement overhead, and GC thrashing.
      */
     val mangaFlow =
-        db.getManga(mangaId)
-            .asRxObservable()
-            .asFlow()
-            .map { it.toMangaItem() }
+        mangaRepository
+            .observeMangaById(mangaId)
+            .mapNotNull {
+                it ?: return@mapNotNull null
+                it.toMangaItem()
+            }
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -425,7 +431,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     init {
         viewModelScope.launchIO {
-            if (!db.getManga(mangaId).executeAsBlocking()!!.initialized) {
+            if (!mangaRepository.getMangaById(mangaId)!!.initialized) {
                 onRefresh()
             }
         }
@@ -434,16 +440,16 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         viewModelScope.launchIO {
             @OptIn(FlowPreview::class)
             _persistFilterChannel.receiveAsFlow().debounce(2000).collect {
-                val manga = db.getManga(mangaId).executeAsBlocking()!!
+                val manga = mangaRepository.getMangaById(mangaId)!!
                 val filterState = _mangaFilterState.value ?: return@collect
 
                 // Apply state to DB object using the consolidated logic
                 filterState.applyToManga(manga, mangaDetailsPreferences)
 
-                db.insertManga(manga).executeOnIO()
-                db.updateChapterFlags(manga).executeOnIO()
-                db.updateMangaFilteredScanlators(manga).executeOnIO()
-                db.updateMangaFilteredLanguages(manga).executeOnIO()
+                mangaRepository.insertManga(manga)
+                mangaRepository.updateChapterFlags(manga)
+                mangaRepository.updateScanlatorFilter(manga)
+                mangaRepository.updateLanguageFilter(manga)
             }
         }
 
@@ -515,7 +521,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     effectiveManga
                                         .copy(filteredScanlators = persistentListOf())
                                         .toManga()
-                                db.insertManga(manga).executeOnIO()
+                                mangaRepository.insertManga(manga)
                             }
 
                             val activeChapters =
@@ -718,7 +724,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 it.copy(general = it.general.copy(isRefreshing = true))
             }
 
-            val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+            val mangaItem = mangaRepository.getMangaById(mangaId)!!.toMangaItem()
 
             mangaUpdateCoordinator
                 .update(mangaItem = mangaItem, isMerging = isMerging)
@@ -752,7 +758,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
                         is MangaResult.Success -> {
                             syncChaptersReadStatus()
-                            val mangaItem = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+                            val mangaItem = mangaRepository.getMangaById(mangaId)!!.toMangaItem()
 
                             autoAddTrackers(
                                 mangaItem,
@@ -799,7 +805,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         canUndo: Boolean = false,
     ) {
         viewModelScope.launchNonCancellable {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!
             if (chapterItems.isNotEmpty()) {
                 val delete: suspend () -> Unit = {
                     if (isEverything) {
@@ -867,7 +873,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
         skipSync: Boolean = false,
     ) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val manga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             val updatedChapterList =
                 if (
                     markAction is ChapterMarkActions.PreviousRead ||
@@ -973,7 +979,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Delete the list of chapters */
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!
             val allChapterSize = mangaDetailScreenState.value.chapters.allChapters.size
             when (downloadAction) {
                 is DownloadAction.ImmediateDownload -> {
@@ -1136,7 +1142,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     private fun createInitialCurrentArtwork(): Artwork {
-        val manga = db.getManga(mangaId).executeAsBlocking()!!.toMangaItem()
+        val manga = runBlocking { mangaRepository.getMangaById(mangaId)!!.toMangaItem() }
         return Artwork(
             cover = manga.userCover,
             dynamicCover = manga.dynamicCover,
@@ -1472,7 +1478,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Search Tracker */
     fun searchTracker(title: String, service: TrackServiceItem) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!
             val previouslyTracked =
                 mangaDetailScreenState.value.track.tracks.firstOrNull {
                     service.id == it.trackServiceId
@@ -1665,7 +1671,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun changeScanlatorOption(scanlatorOption: MangaConstants.ScanlatorOption?) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val manga = mangaRepository.getMangaById(mangaId)!!
 
             val newFilteredScanlators =
                 if (scanlatorOption != null) {
@@ -1694,7 +1700,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun changeLanguageOption(languageOptions: MangaConstants.LanguageOption?) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val manga = mangaRepository.getMangaById(mangaId)!!
             val newFilteredLanguages =
                 if (languageOptions != null) {
                     val filteredLanguages =
@@ -1721,7 +1727,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Changes the filtered scanlators, if null then it resets the scanlator filter */
     fun setGlobalOption(option: MangaConstants.SetGlobal) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeAsBlocking()!!
+            val manga = mangaRepository.getMangaById(mangaId)!!
             when (option) {
                 MangaConstants.SetGlobal.Sort -> {
                     mangaDetailsPreferences.sortChapterOrder().set(manga.sorting)
@@ -1739,9 +1745,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     manga.setFilterToGlobal()
                 }
             }
-            db.updateChapterFlags(manga).executeOnIO()
-            db.updateMangaFilteredScanlators(manga).executeOnIO()
-            db.updateMangaFilteredLanguages(manga).executeOnIO()
+            mangaRepository.updateChapterFlags(manga)
+            mangaRepository.updateScanlatorFilter(manga)
+            mangaRepository.updateLanguageFilter(manga)
         }
     }
 
@@ -1939,7 +1945,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
     /** Save Cover to directory, if given a url save that specific cover */
     private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
-        val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+        val dbManga = runBlocking { mangaRepository.getMangaById(mangaId)!! }
         val cover =
             when (artwork.cover.isBlank() || dbManga.thumbnail_url == artwork.cover) {
                 true ->
@@ -1970,22 +1976,22 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     /** Set custom cover */
     fun setCover(artwork: Artwork) {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!
             coverCache.setCustomCoverToCache(dbManga, artwork.cover)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = artwork.cover
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga)
         }
     }
 
     /** Reset cover */
     fun resetCover() {
         viewModelScope.launchIO {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = mangaRepository.getMangaById(mangaId)!!
             coverCache.deleteCustomCover(dbManga)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = null
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga)
         }
     }
 
@@ -2052,7 +2058,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             }
 
             runCatching {
-                    val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+                    val dbManga = mangaRepository.getMangaById(mangaId)!!
                     statusHandler.getReadChapterIds(dbManga.uuid()).collect { chapterIds ->
                         val chaptersToMarkRead =
                             mangaDetailScreenState.value.chapters.allChapters
@@ -2205,7 +2211,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     }
 
     fun getManga(): Manga {
-        return db.getManga(mangaId).executeAsBlocking()!!
+        return runBlocking { mangaRepository.getMangaById(mangaId)!! }
     }
 
     fun getChapterUrl(chapter: SimpleChapter): String {
@@ -2458,7 +2464,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
         if (url != effectiveManga.dynamicCover) {
             val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
-            db.insertManga(dbManga).executeOnIO()
+            mangaRepository.insertManga(dbManga)
         }
     }
 

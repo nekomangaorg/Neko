@@ -4,7 +4,6 @@ import androidx.compose.ui.util.fastAny
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -14,7 +13,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -25,6 +23,7 @@ import kotlinx.coroutines.delay
 import org.nekomanga.constants.Constants
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -37,9 +36,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedRepository(
-    private val db: DatabaseHelper = Injekt.get(),
     private val chapterRepository: ChapterRepository = Injekt.get(),
     private val historyRepository: HistoryRepository = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
@@ -98,7 +97,7 @@ class FeedRepository(
                     if (groupedEntries.isEmpty()) return emptyList()
 
                     val mangaIds = groupedEntries.map { it.key }
-                    val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id!! }
+                    val mangasMap = mangaRepository.getMangaByIds(mangaIds).associateBy { it.id!! }
                     val chaptersMap =
                         chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
@@ -208,7 +207,7 @@ class FeedRepository(
 
                     val mangasMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
-                            db.getMangas(mangaIdsToFetch).executeOnIO().associateBy { it.id!! }
+                            mangaRepository.getMangaByIds(mangaIdsToFetch).associateBy { it.id!! }
                         } else {
                             emptyMap()
                         }
@@ -280,8 +279,8 @@ class FeedRepository(
 
         return com.github.michaelbull.result
             .runCatching {
-                db.getFavoriteMangaList()
-                    .executeOnIO()
+                mangaRepository
+                    .getFavoriteMangaList()
                     .distinctBy { it.id }
                     .sortedBy { it.date_added }
                     .takeLast(100)
@@ -523,7 +522,7 @@ class FeedRepository(
     }
 
     suspend fun deleteChapter(chapterItem: ChapterItem) {
-        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId) ?: return
         downloadManager.deleteChapters(manga, listOf(chapterItem.chapter.toDbChapter()))
     }
 
@@ -580,7 +579,7 @@ class FeedRepository(
     suspend fun markChapter(chapterItem: ChapterItem, markAction: ChapterMarkActions): ChapterItem {
         chapterUseCases.markChapters(markAction, listOf(chapterItem))
 
-        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId)!!
 
         chapterUseCases.markChaptersRemote(markAction, manga.uuid(), listOf(chapterItem))
 
@@ -594,7 +593,7 @@ class FeedRepository(
         chapterItem: ChapterItem,
         downloadAction: MangaConstants.DownloadAction,
     ) {
-        val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
+        val dbManga = mangaRepository.getMangaById(feedManga.mangaId) ?: return
         val dbChapter = chapterItem.chapter.toDbChapter()
 
         when (downloadAction) {
@@ -615,7 +614,7 @@ class FeedRepository(
             val feedRepository = FeedRepository()
             val page = feedRepository.getHistoryPage(offset = 0, group = FeedHistoryGroup.Series)
             return page.get()?.second?.mapNotNull { feedManga ->
-                feedRepository.db.getManga(feedManga.mangaId).executeAsBlocking()
+                feedRepository.mangaRepository.getMangaById(feedManga.mangaId)
             } ?: emptyList()
         }
     }

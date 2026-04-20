@@ -15,6 +15,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
@@ -26,6 +27,7 @@ class BrowseRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     val loginHelper: MangaDexLoginHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
 
@@ -33,7 +35,7 @@ class BrowseRepository(
 
     suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
         return mangaDex.getRandomManga().andThen {
-            val displayManga = it.toDisplayManga(db, mangaDex.id)
+            val displayManga = it.toDisplayManga(mangaRepository, mangaDex.id)
             Ok(displayManga)
         }
     }
@@ -43,7 +45,8 @@ class BrowseRepository(
         filters: DexFilters,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search(page, filters).andThen { mangaListPage ->
-            val displayMangaList = mangaListPage.sourceManga.toDisplayManga(db, mangaDex.id)
+            val displayMangaList =
+                mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
             Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
         }
     }
@@ -101,7 +104,7 @@ class BrowseRepository(
                         displayScreenType = listResult.displayScreenType,
                         displayManga =
                             listResult.sourceManga
-                                .toDisplayManga(db, mangaDex.id)
+                                .toDisplayManga(mangaRepository, mangaDex.id)
                                 .distinctBy { it.url }
                                 .toPersistentList(),
                     )
@@ -112,7 +115,7 @@ class BrowseRepository(
 
     suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.toDisplayManga(db, mangaDex.id).toPersistentList())
+            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id).toPersistentList())
         }
     }
 }

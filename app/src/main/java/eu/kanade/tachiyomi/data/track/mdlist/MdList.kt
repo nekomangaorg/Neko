@@ -64,14 +64,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         return withContext(Dispatchers.IO) {
             try {
                 val manga =
-                    db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                        .executeAsBlocking() ?: return@withContext track
+                    mangaRepository.getMangaByUrlAndSource(
+                        track.tracking_url.substringAfter(".org"),
+                        mdex.id,
+                    ) ?: return@withContext track
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
                 mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
                 manga.follow_status = followStatus
-                db.insertManga(manga).executeAsBlocking()
+                mangaRepository.insertManga(manga)
 
                 // mangadex wont update chapters if manga is not follows this prevents unneeded
                 // network call
@@ -95,7 +97,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                             newFollowStatus,
                         )
                         manga.follow_status = newFollowStatus
-                        db.insertManga(manga).executeAsBlocking()
+                        mangaRepository.insertManga(manga)
                     }
                     mdex.updateReadingProgress(track)
                 } else if (track.last_chapter_read.toInt() != 0) {

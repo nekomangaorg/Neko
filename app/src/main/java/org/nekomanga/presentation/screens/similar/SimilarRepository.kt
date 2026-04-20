@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.logging.TimberKt
@@ -22,6 +23,7 @@ class SimilarRepository {
 
     private val similarHandler: SimilarHandler by injectLazy()
     private val db: DatabaseHelper by injectLazy()
+    private val mangaRepository: MangaRepository by injectLazy()
     private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     suspend fun fetchSimilar(
@@ -131,7 +133,7 @@ class SimilarRepository {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(id, manga.map { it.toDisplayManga(db, mangaDex.id) })
+            SimilarMangaGroup(id, manga.map { it.toDisplayManga(mangaRepository, mangaDex.id) })
         }
     }
 }

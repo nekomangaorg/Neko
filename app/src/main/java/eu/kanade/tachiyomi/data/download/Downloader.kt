@@ -54,6 +54,7 @@ import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
@@ -74,6 +75,8 @@ class Downloader(
     private val db: DatabaseHelper by injectLazy()
 
     private val chapterRepository: ChapterRepository by injectLazy()
+
+    private val mangaRepository: MangaRepository by injectLazy()
 
     /** Store for persisting downloads across restarts. */
     private val store = DownloadStore(context, sourceManager)
@@ -306,7 +309,7 @@ class Downloader(
      * @param download the chapter to be downloaded.
      */
     private suspend fun downloadChapter(download: Download) {
-        val dbManga = db.getManga(download.mangaItem.id).executeAsBlocking() ?: return
+        val dbManga = mangaRepository.getMangaById(download.mangaItem.id) ?: return
         val dbChapter = chapterRepository.getChapterById(download.chapterItem.id) ?: return
 
         val mangaDir = provider.getMangaDir(dbManga)

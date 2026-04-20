@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -18,7 +17,6 @@ import eu.kanade.tachiyomi.util.manga.resync
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.activeNetworkState
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.PersistentList
@@ -38,6 +36,7 @@ import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.BrowseFilterRepository
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -64,11 +63,12 @@ class BrowseViewModel : ViewModel() {
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
-    private val db: DatabaseHelper = Injekt.get()
 
     private val categoryRepository: CategoryRepository = Injekt.get()
 
     val browseFilterRepository: BrowseFilterRepository = Injekt.get()
+
+    private val mangaRepository: MangaRepository = Injekt.get()
 
     private val mangaUseCases: MangaUseCases by injectLazy()
 
@@ -420,7 +420,7 @@ class BrowseViewModel : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
+            val editManga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -429,7 +429,7 @@ class BrowseViewModel : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.insertManga(editManga)
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -751,12 +751,16 @@ class BrowseViewModel : ViewModel() {
         if (!_browseScreenState.value.firstLoad) {
             viewModelScope.launchIO {
                 val newHomePageManga =
-                    _browseScreenState.value.homePageManga.resync(db).updateVisibility(preferences)
+                    _browseScreenState.value.homePageManga
+                        .resync(mangaRepository)
+                        .updateVisibility(preferences)
                 _browseScreenState.update { it.copy(homePageManga = newHomePageManga) }
             }
             viewModelScope.launchIO {
                 val allDisplayManga =
-                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db).unique()
+                    _browseScreenState.value.displayMangaHolder.allDisplayManga
+                        .resync(mangaRepository)
+                        .unique()
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =

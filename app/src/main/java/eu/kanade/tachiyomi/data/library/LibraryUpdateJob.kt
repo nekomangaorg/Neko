@@ -93,6 +93,7 @@ import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -117,6 +118,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val categoryRepository by injectLazy<CategoryRepository>()
 
     private val chapterRepository by injectLazy<ChapterRepository>()
+
+    private val mangaRepository by injectLazy<MangaRepository>()
 
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
@@ -174,7 +177,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         instance = WeakReference(this)
 
-        val allLibraryManga = db.getLibraryMangaList().executeOnIO()
+        val allLibraryManga = mangaRepository.getLibraryList()
         val allTracks = db.getAllTracks().executeOnIO()
         val tracksByMangaId = allTracks.groupBy { it.manga_id }
 
@@ -526,7 +529,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     context.imageLoader.execute(request)
                                 }
                             }
-                            db.insertManga(manga).executeOnIO()
+                            mangaRepository.insertManga(manga)
 
                             if (holder.sourceArtwork.isNotEmpty()) {
                                 holder.sourceArtwork
@@ -562,6 +565,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     db,
                                     appDatabase,
                                     chapterRepository,
+                                    mangaRepository,
                                     fetchedChapters,
                                     manga,
                                     errorFromMerged,
@@ -836,7 +840,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private fun addCategory(categoryId: Int) {
         extraScope.launch {
-            val allLibraryManga = db.getLibraryMangaList().executeOnIO()
+            val allLibraryManga = mangaRepository.getLibraryList()
             val tracksByMangaId = db.getAllTracks().executeOnIO().groupBy { it.manga_id }
             val mangaToAdd =
                 getAndFilterMangaToUpdate(

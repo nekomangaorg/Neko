@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
@@ -31,6 +32,7 @@ class FollowsSyncProcessor {
     val mangaDexPreferences: MangaDexPreferences by injectLazy()
     val libraryPreference: LibraryPreferences by injectLazy()
     val db: DatabaseHelper by injectLazy()
+    val mangaRepository: MangaRepository by injectLazy()
     val categoryRepository: CategoryRepository by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
@@ -72,21 +74,14 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = libraryPreference.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-                    val allDbMangaByUuid =
-                        db.getMangaList().executeOnIO().mapNotNull { manga ->
-                            if (manga.favorite) {
-                                manga.uuid() to manga
-                            } else {
-                                null
-                            }
-                        }
-
                     val mangaIdsToUpdate = listManga.mapNotNull { networkManga ->
                         updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
                         var dbManga =
-                            db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                                .executeAsBlocking()
+                            mangaRepository.getMangaByUrlAndSource(
+                                networkManga.url,
+                                sourceManager.mangaDex.id,
+                            )
                         if (dbManga == null) {
                             dbManga =
                                 Manga.create(
@@ -102,11 +97,14 @@ class FollowsSyncProcessor {
                             countOfAdded.incrementAndGet()
                             dbManga.favorite = true
 
-                            db.insertManga(dbManga).executeAsBlocking()
+                            mangaRepository.insertManga(dbManga)
 
                             dbManga =
-                                db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                                    .executeAsBlocking()
+                                mangaRepository.getMangaByUrlAndSource(
+                                    networkManga.url,
+                                    sourceManager.mangaDex.id,
+                                )
+
                             if (defaultCategory != null) {
                                 val mc = MangaCategory.create(dbManga!!, defaultCategory)
                                 categoryRepository.setMangaCategories(
@@ -142,8 +140,8 @@ class FollowsSyncProcessor {
                 ids?.split(", ")
                     ?.map { it.toLong() }
                     ?.chunked(900)
-                    ?.flatMap { chunk -> db.getMangas(chunk).executeAsBlocking() }
-                    ?.toList() ?: db.getLibraryMangaList().executeAsBlocking()
+                    ?.flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
+                    ?.toList() ?: mangaRepository.getLibraryList()
 
             // only add if the current tracker is not set to reading
 

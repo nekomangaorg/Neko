@@ -1,19 +1,18 @@
 package org.nekomanga.usecases.category
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.ui.library.LibrarySort
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.DisplayManga
 
 class ModifyCategoryUseCase(
-    private val db: DatabaseHelper,
     private val categoryRepository: CategoryRepository,
+    private val mangaRepository: MangaRepository,
     private val libraryPreferences: LibraryPreferences,
 ) {
 
@@ -28,7 +27,7 @@ class ModifyCategoryUseCase(
         val dbCategories = categories.map { it.toDbCategory() }
 
         val mangaIds = mangaList.map { it.mangaId }
-        val dbMangas = db.getMangas(mangaIds).executeOnIO()
+        val dbMangas = mangaRepository.getMangaByIds(mangaIds)
         val mangaCategories = dbMangas.flatMap { dbManga ->
             dbCategories.map { MangaCategory.create(dbManga, it) }
         }
@@ -55,7 +54,7 @@ class ModifyCategoryUseCase(
     }
 
     suspend fun updateMangaCategories(mangaId: Long, enabledCategories: List<CategoryItem>) {
-        val dbManga = db.getManga(mangaId).executeOnIO() ?: return
+        val dbManga = mangaRepository.getMangaById(mangaId) ?: return
         val categories = enabledCategories.map { MangaCategory.create(dbManga, it.toDbCategory()) }
         categoryRepository.setMangaCategories(categories, listOf(dbManga.id!!))
     }

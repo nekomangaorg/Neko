@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 
@@ -40,11 +41,12 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
 class RemoveMergedManga(
     private val db: DatabaseHelper,
     private val chapterRepository: ChapterRepository,
+    private val mangaRepository: MangaRepository,
     private val downloadManager: DownloadManager,
     private val libraryPreferences: LibraryPreferences,
 ) {
     suspend fun execute(mangaId: Long, mergeType: MergeType) {
-        val dbManga = db.getManga(mangaId).executeOnIO() ?: return
+        val dbManga = mangaRepository.getMangaById(mangaId) ?: return
         db.deleteMergeManga(mangaId).executeOnIO()
         val (mergedChapters, _) =
             chapterRepository.getChaptersForManga(mangaId).partition {

@@ -10,13 +10,13 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import okhttp3.OkHttpClient
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.injectLazy
 
@@ -28,6 +28,8 @@ abstract class TrackService(val id: Int) {
 
     val chapterRepository: ChapterRepository by injectLazy()
     val historyRepository: HistoryRepository by injectLazy()
+
+    val mangaRepository: MangaRepository by injectLazy()
 
     open fun canRemoveFromService() = false
 
@@ -140,7 +142,7 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
-    val manga = db.getManga(track.manga_id).executeOnIO()
+    val manga = mangaRepository.getMangaById(track.manga_id)
     val allRead =
         manga?.isOneShotOrCompleted(chapterRepository) == true &&
             chapterRepository.getChaptersForManga(track.manga_id).all { it.read }

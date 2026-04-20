@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import androidx.room.withTransaction
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -30,6 +31,7 @@ import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -58,6 +60,7 @@ class MangaUpdateCoordinator {
     private val categoryRepository: CategoryRepository by injectLazy()
 
     private val chapterRepository: ChapterRepository by injectLazy()
+    private val mangaRepository: MangaRepository by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
@@ -133,8 +136,8 @@ class MangaUpdateCoordinator {
                     mangaForDb.favorite,
                 )
 
-                db.inTransaction {
-                    db.insertManga(mangaForDb).executeAsBlocking()
+                appDatabase.withTransaction {
+                    mangaRepository.insertManga(mangaForDb)
                     send(MangaResult.UpdatedManga)
 
                     if (sourceArtwork.isNotEmpty()) {
@@ -162,6 +165,7 @@ class MangaUpdateCoordinator {
                 db = db,
                 appDatabase = appDatabase,
                 chapterRepository = chapterRepository,
+                mangaRepository = mangaRepository,
                 rawSourceChapters = allChapters,
                 manga = manga,
                 errorFromMerged = errorFromMerged,

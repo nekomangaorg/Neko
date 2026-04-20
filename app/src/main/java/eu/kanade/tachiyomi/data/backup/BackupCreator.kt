@@ -39,16 +39,17 @@ import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupCreator(val context: Context) {
-
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val categoryRepository: CategoryRepository by injectLazy()
     internal val chapterRepository: ChapterRepository by injectLazy()
     internal val historyRepository: HistoryRepository by injectLazy()
+    internal val mangaRepository: MangaRepository by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     internal val storageManager: StorageManager by injectLazy()
@@ -280,9 +281,7 @@ class BackupCreator(val context: Context) {
         return mangaObject
     }
 
-    internal fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangaList().executeAsBlocking()
+    internal suspend fun getFavoriteManga(): List<Manga> = mangaRepository.getFavoriteMangaList()
 
-    internal fun getReadManga(): List<Manga> =
-        databaseHelper.getReadNotInLibraryMangas().executeAsBlocking()
+    internal suspend fun getReadManga(): List<Manga> = mangaRepository.getReadNotInLibraryManga()
 }
