@@ -5,19 +5,16 @@ import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
 import eu.kanade.tachiyomi.data.database.mappers.MangaAggregateTypeMapping
-import eu.kanade.tachiyomi.data.database.mappers.MergeMangaTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ScanlatorTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.TrackTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.UploaderTypeMapping
 import eu.kanade.tachiyomi.data.database.models.MangaAggregate
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
-import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.ScanlatorGroupImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.UploaderImpl
 import eu.kanade.tachiyomi.data.database.queries.MangaAggregateQueries
-import eu.kanade.tachiyomi.data.database.queries.MergeMangaQueries
 import eu.kanade.tachiyomi.data.database.queries.ScanlatorGroupQueries
 import eu.kanade.tachiyomi.data.database.queries.SimilarQueries
 import eu.kanade.tachiyomi.data.database.queries.TrackQueries
@@ -26,12 +23,7 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
 /** This class provides operations to manage the database through its interfaces. */
 open class DatabaseHelper(context: Context) :
-    MergeMangaQueries,
-    TrackQueries,
-    ScanlatorGroupQueries,
-    UploaderQueries,
-    MangaAggregateQueries,
-    SimilarQueries {
+    TrackQueries, ScanlatorGroupQueries, UploaderQueries, MangaAggregateQueries, SimilarQueries {
 
     private val configuration =
         SupportSQLiteOpenHelper.Configuration.builder(context)
@@ -46,7 +38,6 @@ open class DatabaseHelper(context: Context) :
             .addTypeMapping(MangaSimilar::class.java, SimilarTypeMapping())
             .addTypeMapping(ScanlatorGroupImpl::class.java, ScanlatorTypeMapping())
             .addTypeMapping(UploaderImpl::class.java, UploaderTypeMapping())
-            .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())
             .addTypeMapping(MangaAggregate::class.java, MangaAggregateTypeMapping())
             .build()
 

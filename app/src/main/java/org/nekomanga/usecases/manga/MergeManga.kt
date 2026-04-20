@@ -2,15 +2,14 @@ package org.nekomanga.usecases.manga
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 
@@ -39,15 +38,15 @@ class SearchMergedManga(private val sourceManager: SourceManager) {
 }
 
 class RemoveMergedManga(
-    private val db: DatabaseHelper,
     private val chapterRepository: ChapterRepository,
     private val mangaRepository: MangaRepository,
+    private val mergeMangaRepository: MergeMangaRepository,
     private val downloadManager: DownloadManager,
     private val libraryPreferences: LibraryPreferences,
 ) {
     suspend fun execute(mangaId: Long, mergeType: MergeType) {
         val dbManga = mangaRepository.getMangaById(mangaId) ?: return
-        db.deleteMergeManga(mangaId).executeOnIO()
+        mergeMangaRepository.deleteAllMergeMangaForManga(mangaId)
         val (mergedChapters, _) =
             chapterRepository.getChaptersForManga(mangaId).partition {
                 it.isMergedChapterOfType(mergeType)
@@ -63,9 +62,9 @@ class RemoveMergedManga(
     }
 }
 
-class AddMergedManga(private val db: DatabaseHelper) {
+class AddMergedManga(private val mergeMangaRepository: MergeMangaRepository) {
     suspend fun execute(mangaId: Long, mergeManga: SourceMergeManga) {
         val newMergedManga = mergeManga.toMergeMangaImpl(mangaId)
-        db.insertMergeManga(newMergedManga).executeOnIO()
+        mergeMangaRepository.insertMergeManga(newMergedManga)
     }
 }

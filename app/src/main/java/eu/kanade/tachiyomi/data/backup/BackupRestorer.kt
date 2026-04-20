@@ -38,6 +38,7 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -61,6 +62,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private val chapterRepository: ChapterRepository by injectLazy()
     private val historyRepository: HistoryRepository by injectLazy()
     private val mangaRepository: MangaRepository by injectLazy()
+    private val mergeMangaRepository: MergeMangaRepository by injectLazy()
+
     private val db: DatabaseHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
@@ -168,7 +171,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                             else emptyMap()
                         val dbMergeMangaMap =
                             if (existingMangaIds.isNotEmpty())
-                                db.getMergeMangaList(existingMangaIds).executeAsBlocking().groupBy {
+                                mergeMangaRepository.getMergeMangaList(existingMangaIds).groupBy {
                                     it.mangaId
                                 }
                             else emptyMap()

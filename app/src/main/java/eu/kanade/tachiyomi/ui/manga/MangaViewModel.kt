@@ -57,6 +57,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.DateFormat
+import kotlin.getValue
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentSet
@@ -102,6 +103,7 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
@@ -160,6 +162,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
     val coverCache: CoverCache = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
     val mangaRepository: MangaRepository = Injekt.get()
+    val mergeMangaRepository: MergeMangaRepository = Injekt.get()
+
     val artworkRepository: ArtworkRepository = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
@@ -289,8 +293,8 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val mergedFlow =
-        db.getMergeMangaList(mangaId)
-            .asFlow()
+        mergeMangaRepository
+            .observeMergeMangaList(mangaId)
             .map { mergeMangaList ->
                 when (mergeMangaList.isNotEmpty()) {
                     true -> {

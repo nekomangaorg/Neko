@@ -32,6 +32,7 @@ import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.MangaItem
@@ -61,6 +62,8 @@ class MangaUpdateCoordinator {
 
     private val chapterRepository: ChapterRepository by injectLazy()
     private val mangaRepository: MangaRepository by injectLazy()
+    private val mergeMangaRepository: MergeMangaRepository by injectLazy()
+
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexPreferences: MangaDexPreferences by injectLazy()
@@ -214,7 +217,7 @@ class MangaUpdateCoordinator {
         var mergedSourceError = false
 
         val mergedSourcesChapters =
-            db.getMergeMangaList(manga).executeAsBlocking().map { mergeManga ->
+            mergeMangaRepository.getMergeMangaList(manga.id!!).map { mergeManga ->
                 async {
                     val source = MergeType.getSource(mergeManga.mergeType, sourceManager)
                     source
