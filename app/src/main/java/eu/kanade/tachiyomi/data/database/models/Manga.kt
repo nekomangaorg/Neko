@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
-import kotlinx.coroutines.runBlocking
 import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
@@ -173,11 +172,10 @@ interface Manga : SManga {
         }
     }
 
-    fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
-        val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
-        val chapters by lazy {
-            runBlocking { chapterRepository.getChaptersForManga(this@Manga.id!!) }
-        }
+   suspend fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
+        val tags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
+        val chapters = chapterRepository.getChaptersForManga(this@Manga.id!!)
+
         val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
         return status == SManga.COMPLETED ||
             tags?.contains("oneshot") == true ||

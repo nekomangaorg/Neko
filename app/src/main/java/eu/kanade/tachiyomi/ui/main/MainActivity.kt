@@ -49,9 +49,9 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.R
 import org.nekomanga.data.database.repository.ChapterRepository
@@ -361,7 +361,7 @@ class MainActivity : BaseMainActivity() {
                         val mangaRepository: MangaRepository = Injekt.get()
 
                         val downloadManager = Injekt.get<DownloadManager>()
-                        runBlocking {
+                        lifecycleScope.launch(Dispatchers.Default) {
                             val chapters = chapterRepository.getChaptersForManga(mangaId)
                             mangaRepository.getMangaById(mangaId)?.let { manga ->
                                 val availableChapters = chapters.filter {
