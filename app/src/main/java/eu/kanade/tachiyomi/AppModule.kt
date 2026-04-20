@@ -62,6 +62,8 @@ import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.ChapterRepositoryImpl
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -134,6 +136,10 @@ class AppModule(val app: Application) : InjektModule {
                 mangaDexPreferences = get(),
                 libraryPreferences = get(),
             )
+        }
+
+        addSingletonFactory<MergeMangaRepository> {
+            MergeMangaRepositoryImpl(mergeMangaDao = get<AppDatabase>().mergeMangaDao())
         }
 
         addSingletonFactory { DatabaseHelper(app) }

@@ -94,6 +94,7 @@ import org.nekomanga.data.database.repository.ArtworkRepository
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -120,6 +121,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val chapterRepository by injectLazy<ChapterRepository>()
 
     private val mangaRepository by injectLazy<MangaRepository>()
+
+    private val mergeMangaRepository by injectLazy<MergeMangaRepository>()
 
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
@@ -446,7 +449,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
                             info
                         }
-                        val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
+                        val mergeMangaList = mergeMangaRepository.getMergeMangaList(manga.id!!)
                         val mergedList =
                             when (mergeMangaList.isNotEmpty()) {
                                 true -> {

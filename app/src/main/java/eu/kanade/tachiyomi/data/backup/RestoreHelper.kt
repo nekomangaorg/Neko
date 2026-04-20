@@ -31,6 +31,7 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -42,6 +43,7 @@ class RestoreHelper(val context: Context) {
     val chapterRepository: ChapterRepository by injectLazy()
     val historyRepository: HistoryRepository by injectLazy()
     val mangaRepository: MangaRepository by injectLazy()
+    val mergeMangaRepository: MergeMangaRepository by injectLazy()
     val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -396,18 +398,18 @@ class RestoreHelper(val context: Context) {
         }
     }
 
-    fun restoreMergeMangaForManga(
+    suspend fun restoreMergeMangaForManga(
         manga: Manga,
         mergeMangaList: List<MergeMangaImpl>,
         preFetchedDbMergeMangaList: List<MergeMangaImpl>? = null,
     ) {
         val dbMergeMangaList =
-            preFetchedDbMergeMangaList ?: db.getMergeMangaList(manga).executeAsBlocking()
+            preFetchedDbMergeMangaList ?: mergeMangaRepository.getMergeMangaList(manga.id!!)
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
                 val newMergeManga = mergeManga.copy(mangaId = manga.id!!)
-                db.insertMergeManga(newMergeManga).executeAsBlocking()
+                mergeMangaRepository.insertMergeManga(newMergeManga)
             }
         }
     }

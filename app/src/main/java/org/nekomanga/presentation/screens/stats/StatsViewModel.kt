@@ -28,6 +28,7 @@ import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.HistoryRepository
 import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -50,6 +51,8 @@ class StatsViewModel() : ViewModel() {
     private val categoryRepository: CategoryRepository = Injekt.get()
     private val historyRepository: HistoryRepository = Injekt.get()
     private val mangaRepository: MangaRepository = Injekt.get()
+    private val mergeMangaRepository: MergeMangaRepository = Injekt.get()
+
     private val prefs: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -82,7 +85,7 @@ class StatsViewModel() : ViewModel() {
                 val favoritedMangalist = mangaRepository.getFavoriteMangaList()
 
                 val mergedMangaList =
-                    db.getAllMergeManga().executeAsBlocking().mapNotNull { mergedManga ->
+                    mergeMangaRepository.getAllMergeManga().mapNotNull { mergedManga ->
                         when (
                             favoritedMangalist.firstOrNull { manga ->
                                 manga.id!! == mergedManga.mangaId
