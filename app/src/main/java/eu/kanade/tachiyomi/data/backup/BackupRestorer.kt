@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import java.util.Collections
@@ -38,6 +37,7 @@ import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -60,6 +60,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     private val categoryRepository: CategoryRepository by injectLazy()
     private val chapterRepository: ChapterRepository by injectLazy()
     private val historyRepository: HistoryRepository by injectLazy()
+    private val mangaRepository: MangaRepository by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
@@ -108,8 +109,8 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
         // [OPTIMIZATION] Pre-fetch all existing MangaDex manga IDs to avoid N read queries
         val dbMangaMap =
-            db.getMangaList()
-                .executeOnIO()
+            mangaRepository
+                .getMangaList()
                 .filter { sourceManager.isMangadex(it.source) }
                 .associateBy { MdUtil.getMangaUUID(it.url) }
 
@@ -331,7 +332,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                 restoreHelper.restoreMangaNoFetch(manga, existingDbManga)
             } else {
                 manga.initialized = false
-                manga.id = db.insertManga(manga).executeAsBlocking().insertedId()
+                manga.id = mangaRepository.insertManga(manga)
             }
 
             // Restore related data using helper (Blocking calls are fine inside transaction)

@@ -1,6 +1,5 @@
 package org.nekomanga.usecases.manga
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter as DbChapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -9,13 +8,13 @@ import eu.kanade.tachiyomi.util.chapter.getChapterNum
 import eu.kanade.tachiyomi.util.chapter.getMissingChapters
 import eu.kanade.tachiyomi.util.chapter.getVolumeNum
 import eu.kanade.tachiyomi.util.chapter.isAvailable
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 
 class UpdateMangaStatusAndMissingChapterCount(
-    private val db: DatabaseHelper,
+    private val mangaRepository: MangaRepository,
     private val chapterRepository: ChapterRepository,
     private val downloadManager: DownloadManager,
 ) {
@@ -51,7 +50,7 @@ class UpdateMangaStatusAndMissingChapterCount(
         }
 
         // Persist changes
-        if (updated) db.insertManga(manga).executeOnIO()
+        if (updated) mangaRepository.insertManga(manga)
     }
 
     private fun isMangaStatusCompleted(chapters: List<DbChapter>, manga: Manga): Boolean {

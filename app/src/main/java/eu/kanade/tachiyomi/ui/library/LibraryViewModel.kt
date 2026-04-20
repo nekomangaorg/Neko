@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
 import eu.kanade.tachiyomi.util.system.asFlow
 import eu.kanade.tachiyomi.util.system.combine
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import kotlinx.collections.immutable.PersistentList
@@ -66,6 +65,7 @@ import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
@@ -94,6 +94,7 @@ class LibraryViewModel() : ViewModel() {
     val db: DatabaseHelper = Injekt.get()
     val categoryRepository: CategoryRepository = Injekt.get()
     val chapterRepository: ChapterRepository = Injekt.get()
+    val mangaRepository: MangaRepository = Injekt.get()
     val downloadManager: DownloadManager = Injekt.get()
     val workManager: WorkManager = Injekt.get()
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
@@ -180,8 +181,8 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     private val rawLibraryMangaListFlow =
-        db.getLibraryMangaList()
-            .asFlow()
+        mangaRepository
+            .observeLibrary()
             .distinctUntilChanged()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -332,7 +333,8 @@ class LibraryViewModel() : ViewModel() {
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
     }
 
-    val lastReadMangaFlow = getSortFlow(LibrarySort.LastRead) { db.getLastReadManga().asFlow() }
+    val lastReadMangaFlow =
+        getSortFlow(LibrarySort.LastRead) { mangaRepository.observeLastReadManga() }
 
     /**
      * Flow that tracks the last fetched manga to be used for sorting.
@@ -342,7 +344,7 @@ class LibraryViewModel() : ViewModel() {
      * globally or by any category. This prevents massive blocking DB reads during UI state updates.
      */
     val lastFetchMangaFlow =
-        getSortFlow(LibrarySort.DateFetched) { db.getLastFetchedManga().asFlow() }
+        getSortFlow(LibrarySort.DateFetched) { mangaRepository.observeLastFetchedManga() }
 
     val filteredMangaListFlow =
         combine(
@@ -1064,7 +1066,7 @@ class LibraryViewModel() : ViewModel() {
             clearSelectedManga()
 
             val mangaIds = currentSelected.map { it.displayManga.mangaId }
-            val dbMangas = db.getMangas(mangaIds).executeOnIO()
+            val dbMangas = mangaRepository.getMangaByIds(mangaIds)
 
             for (dbManga in dbMangas) {
                 try {
@@ -1076,7 +1078,7 @@ class LibraryViewModel() : ViewModel() {
                 dbManga.favorite = false
             }
 
-            db.insertMangaList(dbMangas).executeOnIO()
+            mangaRepository.insertMangaList(dbMangas)
         }
     }
 
@@ -1110,7 +1112,7 @@ class LibraryViewModel() : ViewModel() {
             _internalLibraryScreenState.update { it.copy(selectedItems = persistentListOf()) }
 
             val mangaIds = selectedItems.map { it.displayManga.mangaId }
-            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val mangasMap = mangaRepository.getMangaByIds(mangaIds).associateBy { it.id }
             val chaptersMap =
                 chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
@@ -1141,7 +1143,7 @@ class LibraryViewModel() : ViewModel() {
             }
 
             val mangaIds = displayMangaList.map { it.mangaId }
-            val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id }
+            val mangasMap = mangaRepository.getMangaByIds(mangaIds).associateBy { it.id }
             val chaptersMap =
                 chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
@@ -1208,8 +1210,7 @@ class LibraryViewModel() : ViewModel() {
 
     fun openNextUnread(mangaId: Long, openChapter: (Manga, Chapter) -> Unit) {
         viewModelScope.launchIO {
-            val manga = db.getManga(mangaId).executeOnIO()
-            manga ?: return@launchIO
+            val manga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             val chapters = chapterRepository.getChaptersForManga(mangaId)
 
             // to avoid allocating an intermediate list of available chapters,

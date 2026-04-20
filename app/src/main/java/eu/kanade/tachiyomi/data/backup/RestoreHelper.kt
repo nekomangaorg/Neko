@@ -30,6 +30,7 @@ import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -40,6 +41,7 @@ class RestoreHelper(val context: Context) {
     val categoryRepository: CategoryRepository by injectLazy()
     val chapterRepository: ChapterRepository by injectLazy()
     val historyRepository: HistoryRepository by injectLazy()
+    val mangaRepository: MangaRepository by injectLazy()
     val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -213,13 +215,13 @@ class RestoreHelper(val context: Context) {
         return null
     }
 
-    fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+    suspend fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
         val backupFavorite = manga.favorite
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.initialized = false
         manga.favorite = dbManga.favorite || backupFavorite
-        db.insertManga(manga).executeAsBlocking()
+        mangaRepository.insertManga(manga)
     }
 
     /**

@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
 import eu.kanade.tachiyomi.util.manga.resync
 import eu.kanade.tachiyomi.util.manga.unique
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toPersistentList
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -54,6 +54,8 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
 
     private val categoryRepository: CategoryRepository = Injekt.get()
+
+    private val mangaRepository: MangaRepository = Injekt.get()
 
     private val mangaUseCases: MangaUseCases by injectLazy()
 
@@ -172,7 +174,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
+            val editManga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -181,7 +183,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.insertManga(editManga)
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -275,7 +277,10 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
     fun updateMangaForChanges() {
         viewModelScope.launchIO {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).unique().toPersistentList()
+                _displayScreenState.value.allDisplayManga
+                    .resync(mangaRepository)
+                    .unique()
+                    .toPersistentList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,

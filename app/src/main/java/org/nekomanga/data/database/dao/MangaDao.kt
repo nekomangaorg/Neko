@@ -41,7 +41,7 @@ interface MangaDao {
     suspend fun insertManga(manga: MangaEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMangaList(mangaList: List<MangaEntity>)
+    suspend fun insertMangaList(mangaList: List<MangaEntity>): List<Long>
 
     @Update suspend fun updateManga(manga: MangaEntity)
 

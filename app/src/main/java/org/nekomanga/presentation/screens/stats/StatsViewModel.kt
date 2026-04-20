@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.update
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -48,6 +49,7 @@ class StatsViewModel() : ViewModel() {
     private val db: DatabaseHelper = Injekt.get()
     private val categoryRepository: CategoryRepository = Injekt.get()
     private val historyRepository: HistoryRepository = Injekt.get()
+    private val mangaRepository: MangaRepository = Injekt.get()
     private val prefs: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -77,7 +79,7 @@ class StatsViewModel() : ViewModel() {
                 val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
                 val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
-                val favoritedMangalist = db.getFavoriteMangaList().executeAsBlocking()
+                val favoritedMangalist = mangaRepository.getFavoriteMangaList()
 
                 val mergedMangaList =
                     db.getAllMergeManga().executeAsBlocking().mapNotNull { mergedManga ->
@@ -245,8 +247,8 @@ class StatsViewModel() : ViewModel() {
         }
     }
 
-    private fun getLibrary(): List<LibraryManga> {
-        return db.getLibraryMangaList().executeAsBlocking().distinctBy { it.id }
+    private suspend fun getLibrary(): List<LibraryManga> {
+        return mangaRepository.getLibraryList().distinctBy { it.id }
     }
 
     private fun getTracks(mangaList: List<LibraryManga>): List<Track> {

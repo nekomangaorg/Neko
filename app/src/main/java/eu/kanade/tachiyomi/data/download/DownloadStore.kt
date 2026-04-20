@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.util.manga.toSimpleManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import uy.kohesive.injekt.injectLazy
 
@@ -28,6 +28,8 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
     private val json: Json by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     private val chapterRepository: ChapterRepository by injectLazy()
+
+    private val mangaRepository: MangaRepository by injectLazy()
 
     /** Counter used to keep the queue order. */
     private var counter = 0
@@ -86,7 +88,8 @@ class DownloadStore(context: Context, private val sourceManager: SourceManager) 
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
                 val manga =
-                    cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeOnIO() } ?: continue
+                    cachedManga.getOrPut(mangaId) { mangaRepository.getMangaById(mangaId) }
+                        ?: continue
                 val chapter = chapterRepository.getChapterById(chapterId) ?: continue
                 val simpleChapter = chapter.toSimpleChapter() ?: continue
                 val source = chapter.getHttpSource(sourceManager)

@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Handler
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
@@ -27,7 +26,6 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -37,6 +35,7 @@ import kotlinx.coroutines.coroutineScope
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 import org.nekomanga.R
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.site.MangaDexPreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -200,9 +199,9 @@ class NotificationReceiver : BroadcastReceiver() {
     internal suspend fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
         dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
         coroutineScope {
-            val db = DatabaseHelper(context)
             val chapterRepository: ChapterRepository = Injekt.get()
-            val manga = db.getManga(mangaId).executeOnIO()
+            val mangaRepository: MangaRepository = Injekt.get()
+            val manga = mangaRepository.getMangaById(mangaId)
             val chapter = chapterRepository.getChapterById(chapterId)
             if (manga != null && chapter != null) {
                 val intent =
@@ -275,12 +274,12 @@ class NotificationReceiver : BroadcastReceiver() {
 
     /** Method called when user wants to mark as read */
     private suspend fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
-        val db: DatabaseHelper = Injekt.get()
         val preferences: PreferencesHelper = Injekt.get()
         val mangaDexPreference: MangaDexPreferences = Injekt.get()
         val chapterRepository: ChapterRepository = Injekt.get()
+        val mangaRepository: MangaRepository = Injekt.get()
 
-        val manga = db.getManga(mangaId).executeOnIO() ?: return
+        val manga = mangaRepository.getMangaById(mangaId) ?: return
 
         val dbChapters = chapterUrls.mapNotNull { chapterUrl ->
             val chapter =
@@ -336,9 +335,10 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param mangaId id of manga
      */
     private suspend fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
-        val db: DatabaseHelper = Injekt.get()
         val chapterRepository: ChapterRepository = Injekt.get()
-        val manga = db.getManga(mangaId).executeOnIO()
+        val mangaRepository: MangaRepository = Injekt.get()
+
+        val manga = mangaRepository.getMangaById(mangaId)
         val chapters = chapterUrls.mapNotNull {
             chapterRepository.getChapterByUrlAndMangaId(it, mangaId)
         }

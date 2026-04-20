@@ -15,6 +15,7 @@ import java.util.TreeSet
 import org.nekomanga.constants.Constants
 import org.nekomanga.data.database.AppDatabase
 import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
@@ -37,6 +38,7 @@ suspend fun syncChaptersWithSource(
     db: DatabaseHelper,
     appDatabase: AppDatabase,
     chapterRepository: ChapterRepository,
+    mangaRepository: MangaRepository,
     rawSourceChapters: List<SChapter>,
     manga: Manga,
     errorFromMerged: Boolean = false,
@@ -306,12 +308,12 @@ suspend fun syncChaptersWithSource(
             }
             delta /= topChapters.size - 1
             manga.next_update = newestDate + delta
-            db.updateNextUpdated(manga).executeAsBlocking()
+            mangaRepository.updateNextUpdated(manga.id!!, newestDate + delta)
         }
 
         if (newestDate != 0L && newestDate != manga.last_update) {
             manga.last_update = newestDate
-            db.updateLastUpdated(manga).executeAsBlocking()
+            mangaRepository.updateLastUpdated(manga.id!!, newestDate)
         }
         return Pair(emptyList(), emptyList())
     }
@@ -373,7 +375,7 @@ suspend fun syncChaptersWithSource(
             }
             delta /= topChapters.size - 1
             manga.next_update = topChapters[0].date_upload + delta
-            db.updateNextUpdated(manga).executeAsBlocking()
+            mangaRepository.updateNextUpdated(manga.id!!, topChapters[0].date_upload + delta)
         }
 
         // Set this manga as updated since chapters were changed
@@ -386,7 +388,7 @@ suspend fun syncChaptersWithSource(
         } else {
             manga.last_update = dateFetch
         }
-        db.updateLastUpdated(manga).executeAsBlocking()
+        mangaRepository.updateLastUpdated(manga.id!!, manga.last_update)
     }
     val newChapters = toAdd.subtract(readded.toSet()).toList().filter { !it.isUnavailable }
 

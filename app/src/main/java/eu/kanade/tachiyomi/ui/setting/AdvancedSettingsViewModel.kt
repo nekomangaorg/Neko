@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -18,6 +17,7 @@ import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.presentation.components.UiText
@@ -35,13 +35,13 @@ class AdvancedSettingsViewModel : ViewModel() {
 
     val downloadManager: DownloadManager by injectLazy()
 
-    val db: DatabaseHelper by injectLazy()
-
     val historyRepository: HistoryRepository by injectLazy()
 
     val categoryRepository: CategoryRepository by injectLazy()
 
     val chapterRepository: ChapterRepository by injectLazy()
+
+    val mangaRepository: MangaRepository by injectLazy()
 
     private val _toastEvent = MutableSharedFlow<UiText>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -59,7 +59,7 @@ class AdvancedSettingsViewModel : ViewModel() {
                 _toastEvent.emit(UiText.StringResource(R.string.starting_cleanup))
                 var foldersCleared = 0
                 val mangaMap =
-                    db.getMangaList().executeAsBlocking().associateBy {
+                    mangaRepository.getMangaList().associateBy {
                         downloadManager.getMangaDirName(it)
                     }
                 val mangaFolders = downloadManager.getMangaFolders()
@@ -112,9 +112,9 @@ class AdvancedSettingsViewModel : ViewModel() {
         viewModelScope.launchUI {
             mangaDetailsPreferences.coverVibrantColors().delete()
             if (keepRead) {
-                db.deleteAllMangaNotInLibraryAndNotRead().executeAsBlocking()
+                mangaRepository.deleteAllNotInLibraryAndNotRead()
             } else {
-                db.deleteAllMangaNotInLibrary().executeAsBlocking()
+                mangaRepository.deleteAllNotInLibrary()
             }
             historyRepository.deleteHistoryNoLastRead()
 

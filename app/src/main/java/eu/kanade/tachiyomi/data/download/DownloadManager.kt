@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -56,7 +56,7 @@ class DownloadManager(
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
 
-    private val db = Injekt.get<DatabaseHelper>()
+    private val mangaRepository: MangaRepository = Injekt.get()
 
     /**
      * Downloads provider, used to retrieve the folders where the chapters are or should be stored.
@@ -121,9 +121,11 @@ class DownloadManager(
      * @param isNotification value that determines if status is set (needed for view updates)
      */
     fun clearQueue() {
-        deletePendingDownloads(queueState.value)
-        downloader.clearQueue()
-        downloader.stop()
+        scope.launchNonCancellable {
+            deletePendingDownloads(queueState.value)
+            downloader.clearQueue()
+            downloader.stop()
+        }
     }
 
     /**
@@ -256,11 +258,11 @@ class DownloadManager(
      *
      * @param downloads list of downloads to cancel
      */
-    fun deletePendingDownloads(downloads: List<Download>) {
+    suspend fun deletePendingDownloads(downloads: List<Download>) {
         val downloadsByManga = downloads.groupBy { it.chapterItem.mangaId }
         downloadsByManga.forEach { entry ->
             val manga = entry.value.first().mangaItem
-            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
+            val dbManga = mangaRepository.getMangaById(manga.id) ?: return
             deleteChapters(dbManga, entry.value.map { it.chapterItem.toDbChapter() })
         }
     }
@@ -270,11 +272,11 @@ class DownloadManager(
      *
      * @param downloads list of downloads to cancel
      */
-    fun deletePendingDownloadsItems(downloads: List<DownloadItem>) {
+    suspend fun deletePendingDownloadsItems(downloads: List<DownloadItem>) {
         val downloadsByManga = downloads.groupBy { it.mangaItem.id }
         downloadsByManga.forEach { entry ->
             val manga = entry.value.first().mangaItem
-            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
+            val dbManga = mangaRepository.getMangaById(manga.id) ?: return
             deleteChapters(dbManga, entry.value.map { it.chapterItem.chapter.toDbChapter() })
         }
     }
