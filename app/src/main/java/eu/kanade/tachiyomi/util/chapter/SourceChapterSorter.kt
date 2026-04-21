@@ -49,9 +49,13 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
             .any { (a, b) ->
                 val first = a.mapNotNull { getChapterNum(it) }.minOrNull()
                 val second = b.mapNotNull { getChapterNum(it) }.maxOrNull()
-                // It's not a volume reset if both are have the same whole part and at least one is a dot chapter
-                first == null || second == null || first < second ||
-                    ((first % 1f != 0f || second % 1f != 0f) && floor(first) == floor(second))
+                first == null ||
+                    second == null ||
+                    (first < second &&
+                        // It's not a volume reset if both are have the same whole part
+                        // and at least one is a dot chapter
+                        ((first % 1f == 0f && second % 1f == 0f) ||
+                            floor(first) != floor(second)))
             }
     if (hasVolumeChange) {
         val (firstVolume, withVolume) = withVolume.partition { getVolumeNum(it) == 1 }
