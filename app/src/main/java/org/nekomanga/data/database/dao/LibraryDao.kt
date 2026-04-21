@@ -8,6 +8,12 @@ import org.nekomanga.data.database.model.LibraryMangaRaw
 @Dao
 interface LibraryDao {
 
+    companion object {
+        const val RAW_CHAPTER_SEPARATOR = " [.] "
+        const val RAW_SCANLATOR_TYPE_SEPARATOR = " [;] "
+        const val RAW_CHAPTER_COUNT_SEPARATOR = " [-] "
+    }
+
     @Query(
         """
         SELECT M.*, COALESCE(MC.category_id, 0) AS category
@@ -21,8 +27,8 @@ interface LibraryDao {
             LEFT JOIN (
                 SELECT manga_id,
                     GROUP_CONCAT(
-                        agg_scanlator || ' [;] ' || agg_uploader || ' [-] ' || agg_count,
-                        ' [.] '
+                        agg_scanlator || '${RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
+                        '${RAW_CHAPTER_SEPARATOR}'
                     ) AS unread
                 FROM (
                     SELECT manga_id,
@@ -39,8 +45,8 @@ interface LibraryDao {
             LEFT JOIN (
                 SELECT manga_id,
                     GROUP_CONCAT(
-                        agg_scanlator || ' [;] ' || agg_uploader || ' [-] ' || agg_count,
-                        ' [.] '
+                        agg_scanlator || '${RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
+                        '${RAW_CHAPTER_SEPARATOR}'
                     ) AS hasread
                 FROM (
                     SELECT manga_id,
@@ -93,8 +99,8 @@ interface LibraryDao {
             LEFT JOIN (
                 SELECT manga_id,
                     GROUP_CONCAT(
-                        agg_scanlator || ' [;] ' || agg_uploader || ' [-] ' || agg_count,
-                        ' [.] '
+                        agg_scanlator || '${RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
+                        '${RAW_CHAPTER_SEPARATOR}'
                     ) AS unread
                 FROM (
                     SELECT manga_id,
@@ -111,8 +117,8 @@ interface LibraryDao {
             LEFT JOIN (
                 SELECT manga_id,
                     GROUP_CONCAT(
-                        agg_scanlator || ' [;] ' || agg_uploader || ' [-] ' || agg_count,
-                        ' [.] '
+                        agg_scanlator || '${RAW_SCANLATOR_TYPE_SEPARATOR}' || agg_uploader || '${RAW_CHAPTER_COUNT_SEPARATOR}' || agg_count,
+                        '${RAW_CHAPTER_SEPARATOR}'
                     ) AS hasread
                 FROM (
                     SELECT manga_id,

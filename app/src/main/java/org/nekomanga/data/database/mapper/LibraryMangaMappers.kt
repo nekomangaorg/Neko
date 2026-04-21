@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.model.LibraryMangaRaw
 
 fun LibraryMangaRaw.toLibraryManga(
@@ -101,7 +102,7 @@ private fun parseChapterCount(
     val filtered = ChapterUtil.getScanlators(filteredScanlatorsString).toSet()
 
     while (startIndex < countString.length) {
-        val endIndex = countString.indexOf(Constants.RAW_CHAPTER_SEPARATOR, startIndex)
+        val endIndex = countString.indexOf(LibraryDao.RAW_CHAPTER_SEPARATOR, startIndex)
         val groupString =
             if (endIndex == -1) {
                 countString.substring(startIndex)
@@ -109,10 +110,10 @@ private fun parseChapterCount(
                 countString.substring(startIndex, endIndex)
             }
 
-        val parts = groupString.split(Constants.RAW_SCANLATOR_TYPE_SEPARATOR)
+        val parts = groupString.split(LibraryDao.RAW_SCANLATOR_TYPE_SEPARATOR)
         if (parts.size == 2) {
             val scanlator = parts[0]
-            val extraParts = parts[1].split(Constants.RAW_CHAPTER_COUNT_SEPARATOR)
+            val extraParts = parts[1].split(LibraryDao.RAW_CHAPTER_COUNT_SEPARATOR)
 
             if (extraParts.size == 2) {
                 val uploader = extraParts[0]
@@ -169,7 +170,7 @@ private fun parseChapterCount(
         }
 
         if (endIndex == -1) break
-        startIndex = endIndex + Constants.RAW_CHAPTER_SEPARATOR.length
+        startIndex = endIndex + LibraryDao.RAW_CHAPTER_SEPARATOR.length
     }
 
     return validChapterCount
