@@ -311,7 +311,7 @@ object DatabaseMigrations {
         db.execSQL(
             """
             INSERT INTO `merge_manga` (`id`, `manga_id`, `cover_url`, `title`, `url`, `merge_type`)
-            SELECT `_id`, COALESCE(`manga_id`, 0), COALESCE(`cover_url`, ''), COALESCE(`title`, ''), COALESCE(`url`, ''), COALESCE(`merge_type`, 0)
+            SELECT `_id`, COALESCE(`manga_id`, 0), COALESCE(`cover_url`, ''), COALESCE(`title`, ''), COALESCE(`url`, ''), COALESCE(`mergeType`, 0)
             FROM `temp_merge_manga`
             """
                 .trimIndent()
