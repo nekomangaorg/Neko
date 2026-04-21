@@ -18,3 +18,6 @@ Action: Always append `.distinctUntilChanged()` after `combine()` blocks that ag
 ## 2026-03-31 - [Filter-Map Chain Optimization]
 **Learning:** Chaining `.filterNot { ... }` with `.mapNotNull { ... }` generates an intermediate List allocation in memory before mapping. Using `.asSequence()` works but adds overhead.
 **Action:** Replace `list.filterNot { cond }.mapNotNull { transform(it) }` with a single pass `list.mapNotNull { if(cond) null else transform(it) }` for small-to-medium lists to save allocations and GC churn without the sequence overhead.
+## 2026-04-03 - [Avoid Intermediate Lists with all]
+**Learning:** Chaining `.map { ... }.all { ... }` creates an intermediate list of transformed elements, which adds memory allocation and garbage collection overhead. This is especially true for list iteration within Compose state changes (`derivedStateOf`, `remember` triggers).
+**Action:** Replace `.map { ... }.all { ... }` with a single `.all { transformedElement -> ... }` to avoid the intermediate list creation and improve iteration performance, particularly in frequently recomposed UI areas.
