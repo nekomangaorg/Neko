@@ -183,7 +183,7 @@ object DatabaseMigrations {
             """
             CREATE TABLE IF NOT EXISTS `merge_manga` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `manga_id` INTEGER NOT NULL,
-                `cover_url` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `mergeType` INTEGER NOT NULL,
+                `cover_url` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `merge_type` INTEGER NOT NULL,
                 FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
             """
@@ -310,7 +310,7 @@ object DatabaseMigrations {
 
         db.execSQL(
             """
-            INSERT INTO `merge_manga` (`id`, `manga_id`, `cover_url`, `title`, `url`, `mergeType`)
+            INSERT INTO `merge_manga` (`id`, `manga_id`, `cover_url`, `title`, `url`, `merge_type`)
             SELECT `_id`, COALESCE(`manga_id`, 0), COALESCE(`cover_url`, ''), COALESCE(`title`, ''), COALESCE(`url`, ''), COALESCE(`merge_type`, 0)
             FROM `temp_merge_manga`
             """
