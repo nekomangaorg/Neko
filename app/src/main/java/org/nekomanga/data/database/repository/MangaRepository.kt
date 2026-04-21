@@ -58,6 +58,8 @@ interface MangaRepository {
 
     suspend fun updateManga(manga: Manga)
 
+    suspend fun updateMangaList(mangas: List<Manga>)
+
     suspend fun deleteManga(manga: Manga)
 
     suspend fun deleteMangaList(mangas: List<Manga>)

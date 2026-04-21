@@ -531,7 +531,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     context.imageLoader.execute(request)
                                 }
                             }
-                            mangaRepository.insertManga(manga)
+                            mangaRepository.updateManga(manga)
 
                             if (holder.sourceArtwork.isNotEmpty()) {
                                 holder.sourceArtwork

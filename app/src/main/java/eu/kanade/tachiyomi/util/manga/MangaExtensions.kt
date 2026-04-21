@@ -66,7 +66,7 @@ fun SourceManga.toDisplayManga(mangaRepository: MangaRepository, sourceId: Long)
         localManga = newManga
     } else if (localManga.title.isBlank()) {
         localManga.title = this.title
-        runBlocking { mangaRepository.insertManga(localManga) }
+        runBlocking { mangaRepository.updateManga(localManga) }
     }
     return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
@@ -112,7 +112,7 @@ fun Iterable<SourceManga>.toDisplayManga(
         newMangasList.forEachIndexed { index, manga -> manga.id = insertedIds[index] }
     }
     if (updateMangasList.isNotEmpty()) {
-        runBlocking { mangaRepository.insertMangaList(updateMangasList) }
+        runBlocking { mangaRepository.updateMangaList(updateMangasList) }
     }
 
     return mappedMangas.map { (sourceManga, localManga) ->

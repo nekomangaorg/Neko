@@ -223,7 +223,7 @@ class RestoreHelper(val context: Context) {
         manga.copyFrom(dbManga)
         manga.initialized = false
         manga.favorite = dbManga.favorite || backupFavorite
-        mangaRepository.insertManga(manga)
+        mangaRepository.updateManga(manga)
     }
 
     /**

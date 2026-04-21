@@ -96,7 +96,7 @@ class FollowsSyncProcessor {
                             countOfAdded.incrementAndGet()
                             dbManga.favorite = true
 
-                            mangaRepository.insertManga(dbManga)
+                            mangaRepository.updateManga(dbManga)
 
                             dbManga =
                                 mangaRepository.getMangaByUrlAndSource(

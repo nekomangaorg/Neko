@@ -50,7 +50,7 @@ class UpdateMangaStatusAndMissingChapterCount(
         }
 
         // Persist changes
-        if (updated) mangaRepository.insertManga(manga)
+        if (updated) mangaRepository.updateManga(manga)
     }
 
     private fun isMangaStatusCompleted(chapters: List<DbChapter>, manga: Manga): Boolean {

@@ -181,7 +181,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
                         false -> 0
                     }
             }
-            mangaRepository.insertManga(editManga)
+            mangaRepository.updateManga(editManga)
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 

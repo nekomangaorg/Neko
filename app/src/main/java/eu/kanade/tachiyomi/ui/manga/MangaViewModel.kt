@@ -455,7 +455,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 // Apply state to DB object using the consolidated logic
                 filterState.applyToManga(manga, mangaDetailsPreferences)
 
-                mangaRepository.insertManga(manga)
+                mangaRepository.updateManga(manga)
                 mangaRepository.updateChapterFlags(manga)
                 mangaRepository.updateScanlatorFilter(manga)
                 mangaRepository.updateLanguageFilter(manga)
@@ -530,7 +530,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                     effectiveManga
                                         .copy(filteredScanlators = persistentListOf())
                                         .toManga()
-                                mangaRepository.insertManga(manga)
+                                mangaRepository.updateManga(manga)
                             }
 
                             val activeChapters =
@@ -1989,7 +1989,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             coverCache.setCustomCoverToCache(dbManga, artwork.cover)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = artwork.cover
-            mangaRepository.insertManga(dbManga)
+            mangaRepository.updateManga(dbManga)
         }
     }
 
@@ -2000,7 +2000,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             coverCache.deleteCustomCover(dbManga)
             MangaCoverMetadata.remove(mangaId)
             dbManga.user_cover = null
-            mangaRepository.insertManga(dbManga)
+            mangaRepository.updateManga(dbManga)
         }
     }
 
@@ -2473,7 +2473,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
 
         if (url != effectiveManga.dynamicCover) {
             val dbManga = effectiveManga.copy(dynamicCover = url).toManga()
-            mangaRepository.insertManga(dbManga)
+            mangaRepository.updateManga(dbManga)
         }
     }
 

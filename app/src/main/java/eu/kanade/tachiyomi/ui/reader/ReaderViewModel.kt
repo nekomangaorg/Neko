@@ -379,7 +379,7 @@ constructor(
             tempManga.copyFrom(networkManga)
             tempManga.title = networkManga.title
 
-            mangaRepository.insertManga(tempManga)
+            mangaRepository.updateManga(tempManga)
             val manga = mangaRepository.getMangaByUrl(tempManga.url)!!
 
             TimberKt.d { "tempManga id ${tempManga.id}" }
@@ -1062,7 +1062,7 @@ constructor(
                     if (manga.favorite) {
                         coverCache.setCustomCoverToCache(manga, stream())
                         manga.user_cover = "file://chapterPage-" + Random.nextInt(1000)
-                        mangaRepository.insertManga(manga)
+                        mangaRepository.updateManga(manga)
                         SetAsCoverResult.Success
                     } else {
                         SetAsCoverResult.AddToLibraryFirst

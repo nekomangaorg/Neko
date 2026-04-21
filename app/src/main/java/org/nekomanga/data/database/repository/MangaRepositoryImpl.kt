@@ -115,6 +115,9 @@ class MangaRepositoryImpl(
 
     override suspend fun updateManga(manga: Manga) = mangaDao.updateManga(manga.toEntity())
 
+    override suspend fun updateMangaList(mangas: List<Manga>) =
+        mangaDao.updateMangaList(mangas.map { it.toEntity() })
+
     override suspend fun deleteManga(manga: Manga) = mangaDao.deleteManga(manga.toEntity())
 
     override suspend fun deleteMangaList(mangas: List<Manga>) =

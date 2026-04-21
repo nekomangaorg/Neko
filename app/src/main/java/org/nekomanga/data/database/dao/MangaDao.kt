@@ -45,6 +45,8 @@ interface MangaDao {
 
     @Update suspend fun updateManga(manga: MangaEntity)
 
+    @Update suspend fun updateMangaList(mangaList: List<MangaEntity>)
+
     @Delete suspend fun deleteManga(manga: MangaEntity)
 
     @Delete suspend fun deleteMangaList(mangaList: List<MangaEntity>)

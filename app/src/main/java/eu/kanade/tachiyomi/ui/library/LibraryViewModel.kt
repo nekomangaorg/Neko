@@ -1079,7 +1079,7 @@ class LibraryViewModel() : ViewModel() {
                 dbManga.favorite = false
             }
 
-            mangaRepository.insertMangaList(dbMangas)
+            mangaRepository.updateMangaList(dbMangas)
         }
     }
 

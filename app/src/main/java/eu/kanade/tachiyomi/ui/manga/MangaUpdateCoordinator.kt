@@ -143,7 +143,7 @@ class MangaUpdateCoordinator {
                 )
 
                 appDatabase.withTransaction {
-                    mangaRepository.insertManga(mangaForDb)
+                    mangaRepository.updateManga(mangaForDb)
                     send(MangaResult.UpdatedManga)
 
                     if (sourceArtwork.isNotEmpty()) {

@@ -25,7 +25,7 @@ class ModifyMangaUseCase(
 
         if (previousEffectiveTitle != newEffectiveTitle) {
             dbManga.user_title = title
-            mangaRepository.insertManga(dbManga)
+            mangaRepository.updateManga(dbManga)
 
             val provider = DownloadProvider(preferences.context)
             provider.renameMangaFolder(previousEffectiveTitle, newEffectiveTitle)
@@ -46,7 +46,7 @@ class ModifyMangaUseCase(
                     false -> 0
                 }
         }
-        mangaRepository.insertManga(editManga)
+        mangaRepository.updateManga(editManga)
 
         val mangaUseCases: MangaUseCases = Injekt.get()
         mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
