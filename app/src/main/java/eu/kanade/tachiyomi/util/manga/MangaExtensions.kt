@@ -24,7 +24,7 @@ import org.nekomanga.domain.manga.LibraryMangaItem
 import org.nekomanga.domain.manga.SimpleManga
 import org.nekomanga.domain.manga.SourceManga
 
-fun Manga.shouldDownloadNewChapters(
+suspend fun Manga.shouldDownloadNewChapters(
     categoryRepository: CategoryRepository,
     prefs: PreferencesHelper,
 ): Boolean {
@@ -40,9 +40,8 @@ fun Manga.shouldDownloadNewChapters(
 
     // Get all categories, else default category (0)
     val categoriesForManga =
-        runBlocking {
-                categoryRepository.getCategoriesForManga(this@shouldDownloadNewChapters.id!!)
-            }
+        categoryRepository
+            .getCategoriesForManga(this@shouldDownloadNewChapters.id!!)
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
@@ -55,10 +54,11 @@ fun Manga.shouldDownloadNewChapters(
 }
 
 /** Takes a SourceManga and converts to a display manga */
-fun SourceManga.toDisplayManga(mangaRepository: MangaRepository, sourceId: Long): DisplayManga {
-    var localManga = runBlocking {
-        mangaRepository.getMangaByUrlAndSource(this@toDisplayManga.url, sourceId)
-    }
+suspend fun SourceManga.toDisplayManga(
+    mangaRepository: MangaRepository,
+    sourceId: Long,
+): DisplayManga {
+    var localManga = mangaRepository.getMangaByUrlAndSource(this@toDisplayManga.url, sourceId)
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
         newManga.apply { this.thumbnail_url = currentThumbnail }
@@ -66,13 +66,13 @@ fun SourceManga.toDisplayManga(mangaRepository: MangaRepository, sourceId: Long)
         localManga = newManga
     } else if (localManga.title.isBlank()) {
         localManga.title = this.title
-        runBlocking { mangaRepository.updateManga(localManga) }
+        mangaRepository.updateManga(localManga)
     }
     return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
 /** Takes a list of SourceManga and converts to a list of display manga in bulk */
-fun Iterable<SourceManga>.toDisplayManga(
+suspend fun Iterable<SourceManga>.toDisplayManga(
     mangaRepository: MangaRepository,
     sourceId: Long,
 ): List<DisplayManga> {
@@ -85,7 +85,7 @@ fun Iterable<SourceManga>.toDisplayManga(
     val existingMangas =
         urls
             .chunked(900)
-            .flatMap { chunk -> runBlocking { mangaRepository.getMangaByUrls(chunk) } }
+            .flatMap { chunk -> mangaRepository.getMangaByUrls(chunk) }
             .associateBy { it.url }
 
     val newMangasList = mutableListOf<Manga>()
@@ -270,16 +270,23 @@ fun SManga.getSlug(): String {
 }
 
 /** resync homepage manga with db manga */
-fun List<HomePageManga>.resync(mangaRepository: MangaRepository): PersistentList<HomePageManga> {
+suspend fun List<HomePageManga>.resyncHomePageManga(
+    mangaRepository: MangaRepository
+): PersistentList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.resync(mangaRepository).toPersistentList()
+                displayManga =
+                    homePageManga.displayManga
+                        .resyncDisplayManga(mangaRepository)
+                        .toPersistentList()
             )
         }
         .toPersistentList()
 }
 
-fun List<DisplayManga>.resync(mangaRepository: MangaRepository): List<DisplayManga> {
+suspend fun List<DisplayManga>.resyncDisplayManga(
+    mangaRepository: MangaRepository
+): List<DisplayManga> {
     if (this.isEmpty()) return emptyList()
 
     // Fetch existing mangas from database by IDs in chunks to avoid SQLite parameter limit
@@ -287,7 +294,7 @@ fun List<DisplayManga>.resync(mangaRepository: MangaRepository): List<DisplayMan
     val existingMangas =
         mangaIds
             .chunked(900)
-            .flatMap { chunk -> runBlocking { mangaRepository.getMangaByIds(chunk) } }
+            .flatMap { chunk -> mangaRepository.getMangaByIds(chunk) }
             .associateBy { it.id }
 
     return this.mapNotNull { displayManga ->

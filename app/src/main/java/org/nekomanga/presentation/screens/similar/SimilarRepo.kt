@@ -129,7 +129,10 @@ class SimilarRepo {
         }
     }
 
-    private fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
+    private suspend fun createGroup(
+        @StringRes id: Int,
+        manga: List<SourceManga>,
+    ): SimilarMangaGroup? {
         return if (manga.isEmpty()) {
             null
         } else {

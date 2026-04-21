@@ -13,7 +13,8 @@ import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
-import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.resyncDisplayManga
+import eu.kanade.tachiyomi.util.manga.resyncHomePageManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.activeNetworkState
@@ -752,14 +753,14 @@ class BrowseViewModel : ViewModel() {
             viewModelScope.launchIO {
                 val newHomePageManga =
                     _browseScreenState.value.homePageManga
-                        .resync(mangaRepository)
+                        .resyncHomePageManga(mangaRepository)
                         .updateVisibility(preferences)
                 _browseScreenState.update { it.copy(homePageManga = newHomePageManga) }
             }
             viewModelScope.launchIO {
                 val allDisplayManga =
                     _browseScreenState.value.displayMangaHolder.allDisplayManga
-                        .resync(mangaRepository)
+                        .resyncDisplayManga(mangaRepository)
                         .unique()
                 _browseScreenState.update {
                     it.copy(

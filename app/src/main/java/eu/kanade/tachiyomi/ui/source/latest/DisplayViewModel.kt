@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
-import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.resyncDisplayManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
@@ -276,7 +276,7 @@ class DisplayViewModel(val displayScreenType: DisplayScreenType) : ViewModel() {
         viewModelScope.launchIO {
             val newDisplayManga =
                 _displayScreenState.value.allDisplayManga
-                    .resync(mangaRepository)
+                    .resyncDisplayManga(mangaRepository)
                     .unique()
                     .toPersistentList()
             _displayScreenState.update {

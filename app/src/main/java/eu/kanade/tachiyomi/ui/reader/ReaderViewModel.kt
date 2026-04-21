@@ -655,9 +655,9 @@ constructor(
      * Removes [currentChapter] from download queue if setting is enabled and [currentChapter] is
      * queued for download
      */
-    private fun deleteChapterFromDownloadQueue(currentChapter: ReaderChapter): Download? {
+    private suspend fun deleteChapterFromDownloadQueue(currentChapter: ReaderChapter): Download? {
         return downloadManager.getQueuedDownloadOrNull(currentChapter.chapter.id!!)?.apply {
-            runBlocking { downloadManager.deletePendingDownloads(listOf(this@apply)) }
+            downloadManager.deletePendingDownloads(listOf(this@apply))
         }
     }
 
