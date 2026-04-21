@@ -3,7 +3,9 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import kotlin.math.floor
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.logging.TimberKt
 
 /** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
@@ -20,20 +22,20 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
     zeroVolume =
         zeroVolume.sortedWith(
             compareByDescending<Chapter> { getChapterNum(it) == null }
-                .thenByDescending { getChapterNum(it) }
+                .thenByDescending { getChapterNum(it) },
         )
 
     var (nullVolume, withVolume) = nonZeroVolume.partition { getVolumeNum(it) == null }
     nullVolume =
         nullVolume.sortedWith(
             compareByDescending<Chapter> { getChapterNum(it) == null }
-                .thenByDescending { getChapterNum(it) }
+                .thenByDescending { getChapterNum(it) },
         )
     withVolume =
         withVolume.sortedWith(
             compareByDescending<Chapter> { getVolumeNum(it) }
                 .thenByDescending { getChapterNum(it) == null }
-                .thenByDescending { getChapterNum(it) }
+                .thenByDescending { getChapterNum(it) },
         )
 
     val comp = compareBy<Chapter> { getChapterNum(it) != null }.thenBy { getChapterNum(it) }
@@ -48,7 +50,9 @@ fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
             .any { (a, b) ->
                 val first = a.mapNotNull { getChapterNum(it) }.minOrNull()
                 val second = b.mapNotNull { getChapterNum(it) }.maxOrNull()
-                first == null || second == null || first < second
+                // It's not a volume reset if both are have the same whole part and at least one is a dot chapter
+                first == null || second == null || first < second ||
+                    ((first % 1f != 0f || second % 1f != 0f) && floor(first) == floor(second))
             }
     if (hasVolumeChange) {
         val (firstVolume, withVolume) = withVolume.partition { getVolumeNum(it) == 1 }
@@ -72,15 +76,15 @@ fun <T> List<List<T>>.mergeSorted(comparator: Comparator<T>): List<T> {
     val c: Comparator<Map.Entry<Iterator<T>, T>> = Comparator.comparing({ it.value }, comparator)
 
     return sequence {
-            while (iteratorToCurrentValues.isNotEmpty()) {
-                val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
+        while (iteratorToCurrentValues.isNotEmpty()) {
+            val smallestEntry = iteratorToCurrentValues.minWithOrNull(c)!!
 
-                yield(smallestEntry.value)
+            yield(smallestEntry.value)
 
-                if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
-                else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
-            }
+            if (!smallestEntry.key.hasNext()) iteratorToCurrentValues.remove(smallestEntry.key)
+            else iteratorToCurrentValues[smallestEntry.key] = smallestEntry.key.next()
         }
+    }
         .toList()
         .reversed()
 }
