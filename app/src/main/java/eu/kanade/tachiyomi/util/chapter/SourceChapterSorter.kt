@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import kotlin.math.floor
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.logging.TimberKt
 
 /** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<Chapter>): List<Chapter> {
