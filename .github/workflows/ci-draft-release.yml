@@ -20,7 +20,7 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v5
 
-  build_and_release:
+  build_test_and_release:
     name: Build and Update Draft Release
     needs: validate_gradle_wrapper
     runs-on: ubuntu-latest
@@ -47,6 +47,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-disabled: true
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
 
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.3

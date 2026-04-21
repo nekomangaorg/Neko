@@ -1,15 +1,10 @@
 package org.nekomanga.usecases.chapters
 
-import com.pushtorefresh.storio.sqlite.operations.put.PreparedPutCollectionOfObjects
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,6 +16,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -29,22 +25,19 @@ import org.nekomanga.domain.chapter.SimpleChapter
 class MarkChapterUseCaseTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var db: DatabaseHelper
+    private lateinit var mockChapterRepository: ChapterRepository
     private lateinit var markChapterUseCase: MarkChapterUseCase
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        db = mockk()
-        markChapterUseCase = MarkChapterUseCase(db)
-
-        mockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
+        mockChapterRepository = mockk()
+        markChapterUseCase = MarkChapterUseCase(mockChapterRepository)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        unmockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
     }
 
     @Test
@@ -64,18 +57,17 @@ class MarkChapterUseCaseTest {
                     .copy(id = 1L, mangaId = 100L, read = true, lastPageRead = 20, pagesLeft = 0)
             val chapterItem = ChapterItem(chapter = simpleChapter)
 
-            val mockPreparedPut = mockk<PreparedPutCollectionOfObjects<Chapter>>()
             val capturedChapters = slot<List<Chapter>>()
 
-            every { db.updateChaptersProgress(capture(capturedChapters)) } returns mockPreparedPut
-            coEvery { mockPreparedPut.executeOnIO() } returns mockk()
+            coEvery {
+                mockChapterRepository.updateChaptersProgress(capture(capturedChapters))
+            } returns mockk()
 
             // Act
             markChapterUseCase(markAction, listOf(chapterItem))
 
             // Assert
-            coVerify(exactly = 1) { db.updateChaptersProgress(any()) }
-            coVerify(exactly = 1) { mockPreparedPut.executeOnIO() }
+            coVerify(exactly = 1) { mockChapterRepository.updateChaptersProgress(any()) }
 
             val updatedChapters = capturedChapters.captured
             assertEquals(1, updatedChapters.size)

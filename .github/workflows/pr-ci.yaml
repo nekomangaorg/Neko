@@ -18,7 +18,7 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v5
 
-  pr_build:
+  pr_build_and_test:
     runs-on: ubuntu-latest
     steps:
       - name: clone repo
@@ -37,6 +37,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-disabled: true
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
 
       - name: Build app
         run: ./gradlew assembleDebug

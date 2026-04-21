@@ -1,19 +1,13 @@
 package org.nekomanga.usecases.tracking
 
-import com.pushtorefresh.storio.sqlite.operations.get.PreparedGetListOfObjects
-import com.pushtorefresh.storio.sqlite.operations.put.PreparedPutObject
-import com.pushtorefresh.storio.sqlite.operations.put.PutResult
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -23,16 +17,19 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.addSingleton
-import uy.kohesive.injekt.api.get
 
 class RefreshTrackingUseCaseTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var db: DatabaseHelper
+    private lateinit var mockTrackRepository: TrackRepository
+    private lateinit var mockChapterRepository: ChapterRepository
+
     private lateinit var trackManager: TrackManager
     private lateinit var preferences: PreferencesHelper
     private lateinit var useCase: RefreshTrackingUseCase
@@ -40,33 +37,35 @@ class RefreshTrackingUseCaseTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        db = mockk()
+        mockTrackRepository = mockk()
+        mockChapterRepository = mockk()
         trackManager = mockk()
         preferences = mockk()
 
-        mockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
-
         // Injekt
-        Injekt.addSingleton(db)
+        Injekt.addSingleton(mockTrackRepository)
+        Injekt.addSingleton(mockChapterRepository)
         Injekt.addSingleton(trackManager)
         Injekt.addSingleton(preferences)
 
-        useCase = RefreshTrackingUseCase(db, trackManager, preferences)
+        useCase =
+            RefreshTrackingUseCase(
+                mockChapterRepository,
+                mockTrackRepository,
+                trackManager,
+                preferences,
+            )
     }
 
     @After
     fun tearDown() {
-        try {
-            unmockkStatic("eu.kanade.tachiyomi.util.system.DatabaseExtensionsKt")
-        } finally {
-            Dispatchers.resetMain()
-            val fields = Injekt::class.java.declaredFields
-            for (field in fields) {
-                if (field.name == "registrars") {
-                    field.isAccessible = true
-                    val map = field.get(Injekt) as MutableMap<*, *>
-                    map.clear()
-                }
+        Dispatchers.resetMain()
+        val fields = Injekt::class.java.declaredFields
+        for (field in fields) {
+            if (field.name == "registrars") {
+                field.isAccessible = true
+                val map = field.get(Injekt) as MutableMap<*, *>
+                map.clear()
             }
         }
     }
@@ -84,9 +83,7 @@ class RefreshTrackingUseCaseTest {
                     every { manga_id } returns mangaId
                 }
 
-            val mockGetTracks = mockk<PreparedGetListOfObjects<Track>>()
-            every { db.getTracks(mangaId) } returns mockGetTracks
-            coEvery { mockGetTracks.executeOnIO() } returns listOf(mockTrack)
+            coEvery { mockTrackRepository.getTracksForManga(mangaId) } returns listOf(mockTrack)
 
             val mockService =
                 mockk<TrackService>(relaxed = true) { every { isLogged() } returns true }
@@ -94,10 +91,7 @@ class RefreshTrackingUseCaseTest {
 
             coEvery { mockService.refresh(any()) } returns mockTrack
 
-            val mockInsertTrack = mockk<PreparedPutObject<Track>>()
-            every { db.insertTrack(any()) } returns mockInsertTrack
-            val mockPutResult = mockk<PutResult>(relaxed = true)
-            coEvery { mockInsertTrack.executeOnIO() } returns mockPutResult
+            coEvery { mockTrackRepository.insertTrack(any()) } returns 1L
 
             val syncChaptersPref = mockk<Preference<Boolean>>()
             every { preferences.syncChaptersWithTracker() } returns syncChaptersPref
@@ -118,9 +112,8 @@ class RefreshTrackingUseCaseTest {
                     every { manga_id } returns mangaId
                 }
 
-            val mockGetChapters = mockk<PreparedGetListOfObjects<Chapter>>()
-            every { db.getChapters(mangaId) } returns mockGetChapters
-            coEvery { mockGetChapters.executeOnIO() } returns listOf(mockChapter3, mockChapter6)
+            coEvery { mockChapterRepository.getChaptersForManga(mangaId) } returns
+                listOf(mockChapter3, mockChapter6)
 
             var markedChapters = emptyList<ChapterItem>()
             var errors = 0
