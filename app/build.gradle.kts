@@ -27,8 +27,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 64
-        versionName = "3.3.6"
+        versionCode = 65
+        versionName = "3.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -112,7 +112,6 @@ dependencies {
     implementation(libs.bundles.ok)
     implementation(libs.tokenbucket)
     implementation(libs.timber)
-    implementation(libs.rx.java)
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
@@ -123,7 +122,6 @@ dependencies {
     implementation(libs.bundles.google)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
-    implementation(libs.bundles.rx)
     implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10
@@ -139,7 +137,6 @@ dependencies {
 
     // Database
     implementation(libs.sqlite)
-    implementation(libs.sqlite.android)
 
     // Room
     implementation(androidx.bundles.room)
@@ -153,10 +150,6 @@ dependencies {
 
     // Logging
     implementation(libs.timber)
-
-    // Required outsde of version catalog cause aar
-    implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
-    implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
 
     // UI
     implementation(libs.bundles.fastadapter)
