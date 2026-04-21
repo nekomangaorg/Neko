@@ -1424,6 +1424,9 @@
     <string name="is_merged">Merged</string>
     <string name="is_not_merged">Merge</string>
     <string name="links">Links</string>
+    <string name="supported_links">Supported links</string>
+    <string name="supported_links_summary">Open Android settings to choose which links are associated with this app</string>
+    <string name="system">System</string>
     <string name="open_external">Open external links</string>
     <string name="comments">Comments</string>
     <string name="comments_unavailable">"Comments not available"</string>
