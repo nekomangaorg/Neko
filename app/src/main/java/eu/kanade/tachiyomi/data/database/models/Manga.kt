@@ -172,7 +172,7 @@ interface Manga : SManga {
         }
     }
 
-   suspend fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
+    suspend fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
         val tags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
         val chapters = chapterRepository.getChaptersForManga(this@Manga.id!!)
 

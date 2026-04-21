@@ -29,7 +29,7 @@ interface MergeMangaDao {
 
     @Delete suspend fun deleteMergeManga(mergeManga: MergeMangaEntity)
 
-    @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId AND mergeType = :mergeType")
+    @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId AND merge_type = :mergeType")
     suspend fun deleteMergeMangaByType(mangaId: Long, mergeType: Int)
 
     @Query("DELETE FROM merge_manga WHERE manga_id = :mangaId")

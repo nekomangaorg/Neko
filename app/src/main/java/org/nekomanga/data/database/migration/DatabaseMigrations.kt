@@ -28,18 +28,29 @@ object DatabaseMigrations {
         }
 
     private fun backupDataToTempTables(db: SupportSQLiteDatabase) {
-        db.execSQL("CREATE TABLE `temp_mangas` AS SELECT * FROM `mangas`")
-        db.execSQL("CREATE TABLE `temp_chapters` AS SELECT * FROM `chapters`")
-        db.execSQL("CREATE TABLE `temp_history` AS SELECT * FROM `history`")
-        db.execSQL("CREATE TABLE `temp_categories` AS SELECT * FROM `categories`")
-        db.execSQL("CREATE TABLE `temp_mangas_categories` AS SELECT * FROM `mangas_categories`")
-        db.execSQL("CREATE TABLE `temp_manga_aggregate` AS SELECT * FROM `manga_aggregate`")
-        db.execSQL("CREATE TABLE `temp_manga_sync` AS SELECT * FROM `manga_sync`")
-        db.execSQL("CREATE TABLE `temp_artwork` AS SELECT * FROM `artwork`")
-        db.execSQL("CREATE TABLE `temp_browse_filter` AS SELECT * FROM `browse_filter`")
-        db.execSQL("CREATE TABLE `temp_manga_related` AS SELECT * FROM `manga_related`")
-        db.execSQL("CREATE TABLE `temp_scanlator_group` AS SELECT * FROM `scanlator_group`")
-        db.execSQL("CREATE TABLE `temp_uploader` AS SELECT * FROM `uploader`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS`temp_mangas` AS SELECT * FROM `mangas`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS`temp_chapters` AS SELECT * FROM `chapters`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_history` AS SELECT * FROM `history`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_categories` AS SELECT * FROM `categories`")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `temp_mangas_categories` AS SELECT * FROM `mangas_categories`"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `temp_manga_aggregate` AS SELECT * FROM `manga_aggregate`"
+        )
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_manga_sync` AS SELECT * FROM `manga_sync`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_artwork` AS SELECT * FROM `artwork`")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `temp_browse_filter` AS SELECT * FROM `browse_filter`"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `temp_manga_related` AS SELECT * FROM `manga_related`"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `temp_scanlator_group` AS SELECT * FROM `scanlator_group`"
+        )
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_uploader` AS SELECT * FROM `uploader`")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_merge_manga` AS SELECT * FROM `merge_manga`")
     }
 
     private fun dropOldTables(db: SupportSQLiteDatabase) {
@@ -76,7 +87,8 @@ object DatabaseMigrations {
                 `manga_last_chapter` INTEGER, `merge_manga_image_url` TEXT, `alt_titles` TEXT, `user_cover` TEXT, `user_title` TEXT,
                 `language_filter_flag` TEXT, `dynamic_cover` TEXT
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 2. Categories (Parent)
@@ -86,7 +98,8 @@ object DatabaseMigrations {
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `sort` INTEGER NOT NULL,
                 `flags` INTEGER NOT NULL, `manga_order` TEXT NOT NULL
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 3. Chapters (Child of Manga)
@@ -101,7 +114,8 @@ object DatabaseMigrations {
                 `date_upload` INTEGER NOT NULL, `mangadex_chapter_id` TEXT, `language` TEXT,
                 FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 4. History (Child of Chapters)
@@ -111,7 +125,8 @@ object DatabaseMigrations {
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapter_id` INTEGER NOT NULL, `last_read` INTEGER NOT NULL, `time_read` INTEGER NOT NULL,
                 FOREIGN KEY(`chapter_id`) REFERENCES `chapters`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 5. Manga Categories (Child of Manga & Categories)
@@ -122,7 +137,8 @@ object DatabaseMigrations {
                 FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
                 FOREIGN KEY(`category_id`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 6. Manga Aggregate (Child of Manga)
@@ -132,20 +148,22 @@ object DatabaseMigrations {
                 `manga_id` INTEGER NOT NULL, `volumes` TEXT NOT NULL, PRIMARY KEY(`manga_id`),
                 FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 7. Track (Child of Manga)
         db.execSQL(
             """
             CREATE TABLE IF NOT EXISTS `track` (
-                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `track_manga_id` INTEGER NOT NULL, `track_service_id` INTEGER NOT NULL,
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `manga_id` INTEGER NOT NULL, `track_service_id` INTEGER NOT NULL,
                 `media_id` INTEGER NOT NULL, `library_id` INTEGER, `title` TEXT NOT NULL, `last_chapter_read` REAL NOT NULL,
                 `total_chapters` INTEGER NOT NULL, `status` INTEGER NOT NULL, `score` REAL NOT NULL, `tracking_url` TEXT NOT NULL,
                 `start_date` INTEGER NOT NULL, `finish_date` INTEGER NOT NULL,
-                FOREIGN KEY(`track_manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+                FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         // 8. Artwork (Child of Manga)
@@ -156,14 +174,35 @@ object DatabaseMigrations {
                 `volume` TEXT NOT NULL, `locale` TEXT NOT NULL, `description` TEXT NOT NULL,
                 FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
             )
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
-        // 9. Independent tables
-        db.execSQL("CREATE TABLE IF NOT EXISTS `browse_filter` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `filters` TEXT NOT NULL, `is_default` INTEGER NOT NULL)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `manga_similar` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `manga_id` TEXT NOT NULL, `matched_ids` TEXT NOT NULL)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `scanlator_group` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uuid` TEXT NOT NULL, `description` TEXT)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `uploader` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT NOT NULL, `uuid` TEXT NOT NULL)")
+        // 9. Merge Manga (Child of Manga)
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `merge_manga` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `manga_id` INTEGER NOT NULL,
+                `cover_url` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `mergeType` INTEGER NOT NULL,
+                FOREIGN KEY(`manga_id`) REFERENCES `manga`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """
+                .trimIndent()
+        )
+
+        // 10. Independent tables
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `browse_filter` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `filters` TEXT NOT NULL, `is_default` INTEGER NOT NULL)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `manga_similar` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `manga_id` TEXT NOT NULL, `matched_ids` TEXT NOT NULL)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `scanlator_group` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uuid` TEXT NOT NULL, `description` TEXT)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `uploader` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT NOT NULL, `uuid` TEXT NOT NULL)"
+        )
     }
 
     private fun restoreDataFromTempTables(db: SupportSQLiteDatabase) {
@@ -187,7 +226,8 @@ object DatabaseMigrations {
                 `missing_chapters`, `rating`, `users`, `thread_id`, `replies_count`, `merge_manga_url`, `manga_last_volume`,
                 `manga_last_chapter`, `merge_manga_image_url`, `alt_titles`, `user_cover`, `user_title`, `language_filter_flag`, `dynamic_cover`
             FROM `temp_mangas`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -195,7 +235,8 @@ object DatabaseMigrations {
             INSERT INTO `categories` (`id`, `name`, `sort`, `flags`, `manga_order`)
             SELECT `_id`, `name`, `sort`, `flags`, COALESCE(`manga_order`, '')
             FROM `temp_categories`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -212,7 +253,8 @@ object DatabaseMigrations {
                 COALESCE(`chapter_number`, 0.0), COALESCE(`source_order`, 0), COALESCE(`smart_order`, 0), COALESCE(`date_fetch`, 0),
                 COALESCE(`date_upload`, 0), `mangadex_chapter_id`, `language`
             FROM `temp_chapters`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -220,7 +262,8 @@ object DatabaseMigrations {
             INSERT INTO `history` (`id`, `chapter_id`, `last_read`, `time_read`)
             SELECT `history_id`, `history_chapter_id`, COALESCE(`history_last_read`, 0), COALESCE(`history_time_read`, 0)
             FROM `temp_history`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -228,7 +271,8 @@ object DatabaseMigrations {
             INSERT INTO `manga_categories` (`id`, `manga_id`, `category_id`)
             SELECT `_id`, `manga_id`, `category_id`
             FROM `temp_mangas_categories`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -236,13 +280,14 @@ object DatabaseMigrations {
             INSERT INTO `manga_aggregate` (`manga_id`, `volumes`)
             SELECT `manga_id`, COALESCE(`volumes`, '')
             FROM `temp_manga_aggregate`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
             """
             INSERT INTO `track` (
-                `id`, `track_manga_id`, `track_service_id`, `media_id`, `library_id`, `title`, `last_chapter_read`,
+                `id`, `manga_id`, `track_service_id`, `media_id`, `library_id`, `title`, `last_chapter_read`,
                 `total_chapters`, `status`, `score`, `tracking_url`, `start_date`, `finish_date`
             )
             SELECT
@@ -250,7 +295,8 @@ object DatabaseMigrations {
                 COALESCE(`last_chapter_read`, 0.0), COALESCE(`total_chapters`, 0), COALESCE(`status`, 0), COALESCE(`score`, 0.0),
                 COALESCE(`remote_url`, ''), COALESCE(`start_date`, 0), COALESCE(`finish_date`, 0)
             FROM `temp_manga_sync`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -258,7 +304,17 @@ object DatabaseMigrations {
             INSERT INTO `artwork` (`id`, `manga_id`, `file_name`, `volume`, `locale`, `description`)
             SELECT `_id`, `manga_id`, `filename`, `volume`, `locale`, `description`
             FROM `temp_artwork`
-            """.trimIndent()
+            """
+                .trimIndent()
+        )
+
+        db.execSQL(
+            """
+            INSERT INTO `merge_manga` (`id`, `manga_id`, `cover_url`, `title`, `url`, `mergeType`)
+            SELECT `_id`, COALESCE(`manga_id`, 0), COALESCE(`cover_url`, ''), COALESCE(`title`, ''), COALESCE(`url`, ''), COALESCE(`merge_type`, 0)
+            FROM `temp_merge_manga`
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -266,7 +322,8 @@ object DatabaseMigrations {
             INSERT INTO `browse_filter` (`id`, `name`, `filters`, `is_default`)
             SELECT `_id`, `name`, `filters`, `is_default`
             FROM `temp_browse_filter`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -274,7 +331,8 @@ object DatabaseMigrations {
             INSERT INTO `manga_similar` (`id`, `manga_id`, `matched_ids`)
             SELECT `_id`, COALESCE(`manga_id`, ''), COALESCE(`matched_ids`, '')
             FROM `temp_manga_related`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -282,7 +340,8 @@ object DatabaseMigrations {
             INSERT INTO `scanlator_group` (`id`, `name`, `uuid`, `description`)
             SELECT `_id`, COALESCE(`name`, ''), COALESCE(`uuid`, ''), `description`
             FROM `temp_scanlator_group`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
 
         db.execSQL(
@@ -290,7 +349,8 @@ object DatabaseMigrations {
             INSERT INTO `uploader` (`id`, `username`, `uuid`)
             SELECT `_id`, COALESCE(`username`, ''), COALESCE(`uuid`, '')
             FROM `temp_uploader`
-            """.trimIndent()
+            """
+                .trimIndent()
         )
     }
 
@@ -298,14 +358,35 @@ object DatabaseMigrations {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_artwork_manga_id` ON `artwork` (`manga_id`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_manga_favorite` ON `manga` (`favorite`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_manga_url` ON `manga` (`url`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_manga_categories_manga_id` ON `manga_categories` (`manga_id`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_manga_categories_category_id` ON `manga_categories` (`category_id`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_manga_similar_manga_id` ON `manga_similar` (`manga_id`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `track_manga_id_index` ON `track` (`track_manga_id`)")
-        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_track_track_manga_id_track_service_id` ON `track` (`track_manga_id`, `track_service_id`)")
-        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_scanlator_group_uuid` ON `scanlator_group` (`uuid`)")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_manga_categories_manga_id` ON `manga_categories` (`manga_id`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_manga_categories_category_id` ON `manga_categories` (`category_id`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_manga_similar_manga_id` ON `manga_similar` (`manga_id`)"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_track_manga_id` ON `track` (`manga_id`)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_track_manga_id_track_service_id` ON `track` (`manga_id`, `track_service_id`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_merge_manga_manga_id` ON `merge_manga` (`manga_id`)"
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_scanlator_group_uuid` ON `scanlator_group` (`uuid`)"
+        )
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_uploader_uuid` ON `uploader` (`uuid`)")
-        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_history_chapter_id` ON `history` (`chapter_id`)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_history_chapter_id` ON `history` (`chapter_id`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_chapters_manga_id` ON `chapters` (`manga_id`)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_chapters_manga_id_read` ON `chapters` (`manga_id`, `read`)"
+        )
     }
 
     private fun dropTempTables(db: SupportSQLiteDatabase) {
@@ -317,6 +398,7 @@ object DatabaseMigrations {
         db.execSQL("DROP TABLE IF EXISTS `temp_manga_aggregate`")
         db.execSQL("DROP TABLE IF EXISTS `temp_manga_sync`")
         db.execSQL("DROP TABLE IF EXISTS `temp_artwork`")
+        db.execSQL("DROP TABLE IF EXISTS `temp_merge_manga`")
         db.execSQL("DROP TABLE IF EXISTS `temp_browse_filter`")
         db.execSQL("DROP TABLE IF EXISTS `temp_manga_related`")
         db.execSQL("DROP TABLE IF EXISTS `temp_scanlator_group`")

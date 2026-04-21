@@ -26,5 +26,5 @@ data class MergeMangaEntity(
     @ColumnInfo(name = "cover_url") val coverUrl: String,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "url") val url: String,
-    @ColumnInfo(name = "mergeType") val mergeType: MergeType,
+    @ColumnInfo(name = "merge_type") val mergeType: MergeType,
 )

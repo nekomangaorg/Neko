@@ -56,6 +56,8 @@ import org.nekomanga.data.database.repository.CategoryRepository
 import org.nekomanga.data.database.repository.CategoryRepositoryImpl
 import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.HistoryRepositoryImpl
 import org.nekomanga.data.database.repository.MangaAggregateRepository
 import org.nekomanga.data.database.repository.MangaAggregateRepositoryImpl
 import org.nekomanga.data.database.repository.MangaRepository
@@ -124,6 +126,10 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory<ChapterRepository> {
             ChapterRepositoryImpl(chapterDao = get<AppDatabase>().chapterDao())
+        }
+
+        addSingletonFactory<HistoryRepository> {
+            HistoryRepositoryImpl(historyDao = get<AppDatabase>().historyDao())
         }
 
         addSingletonFactory<MangaRepository> {
