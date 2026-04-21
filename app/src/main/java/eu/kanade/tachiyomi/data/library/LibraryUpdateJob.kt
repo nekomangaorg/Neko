@@ -24,7 +24,6 @@ import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -54,7 +53,6 @@ import eu.kanade.tachiyomi.util.manga.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.jobIsRunning
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.saveTimeTaken
@@ -89,6 +87,13 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
@@ -104,7 +109,20 @@ import uy.kohesive.injekt.injectLazy
 class LibraryUpdateJob(private val context: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(context, workerParameters) {
 
-    private val db by injectLazy<DatabaseHelper>()
+    private val appDatabase by injectLazy<AppDatabase>()
+
+    private val artworkRepository by injectLazy<ArtworkRepository>()
+
+    private val categoryRepository by injectLazy<CategoryRepository>()
+
+    private val chapterRepository by injectLazy<ChapterRepository>()
+
+    private val mangaRepository by injectLazy<MangaRepository>()
+
+    private val mergeMangaRepository by injectLazy<MergeMangaRepository>()
+
+    private val trackRepository by injectLazy<TrackRepository>()
+
     private val coverCache by injectLazy<CoverCache>()
     private val sourceManager by injectLazy<SourceManager>()
     private val preferences by injectLazy<PreferencesHelper>()
@@ -161,8 +179,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         instance = WeakReference(this)
 
-        val allLibraryManga = db.getLibraryMangaList().executeOnIO()
-        val allTracks = db.getAllTracks().executeOnIO()
+        val allLibraryManga = mangaRepository.getLibraryList()
+        val allTracks = trackRepository.getAllTracks()
         val tracksByMangaId = allTracks.groupBy { it.manga_id }
 
         val savedMangaList =
@@ -363,7 +381,10 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             async {
                                 requestSemaphore.withPermit {
                                     val shouldDownload =
-                                        manga.shouldDownloadNewChapters(db, preferences)
+                                        manga.shouldDownloadNewChapters(
+                                            categoryRepository,
+                                            preferences,
+                                        )
                                     updateMangaChapters(manga, shouldDownload)
                                 }
                             }
@@ -427,7 +448,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                             mangaUseCases.updateMangaAggregate(manga.id!!, manga.url, true)
                             info
                         }
-                        val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
+                        val mergeMangaList = mergeMangaRepository.getMergeMangaList(manga.id!!)
                         val mergedList =
                             when (mergeMangaList.isNotEmpty()) {
                                 true -> {
@@ -510,29 +531,30 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                     context.imageLoader.execute(request)
                                 }
                             }
-                            db.insertManga(manga).executeOnIO()
+                            mangaRepository.updateManga(manga)
 
                             if (holder.sourceArtwork.isNotEmpty()) {
                                 holder.sourceArtwork
                                     .map { sourceArt -> sourceArt.toArtworkImpl(manga.id!!) }
                                     .let { art ->
                                         runCatching {
-                                            db.deleteArtworkForManga(manga).executeOnIO()
-                                            db.insertArtWorkList(art).executeOnIO()
+                                            artworkRepository.deleteArtworkByMangaId(manga.id!!)
+                                            artworkRepository.insertArtworks(art)
                                         }
                                     }
                             }
 
                             // add mdlist tracker if manga in library has it missing
                             withIOContext {
-                                val tracks = db.getTracks(manga).executeOnIO().toMutableList()
+                                val tracks =
+                                    trackRepository.getTracksForManga(manga.id!!).toMutableList()
 
                                 if (
                                     tracks.isEmpty() ||
                                         !tracks.any { it.sync_id == trackManager.mdList.id }
                                 ) {
                                     val track = trackManager.mdList.createInitialTracker(manga)
-                                    db.insertTrack(track).executeOnIO()
+                                    trackRepository.insertTrack(track)
                                     if (mangaDexLoginHelper.isLoggedIn()) {
                                         trackManager.mdList.bind(track)
                                     }
@@ -542,7 +564,14 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                         if (fetchedChapters.isNotEmpty()) {
                             val newChapters =
-                                syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
+                                syncChaptersWithSource(
+                                    appDatabase,
+                                    chapterRepository,
+                                    mangaRepository,
+                                    fetchedChapters,
+                                    manga,
+                                    errorFromMerged,
+                                )
 
                             if (newChapters.first.isNotEmpty()) {
                                 if (shouldDownload) {
@@ -599,7 +628,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         coroutineScope {
                             launch {
                                 if (mangaDexPreferences.readingSync().get()) {
-                                    val dbChapters = db.getChapters(manga).executeOnIO()
+                                    val dbChapters =
+                                        chapterRepository.getChaptersForManga(manga.id!!)
                                     val (mergedChapters, nonMergedChapters) =
                                         dbChapters.partition { it.isMergedChapter() }
                                     if (mangaDexLoginHelper.isLoggedIn()) {
@@ -626,7 +656,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                             }
                                                         }
                                                         .toList()
-                                                db.updateChaptersProgress(markRead).executeOnIO()
+                                                chapterRepository.updateChaptersProgress(markRead)
                                             }
                                     }
                                     if (mergedChapters.isNotEmpty()) {
@@ -660,7 +690,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                     }
                                                 }
                                                 .toList()
-                                        db.updateChaptersProgress(markRead).executeOnIO()
+                                        chapterRepository.updateChaptersProgress(markRead)
                                     }
                                 }
                             }
@@ -706,8 +736,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         TimberKt.d { "Updating follow statuses" }
                         mangaList.mapAsync { libraryManga ->
                             runCatching {
-                                    db.getTracks(libraryManga)
-                                        .executeOnIO()
+                                    trackRepository
+                                        .getTracksForManga(libraryManga.id!!)
                                         .toMutableList()
                                         .firstOrNull { it.sync_id == trackManager.mdList.id }
                                         ?.apply {
@@ -715,7 +745,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                                 readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
                                             if (this.status != FollowStatus.fromDex(result).int) {
                                                 this.status = FollowStatus.fromDex(result).int
-                                                db.insertTrack(this).executeOnIO()
+                                                trackRepository.insertTrack(this)
                                             }
                                         }
                                 }
@@ -802,7 +832,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private fun addMangaToQueue(manga: List<LibraryManga>) {
         extraScope.launch {
-            val tracksByMangaId = db.getAllTracks().executeOnIO().groupBy { it.manga_id }
+            val tracksByMangaId = trackRepository.getAllTracks().groupBy { it.manga_id }
             val mangaToAdd =
                 getAndFilterMangaToUpdate(manga, tracksByMangaId = tracksByMangaId, categoryId = -1)
 
@@ -812,8 +842,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private fun addCategory(categoryId: Int) {
         extraScope.launch {
-            val allLibraryManga = db.getLibraryMangaList().executeOnIO()
-            val tracksByMangaId = db.getAllTracks().executeOnIO().groupBy { it.manga_id }
+            val allLibraryManga = mangaRepository.getLibraryList()
+            val tracksByMangaId = trackRepository.getAllTracks().groupBy { it.manga_id }
             val mangaToAdd =
                 getAndFilterMangaToUpdate(
                     allLibraryManga,
@@ -834,7 +864,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         extraScope.launch {
             val jobs = distinctManga.map { manga ->
                 async(Dispatchers.IO) {
-                    val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
+                    val shouldDownload =
+                        manga.shouldDownloadNewChapters(categoryRepository, preferences)
                     val hasDLs = updateMangaChapters(manga, shouldDownload)
 
                     if (hasDLs && !hasDownloads) {

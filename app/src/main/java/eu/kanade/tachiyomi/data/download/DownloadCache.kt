@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -26,12 +25,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 /**
  * Cache where we dump the downloads directory from the filesystem. This class is needed because
@@ -182,9 +181,9 @@ class DownloadCache(
                 it.name == provider.getSourceDirName()
             } ?: return
 
-        val db: DatabaseHelper by injectLazy()
+        val mangaRepository: MangaRepository = Injekt.get()
         // Optimization: Fetch once
-        val allManga = db.getMangaList().executeAsBlocking()
+        val allManga = mangaRepository.getMangaList()
 
         // 3. Create lookup map for O(1) access
         val mangaLookup = allManga.associateBy {

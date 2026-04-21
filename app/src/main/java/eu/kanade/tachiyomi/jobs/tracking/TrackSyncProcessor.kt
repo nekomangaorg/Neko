@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.jobs.tracking
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +10,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.track.toTrackServiceItem
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.tracking.TrackUseCases
@@ -20,7 +20,8 @@ import uy.kohesive.injekt.api.get
 
 class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
-    val db: DatabaseHelper = Injekt.get()
+    val mangaRepository: MangaRepository = Injekt.get()
+    val trackRepository: TrackRepository = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
 
@@ -30,7 +31,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
     ) =
         withContext(dispatcher) {
             var count = 0
-            val libraryMangaList = db.getLibraryMangaList().executeAsBlocking()
+            val libraryMangaList = mangaRepository.getLibraryList()
             val loggedServices = trackManager.services.values.filter { it.isLogged() }
             val autoAddTracker = preferences.autoAddTracker().get()
             val trackUseCases: TrackUseCases = Injekt.get()
@@ -43,7 +44,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                 libraryMangaList
                     .mapNotNull { it.id }
                     .chunked(900)
-                    .map { chunk -> async { db.getTracks(chunk).executeOnIO() } }
+                    .map { chunk -> async { trackRepository.getTracksForMangaByIds(chunk) } }
                     .awaitAll()
                     .flatten()
                     .groupBy { it.manga_id }
@@ -125,7 +126,7 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                 async {
                                     try {
                                         val newTrack = service.refresh(track)
-                                        db.insertTrack(newTrack).executeOnIO()
+                                        trackRepository.insertTrack(newTrack)
                                     } catch (e: Exception) {
                                         if (e !is CancellationException) {
                                             TimberKt.e(e)

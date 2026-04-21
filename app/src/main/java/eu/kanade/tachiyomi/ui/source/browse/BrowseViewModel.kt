@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -14,11 +13,11 @@ import eu.kanade.tachiyomi.ui.library.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.manga.filterVisibility
-import eu.kanade.tachiyomi.util.manga.resync
+import eu.kanade.tachiyomi.util.manga.resyncDisplayManga
+import eu.kanade.tachiyomi.util.manga.resyncHomePageManga
 import eu.kanade.tachiyomi.util.manga.unique
 import eu.kanade.tachiyomi.util.manga.updateVisibility
 import eu.kanade.tachiyomi.util.system.activeNetworkState
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.PersistentList
@@ -36,6 +35,9 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.core.preferences.observeAndUpdate
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.repository.BrowseFilterRepository
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -62,7 +64,13 @@ class BrowseViewModel : ViewModel() {
     private val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get()
     val securityPreferences: SecurityPreferences = Injekt.get()
-    private val db: DatabaseHelper = Injekt.get()
+
+    private val categoryRepository: CategoryRepository = Injekt.get()
+
+    val browseFilterRepository: BrowseFilterRepository = Injekt.get()
+
+    private val mangaRepository: MangaRepository = Injekt.get()
+
     private val mangaUseCases: MangaUseCases by injectLazy()
 
     private val _browseScreenState =
@@ -180,8 +188,8 @@ class BrowseViewModel : ViewModel() {
 
         viewModelScope.launchIO {
             val categories =
-                db.getCategories()
-                    .executeOnIO()
+                categoryRepository
+                    .getCategories()
                     .map { category -> category.toCategoryItem() }
                     .toPersistentList()
 
@@ -413,7 +421,7 @@ class BrowseViewModel : ViewModel() {
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         viewModelScope.launchIO {
-            val editManga = db.getManga(mangaId).executeOnIO() ?: return@launchIO
+            val editManga = mangaRepository.getMangaById(mangaId) ?: return@launchIO
             editManga.apply {
                 favorite = !favorite
                 date_added =
@@ -422,7 +430,7 @@ class BrowseViewModel : ViewModel() {
                         false -> 0
                     }
             }
-            db.insertManga(editManga).executeOnIO()
+            mangaRepository.updateManga(editManga)
 
             mangaUseCases.updateMangaAggregate(mangaId, editManga.url, editManga.favorite)
 
@@ -437,13 +445,16 @@ class BrowseViewModel : ViewModel() {
                         ?.let {
                             val categories =
                                 listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                            db.setMangaCategories(categories, listOf(editManga))
+                            categoryRepository.setMangaCategories(
+                                categories,
+                                listOf(editManga.id!!),
+                            )
                         }
                 } else if (categoryItems.isNotEmpty()) {
                     val categories = categoryItems.map {
                         MangaCategory.create(editManga, it.toDbCategory())
                     }
-                    db.setMangaCategories(categories, listOf(editManga))
+                    categoryRepository.setMangaCategories(categories, listOf(editManga.id!!))
                 }
             }
         }
@@ -515,7 +526,7 @@ class BrowseViewModel : ViewModel() {
                     name = name,
                     dexFilters = Json.encodeToString(browseScreenState.value.filters),
                 )
-            db.insertBrowseFilter(browseFilter).executeOnIO()
+            browseFilterRepository.insertBrowseFilter(browseFilter)
             updateBrowseFilters()
         }
     }
@@ -537,14 +548,14 @@ class BrowseViewModel : ViewModel() {
                         it.copy(default = false)
                     }
                 }
-            db.insertBrowseFilters(updatedFilters).executeOnIO()
+            browseFilterRepository.insertBrowseFilters(updatedFilters)
             updateBrowseFilters()
         }
     }
 
     fun deleteFilter(name: String) {
         viewModelScope.launchIO {
-            db.deleteBrowseFilter(name).executeOnIO()
+            browseFilterRepository.deleteBrowseFilterByName(name)
             updateBrowseFilters()
         }
     }
@@ -690,12 +701,12 @@ class BrowseViewModel : ViewModel() {
         viewModelScope.launchIO {
             val category = Category.create(newCategory)
             category.order = (_browseScreenState.value.categories.maxOfOrNull { it.order } ?: 0) + 1
-            db.insertCategory(category).executeOnIO()
+            categoryRepository.insertCategory(category)
             _browseScreenState.update {
                 it.copy(
                     categories =
-                        db.getCategories()
-                            .executeOnIO()
+                        categoryRepository
+                            .getCategories()
                             .map { category -> category.toCategoryItem() }
                             .toPersistentList()
                 )
@@ -724,7 +735,7 @@ class BrowseViewModel : ViewModel() {
 
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         viewModelScope.launchIO {
-            val filters = db.getBrowseFilters().executeOnIO().toPersistentList()
+            val filters = browseFilterRepository.getBrowseFilters().toPersistentList()
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters
@@ -741,12 +752,16 @@ class BrowseViewModel : ViewModel() {
         if (!_browseScreenState.value.firstLoad) {
             viewModelScope.launchIO {
                 val newHomePageManga =
-                    _browseScreenState.value.homePageManga.resync(db).updateVisibility(preferences)
+                    _browseScreenState.value.homePageManga
+                        .resyncHomePageManga(mangaRepository)
+                        .updateVisibility(preferences)
                 _browseScreenState.update { it.copy(homePageManga = newHomePageManga) }
             }
             viewModelScope.launchIO {
                 val allDisplayManga =
-                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db).unique()
+                    _browseScreenState.value.displayMangaHolder.allDisplayManga
+                        .resyncDisplayManga(mangaRepository)
+                        .unique()
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =

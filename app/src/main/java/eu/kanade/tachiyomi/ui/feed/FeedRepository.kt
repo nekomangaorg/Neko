@@ -4,7 +4,6 @@ import androidx.compose.ui.util.fastAny
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -14,7 +13,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -23,6 +21,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
 import org.nekomanga.constants.Constants
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.SimpleChapter
@@ -35,7 +36,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedRepository(
-    private val db: DatabaseHelper = Injekt.get(),
+    private val chapterRepository: ChapterRepository = Injekt.get(),
+    private val historyRepository: HistoryRepository = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterUseCases: ChapterUseCases = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
@@ -49,7 +52,7 @@ class FeedRepository(
         val blockedGroups = mangaDexPreferences.blockedGroups().get()
         val blockedUploaders = mangaDexPreferences.blockedUploaders().get()
 
-        val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
+        val chapterHistories = historyRepository.getChapterHistoryByMangaId(feedManga.mangaId)
         val simpleChapters =
             chapterHistories
                 .mapNotNull { chpHistory ->
@@ -94,8 +97,9 @@ class FeedRepository(
                     if (groupedEntries.isEmpty()) return emptyList()
 
                     val mangaIds = groupedEntries.map { it.key }
-                    val mangasMap = db.getMangas(mangaIds).executeOnIO().associateBy { it.id!! }
-                    val chaptersMap = db.getChapters(mangaIds).executeOnIO().groupBy { it.manga_id }
+                    val mangasMap = mangaRepository.getMangaByIds(mangaIds).associateBy { it.id!! }
+                    val chaptersMap =
+                        chapterRepository.getChaptersForMangaIds(mangaIds).groupBy { it.manga_id }
 
                     return groupedEntries.mapNotNull { entry ->
                         val mangaId = entry.key
@@ -150,8 +154,8 @@ class FeedRepository(
             .runCatching {
                 suspend fun lookup(current: List<Long>, offset: Int, limit: Int): List<FeedManga> {
                     val groupedEntries =
-                        db.getRecentMangaLimit(offset = offset, limit = limit, isResuming = false)
-                            .executeOnIO()
+                        historyRepository
+                            .getRecentMangaLimit(search = "", offset = offset, limit = limit)
                             .filterNot { current.contains(it.manga.id) }
                             .mapNotNull { history ->
                                 history.manga.id ?: return@mapNotNull null
@@ -203,14 +207,16 @@ class FeedRepository(
 
                     val mangasMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
-                            db.getMangas(mangaIdsToFetch).executeOnIO().associateBy { it.id!! }
+                            mangaRepository.getMangaByIds(mangaIdsToFetch).associateBy { it.id!! }
                         } else {
                             emptyMap()
                         }
 
                     val chaptersMap =
                         if (mangaIdsToFetch.isNotEmpty()) {
-                            db.getChapters(mangaIdsToFetch).executeOnIO().groupBy { it.manga_id }
+                            chapterRepository.getChaptersForMangaIds(mangaIdsToFetch).groupBy {
+                                it.manga_id
+                            }
                         } else {
                             emptyMap()
                         }
@@ -273,15 +279,15 @@ class FeedRepository(
 
         return com.github.michaelbull.result
             .runCatching {
-                db.getFavoriteMangaList()
-                    .executeOnIO()
+                mangaRepository
+                    .getFavoriteMangaList()
                     .distinctBy { it.id }
                     .sortedBy { it.date_added }
                     .takeLast(100)
                     .mapNotNull { manga ->
                         val chapters =
-                            db.getChapters(manga)
-                                .executeOnIO()
+                            chapterRepository
+                                .getChaptersForManga(manga.id!!)
                                 .filterNot {
                                     it.scanlatorList().fastAny { scanlator ->
                                         scanlator in blockedGroups
@@ -337,13 +343,12 @@ class FeedRepository(
                             if (offset == 0) {
                                 bySeriesSet.clear()
                             }
-                            db.getRecentMangaLimit(
+                            historyRepository
+                                .getRecentMangaLimit(
                                     search = searchQuery,
                                     offset = offset,
                                     limit = limit,
-                                    isResuming = false,
                                 )
-                                .executeOnIO()
                                 .mapNotNull { history ->
                                     history.manga.id ?: return@mapNotNull null
                                     history.chapter.id ?: return@mapNotNull null
@@ -352,8 +357,9 @@ class FeedRepository(
                                     }
 
                                     val chapterHistories =
-                                        db.getChapterHistoryByMangaId(history.manga.id!!)
-                                            .executeOnIO()
+                                        historyRepository.getChapterHistoryByMangaId(
+                                            history.manga.id!!
+                                        )
                                     val chapterItems =
                                         chapterHistories
                                             .mapNotNull { chpHistory ->
@@ -387,13 +393,12 @@ class FeedRepository(
                             val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
                             val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
                             dateFormat.calendar.firstDayOfWeek = dayOfWeek
-                            db.getHistoryUngrouped(
+                            historyRepository
+                                .getRecentHistoryUngrouped(
                                     search = searchQuery,
                                     offset = offset,
                                     limit = limit,
-                                    isResuming = false,
                                 )
-                                .executeOnIO()
                                 .groupBy {
                                     val date = it.history.last_read
                                     it.manga to
@@ -421,13 +426,12 @@ class FeedRepository(
                                 }
                         }
                         else -> {
-                            db.getHistoryUngrouped(
+                            historyRepository
+                                .getRecentHistoryUngrouped(
                                     search = searchQuery,
                                     offset = offset,
                                     limit = limit,
-                                    isResuming = false,
                                 )
-                                .executeOnIO()
                                 .mapNotNull {
                                     it.manga.id ?: return@mapNotNull null
                                     it.chapter.id ?: return@mapNotNull null
@@ -472,13 +476,13 @@ class FeedRepository(
         return com.github.michaelbull.result
             .runCatching {
                 val chapters =
-                    db.getRecentChapters(
+                    chapterRepository
+                        .getRecentChapters(
                             search = searchQuery,
                             offset = offset,
                             limit = limit,
                             sortByFetched = uploadsFetchSort,
                         )
-                        .executeAsBlocking()
                         .mapNotNull {
                             val chapterItem =
                                 getChapterItem(it.manga, it.chapter.toSimpleChapter()!!)
@@ -514,29 +518,29 @@ class FeedRepository(
     }
 
     suspend fun deleteAllHistory() {
-        db.deleteHistory().executeAsBlocking()
+        historyRepository.deleteAllHistory()
     }
 
     suspend fun deleteChapter(chapterItem: ChapterItem) {
-        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId) ?: return
         downloadManager.deleteChapters(manga, listOf(chapterItem.chapter.toDbChapter()))
     }
 
     suspend fun deleteAllHistoryForManga(mangaId: Long) {
-        val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
+        val history = historyRepository.getHistoryByMangaId(mangaId)
         history.forEach {
             it.last_read = 0L
             it.time_read = 0L
         }
-        db.upsertHistoryLastRead(history).executeAsBlocking()
+        historyRepository.upsertHistoryList(history)
     }
 
     suspend fun deleteHistoryForChapter(chapterUrl: String) {
-        val history = db.getHistoryByChapterUrl(chapterUrl).executeAsBlocking()
+        val history = historyRepository.getHistoryByChapterUrl(chapterUrl)
         history ?: return
         history.last_read = 0L
         history.time_read = 0L
-        db.upsertHistoryLastRead(history).executeAsBlocking()
+        historyRepository.upsertHistory(history)
     }
 
     fun getChapterItem(manga: Manga, chapter: SimpleChapter): ChapterItem {
@@ -575,12 +579,12 @@ class FeedRepository(
     suspend fun markChapter(chapterItem: ChapterItem, markAction: ChapterMarkActions): ChapterItem {
         chapterUseCases.markChapters(markAction, listOf(chapterItem))
 
-        val manga = db.getManga(chapterItem.chapter.mangaId).executeOnIO()!!
+        val manga = mangaRepository.getMangaById(chapterItem.chapter.mangaId)!!
 
         chapterUseCases.markChaptersRemote(markAction, manga.uuid(), listOf(chapterItem))
 
         val simpleChapter =
-            db.getChapter(chapterItem.chapter.id).executeOnIO()!!.toSimpleChapter()!!
+            chapterRepository.getChapterById(chapterItem.chapter.id)!!.toSimpleChapter()!!
         return chapterItem.copy(chapter = simpleChapter)
     }
 
@@ -589,7 +593,7 @@ class FeedRepository(
         chapterItem: ChapterItem,
         downloadAction: MangaConstants.DownloadAction,
     ) {
-        val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
+        val dbManga = mangaRepository.getMangaById(feedManga.mangaId) ?: return
         val dbChapter = chapterItem.chapter.toDbChapter()
 
         when (downloadAction) {
@@ -610,7 +614,7 @@ class FeedRepository(
             val feedRepository = FeedRepository()
             val page = feedRepository.getHistoryPage(offset = 0, group = FeedHistoryGroup.Series)
             return page.get()?.second?.mapNotNull { feedManga ->
-                feedRepository.db.getManga(feedManga.mangaId).executeAsBlocking()
+                feedRepository.mangaRepository.getMangaById(feedManga.mangaId)
             } ?: emptyList()
         }
     }

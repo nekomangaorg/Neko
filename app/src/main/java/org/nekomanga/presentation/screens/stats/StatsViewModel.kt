@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -25,6 +24,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.nekomanga.R
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
@@ -43,7 +47,13 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class StatsViewModel() : ViewModel() {
-    private val db: DatabaseHelper = Injekt.get()
+    private val categoryRepository: CategoryRepository = Injekt.get()
+    private val historyRepository: HistoryRepository = Injekt.get()
+    private val mangaRepository: MangaRepository = Injekt.get()
+    private val mergeMangaRepository: MergeMangaRepository = Injekt.get()
+
+    private val trackRepository: TrackRepository = Injekt.get()
+
     private val prefs: PreferencesHelper = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
@@ -73,10 +83,10 @@ class StatsViewModel() : ViewModel() {
                 val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
                 val lastUpdateDuration = libraryPreferences.lastUpdateDuration().get()
 
-                val favoritedMangalist = db.getFavoriteMangaList().executeAsBlocking()
+                val favoritedMangalist = mangaRepository.getFavoriteMangaList()
 
                 val mergedMangaList =
-                    db.getAllMergeManga().executeAsBlocking().mapNotNull { mergedManga ->
+                    mergeMangaRepository.getAllMergeManga().mapNotNull { mergedManga ->
                         when (
                             favoritedMangalist.firstOrNull { manga ->
                                 manga.id!! == mergedManga.mangaId
@@ -137,7 +147,7 @@ class StatsViewModel() : ViewModel() {
                     libraryList
                         .map {
                             async {
-                                val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
+                                val history = historyRepository.getHistoryByMangaId(it.id!!)
                                 val tracks = getTracks(it)
 
                                 DetailedStatManga(
@@ -162,8 +172,8 @@ class StatsViewModel() : ViewModel() {
                                             .map { prefs.context.getString(it.nameRes()) }
                                             .toPersistentList(),
                                     categories =
-                                        (db.getCategoriesForManga(it)
-                                                .executeAsBlocking()
+                                        (categoryRepository
+                                                .getCategoriesForManga(it.id!!)
                                                 .map { category -> category.name }
                                                 .takeUnless { it.isEmpty() }
                                                 ?: listOf(
@@ -181,7 +191,7 @@ class StatsViewModel() : ViewModel() {
                         isLoading = false,
                         manga = detailedStatMangaList.toPersistentList(),
                         categories =
-                            (db.getCategories().executeAsBlocking().map { it.name } +
+                            (categoryRepository.getCategories().map { it.name } +
                                     listOf(prefs.context.getString(R.string.default_value)))
                                 .toPersistentList(),
                         tags =
@@ -241,16 +251,16 @@ class StatsViewModel() : ViewModel() {
         }
     }
 
-    private fun getLibrary(): List<LibraryManga> {
-        return db.getLibraryMangaList().executeAsBlocking().distinctBy { it.id }
+    private suspend fun getLibrary(): List<LibraryManga> {
+        return mangaRepository.getLibraryList().distinctBy { it.id }
     }
 
-    private fun getTracks(mangaList: List<LibraryManga>): List<Track> {
-        return db.getTracks(mangaList.map { it.id!! }).executeAsBlocking()
+    private suspend fun getTracks(mangaList: List<LibraryManga>): List<Track> {
+        return trackRepository.getTracksForMangaByIds(mangaList.map { it.id!! })
     }
 
-    private fun getTracks(mangaList: LibraryManga): List<Track> {
-        return db.getTracks(mangaList.id!!).executeAsBlocking()
+    private suspend fun getTracks(mangaList: LibraryManga): List<Track> {
+        return trackRepository.getTracksForManga(mangaList.id!!)
     }
 
     private fun getMangaByTrackCount(mangaList: List<LibraryManga>, tracks: List<Track>): Int {
@@ -273,8 +283,8 @@ class StatsViewModel() : ViewModel() {
         return trackManager.services.values.filter { it.isLogged() }
     }
 
-    private fun hasTrackWithGivenStatus(manga: Manga, globalStatusId: Int): Boolean {
-        val tracks = db.getTracks(manga).executeAsBlocking()
+    private suspend fun hasTrackWithGivenStatus(manga: Manga, globalStatusId: Int): Boolean {
+        val tracks = trackRepository.getTracksForManga(manga.id!!)
         return tracks.any { track ->
             val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
             return if (status.isNullOrBlank()) {
@@ -285,7 +295,7 @@ class StatsViewModel() : ViewModel() {
         }
     }
 
-    private fun getGlobalUpdateManga(
+    private suspend fun getGlobalUpdateManga(
         libraryManga: List<LibraryManga>
     ): Map<Long?, List<LibraryManga>> {
         val includedCategories =
@@ -330,8 +340,8 @@ class StatsViewModel() : ViewModel() {
         return service?.get10PointScore(track.score)
     }
 
-    private fun getReadDuration(): String {
-        val chaptersTime = db.getTotalReadDuration()
+    private suspend fun getReadDuration(): String {
+        val chaptersTime = historyRepository.getTotalReadDuration()
         return chaptersTime.getReadDuration(prefs.context.getString(R.string.none))
     }
 

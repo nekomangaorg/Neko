@@ -17,6 +17,7 @@ retrofitVersion = "3.0.0"
 sandwichVersion = "2.2.1"
 sqliteAndroidVersion = "3.49.0"
 sqliteVersion = "2.6.2"
+kspVersion = "2.3.6"
 
 
 [libraries]
@@ -109,6 +110,7 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 firebase = { id = "com.google.firebase.crashlytics", version.ref = "firebasePluginVersion" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmtVersion" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 
 [bundles]
 coil = [ "coil3", "coil3-compose", "coil3-svg", "coil3-gif", "coil3-okhttp" ]

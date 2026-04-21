@@ -37,7 +37,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -50,10 +49,13 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.isAvailable
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.R
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
@@ -355,31 +357,35 @@ class MainActivity : BaseMainActivity() {
                 ) {
                     val mangaId = extras.getLong(DeepLinks.Extras.MangaId)
                     if (mangaId != 0L) {
-                        val db = Injekt.get<DatabaseHelper>()
+                        val chapterRepository: ChapterRepository = Injekt.get()
+                        val mangaRepository: MangaRepository = Injekt.get()
+
                         val downloadManager = Injekt.get<DownloadManager>()
-                        val chapters = db.getChapters(mangaId).executeAsBlocking()
-                        db.getManga(mangaId).executeAsBlocking()?.let { manga ->
-                            val availableChapters = chapters.filter {
-                                it.isAvailable(downloadManager, manga)
-                            }
-                            val nextUnreadChapter =
-                                ChapterItemSort()
-                                    .getNextUnreadChapter(
-                                        manga,
-                                        availableChapters.map {
-                                            it.toSimpleChapter()!!.toChapterItem()
-                                        },
-                                        false,
-                                    )
-                            if (nextUnreadChapter != null) {
-                                val activity =
-                                    ReaderActivity.newIntent(
-                                        this,
-                                        manga,
-                                        nextUnreadChapter.chapter.toDbChapter(),
-                                    )
-                                startActivity(activity)
-                                finish()
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            val chapters = chapterRepository.getChaptersForManga(mangaId)
+                            mangaRepository.getMangaById(mangaId)?.let { manga ->
+                                val availableChapters = chapters.filter {
+                                    it.isAvailable(downloadManager, manga)
+                                }
+                                val nextUnreadChapter =
+                                    ChapterItemSort()
+                                        .getNextUnreadChapter(
+                                            manga,
+                                            availableChapters.map {
+                                                it.toSimpleChapter()!!.toChapterItem()
+                                            },
+                                            false,
+                                        )
+                                if (nextUnreadChapter != null) {
+                                    val activity =
+                                        ReaderActivity.newIntent(
+                                            this@MainActivity,
+                                            manga,
+                                            nextUnreadChapter.chapter.toDbChapter(),
+                                        )
+                                    startActivity(activity)
+                                    finish()
+                                }
                             }
                         }
                     }

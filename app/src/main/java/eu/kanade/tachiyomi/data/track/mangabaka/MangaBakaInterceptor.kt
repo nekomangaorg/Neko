@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track.mangabaka
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
-import org.nekomanga.network.mangabaka.dto.MangaBakaOAuth
+import org.nekomanga.data.network.mangabaka.dto.MangaBakaOAuth
 import uy.kohesive.injekt.injectLazy
 
 class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {

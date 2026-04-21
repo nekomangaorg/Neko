@@ -1,10 +1,11 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -45,6 +46,32 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.data.database.AppDatabase
+import org.nekomanga.data.database.migration.DatabaseMigrations
+import org.nekomanga.data.database.repository.ArtworkRepository
+import org.nekomanga.data.database.repository.ArtworkRepositoryImpl
+import org.nekomanga.data.database.repository.BrowseFilterRepository
+import org.nekomanga.data.database.repository.BrowseFilterRepositoryImpl
+import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.CategoryRepositoryImpl
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.ChapterRepositoryImpl
+import org.nekomanga.data.database.repository.HistoryRepository
+import org.nekomanga.data.database.repository.HistoryRepositoryImpl
+import org.nekomanga.data.database.repository.MangaAggregateRepository
+import org.nekomanga.data.database.repository.MangaAggregateRepositoryImpl
+import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.MangaRepositoryImpl
+import org.nekomanga.data.database.repository.MergeMangaRepository
+import org.nekomanga.data.database.repository.MergeMangaRepositoryImpl
+import org.nekomanga.data.database.repository.ScanlatorGroupRepository
+import org.nekomanga.data.database.repository.ScanlatorGroupRepositoryImpl
+import org.nekomanga.data.database.repository.SimilarRepository
+import org.nekomanga.data.database.repository.SimilarRepositoryImpl
+import org.nekomanga.data.database.repository.TrackRepository
+import org.nekomanga.data.database.repository.TrackRepositoryImpl
+import org.nekomanga.data.database.repository.UploaderRepository
+import org.nekomanga.data.database.repository.UploaderRepositoryImpl
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -53,7 +80,7 @@ import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
-import org.nekomanga.presentation.screens.similar.SimilarRepository
+import org.nekomanga.presentation.screens.similar.SimilarRepo
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
@@ -74,7 +101,73 @@ class AppModule(val app: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
 
-        addSingletonFactory { DatabaseHelper(app) }
+        addSingletonFactory {
+            Room.databaseBuilder(app, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .addMigrations(DatabaseMigrations.MIGRATION_45_46)
+                .fallbackToDestructiveMigration(false)
+                .build()
+        }
+
+        addSingletonFactory<ArtworkRepository> {
+            ArtworkRepositoryImpl(artworkDao = get<AppDatabase>().artworkDao())
+        }
+
+        addSingletonFactory<BrowseFilterRepository> {
+            BrowseFilterRepositoryImpl(browseFilterDao = get<AppDatabase>().browseFilterDao())
+        }
+
+        addSingletonFactory<CategoryRepository> {
+            CategoryRepositoryImpl(
+                categoryDao = get<AppDatabase>().categoryDao(),
+                mangaCategoryDao = get<AppDatabase>().mangaCategoryDao(),
+            )
+        }
+
+        addSingletonFactory<ChapterRepository> {
+            ChapterRepositoryImpl(chapterDao = get<AppDatabase>().chapterDao())
+        }
+
+        addSingletonFactory<HistoryRepository> {
+            HistoryRepositoryImpl(historyDao = get<AppDatabase>().historyDao())
+        }
+
+        addSingletonFactory<MangaRepository> {
+            MangaRepositoryImpl(
+                libraryDao = get<AppDatabase>().libraryDao(),
+                mangaDao = get<AppDatabase>().mangaDao(), // INJECTED HERE
+                mangaDexPreferences = get(),
+                libraryPreferences = get(),
+            )
+        }
+
+        addSingletonFactory<MergeMangaRepository> {
+            MergeMangaRepositoryImpl(mergeMangaDao = get<AppDatabase>().mergeMangaDao())
+        }
+
+        // Bind the ScanlatorGroup repository
+        addSingletonFactory<ScanlatorGroupRepository> {
+            ScanlatorGroupRepositoryImpl(scanlatorGroupDao = get<AppDatabase>().scanlatorGroupDao())
+        }
+
+        // Bind the Similar repository
+        addSingletonFactory<SimilarRepository> {
+            SimilarRepositoryImpl(similarDao = get<AppDatabase>().similarDao())
+        }
+
+        addSingletonFactory<MangaAggregateRepository> {
+            MangaAggregateRepositoryImpl(mangaAggregateDao = get<AppDatabase>().mangaAggregateDao())
+        }
+
+        // Bind the Uploader repository
+        addSingletonFactory<UploaderRepository> {
+            UploaderRepositoryImpl(uploaderDao = get<AppDatabase>().uploaderDao())
+        }
+
+        // Bind the Track repository
+        addSingletonFactory<TrackRepository> {
+            TrackRepositoryImpl(trackDao = get<AppDatabase>().trackDao())
+        }
 
         addSingletonFactory { ChapterCache(app) }
 
@@ -147,7 +240,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(DelayedTrackingStore(app))
 
-        addSingleton(SimilarRepository())
+        addSingleton(SimilarRepo())
 
         addSingleton(MangaUpdateCoordinator())
 
@@ -179,7 +272,7 @@ class AppModule(val app: Application) : InjektModule {
 
                 get<SourceManager>()
 
-                get<DatabaseHelper>()
+                get<AppDatabase>()
 
                 get<DownloadManager>()
             } catch (e: Exception) {

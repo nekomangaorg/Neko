@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.ChapterCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -53,6 +52,8 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants.TMP_DIR_SUFFIX
 import org.nekomanga.constants.Constants.TMP_FILE_SUFFIX
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.data.database.repository.ChapterRepository
+import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
@@ -70,7 +71,9 @@ class Downloader(
     private val readerPreferences: ReaderPreferences by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
 
-    private val db: DatabaseHelper by injectLazy()
+    private val chapterRepository: ChapterRepository by injectLazy()
+
+    private val mangaRepository: MangaRepository by injectLazy()
 
     /** Store for persisting downloads across restarts. */
     private val store = DownloadStore(context, sourceManager)
@@ -303,8 +306,8 @@ class Downloader(
      * @param download the chapter to be downloaded.
      */
     private suspend fun downloadChapter(download: Download) {
-        val dbManga = db.getManga(download.mangaItem.id).executeAsBlocking() ?: return
-        val dbChapter = db.getChapter(download.chapterItem.id).executeAsBlocking() ?: return
+        val dbManga = mangaRepository.getMangaById(download.mangaItem.id) ?: return
+        val dbChapter = chapterRepository.getChapterById(download.chapterItem.id) ?: return
 
         val mangaDir = provider.getMangaDir(dbManga)
 

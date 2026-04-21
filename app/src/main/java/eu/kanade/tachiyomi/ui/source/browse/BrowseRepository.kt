@@ -4,17 +4,18 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.manga.toDisplayManga
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.nekomanga.data.database.repository.MangaRepository
+import org.nekomanga.data.database.repository.ScanlatorGroupRepository
+import org.nekomanga.data.database.repository.UploaderRepository
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
@@ -25,7 +26,9 @@ import uy.kohesive.injekt.api.get
 class BrowseRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     val loginHelper: MangaDexLoginHelper = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
+    private val scanlatorGroupRepository: ScanlatorGroupRepository = Injekt.get(),
+    private val uploaderRepository: UploaderRepository = Injekt.get(),
     private val mangaDexPreferences: MangaDexPreferences = Injekt.get(),
 ) {
 
@@ -33,7 +36,7 @@ class BrowseRepository(
 
     suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
         return mangaDex.getRandomManga().andThen {
-            val displayManga = it.toDisplayManga(db, mangaDex.id)
+            val displayManga = it.toDisplayManga(mangaRepository, mangaDex.id)
             Ok(displayManga)
         }
     }
@@ -43,7 +46,8 @@ class BrowseRepository(
         filters: DexFilters,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search(page, filters).andThen { mangaListPage ->
-            val displayMangaList = mangaListPage.sourceManga.toDisplayManga(db, mangaDex.id)
+            val displayMangaList =
+                mangaListPage.sourceManga.toDisplayManga(mangaRepository, mangaDex.id)
             Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
         }
     }
@@ -53,7 +57,7 @@ class BrowseRepository(
         val blockedGroupUUIDs = coroutineScope {
             val chunks = blockedGroupNames.chunked(900)
             val existingGroups = chunks.flatMap { chunk ->
-                db.getScanlatorGroupsByNames(chunk).executeAsBlocking()
+                scanlatorGroupRepository.getScanlatorGroupsByNames(chunk)
             }
             val existingGroupNames = existingGroups.map { it.name }.toSet()
             val missingGroupNames = blockedGroupNames.filterNot { it in existingGroupNames }
@@ -65,7 +69,7 @@ class BrowseRepository(
                     .mapNotNull { result -> result.getOrElse { null }?.toScanlatorGroupImpl() }
 
             if (fetchedGroups.isNotEmpty()) {
-                db.insertScanlatorGroups(fetchedGroups).executeOnIO()
+                scanlatorGroupRepository.insertScanlatorGroups(fetchedGroups)
             }
             (existingGroups + fetchedGroups).map { it.uuid }
         }
@@ -74,7 +78,7 @@ class BrowseRepository(
         val blockedUploaderUUIDs = coroutineScope {
             val chunks = blockedUploaderNames.chunked(900)
             val existingUploaders = chunks.flatMap { chunk ->
-                db.getUploadersByNames(chunk).executeAsBlocking()
+                uploaderRepository.getUploadersByNames(chunk)
             }
             val existingUploaderNames = existingUploaders.map { it.username }.toSet()
             val missingUploaderNames = blockedUploaderNames.filterNot {
@@ -88,7 +92,7 @@ class BrowseRepository(
                     .mapNotNull { result -> result.getOrElse { null }?.toUploaderImpl() }
 
             if (fetchedUploaders.isNotEmpty()) {
-                db.insertUploader(fetchedUploaders).executeOnIO()
+                uploaderRepository.insertUploaders(fetchedUploaders)
             }
             (existingUploaders + fetchedUploaders).map { it.uuid }
         }
@@ -101,7 +105,7 @@ class BrowseRepository(
                         displayScreenType = listResult.displayScreenType,
                         displayManga =
                             listResult.sourceManga
-                                .toDisplayManga(db, mangaDex.id)
+                                .toDisplayManga(mangaRepository, mangaDex.id)
                                 .distinctBy { it.url }
                                 .toPersistentList(),
                     )
@@ -112,7 +116,7 @@ class BrowseRepository(
 
     suspend fun getFollows(): Result<PersistentList<DisplayManga>, ResultError> {
         return mangaDex.fetchAllFollows().andThen { sourceManga ->
-            Ok(sourceManga.toDisplayManga(db, mangaDex.id).toPersistentList())
+            Ok(sourceManga.toDisplayManga(mangaRepository, mangaDex.id).toPersistentList())
         }
     }
 }

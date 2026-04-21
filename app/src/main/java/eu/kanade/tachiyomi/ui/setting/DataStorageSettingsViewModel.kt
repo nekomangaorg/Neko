@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.coil.CoilDiskCache
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
@@ -37,8 +36,6 @@ class DataStorageSettingsViewModel : ViewModel() {
     val coverCache: CoverCache by injectLazy()
 
     val network: NetworkHelper by injectLazy()
-
-    val db: DatabaseHelper by injectLazy()
 
     private val _toastEvent = MutableSharedFlow<UiText.StringResource>()
     val toastEvent = _toastEvent.asSharedFlow()

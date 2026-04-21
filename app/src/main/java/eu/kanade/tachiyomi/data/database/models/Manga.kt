@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.models
 
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
 import eu.kanade.tachiyomi.data.external.AnimePlanet
@@ -23,6 +22,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
 import org.nekomanga.constants.Constants.ALT_TITLES_SEPARATOR
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.domain.details.MangaDetailsPreferences
 
 interface Manga : SManga {
@@ -172,9 +172,10 @@ interface Manga : SManga {
         }
     }
 
-    fun isOneShotOrCompleted(db: DatabaseHelper): Boolean {
-        val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
-        val chapters by lazy { db.getChapters(this).executeAsBlocking() }
+    suspend fun isOneShotOrCompleted(chapterRepository: ChapterRepository): Boolean {
+        val tags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
+        val chapters = chapterRepository.getChaptersForManga(this@Manga.id!!)
+
         val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
         return status == SManga.COMPLETED ||
             tags?.contains("oneshot") == true ||
