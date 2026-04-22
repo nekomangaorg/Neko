@@ -17,8 +17,6 @@ import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,6 +49,8 @@ class StatsViewModel() : ViewModel() {
     private val historyRepository: HistoryRepository = Injekt.get()
     private val mangaRepository: MangaRepository = Injekt.get()
     private val mergeMangaRepository: MergeMangaRepository = Injekt.get()
+    private val chapterRepository: org.nekomanga.data.database.repository.ChapterRepository =
+        Injekt.get()
 
     private val trackRepository: TrackRepository = Injekt.get()
 
@@ -143,48 +143,72 @@ class StatsViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isNotEmpty()) {
+                // perf: Extract IDs and chunk queries to avoid SQLite max variables limit (999) and
+                // eliminate N+1 queries
+                val allMangaIds = libraryList.mapNotNull { it.id }
+
+                val chapterMangaMap =
+                    allMangaIds
+                        .chunked(900)
+                        .flatMap { chunk -> chapterRepository.getChaptersForMangaIds(chunk) }
+                        .associate { it.id to it.manga_id }
+
+                val historyMap =
+                    allMangaIds
+                        .chunked(900)
+                        .flatMap { chunk -> historyRepository.getHistoryByMangaIds(chunk) }
+                        .groupBy { chapterMangaMap[it.chapter_id] }
+
+                val tracksMap =
+                    allMangaIds
+                        .chunked(900)
+                        .flatMap { chunk -> trackRepository.getTracksForMangaByIds(chunk) }
+                        .groupBy { it.manga_id }
+
+                val categoryMap =
+                    allMangaIds
+                        .chunked(900)
+                        .flatMap { chunk -> categoryRepository.getMangaCategories(chunk) }
+                        .groupBy { it.manga_id }
+
+                val allCategories = categoryRepository.getCategories().associateBy { it.id }
+                val defaultCategoryName = prefs.context.getString(R.string.default_value)
+
                 val detailedStatMangaList =
                     libraryList
                         .map {
-                            async {
-                                val history = historyRepository.getHistoryByMangaId(it.id!!)
-                                val tracks = getTracks(it)
+                            val history = historyMap[it.id] ?: emptyList()
+                            val tracks = tracksMap[it.id] ?: emptyList()
+                            val mangaCategoryNames =
+                                categoryMap[it.id]
+                                    ?.mapNotNull { mc -> allCategories[mc.category_id]?.name }
+                                    ?.takeUnless { names -> names.isEmpty() }
+                                    ?: listOf(defaultCategoryName)
 
-                                DetailedStatManga(
-                                    id = it.id!!,
-                                    title = it.title,
-                                    type = MangaType.fromLangFlag(it.lang_flag),
-                                    status = MangaStatus.fromStatus(it.status),
-                                    contentRating =
-                                        MangaContentRating.getContentRating(it.getContentRating()),
-                                    totalChapters = it.totalChapters,
-                                    readChapters = it.read,
-                                    bookmarkedChapters = it.bookmarkCount,
-                                    unavailableChapters = it.unavailableCount,
-                                    readDuration = getReadDurationFromHistory(history),
-                                    startYear = getStartYear(history),
-                                    rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                                    tags = (it.getGenres() ?: emptyList()).toPersistentList(),
-                                    userScore = getUserScore(tracks),
-                                    trackers =
-                                        tracks
-                                            .mapNotNull { trackManager.getService(it.sync_id) }
-                                            .map { prefs.context.getString(it.nameRes()) }
-                                            .toPersistentList(),
-                                    categories =
-                                        (categoryRepository
-                                                .getCategoriesForManga(it.id!!)
-                                                .map { category -> category.name }
-                                                .takeUnless { it.isEmpty() }
-                                                ?: listOf(
-                                                    prefs.context.getString(R.string.default_value)
-                                                ))
-                                            .sorted()
-                                            .toPersistentList(),
-                                )
-                            }
+                            DetailedStatManga(
+                                id = it.id!!,
+                                title = it.title,
+                                type = MangaType.fromLangFlag(it.lang_flag),
+                                status = MangaStatus.fromStatus(it.status),
+                                contentRating =
+                                    MangaContentRating.getContentRating(it.getContentRating()),
+                                totalChapters = it.totalChapters,
+                                readChapters = it.read,
+                                bookmarkedChapters = it.bookmarkCount,
+                                unavailableChapters = it.unavailableCount,
+                                readDuration = getReadDurationFromHistory(history),
+                                startYear = getStartYear(history),
+                                rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
+                                tags = (it.getGenres() ?: emptyList()).toPersistentList(),
+                                userScore = getUserScore(tracks),
+                                trackers =
+                                    tracks
+                                        .mapNotNull { trackManager.getService(it.sync_id) }
+                                        .map { prefs.context.getString(it.nameRes()) }
+                                        .toPersistentList(),
+                                categories = mangaCategoryNames.sorted().toPersistentList(),
+                            )
                         }
-                        .awaitAll()
                         .sortedBy { it.title }
                 _detailState.update {
                     DetailedState(
