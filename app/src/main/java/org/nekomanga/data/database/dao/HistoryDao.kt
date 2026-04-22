@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.nekomanga.data.database.entity.HistoryEntity
 import org.nekomanga.data.database.model.MangaChapterHistory
+import org.nekomanga.data.database.model.MangaHistoryStats
 
 @Dao
 interface HistoryDao {
@@ -357,6 +358,19 @@ interface HistoryDao {
     """
     )
     suspend fun getHistoryByChapterUrl(chapterUrl: String): HistoryEntity?
+
+    @Query(
+        """
+        SELECT chapters.manga_id,
+               SUM(history.time_read) AS read_duration,
+               MIN(CASE WHEN history.last_read > 0 THEN history.last_read ELSE NULL END) AS oldest_read_date
+        FROM history
+        JOIN chapters ON history.chapter_id = chapters.id
+        WHERE chapters.manga_id IN (:mangaIds)
+        GROUP BY chapters.manga_id
+        """
+    )
+    suspend fun getHistoryStatsForMangaIds(mangaIds: List<Long>): List<MangaHistoryStats>
 
     @Query("SELECT SUM(time_read) FROM history") suspend fun getTotalReadDuration(): Long
 

@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -143,12 +142,20 @@ class StatsViewModel() : ViewModel() {
         viewModelScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isNotEmpty()) {
+                val historyStatsMap =
+                    historyRepository
+                        .getHistoryStatsForMangaIds(libraryList.mapNotNull { it.id })
+                        .associateBy { it.mangaId }
+
+                val allTracks = getTracks(libraryList)
+                val tracksByMangaId = allTracks.groupBy { it.manga_id }
+
                 val detailedStatMangaList =
                     libraryList
                         .map {
                             async {
-                                val history = historyRepository.getHistoryByMangaId(it.id!!)
-                                val tracks = getTracks(it)
+                                val stats = historyStatsMap[it.id]
+                                val tracks = tracksByMangaId[it.id] ?: emptyList()
 
                                 DetailedStatManga(
                                     id = it.id!!,
@@ -161,8 +168,8 @@ class StatsViewModel() : ViewModel() {
                                     readChapters = it.read,
                                     bookmarkedChapters = it.bookmarkCount,
                                     unavailableChapters = it.unavailableCount,
-                                    readDuration = getReadDurationFromHistory(history),
-                                    startYear = getStartYear(history),
+                                    readDuration = stats?.readDuration ?: 0L,
+                                    startYear = getStartYear(stats?.oldestReadDate),
                                     rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
                                     tags = (it.getGenres() ?: emptyList()).toPersistentList(),
                                     userScore = getUserScore(tracks),
@@ -345,12 +352,7 @@ class StatsViewModel() : ViewModel() {
         return chaptersTime.getReadDuration(prefs.context.getString(R.string.none))
     }
 
-    private fun getReadDurationFromHistory(history: List<History>): Long {
-        return history.sumOf { it.time_read }
-    }
-
-    private fun getStartYear(history: List<History>): Int? {
-        val oldestDate = history.filter { it.last_read > 0 }.minOfOrNull { it.last_read }
+    private fun getStartYear(oldestDate: Long?): Int? {
         if (oldestDate == null || oldestDate <= 0L) {
             return null
         } else {

@@ -10,6 +10,7 @@ import org.nekomanga.data.database.mapper.toEntity
 import org.nekomanga.data.database.mapper.toHistory
 import org.nekomanga.data.database.mapper.toManga
 import org.nekomanga.data.database.model.MangaChapterHistory
+import org.nekomanga.data.database.model.MangaHistoryStats
 
 class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryRepository {
 
@@ -135,6 +136,10 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
 
     override suspend fun getHistoryByChapterUrl(chapterUrl: String): History? {
         return historyDao.getHistoryByChapterUrl(chapterUrl)?.toHistory()
+    }
+
+    override suspend fun getHistoryStatsForMangaIds(mangaIds: List<Long>): List<MangaHistoryStats> {
+        return mangaIds.chunked(500).flatMap { historyDao.getHistoryStatsForMangaIds(it) }
     }
 
     override suspend fun getTotalReadDuration(): Long {

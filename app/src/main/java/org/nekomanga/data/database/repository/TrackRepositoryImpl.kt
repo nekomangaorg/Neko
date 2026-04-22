@@ -24,7 +24,10 @@ class TrackRepositoryImpl(private val trackDao: TrackDao) : TrackRepository {
     }
 
     override suspend fun getTracksForMangaByIds(mangaIds: List<Long>): List<Track> {
-        return trackDao.getTracksForMangaByIds(mangaIds).map { it.toTrack() }
+        return mangaIds
+            .chunked(500)
+            .flatMap { trackDao.getTracksForMangaByIds(it) }
+            .map { it.toTrack() }
     }
 
     override fun observeAllTracks(): Flow<List<Track>> {

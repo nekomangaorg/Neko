@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory as LegacyMangaChapterHistory
 import kotlinx.coroutines.flow.Flow
 import org.nekomanga.data.database.model.MangaChapterHistory
+import org.nekomanga.data.database.model.MangaHistoryStats
 
 interface HistoryRepository {
 
@@ -59,6 +60,8 @@ interface HistoryRepository {
     suspend fun getHistoryByMangaIds(mangaIds: List<Long>): List<History>
 
     suspend fun getHistoryByChapterUrl(chapterUrl: String): History?
+
+    suspend fun getHistoryStatsForMangaIds(mangaIds: List<Long>): List<MangaHistoryStats>
 
     suspend fun getTotalReadDuration(): Long
 
