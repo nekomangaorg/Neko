@@ -108,6 +108,7 @@ internal class AdvancedSettingsScreen(
                 },
             ),
             backgroundActivityGroup(context),
+            systemGroup(context),
             networkGroup(context, clearNetworkCookies),
             dataGroup(cleanupDownloads, clearDatabase, reindexDownloads, dedupeCategories),
             getReaderGroup(readerPreferences),
@@ -145,6 +146,33 @@ internal class AdvancedSettingsScreen(
                         subtitle = stringResource(R.string.about_dont_kill_my_app),
                         onClick = { context.openInBrowser(DONT_KILL_MY_APP_URL) },
                     ),
+                ),
+        )
+    }
+
+    @Composable
+    fun systemGroup(context: Context): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.system),
+            preferenceItems =
+                persistentListOf(
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(R.string.supported_links),
+                        subtitle = stringResource(R.string.supported_links_summary),
+                        onClick = {
+                            val intent =
+                                if (android.os.Build.VERSION.SDK_INT >= 31) {
+                                    Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                    }
+                                } else {
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                    }
+                                }
+                            context.startActivity(intent)
+                        },
+                    )
                 ),
         )
     }
@@ -325,6 +353,11 @@ internal class AdvancedSettingsScreen(
                     title = stringResource(R.string.dont_kill_my_app),
                     subtitle = stringResource(R.string.about_dont_kill_my_app),
                     group = stringResource(R.string.background_activity),
+                ),
+                SearchTerm(
+                    title = stringResource(R.string.supported_links),
+                    subtitle = stringResource(R.string.supported_links_summary),
+                    group = stringResource(R.string.system),
                 ),
                 SearchTerm(
                     title = stringResource(R.string.clear_cookies),
