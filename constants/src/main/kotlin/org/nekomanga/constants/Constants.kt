@@ -23,9 +23,6 @@ object Constants {
     const val SCANLATOR_SEPARATOR = " & "
 
     const val ALT_TITLES_SEPARATOR = "|~|"
-    const val RAW_CHAPTER_SEPARATOR = " [.] "
-    const val RAW_SCANLATOR_TYPE_SEPARATOR = " [;] "
-    const val RAW_CHAPTER_COUNT_SEPARATOR = " [-] "
 
     const val TMP_DIR_SUFFIX = "_tmp"
     const val TMP_FILE_SUFFIX = ".tmp"
