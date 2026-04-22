@@ -48,10 +48,11 @@ data class MangaBakaSeries(
     val source: MangaBakaSourceSpecificData,
 ) {
     fun parseTitle(): String {
-        return titles?.firstOrNull { it.traits.contains("native") }?.title
-            ?: nativeTitle
-            ?: title
-            ?: romanizedTitle
+        return titles?.firstOrNull { it.language == "en" && it.traits.contains("official") }?.title
+            ?: titles
+                ?.firstOrNull { it.language.contains("-Latn") && it.traits.contains("native") }
+                ?.title
+            ?: titles?.firstOrNull { it.traits.contains("native") }?.title
             ?: "NO TITLE"
     }
 }
