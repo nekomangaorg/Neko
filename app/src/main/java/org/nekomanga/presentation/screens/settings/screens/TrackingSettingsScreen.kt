@@ -291,7 +291,7 @@ internal class TrackingSettingsScreen(
                             isLoggedIn = trackingScreenState.mangaBakaIsLoggedIn,
                             login = { context.openInBrowser(trackingScreenState.mangaBakaAuthUrl) },
                             logout = {
-                                trackServiceForLoginLogout = trackingScreenState.mangaBaka
+                                trackServiceIdForLoginLogout = trackingScreenState.mangaBaka.id
                                 showLogoutDialog = true
                             },
                         )
