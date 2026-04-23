@@ -14,7 +14,7 @@ fun AddEditCategoryTopBar(
     onNavigationIconClicked: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, false)
 
     TitleTopAppBar(
         color = color,

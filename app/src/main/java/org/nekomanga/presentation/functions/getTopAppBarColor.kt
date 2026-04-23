@@ -6,15 +6,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
 @Composable
-fun getTopAppBarColor(title: String, altAppBarColor: Boolean): Triple<Color, Color, Boolean> {
+fun getTopAppBarColor(hasTitle: Boolean, altAppBarColor: Boolean): Triple<Color, Color, Boolean> {
     return when {
-        title.isEmpty() && !altAppBarColor ->
+        !hasTitle && !altAppBarColor ->
             Triple(
                 Color.Transparent,
                 Color.Black,
                 (MaterialTheme.colorScheme.surface.luminance() > 0.5f),
             )
-        title.isNotEmpty() && !altAppBarColor ->
+        hasTitle && !altAppBarColor ->
             Triple(
                 MaterialTheme.colorScheme.surface.copy(alpha = .7f),
                 MaterialTheme.colorScheme.onSurface,

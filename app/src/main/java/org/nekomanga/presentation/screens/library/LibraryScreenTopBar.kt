@@ -40,7 +40,7 @@ fun LibraryScreenTopBar(
             libraryScreenState.selectedItems.isNotEmpty()
         }
 
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", selectionMode)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, selectionMode)
 
     if (selectionMode) {
         TitleTopAppBar(

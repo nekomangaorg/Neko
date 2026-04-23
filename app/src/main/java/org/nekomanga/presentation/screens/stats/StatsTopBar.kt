@@ -21,7 +21,7 @@ fun StatsTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onSwitchClick: () -> Unit,
 ) {
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, false)
 
     // Return null for states that shouldn't have a title
     val titleTextRes =

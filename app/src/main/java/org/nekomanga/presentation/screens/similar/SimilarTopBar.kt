@@ -20,7 +20,7 @@ fun SimilarTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onSettingClick: () -> Unit,
 ) {
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, false)
     TitleTopAppBar(
         color = color,
         title = stringResource(R.string.similar),

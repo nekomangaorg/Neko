@@ -36,7 +36,7 @@ fun FeedScreenTopBar(
                 listOf(FeedScreenType.Updates, FeedScreenType.History)
         }
 
-    val (color, _, _) = getTopAppBarColor("", false)
+    val (color, _, _) = getTopAppBarColor(isSummaryView, false)
 
     TitleTopAppBar(
         color = color,

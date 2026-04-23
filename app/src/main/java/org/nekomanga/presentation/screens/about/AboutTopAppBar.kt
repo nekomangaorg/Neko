@@ -16,7 +16,7 @@ fun AboutTopAppBar(
     onNavigationClicked: () -> Unit,
 ) {
 
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, false)
 
     TitleTopAppBar(
         color = color,

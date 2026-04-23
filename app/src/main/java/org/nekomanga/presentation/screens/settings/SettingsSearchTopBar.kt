@@ -16,7 +16,7 @@ fun SettingsSearchTopBar(
     incognitoMode: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val (color, onColor, useDarkIcons) = getTopAppBarColor("", false)
+    val (color, onColor, useDarkIcons) = getTopAppBarColor(true, false)
 
     SearchOutlineTopAppBar(
         onSearch = onSearch,
