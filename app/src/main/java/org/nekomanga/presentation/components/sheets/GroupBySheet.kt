@@ -40,7 +40,7 @@ fun GroupBySheet(
             Gap(Size.medium)
             Text(
                 modifier = paddingModifier.fillMaxWidth(),
-                text = stringResource(R.string.sort_by),
+                text = stringResource(R.string.group_library_by),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
             )
