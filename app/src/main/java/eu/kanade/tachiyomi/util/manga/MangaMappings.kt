@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import org.nekomanga.logging.TimberKt
 
 /**
  * This class provides operations to manage the database through its interfaces.
@@ -37,7 +36,6 @@ class MangaMappings(context: Context) {
     }
 
     fun getMangadexUUID(id: String, service: String): String? {
-        TimberKt.d { "CESCO getMangadexUUID: $id, $service" }
         val queryString = "SELECT mdex FROM mappings WHERE ${service.lowercase()} = ? LIMIT 1"
         val whereArgs = arrayOf(id)
         return getResult(queryString, whereArgs)
@@ -55,8 +53,8 @@ class MangaMappings(context: Context) {
         return getResult(queryString, whereArgs)
     }
 
-    fun getMbForMuID(id: String): String? {
-        val queryString = "SELECT mb FROM mappings WHERE mb = ? LIMIT 1"
+    fun getMbId(id: String): String? {
+        val queryString = "SELECT mb FROM mappings WHERE mdex = ? LIMIT 1"
         val whereArgs = arrayOf(id)
         return getResult(queryString, whereArgs)
     }

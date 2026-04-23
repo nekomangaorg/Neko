@@ -1867,17 +1867,17 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             return@async // Already tracked, skip
 
                         // Check if the manga has a remote ID for this service
-                        trackManager.getIdFromManga(trackService, manga)
-                            ?: return@async // No ID found, skip
+                        val id =
+                            trackManager.getIdFromManga(trackService, manga)
+                                ?: return@async // No ID found, skip
 
                         // --- 4. Perform the search and register the track ---
 
                         // We are online, not tracked, and have a remote ID. Proceed.
                         val trackResult =
-                            trackUseCases.searchTracker.awaitNonFlow(
-                                title = "",
-                                service =
-                                    trackManager.getService(trackService.id)!!.toTrackServiceItem(),
+                            trackUseCases.searchTracker.byId(
+                                id = id,
+                                service = trackService,
                                 manga = manga,
                                 previouslyTracker = false,
                             )

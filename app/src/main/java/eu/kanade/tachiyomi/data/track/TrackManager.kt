@@ -52,7 +52,7 @@ class TrackManager(private val context: Context) {
             ANILIST -> manga.anilist_id
             KITSU -> manga.kitsu_id
             MANGA_UPDATES -> getMangaUpdatesApiId(manga)
-            MANGABAKA -> mappings.getMbForMuID(MdUtil.getMangaUUID(manga.url))
+            MANGABAKA -> mappings.getMbId(MdUtil.getMangaUUID(manga.url))
             else -> null
         }
     }

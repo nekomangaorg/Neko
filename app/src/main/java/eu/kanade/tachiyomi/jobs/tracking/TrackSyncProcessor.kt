@@ -77,17 +77,14 @@ class TrackSyncProcessor(private val dispatcher: CoroutineDispatcher = Dispatche
                                                             manga,
                                                         )
                                                     if (id != null) {
+
                                                         val trackResult =
-                                                            trackUseCases.searchTracker
-                                                                .awaitNonFlow(
-                                                                    "",
-                                                                    trackManager
-                                                                        .getService(trackService.id)
-                                                                        ?.toTrackServiceItem()
-                                                                        ?: return@async,
-                                                                    manga,
-                                                                    false,
-                                                                )
+                                                            trackUseCases.searchTracker.byId(
+                                                                id = id,
+                                                                service = trackServiceItem,
+                                                                manga = manga,
+                                                                previouslyTracker = false,
+                                                            )
                                                         when (trackResult) {
                                                             is TrackingConstants.TrackSearchResult.Success -> {
                                                                 val trackSearchItem =

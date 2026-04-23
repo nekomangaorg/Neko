@@ -150,7 +150,7 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        if (query.startsWith(SEARCH_ID_PREFIX)) {
+        if (query.startsWith(SEARCH_ID_PREFIX) && !wasPreviouslyTracked) {
             query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
                 return api.getMangaDetails(id)?.let { listOf(it) } ?: emptyList()
             }
