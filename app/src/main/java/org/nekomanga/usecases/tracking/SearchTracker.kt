@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import org.nekomanga.constants.Constants.TRACKER_SEARCH_ID_PREFIX
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toTrackSearchItem
 import org.nekomanga.logging.TimberKt
@@ -49,6 +50,15 @@ class SearchTracker(private val trackManager: TrackManager = Injekt.get()) {
                     )
                 )
             }
+
+    suspend fun byId(
+        id: String,
+        service: TrackServiceItem,
+        manga: Manga,
+        previouslyTracker: Boolean,
+    ): TrackingConstants.TrackSearchResult {
+        return awaitNonFlow(TRACKER_SEARCH_ID_PREFIX + id, service, manga, previouslyTracker)
+    }
 
     suspend fun awaitNonFlow(
         title: String,

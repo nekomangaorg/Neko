@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.mangabaka.MangaBakaApi
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.ui.setting.MergeLoginEvent
 import eu.kanade.tachiyomi.ui.setting.TrackingSettingsViewModel
@@ -289,12 +290,25 @@ internal class TrackingSettingsScreen(
                                     trackingScreenState.mangaBakaUsername
                                 else null,
                             isLoggedIn = trackingScreenState.mangaBakaIsLoggedIn,
-                            login = { context.openInBrowser(trackingScreenState.mangaBakaAuthUrl) },
+                            login = {
+                                val pkceCodes = MangaBakaApi.getPkceS256ChallengeCode()
+                                preferences.mangabakaCodeVerifier().set(pkceCodes.codeVerifier)
+                                context.openInBrowser(MangaBakaApi.authUrl(pkceCodes.codeChallenge))
+                            },
                             logout = {
                                 trackServiceIdForLoginLogout = trackingScreenState.mangaBaka.id
                                 showLogoutDialog = true
                             },
-                        )
+                        ),
+                        Preference.PreferenceItem.BasicSwitchPreference(
+                            title = stringResource(R.string.auto_track),
+                            enabled = trackingScreenState.mangaBakaIsLoggedIn,
+                            checked = trackingScreenState.mangaBakaAutoAddTrack,
+                            onValueChanged = {
+                                updateAutoAddTrack(it, trackingScreenState.mangaBaka)
+                                true
+                            },
+                        ),
                     ),
             ),
         )

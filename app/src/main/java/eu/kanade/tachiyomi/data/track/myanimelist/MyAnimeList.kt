@@ -8,9 +8,9 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
+import org.nekomanga.constants.Constants.TRACKER_SEARCH_ID_PREFIX
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -108,8 +108,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        if (query.startsWith(SEARCH_ID_PREFIX)) {
-            query.substringAfter(SEARCH_ID_PREFIX).toLongOrNull()?.let { id ->
+        if (query.startsWith(TRACKER_SEARCH_ID_PREFIX)) {
+            query.substringAfter(TRACKER_SEARCH_ID_PREFIX).toLongOrNull()?.let { id ->
                 return listOf(api.getMangaDetails(id))
             }
         }
@@ -177,7 +177,6 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         const val PLAN_TO_READ = 6
         const val REREADING = 7
 
-        private const val SEARCH_ID_PREFIX = "id:"
         private const val SEARCH_LIST_PREFIX = "my:"
     }
 }

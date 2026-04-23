@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
-import eu.kanade.tachiyomi.data.track.mangabaka.MangaBakaApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -96,10 +95,6 @@ class TrackingSettingsViewModel : ViewModel() {
                 _state.update { it.copy(mangaBakaIsLoggedIn = loggedIn) }
             },
         )
-
-        val pkceCodes = MangaBakaApi.getPkceS256ChallengeCode()
-        preferences.mangabakaCodeVerifier().set(pkceCodes.codeVerifier)
-        _state.update { it.copy(mangaBakaAuthUrl = MangaBakaApi.authUrl(pkceCodes.codeChallenge)) }
     }
 
     fun launchTrackerUpdates(
@@ -169,6 +164,5 @@ class TrackingSettingsViewModel : ViewModel() {
         val mangaBakaUsername: String = "",
         val mangaBakaIsLoggedIn: Boolean = false,
         val mangaBakaAutoAddTrack: Boolean = false,
-        val mangaBakaAuthUrl: Uri = Uri.EMPTY,
     )
 }
