@@ -10,6 +10,8 @@ import eu.kanade.tachiyomi.util.PkceUtil
 import eu.kanade.tachiyomi.util.system.toLocalDate
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.math.RoundingMode
+import java.security.SecureRandom
+import java.util.Base64
 import kotlin.time.Instant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -277,8 +279,12 @@ class MangaBakaApi(
         }
     }
 
+    fun verifyOAuthState(state: String): Boolean = state == oauthStateParam
+
     companion object {
         private const val CLIENT_ID = "UZqzTejmOGFldPOSpDHjiTYZKxPthHUa"
+
+        private var oauthStateParam: String = ""
 
         private const val BASE_URL = "https://mangabaka.org"
         private const val API_BASE_URL = "https://api.mangabaka.dev"
@@ -300,6 +306,7 @@ class MangaBakaApi(
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("scope", SCOPES)
                 .appendQueryParameter("redirect_uri", REDIRECT_URI)
+                .appendQueryParameter("state", getOAuthStateParam())
                 .build()
 
         fun refreshTokenRequest(token: String) =
@@ -314,13 +321,22 @@ class MangaBakaApi(
                         .build(),
             )
 
+        private fun getOAuthStateParam(): String {
+            val bytes = ByteArray(16)
+            SecureRandom().nextBytes(bytes)
+            oauthStateParam = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+
+            return oauthStateParam
+        }
+
         fun getPkceS256ChallengeCode(): PkceCodes {
             // MangaBaka requires an actually conformant PKCE process, unlike MAL
             // 1. create verifier
             // 2. create challenge from verifier (S256 hash -> base64 URL encode)
             // 3. send challenge to /authorize
             // 4. send verifier for access tokens to /token
-            return PkceUtil.generateS256Codes()
+            val codes = PkceUtil.generateS256Codes()
+            return codes
         }
     }
 }

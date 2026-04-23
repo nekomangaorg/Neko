@@ -13,6 +13,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
 import org.nekomanga.R
 import org.nekomanga.data.network.mangabaka.dto.MangaBakaOAuth
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
@@ -166,6 +167,8 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
         return track
     }
 
+    fun verifyOAuthState(state: String): Boolean = api.verifyOAuthState(state)
+
     override suspend fun login(username: String, password: String) = login(password)
 
     suspend fun login(code: String): Boolean {
@@ -188,7 +191,8 @@ class MangaBaka(private val context: Context, id: Int) : TrackService(id) {
                 }
             scorePreference.set(scoreType)
             return true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            TimberKt.e(e) { "Login failed" }
             logout()
         }
         return false
