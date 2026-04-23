@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.theme.ThemeColorState
@@ -62,7 +61,7 @@ fun SortRow(
                     imageVector = Icons.Filled.ArrowUpward,
                     contentDescription = stringResource(id = org.nekomanga.R.string.ascending),
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(Size.large),
                 )
             }
             MangaConstants.SortState.Descending -> {
@@ -70,11 +69,11 @@ fun SortRow(
                     imageVector = Icons.Filled.ArrowDownward,
                     contentDescription = stringResource(id = org.nekomanga.R.string.descending),
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(Size.large),
                 )
             }
             MangaConstants.SortState.None -> {
-                Gap(24.dp)
+                Gap(Size.large)
             }
         }
         Gap(Size.medium)
