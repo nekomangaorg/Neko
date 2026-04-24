@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import org.nekomanga.data.database.entity.CategoryEntity
 import org.nekomanga.data.database.entity.MangaCategoryEntity
@@ -38,11 +39,9 @@ interface CategoryDao {
     )
     suspend fun getCategoriesForManga(mangaId: Long): List<CategoryEntity>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity): Long
+    @Upsert suspend fun insertCategory(category: CategoryEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategories(categories: List<CategoryEntity>)
+    @Upsert suspend fun insertCategories(categories: List<CategoryEntity>)
 
     @Delete suspend fun deleteCategory(category: CategoryEntity)
 
