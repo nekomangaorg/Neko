@@ -84,7 +84,7 @@ class ChapterRepositoryImpl(
         sortByFetched: Boolean,
     ): Flow<List<LegacyMangaChapter>> {
         val sortByFetchedInt = if (sortByFetched) 1 else 0
-        return chapterDao.observeRecentChapters(search, limit, offset, sortByFetchedInt).map {
+        return chapterDao.observeRecentChapters("%$search%", limit, offset, sortByFetchedInt).map {
             it.map { LegacyMangaChapter(it.manga.toManga(), it.chapter.toChapter()) }
         }
     }
@@ -96,7 +96,7 @@ class ChapterRepositoryImpl(
         sortByFetched: Boolean,
     ): List<LegacyMangaChapter> {
         val sortByFetchedInt = if (sortByFetched) 1 else 0
-        return chapterDao.getRecentChapters(search, limit, offset, sortByFetchedInt).map {
+        return chapterDao.getRecentChapters("%$search%", limit, offset, sortByFetchedInt).map {
             LegacyMangaChapter(it.manga.toManga(), it.chapter.toChapter())
         }
     }
