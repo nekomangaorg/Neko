@@ -20,7 +20,7 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         limit: Int,
         offset: Int,
     ): Flow<List<LegacyMangaChapterHistory>> {
-        return historyDao.observeRecentHistoryUngrouped(search, limit, offset).map {
+        return historyDao.observeRecentHistoryUngrouped("%$search%", limit, offset).map {
             it.map {
                 LegacyMangaChapterHistory(
                     it.manga.toManga(),
@@ -36,7 +36,7 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         limit: Int,
         offset: Int,
     ): List<LegacyMangaChapterHistory> {
-        return historyDao.getRecentHistoryUngrouped(search, limit, offset).map {
+        return historyDao.getRecentHistoryUngrouped("%$search%", limit, offset).map {
             LegacyMangaChapterHistory(
                 it.manga.toManga(),
                 it.chapter.toChapter(),
@@ -50,7 +50,7 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         limit: Int,
         offset: Int,
     ): Flow<List<LegacyMangaChapterHistory>> {
-        return historyDao.observeRecentMangaLimit(search, limit, offset).map {
+        return historyDao.observeRecentMangaLimit("%$search%", limit, offset).map {
             it.map {
                 LegacyMangaChapterHistory(
                     it.manga.toManga(),
@@ -66,7 +66,7 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         limit: Int,
         offset: Int,
     ): List<LegacyMangaChapterHistory> {
-        return historyDao.getRecentMangaLimit(search, limit, offset).map {
+        return historyDao.getRecentMangaLimit("%$search%", limit, offset).map {
             LegacyMangaChapterHistory(
                 it.manga.toManga(),
                 it.chapter.toChapter(),
@@ -88,7 +88,7 @@ class HistoryRepositoryImpl(private val historyDao: HistoryDao) : HistoryReposit
         limit: Int,
         offset: Int,
     ): Flow<List<MangaChapterHistory>> {
-        return historyDao.observeAllRecentsTypes(search, includeRead, limit, offset)
+        return historyDao.observeAllRecentsTypes("%$search%", includeRead, limit, offset)
     }
 
     override fun observeChapterHistoryByMangaId(
