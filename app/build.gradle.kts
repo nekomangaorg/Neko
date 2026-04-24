@@ -34,7 +34,11 @@ android {
         setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
-        buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField(
+            "String",
+            "BUILD_TIME",
+            if (System.getenv("CI") == "true") "\"${getBuildTime()}\"" else "\"0\"",
+        )
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
         ksp { arg("room.schemaLocation", "$projectDir/schemas") }
