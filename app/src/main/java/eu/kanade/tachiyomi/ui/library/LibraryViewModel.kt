@@ -101,6 +101,7 @@ class LibraryViewModel() : ViewModel() {
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
+    val groupLibraryManga = org.nekomanga.usecases.library.GroupLibraryMangaUseCase()
     val categoryUseCases: CategoryUseCases = CategoryUseCases()
 
     private val initialState =
@@ -420,7 +421,7 @@ class LibraryViewModel() : ViewModel() {
                 withContext(Dispatchers.Default) {
                     when (libraryViewPreferences.groupBy) {
                         LibraryGroup.ByCategory -> {
-                            groupByCategory(activeMangaList, categoryList)
+                            groupLibraryManga.groupByCategory(activeMangaList, categoryList)
                         }
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,
@@ -428,7 +429,7 @@ class LibraryViewModel() : ViewModel() {
                         LibraryGroup.ByStatus,
                         LibraryGroup.ByTag,
                         LibraryGroup.ByTrackStatus -> {
-                            groupByDynamic(
+                            groupLibraryManga.groupByDynamic(
                                 libraryMangaList = activeMangaList,
                                 currentLibraryGroup = libraryViewPreferences.groupBy,
                                 sortOrder = libraryViewPreferences.sortingMode,
@@ -437,10 +438,10 @@ class LibraryViewModel() : ViewModel() {
                             )
                         }
                         LibraryGroup.Ungrouped -> {
-                            groupByUngrouped(
-                                activeMangaList,
-                                libraryViewPreferences.sortingMode,
-                                libraryViewPreferences.sortAscending,
+                            groupLibraryManga.groupByUngrouped(
+                                libraryMangaList = activeMangaList,
+                                sortOrder = libraryViewPreferences.sortingMode,
+                                isAscending = libraryViewPreferences.sortAscending,
                             )
                         }
                     }
@@ -818,110 +819,8 @@ class LibraryViewModel() : ViewModel() {
         }
     }
 
-    fun groupByDynamic(
-        libraryMangaList: List<LibraryMangaItem>,
-        currentLibraryGroup: LibraryGroup,
-        sortOrder: LibrarySort,
-        sortAscending: Boolean,
-        loggedInTrackStatus: Map<Long, List<String>>,
-    ): PersistentList<LibraryCategoryItem> {
-        val groupedMap = mutableMapOf<String, MutableList<LibraryMangaItem>>()
-        val notTrackedList = listOf("Not tracked")
-
-        val distinctMangaList = libraryMangaList.distinctBy { it.displayManga.mangaId }
-
-        for (libraryMangaItem in distinctMangaList) {
-            val groupingKeys =
-                when (currentLibraryGroup) {
-                    LibraryGroup.ByAuthor -> libraryMangaItem.author
-                    LibraryGroup.ByContent -> libraryMangaItem.contentRating
-                    LibraryGroup.ByLanguage -> libraryMangaItem.language
-                    LibraryGroup.ByStatus -> libraryMangaItem.status
-                    LibraryGroup.ByTag -> libraryMangaItem.genre
-                    LibraryGroup.ByTrackStatus -> {
-                        loggedInTrackStatus[libraryMangaItem.displayManga.mangaId] ?: notTrackedList
-                    }
-                    else -> libraryMangaItem.language
-                }.distinct()
-
-            for (key in groupingKeys) {
-                groupedMap.getOrPut(key) { mutableListOf() }.add(libraryMangaItem)
-            }
-        }
-        val keyComparator = currentLibraryGroup.keyComparator
-
-        return groupedMap.entries
-            .sortedWith(compareBy(keyComparator) { it.key })
-            .mapIndexed { index, entry ->
-                val categoryName = entry.key
-                val items = entry.value
-                val categoryItem =
-                    CategoryItem(
-                        id = index,
-                        sortOrder = sortOrder,
-                        isAscending = sortAscending,
-                        name = categoryName,
-                        isHidden = false,
-                        isDynamic = true,
-                    )
-                LibraryCategoryItem(
-                    categoryItem = categoryItem,
-                    libraryItems = items.toPersistentList(),
-                )
-            }
-            .toPersistentList()
-    }
-
     private fun dynamicCategoryName(groupType: Int, categoryName: String): String {
         return groupType.toString() + dynamicCategorySplitter + categoryName
-    }
-
-    fun groupByUngrouped(
-        libraryMangaList: List<LibraryMangaItem>,
-        sortOrder: LibrarySort,
-        isAscending: Boolean,
-    ): PersistentList<LibraryCategoryItem> {
-
-        val allCategoryItem =
-            CategoryItem(
-                id = -1,
-                name = ALL_CATEGORY,
-                order = -1,
-                sortOrder = sortOrder,
-                isAscending = isAscending,
-                isDynamic = true,
-            )
-
-        val distinctList =
-            libraryMangaList.distinctBy { it.displayManga.mangaId }.toPersistentList()
-
-        return persistentListOf(
-            LibraryCategoryItem(categoryItem = allCategoryItem, libraryItems = distinctList)
-        )
-    }
-
-    fun groupByCategory(
-        libraryMangaList: List<LibraryMangaItem>,
-        categoryList: List<CategoryItem>,
-    ): List<LibraryCategoryItem> {
-        if (libraryMangaList.isEmpty()) {
-            return emptyList()
-        }
-
-        val mangaMap = libraryMangaList.groupBy { it.category }
-
-        return categoryList.mapNotNull { categoryItem ->
-            val unsortedMangaList = mangaMap[categoryItem.id] ?: emptyList()
-
-            if (categoryItem.isSystemCategory && unsortedMangaList.isEmpty()) {
-                return@mapNotNull null
-            }
-
-            LibraryCategoryItem(
-                categoryItem = categoryItem,
-                libraryItems = unsortedMangaList.toPersistentList(),
-            )
-        }
     }
 
     fun observeLibraryUpdates() {
