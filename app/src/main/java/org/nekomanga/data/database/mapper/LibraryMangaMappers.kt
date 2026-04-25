@@ -2,8 +2,10 @@ package org.nekomanga.data.database.mapper
 
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.model.LibraryMangaRaw
 
@@ -62,6 +64,7 @@ fun LibraryMangaRaw.toLibraryManga(
         this.category = raw.category
         this.bookmarkCount = raw.bookmarkCount
         this.unavailableCount = raw.unavailableCount
+        this.isMerged = raw.isMerged
 
         // 3. Parse the concatenated chapter strings
         this.unread =
@@ -99,6 +102,7 @@ private fun parseChapterCount(
     var validChapterCount = 0
     var startIndex = 0
 
+    val sources = SourceManager.mergeSourceNames + MdConstants.name
     val filtered = ChapterUtil.getScanlators(filteredScanlatorsString).toSet()
 
     while (startIndex < countString.length) {
@@ -119,7 +123,6 @@ private fun parseChapterCount(
                 val uploader = extraParts[0]
                 val currentGroupCount = extraParts[1].toIntOrNull() ?: 0
                 val scanlators = ChapterUtil.getScanlators(scanlator)
-                val sources = ChapterUtil.getScanlators(scanlator).map { it.substringBefore("/") }
 
                 var isFilteredOut = false
 

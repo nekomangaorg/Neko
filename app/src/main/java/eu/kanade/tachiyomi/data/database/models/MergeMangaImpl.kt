@@ -108,8 +108,8 @@ enum class MergeType(val id: Int, val scanlatorName: String, val baseUrl: String
         }
 
         fun containsMergeSourceName(name: String?): Boolean {
-            name ?: false
-            return entries.any { name!!.contains(MergeType.getMergeTypeName(it)) }
+            name ?: return false
+            return entries.any { name.contains(MergeType.getMergeTypeName(it)) }
         }
     }
 }

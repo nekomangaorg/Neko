@@ -98,9 +98,7 @@ class ChapterUtil {
             }
 
             // at this point if the chapter is not merged and the source is Not MangaDex or Local
-            // then we
-            // already
-            // know its not a matching chapter
+            // then we already know it's not a matching chapter
             if (!isMerged) {
                 return false
             }
