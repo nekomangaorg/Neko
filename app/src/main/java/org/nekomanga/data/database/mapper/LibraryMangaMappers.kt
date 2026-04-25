@@ -102,6 +102,7 @@ private fun parseChapterCount(
     var validChapterCount = 0
     var startIndex = 0
 
+    val sources = SourceManager.mergeSourceNames + MdConstants.name
     val filtered = ChapterUtil.getScanlators(filteredScanlatorsString).toSet()
 
     while (startIndex < countString.length) {
@@ -122,7 +123,6 @@ private fun parseChapterCount(
                 val uploader = extraParts[0]
                 val currentGroupCount = extraParts[1].toIntOrNull() ?: 0
                 val scanlators = ChapterUtil.getScanlators(scanlator)
-                val sources = SourceManager.mergeSourceNames + MdConstants.name
 
                 var isFilteredOut = false
 
