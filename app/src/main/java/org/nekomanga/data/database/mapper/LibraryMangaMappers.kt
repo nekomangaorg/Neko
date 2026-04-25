@@ -2,8 +2,10 @@ package org.nekomanga.data.database.mapper
 
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.data.database.dao.LibraryDao
 import org.nekomanga.data.database.model.LibraryMangaRaw
 
@@ -119,7 +121,7 @@ private fun parseChapterCount(
                 val uploader = extraParts[0]
                 val currentGroupCount = extraParts[1].toIntOrNull() ?: 0
                 val scanlators = ChapterUtil.getScanlators(scanlator)
-                val sources = ChapterUtil.getScanlators(scanlator).map { it.substringBefore("/") }
+                val sources = SourceManager.mergeSourceNames + MdConstants.name
 
                 var isFilteredOut = false
 
