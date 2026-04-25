@@ -15,4 +15,5 @@ data class LibraryMangaRaw(
     @ColumnInfo(name = "bookmark_count") val bookmarkCount: Int,
     @ColumnInfo(name = "unavailable_count") val unavailableCount: Int,
     @ColumnInfo(name = "category") val category: Int,
+    @ColumnInfo(name = "is_merged") val isMerged: Boolean = false,
 )
