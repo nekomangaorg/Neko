@@ -27,9 +27,7 @@ fun ChapterEntity.toChapter(): ChapterImpl {
         date_upload = this@toChapter.dateUpload
         mangadex_chapter_id = this@toChapter.mangadexChapterId ?: ""
         language = this@toChapter.language
-
-        // (Note: isUnavailable is an extension property handled by Chapter.canDeleteChapter
-        // or set via the source, it is not a direct mutable field on ChapterImpl)
+        isUnavailable = this@toChapter.isUnavailable
     }
 }
 
