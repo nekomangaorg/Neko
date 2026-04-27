@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.util.manga.toLibraryMangaItem
 import eu.kanade.tachiyomi.util.system.combine
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
@@ -66,7 +65,6 @@ import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.category.CategoryItem.Companion.ALL_CATEGORY
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.chapter.ChapterMarkActions
 import org.nekomanga.domain.chapter.toSimpleChapter
@@ -79,6 +77,7 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.category.CategoryUseCases
 import org.nekomanga.usecases.chapters.ChapterUseCases
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
+import org.nekomanga.usecases.library.GroupLibraryMangaUseCase
 import org.nekomanga.util.system.mapAsync
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -101,7 +100,7 @@ class LibraryViewModel() : ViewModel() {
     val chapterItemFilter: ChapterItemFilter = Injekt.get()
     val chapterUseCases: ChapterUseCases = Injekt.get()
     val filterLibraryManga: FilterLibraryMangaUseCase = Injekt.get()
-    val groupLibraryManga = org.nekomanga.usecases.library.GroupLibraryMangaUseCase()
+    val groupLibraryManga = GroupLibraryMangaUseCase()
     val categoryUseCases: CategoryUseCases = CategoryUseCases()
 
     private val initialState =
