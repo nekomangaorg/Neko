@@ -109,15 +109,14 @@ class FollowsSyncProcessor {
 
                             mangaRepository.updateManga(dbManga)
 
+                            val mangaId = dbManga.id ?: return@mapNotNull null
+
                             if (defaultCategory != null) {
                                 val mc = MangaCategory.create(dbManga, defaultCategory)
-                                categoryRepository.setMangaCategories(
-                                    listOf(mc),
-                                    listOf(dbManga.id!!),
-                                )
+                                categoryRepository.setMangaCategories(listOf(mc), listOf(mangaId))
                             }
 
-                            return@mapNotNull dbManga.id
+                            return@mapNotNull mangaId
                         }
                         return@mapNotNull null
                     }

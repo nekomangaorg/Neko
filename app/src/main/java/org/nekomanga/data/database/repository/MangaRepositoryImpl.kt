@@ -77,50 +77,30 @@ class MangaRepositoryImpl(
         mangaDao.getMangaByIds(ids).map { it.toManga() }
 
     override suspend fun getMangaByUrlAndSource(url: String, sourceId: Long): Manga? {
-        var manga = mangaDao.getMangaByUrlAndSourceSync(url, sourceId)
-        if (manga == null) {
-            val altUrl =
-                if (url.startsWith("/title/")) {
-                    url.replaceFirst("/title/", "/manga/")
-                } else if (url.startsWith("/manga/")) {
-                    url.replaceFirst("/manga/", "/title/")
-                } else null
-
-            if (altUrl != null) {
-                manga = mangaDao.getMangaByUrlAndSourceSync(altUrl, sourceId)
-            }
-        }
+        val altUrl = getAltUrl(url)
+        val manga =
+            mangaDao.getMangaByUrlAndSourceSync(url, sourceId)
+                ?: altUrl?.let { mangaDao.getMangaByUrlAndSourceSync(it, sourceId) }
         return manga?.toManga()
     }
 
     override suspend fun getMangaByUrls(urls: List<String>): List<Manga> {
-        val allUrls = urls.flatMap { url ->
-            val altUrl =
-                if (url.startsWith("/title/")) {
-                    url.replaceFirst("/title/", "/manga/")
-                } else if (url.startsWith("/manga/")) {
-                    url.replaceFirst("/manga/", "/title/")
-                } else null
-            if (altUrl != null) listOf(url, altUrl) else listOf(url)
-        }
+        val allUrls = urls.flatMap { url -> listOfNotNull(url, getAltUrl(url)) }
         return mangaDao.getMangaByUrls(allUrls).map { it.toManga() }
     }
 
     override suspend fun getMangaByUrl(url: String): Manga? {
-        var manga = mangaDao.getMangaByUrl(url)
-        if (manga == null) {
-            val altUrl =
-                if (url.startsWith("/title/")) {
-                    url.replaceFirst("/title/", "/manga/")
-                } else if (url.startsWith("/manga/")) {
-                    url.replaceFirst("/manga/", "/title/")
-                } else null
-
-            if (altUrl != null) {
-                manga = mangaDao.getMangaByUrl(altUrl)
-            }
-        }
+        val altUrl = getAltUrl(url)
+        val manga = mangaDao.getMangaByUrl(url) ?: altUrl?.let { mangaDao.getMangaByUrl(it) }
         return manga?.toManga()
+    }
+
+    private fun getAltUrl(url: String): String? {
+        return when {
+            url.startsWith("/title/") -> url.replaceFirst("/title/", "/manga/")
+            url.startsWith("/manga/") -> url.replaceFirst("/manga/", "/title/")
+            else -> null
+        }
     }
 
     override suspend fun getMangaById(id: Long): Manga? = mangaDao.getMangaById(id)?.toManga()
