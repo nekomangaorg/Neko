@@ -111,7 +111,12 @@ class ModifyCategoryUseCaseTest {
 
             // Assert
             coVerify(exactly = 1) {
-                categoryRepository.insertCategory(match { it.name == "Regular" })
+                categoryRepository.insertCategory(
+                    match { insertedCategory ->
+                        insertedCategory.name == "Regular" &&
+                            insertedCategory.mangaSort == LibrarySort.Title.categoryValueDescending
+                    }
+                )
             }
         }
 
@@ -181,7 +186,12 @@ class ModifyCategoryUseCaseTest {
 
             // Assert
             coVerify(exactly = 1) {
-                categoryRepository.insertCategory(match { it.name == "Regular" })
+                categoryRepository.insertCategory(
+                    match { insertedCategory ->
+                        insertedCategory.name == "Regular" &&
+                            insertedCategory.mangaSort == LibrarySort.DateAdded.categoryValue
+                    }
+                )
             }
         }
 }
