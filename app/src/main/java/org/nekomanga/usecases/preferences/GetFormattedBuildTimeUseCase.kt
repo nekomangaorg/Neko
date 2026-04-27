@@ -8,9 +8,10 @@ import java.util.TimeZone
 class GetFormattedBuildTimeUseCase(private val getDateFormatUseCase: GetDateFormatUseCase) {
     operator fun invoke(buildTime: String): String {
         return runCatching {
-                val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
+                val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US)
                 inputDf.timeZone = TimeZone.getTimeZone("UTC")
-                inputDf.parse(buildTime)!!.toTimestampString(getDateFormatUseCase())
+                inputDf.parse(buildTime)?.toTimestampString(getDateFormatUseCase())
+                    ?: error("Invalid Date String")
             }
             .getOrDefault(buildTime)
     }

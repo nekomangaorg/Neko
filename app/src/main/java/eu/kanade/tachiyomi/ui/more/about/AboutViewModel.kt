@@ -17,8 +17,6 @@ import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class AboutViewModel : ViewModel() {
@@ -26,7 +24,7 @@ class AboutViewModel : ViewModel() {
     private val preferences: PreferencesHelper by injectLazy()
 
     private val securityPreferences: SecurityPreferences by injectLazy()
-    private val getFormattedBuildTimeUseCase: GetFormattedBuildTimeUseCase = Injekt.get()
+    private val getFormattedBuildTimeUseCase: GetFormattedBuildTimeUseCase by injectLazy()
 
     val appSnackbarManager: AppSnackbarManager by injectLazy()
 

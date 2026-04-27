@@ -1,5 +1,5 @@
-1. Extract logic from `getFormattedBuildTime()` inside `AboutViewModel.kt` into `GetFormattedBuildTimeUseCase`.
-2. Add `GetFormattedBuildTimeUseCase` to `AppModule.kt` DI container.
-3. Update `AboutViewModel.kt` to inject and use `GetFormattedBuildTimeUseCase`.
-4. Run tests and static analysis.
-5. Create a dedicated test `GetFormattedBuildTimeUseCaseTest`.
+1. Update `AboutViewModel.kt` to use `by injectLazy()` for `getFormattedBuildTimeUseCase` and remove unused imports.
+2. Update `GetFormattedBuildTimeUseCase.kt` to use `Locale.US` and `?.let` or `?:` to avoid the `!!` assertion operator.
+3. Test changes.
+4. Reply to comments.
+5. Submit changes.
