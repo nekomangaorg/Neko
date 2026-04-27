@@ -89,6 +89,17 @@ class FollowsSyncProcessor {
                                     sourceManager.mangaDex.id,
                                 )
                             dbManga.date_added = Date().time
+                            dbManga.favorite = true
+
+                            countOfAdded.incrementAndGet()
+                            val id = mangaRepository.insertManga(dbManga)
+                            dbManga.id = id
+
+                            if (defaultCategory != null) {
+                                val mc = MangaCategory.create(dbManga, defaultCategory)
+                                categoryRepository.setMangaCategories(listOf(mc), listOf(id))
+                            }
+                            return@mapNotNull id
                         }
 
                         // Increment and update if it is not already favorited
@@ -98,21 +109,15 @@ class FollowsSyncProcessor {
 
                             mangaRepository.updateManga(dbManga)
 
-                            dbManga =
-                                mangaRepository.getMangaByUrlAndSource(
-                                    networkManga.url,
-                                    sourceManager.mangaDex.id,
-                                )
-
                             if (defaultCategory != null) {
-                                val mc = MangaCategory.create(dbManga!!, defaultCategory)
+                                val mc = MangaCategory.create(dbManga, defaultCategory)
                                 categoryRepository.setMangaCategories(
                                     listOf(mc),
                                     listOf(dbManga.id!!),
                                 )
                             }
 
-                            return@mapNotNull dbManga?.id
+                            return@mapNotNull dbManga.id
                         }
                         return@mapNotNull null
                     }
