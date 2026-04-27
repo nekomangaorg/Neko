@@ -108,11 +108,13 @@ object MangaConstants {
             TrackingConstants.TrackSearchResult.Loading,
     )
 
+    @Immutable
     data class MangaScreenCategoryState(
         val allCategories: PersistentList<CategoryItem> = persistentListOf(),
         val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
     )
 
+    @Immutable
     data class MangaScreenMergeState(
         val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
         val mergeSearchResult: MergeConstants.MergeSearchResult =
@@ -130,11 +132,13 @@ object MangaConstants {
     )
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
+    @Immutable
     data class NextUnreadChapter(
         val text: UiText = UiText.String(""),
         val simpleChapter: SimpleChapter? = null,
     )
 
+    @Immutable
     data class SortFilter(
         val sourceOrderSort: SortState = SortState.None,
         val smartOrderSort: SortState = SortState.None,
@@ -142,16 +146,19 @@ object MangaConstants {
         val matchesGlobalDefaults: Boolean = true,
     )
 
-    data class SortOption(val sortState: SortState, val sortType: SortType)
+    @Immutable data class SortOption(val sortState: SortState, val sortType: SortType)
 
+    @Immutable
     data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
 
-    data class ScanlatorOption(val name: String, val disabled: Boolean = false)
+    @Immutable data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
+    @Immutable
     data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
 
-    data class LanguageOption(val name: String, val disabled: Boolean = false)
+    @Immutable data class LanguageOption(val name: String, val disabled: Boolean = false)
 
+    @Immutable
     data class ChapterDisplay(
         val showAll: Boolean = false,
         val unread: ToggleableState = ToggleableState.Off,
@@ -256,7 +263,10 @@ object MangaConstants {
     }
 
     @Immutable
-    data class CategoriesData(val all: List<CategoryItem>, val current: List<CategoryItem>)
+    data class CategoriesData(
+        val all: PersistentList<CategoryItem>,
+        val current: PersistentList<CategoryItem>,
+    )
 
     sealed class DownloadAction {
         data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()

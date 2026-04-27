@@ -117,6 +117,7 @@ enum class MoveDownloadDirection {
     Bottom,
 }
 
+@Immutable
 data class FeedManga(
     val mangaTitle: String,
     val date: Long,
