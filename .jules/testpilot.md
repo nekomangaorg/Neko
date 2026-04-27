@@ -7,3 +7,6 @@
 ## 2025-04-04 - Testing MarkChaptersRemote skipSync edge case
 **Learning:** MangaDexPreferences nested method mocking requires explicit returns. When using MockK to mock a use case that might skip execution conditionally, using `coVerify(exactly = 0)` cleanly asserts that external dependencies (like `StatusHandler`) are bypassed correctly.
 **Action:** When testing conditional skips, mock all preferences normally and use exactly = 0 for the verification step on the external calls.
+## 2024-05-24 - Testing ModifyCategoryUseCase Preferences
+**Learning:** When writing unit tests involving nested preference structures like `LibraryPreferences` in Nekomanga, setting values requires explicit MockK chains (e.g., `every { libraryPreferences.sortAscending().set(any()) } just runs`) because methods like `sortAscending()` return a generic `Preference` object instead of a direct primitive value.
+**Action:** Always mock the intermediate `Preference` object and its `.set()` or `.get()` methods individually when testing domain logic that alters App preferences to prevent runtime test crashes.
