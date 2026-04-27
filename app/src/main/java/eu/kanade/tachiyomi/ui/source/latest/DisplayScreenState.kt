@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
@@ -8,6 +9,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.UiText
 
+@Immutable
 data class DisplayScreenState(
     val isLoading: Boolean = false,
     val incognitoMode: Boolean = false,
@@ -29,6 +31,7 @@ data class DisplayScreenState(
     val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 
+@Immutable
 data class DisplayPageResult(
     val hasNextPage: Boolean = false,
     val displayResult: PersistentList<DisplayResult> = persistentListOf(),

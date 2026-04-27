@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -26,6 +27,7 @@ import org.nekomanga.presentation.components.UiText
 
 object MangaConstants {
 
+    @Immutable
     data class StaticChapterData(
         val allChapters: PersistentList<ChapterItem>,
         val missingChapters: MissingChapterHolder,
@@ -35,6 +37,7 @@ object MangaConstants {
         val allLanguages: PersistentSet<String>,
     )
 
+    @Immutable
     data class MangaScreenGeneralState(
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
@@ -52,6 +55,7 @@ object MangaConstants {
         val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
     )
 
+    @Immutable
     data class MangaScreenMangaState(
         val initialized: Boolean = false,
         val inLibrary: Boolean = false,
@@ -77,6 +81,7 @@ object MangaConstants {
         val dynamicCovers: Boolean = false,
     )
 
+    @Immutable
     data class MangaScreenChapterState(
         val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allChapters: PersistentList<ChapterItem> = persistentListOf(),
@@ -93,6 +98,7 @@ object MangaConstants {
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
     )
 
+    @Immutable
     data class MangaScreenTrackState(
         val tracks: PersistentList<TrackItem> = persistentListOf(),
         val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
@@ -113,6 +119,7 @@ object MangaConstants {
             MergeConstants.MergeSearchResult.Loading,
     )
 
+    @Immutable
     data class MangaDetailScreenState(
         val general: MangaScreenGeneralState,
         val manga: MangaScreenMangaState,
@@ -248,6 +255,7 @@ object MangaConstants {
         }
     }
 
+    @Immutable
     data class CategoriesData(val all: List<CategoryItem>, val current: List<CategoryItem>)
 
     sealed class DownloadAction {
