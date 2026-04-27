@@ -7,10 +7,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.ui.main.AppSnackbarManager
-import eu.kanade.tachiyomi.util.system.toTimestampString
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +16,9 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.snackbar.SnackbarState
+import org.nekomanga.usecases.preferences.GetFormattedBuildTimeUseCase
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class AboutViewModel : ViewModel() {
@@ -27,6 +26,7 @@ class AboutViewModel : ViewModel() {
     private val preferences: PreferencesHelper by injectLazy()
 
     private val securityPreferences: SecurityPreferences by injectLazy()
+    private val getFormattedBuildTimeUseCase: GetFormattedBuildTimeUseCase = Injekt.get()
 
     val appSnackbarManager: AppSnackbarManager by injectLazy()
 
@@ -40,12 +40,7 @@ class AboutViewModel : ViewModel() {
     val aboutScreenState: StateFlow<AboutScreenState> = _aboutScreenState.asStateFlow()
 
     private fun getFormattedBuildTime(): String {
-        return runCatching {
-                val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
-                inputDf.timeZone = TimeZone.getTimeZone("UTC")
-                inputDf.parse(BuildConfig.BUILD_TIME)!!.toTimestampString(preferences.dateFormat())
-            }
-            .getOrDefault(BuildConfig.BUILD_TIME)
+        return getFormattedBuildTimeUseCase(BuildConfig.BUILD_TIME)
     }
 
     fun notOnlineSnackbar() {
