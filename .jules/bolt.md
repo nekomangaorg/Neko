@@ -21,3 +21,11 @@ Action: Always append `.distinctUntilChanged()` after `combine()` blocks that ag
 ## 2026-04-03 - [Avoid Intermediate Lists with all]
 **Learning:** Chaining `.map { ... }.all { ... }` creates an intermediate list of transformed elements, which adds memory allocation and garbage collection overhead. This is especially true for list iteration within Compose state changes (`derivedStateOf`, `remember` triggers).
 **Action:** Replace `.map { ... }.all { ... }` with a single `.all { transformedElement -> ... }` to avoid the intermediate list creation and improve iteration performance, particularly in frequently recomposed UI areas.
+
+## 2026-04-28 - [Avoid Intermediate Lists with asSequence]
+**Learning:** Chaining `.filter {}.sortedWith {}.take {}.map {}` on active chapters creates multiple intermediate lists in memory, which increases GC overhead and reduces performance on chapter lists.
+**Action:** Add `.asSequence()` to large list operations before chaining multiple operators like `filter`, `sortedWith`, `take`, and `map`, finishing with `.toList()` to avoid unnecessary memory allocations.
+
+## 2026-04-28 - [Avoid FastScroller Recomposition on Scroll]
+**Learning:** Passing `state.firstVisibleItemScrollOffset` or referencing changing bounds like `visibleItemsInfo` inside a layout block without deferring causes continuous recomposition on every scroll frame (due to effect parameters/variables being evaluated during composition).
+**Action:** Move frequently changing scroll state evaluations into a `snapshotFlow { ... }.collectLatest { ... }` block within a parameterless `LaunchedEffect(state)`. Read properties directly from `state.layoutInfo` inside the collector, and capture external composition scope variables safely via `rememberUpdatedState()`.

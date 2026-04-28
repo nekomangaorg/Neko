@@ -1016,12 +1016,16 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
                         mangaDetailScreenState.value.chapters.activeChapters
+                            // Use asSequence to avoid intermediate memory allocations during
+                            // multiple list operations
+                            .asSequence()
                             .filter {
                                 !it.chapter.read && it.isNotDownloaded && !it.chapter.isUnavailable
                             }
                             .sortedWith(chapterSort.sortComparator(dbManga, true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
+                            .toList()
                     downloadManager.downloadChapters(dbManga, filteredChapters)
                 }
                 is DownloadAction.DownloadUnread -> {
