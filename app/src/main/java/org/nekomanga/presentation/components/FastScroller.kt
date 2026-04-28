@@ -151,7 +151,6 @@ fun VerticalFastScroller(
                     val thumbTopPaddingState by rememberUpdatedState(thumbTopPadding)
                     val stableScrollInProgressState by rememberUpdatedState(stableScrollInProgress)
                     val scrollHeightPxState by rememberUpdatedState(scrollHeightPx)
-                    val bottomItemSizeState by rememberUpdatedState(bottomItem.size)
 
                     LaunchedEffect(listState) {
                         snapshotFlow { listState.firstVisibleItemScrollOffset }
@@ -218,7 +217,8 @@ fun VerticalFastScroller(
                             scrollSectionIndex.coerceIn(0, listState.layoutInfo.totalItemsCount - 1)
                         val scrollItemOffset =
                             scrollSectionOffset +
-                                (scrollSectionIndex - scrollItemIndex) * bottomItemSizeState
+                                (scrollSectionIndex - scrollItemIndex) *
+                                    (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.size ?: 0)
                         listState.scrollToItem(
                             index = scrollItemIndex,
                             scrollOffset = scrollItemOffset,
