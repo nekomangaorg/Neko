@@ -375,7 +375,8 @@ class RestoreHelper(val context: Context) {
                         if (track.media_id != dbTrack.media_id) {
                             dbTrack.media_id = track.media_id
                         }
-                        if (track.library_id != dbTrack.library_id) {
+                        // -1L was nullsafe replacement
+                        if (track.library_id != -1L && track.library_id != dbTrack.library_id) {
                             dbTrack.library_id = track.library_id
                         }
                         dbTrack.last_chapter_read =

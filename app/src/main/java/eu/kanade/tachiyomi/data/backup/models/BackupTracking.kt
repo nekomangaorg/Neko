@@ -57,7 +57,7 @@ data class BackupTracking(
                 syncId = track.sync_id,
                 mediaId = track.media_id,
                 // forced not null so its compatible with 1.x backup system
-                libraryId = track.library_id!!,
+                libraryId = track.library_id ?: -1,
                 title = track.title,
                 // convert to float for 1.x
                 lastChapterRead = track.last_chapter_read,
