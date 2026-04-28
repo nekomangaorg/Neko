@@ -59,6 +59,7 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth-debug"
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
