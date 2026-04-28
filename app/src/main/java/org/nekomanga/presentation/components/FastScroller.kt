@@ -153,7 +153,9 @@ fun VerticalFastScroller(
                     val scrollHeightPxState by rememberUpdatedState(scrollHeightPx)
 
                     LaunchedEffect(listState) {
-                        snapshotFlow { listState.firstVisibleItemScrollOffset }
+                        snapshotFlow {
+                                Pair(listState.firstVisibleItemScrollOffset, isThumbDraggedState)
+                            }
                             .collectLatest {
                                 if (
                                     listState.layoutInfo.totalItemsCount != 0 &&
@@ -416,7 +418,9 @@ fun VerticalGridFastScroller(
                     val isThumbDraggedGridState by rememberUpdatedState(isThumbDragged)
 
                     LaunchedEffect(state) {
-                        snapshotFlow { state.firstVisibleItemScrollOffset }
+                        snapshotFlow {
+                                Pair(state.firstVisibleItemScrollOffset, isThumbDraggedGridState)
+                            }
                             .collectLatest {
                                 if (
                                     state.layoutInfo.totalItemsCount == 0 || isThumbDraggedGridState
