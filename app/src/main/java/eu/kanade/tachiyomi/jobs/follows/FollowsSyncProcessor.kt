@@ -8,7 +8,9 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -17,12 +19,17 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.data.database.repository.CategoryRepository
+import org.nekomanga.data.database.repository.ChapterRepository
 import org.nekomanga.data.database.repository.MangaRepository
 import org.nekomanga.data.database.repository.TrackRepository
+import org.nekomanga.domain.chapter.ChapterMarkActions
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.ChapterUseCases
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class FollowsSyncProcessor {
@@ -32,9 +39,12 @@ class FollowsSyncProcessor {
     val libraryPreference: LibraryPreferences by injectLazy()
     val mangaRepository: MangaRepository by injectLazy()
     val categoryRepository: CategoryRepository by injectLazy()
+    val chapterRepository: ChapterRepository by injectLazy()
     val trackRepository: TrackRepository by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
+    val statusHandler: StatusHandler by injectLazy()
+    private val chapterUseCases: ChapterUseCases by injectLazy()
     private val followsHandler: FollowsHandler by injectLazy()
 
     /** Syncs follows list manga into library based off the preference */
@@ -178,6 +188,24 @@ class FollowsSyncProcessor {
                             trackRepository.insertTrack(returnedTracker)
                         }
                         countNew.incrementAndGet()
+                    }
+
+                    val mangaUUID = MdUtil.getMangaUUID(manga.url)
+                    val readMdChapters =
+                        chapterRepository.getChaptersForManga(manga.id!!).mapNotNull {
+                            return@mapNotNull if (it.isMergedChapter() || !it.read) {
+                                null
+                            } else {
+                                it.toSimpleChapter()?.toChapterItem()
+                            }
+                        }
+
+                    if (readMdChapters.isNotEmpty()) {
+                        chapterUseCases.markChaptersRemote(
+                            markAction = ChapterMarkActions.Read(),
+                            mangaUuid = mangaUUID,
+                            chapterItems = readMdChapters,
+                        )
                     }
                 }
             completeNotification(countNew.get())
