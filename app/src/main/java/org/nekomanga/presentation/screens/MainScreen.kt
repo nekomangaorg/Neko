@@ -8,8 +8,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayViewModel
 import eu.kanade.tachiyomi.ui.source.latest.toSerializable
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.AppBar
+import org.nekomanga.presentation.components.MangaDexLogoutBanner
 import org.nekomanga.presentation.screens.deepLink.DeepLinkScreen
 import org.nekomanga.presentation.screens.deepLink.DeepLinkViewModel
 import org.nekomanga.presentation.screens.similar.SimilarViewModel
@@ -89,8 +91,12 @@ fun MainScreen(
         Unit
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        MangaDexLogoutBanner(
+            onSignInClick = { backStack.add(Screens.Settings.Main(Screens.Settings.MangaDex)) }
+        )
         NavDisplay(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
             backStack = backStack,
             onBack = { backStack.removeLastOrNull() },
             entryDecorators =
