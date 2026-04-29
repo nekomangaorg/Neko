@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
-import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -29,7 +28,6 @@ import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.usecases.chapters.ChapterUseCases
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class FollowsSyncProcessor {
@@ -191,18 +189,23 @@ class FollowsSyncProcessor {
 
                     if (mangaDexPreferences.readingSync().get()) {
                         val mangaId = manga.id ?: return@forEach
-                        val mangaUUID = MdUtil.getMangaUUID(manga.url)
-                        val readMdChapters =
-                            chapterRepository.getChaptersForManga(mangaId)
-                                .filter { it.read && !it.isMergedChapter() }
-                                .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                        try {
+                            val readMdChapters =
+                                chapterRepository.getChaptersForManga(mangaId)
+                                    .mapNotNull {
+                                        if (!it.read || it.isMergedChapter()) return@mapNotNull null
+                                        it.toSimpleChapter()?.toChapterItem()
+                                    }
 
-                        if (readMdChapters.isNotEmpty()) {
-                            chapterUseCases.markChaptersRemote(
-                                markAction = ChapterMarkActions.Read(),
-                                mangaUuid = mangaUUID,
-                                chapterItems = readMdChapters,
-                            )
+                            if (readMdChapters.isNotEmpty()) {
+                                chapterUseCases.markChaptersRemote(
+                                    markAction = ChapterMarkActions.Read(),
+                                    mangaUuid = manga.uuid(),
+                                    chapterItems = readMdChapters,
+                                )
+                            }
+                        } catch (e: Exception) {
+                            TimberKt.e(e) { "Failed to sync read chapters for '${manga.title}'" }
                         }
                     }
 
