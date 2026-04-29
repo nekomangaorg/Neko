@@ -28,6 +28,7 @@ object Notifications {
             const val Skipped = "library_skipped_channel"
         }
 
+        const val Authentication = "authentication_channel"
         const val Installing = "installing_channel"
         const val Status = "status_channel"
         const val Tracking = "tracking_channel"
@@ -35,6 +36,10 @@ object Notifications {
     }
 
     object Id {
+        object Authentication {
+            const val SessionExpired = -801
+        }
+
         object Download {
             const val Progress = -201
             const val Error = -202
@@ -220,6 +225,12 @@ object Notifications {
                     context.getString(R.string.status_channel),
                     NotificationManager.IMPORTANCE_HIGH,
                 ),
+                NotificationChannel(
+                        Channel.Authentication,
+                        context.getString(R.string.authentication_channel),
+                        NotificationManager.IMPORTANCE_HIGH,
+                    )
+                    .apply { setShowBadge(true) },
                 NotificationChannel(
                         CHANNEL_INCOGNITO_MODE,
                         context.getString(R.string.incognito_mode),
