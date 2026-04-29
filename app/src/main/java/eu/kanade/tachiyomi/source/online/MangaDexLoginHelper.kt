@@ -111,7 +111,7 @@ class MangaDexLoginHelper {
     private fun classifyResponse(response: Response): RefreshOutcome {
         return when {
             response.isSuccessful ->
-                runCatching { with(MdUtil.jsonParser) { response.parseAs<LoginResponseDto>() } }
+                runCatching { response.parseAs<LoginResponseDto>(MdUtil.jsonParser) }
                     .fold(
                         onSuccess = {
                             RefreshOutcome.Success(
