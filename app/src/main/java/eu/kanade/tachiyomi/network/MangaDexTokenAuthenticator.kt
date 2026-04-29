@@ -38,11 +38,9 @@ class MangaDexTokenAuthenticator(private val loginHelper: MangaDexLoginHelper) :
                         TimberKt.i { "$tag Token is invalid trying to refresh" }
                         validated = loginHelper.refreshSessionToken()
                     }
-
-                    if (!validated) {
-                        TimberKt.i { "$tag Unable to refresh token user will need to relogin" }
-                        loginHelper.invalidate()
-                    }
+                    // refreshSessionToken handles invalidation on persistent failures
+                    // and intentionally preserves tokens on transient failures so that
+                    // a later 401 can naturally retry the refresh.
                 } else {
                     validated = false
                     loginHelper.invalidate()
