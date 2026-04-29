@@ -1099,6 +1099,7 @@ constructor(
                 statusHandler.markChaptersStatus(
                     manga!!.uuid(),
                     listOf(readerChapter.chapter.mangadex_chapter_id),
+                    updateHistory = true,
                 )
             }
         } else {

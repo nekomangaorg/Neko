@@ -301,6 +301,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 statusHandler.markChaptersStatus(
                     mangaId.toString(),
                     nonMergedChapters.map { it.mangadex_chapter_id },
+                    updateHistory = true,
                 )
             }
             if (mergedChapters.isNotEmpty()) {

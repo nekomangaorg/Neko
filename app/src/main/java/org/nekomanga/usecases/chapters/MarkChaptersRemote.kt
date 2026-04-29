@@ -36,6 +36,7 @@ class MarkChaptersRemote(
                         mangaUuid,
                         nonMergedChapters.map { it.mangaDexChapterId },
                         syncRead,
+                        updateHistory = syncRead,
                     )
                 }
                 if (mergedChapters.isNotEmpty()) {
