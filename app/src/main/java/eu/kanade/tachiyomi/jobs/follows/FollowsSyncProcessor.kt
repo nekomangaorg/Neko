@@ -43,7 +43,6 @@ class FollowsSyncProcessor {
     val trackRepository: TrackRepository by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
-    val statusHandler: StatusHandler by injectLazy()
     private val chapterUseCases: ChapterUseCases by injectLazy()
     private val followsHandler: FollowsHandler by injectLazy()
 
@@ -190,15 +189,12 @@ class FollowsSyncProcessor {
                         countNew.incrementAndGet()
                     }
 
+                    val mangaId = manga.id ?: return@forEach
                     val mangaUUID = MdUtil.getMangaUUID(manga.url)
                     val readMdChapters =
-                        chapterRepository.getChaptersForManga(manga.id!!).mapNotNull {
-                            return@mapNotNull if (it.isMergedChapter() || !it.read) {
-                                null
-                            } else {
-                                it.toSimpleChapter()?.toChapterItem()
-                            }
-                        }
+                        chapterRepository.getChaptersForManga(mangaId)
+                            .filter { it.read && !it.isMergedChapter() }
+                            .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
 
                     if (readMdChapters.isNotEmpty()) {
                         chapterUseCases.markChaptersRemote(
