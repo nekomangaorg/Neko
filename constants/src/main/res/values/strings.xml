@@ -1469,6 +1469,9 @@
     <string name="crash_screen_restart_application">Restart the application</string>
 
 
+    <!-- MangaDex authentication banner -->
+    <string name="mangadex_session_expired_banner">Signed out of MangaDex — your library is no longer syncing.</string>
+
     <!-- Follows -->
     <string name="status_channel">Manga status sync</string>
     <string name="syncing_follows">Begin syncing follows</string>
