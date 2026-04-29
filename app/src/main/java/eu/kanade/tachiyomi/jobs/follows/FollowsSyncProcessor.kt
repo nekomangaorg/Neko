@@ -189,20 +189,23 @@ class FollowsSyncProcessor {
                         countNew.incrementAndGet()
                     }
 
-                    val mangaId = manga.id ?: return@forEach
-                    val mangaUUID = MdUtil.getMangaUUID(manga.url)
-                    val readMdChapters =
-                        chapterRepository.getChaptersForManga(mangaId)
-                            .filter { it.read && !it.isMergedChapter() }
-                            .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
+                    if (mangaDexPreferences.readingSync().get()) {
+                        val mangaId = manga.id ?: return@forEach
+                        val mangaUUID = MdUtil.getMangaUUID(manga.url)
+                        val readMdChapters =
+                            chapterRepository.getChaptersForManga(mangaId)
+                                .filter { it.read && !it.isMergedChapter() }
+                                .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
 
-                    if (readMdChapters.isNotEmpty()) {
-                        chapterUseCases.markChaptersRemote(
-                            markAction = ChapterMarkActions.Read(),
-                            mangaUuid = mangaUUID,
-                            chapterItems = readMdChapters,
-                        )
+                        if (readMdChapters.isNotEmpty()) {
+                            chapterUseCases.markChaptersRemote(
+                                markAction = ChapterMarkActions.Read(),
+                                mangaUuid = mangaUUID,
+                                chapterItems = readMdChapters,
+                            )
+                        }
                     }
+
                 }
             completeNotification(countNew.get())
         }
