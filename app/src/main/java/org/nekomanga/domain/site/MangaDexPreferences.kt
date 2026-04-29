@@ -48,6 +48,8 @@ class MangaDexPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastRefreshTime() = this.preferenceStore.getLong("mangadex_refresh_token_time", 0)
 
+    fun unexpectedLogout() = this.preferenceStore.getBoolean("mangadex_unexpected_logout", false)
+
     fun removeTokens() {
         sessionToken().delete()
         refreshToken().delete()
