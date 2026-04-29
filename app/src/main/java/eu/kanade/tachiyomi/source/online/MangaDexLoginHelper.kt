@@ -269,7 +269,7 @@ class MangaDexLoginHelper {
         private const val RETRY_BACKOFF_MILLIS = 500L
 
         internal fun classifyHttpFailure(code: Int): RefreshOutcome {
-            return if (code in 500..599) {
+            return if (code in 500..599 || code == 429) {
                 RefreshOutcome.Transient(HttpException(code))
             } else {
                 RefreshOutcome.Persistent(HttpException(code))
