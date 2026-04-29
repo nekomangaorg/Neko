@@ -46,6 +46,7 @@ class StatusHandler {
         mangaId: String,
         chapterIds: List<String>,
         read: Boolean = true,
+        updateHistory: Boolean = false,
     ) {
         withIOContext {
             val dto =
@@ -53,7 +54,7 @@ class StatusHandler {
                     true -> MarkStatusDto(chapterIdsRead = chapterIds)
                     false -> MarkStatusDto(chapterIdsUnread = chapterIds)
                 }
-            authService.markStatusForMultipleChapters(mangaId, dto).onFailure {
+            authService.markStatusForMultipleChapters(mangaId, dto, updateHistory).onFailure {
                 this.log("trying to mark chapters read=$read")
             }
         }

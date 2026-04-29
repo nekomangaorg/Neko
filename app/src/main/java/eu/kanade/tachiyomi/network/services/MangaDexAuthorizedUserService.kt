@@ -65,6 +65,7 @@ interface MangaDexAuthorizedUserService {
     suspend fun markStatusForMultipleChapters(
         @Path("id") mangaId: String,
         @Body markStatusDto: MarkStatusDto,
+        @Query("updateHistory") updateHistory: Boolean,
     ): ApiResponse<ResultDto>
 
     @POST("${MdConstants.Api.manga}/{id}/follow")
