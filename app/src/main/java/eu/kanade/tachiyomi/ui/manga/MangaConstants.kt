@@ -146,7 +146,8 @@ object MangaConstants {
         val matchesGlobalDefaults: Boolean = true,
     )
 
-    @Immutable data class SortOption(val sortState: SortState, val sortType: SortType)
+    @Immutable
+    data class SortOption(val sortState: SortState, val sortType: SortType)
 
     @Immutable
     data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
