@@ -37,7 +37,7 @@ object Notifications {
 
     object Id {
         object Authentication {
-            const val SessionExpired = -801
+            const val SessionExpired = 1_000_000
         }
 
         object Download {
