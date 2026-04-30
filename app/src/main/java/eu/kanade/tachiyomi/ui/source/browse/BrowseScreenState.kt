@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import kotlinx.collections.immutable.ImmutableMap
@@ -15,6 +16,7 @@ import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.UiText
 
+@Immutable
 data class BrowseScreenState(
     val initialLoading: Boolean = true,
     val useVividColorHeaders: Boolean = true,
@@ -45,11 +47,13 @@ data class BrowseScreenState(
     val categories: PersistentList<CategoryItem> = persistentListOf(),
 )
 
+@Immutable
 data class HomePageManga(
     val displayScreenType: DisplayScreenType,
     val displayManga: PersistentList<DisplayManga> = persistentListOf(),
 )
 
+@Immutable
 data class DisplayMangaHolder(
     val resultType: BrowseScreenType = BrowseScreenType.None,
     val allDisplayManga: PersistentList<DisplayManga> = persistentListOf(),

@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.similar
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -7,6 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 
+@Immutable
 data class SimilarScreenState(
     val isRefreshing: Boolean = false,
     val incognitoMode: Boolean = false,

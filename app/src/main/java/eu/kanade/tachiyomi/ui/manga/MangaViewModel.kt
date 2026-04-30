@@ -279,12 +279,12 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
             ) { allCategories, mangaCategories ->
                 val mangaCategorySet = mangaCategories.map { it.category_id }.toSet()
                 MangaConstants.CategoriesData(
-                    all = allCategories.map { it.toCategoryItem() },
+                    all = allCategories.map { it.toCategoryItem() }.toPersistentList(),
                     current =
                         allCategories.mapNotNull {
                             if (it.id != null && it.id in mangaCategorySet) it.toCategoryItem()
                             else null
-                        },
+                        }.toPersistentList(),
                 )
             }
             .distinctUntilChanged()

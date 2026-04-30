@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.feed
 
+import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -8,6 +9,7 @@ import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.domain.manga.Artwork
 
+@Immutable
 data class FeedScreenState(
     val firstLoad: Boolean = true,
     val isRefreshing: Boolean = false,
@@ -25,6 +27,7 @@ data class FeedScreenState(
     val downloadOnlyOnUnmetered: Boolean,
 )
 
+@Immutable
 data class HistoryScreenPagingState(
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
@@ -35,6 +38,7 @@ data class HistoryScreenPagingState(
     val searchQuery: String = "",
 )
 
+@Immutable
 data class UpdatesScreenPagingState(
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
@@ -45,6 +49,7 @@ data class UpdatesScreenPagingState(
     val searchQuery: String = "",
 )
 
+@Immutable
 data class SummaryScreenPagingState(
     val updatingUpdates: Boolean = true,
     val updatesFeedMangaList: PersistentList<FeedManga> = persistentListOf(),
@@ -112,6 +117,7 @@ enum class MoveDownloadDirection {
     Bottom,
 }
 
+@Immutable
 data class FeedManga(
     val mangaTitle: String,
     val date: Long,
