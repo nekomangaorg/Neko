@@ -152,7 +152,8 @@ object MangaConstants {
     @Immutable
     data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
 
-    @Immutable data class ScanlatorOption(val name: String, val disabled: Boolean = false)
+    @Immutable
+    data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
     @Immutable
     data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
