@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MergeType
@@ -26,6 +27,7 @@ import org.nekomanga.presentation.components.UiText
 
 object MangaConstants {
 
+    @Immutable
     data class StaticChapterData(
         val allChapters: PersistentList<ChapterItem>,
         val missingChapters: MissingChapterHolder,
@@ -35,6 +37,7 @@ object MangaConstants {
         val allLanguages: PersistentSet<String>,
     )
 
+    @Immutable
     data class MangaScreenGeneralState(
         val isRefreshing: Boolean = false,
         val isSearching: Boolean = false,
@@ -52,6 +55,7 @@ object MangaConstants {
         val removedChapters: PersistentList<ChapterItem> = persistentListOf(),
     )
 
+    @Immutable
     data class MangaScreenMangaState(
         val initialized: Boolean = false,
         val inLibrary: Boolean = false,
@@ -77,6 +81,7 @@ object MangaConstants {
         val dynamicCovers: Boolean = false,
     )
 
+    @Immutable
     data class MangaScreenChapterState(
         val activeChapters: PersistentList<ChapterItem> = persistentListOf(),
         val allChapters: PersistentList<ChapterItem> = persistentListOf(),
@@ -93,6 +98,7 @@ object MangaConstants {
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
     )
 
+    @Immutable
     data class MangaScreenTrackState(
         val tracks: PersistentList<TrackItem> = persistentListOf(),
         val loggedInTrackService: PersistentList<TrackServiceItem> = persistentListOf(),
@@ -102,17 +108,20 @@ object MangaConstants {
             TrackingConstants.TrackSearchResult.Loading,
     )
 
+    @Immutable
     data class MangaScreenCategoryState(
         val allCategories: PersistentList<CategoryItem> = persistentListOf(),
         val currentCategories: PersistentList<CategoryItem> = persistentListOf(),
     )
 
+    @Immutable
     data class MangaScreenMergeState(
         val validMergeTypes: PersistentList<MergeType> = persistentListOf(),
         val mergeSearchResult: MergeConstants.MergeSearchResult =
             MergeConstants.MergeSearchResult.Loading,
     )
 
+    @Immutable
     data class MangaDetailScreenState(
         val general: MangaScreenGeneralState,
         val manga: MangaScreenMangaState,
@@ -123,11 +132,13 @@ object MangaConstants {
     )
 
     /** Holds the next unread chapter and the text to display for the quick read button. */
+    @Immutable
     data class NextUnreadChapter(
         val text: UiText = UiText.String(""),
         val simpleChapter: SimpleChapter? = null,
     )
 
+    @Immutable
     data class SortFilter(
         val sourceOrderSort: SortState = SortState.None,
         val smartOrderSort: SortState = SortState.None,
@@ -135,16 +146,22 @@ object MangaConstants {
         val matchesGlobalDefaults: Boolean = true,
     )
 
+    @Immutable
     data class SortOption(val sortState: SortState, val sortType: SortType)
 
+    @Immutable
     data class ScanlatorFilter(val scanlators: PersistentList<ScanlatorOption> = persistentListOf())
 
+    @Immutable
     data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
+    @Immutable
     data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
 
+    @Immutable
     data class LanguageOption(val name: String, val disabled: Boolean = false)
 
+    @Immutable
     data class ChapterDisplay(
         val showAll: Boolean = false,
         val unread: ToggleableState = ToggleableState.Off,
@@ -248,7 +265,11 @@ object MangaConstants {
         }
     }
 
-    data class CategoriesData(val all: List<CategoryItem>, val current: List<CategoryItem>)
+    @Immutable
+    data class CategoriesData(
+        val all: PersistentList<CategoryItem>,
+        val current: PersistentList<CategoryItem>,
+    )
 
     sealed class DownloadAction {
         data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()

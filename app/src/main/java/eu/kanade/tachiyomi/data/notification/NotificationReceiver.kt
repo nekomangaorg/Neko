@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.canDeleteChapter
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -299,7 +300,7 @@ class NotificationReceiver : BroadcastReceiver() {
             if (nonMergedChapters.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
                 statusHandler.markChaptersStatus(
-                    mangaId.toString(),
+                    manga.uuid(),
                     nonMergedChapters.map { it.mangadex_chapter_id },
                 )
             }

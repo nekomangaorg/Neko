@@ -47,7 +47,7 @@ fun InLibraryIcon(offset: Dp, outline: Boolean) {
             imageVector = Icons.Default.Favorite,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(Size.mediumLarge),
         )
     }
 }

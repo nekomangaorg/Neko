@@ -37,7 +37,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.collections.immutable.ImmutableMap
@@ -267,7 +266,7 @@ fun MangaGridItem(
 
         if (displayManga.inLibrary) {
             Box(modifier = Modifier.clearAndSetSemantics {}) {
-                InLibraryBadge(shouldOutlineCover, offset = 0.dp)
+                InLibraryBadge(shouldOutlineCover, offset = Size.none)
             }
         }
         if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
@@ -278,7 +277,7 @@ fun MangaGridItem(
                     unreadCount = unreadCount,
                     showDownloads = showDownloadBadge,
                     downloadCount = downloadCount,
-                    offset = 0.dp,
+                    offset = Size.none,
                 )
             }
         }
