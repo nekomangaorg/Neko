@@ -216,7 +216,7 @@ fun MangaRow(
             if ((showUnreadBadge && unreadCount > 0) || (showDownloadBadge && downloadCount > 0)) {
                 Gap(Size.tiny)
                 DownloadUnreadBadge(
-                    offset = 0.dp,
+                    offset = Size.none,
                     outline = shouldOutlineCover,
                     showUnread = showUnreadBadge,
                     showDownloads = showDownloadBadge,
