@@ -156,7 +156,8 @@ object MangaConstants {
     @Immutable
     data class LanguageFilter(val languages: PersistentList<LanguageOption> = persistentListOf())
 
-    @Immutable data class LanguageOption(val name: String, val disabled: Boolean = false)
+    @Immutable
+    data class LanguageOption(val name: String, val disabled: Boolean = false)
 
     @Immutable
     data class ChapterDisplay(
