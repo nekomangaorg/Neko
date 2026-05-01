@@ -45,11 +45,12 @@ fun libraryMangaItemComparator(
 
 private fun compareByTitle(removeArticles: Boolean): Comparator<LibraryMangaItem> {
     return Comparator { item1, item2 ->
-        val (title1, title2) = if (removeArticles) {
-            item1.titleWithoutArticles to item2.titleWithoutArticles
-        } else {
-            item1.displayManga.getTitle() to item2.displayManga.getTitle()
-        }
+        val (title1, title2) =
+            if (removeArticles) {
+                item1.titleWithoutArticles to item2.titleWithoutArticles
+            } else {
+                item1.displayManga.getTitle() to item2.displayManga.getTitle()
+            }
         title1.compareTo(title2, ignoreCase = true)
     }
 }

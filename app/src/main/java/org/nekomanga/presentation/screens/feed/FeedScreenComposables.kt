@@ -9,13 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenState
-import eu.kanade.tachiyomi.ui.feed.FeedScreenType
-import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
-import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
-import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nekomanga.R

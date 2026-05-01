@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.feed
+package org.nekomanga.presentation.screens.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

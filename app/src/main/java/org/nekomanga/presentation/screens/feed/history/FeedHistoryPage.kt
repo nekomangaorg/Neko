@@ -17,9 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
@@ -27,6 +24,9 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.feed.FeedHistoryGroup
+import org.nekomanga.presentation.screens.feed.FeedManga
+import org.nekomanga.presentation.screens.feed.FeedScreenActions
 import org.nekomanga.presentation.theme.Size
 
 @Composable

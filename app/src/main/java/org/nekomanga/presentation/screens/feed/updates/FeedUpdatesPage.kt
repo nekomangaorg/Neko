@@ -17,8 +17,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
@@ -29,6 +27,8 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.feed.FeedManga
+import org.nekomanga.presentation.screens.feed.FeedScreenActions
 import org.nekomanga.presentation.theme.Size
 
 @Composable

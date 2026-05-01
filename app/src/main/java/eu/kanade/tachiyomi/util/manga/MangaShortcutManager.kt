@@ -12,7 +12,6 @@ import coil3.toBitmap
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.feed.FeedRepository
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.presentation.screens.feed.FeedRepository
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

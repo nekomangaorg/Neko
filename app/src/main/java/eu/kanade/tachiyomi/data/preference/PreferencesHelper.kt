@@ -9,14 +9,14 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.merged.suwayomi.LoginMode
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import eu.kanade.tachiyomi.ui.main.states.SideNavAlignment
 import eu.kanade.tachiyomi.ui.main.states.SideNavMode
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.presentation.screens.feed.FeedHistoryGroup
+import org.nekomanga.presentation.screens.feed.FeedScreenType
 import org.nekomanga.presentation.theme.Themes
 import tachiyomi.core.preference.Preference
 import tachiyomi.core.preference.PreferenceStore
