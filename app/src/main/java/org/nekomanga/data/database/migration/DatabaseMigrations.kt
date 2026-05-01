@@ -7,6 +7,9 @@ object DatabaseMigrations {
     val MIGRATION_45_46 =
         object : Migration(45, 46) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                // 0. Clean up any leftover temporary tables from previous failed migrations
+                dropTempTables(db)
+
                 // 1. Copy all data into temporary tables (strips constraints)
                 backupDataToTempTables(db)
 
@@ -28,29 +31,19 @@ object DatabaseMigrations {
         }
 
     private fun backupDataToTempTables(db: SupportSQLiteDatabase) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS`temp_mangas` AS SELECT * FROM `mangas`")
-        db.execSQL("CREATE TABLE IF NOT EXISTS`temp_chapters` AS SELECT * FROM `chapters`")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_history` AS SELECT * FROM `history`")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_categories` AS SELECT * FROM `categories`")
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `temp_mangas_categories` AS SELECT * FROM `mangas_categories`"
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `temp_manga_aggregate` AS SELECT * FROM `manga_aggregate`"
-        )
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_manga_sync` AS SELECT * FROM `manga_sync`")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_artwork` AS SELECT * FROM `artwork`")
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `temp_browse_filter` AS SELECT * FROM `browse_filter`"
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `temp_manga_related` AS SELECT * FROM `manga_related`"
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `temp_scanlator_group` AS SELECT * FROM `scanlator_group`"
-        )
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_uploader` AS SELECT * FROM `uploader`")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `temp_merge_manga` AS SELECT * FROM `merge_manga`")
+        db.execSQL("CREATE TABLE `temp_mangas` AS SELECT * FROM `mangas`")
+        db.execSQL("CREATE TABLE `temp_chapters` AS SELECT * FROM `chapters`")
+        db.execSQL("CREATE TABLE `temp_history` AS SELECT * FROM `history`")
+        db.execSQL("CREATE TABLE `temp_categories` AS SELECT * FROM `categories`")
+        db.execSQL("CREATE TABLE `temp_mangas_categories` AS SELECT * FROM `mangas_categories`")
+        db.execSQL("CREATE TABLE `temp_manga_aggregate` AS SELECT * FROM `manga_aggregate`")
+        db.execSQL("CREATE TABLE `temp_manga_sync` AS SELECT * FROM `manga_sync`")
+        db.execSQL("CREATE TABLE `temp_artwork` AS SELECT * FROM `artwork`")
+        db.execSQL("CREATE TABLE `temp_browse_filter` AS SELECT * FROM `browse_filter`")
+        db.execSQL("CREATE TABLE `temp_manga_related` AS SELECT * FROM `manga_related`")
+        db.execSQL("CREATE TABLE `temp_scanlator_group` AS SELECT * FROM `scanlator_group`")
+        db.execSQL("CREATE TABLE `temp_uploader` AS SELECT * FROM `uploader`")
+        db.execSQL("CREATE TABLE `temp_merge_manga` AS SELECT * FROM `merge_manga`")
     }
 
     private fun dropOldTables(db: SupportSQLiteDatabase) {
