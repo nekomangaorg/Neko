@@ -32,5 +32,6 @@ object DeepLinks {
         const val UpdateNotes = "eu.kanade.tachiyomi.SHOW_UPDATE_NOTES"
         const val Source = "eu.kanade.tachiyomi.SHOW_SOURCE"
         const val ReaderSettings = "eu.kanade.tachiyomi.READER_SETTINGS"
+        const val MangaDexSettings = "eu.kanade.tachiyomi.MANGADEX_SETTINGS"
     }
 }

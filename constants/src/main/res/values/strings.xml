@@ -1469,6 +1469,11 @@
     <string name="crash_screen_restart_application">Restart the application</string>
 
 
+    <!-- MangaDex authentication notification -->
+    <string name="authentication_channel">MangaDex sign-in</string>
+    <string name="mangadex_session_expired_title">Signed out of MangaDex</string>
+    <string name="mangadex_session_expired_body">Your library and reading progress are no longer syncing. Tap to sign in again.</string>
+
     <!-- Follows -->
     <string name="status_channel">Manga status sync</string>
     <string name="syncing_follows">Begin syncing follows</string>
