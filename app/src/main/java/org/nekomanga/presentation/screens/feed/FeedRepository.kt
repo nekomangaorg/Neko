@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.feed
+package org.nekomanga.presentation.screens.feed
 
 import androidx.compose.ui.util.fastAny
 import com.github.michaelbull.result.Result

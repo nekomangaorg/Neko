@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.feed
+package org.nekomanga.presentation.screens.feed
 
 import androidx.compose.runtime.Immutable
 import eu.kanade.tachiyomi.ui.manga.MangaConstants

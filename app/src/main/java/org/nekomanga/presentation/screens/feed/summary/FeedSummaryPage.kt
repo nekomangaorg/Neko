@@ -21,8 +21,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -31,6 +29,8 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.listcard.ExpressiveListCard
 import org.nekomanga.presentation.components.listcard.ListCardType
 import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.feed.FeedManga
+import org.nekomanga.presentation.screens.feed.FeedScreenActions
 import org.nekomanga.presentation.screens.feed.updates.UpdatesCard
 import org.nekomanga.presentation.theme.Size
 

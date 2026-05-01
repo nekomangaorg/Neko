@@ -33,8 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.data.database.models.MergeType
-import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
-import eu.kanade.tachiyomi.ui.feed.DownloaderStatus
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.R
@@ -42,6 +40,8 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.presentation.components.ToolTipButton
 import org.nekomanga.presentation.components.dialog.ConfirmationDialog
+import org.nekomanga.presentation.screens.feed.DownloadScreenActions
+import org.nekomanga.presentation.screens.feed.DownloaderStatus
 import org.nekomanga.presentation.theme.Size
 import soup.compose.material.motion.MaterialFade
 

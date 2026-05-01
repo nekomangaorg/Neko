@@ -38,15 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.ui.feed.DownloadScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenState
-import eu.kanade.tachiyomi.ui.feed.FeedScreenType
-import eu.kanade.tachiyomi.ui.feed.FeedSettingActions
-import eu.kanade.tachiyomi.ui.feed.FeedViewModel
-import eu.kanade.tachiyomi.ui.feed.HistoryScreenPagingState
-import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
-import eu.kanade.tachiyomi.ui.feed.UpdatesScreenPagingState
 import eu.kanade.tachiyomi.ui.main.states.RefreshState
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
@@ -57,10 +48,19 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.ButtonGroup
 import org.nekomanga.presentation.components.scaffold.RootScaffold
+import org.nekomanga.presentation.screens.feed.DownloadScreenActions
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
+import org.nekomanga.presentation.screens.feed.FeedScreenActions
 import org.nekomanga.presentation.screens.feed.FeedScreenContent
 import org.nekomanga.presentation.screens.feed.FeedScreenDialogs
+import org.nekomanga.presentation.screens.feed.FeedScreenState
 import org.nekomanga.presentation.screens.feed.FeedScreenTopBar
+import org.nekomanga.presentation.screens.feed.FeedScreenType
+import org.nekomanga.presentation.screens.feed.FeedSettingActions
+import org.nekomanga.presentation.screens.feed.FeedViewModel
+import org.nekomanga.presentation.screens.feed.HistoryScreenPagingState
+import org.nekomanga.presentation.screens.feed.SummaryScreenPagingState
+import org.nekomanga.presentation.screens.feed.UpdatesScreenPagingState
 import org.nekomanga.presentation.theme.Size
 
 @Composable

@@ -36,7 +36,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import eu.kanade.tachiyomi.ui.feed.FeedManga
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -52,6 +51,7 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.components.theme.defaultThemeColorState
 import org.nekomanga.presentation.screens.feed.FeedChapterTitleLine
 import org.nekomanga.presentation.screens.feed.FeedCover
+import org.nekomanga.presentation.screens.feed.FeedManga
 import org.nekomanga.presentation.screens.feed.getReadTextColor
 import org.nekomanga.presentation.theme.Size
 

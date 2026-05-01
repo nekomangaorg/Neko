@@ -26,11 +26,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.ui.feed.FeedHistoryGroup
-import eu.kanade.tachiyomi.ui.feed.FeedManga
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenType
-import eu.kanade.tachiyomi.ui.feed.SummaryScreenPagingState
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.PersistentList
 import org.nekomanga.domain.manga.Artwork

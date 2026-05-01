@@ -6,9 +6,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.ui.feed.FeedScreenActions
-import eu.kanade.tachiyomi.ui.feed.FeedScreenState
-import eu.kanade.tachiyomi.ui.feed.FeedScreenType
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions

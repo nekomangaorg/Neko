@@ -191,11 +191,10 @@ class FollowsSyncProcessor {
                         val mangaId = manga.id ?: return@forEach
                         try {
                             val readMdChapters =
-                                chapterRepository.getChaptersForManga(mangaId)
-                                    .mapNotNull {
-                                        if (!it.read || it.isMergedChapter()) return@mapNotNull null
-                                        it.toSimpleChapter()?.toChapterItem()
-                                    }
+                                chapterRepository.getChaptersForManga(mangaId).mapNotNull {
+                                    if (!it.read || it.isMergedChapter()) return@mapNotNull null
+                                    it.toSimpleChapter()?.toChapterItem()
+                                }
 
                             if (readMdChapters.isNotEmpty()) {
                                 chapterUseCases.markChaptersRemote(
@@ -208,7 +207,6 @@ class FollowsSyncProcessor {
                             TimberKt.e(e) { "Failed to sync read chapters for '${manga.title}'" }
                         }
                     }
-
                 }
             completeNotification(countNew.get())
         }
