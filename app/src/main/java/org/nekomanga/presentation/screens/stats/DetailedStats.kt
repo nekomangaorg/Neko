@@ -218,8 +218,7 @@ private fun TagView(
 ) {
     val tagStats = detailedStats.detailTagState
     val sortedTagPairs =
-        remember(sortType) {
-
+        remember(sortType, tagStats) {
             tagStats.sortedTagPairs
                 .sortedWith { t, t2 ->
                     when (sortType) {
