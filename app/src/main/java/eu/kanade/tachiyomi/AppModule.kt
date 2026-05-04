@@ -83,6 +83,7 @@ import org.nekomanga.presentation.screens.feed.FeedRepository
 import org.nekomanga.presentation.screens.similar.SimilarRepo
 import org.nekomanga.usecases.chapters.CalculateChapterFilterUseCase
 import org.nekomanga.usecases.chapters.ChapterUseCases
+import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
 import org.nekomanga.usecases.library.FilterLibraryMangaUseCase
 import org.nekomanga.usecases.manga.MangaUseCases
 import org.nekomanga.usecases.preferences.GetDateFormatUseCase
@@ -250,6 +251,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(BrowseRepository())
 
         addSingleton(CalculateChapterFilterUseCase())
+        addSingleton(ParseChapterNameUseCase())
         addSingleton(ChapterUseCases())
 
         addSingleton(FilterLibraryMangaUseCase())
