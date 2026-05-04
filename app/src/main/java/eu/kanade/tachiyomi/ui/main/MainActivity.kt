@@ -399,6 +399,10 @@ class MainActivity : BaseMainActivity() {
             DeepLinks.Actions.ReaderSettings -> {
                 deepLinkScreens = listOf(Screens.Settings.Main(Screens.Settings.Reader))
             }
+
+            DeepLinks.Actions.MangaDexSettings -> {
+                deepLinkScreens = listOf(Screens.Settings.Main(Screens.Settings.MangaDex))
+            }
         }
         if (deepLinkScreens != null) {
             viewModel.setDeepLink(deepLinkScreens)
@@ -416,7 +420,8 @@ class MainActivity : BaseMainActivity() {
             DeepLinks.Intents.Search,
             DeepLinks.Actions.Manga,
             DeepLinks.Actions.MangaBack,
-            DeepLinks.Actions.ReaderSettings -> true
+            DeepLinks.Actions.ReaderSettings,
+            DeepLinks.Actions.MangaDexSettings -> true
             else -> false
         }
     }
