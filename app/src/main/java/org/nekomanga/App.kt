@@ -184,7 +184,6 @@ open class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.F
                     val tapIntent =
                         Intent(this, MainActivity::class.java).apply {
                             action = DeepLinks.Actions.MangaDexSettings
-                            putExtra(DeepLinks.Extras.NotificationId, Notifications.Id.Authentication.SessionExpired)
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
                     val pendingIntent =
