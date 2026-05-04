@@ -5,7 +5,7 @@ class ParseChapterNameUseCase {
         val builder = StringBuilder()
         var title = ""
         var vol = ""
-        val list = chapterName.split(Regex(" "), 3)
+        val list = chapterName.trim().split(" ", limit = 3).filter { it.isNotBlank() }
 
         list.forEach {
             if (it.startsWith("vol.", true)) {
@@ -14,7 +14,7 @@ class ParseChapterNameUseCase {
                 builder.append(" Ch.")
                 builder.append(it.substringAfter(".").padStart(4, '0'))
             } else {
-                title = " $it"
+                title += " $it"
             }
         }
 
