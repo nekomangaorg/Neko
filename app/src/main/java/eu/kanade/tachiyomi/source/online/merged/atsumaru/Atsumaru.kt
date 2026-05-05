@@ -9,21 +9,15 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.AllChaptersDto
-import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.BrowseMangaDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.MangaObjectDto
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.PageObjectDto
-import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchFilter
-import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchRequest
 import eu.kanade.tachiyomi.source.online.merged.atsumaru.dto.SearchResultsDto
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.closeQuietly
 import org.nekomanga.core.network.GET
-import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
@@ -94,19 +88,27 @@ class Atsumaru : ReducedHttpSource() {
     }
 
     override suspend fun searchManga(query: String): List<SManga> {
-        val types = listOf("Manga", "Manwha", "Manhua", "OEL")
 
-        val searchRequest =
-            SearchRequest(
-                page = 0,
-                filter = SearchFilter(search = query, types = types, sortBy = "popularity"),
-            )
+        val url =
+            "$baseUrl/collections/manga/documents/search"
+                .toHttpUrl()
+                .newBuilder()
+                .apply {
+                    addQueryParameter("q", query.ifEmpty { "*" })
+                    addQueryParameter("query_by", "title,englishTitle,otherNames,authors")
+                    addQueryParameter("query_by_weights", "4,3,2,1")
+                    addQueryParameter("num_typos", "4,3,2,1")
+                    addQueryParameter(
+                        "include_fields",
+                        "id,title,englishTitle,poster,posterSmall,posterMedium,type,isAdult,status,year,synopsis,otherNames,mbRating,avgRating,authors",
+                    )
+                    addQueryParameter("page", "1")
+                    addQueryParameter("per_page", "40")
+                }
+                .build()
+                .toString()
 
-        val jsonString = json.encodeToString(searchRequest)
-        val requestBody = jsonString.toRequestBody("application/json".toMediaType())
-
-        val response =
-            client.newCall(POST("$baseUrl/api/explore/filteredView", headers, requestBody)).await()
+        val response = client.newCall(GET(url, headers)).await()
 
         if (!response.isSuccessful) {
             response.closeQuietly()
@@ -120,9 +122,10 @@ class Atsumaru : ReducedHttpSource() {
                     it.document.toSManga(baseUrl)
                 }
             }
-            .getOrElse {
-                json.decodeFromString<BrowseMangaDto>(body).items.map { it.toSManga(baseUrl) }
-            }
+            .getOrThrow()
+        /*  .getOrElse {
+            json.decodeFromString<BrowseMangaDto>(body).items.map { it.toSManga(baseUrl) }
+        }*/
     }
 
     override suspend fun fetchChapters(

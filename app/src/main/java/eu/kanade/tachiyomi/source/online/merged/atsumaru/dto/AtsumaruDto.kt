@@ -35,6 +35,13 @@ class SearchResultsDto(
 }
 
 @Serializable
+class BaseSearchMangaInfoDto(
+    val id: String,
+    val title: String,
+    @JsonNames("poster", "image") val imagePath: JsonElement,
+)
+
+@Serializable
 class MangaDto(
     // Common
     private val id: String,
@@ -42,9 +49,6 @@ class MangaDto(
     @JsonNames("poster", "image") private val imagePath: JsonElement,
 
     // Details
-    private val authors: List<AuthorDto>? = null,
-    private val synopsis: String? = null,
-    private val tags: List<TagDto>? = null,
     private val status: String? = null,
     private val type: String? = null,
     val scanlators: List<ScanlatorDto>? = null,
@@ -76,15 +80,6 @@ class MangaDto(
                         }
                     url.replaceFirst(Regex("^https?:?//"), "https://")
                 }
-            description = synopsis
-            genre =
-                buildList {
-                        type?.let { add(it) }
-                        tags?.forEach { add(it.name) }
-                    }
-                    .joinToString()
-
-            authors?.let { author = it.joinToString { author -> author.name } }
 
             this@MangaDto.status?.let {
                 status =
