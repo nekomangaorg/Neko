@@ -616,20 +616,16 @@ class LibraryViewModel() : ViewModel() {
             .distinctUntilChanged()
             .onEach { hasCategories ->
                 val groupItems =
-                    mutableListOf(
+                    listOfNotNull(
                         LibraryGroup.ByCategory,
                         LibraryGroup.ByTag,
                         LibraryGroup.ByStatus,
                         LibraryGroup.ByAuthor,
                         LibraryGroup.ByContent,
                         LibraryGroup.ByLanguage,
+                        LibraryGroup.ByTrackStatus.takeIf { loggedServices.isNotEmpty() },
+                        LibraryGroup.Ungrouped.takeIf { hasCategories },
                     )
-                if (loggedServices.isNotEmpty()) {
-                    groupItems.add(LibraryGroup.ByTrackStatus)
-                }
-                if (hasCategories) {
-                    groupItems.add(LibraryGroup.Ungrouped)
-                }
                 _internalLibraryScreenState.update {
                     it.copy(groupByOptions = groupItems.toPersistentList())
                 }
