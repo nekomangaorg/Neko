@@ -50,8 +50,10 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -129,9 +131,8 @@ class LibraryViewModel() : ViewModel() {
 
     private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
-    private val loggedServices by lazy {
-        Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
-    }
+    private val loggedServices
+        get() = Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
 
     /** Save the current list to speed up loading later */
     override fun onCleared() {
@@ -608,26 +609,27 @@ class LibraryViewModel() : ViewModel() {
         observeLibraryUpdates()
         preferenceUpdates()
 
-        viewModelScope.launchIO {
-            val groupItems =
-                mutableListOf(
-                    LibraryGroup.ByCategory,
-                    LibraryGroup.ByTag,
-                    LibraryGroup.ByStatus,
-                    LibraryGroup.ByAuthor,
-                    LibraryGroup.ByContent,
-                    LibraryGroup.ByLanguage,
-                )
-            if (loggedServices.isNotEmpty()) {
-                groupItems.add(LibraryGroup.ByTrackStatus)
+        categoryRepository
+            .observeCategories()
+            .map { it.isNotEmpty() }
+            .distinctUntilChanged()
+            .onEach { hasCategories ->
+                val groupItems =
+                    listOfNotNull(
+                        LibraryGroup.ByCategory,
+                        LibraryGroup.ByTag,
+                        LibraryGroup.ByStatus,
+                        LibraryGroup.ByAuthor,
+                        LibraryGroup.ByContent,
+                        LibraryGroup.ByLanguage,
+                        LibraryGroup.ByTrackStatus.takeIf { loggedServices.isNotEmpty() },
+                        LibraryGroup.Ungrouped.takeIf { hasCategories },
+                    )
+                _internalLibraryScreenState.update {
+                    it.copy(groupByOptions = groupItems.toPersistentList())
+                }
             }
-            if (categoryRepository.getCategories().isNotEmpty()) {
-                groupItems.add(LibraryGroup.Ungrouped)
-            }
-            _internalLibraryScreenState.update {
-                it.copy(groupByOptions = groupItems.toPersistentList())
-            }
-        }
+            .launchIn(viewModelScope)
     }
 
     fun preferenceUpdates() {
