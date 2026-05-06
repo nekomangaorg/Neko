@@ -82,6 +82,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.site.MangaDexPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
+import org.nekomanga.usecases.chapters.ParseChapterNameUseCase
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -107,6 +108,8 @@ constructor(
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
 ) : ViewModel() {
+
+    private val parseChapterName: ParseChapterNameUseCase by injectLazy()
 
     private val mutableState = MutableStateFlow(State())
     val state = mutableState.asStateFlow()
@@ -866,36 +869,6 @@ constructor(
 
         stream().use { input -> destFile.openOutputStream().use { output -> input.copyTo(output) } }
         return destFile
-    }
-
-    private fun parseChapterName(chapterName: String, pageNumber: String): String {
-        val builder = StringBuilder()
-        var title = ""
-        var vol = ""
-        val list = chapterName.split(Regex(" "), 3)
-
-        list.forEach {
-            if (it.startsWith("vol.", true)) {
-                vol = " Vol." + it.substringAfter(".").padStart(4, '0')
-            } else if (it.startsWith("ch.", true)) {
-                builder.append(" Ch.")
-                builder.append(it.substringAfter(".").padStart(4, '0'))
-            } else {
-                title = " $it"
-            }
-        }
-
-        if (vol.isNotBlank()) {
-            builder.append(vol)
-        }
-        builder.append(" Pg.")
-        builder.append(pageNumber.padStart(4, '0'))
-
-        if (title.isNotEmpty()) {
-            builder.append(title.take(200))
-        }
-
-        return builder.toString().trim()
     }
 
     /**
