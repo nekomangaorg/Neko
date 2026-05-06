@@ -131,9 +131,8 @@ class LibraryViewModel() : ViewModel() {
 
     private val _mangaRefreshingState = MutableStateFlow(emptySet<Long>())
 
-    private val loggedServices by lazy {
-        Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
-    }
+    private val loggedServices
+        get() = Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
 
     /** Save the current list to speed up loading later */
     override fun onCleared() {
