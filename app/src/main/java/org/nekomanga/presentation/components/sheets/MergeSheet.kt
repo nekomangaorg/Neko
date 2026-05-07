@@ -336,7 +336,7 @@ fun MergedItem(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(0.9f).align(Alignment.CenterVertically),
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
             )
             IconButton(onClick = onRemove, modifier = Modifier.padding(end = Size.tiny)) {
                 Icon(

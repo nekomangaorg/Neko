@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
 import com.hippo.unifile.UniFile
@@ -810,9 +811,10 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                                                 }
                                             removedChapters = this.second
                                         }
-                                    TimberKt.d { "removed aa ${removedChapters.size}" }
+
                                     try {
-                                        val dbManga = mangaRepository.getMangaById(mangaId)!!
+                                        val dbManga =
+                                            mangaRepository.getMangaById(mangaId) ?: return@collect
                                         downloadManager.deleteChapters(dbManga, mergeRemoved)
                                     } catch (e: Exception) {
                                         TimberKt.e(e) {
@@ -1126,16 +1128,13 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         SnackbarState(
                             message = errorMessage,
                             fieldRes = serviceNameRes,
-                            messageRes = org.nekomanga.R.string.error_refreshing_,
+                            messageRes = R.string.error_refreshing_,
                             snackBarColor = _mangaDetailScreenState.value.general.snackbarColor,
                         )
                     )
                 },
                 onChaptersToMarkRead = { chaptersToMark ->
-                    markChapters(
-                        chaptersToMark,
-                        org.nekomanga.domain.chapter.ChapterMarkActions.Read(),
-                    )
+                    markChapters(chaptersToMark, ChapterMarkActions.Read())
                 },
             )
         }
@@ -1855,7 +1854,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                             runCatching {
                                     mdList.bind(track)
                                 } // Assumes bind() mutates the 'track' object
-                                .onFailure { exception ->
+                                .onErr { exception ->
                                     TimberKt.e(exception) { "Error binding new MangaDex track" }
                                 }
                         }
@@ -2097,7 +2096,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                     val threadId =
                         sourceManager.mangaDex
                             .getChapterCommentId(chapterId)
-                            .onFailure { TimberKt.e { it.message() } }
+                            .onErr { TimberKt.e { it.message() } }
                             .getOrElse { null }
                     _mangaDetailScreenState.update {
                         it.copy(general = it.general.copy(isRefreshing = false))
@@ -2140,7 +2139,7 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                         }
                     }
                 }
-                .onFailure {
+                .onErr {
                     TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
                     viewModelScope.launchIO {
                         delay(3000)
@@ -2475,12 +2474,9 @@ class MangaViewModel(val mangaId: Long) : ViewModel() {
                 if (volumes != null) {
                     for ((_, volumeInfo) in volumes) {
                         val chaptersInVolume = volumeInfo.chapters.values
-                        val matchById =
-                            mangaDexChapterId != null &&
-                                chaptersInVolume.any {
-                                    it.id == mangaDexChapterId ||
-                                        it.others.contains(mangaDexChapterId)
-                                }
+                        val matchById = chaptersInVolume.any {
+                            it.id == mangaDexChapterId || it.others.contains(mangaDexChapterId)
+                        }
                         val matchByNumber = chaptersInVolume.any { it.chapter == chapterNumberStr }
 
                         if (matchById || matchByNumber) {
