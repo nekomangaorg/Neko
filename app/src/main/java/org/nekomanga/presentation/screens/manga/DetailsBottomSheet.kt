@@ -177,12 +177,13 @@ fun DetailsBottomSheet(
                     onNavigate(null)
                     openInWebView(url, title)
                 },
-                removeMergeSource = { mergeType ->
+                removeMergeSource = { mergeMangaImpl ->
                     onNavigate(null)
-                    mergeActions.remove(mergeType)
+                    mergeActions.remove(mergeMangaImpl)
                 },
-                cancelClick = { onNavigate(null) },
-                search = mergeActions.search,
+                search = { query, mergeType, mergedUrls ->
+                    mergeActions.search(query, mergeType, mergedUrls)
+                },
                 mergeMangaClick = { mergeManga ->
                     onNavigate(null)
                     mergeActions.add(mergeManga)

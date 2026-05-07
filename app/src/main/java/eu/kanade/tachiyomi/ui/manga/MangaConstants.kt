@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -324,8 +325,8 @@ object MangaConstants {
     )
 
     class MergeActions(
-        val remove: (MergeType) -> Unit,
-        val search: (String, MergeType) -> Unit,
+        val remove: (MergeMangaImpl) -> Unit,
+        val search: (String, MergeType, List<String>) -> Unit,
         val add: (SourceMergeManga) -> Unit,
     )
 

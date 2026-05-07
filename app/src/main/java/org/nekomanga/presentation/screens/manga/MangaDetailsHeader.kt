@@ -131,9 +131,13 @@ fun MangaDetailsHeader(
                             ButtonBlock(
                                 hideButtonText = mangaDetailScreenState.general.hideButtonText,
                                 isInitialized = mangaDetailScreenState.manga.initialized,
-                                isMerged =
-                                    mangaDetailScreenState.manga.isMerged
-                                        is MergeConstants.IsMergedManga.Yes,
+                                mergedCount =
+                                    if (
+                                        mangaDetailScreenState.manga.isMerged
+                                            is MergeConstants.IsMergedManga.Yes
+                                    )
+                                        mangaDetailScreenState.manga.isMerged.mergedMangaList.size
+                                    else 0,
                                 inLibrary = mangaDetailScreenState.manga.inLibrary,
                                 loggedIntoTrackers = isLoggedIntoTrackers,
                                 trackServiceCount = mangaDetailScreenState.track.trackServiceCount,
