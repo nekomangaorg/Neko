@@ -23,8 +23,7 @@ import tachiyomi.core.network.await
 class Comix : ReducedHttpSource() {
     override val name = "Comix"
     override val baseUrl = "https://comix.to"
-    private val apiUrl = "$baseUrl/api/v2/"
-    private val mangaUrl = "$baseUrl/title"
+    private val apiUrl = "https://comix.to/api/v2/"
 
     override val client = network.cloudFlareClient.newBuilder().rateLimit(5).build()
 
@@ -134,8 +133,6 @@ class Comix : ReducedHttpSource() {
     override fun imageRequest(page: Page): Request {
         return GET(page.imageUrl ?: throw Exception("Image URL is null"), headers)
     }
-
-    override fun getMangaUrl(url: String): String = mangaUrl + url
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return "$baseUrl/${simpleChapter.url}"
