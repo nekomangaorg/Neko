@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.source.online.SChapterStatusPair
+import eu.kanade.tachiyomi.source.online.merged.comix.ComixHash.generateHash
 import eu.kanade.tachiyomi.util.lang.toDisplayMessage
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
@@ -23,7 +24,8 @@ import tachiyomi.core.network.await
 class Comix : ReducedHttpSource() {
     override val name = "Comix"
     override val baseUrl = "https://comix.to"
-    private val apiUrl = "https://comix.to/api/v2/"
+    private val apiUrl = "$baseUrl/api/v1/"
+    private val mangaUrl = "$baseUrl/title"
 
     override val client = network.cloudFlareClient.newBuilder().rateLimit(5).build()
 
@@ -65,14 +67,9 @@ class Comix : ReducedHttpSource() {
         val mangaHash = mangaUrl.removePrefix("/").substringAfterLast("/")
 
         val path = "/manga/$mangaHash/chapters"
-        val time = 1L
-        val hashToken = ComixHash.generateHash(path, 0, time)
+        val hashToken = generateHash(path)
 
-        // Logic to support deduplication if enabled
-        var chapterList: ArrayList<Chapter>?
-
-        chapterList = ArrayList()
-
+        val chapterList = ArrayList<Chapter>()
         var page = 1
         var hasNext: Boolean
 
@@ -85,7 +82,6 @@ class Comix : ReducedHttpSource() {
                         .addQueryParameter("order[number]", "desc")
                         .addQueryParameter("limit", "100")
                         .addQueryParameter("page", page.toString())
-                        .addQueryParameter("time", time.toString())
                         .addQueryParameter("_", hashToken)
                         .build()
 
@@ -97,7 +93,7 @@ class Comix : ReducedHttpSource() {
 
                 val resp = json.decodeFromString<ChapterDetailsResponse>(response.body.string())
                 val items = resp.result.items
-                hasNext = resp.result.pagination.lastPage > resp.result.pagination.page
+                hasNext = resp.result.meta.lastPage > resp.result.meta.page
                 page++
 
                 chapterList.addAll(items)
@@ -112,7 +108,8 @@ class Comix : ReducedHttpSource() {
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val chapterId = chapter.url.substringAfterLast("/")
-        val url = "${apiUrl}chapters/$chapterId"
+        val hashToken = generateHash("/chapters/$chapterId")
+        val url = "${apiUrl}chapters/$chapterId?_=$hashToken"
 
         val response = client.newCall(GET(url, headers)).await()
         if (!response.isSuccessful) {
@@ -120,19 +117,21 @@ class Comix : ReducedHttpSource() {
             throw Exception("HTTP error ${response.code}")
         }
 
-        val res = json.decodeFromString<ChapterResponse>(response.body!!.string())
+        val res = json.decodeFromString<ChapterResponse>(response.body.string())
         val result = res.result ?: throw Exception("Chapter not found")
 
-        if (result.images.isEmpty()) {
-            throw Exception("No images found for chapter ${result.chapterId}")
+        if (result.pages.isEmpty()) {
+            throw Exception("No images found for chapter ${result.id}")
         }
 
-        return result.images.mapIndexed { index, img -> Page(index, imageUrl = img.url) }
+        return result.pages.mapIndexed { index, img -> Page(index, imageUrl = img.url) }
     }
 
     override fun imageRequest(page: Page): Request {
         return GET(page.imageUrl ?: throw Exception("Image URL is null"), headers)
     }
+
+    override fun getMangaUrl(url: String): String = mangaUrl + url
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
         return "$baseUrl/${simpleChapter.url}"
