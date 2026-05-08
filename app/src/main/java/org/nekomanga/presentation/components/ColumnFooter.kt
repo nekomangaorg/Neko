@@ -80,7 +80,7 @@ fun ColumnScope.SearchFooter(
             if (isError) {
                 Icon(
                     imageVector = Icons.Default.Warning,
-                    contentDescription = stringResource(id = R.string.unknown_error),
+                    contentDescription = stringResource(id = R.string.warning),
                     tint = MaterialTheme.colorScheme.error,
                 )
             } else if (title.isNotEmpty()) {
