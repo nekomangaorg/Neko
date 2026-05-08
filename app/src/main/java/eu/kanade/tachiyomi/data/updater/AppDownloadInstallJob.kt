@@ -248,7 +248,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
             withContext(Dispatchers.Main) {
-                context.toast(error.message ?: context.getString(R.string.unknown_error))
+                context.toast(error.message?.takeIf { it.isNotBlank() } ?: context.getString(R.string.unknown_error))
             }
             notifier.cancelInstallNotification()
             notifier.onDownloadFinished(file.getUriCompat(context))
