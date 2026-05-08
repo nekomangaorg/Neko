@@ -275,7 +275,9 @@ fun MangaScreen(
                                     Intent.createChooser(intent, context.getString(R.string.share))
                                 )
                             } catch (e: Exception) {
-                                context.toast(e.message ?: context.getString(R.string.unknown_error))
+                                context.toast(
+                                    e.message ?: context.getString(R.string.unknown_error)
+                                )
                             }
                         }
                     }

@@ -43,6 +43,7 @@ import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
 import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.core.network.GET
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.ProgressListener
@@ -246,7 +247,9 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             if (error is CancellationException) throw error
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
-            withContext(Dispatchers.Main) { context.toast(error.message ?: context.getString(R.string.unknown_error)) }
+            withContext(Dispatchers.Main) {
+                context.toast(error.message ?: context.getString(R.string.unknown_error))
+            }
             notifier.cancelInstallNotification()
             notifier.onDownloadFinished(file.getUriCompat(context))
             PreferenceManager.getDefaultSharedPreferences(context).edit {
