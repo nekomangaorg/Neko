@@ -119,16 +119,13 @@ interface Manga : SManga {
         else mangaDetailsPreferences.filterChapterByAvailable().get()
 
     fun getGenres(filterOutSafe: Boolean = false): List<String>? {
-        return genre
-            ?.split(",")
-            ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
-            ?.filter {
-                if (filterOutSafe) {
-                    !it.equals("Content rating: safe", true)
-                } else {
-                    true
-                }
-            }
+        return genre?.split(",")?.mapNotNull { tag ->
+            val trimmed = tag.trim()
+            if (trimmed.isBlank()) return@mapNotNull null
+            if (filterOutSafe && trimmed.equals("Content rating: safe", true))
+                return@mapNotNull null
+            trimmed
+        }
     }
 
     fun getContentRating(): String? {

@@ -156,8 +156,8 @@ class FeedRepository(
                     val groupedEntries =
                         historyRepository
                             .getRecentMangaLimit(search = "", offset = offset, limit = limit)
-                            .filterNot { current.contains(it.manga.id) }
                             .mapNotNull { history ->
+                                if (current.contains(history.manga.id)) return@mapNotNull null
                                 history.manga.id ?: return@mapNotNull null
                                 history.chapter.id ?: return@mapNotNull null
 
