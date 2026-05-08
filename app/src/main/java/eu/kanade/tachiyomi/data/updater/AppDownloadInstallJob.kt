@@ -246,7 +246,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             if (error is CancellationException) throw error
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
-            withContext(Dispatchers.Main) { context.toast(error.message) }
+            withContext(Dispatchers.Main) { context.toast(error.message ?: context.getString(R.string.unknown_error)) }
             notifier.cancelInstallNotification()
             notifier.onDownloadFinished(file.getUriCompat(context))
             PreferenceManager.getDefaultSharedPreferences(context).edit {
